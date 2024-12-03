@@ -68,6 +68,7 @@ public partial class FrmColorPicker : ToolForm, IToolForm<ColorPickerConfig>
         }
 
         TableLayout.BackColor = Config.Theme.ColorPalatte.AppBg;
+        TooltipMain.DarkMode = darkMode;
 
         base.ApplyTheme(darkMode, style);
 
@@ -131,7 +132,7 @@ public partial class FrmColorPicker : ToolForm, IToolForm<ColorPickerConfig>
 
     private void PicMain_ImageMouseClick(object? sender, Viewer.ImageMouseEventArgs e)
     {
-        if (sender is not DXCanvas PicMain
+        if (sender is not ViewerCanvas PicMain
             || e.ImageX < 0 || e.ImageY < 0
             || e.ImageX > Local.FrmMain.PicMain.SourceWidth
             || e.ImageY > Local.FrmMain.PicMain.SourceHeight) return;
@@ -229,10 +230,9 @@ public partial class FrmColorPicker : ToolForm, IToolForm<ColorPickerConfig>
         LblCursorLocation.ForeColor = color.InvertBlackOrWhite();
 
         var alpha = Math.Round(color.A / 255f, 3);
-        var alphaText = string.Empty;
 
         // RGBA color -----------------------------------------------
-        alphaText = Settings.ShowRgbWithAlpha ? $", {alpha}" : "";
+        var alphaText = Settings.ShowRgbWithAlpha ? $", {alpha}" : "";
         TxtRgb.Text = $"{color.R}, {color.G}, {color.B}{alphaText}";
 
         // HEXA color -----------------------------------------------

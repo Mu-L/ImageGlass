@@ -123,7 +123,7 @@ public class IgImgData : IDisposable
                 var frames = data.MultiFrameImage.AsEnumerable().Select(frame =>
                 {
                     var duration = frame.AnimationDelay > 0 ? frame.AnimationDelay : 10;
-                    duration = duration * 1000 / frame.AnimationTicksPerSecond;
+                    duration = duration * 1000 / (uint)frame.AnimationTicksPerSecond;
 
                     return new AnimatedImgFrame(frame.ToBitmap(), duration);
                 });
@@ -133,7 +133,7 @@ public class IgImgData : IDisposable
             else
             {
                 var bytes = data.MultiFrameImage.ToByteArray(MagickFormat.Tiff);
-                Source = WicBitmapDecoder.Load(new MemoryStream(bytes));
+                Source = WicBitmapDecoder.Load(new MemoryStream(bytes) { Position = 0 });
             }
         }
         // single frame
@@ -141,17 +141,8 @@ public class IgImgData : IDisposable
         {
             HasAlpha = data.SingleFrameImage?.HasAlpha ?? false;
 
-            if (HasAlpha)
-            {
-                // for alpha accuracy
-                Image = BHelper.ToWicBitmapSource(data.SingleFrameImage?.ToBitmapSourceWithDensity());
-            }
-            else
-            {
-                // for lower memory
-                using var bmp = data.SingleFrameImage?.ToBitmapWithDensity();
-                Image = BHelper.ToWicBitmapSource(bmp);
-            }
+            var bmpSrc = data.SingleFrameImage?.ToBitmapSourceWithDensity();
+            Image = BHelper.ToWicBitmapSource(bmpSrc, HasAlpha);
         }
     }
 }

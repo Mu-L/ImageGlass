@@ -127,6 +127,7 @@ public partial class FrmMain
         { nameof(MnuColorPicker),           [new(Keys.K)] },
         { nameof(MnuCropTool),              [new(Keys.C)] },
         { nameof(MnuFrameNav),              [new(Keys.P)] },
+        { nameof(MnuResizeTool),            [new(Keys.Alt | Keys.R)] },
         { nameof(MnuLosslessCompression),   [new(Keys.Alt | Keys.C)] },
         { Const.IGTOOL_EXIFTOOL,            [new(Keys.X)] },
 
@@ -582,12 +583,10 @@ public partial class FrmMain
         {
             if (item.GetType() == typeof(ToolStripButton))
             {
-                var tItem = item as ToolStripButton;
-                if (tItem is null) continue;
+                if (item is not ToolStripButton tItem) continue;
 
                 // update item from metadata
-                var tagModel = tItem.Tag as ToolbarItemTagModel;
-                if (tagModel is null) continue;
+                if (tItem.Tag is not ToolbarItemTagModel tagModel) continue;
 
                 // load check state:
                 // Executable is menu item
@@ -617,7 +616,7 @@ public partial class FrmMain
                 // Example: OnClick = new("IG_ToggleToolbar", false)
                 else if (configProp.PropertyType.Equals(typeof(bool)))
                 {
-                    if (bool.TryParse(propValue.ToString(), out bool value))
+                    if (bool.TryParse(propValue.ToString(), out var value))
                     {
                         tItem.Checked = value;
                     }
@@ -775,13 +774,14 @@ public partial class FrmMain
 
         // Menu Tools
         #region Menu Tools
-        MnuTools.Text = lang[$"{Name}.{nameof(MnuTools)}"];
+        MnuTools.Text = lang[$"{nameof(FrmMain)}.{nameof(MnuTools)}"];
 
-        MnuColorPicker.Text = lang[$"{Name}.{nameof(MnuColorPicker)}"];
-        MnuFrameNav.Text = lang[$"{Name}.{nameof(MnuFrameNav)}"];
-        MnuCropTool.Text = lang[$"{Name}.{nameof(MnuCropTool)}"];
-        MnuLosslessCompression.Text = lang[$"{Name}.{nameof(MnuLosslessCompression)}"];
-        MnuGetMoreTools.Text = lang[$"{Name}.{nameof(MnuGetMoreTools)}"];
+        MnuColorPicker.Text = lang[$"{nameof(FrmMain)}.{nameof(MnuColorPicker)}"];
+        MnuFrameNav.Text = lang[$"{nameof(FrmMain)}.{nameof(MnuFrameNav)}"];
+        MnuCropTool.Text = lang[$"{nameof(FrmMain)}.{nameof(MnuCropTool)}"];
+        MnuResizeTool.Text = lang[$"{nameof(FrmMain)}.{nameof(MnuResizeTool)}"];
+        MnuLosslessCompression.Text = lang[$"{nameof(FrmMain)}.{nameof(MnuLosslessCompression)}"];
+        MnuGetMoreTools.Text = lang[$"{nameof(FrmMain)}.{nameof(MnuGetMoreTools)}"];
 
         foreach (var item in MnuTools.DropDownItems)
         {
@@ -793,8 +793,8 @@ public partial class FrmMain
         #endregion
 
 
-        MnuSettings.Text = lang[$"{Name}.{nameof(MnuSettings)}"];
-        MnuExit.Text = lang[$"{Name}.{nameof(MnuExit)}"];
+        MnuSettings.Text = lang[$"{nameof(FrmMain)}.{nameof(MnuSettings)}"];
+        MnuExit.Text = lang[$"{nameof(FrmMain)}.{nameof(MnuExit)}"];
 
 
         // Menu Help
@@ -876,37 +876,44 @@ public partial class FrmMain
     /// </summary>
     public void LoadToolbarItemsText(ModernToolbar modernToolbar)
     {
-        Parallel.For(0, modernToolbar.Items.Count, (i) =>
+        foreach (var tItem in modernToolbar.Items.OfType<ToolStripButton>())
         {
-            if (modernToolbar.Items[i] is ToolStripButton tItem)
+            if (tItem.Tag is ToolbarItemTagModel tagModel)
             {
-                if (tItem.Tag is ToolbarItemTagModel tagModel)
+                // get the custom hotkeys
+                var hotkeyList = Config.ToolbarButtons.Find(btn => btn.Id == tItem.Name)
+                    ?.Hotkeys
+                    .Select(hk => hk.ToString()) ?? [];
+                var customHotkey = ZString.Join(", ", hotkeyList);
+                var hotkeyText = string.IsNullOrEmpty(customHotkey) ? null : customHotkey;
+                string langKey;
+
+                if (tItem.Name == Toolbar.MainMenuButton.Name)
                 {
-                    string langKey;
-                    string hotkey;
-                    if (tItem.Name == Toolbar.MainMenuButton.Name)
-                    {
-                        langKey = $"{Name}.MnuMain";
-                        hotkey = Config.GetHotkeyString(CurrentMenuHotkeys, nameof(MnuMain));
-                    }
-                    else
-                    {
-                        langKey = $"{Name}.{tagModel.OnClick.Executable}";
-                        hotkey = Config.GetHotkeyString(CurrentMenuHotkeys, tagModel.OnClick.Executable);
-                    }
+                    langKey = $"{nameof(FrmMain)}.{nameof(MnuMain)}";
+                    hotkeyText ??= Config.GetHotkeyString(CurrentMenuHotkeys, nameof(MnuMain));
+                }
+                else
+                {
+                    langKey = $"{nameof(FrmMain)}.{tagModel.OnClick.Executable}";
+                    hotkeyText ??= Config.GetHotkeyString(CurrentMenuHotkeys, tagModel.OnClick.Executable);
+                }
 
-                    if (Config.Language.TryGetValue(langKey, out string? value))
-                    {
-                        tItem.Text = tItem.ToolTipText = value;
 
-                        if (!string.IsNullOrEmpty(hotkey))
-                        {
-                            tItem.ToolTipText += $" ({hotkey})";
-                        }
-                    }
+                // set text
+                if (Config.Language.TryGetValue(langKey, out var value))
+                {
+                    tItem.Text = tItem.ToolTipText = value;
+                }
+
+                // set hotkey tooltip
+                if (!string.IsNullOrEmpty(hotkeyText))
+                {
+                    tItem.ToolTipText = $"{tItem.Text} ({hotkeyText})";
                 }
             }
-        });
+        }
+
     }
 
 
@@ -921,9 +928,9 @@ public partial class FrmMain
         var newMenuIconHeight = this.ScaleToDpi(Const.MENU_ICON_HEIGHT);
 
         // add ImageOrderBy items
-        foreach (var order in Enum.GetValues(typeof(ImageOrderBy)))
+        foreach (var order in Enum.GetValues<ImageOrderBy>())
         {
-            var orderName = Enum.GetName(typeof(ImageOrderBy), order);
+            var orderName = Enum.GetName(order);
             var mnu = new ToolStripRadioButtonMenuItem()
             {
                 Text = Config.Language[$"_.{nameof(ImageOrderBy)}._{orderName}"],
@@ -945,9 +952,9 @@ public partial class FrmMain
         MnuLoadingOrders.DropDown.Items.Add(new ToolStripSeparator());
 
         // add ImageOrderType items
-        foreach (var orderType in Enum.GetValues(typeof(ImageOrderType)))
+        foreach (var orderType in Enum.GetValues<ImageOrderType>())
         {
-            var typeName = Enum.GetName(typeof(ImageOrderType), orderType);
+            var typeName = Enum.GetName(orderType);
             var mnu = new ToolStripRadioButtonMenuItem()
             {
                 Text = Config.Language[$"_.{nameof(ImageOrderType)}._{typeName}"],
@@ -970,8 +977,7 @@ public partial class FrmMain
 
     private void MnuLoadingOrderItem_Click(object? sender, EventArgs e)
     {
-        var mnu = sender as ToolStripMenuItem;
-        if (mnu is null) return;
+        if (sender is not ToolStripMenuItem mnu) return;
 
         if (mnu.Tag is ModernMenuItemTag tag
             && tag.ImageOrderBy != null
@@ -990,8 +996,7 @@ public partial class FrmMain
 
     private void MnuLoadingOrderTypeItem_Click(object? sender, EventArgs e)
     {
-        var mnu = sender as ToolStripMenuItem;
-        if (mnu is null) return;
+        if (sender is not ToolStripMenuItem mnu) return;
 
         if (mnu.Tag is ModernMenuItemTag tag
             && tag.ImageOrderType != null
@@ -1018,6 +1023,7 @@ public partial class FrmMain
             nameof(MnuColorPicker),
             nameof(MnuCropTool),
             nameof(MnuFrameNav),
+            nameof(MnuResizeTool),
             nameof(MnuLosslessCompression),
             nameof(MnuExternalToolsSeparator),
             nameof(MnuGetMoreTools),
@@ -1205,7 +1211,7 @@ public partial class FrmMain
 
 
         // update Gallery bar layout
-        if (Gallery.Dock == DockStyle.Left || Gallery.Dock == DockStyle.Right)
+        if (Gallery.Dock is DockStyle.Left or DockStyle.Right)
         {
             Gallery.View = ImageGlass.Gallery.View.Thumbnails;
             Gallery.ScrollBars = true;
@@ -1252,7 +1258,7 @@ public partial class FrmMain
 
 
         // make sure Gallery does not cover toolbar in vertical layout
-        if (Gallery.Dock == DockStyle.Left || Gallery.Dock == DockStyle.Right)
+        if (Gallery.Dock is DockStyle.Left or DockStyle.Right)
         {
             Gallery.BringToFront();
         }

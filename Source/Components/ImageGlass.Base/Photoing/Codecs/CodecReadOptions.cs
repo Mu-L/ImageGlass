@@ -27,12 +27,12 @@ public record CodecReadOptions
     /// <summary>
     /// Gets, sets the requested width of the image.
     /// </summary>
-    public int Width { get; set; } = 0;
+    public uint Width { get; set; } = 0;
 
     /// <summary>
     /// Gets, sets the requested height of the image.
     /// </summary>
-    public int Height { get; set; } = 0;
+    public uint Height { get; set; } = 0;
 
     /// <summary>
     /// Gets, sets the value indicates whether the color profile should be ignored.
@@ -92,7 +92,7 @@ public record CodecReadOptions
     /// Gets, sets the value indicates that if the image dimension exceeds the supported value,
     /// it will be scale down to <see cref="Const.MAX_IMAGE_DIMENSION"/> value.
     /// </summary>
-    public bool AutoScaleDownLargeImage { get; set; } = true;
+    public bool AutoScaleDownLargeImage { get; set; } = false;
 
 
     /// <summary>

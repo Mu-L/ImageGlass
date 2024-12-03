@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Cysharp.Text;
 using ImageGlass;
 using ImageGlass.Base;
 using ImageGlass.Settings;
@@ -38,6 +39,16 @@ public partial class FrmQuickSetup : WebForm
     {
         base.OnLoad(e);
         if (DesignMode) return;
+
+
+        // if WebView2 not installed, show the warning
+        if (!Web2.CheckWebview2Installed())
+        {
+            ShowWebView2Warning();
+            Close();
+            return;
+        }
+
 
         _ = Config.UpdateFormIcon(this);
         Web2.PageName = "quick-setup";
@@ -97,11 +108,7 @@ public partial class FrmQuickSetup : WebForm
         }
         else if (e.Name.Equals("SKIP_AND_LAUNCH", StringComparison.InvariantCultureIgnoreCase))
         {
-            Config.QuickSetupVersion = Const.QUICK_SETUP_VERSION;
-            await Config.WriteAsync();
-
-            CmdHelper.LaunchImageGlass();
-            Close();
+            await SkipAndLaunchAsync();
         }
         else if (e.Name.Equals("LOAD_LANGUAGE", StringComparison.InvariantCultureIgnoreCase))
         {
@@ -119,6 +126,56 @@ public partial class FrmQuickSetup : WebForm
 
     // Private methods
     #region Private methods
+
+    private void ShowWebView2Warning()
+    {
+        // footer buttons
+        var btnDownload = new TaskDialogCommandLinkButton(Config.Language["_._Download"]);
+        var btnSkip = new TaskDialogCommandLinkButton(
+            Config.Language[$"{Name}._SkipQuickSetup"],
+            allowCloseDialog: false);
+
+
+        btnDownload.Click += async (_, _) => await BHelper.OpenUrlAsync("https://developer.microsoft.com/microsoft-edge/webview2");
+        btnSkip.Click += async (_, _) => await SkipAndLaunchAsync();
+
+
+        var heading = "";
+        if (Web2.Webview2Version == null)
+        {
+            heading = Config.Language["_._Webview2._NotFound"];
+        }
+        else if (Web2.Webview2Version < Web2.MIN_VERSION)
+        {
+            heading = ZString.Format(Config.Language["_._Webview2._Outdated"], Web2.MIN_VERSION);
+        }
+
+
+        // content
+        var page = new TaskDialogPage()
+        {
+            Icon = TaskDialogIcon.ShieldWarningYellowBar,
+            Buttons = [btnDownload, btnSkip, TaskDialogButton.Cancel],
+            SizeToContent = true,
+            AllowCancel = false,
+            EnableLinks = true,
+            Caption = Config.Language[$"{Name}._Text"],
+
+            Heading = heading,
+            Text = "Features require WebView2 Runtime:\r\n" +
+                $"- {Config.Language[$"{Name}._Text"]}\r\n" +
+                $"- {Config.Language["FrmMain.MnuSettings"]}\r\n" +
+                $"- SVG\r\n" +
+                "\r\n" +
+                "<a href=\"https://developer.microsoft.com/microsoft-edge/webview2\">https://developer.microsoft.com/microsoft-edge/webview2</a>",
+        };
+
+
+        // show dialog
+        _ = TaskDialog.ShowDialog(page, TaskDialogStartupLocation.CenterScreen);
+    }
+
+
     private async Task ApplySettingsAsync(string settingJson)
     {
         // try to kill all ImageGlass processes
@@ -162,6 +219,16 @@ public partial class FrmQuickSetup : WebForm
     private async Task ApplyAndCloseAsync()
     {
         // write settings
+        await Config.WriteAsync();
+
+        CmdHelper.LaunchImageGlass();
+        Close();
+    }
+
+
+    private async Task SkipAndLaunchAsync()
+    {
+        Config.QuickSetupVersion = Const.QUICK_SETUP_VERSION;
         await Config.WriteAsync();
 
         CmdHelper.LaunchImageGlass();

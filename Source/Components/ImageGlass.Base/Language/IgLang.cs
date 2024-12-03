@@ -284,7 +284,8 @@ public class IgLang : IDictionary<string, string>
             { "_._UserAction._MethodArgumentNotSupported", "The argument type of method '{0}' is not supported" }, // v9.0
             { "_._UserAction._Win32ExeError", "Cannot execute command '{0}'. Make sure the name is correct." }, // v9.0
 
-            { "_._Webview2._NotFound", "Please install the latest version of WebView2 Runtime." }, // 9.1
+            { "_._Webview2._NotFound", "Please install WebView2 Runtime to access full features of ImageGlass." }, // 9.2
+            { "_._Webview2._Outdated", "Your WebView2 Runtime is not supported. Please update to version {0} or later." }, // 9.2
 
             // Gallery tooltip
             { $"_.Metadata._{nameof(IgMetadata.FileSize)}", "File size" }, //v9.0
@@ -508,8 +509,9 @@ public class IgLang : IDictionary<string, string>
             #region Tools
             { "FrmMain.MnuTools", "Tools" }, //v3.0
             { "FrmMain.MnuColorPicker", "Color picker" }, //v5.0
-            { "FrmMain.MnuFrameNav", "Frame navigation" }, // v7.5
             { "FrmMain.MnuCropTool", "Crop image" }, // v7.6
+            { "FrmMain.MnuResizeTool", "Resize image" }, // v9.2
+            { "FrmMain.MnuFrameNav", "Frame navigation" }, // v7.5
             { "FrmMain.MnuGetMoreTools", "Get more tools…" }, // v9.0
 
             { "FrmMain.MnuLosslessCompression", "Magick.NET Lossless Compression" }, // v9.1
@@ -916,6 +918,16 @@ public class IgLang : IDictionary<string, string>
             #region FrmHotkeyPicker
             { "FrmHotkeyPicker.LblHotkey", "Press hotkeys" }, // v9.0
             #endregion // FrmHotkeyPicker
+
+
+            #region FrmResize
+            { "FrmResize.RadResizeByPixels", "Pixels" }, // v9.2
+            { "FrmResize.RadResizeByPercentage", "Percentage" }, // v9.2
+            { "FrmResize.ChkKeepRatio", "Keep ratio propotional" }, // v9.2
+            { "FrmResize.LblResample", "Resample:" }, // v9.2
+            { "FrmResize.LblCurrentSize", "Current Size:" }, // v9.2
+            { "FrmResize.LblNewSize", "New Size:" }, // v9.2
+            #endregion // FrmResize
 
 
             #region igcmd.exe

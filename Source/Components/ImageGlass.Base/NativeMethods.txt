@@ -30,3 +30,5 @@ timeGetDevCaps
 ShellExecuteEx
 StrCmpLogicalW
 GetWindowPlacement
+MapVirtualKey
+VkKeyScanEx

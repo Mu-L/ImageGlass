@@ -30,10 +30,7 @@ using Microsoft.Win32;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Dynamic;
-using System.Media;
 using System.Reflection;
-using System.Text;
-using Windows.Globalization;
 
 namespace ImageGlass.Settings;
 
@@ -458,12 +455,12 @@ public static class Config
     /// <summary>
     /// Gets, sets toolbar icon height
     /// </summary>
-    public static int ToolbarIconHeight { get; set; } = Const.TOOLBAR_ICON_HEIGHT;
+    public static uint ToolbarIconHeight { get; set; } = Const.TOOLBAR_ICON_HEIGHT;
 
     /// <summary>
     /// Gets, sets value of image quality for editting
     /// </summary>
-    public static int ImageEditQuality { get; set; } = 80;
+    public static uint ImageEditQuality { get; set; } = 80;
 
     /// <summary>
     /// Gets, sets value of duration to display the in-app message
@@ -681,7 +678,7 @@ public static class Config
 
         // get user config version
         Version = items.GetValue<float>($"_Metadata:{nameof(Version)}");
-            
+
 
         // save the config for all tools
         ToolSettings = items.GetValueObj(nameof(ToolSettings)).GetValue(nameof(ToolSettings), new ExpandoObject());
@@ -764,7 +761,7 @@ public static class Config
 
         #region Slideshow
         SlideshowInterval = items.GetValueEx(nameof(SlideshowInterval), SlideshowInterval);
-        if (SlideshowInterval < 1) SlideshowInterval = 5f;
+        if (SlideshowInterval <= 0) SlideshowInterval = 5f;
 
         SlideshowIntervalTo = items.GetValueEx(nameof(SlideshowIntervalTo), SlideshowIntervalTo);
         SlideshowIntervalTo = Math.Max(SlideshowIntervalTo, SlideshowInterval);
@@ -873,7 +870,21 @@ public static class Config
         // toolbar buttons
         var toolbarItems = items.GetSection(nameof(ToolbarButtons))
             .GetChildren()
-            .Select(i => i.Get<ToolbarItemModel>());
+            .Select(i =>
+            {
+                var item = i.Get<ToolbarItemModel>();
+                var hotkeysArr = i.GetChildren()
+                    .FirstOrDefault(i => i.Key == nameof(ToolbarItemModel.Hotkeys))
+                    ?.Get<string[]>() ?? [];
+
+                item.Hotkeys = hotkeysArr.Distinct()
+                    .Where(i => !string.IsNullOrEmpty(i))
+                    .Select(i => new Hotkey(i))
+                    .ToList();
+
+                return item;
+            })
+            .Where(i => i != null);
         ToolbarButtons = toolbarItems.ToList();
 
 
@@ -903,7 +914,7 @@ public static class Config
             .GetChildren()
             .ToDictionary(
                 i => BHelper.ParseEnum<MouseClickEvent>(i.Key),
-                i => i.Get<ToggleAction>());
+                i => ParseToggleAction(i));
 
 
         // MouseWheelActions
@@ -1208,14 +1219,18 @@ public static class Config
     /// </summary>
     public static List<ExpandoObject> ConvertToolbarButtonsToExpandoObjList(IEnumerable<ToolbarItemModel> list)
     {
-        var items = list.Select(i =>
+        var items = list.Select(btn =>
         {
-            var obj = i.ToExpandoObject();
+            var obj = btn.ToExpandoObject();
 
-            if (string.IsNullOrWhiteSpace(i.Image)) return obj;
+            // set hotkeys
+            obj.Set(nameof(ToolbarItemModel.Hotkeys), btn.Hotkeys.Select(hk => hk.ToString()));
 
-            var filePath = Theme.GetToolbarIconFilePath(i.Image);
-            if (string.IsNullOrWhiteSpace(filePath)) filePath = i.Image;
+            // set image url
+            if (string.IsNullOrWhiteSpace(btn.Image)) return obj;
+
+            var filePath = Theme.GetToolbarIconFilePath(btn.Image);
+            if (string.IsNullOrWhiteSpace(filePath)) filePath = btn.Image;
 
             try
             {
@@ -1475,7 +1490,7 @@ public static class Config
         // float
         else if (prop.PropertyType.Equals(typeof(float)))
         {
-            if (int.TryParse(newValue, out var value))
+            if (float.TryParse(newValue, out var value))
             {
                 prop.SetValue(null, value);
                 Done = true;
@@ -1625,8 +1640,10 @@ public static class Config
     /// <summary>
     /// Updates form icon using theme setting.
     /// </summary>
-    public static async Task UpdateFormIcon(Form frm)
+    public static async Task UpdateFormIcon(Form? frm)
     {
+        if (frm is null) return;
+
         // Icon theming
         if (Config.Theme.Settings.AppLogo?.GetHicon() is not IntPtr hIcon) return;
         frm.Icon = Icon.FromHandle(hIcon);
@@ -1711,10 +1728,9 @@ public static class Config
         }
 
 
+        // merge tool hotkeys
         var toolHotkeys = Config.Tools
             .ToDictionary(i => i.ToolId, i => i.Hotkeys);
-
-        // merge tool hotkeys
         foreach (var item in toolHotkeys)
         {
             if (result.ContainsKey(item.Key))
@@ -1726,6 +1742,25 @@ public static class Config
                 result.Add(item.Key, item.Value);
             }
         }
+
+
+        // merge toolbar hotkeys
+        var toolbarHotkeys = Config.ToolbarButtons
+            .Where(i => i.Type == ToolbarItemModelType.Button && i.Hotkeys.Count > 0)
+            .ToDictionary(i => i.Id, i => i.Hotkeys);
+
+        foreach (var item in toolbarHotkeys)
+        {
+            if (result.ContainsKey(item.Key))
+            {
+                result[item.Key] = item.Value;
+            }
+            else
+            {
+                result.Add(item.Key, item.Value);
+            }
+        }
+
 
         return result;
     }
@@ -1944,8 +1979,6 @@ public static class Config
         PopupButton buttons = PopupButton.OK,
         string optionText = "")
     {
-        SystemSounds.Question.Play();
-
         return Popup.ShowDialog(description, title, heading, details, note, ColorStatusType.Info, buttons, icon, thumbnail, optionText, Config.EnableWindowTopMost, formOwner);
     }
 
@@ -1972,7 +2005,6 @@ public static class Config
         string optionText = "")
     {
         heading ??= Language["_._Warning"];
-        SystemSounds.Exclamation.Play();
 
         return Popup.ShowDialog(description, title, heading, details, note, ColorStatusType.Warning, buttons, icon, thumbnail, optionText, Config.EnableWindowTopMost, formOwner);
     }
@@ -2000,7 +2032,6 @@ public static class Config
         string optionText = "")
     {
         heading ??= Language["_._Error"];
-        SystemSounds.Asterisk.Play();
 
         return Popup.ShowDialog(description, title, heading, details, note, ColorStatusType.Danger, buttons, icon, thumbnail, optionText, Config.EnableWindowTopMost, formOwner);
     }
@@ -2116,6 +2147,51 @@ public static class Config
     }
 
     #endregion // Config file migration
+
+
+    // ToggleAction, SingleAction Parser
+    #region ToggleAction, SingleAction Parser
+
+    private static ToggleAction? ParseToggleAction(IConfigurationSection sec)
+    {
+        if (!sec.Exists()) return null;
+
+        var toggleOn = ParseSingleAction(sec.GetSection(nameof(ToggleAction.ToggleOn)));
+        var toggleOff = ParseSingleAction(sec.GetSection(nameof(ToggleAction.ToggleOff)));
+
+        return new ToggleAction(toggleOn)
+        {
+            ToggleOff = toggleOff,
+        };
+    }
+
+
+    private static SingleAction? ParseSingleAction(IConfigurationSection sec)
+    {
+        if (!sec.Exists()) return null;
+
+        var exe = sec.GetValueEx(nameof(SingleAction.Executable), "");
+        var args = Array.Empty<object>();
+        SingleAction? nextAc = null;
+
+        // get Arguments
+        var argsSec = sec.GetSection(nameof(SingleAction.Arguments));
+        if (argsSec.Exists())
+        {
+            args = argsSec.Get<object[]>().ToArray();
+        }
+
+        // get NextAction
+        var nextSec = sec.GetSection(nameof(SingleAction.NextAction));
+        if (nextSec.Exists())
+        {
+            nextAc = ParseSingleAction(nextSec);
+        }
+
+        return new SingleAction(exe, args, nextAc);
+    }
+
+    #endregion // ToggleAction, SingleAction Parser
 
 
     // ImageFormats

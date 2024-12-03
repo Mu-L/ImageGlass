@@ -39,10 +39,6 @@ namespace ImageGlass;
 
 public partial class FrmMain
 {
-    // to delay the cleaning task when disconnecting multiple slideshows
-    private CancellationTokenSource _cleanSlideshowServerCancelToken = new();
-
-
     /// <summary>
     /// Opens file picker to choose an image
     /// </summary>
@@ -716,7 +712,7 @@ public partial class FrmMain
             Gallery.Height = Gallery.ThumbnailSize.Height
                 + Gallery.Padding.Vertical
                 + (int)gapWidth + scrollBarSize
-                + (int)(Gallery.Renderer.MeasureItemMargin(Gallery.View).Height);
+                + (int)Gallery.Renderer.MeasureItemMargin(Gallery.View).Height;
         }
 
         Gallery.ResumeLayout(false);
@@ -858,13 +854,95 @@ public partial class FrmMain
     /// <summary>
     /// Open About dialog
     /// </summary>
-    public static void IG_About()
+    public void IG_About()
     {
+        // if WebView2 not installed
+        if (!Web2.CheckWebview2Installed())
+        {
+            ShowNativeAboutDialog();
+            return;
+        }
+
+
         using var frm = new FrmAbout()
         {
             StartPosition = FormStartPosition.CenterParent,
         };
         frm.ShowDialog();
+    }
+    private void ShowNativeAboutDialog()
+    {
+        var langPath = nameof(FrmAbout);
+
+        var archInfo = Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit";
+        var appVersion = App.Version + $" ({archInfo})";
+
+
+        // footer buttons
+        var btnDonate = new TaskDialogButton(Config.Language[$"{langPath}._Donate"], allowCloseDialog: false);
+        var btnCheckForUpdate = new TaskDialogButton(Config.Language["_._CheckForUpdate"], allowCloseDialog: false);
+        var btnClose = new TaskDialogButton(Config.Language["_._Close"], allowCloseDialog: true);
+
+        btnDonate.Click += async (_, _) => await BHelper.OpenUrlAsync("https://imageglass.org/support", "from_about_donate");
+        btnCheckForUpdate.Click += (_, _) => IG_CheckForUpdate(true);
+
+        // WebView2 warning
+        var webview2Warning = "";
+        if (Web2.Webview2Version == null)
+        {
+            webview2Warning = Config.Language["_._Webview2._NotFound"];
+        }
+        else if (Web2.Webview2Version < Web2.MIN_VERSION)
+        {
+            webview2Warning = ZString.Format(Config.Language["_._Webview2._Outdated"], Web2.MIN_VERSION);
+        }
+
+        // content
+        var page = new TaskDialogPage()
+        {
+            Icon = new TaskDialogIcon(this.Icon),
+            Buttons = [btnDonate, btnCheckForUpdate, btnClose],
+            SizeToContent = true,
+            AllowCancel = true,
+            EnableLinks = true,
+            Caption = Config.Language[$"{nameof(FrmMain)}.{nameof(MnuAbout)}"],
+
+            Heading = $"{Application.ProductName} {Const.APP_CODE.CapitalizeFirst()}\r\n" +
+                $"{Config.Language[$"{langPath}._Slogan"]}",
+
+            Text =
+                $"{Config.Language[$"{langPath}._Version"]} {appVersion}\r\n" +
+                $"{ImageMagick.MagickNET.Version}\r\n" +
+                $".NET Runtime: {Environment.Version}\r\n" +
+                $"WebView2 Runtime: {Web2.Webview2Version}\r\n\r\n" +
+
+                $"{Config.Language[$"{langPath}._Thanks"]}\r\n" +
+                    $"◾ {Config.Language[$"{langPath}._LogoDesigner"]} Nguyễn Quốc Tuấn.\r\n" +
+                    $"◾ {Config.Language[$"{langPath}._Collaborator"]} Kevin Routley (<a href=\"https://github.com/fire-eggs\">https://github.com/fire-eggs</a>).\r\n" +
+                    $"\r\n" +
+
+                    $"{Config.Language[$"{langPath}._Contact"]}\r\n" +
+                    $"◾ {Config.Language[$"{langPath}._Homepage"]} <a href=\"https://imageglass.org\">https://imageglass.org</a>\r\n" +
+                    $"◾ GitHub: <a href=\"https://github.com/d2phap/ImageGlass\">https://github.com/d2phap/ImageGlass</a>\r\n" +
+                    $"◾ {Config.Language[$"{langPath}._Email"]} phap@imageglass.org",
+
+            Footnote = new()
+            {
+                Icon = TaskDialogIcon.Warning,
+                Text = $"{webview2Warning}\r\n\r\n" +
+                    $"{Config.Language[$"{langPath}._License"]}: <a href=\"https://imageglass.org/license\">https://imageglass.org/license</a>\r\n" +
+                    $"Copyright © 2010-{DateTime.Now.Year} by Dương Diệu Pháp. All rights reserved.",
+            },
+        };
+
+        page.LinkClicked += async (object? sender, TaskDialogLinkClickedEventArgs e) =>
+        {
+            await BHelper.OpenUrlAsync(e.LinkHref, "from_about");
+        };
+
+
+        // show dialog
+        _ = TaskDialog.ShowDialog(this, page);
     }
 
 
@@ -883,13 +961,39 @@ public partial class FrmMain
     /// </summary>
     public void IG_OpenSettings()
     {
+        // if WebView2 not installed, open config.json file
+        if (!Web2.CheckWebview2Installed())
+        {
+            var configFilePath = App.ConfigDir(PathType.File, Source.UserFilename);
+            _ = FrmSettings.OpenUserConfigFileAsync(configFilePath);
+
+            return;
+        }
+
+
         if (Local.FrmSettings.IsDisposed)
         {
             Local.FrmSettings = new();
         }
 
+        if (Local.FrmSettings.WindowState == FormWindowState.Minimized)
+        {
+            Local.FrmSettings.WindowState = FormWindowState.Normal;
+        }
+
         Local.FrmSettings.TopMost = TopMost;
         Local.FrmSettings.Show();
+        Local.FrmSettings.Activate();
+    }
+
+
+    /// <summary>
+    /// Parses and applies settings from JSON
+    /// </summary>
+    /// <param name="json"></param>
+    public static void IG_ApplySettings(string json)
+    {
+        Local.ApplySettingsFromJson(json);
     }
 
 
@@ -1487,7 +1591,7 @@ public partial class FrmMain
         var hasSelection = PicMain.EnableSelection && !PicMain.SourceSelection.IsEmpty;
         if (hasSelection)
         {
-            using var selectedImg = await GetSelectedImageAreaAsync();
+            using var selectedImg = await GetCurrentImageDataAsync(true);
             error = await DoSaveAsync(selectedImg, srcFilePath, destFilePath, false);
             saveSource = ImageSaveSource.SelectedArea;
         }
@@ -1761,22 +1865,15 @@ public partial class FrmMain
         // get app from the extension
         if (Config.GetEditAppFromExtension(ext) is EditApp app)
         {
-            // open configured app for editing
-            using var p = new Process();
-            p.StartInfo.FileName = BHelper.ResolvePath(app.Executable);
-
-            // build the arguments
-            var args = app.Argument.Replace(Const.FILE_MACRO, $"\"{filePath}\"");
-            p.StartInfo.Arguments = $"{args}";
-
-            // show error dialog
-            p.StartInfo.ErrorDialog = true;
-
             try
             {
-                p.Start();
+                var args = BHelper.BuildExeArgs(app.Executable, app.Argument, filePath);
 
-                RunActionAfterEditing();
+                var result = await BHelper.RunExeCmd(args.Executable, args.Args, false, false, true);
+                if (result == IgExitCode.Done)
+                {
+                    RunActionAfterEditing();
+                }
             }
             catch { }
         }
@@ -2121,11 +2218,11 @@ public partial class FrmMain
             // save image to temp file
             filePath = await Local.SaveImageAsTempFileAsync(defaultExt);
         }
-        else if (ext != ".BMP"
-            && ext != ".JPG"
-            && ext != ".JPEG"
-            && ext != ".PNG"
-            && ext != ".GIF")
+        else if (ext is not ".BMP"
+            and not ".JPG"
+            and not ".JPEG"
+            and not ".PNG"
+            and not ".GIF")
         {
             // save image to temp file
             filePath = await Local.SaveImageAsTempFileAsync(defaultExt);
@@ -2280,7 +2377,7 @@ public partial class FrmMain
 
         if (Config.ShowGallery)
         {
-            if (Gallery.Dock == DockStyle.Left || Gallery.Dock == DockStyle.Right)
+            if (Gallery.Dock is DockStyle.Left or DockStyle.Right)
             {
                 horzGap += Gallery.Width;
             }
@@ -2291,7 +2388,7 @@ public partial class FrmMain
         }
         if (Config.ShowToolbar)
         {
-            if (Toolbar.Dock == DockStyle.Left || Toolbar.Dock == DockStyle.Right)
+            if (Toolbar.Dock is DockStyle.Left or DockStyle.Right)
             {
                 horzGap += Toolbar.Width;
             }
@@ -2302,7 +2399,7 @@ public partial class FrmMain
         }
         if (ToolbarContext.Visible)
         {
-            if (ToolbarContext.Dock == DockStyle.Left || ToolbarContext.Dock == DockStyle.Right)
+            if (ToolbarContext.Dock is DockStyle.Left or DockStyle.Right)
             {
                 horzGap += ToolbarContext.Width;
             }
@@ -2423,7 +2520,7 @@ public partial class FrmMain
         {
             _movableForm.ShowMover = Config.EnableFrameless;
         }
-        
+
 
         // update toolbar items state
         UpdateToolbarItemsState();
@@ -2878,32 +2975,41 @@ public partial class FrmMain
 
     public async Task CropAsync()
     {
-        var img = await GetSelectedImageAreaAsync();
+        var img = await GetCurrentImageDataAsync(true);
         if (img == null) return;
 
         LoadClipboardImage(img);
 
         // reset selection
-        PicMain.ClientSelection = default;
+        PicMain.SourceSelection = default;
     }
 
 
     /// <summary>
-    /// Gets the selected image data clipped by the selection area.
+    /// Gets the current rendered image data
     /// </summary>
-    public async Task<WicBitmapSource?> GetSelectedImageAreaAsync()
+    /// <param name="selectionOnly">Only get the selected area</param>
+    public async Task<WicBitmapSource?> GetCurrentImageDataAsync(bool selectionOnly = false)
     {
-        if (PicMain.Source == ImageSource.Null || PicMain.SourceSelection.IsEmpty) return null;
+        if (PicMain.Source == ImageSource.Null) return null;
+        if (selectionOnly && PicMain.SourceSelection.IsEmpty) return null;
 
 
+        // clipboard image
         if (Local.ClipboardImage != null)
         {
-            return BHelper.CropImage(Local.ClipboardImage, PicMain.SourceSelection);
+            if (selectionOnly)
+            {
+                return BHelper.CropImage(Local.ClipboardImage, PicMain.SourceSelection);
+            }
+
+            return Local.ClipboardImage;
         }
 
 
         var img = await Local.Images.GetAsync(Local.CurrentIndex);
         if (img == null) return null;
+
 
         // apply transforms
         if (Local.ImageTransform.HasChanges)
@@ -2911,7 +3017,12 @@ public partial class FrmMain
             PhotoCodec.TransformImage(img.ImgData.Image, Local.ImageTransform);
         }
 
-        return BHelper.CropImage(img.ImgData.Image, PicMain.SourceSelection);
+        if (selectionOnly)
+        {
+            return BHelper.CropImage(img.ImgData.Image, PicMain.SourceSelection);
+        }
+
+        return img.ImgData.Image;
     }
 
 
@@ -3182,6 +3293,30 @@ public partial class FrmMain
 
 
     /// <summary>
+    /// Open image resize tool.
+    /// </summary>
+    public void IG_OpenResizeTool()
+    {
+        if (Local.IsBusy) return;
+
+
+        if (Local.FrmResize.IsDisposed)
+        {
+            Local.FrmResize = new();
+        }
+
+        if (Local.FrmResize.ShowDialog() != DialogResult.OK) return;
+
+
+        if (Local.FrmResize.Result != null)
+        {
+            LoadClipboardImage(Local.FrmResize.Result);
+        }
+    }
+
+
+
+    /// <summary>
     /// Runs lossless compression tool.
     /// </summary>
     public void IG_LosslessCompression()
@@ -3226,7 +3361,6 @@ public partial class FrmMain
     {
         PicMain.ShowMessage(Config.Language[$"{Name}.{nameof(MnuLosslessCompression)}._Compressing"], null);
 
-        var oldIndex = Local.CurrentIndex;
         var oldFileSize = new FileInfo(filePath).Length;
         Local.IsBusy = true;
 

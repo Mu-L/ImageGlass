@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System.Runtime.InteropServices;
+using Windows.Win32;
+using Windows.Win32.UI.Input.KeyboardAndMouse;
 
 namespace ImageGlass.Base.WinApi;
 
@@ -24,38 +26,44 @@ public class KeyboardApi
 {
 
     [DllImport("user32.dll")]
-    static extern uint MapVirtualKey(uint uCode, uint uMapType);
-
-    [DllImport("user32.dll")]
-    static extern IntPtr GetKeyboardLayout(uint idThread);
-
-    [DllImport("user32.dll")]
     private static extern bool ToAsciiEx(int virtualKey, int scanCode, byte[] lpKeyState, ref uint lpChar, int uFlags, IntPtr dwhkl);
 
-    [DllImport("user32.dll")]
-    private static extern short VkKeyScanExA(char ch, IntPtr dwhkl);
 
 
     /// <summary>
     /// Converts virtual key to string.
     /// </summary>
-    public static char KeyCodeToChar(Keys key, bool withShiftKey)
+    public static unsafe char KeyCodeToChar(Keys key, bool withShiftKey)
     {
-        uint lpChar = 0;
+        var lpChar = 0u;
         var lpKeyState = new byte[256];
 
         if (withShiftKey)
         {
-            var mKey = Keys.ShiftKey;
-
             foreach (Keys sKey in Enum.GetValues(typeof(Keys)))
-                if ((mKey & sKey) == sKey)
+            {
+                if (sKey.HasFlag(Keys.ShiftKey))
+                {
                     lpKeyState[(int)sKey] = 0x80;
+                }
+            }
         }
 
+        // always use en-US keyboard layout
+        nint langHandle;
+        try
+        {
+            var culture = new System.Globalization.CultureInfo("en-US");
+            langHandle = InputLanguage.FromCulture(culture).Handle;
+        }
+        catch
+        {
+            langHandle = InputLanguage.DefaultInputLanguage.Handle;
+        }
+
+        var keyboardLayoutPtr = new HKL(langHandle);
         var virtualKeyCode = (uint)key;
-        var scanCode = MapVirtualKey(virtualKeyCode, 0);
-        var keyboardLayoutPtr = GetKeyboardLayout(0);
+        var scanCode = PInvoke.MapVirtualKey(virtualKeyCode, MAP_VIRTUAL_KEY_TYPE.MAPVK_VK_TO_VSC);
 
         _ = ToAsciiEx((int)key, (int)scanCode, lpKeyState, ref lpChar, 0, keyboardLayoutPtr);
 
@@ -68,9 +76,20 @@ public class KeyboardApi
     /// </summary>
     public static Keys CharToKeyCode(char c)
     {
-        var keyboardLayoutPtr = GetKeyboardLayout(0);
+        // always use en-US keyboard layout
+        nint langHandle;
+        try
+        {
+            var culture = new System.Globalization.CultureInfo("en-US");
+            langHandle = InputLanguage.FromCulture(culture).Handle;
+        }
+        catch
+        {
+            langHandle = InputLanguage.DefaultInputLanguage.Handle;
+        }
 
-        var vkey = VkKeyScanExA(c, keyboardLayoutPtr);
+        var keyboardLayoutPtr = new HKL(langHandle);
+        var vkey = PInvoke.VkKeyScanEx(c, keyboardLayoutPtr);
         var keys = (Keys)(vkey & 0xff);
         var modifiers = vkey >> 8;
 

@@ -26,7 +26,6 @@ using ImageGlass.Base.WinApi;
 using ImageGlass.Gallery;
 using ImageGlass.Settings;
 using ImageGlass.UI;
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
@@ -42,7 +41,7 @@ public partial class FrmMain : ThemedForm
 
     // cancellation tokens of synchronious task
     private CancellationTokenSource? _loadCancelTokenSrc = new();
-    private IProgress<ProgressReporterEventArgs> _uiReporter;
+    private readonly IProgress<ProgressReporterEventArgs> _uiReporter;
     private MovableForm? _movableForm;
     private bool _isShowingImagePreview;
 
@@ -109,10 +108,10 @@ public partial class FrmMain : ThemedForm
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
         // to fix arrow keys sometimes does not regconize
-        if (keyData == Keys.Up
-            || keyData == Keys.Down
-            || keyData == Keys.Left
-            || keyData == Keys.Right)
+        if (keyData is Keys.Up
+            or Keys.Down
+            or Keys.Left
+            or Keys.Right)
         {
             FrmMain_KeyDown(this, new KeyEventArgs(keyData));
 
@@ -132,8 +131,12 @@ public partial class FrmMain : ThemedForm
     private void FrmMain_KeyDown(object sender, KeyEventArgs e)
     {
         //Text = new Hotkey(e.KeyData).ToString() + " - " + e.KeyValue.ToString();
-
         var hotkey = new Hotkey(e.KeyData);
+
+
+        // 1. check if the hotkey action is special action
+        #region Special actions
+
         var actions = Config.GetHotkeyActions(CurrentMenuHotkeys, hotkey);
 
         // open main menu
@@ -160,9 +163,11 @@ public partial class FrmMain : ThemedForm
             return;
         }
 
+        #endregion // Special actions
 
-        // Register and run MAIN MENU shortcuts
-        #region Register and run MAIN MENU shortcuts
+
+        // 2. check hotkey if it's from menu items
+        #region Menu Hotkey
 
         bool CheckMenuShortcut(ToolStripMenuItem mnu)
         {
@@ -200,7 +205,24 @@ public partial class FrmMain : ThemedForm
         {
             if (CheckMenuShortcut(item)) return;
         }
-        #endregion
+        #endregion // Menu Hotkey
+
+
+        // 3. check hotkey if it's from toolbar buttons
+        #region Toolbar Hotkey
+
+        var toolbarBtn = Config.ToolbarButtons.Find(btn =>
+        {
+            var btnHotkey = btn.Hotkeys.SingleOrDefault(k => k.KeyData == e.KeyData);
+            return btnHotkey != null;
+        });
+
+        if (Toolbar.Items.ContainsKey(toolbarBtn?.Id))
+        {
+            Toolbar.Items[toolbarBtn.Id].PerformClick();
+        }
+
+        #endregion // Toolbar Hotkey
     }
 
 
@@ -435,20 +457,18 @@ public partial class FrmMain : ThemedForm
         string? currentFilePath)
     {
         if (!inputPaths.Any()) return;
+
         currentFilePath ??= string.Empty;
+        var hasInitFile = !string.IsNullOrEmpty(currentFilePath);
+
 
         await Task.Run(() =>
         {
-            var allFilesToLoad = new HashSet<string>();
-            var currentFile = currentFilePath;
-            var hasInitFile = !string.IsNullOrEmpty(currentFile);
-
-
             // track paths loaded to prevent duplicates
-            var pathsLoaded = new HashSet<string>();
-            var firstPath = true;
+            var dirPaths = new HashSet<string>();
+            var isFirstPath = true;
 
-            // Parse string to absolute path
+            // parse string to absolute path
             var paths = inputPaths.Select(item => BHelper.ResolvePath(item));
 
             // prepare the distinct dir list
@@ -486,9 +506,9 @@ public partial class FrmMain : ThemedForm
 
 
                 // TODO: Currently only have the ability to watch a single path for changes!
-                if (firstPath)
+                if (isFirstPath)
                 {
-                    firstPath = false;
+                    isFirstPath = false;
                     StartFileWatcher(dirPath);
 
                     // Seek for explorer sort order
@@ -498,31 +518,34 @@ public partial class FrmMain : ThemedForm
                 // KBR 20181004 Fix observed bug: dropping multiple files from the same path
                 // would load ALL files in said path multiple times! Prevent loading the same
                 // path more than once.
-                if (pathsLoaded.Add(dirPath))
-                {
-                    var imageFilenameList = LoadImageFilesFromDirectory(dirPath);
-                    allFilesToLoad.UnionWith(imageFilenameList);
-                }
+                dirPaths.Add(dirPath);
             }
 
 
             Local.InitialInputPath = hasInitFile
                 ? (distinctDirsList.Count > 0 ? distinctDirsList[0] : string.Empty)
-                : currentFile;
+                : currentFilePath;
 
 
-            // sort list
-            // NOTE: relies on LocalSetting.ActiveImageLoadingOrder been updated first!
-            var sortedFilesList = BHelper.SortImageList(allFilesToLoad,
-                Local.ActiveImageLoadingOrder,
-                Local.ActiveImageLoadingOrderType,
-                Config.ShouldGroupImagesByDirectory);
+            // get image files
+            var allFilePaths = BHelper.FindFiles(dirPaths,
+                Config.EnableRecursiveLoading,
+                Config.ShouldLoadHiddenImages,
+                filePath =>
+                {
+                    if (string.IsNullOrWhiteSpace(filePath)) return false;
+
+                    var ext = Path.GetExtension(filePath).ToLowerInvariant();
+                    return ext.Length > 0 && Config.FileFormats.Contains(ext);
+                },
+                filePaths => BHelper.SortFilePathList(filePaths,
+                    Local.ActiveImageLoadingOrder,
+                    Local.ActiveImageLoadingOrderType,
+                    Config.ShouldGroupImagesByDirectory));
+
 
             // add to image list
-            Local.InitImageList(sortedFilesList, distinctDirsList);
-
-            // Find the index of current image
-            UpdateCurrentIndex(currentFilePath);
+            Local.InitImageList(allFilePaths, distinctDirsList);
 
 
             _uiReporter.Report(new(new ImageListLoadedEventArgs()
@@ -536,7 +559,6 @@ public partial class FrmMain : ThemedForm
     /// <summary>
     /// Updates <see cref="Local.CurrentIndex"/> according to the context.
     /// </summary>
-    /// <param name="currentFilePath"></param>
     private static void UpdateCurrentIndex(string? currentFilePath)
     {
         if (string.IsNullOrEmpty(currentFilePath))
@@ -595,58 +617,20 @@ public partial class FrmMain : ThemedForm
         Local.ActiveImageLoadingOrderType = Config.ImageLoadingOrderType;
 
         // Use File Explorer sort order if possible
-        if (Config.ShouldUseExplorerSortOrder)
-        {
-            if (ExplorerSortOrder.GetExplorerSortOrder(fullPath, out var explorerOrder, out var isAscending))
-            {
-                if (explorerOrder != null)
-                {
-                    Local.ActiveImageLoadingOrder = explorerOrder.Value;
-                }
+        if (!Config.ShouldUseExplorerSortOrder) return;
 
-                if (isAscending != null)
-                {
-                    Local.ActiveImageLoadingOrderType = isAscending.Value ? ImageOrderType.Asc : ImageOrderType.Desc;
-                }
+        if (ExplorerSortOrder.GetExplorerSortOrder(fullPath, out var order, out var isAscending))
+        {
+            if (order != null)
+            {
+                Local.ActiveImageLoadingOrder = order.Value;
+            }
+
+            if (isAscending != null)
+            {
+                Local.ActiveImageLoadingOrderType = isAscending.Value ? ImageOrderType.Asc : ImageOrderType.Desc;
             }
         }
-    }
-
-
-    /// <summary>
-    /// Sort and find all supported image from directory
-    /// </summary>
-    /// <param name="path">Image folder path</param>
-    private static ConcurrentBag<string> LoadImageFilesFromDirectory(string path)
-    {
-        // Get files from dir
-        return DirectoryFinder.FindFiles(path,
-            Config.EnableRecursiveLoading,
-            new Predicate<FileInfo>((FileInfo fi) =>
-            {
-                // KBR 20180607 Rework predicate to use a FileInfo instead of the filename.
-                // By doing so, can use the attribute data already loaded into memory, 
-                // instead of fetching it again (via File.GetAttributes). A re-fetch is
-                // very slow across network paths. For me, improves image load from 4+ 
-                // seconds to 0.4 seconds for a specific network path.
-                if (fi.FullName == null)
-                    return false;
-
-                var extension = fi.Extension.ToLowerInvariant();
-
-                // checks if image is hidden and ignores it if so
-                if (!Config.ShouldLoadHiddenImages)
-                {
-                    var attributes = fi.Attributes;
-                    var isHidden = (attributes & FileAttributes.Hidden) != 0;
-                    if (isHidden)
-                    {
-                        return false;
-                    }
-                }
-
-                return extension.Length > 0 && Config.FileFormats.Contains(extension);
-            }));
     }
 
 
@@ -664,10 +648,7 @@ public partial class FrmMain : ThemedForm
         Gallery.SuspendLayout();
         Gallery.Items.Clear();
 
-        foreach (string filename in Local.Images.FileNames)
-        {
-            Gallery.Items.Add(filename);
-        }
+        Gallery.Items.AddRange(Local.Images.FileNames.ToArray());
 
         Gallery.ResumeLayout();
         UpdateGallerySize();
@@ -808,7 +789,7 @@ public partial class FrmMain : ThemedForm
             {
                 ColorProfileName = Config.ColorProfile,
                 ApplyColorProfileForAll = Config.ShouldUseColorProfileForAll,
-                AutoScaleDownLargeImage = true,
+                AutoScaleDownLargeImage = false,
                 UseEmbeddedThumbnailRawFormats = Config.UseEmbeddedThumbnailRawFormats,
                 UseEmbeddedThumbnailOtherFormats = Config.UseEmbeddedThumbnailOtherFormats,
                 EmbeddedThumbnailMinWidth = Config.EmbeddedThumbnailMinWidth,
@@ -846,7 +827,8 @@ public partial class FrmMain : ThemedForm
 
             // check if we should use Webview2 viewer
             var useWebview2 = Config.UseWebview2ForSvg
-                && imgFilePath.EndsWith(".svg", StringComparison.InvariantCultureIgnoreCase);
+                && imgFilePath.EndsWith(".svg", StringComparison.InvariantCultureIgnoreCase)
+                && Web2.CheckWebview2Installed();
 
 
             // set busy state
@@ -1050,7 +1032,7 @@ public partial class FrmMain : ThemedForm
         _ = BHelper.RunAsThread(SelectCurrentGalleryThumbnail);
 
         // show image preview if it's not cached
-        if (!Local.Images.IsCached(Local.CurrentIndex))
+        if (!e.UseWebview2 && !Local.Images.IsCached(Local.CurrentIndex))
         {
             ShowImagePreview(e.FilePath, _loadCancelTokenSrc.Token);
         }
@@ -1254,7 +1236,7 @@ public partial class FrmMain : ThemedForm
                 // get preview size
                 if (Config.ZoomMode == ZoomMode.LockZoom)
                 {
-                    previewSize = new(Local.Metadata.RenderedWidth, Local.Metadata.RenderedHeight);
+                    previewSize = new((int)Local.Metadata.RenderedWidth, (int)Local.Metadata.RenderedHeight);
                 }
                 else
                 {
@@ -1694,13 +1676,10 @@ public partial class FrmMain : ThemedForm
         #region Free path executable
         else
         {
-            var currentFilePath = Local.Images.GetFilePath(Local.CurrentIndex);
-            var procArgs = string.Join("",
-                ac.Arguments
-                    .Select(i => $"{i}".Replace(Const.FILE_MACRO, $"\"{currentFilePath}\""))
-                    .ToArray()) ?? string.Empty;
+            var args = string.Join("", ac.Arguments) ?? string.Empty;
+            var (Executable, Args) = BHelper.BuildExeArgs(ac.Executable, args, Local.Images.GetFilePath(Local.CurrentIndex));
 
-            var result = await BHelper.RunExeCmd(ac.Executable, procArgs, false, false);
+            var result = await BHelper.RunExeCmd(Executable, Args, false, false);
             if (result != IgExitCode.Done)
             {
                 error = new Exception(ZString.Format(Config.Language[$"{langPath}._Win32ExeError"], ac.Executable));
@@ -1747,8 +1726,8 @@ public partial class FrmMain : ThemedForm
                 // update PicMain's context menu
                 Local.UpdateFrmMain(UpdateRequests.MouseActions);
 
-                if (executable != nameof(IG_OpenContextMenu)
-                    && executable != nameof(IG_OpenMainMenu))
+                if (executable is not (nameof(IG_OpenContextMenu))
+                    and not (nameof(IG_OpenMainMenu)))
                 {
                     _ = ExecuteUserActionAsync(action);
                 }
@@ -2411,6 +2390,11 @@ public partial class FrmMain : ThemedForm
         IG_ToggleCropTool();
     }
 
+    private void MnuResizeTool_Click(object sender, EventArgs e)
+    {
+        IG_OpenResizeTool();
+    }
+
     private void MnuFrameNav_Click(object sender, EventArgs e)
     {
         IG_ToggleFrameNavTool();
@@ -2483,5 +2467,5 @@ public partial class FrmMain : ThemedForm
     #endregion // Main Menu component
 
 
-    
+
 }

@@ -25,9 +25,7 @@ namespace ImageGlass.UI;
 
 public class ModernCheckBox : CheckBox
 {
-
     private ModernControlState _controlState = ModernControlState.Normal;
-
     private bool _spacePressed = false;
     private bool _darkMode = false;
     private IColors ColorPalatte => BHelper.GetThemeColorPalatte(_darkMode);
@@ -328,19 +326,19 @@ public class ModernCheckBox : CheckBox
         var initX = Padding.Left;
         var initY = Padding.Top;
         var borderRadius = DpiApi.Scale(2f);
-        var checkBoxSize = Font.Height * 0.8f;
-        var checkBoxRect = new RectangleF(
+        var boxSize = Font.Height * 0.8f;
+        var boxRect = new RectangleF(
             initX,
-            initY + checkBoxSize / 4,
-            checkBoxSize,
-            checkBoxSize);
+            initY + boxSize / 4,
+            boxSize,
+            boxSize);
 
 
         // fill checkbox
         using (var b = new SolidBrush(fillColor))
         {
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.FillRoundedRectangle(b, checkBoxRect, borderRadius, false);
+            g.FillRoundedRectangle(b, boxRect, borderRadius, false);
             g.SmoothingMode = SmoothingMode.None;
         }
 
@@ -353,30 +351,32 @@ public class ModernCheckBox : CheckBox
             p.EndCap = LineCap.Round;
 
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.DrawRoundedRectangle(p, checkBoxRect, borderRadius, false);
+            g.DrawRoundedRectangle(p, boxRect, borderRadius, false);
             g.SmoothingMode = SmoothingMode.None;
         }
 
         if (Checked)
         {
-            var checkMarkThickness = checkBoxSize * 0.13f;
+            var checkMarkThickness = boxSize * 0.13f;
+            var checkColor = ColorPalatte.Accent.InvertBlackOrWhite().InvertBlackOrWhite();
+            if (Focused) checkColor = checkColor.InvertBlackOrWhite();
 
             // draw check mark
-            using (var p = new Pen(fillColor.InvertBlackOrWhite(), checkMarkThickness))
+            using (var p = new Pen(checkColor, checkMarkThickness))
             {
                 p.LineJoin = LineJoin.Round;
                 p.StartCap = LineCap.Round;
                 p.EndCap = LineCap.Round;
 
                 var point1 = new PointF(
-                    checkBoxRect.X + (2f * checkBoxRect.Height / 10),
-                    checkBoxRect.Y + (6 * checkBoxRect.Height / 10));
+                    boxRect.X + (2f * boxRect.Height / 10),
+                    boxRect.Y + (6 * boxRect.Height / 10));
                 var point2 = new PointF(
-                    checkBoxRect.X + (4 * checkBoxRect.Height / 10),
-                    checkBoxRect.Y + (7.5f * checkBoxRect.Height / 10));
+                    boxRect.X + (4 * boxRect.Height / 10),
+                    boxRect.Y + (7.5f * boxRect.Height / 10));
                 var point3 = new PointF(
-                    checkBoxRect.X + (7.5f * checkBoxRect.Height / 10),
-                    checkBoxRect.Y + (2.5f * checkBoxRect.Height / 10));
+                    boxRect.X + (7.5f * boxRect.Height / 10),
+                    boxRect.Y + (2.5f * boxRect.Height / 10));
 
                 g.SmoothingMode = SmoothingMode.AntiAlias;
                 g.DrawLine(p, point1, point2);
@@ -397,9 +397,9 @@ public class ModernCheckBox : CheckBox
             };
 
             var modRect = new RectangleF(
-                checkBoxRect.Right + checkBoxSize / 3,
+                boxRect.Right + boxSize / 3,
                 initY,
-                Bounds.Width - checkBoxSize - Padding.Horizontal,
+                Bounds.Width - boxSize - Padding.Horizontal,
                 Bounds.Height - Padding.Vertical);
 
             g.DrawString(Text, Font, b, modRect, stringFormat);

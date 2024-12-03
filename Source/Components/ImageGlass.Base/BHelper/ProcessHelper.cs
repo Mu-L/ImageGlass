@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // Source:
 // https://github.com/aspnet/AspNetIdentity/blob/b7826741279450c58b230ece98bd04b4815beabf/src/Microsoft.AspNet.Identity.Core/AsyncHelper.cs
 
+using ImageGlass.Base.QueuedWorker;
 using System.Diagnostics;
 using System.Globalization;
 using Windows.ApplicationModel;
@@ -31,6 +32,9 @@ public partial class BHelper
     private static readonly TaskFactory _myTaskFactory = new(
         CancellationToken.None, TaskCreationOptions.None,
         TaskContinuationOptions.None, TaskScheduler.Default);
+
+    private static DebounceDispatcher? _debouncer = null;
+
 
     /// <summary>
     /// Runs an async function synchronous.
@@ -88,14 +92,26 @@ public partial class BHelper
     /// <summary>
     /// Runs as admin
     /// </summary>
-    public static async Task<int> RunExeAsync(string filename, string args, bool asAdmin = false, bool waitForExit = false)
+    public static async Task<int> RunExeAsync(string filename, string args, bool asAdmin = false, bool waitForExit = false, bool showError = false)
     {
         var proc = new Process();
-        proc.StartInfo.FileName = filename;
-        proc.StartInfo.Arguments = args;
+
+        // filename is an app protocal
+        if (filename.EndsWith(':'))
+        {
+            var url = $"{filename}{args}";
+            proc.StartInfo.FileName = url;
+        }
+        // filename is a path
+        else
+        {
+            proc.StartInfo.FileName = filename;
+            proc.StartInfo.Arguments = args;
+        }
 
         proc.StartInfo.Verb = asAdmin ? "runas" : "";
         proc.StartInfo.UseShellExecute = true;
+        proc.StartInfo.ErrorDialog = showError;
 
         try
         {
@@ -126,7 +142,7 @@ public partial class BHelper
     /// Run a command, supports auto-elevating process privilege
     /// if admin permission is required.
     /// </summary>
-    public static async Task<IgExitCode> RunExeCmd(string exePath, string args, bool waitForExit = true, bool appendIgArgs = true)
+    public static async Task<IgExitCode> RunExeCmd(string exePath, string args, bool waitForExit = true, bool appendIgArgs = true, bool showError = false)
     {
         IgExitCode code;
 
@@ -137,7 +153,7 @@ public partial class BHelper
                 args += $" {IgCommands.HIDE_ADMIN_REQUIRED_ERROR_UI}";
             }
 
-            code = (IgExitCode)await RunExeAsync(exePath, args, false, waitForExit);
+            code = (IgExitCode)await RunExeAsync(exePath, args, false, waitForExit, showError);
 
 
             // If that fails due to privs error, re-attempt with admin privs.
@@ -172,4 +188,41 @@ public partial class BHelper
 
         return false;
     }
+
+
+    /// <summary>
+    /// Builds correct file path for executable and app protocol.
+    /// </summary>
+    public static (string Executable, string Args) BuildExeArgs(string executable, string arguments, string currentFilePath = "")
+    {
+        var exe = executable.Trim();
+        var isAppProtocol = exe.EndsWith(':');
+
+        // exclude the double quotes if the executable is app protocol
+        var filePath = isAppProtocol ? currentFilePath : $"\"{currentFilePath}\"";
+
+        var args = arguments.Replace(Const.FILE_MACRO, filePath);
+
+        return (Executable: exe, Args: args);
+    }
+
+
+    /// <summary>
+    /// Takes the last called action, delays the execution after a certain amount of time has passed.
+    /// </summary>
+    public static void Debounce(int delayMs, Action action)
+    {
+        Debounce(delayMs, (object? param) => action());
+    }
+
+
+    /// <summary>
+    /// Takes the last called action, delays the execution after a certain amount of time has passed.
+    /// </summary>
+    public static void Debounce<T>(int delayMs, Action<T> action, T? param = default)
+    {
+        _debouncer ??= new();
+        _debouncer.Debounce(delayMs, action, param);
+    }
+
 }
