@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win32"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:win32="using:ImageGlass.Common.Win32"
+    xmlns:win32="using:ImageGlass.Common.WinOS"
     Closed="Window_Closed"
     mc:Ignorable="d">
 
@@ -57,7 +57,7 @@
         <Grid
             Grid.Row="1"
             VerticalAlignment="Top"
-            Background="DarkSlateBlue"
+            Background="#20ff"
             Canvas.ZIndex="99">
 
             <Button Click="Button_Click">Open</Button>
@@ -69,12 +69,15 @@
             Grid.Row="3"
             Height="100"
             VerticalAlignment="Bottom"
+            Background="#20ff"
             Canvas.ZIndex="98" />
 
 
         <!--  Viewer  -->
         <Grid Grid.Row="2">
-            <win32:VirtualViewerControl x:Name="Viewer" Loaded="Viewer_Loaded" />
+            <Border BorderBrush="Red" BorderThickness="2">
+                <win32:VirtualViewerControl x:Name="Viewer" Loaded="Viewer_Loaded" />
+            </Border>
         </Grid>
 
     </Grid>

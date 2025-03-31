@@ -11,7 +11,7 @@ using Windows.Foundation;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace ImageGlass.Common.Win32;
+namespace ImageGlass.Common.WinOS;
 
 public partial class VirtualViewerControl : SwapChainCanvas
 {
@@ -575,11 +575,15 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
         _bmpWic = WicBitmapSource.Load(path);
-        _bmpD2d = D2dContext.CreateBitmapFromWicBitmap(_bmpWic);
-
-
         SourceWidth = _bmpWic.Size.Width;
         SourceHeight = _bmpWic.Size.Height;
+
+        var exceededMaxBitmapSize = SourceWidth > MAX_HARDWARE_BITMAP_DIMENSION
+            || SourceHeight > MAX_HARDWARE_BITMAP_DIMENSION;
+        UseHardwareAcceleration = !exceededMaxBitmapSize;
+
+
+        _bmpD2d = D2dContext.CreateBitmapFromWicBitmap(_bmpWic);
 
         Refresh();
     }

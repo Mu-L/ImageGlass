@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.35906.104 d17.14
+VisualStudioVersion = 17.14.35906.104
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageGlass.Win32", "ImageGlass.Win32\ImageGlass.Win32.csproj", "{CF4D51AA-DD8B-4E00-8397-602B96341419}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ImageGlass.Common", "ImageGlass.Common", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Win32", "Win32", "{F6FBFAA6-D0A2-4FEF-9C46-01FC2290AE9D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WinOS", "WinOS", "{F6FBFAA6-D0A2-4FEF-9C46-01FC2290AE9D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualViewer", "ImageGlass.Common\Win32\VirtualViewer\VirtualViewer.csproj", "{171576B1-E35D-40A8-8F10-DA4B6C579D02}"
 EndProject
