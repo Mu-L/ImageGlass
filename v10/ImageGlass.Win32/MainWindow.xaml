@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="ImageGlass.Win32.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:ImageGlass.Win32"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:win32="using:ImageGlass.Common.Win32"
+    Closed="Window_Closed"
+    mc:Ignorable="d">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid
+        Padding="10"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <Button Click="Button_Click">Open</Button>
+            <TextBlock
+                Grid.Row="0"
+                FontSize="30"
+                Foreground="Red">
+                Dương Diệu Pháp 🚀
+            </TextBlock>
+        </StackPanel>
+
+        <Border
+            Grid.Row="1"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            BorderBrush="Purple"
+            BorderThickness="10">
+            <win32:VirtualViewerControl
+                x:Name="Viewer"
+                Padding="50"
+                Loaded="Viewer_Loaded" />
+        </Border>
+
+    </Grid>
+</Window>
