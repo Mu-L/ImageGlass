@@ -11,39 +11,71 @@
     mc:Ignorable="d">
 
     <Window.SystemBackdrop>
-        <MicaBackdrop />
+        <DesktopAcrylicBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid
-        Padding="10"
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch">
+
+    <Grid x:Name="ContentArea">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel>
-            <Button Click="Button_Click">Open</Button>
-            <TextBlock
-                Grid.Row="0"
-                FontSize="30"
-                Foreground="Red">
-                Dương Diệu Pháp 🚀
-            </TextBlock>
-        </StackPanel>
 
-        <Border
+        <Grid
+            x:Name="WinMainTitleBar"
+            Grid.Row="0"
+            Height="{x:Bind TitleBarHeight.Value}"
+            Margin="{x:Bind TitleBarMargin}"
+            Background="Green"
+            Canvas.ZIndex="100">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+
+            <ImageIcon
+                Grid.Column="0"
+                Width="20"
+                Margin="5,0,5,0"
+                Source="/Assets/Square44x44Logo.png" />
+
+            <TextBlock
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind Title}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="NoWrap" />
+        </Grid>
+
+
+        <!--  Toolbar  -->
+        <Grid
             Grid.Row="1"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            BorderBrush="Purple"
-            BorderThickness="10">
-            <win32:VirtualViewerControl
-                x:Name="Viewer"
-                Padding="50"
-                Loaded="Viewer_Loaded" />
-        </Border>
+            VerticalAlignment="Top"
+            Background="DarkSlateBlue"
+            Canvas.ZIndex="99">
+
+            <Button Click="Button_Click">Open</Button>
+        </Grid>
+
+
+        <!--  Gallery  -->
+        <Grid
+            Grid.Row="3"
+            Height="100"
+            VerticalAlignment="Bottom"
+            Canvas.ZIndex="98" />
+
+
+        <!--  Viewer  -->
+        <Grid Grid.Row="2">
+            <win32:VirtualViewerControl x:Name="Viewer" Loaded="Viewer_Loaded" />
+        </Grid>
 
     </Grid>
 </Window>
