@@ -1,5 +1,5 @@
 ﻿
-namespace ImageGlass.Common.WinOS;
+namespace ImageGlass.WinNT;
 
 
 /// <summary>

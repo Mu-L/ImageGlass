@@ -2,6 +2,7 @@
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
+using SharpGen.Runtime;
 using System;
 using System.Linq;
 using Vortice.Direct2D1;
@@ -11,7 +12,7 @@ using Windows.Foundation;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace ImageGlass.Common.WinOS;
+namespace ImageGlass.WinNT;
 
 public partial class VirtualViewerControl : SwapChainCanvas
 {
@@ -575,15 +576,29 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
         _bmpWic = WicBitmapSource.Load(path);
-        SourceWidth = _bmpWic.Size.Width;
-        SourceHeight = _bmpWic.Size.Height;
+        SourceWidth = _bmpWic?.Size.Width ?? 0;
+        SourceHeight = _bmpWic?.Size.Height ?? 0;
+
+        if (_bmpWic == null)
+        {
+            Refresh();
+            return;
+        }
 
         var exceededMaxBitmapSize = SourceWidth > MAX_HARDWARE_BITMAP_DIMENSION
             || SourceHeight > MAX_HARDWARE_BITMAP_DIMENSION;
         UseHardwareAcceleration = !exceededMaxBitmapSize;
 
 
-        _bmpD2d = D2dContext.CreateBitmapFromWicBitmap(_bmpWic);
+        try
+        {
+            _bmpD2d = D2dContext.CreateBitmapFromWicBitmap(_bmpWic);
+        }
+        catch (SharpGenException ex) when (ex.ResultCode == Vortice.WIC.ResultCode.ValueOverflow)
+        {
+
+        }
+        
 
         Refresh();
     }
