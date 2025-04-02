@@ -15,6 +15,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageGlass.Common", "Common
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D2Phap.Canvas2D", "..\..\D2Phap.Canvas2D\Source\D2Phap.Canvas2D\D2Phap.Canvas2D\D2Phap.Canvas2D.csproj", "{4A544C6D-B7C4-BF24-35CD-D6C7B9F6B50E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4862527B-5A0F-4976-8924-E46FA9DEA6B1}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64

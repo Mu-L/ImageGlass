@@ -48,6 +48,11 @@ public partial class VirtualViewerControl : SwapChainCanvas
     //private Point? _mouseMovePoint = null;
 
 
+
+    public event EventHandler<EventArgs>? Error;
+
+
+
     public int CheckerboardSize { get; set; } = 25;
     //public BitmapInterpolationMode Interpolation { get; set; } = BitmapInterpolationMode.None;
 
@@ -145,6 +150,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         e.Handled = true;
     }
 
+
     protected override void OnUnloaded()
     {
         base.OnUnloaded();
@@ -157,6 +163,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         _checkerboardBrush?.Dispose();
         _checkerboardBrush = null;
+    }
+
+
+    protected virtual void OnError(EventArgs e)
+    {
+        Error?.Invoke(this, e);
     }
 
 
@@ -575,7 +587,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         _bmpWic = null;
 
 
-        _bmpWic = WicBitmapSource.Load(path);
+        _bmpWic = Wic.Load(path);
         SourceWidth = _bmpWic?.Size.Width ?? 0;
         SourceHeight = _bmpWic?.Size.Height ?? 0;
 
@@ -594,11 +606,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
         {
             _bmpD2d = D2dContext.CreateBitmapFromWicBitmap(_bmpWic);
         }
-        catch (SharpGenException ex) when (ex.ResultCode == Vortice.WIC.ResultCode.ValueOverflow)
+        catch (SharpGenException ex)
         {
-
+            // TODO:
         }
-        
 
         Refresh();
     }
