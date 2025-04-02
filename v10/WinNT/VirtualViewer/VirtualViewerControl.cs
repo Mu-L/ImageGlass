@@ -1,13 +1,18 @@
 ﻿using D2Phap.Canvas2D;
 using Microsoft.UI;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using SharpGen.Runtime;
 using System;
+using System.ComponentModel;
 using System.Linq;
 using Vortice.Direct2D1;
 using Vortice.WIC;
 using Windows.Foundation;
+using Windows.UI;
+using Windows.UI.Core;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -22,7 +27,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private Rect _srcRect = new();
     private Rect _destRect = new();
 
+    private Color _accentColor = Colors.Blue;
+    private InputSystemCursorShape _cursor = InputSystemCursorShape.Arrow;
 
+    // zooming
     private ZoomMode _zoomMode = ZoomMode.AutoZoom;
     private double _zoomSpeed = 0f;
     private double _minZoom = 0.01f; // 1%
@@ -32,20 +40,26 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private double _oldZoomFactor = 1f;
     private bool _isManualZoom = false;
 
-
-
     private Point _zoomedPoint = default;
     private bool _xOut = false;
     private bool _yOut = false;
 
-
+    // panning
     private Point _panHostFromPoint;
     private Point _panHostToPoint;
     private float _panDistance = 20f;
 
-    //private bool _isMouseDragged = false;
-    //private Point? _mouseDownPoint = null;
-    //private Point? _mouseMovePoint = null;
+    // selection
+    private bool _enableSelection = true;
+    private Rect _sourceSelection = default;
+    private Rect _srcSelectionBeforeMoved = default;
+    private bool _canDrawSelection = false;
+    private bool _isSelectionHovered = false;
+    private SelectionResizer? _hoveredResizer = null;
+    private SelectionResizer? _selectedResizer = null;
+    private Point? _mouseDownPoint = null;
+    private Point? _mouseMovePoint = null;
+    private bool _isLeftButtonPressed = false;
 
 
 
@@ -112,6 +126,37 @@ public partial class VirtualViewerControl : SwapChainCanvas
         _destRect.Y + _destRect.Height / 2.0);
 
 
+    
+    public InputSystemCursorShape Cursor
+    {
+        get => _cursor;
+        set
+        {
+            if (_cursor != value)
+            {
+                _cursor = value;
+
+                ProtectedCursor?.Dispose();
+                ProtectedCursor = null;
+
+                ProtectedCursor = InputSystemCursor.Create(_cursor);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets, sets accent color.
+    /// </summary>
+    public Color AccentColor
+    {
+        get => _accentColor;
+        set
+        {
+            _accentColor = value;
+
+            //if (Web2 != null) Web2.AccentColor = _accentColor;
+        }
+    }
 
 
 
@@ -175,7 +220,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     protected override void OnResize(SizeChangedEventArgs e)
     {
         base.OnResize(e);
-        if (e.NewSize.IsEmpty) return;
+        if (e.NewSize.IsEmpty()) return;
 
         // update drawing regions
         CalculateDrawingRegion();
@@ -232,6 +277,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
             e.DrawBitmap(_bmpD2d, _destRect, _srcRect);
         }
 
+        // Draw selection layer
+        DrawSelectionLayer(e);
+
 
         // debug
         e.DrawText(
@@ -241,6 +289,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             Image size: {SourceWidth} x {SourceHeight}
             _srcRect: {_srcRect}
             _destRect: {_destRect}
+            _sourceSelection: {_sourceSelection}
             """,
             "Consolas", 15d * ScreenDpiScaling, DrawingArea, Colors.Magenta);
 
@@ -257,6 +306,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         // draw DrawingArea
         e.DrawRectangle(DrawingArea, 0, Colors.GreenYellow, Colors.Transparent, 3f);
+
+        e.DrawRectangle(_sourceSelection, 0, Colors.PeachPuff);
 
         base.OnRender(e);
     }
@@ -287,7 +338,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     public virtual void CalculateDrawingRegion()
     {
-        if (_bmpWic == null || DrawingArea.IsEmpty) return;
+        if (_bmpWic == null || DrawingArea.IsEmpty()) return;
 
         var zoomX = _zoomedPoint.X * CompositionScaleX - Padding.Left;
         var zoomY = _zoomedPoint.Y * CompositionScaleY - Padding.Top;
