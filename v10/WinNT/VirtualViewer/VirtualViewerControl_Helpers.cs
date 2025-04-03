@@ -76,8 +76,9 @@ public partial class VirtualViewerControl
     /// </summary>
     public Rect RectClientToSource(Rect rect)
     {
-        var p1 = PointClientToSource(new Point(rect.X, rect.Y));
-        var p2 = PointClientToSource(new Point(rect.Right, rect.Bottom));
+        var safeRect = rect.Safe();
+        var p1 = PointClientToSource(new Point(safeRect.X, safeRect.Y));
+        var p2 = PointClientToSource(new Point(safeRect.Right, safeRect.Bottom));
 
 
         // get the min int value
@@ -132,8 +133,10 @@ public partial class VirtualViewerControl
     /// </summary>
     public Rect RectSourceToClient(Rect rect)
     {
-        var loc = PointSourceToClient(new Point(rect.X, rect.Y));
-        var size = new Size(rect.Width * _zoomFactor, rect.Height * _zoomFactor);
+        var safeRect = rect.Safe();
+
+        var loc = PointSourceToClient(new Point(safeRect.X, safeRect.Y));
+        var size = new Size(safeRect.Width * _zoomFactor, safeRect.Height * _zoomFactor);
 
         return new Rect(loc, size);
     }

@@ -62,6 +62,14 @@ public static class TypesExtensions
         return new Point(rect.X, rect.Y);
     }
 
+    public static Rect Safe(this Rect rect)
+    {
+        var w = Math.Max(0, rect.Width);
+        var h = Math.Max(0, rect.Height);
+
+        return new Rect(rect.X, rect.Y, w, h);
+    }
+
     public static Rect Inflate(this Rect rect, double thickness)
     {
         return rect.Inflate(new Thickness(thickness));

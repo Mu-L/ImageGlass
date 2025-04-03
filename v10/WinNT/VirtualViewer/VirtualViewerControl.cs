@@ -2,17 +2,14 @@
 using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using SharpGen.Runtime;
 using System;
-using System.ComponentModel;
 using System.Linq;
 using Vortice.Direct2D1;
 using Vortice.WIC;
 using Windows.Foundation;
 using Windows.UI;
-using Windows.UI.Core;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -66,6 +63,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
     public event EventHandler<EventArgs>? Error;
 
 
+    public double FontSize { get; set; } = 11;
+    public double FontSizeActual => this.DpiScale(FontSize);
 
     public int CheckerboardSize { get; set; } = 25;
     //public BitmapInterpolationMode Interpolation { get; set; } = BitmapInterpolationMode.None;
@@ -126,7 +125,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         _destRect.Y + _destRect.Height / 2.0);
 
 
-    
+
     public InputSystemCursorShape Cursor
     {
         get => _cursor;
@@ -174,7 +173,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         ManipulationDelta += VirtualViewer_ManipulationDelta;
     }
-
 
 
     private void VirtualViewer_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
@@ -306,8 +304,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         // draw DrawingArea
         e.DrawRectangle(DrawingArea, 0, Colors.GreenYellow, Colors.Transparent, 3f);
-
-        e.DrawRectangle(_sourceSelection, 0, Colors.PeachPuff);
 
         base.OnRender(e);
     }

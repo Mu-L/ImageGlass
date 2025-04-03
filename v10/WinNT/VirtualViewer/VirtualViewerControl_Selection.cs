@@ -206,7 +206,7 @@ public partial class VirtualViewerControl
         if (_bmpD2d != null)
         {
             requestRerender = requestRerender || (canSelect && !SourceSelection.IsEmpty());
-            _selectedResizer = SelectionResizers.Find(i => i.HitRegion.Contains(cursor.Position));
+            _selectedResizer = SelectionResizers.Find(i => i.HitRegion.Contains(DpiScale(cursor.Position)));
             _canDrawSelection = canSelect && !_isSelectionHovered && _hoveredResizer == null;
 
             if (canSelect)
@@ -294,13 +294,14 @@ public partial class VirtualViewerControl
         else
         {
             // set resizer cursor
-            var hoveredResizer = SelectionResizers.Find(i => i.HitRegion.Contains(cursor.Position));
+            var dpiCursorPosition = DpiScale(cursor.Position);
+            var hoveredResizer = SelectionResizers.Find(i => i.HitRegion.Contains(dpiCursorPosition));
 
             if (hoveredResizer != null)
             {
                 Cursor = hoveredResizer.Cursor;
             }
-            else if (ClientSelection.Contains(cursor.Position))
+            else if (ClientSelection.Contains(dpiCursorPosition))
             {
                 Cursor = InputSystemCursorShape.SizeAll;
             }
@@ -311,7 +312,7 @@ public partial class VirtualViewerControl
 
 
             // redraw the canvas
-            var isSelectionHovered = ClientSelection.Contains(cursor.Position);
+            var isSelectionHovered = ClientSelection.Contains(dpiCursorPosition);
             requestRerender = requestRerender
                 || _isSelectionHovered != isSelectionHovered
                 || _hoveredResizer != hoveredResizer;
@@ -331,6 +332,7 @@ public partial class VirtualViewerControl
     {
         base.OnPointerExited(e);
 
+        _isSelectionHovered = false;
         _mouseMovePoint = null;
     }
 
@@ -399,11 +401,10 @@ public partial class VirtualViewerControl
                     0.4f);
             }
 
-            var fontSize = 13;
 
             // draw selection size
             var text = $"{_sourceSelection.Width} x {_sourceSelection.Height}";
-            var textSize = g.MeasureText(text, FontFamily.XamlAutoFontFamily.Source, DpiScale(fontSize));
+            var textSize = g.MeasureText(text, FontFamily.XamlAutoFontFamily.Source, FontSizeActual);
             var textPadding = new Thickness(10, 5, 10, 5);
             var textX = ClientSelection.X + (ClientSelection.Width / 2 - textSize.Width / 2);
             var textY = ClientSelection.Y + (ClientSelection.Height / 2 - textSize.Height / 2);
@@ -418,7 +419,7 @@ public partial class VirtualViewerControl
             {
                 g.DrawRectangle(textBgRect, (float)textSize.Height / 5, Colors.White.WithAlpha(100), Colors.Black.WithAlpha(100));
                 g.DrawRectangle(textBgRect, (float)textSize.Height / 5, AccentColor.WithAlpha(100), AccentColor.WithAlpha(150));
-                g.DrawText(text, FontFamily.XamlAutoFontFamily.Source, DpiScale(fontSize), textX, textY, Colors.White);
+                g.DrawText(text, FontFamily.XamlAutoFontFamily.Source, FontSizeActual, textX, textY, Colors.White);
             }
 
 
@@ -588,8 +589,8 @@ public partial class VirtualViewerControl
     {
         if (!EnableSelection || _mouseDownPoint == null) return;
 
-        var srcPoint = PointClientToSource(clientPoint);
-        var srcMouseDownPoint = PointClientToSource(_mouseDownPoint.Value);
+        var srcPoint = PointClientToSource(DpiScale(clientPoint));
+        var srcMouseDownPoint = PointClientToSource(DpiScale(_mouseDownPoint.Value));
 
 
         // get the distance the source rect moved
@@ -619,8 +620,8 @@ public partial class VirtualViewerControl
 
         // set the final source selection after moved
         var srcRect = new Rect(
-            newSrcPoint.X, newSrcPoint.Y,
-            _srcSelectionBeforeMoved.Width, _srcSelectionBeforeMoved.Height);
+            (int)newSrcPoint.X, (int)newSrcPoint.Y,
+            (int)_srcSelectionBeforeMoved.Width, (int)_srcSelectionBeforeMoved.Height);
 
         SetSourceSelection(srcRect, true);
     }
@@ -633,9 +634,10 @@ public partial class VirtualViewerControl
     {
         if (!EnableSelection || _mouseDownPoint == null) return;
 
-        var srcPoint = PointClientToSource(clientCursorPoint);
-        var srcMouseDownPoint = PointClientToSource(_mouseDownPoint.Value);
+        var srcPoint = PointClientToSource(DpiScale(clientCursorPoint));
+        var srcMouseDownPoint = PointClientToSource(DpiScale(_mouseDownPoint.Value));
         var newSrcRect = SourceSelection;
+        var srcSelectionBeforeMoved = _srcSelectionBeforeMoved; // DpiScale(_srcSelectionBeforeMoved);
         var finalSrcRect = new Rect();
 
 
@@ -661,48 +663,45 @@ public partial class VirtualViewerControl
         // top resizers
         if (isTopDirections)
         {
-            var gapY = _srcSelectionBeforeMoved.Y - srcMouseDownPoint.Y;
-            var dH = srcPoint.Y - _srcSelectionBeforeMoved.Y + gapY;
+            var gapY = srcSelectionBeforeMoved.Y - srcMouseDownPoint.Y;
+            var dH = srcPoint.Y - srcSelectionBeforeMoved.Y + gapY;
 
-            newSrcRect.Y = _srcSelectionBeforeMoved.Y + dH;
-            newSrcRect.Height = _srcSelectionBeforeMoved.Height - dH;
+            newSrcRect.Y = srcSelectionBeforeMoved.Y + dH;
+            newSrcRect.Height = Math.Max(0, srcSelectionBeforeMoved.Height - dH);
         }
 
         // right resizers
         if (isRightDirections)
         {
-            var gapX = _srcSelectionBeforeMoved.Right - srcMouseDownPoint.X;
-            var dW = srcPoint.X - _srcSelectionBeforeMoved.Right + gapX;
+            var gapX = srcSelectionBeforeMoved.Right - srcMouseDownPoint.X;
+            var dW = srcPoint.X - srcSelectionBeforeMoved.Right + gapX;
 
-            newSrcRect.Width = _srcSelectionBeforeMoved.Width + dW;
+            newSrcRect.Width = Math.Max(0, srcSelectionBeforeMoved.Width + dW);
         }
 
         // bottom resizers
         if (isBottomDirections)
         {
-            var gapY = _srcSelectionBeforeMoved.Bottom - srcMouseDownPoint.Y;
-            var dH = srcPoint.Y - _srcSelectionBeforeMoved.Bottom + gapY;
+            var gapY = srcSelectionBeforeMoved.Bottom - srcMouseDownPoint.Y;
+            var dH = srcPoint.Y - srcSelectionBeforeMoved.Bottom + gapY;
 
-            newSrcRect.Height = _srcSelectionBeforeMoved.Height + dH;
+            newSrcRect.Height = Math.Max(0, srcSelectionBeforeMoved.Height + dH);
         }
 
         // left resizers
         if (isLeftDirections)
         {
-            var gapX = _srcSelectionBeforeMoved.X - srcMouseDownPoint.X;
-            var dW = srcPoint.X - _srcSelectionBeforeMoved.X + gapX;
+            var gapX = srcSelectionBeforeMoved.X - srcMouseDownPoint.X;
+            var dW = srcPoint.X - srcSelectionBeforeMoved.X + gapX;
 
-            newSrcRect.X = _srcSelectionBeforeMoved.X + dW;
-            newSrcRect.Width = _srcSelectionBeforeMoved.Width - dW;
+            newSrcRect.X = srcSelectionBeforeMoved.X + dW;
+            newSrcRect.Width = Math.Max(0, srcSelectionBeforeMoved.Width - dW);
         }
 
-
-        if (newSrcRect.Width < 0) newSrcRect.Width = 0;
-        if (newSrcRect.Height < 0) newSrcRect.Height = 0;
-
-
         // limit the selected client rect to the image source
+        // TODO: write new Intersect()
         newSrcRect.Intersect(new(0, 0, SourceWidth, SourceHeight));
+        newSrcRect = newSrcRect.Safe();
 
         #endregion // 1. Get correct size and location of new selection
 
@@ -819,11 +818,11 @@ public partial class VirtualViewerControl
         {
             if (finalSrcRect.Width <= 1)
             {
-                finalSrcRect.X = (int)_srcSelectionBeforeMoved.Right - 1;
+                finalSrcRect.X = (int)srcSelectionBeforeMoved.Right - 1;
             }
             if (finalSrcRect.Height <= 1)
             {
-                finalSrcRect.Y = (int)_srcSelectionBeforeMoved.Bottom - 1;
+                finalSrcRect.Y = (int)srcSelectionBeforeMoved.Bottom - 1;
             }
         }
 
@@ -834,11 +833,11 @@ public partial class VirtualViewerControl
         {
             if (finalSrcRect.Width <= 1)
             {
-                finalSrcRect.X = (int)_srcSelectionBeforeMoved.X;
+                finalSrcRect.X = (int)srcSelectionBeforeMoved.X;
             }
             if (finalSrcRect.Height <= 1)
             {
-                finalSrcRect.Y = (int)_srcSelectionBeforeMoved.Y;
+                finalSrcRect.Y = (int)srcSelectionBeforeMoved.Y;
             }
         }
 
@@ -848,12 +847,12 @@ public partial class VirtualViewerControl
             if ((finalSrcRect.Width <= 1 && finalSrcRect.Height <= 1)
                 || (finalSrcRect.Width > 1 && finalSrcRect.Height <= 1))
             {
-                finalSrcRect.X = (int)_srcSelectionBeforeMoved.Left;
-                finalSrcRect.Y = (int)_srcSelectionBeforeMoved.Bottom - 1;
+                finalSrcRect.X = (int)srcSelectionBeforeMoved.Left;
+                finalSrcRect.Y = (int)srcSelectionBeforeMoved.Bottom - 1;
             }
             else if (finalSrcRect.Width <= 1 && finalSrcRect.Height > 1)
             {
-                finalSrcRect.X = (int)_srcSelectionBeforeMoved.Left;
+                finalSrcRect.X = (int)srcSelectionBeforeMoved.Left;
             }
         }
         // bottom-left
@@ -861,7 +860,7 @@ public partial class VirtualViewerControl
         {
             if (finalSrcRect.Width <= 1)
             {
-                finalSrcRect.X = (int)_srcSelectionBeforeMoved.Right - 1;
+                finalSrcRect.X = (int)srcSelectionBeforeMoved.Right - 1;
             }
         }
 
