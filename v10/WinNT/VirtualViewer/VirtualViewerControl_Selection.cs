@@ -2,16 +2,11 @@
 using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
-using Vortice;
 using Windows.Foundation;
-using Windows.Globalization.Fonts;
-using WinRT;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ImageGlass.WinNT;
 
@@ -451,11 +446,11 @@ public partial class VirtualViewerControl
                 g.DrawEllipse(resizerRect, Colors.White.WithAlpha(50), Colors.Black.WithAlpha(200), 8f);
                 g.DrawEllipse(resizerRect, AccentColor.WithAlpha(255), fillColor, 2f);
 
-                
+
                 //// draw debug Hit region
                 //if (EnableDebug)
                 //{
-                    g.DrawRectangle(rItem.HitRegion, 0, Colors.Red);
+                g.DrawRectangle(rItem.HitRegion, 0, Colors.Red);
                 //}
             }
         }
@@ -474,8 +469,7 @@ public partial class VirtualViewerControl
     /// </summary>
     public void SetSourceSelection(Rect srcRect, bool triggerEvent = true)
     {
-        srcRect.Intersect(new Rect(0, 0, (int)SourceWidth, (int)SourceHeight));
-        _sourceSelection = srcRect;
+        _sourceSelection = srcRect.GetIntersection((int)SourceWidth, (int)SourceHeight);
 
         if (triggerEvent)
         {
@@ -498,7 +492,7 @@ public partial class VirtualViewerControl
             SourceWidth, SourceHeight, _destRect);
 
         // limit the selected area to the image
-        cliRect.Intersect(_destRect);
+        cliRect = cliRect.GetIntersection(_destRect);
 
         var srcRect = RectClientToSource(cliRect);
         SetSourceSelection(srcRect, true);
@@ -542,7 +536,7 @@ public partial class VirtualViewerControl
         selectedArea.Height = height;
 
         // limit the selected area to the limitRect
-        selectedArea.Intersect(limitRect);
+        selectedArea = selectedArea.GetIntersection(limitRect);
 
 
         // free aspect ratio
@@ -636,10 +630,13 @@ public partial class VirtualViewerControl
 
         var srcPoint = PointClientToSource(DpiScale(clientCursorPoint));
         var srcMouseDownPoint = PointClientToSource(DpiScale(_mouseDownPoint.Value));
-        var newSrcRect = SourceSelection;
-        var srcSelectionBeforeMoved = _srcSelectionBeforeMoved; // DpiScale(_srcSelectionBeforeMoved);
+        var srcSelectionBeforeMoved = _srcSelectionBeforeMoved;
         var finalSrcRect = new Rect();
 
+        var newX = SourceSelection.X;
+        var newY = SourceSelection.Y;
+        var newWidth = SourceSelection.Width;
+        var newHeight = SourceSelection.Height;
 
         #region 1. Get correct size and location of new selection
 
@@ -666,8 +663,8 @@ public partial class VirtualViewerControl
             var gapY = srcSelectionBeforeMoved.Y - srcMouseDownPoint.Y;
             var dH = srcPoint.Y - srcSelectionBeforeMoved.Y + gapY;
 
-            newSrcRect.Y = srcSelectionBeforeMoved.Y + dH;
-            newSrcRect.Height = Math.Max(0, srcSelectionBeforeMoved.Height - dH);
+            newY = srcSelectionBeforeMoved.Y + dH;
+            newHeight = Math.Max(0, srcSelectionBeforeMoved.Height - dH);
         }
 
         // right resizers
@@ -676,7 +673,7 @@ public partial class VirtualViewerControl
             var gapX = srcSelectionBeforeMoved.Right - srcMouseDownPoint.X;
             var dW = srcPoint.X - srcSelectionBeforeMoved.Right + gapX;
 
-            newSrcRect.Width = Math.Max(0, srcSelectionBeforeMoved.Width + dW);
+            newWidth = Math.Max(0, srcSelectionBeforeMoved.Width + dW);
         }
 
         // bottom resizers
@@ -685,7 +682,7 @@ public partial class VirtualViewerControl
             var gapY = srcSelectionBeforeMoved.Bottom - srcMouseDownPoint.Y;
             var dH = srcPoint.Y - srcSelectionBeforeMoved.Bottom + gapY;
 
-            newSrcRect.Height = Math.Max(0, srcSelectionBeforeMoved.Height + dH);
+            newHeight = Math.Max(0, srcSelectionBeforeMoved.Height + dH);
         }
 
         // left resizers
@@ -694,14 +691,13 @@ public partial class VirtualViewerControl
             var gapX = srcSelectionBeforeMoved.X - srcMouseDownPoint.X;
             var dW = srcPoint.X - srcSelectionBeforeMoved.X + gapX;
 
-            newSrcRect.X = srcSelectionBeforeMoved.X + dW;
-            newSrcRect.Width = Math.Max(0, srcSelectionBeforeMoved.Width - dW);
+            newX = srcSelectionBeforeMoved.X + dW;
+            newWidth = Math.Max(0, srcSelectionBeforeMoved.Width - dW);
         }
 
         // limit the selected client rect to the image source
-        // TODO: write new Intersect()
-        newSrcRect.Intersect(new(0, 0, SourceWidth, SourceHeight));
-        newSrcRect = newSrcRect.Safe();
+        var newSrcRect = new Rect(newX, newY, newWidth, newHeight)
+            .GetIntersection(SourceWidth, SourceHeight);
 
         #endregion // 1. Get correct size and location of new selection
 

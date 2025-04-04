@@ -288,6 +288,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             _srcRect: {_srcRect}
             _destRect: {_destRect}
             _sourceSelection: {_sourceSelection}
+            ClientSelection: {ClientSelection}
             """,
             "Consolas", 15d * ScreenDpiScaling, DrawingArea, Colors.Magenta);
 
