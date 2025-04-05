@@ -38,25 +38,16 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private bool _isManualZoom = false;
 
     private Point _zoomedPoint = default;
+    
+
+    // panning
+    private float _panDistance = 20f;
     private bool _xOut = false;
     private bool _yOut = false;
 
-    // panning
-    private Point _panHostFromPoint;
-    private Point _panHostToPoint;
-    private float _panDistance = 20f;
 
     // selection
-    private bool _enableSelection = true;
-    private Rect _sourceSelection = default;
-    private Rect _srcSelectionBeforeMoved = default;
-    private bool _canDrawSelection = false;
-    private bool _isSelectionHovered = false;
-    private SelectionResizer? _hoveredResizer = null;
-    private SelectionResizer? _selectedResizer = null;
-    private Point? _selectionPointerDownPoint = null;
-    private Point? _selectionPointerMovePoint = null;
-    private bool _isLeftButtonPressed = false;
+    private SelectionInfo _selection = new();
 
 
 
@@ -170,56 +161,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
     protected override void OnLoaded()
     {
         base.OnLoaded();
-
-        ManipulationDelta += VirtualViewer_ManipulationDelta;
-        DoubleTapped += VirtualViewerControl_DoubleTapped;
-    }
-
-
-    private void VirtualViewerControl_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
-    {
-        if (e.PointerDeviceType != PointerDeviceType.Touch) return;
-
-
-        // Touch double-tap:
-        // enable double-tapping for drawing selection
-        var canTouchDrawSelection = EnableSelection
-            && e.PointerDeviceType == PointerDeviceType.Touch
-            && _isLeftButtonPressed
-            && CurrentSelectionAction == SelectionAction.None;
-
-        if (canTouchDrawSelection) CurrentSelectionAction = SelectionAction.Drawing;
-    }
-
-
-
-    private void VirtualViewer_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
-    {
-        var isPintching = e.Delta.Expansion != 0;
-
-
-        // if drawing selection
-        if (!isPintching && CurrentSelectionAction != SelectionAction.None)
-        {
-            // stop velocity
-            e.Complete();
-            e.Handled = true;
-            return;
-        }
-
-
-        // Panning
-        PanTo(-e.Delta.Translation.X, -e.Delta.Translation.Y, e.Position, !isPintching);
-
-        // Zooming for Pinch gesture
-        if (isPintching)
-        {
-            var scaleDelta = e.Delta.Expansion * 8;
-
-            _ = ZoomByDeltaToPoint(scaleDelta, e.Position);
-        }
-
-        e.Handled = true;
     }
 
 
@@ -271,6 +212,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (requestRerender) Invalidate();
     }
 
+
     protected override void OnPointerMoved(PointerRoutedEventArgs e)
     {
         base.OnPointerMoved(e);
@@ -281,6 +223,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // request re-render control
         if (requestRerender) Invalidate();
     }
+
 
     protected override void OnPointerExited(PointerRoutedEventArgs e)
     {
@@ -340,6 +283,48 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
+    protected override void OnDoubleTapped(DoubleTappedRoutedEventArgs e)
+    {
+        base.OnDoubleTapped(e);
+
+        // Touch double-tap:
+        // enable double-tapping for drawing selection
+        OnSelectionBeginWithTouch(e);
+    }
+
+
+    protected override void OnManipulationDelta(ManipulationDeltaRoutedEventArgs e)
+    {
+        base.OnManipulationDelta(e);
+
+        // 1. check if the manipulation is a pinch gesture
+        var isPintching = e.Delta.Expansion != 0;
+
+        // 2. check if we're drawing selection
+        if (CurrentSelectionAction != SelectionAction.None && !isPintching)
+        {
+            // stop velocity
+            e.Complete();
+        }
+        else
+        {
+            // 2. perform panning
+            PanTo(-e.Delta.Translation.X, -e.Delta.Translation.Y, e.Position, !isPintching);
+
+
+            // 3. perform zooming for Pinch gesture
+            if (isPintching)
+            {
+                var scaleDelta = e.Delta.Expansion * 8;
+                _ = ZoomByDeltaToPoint(scaleDelta, e.Position);
+            }
+        }
+
+        e.Handled = true;
+    }
+
+
+
     protected override void OnRender(SwapChainCanvasRenderEventArgs e)
     {
         // draw checkerboard
@@ -363,7 +348,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             Image size: {SourceWidth} x {SourceHeight}
             _srcRect: {_srcRect}
             _destRect: {_destRect}
-            _sourceSelection: {_sourceSelection}
+            _sourceSelection: {_selection.SourceRect}
             ClientSelection: {ClientSelection}
             CurrentTouchPoints: {TouchedPoints}
             """,
@@ -685,8 +670,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
         _zoomedPoint = pointerPosition;
-        _panHostToPoint = pointerPosition;
-
 
         // update drawing regions
         CalculateDrawingRegion();

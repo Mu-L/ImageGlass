@@ -22,6 +22,7 @@ using Windows.Foundation;
 
 namespace ImageGlass.WinNT;
 
+
 /// <summary>
 /// Initialize a new <see cref="SelectionResizer"/> instance.
 /// </summary>
@@ -63,6 +64,10 @@ public class SelectionResizer(SelectionResizerType position, Rect indicatorRegio
 }
 
 
+/// <summary>
+/// Defines different types of selection resizers for a user interface.
+/// Each value represents a specific corner or edge of a selection area.
+/// </summary>
 public enum SelectionResizerType
 {
     TopLeft = 0,

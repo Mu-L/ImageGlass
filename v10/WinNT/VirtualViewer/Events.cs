@@ -130,23 +130,3 @@ public enum ZoomChangeSource
 //    }
 //}
 
-
-/// <summary>
-/// Selection event arguments
-/// </summary>
-public class SelectionEventArgs(Rect clientSelection, Rect sourceSelection) : EventArgs
-{
-
-    /// <summary>
-    /// Gets the client selection area.
-    /// </summary>
-    public Rect ClientSelection => clientSelection;
-
-
-    /// <summary>
-    /// Gets the source selection area.
-    /// </summary>
-    public Rect SourceSelection => sourceSelection;
-
-}
-

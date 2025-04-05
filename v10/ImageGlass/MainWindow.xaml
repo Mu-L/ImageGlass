@@ -77,7 +77,11 @@
         <!--  Viewer  -->
         <Grid Grid.Row="2">
             <Border BorderBrush="Red" BorderThickness="0">
-                <winNT:VirtualViewerControl x:Name="Viewer" Loaded="Viewer_Loaded" />
+                <winNT:VirtualViewerControl
+                    x:Name="Viewer"
+                    EnableDebug="True"
+                    EnableSelection="True"
+                    Loaded="Viewer_Loaded" />
             </Border>
         </Grid>
 
