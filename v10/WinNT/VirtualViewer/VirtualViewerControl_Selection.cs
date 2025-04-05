@@ -19,6 +19,9 @@ public partial class VirtualViewerControl
     public event EventHandler<SelectionEventArgs>? SelectionChanged;
 
 
+    // Public Properties
+    #region Public Properties
+
     /// <summary>
     /// Gets the client selection area.
     /// </summary>
@@ -37,7 +40,37 @@ public partial class VirtualViewerControl
 
 
     /// <summary>
-    /// Gets the resizers of the selection rectangle
+    /// Gets, sets selection aspect ratio.
+    /// If Width or Height is <c>less than or equals 0</c>, we will use free aspect ratio.
+    /// </summary>
+    public Size SelectionAspectRatio { get; set; } = new();
+
+
+    /// <summary>
+    /// Enables or disables the selection.
+    /// </summary>
+    public bool EnableSelection
+    {
+        get => _enableSelection;
+        set
+        {
+            _enableSelection = value;
+            if (!_enableSelection && Parent != null)
+            {
+                Cursor = InputSystemCursorShape.Arrow;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Gets the current action of selection.
+    /// </summary>
+    public SelectionAction CurrentSelectionAction { get; private set; } = SelectionAction.None;
+
+
+    /// <summary>
+    /// Gets 8 resizers of the selection rectangle
     /// </summary>
     public List<SelectionResizer> SelectionResizers
     {
@@ -155,141 +188,124 @@ public partial class VirtualViewerControl
     }
 
 
-    /// <summary>
-    /// Gets, sets selection aspect ratio.
-    /// If Width or Height is <c>less than or equals 0</c>, we will use free aspect ratio.
-    /// </summary>
-    public Size SelectionAspectRatio { get; set; } = new();
+    #endregion // Public Properties
+
 
 
     /// <summary>
-    /// Enables or disables the selection.
+    /// Sets selection area on the source image coordinates.
     /// </summary>
-    public bool EnableSelection
+    public void SetSourceSelection(Rect srcRect, bool triggerEvent = true)
     {
-        get => _enableSelection;
-        set
+        _sourceSelection = srcRect.GetIntersection((int)SourceWidth, (int)SourceHeight);
+
+        if (triggerEvent)
         {
-            _enableSelection = value;
-            if (!_enableSelection && Parent != null)
-            {
-                Cursor = InputSystemCursorShape.Arrow;
-            }
+            SelectionChanged?.Invoke(this, new SelectionEventArgs(ClientSelection, SourceSelection));
         }
     }
 
 
+
+    // Private Functions
+    #region Private Functions
+
     /// <summary>
-    /// Gets the current action of selection.
+    /// Initializes the selection logics when <see cref="OnPointerPressed(PointerRoutedEventArgs)"/> occurs.
     /// </summary>
-    public SelectionAction CurrentSelectionAction { get; private set; } = SelectionAction.None;
-
-
-
-
-    protected override void OnPointerPressed(PointerRoutedEventArgs e)
+    private bool OnSelectionBegin(PointerPoint pointer)
     {
-        base.OnPointerPressed(e);
-        var cursor = e.GetCurrentPoint(this);
+        if (_bmpD2d == null) return false;
 
-        _mouseDownPoint = cursor.Position;
-        _isLeftButtonPressed = cursor.Properties.IsLeftButtonPressed;
 
-        var canSelect = EnableSelection && _isLeftButtonPressed;
-        var requestRerender = false;
+        var dpiCursorPosition = DpiScale(pointer.Position);
+        _selectionPointerDownPoint = pointer.Position;
+        _isLeftButtonPressed = pointer.Properties.IsLeftButtonPressed;
 
-        if (_bmpD2d != null)
+
+        // check if we can start the selection
+        var canSelect = EnableSelection
+            && pointer.Properties.IsLeftButtonPressed
+            && TouchedPoints <= 1;
+        var isSelectionHovered = ClientSelection.Contains(dpiCursorPosition);
+        var requestRerender = canSelect && !SourceSelection.IsEmpty();
+
+
+        // get the selected resizer
+        _selectedResizer = SelectionResizers.Find(i => i.HitRegion.Contains(dpiCursorPosition));
+        _canDrawSelection = canSelect && !isSelectionHovered && _hoveredResizer == null;
+        CurrentSelectionAction = SelectionAction.None;
+
+
+        if (canSelect)
         {
-            requestRerender = requestRerender || (canSelect && !SourceSelection.IsEmpty());
-            _selectedResizer = SelectionResizers.Find(i => i.HitRegion.Contains(DpiScale(cursor.Position)));
-            _canDrawSelection = canSelect && !_isSelectionHovered && _hoveredResizer == null;
+            _srcSelectionBeforeMoved = new Rect(_sourceSelection.Position(), _sourceSelection.Size());
 
-            if (canSelect)
+            // resize selection
+            if (canSelect && _selectedResizer != null)
             {
-                _srcSelectionBeforeMoved = new Rect(_sourceSelection.Position(), _sourceSelection.Size());
-
-                // resize selection
-                if (canSelect && _hoveredResizer != null)
-                {
-                    CurrentSelectionAction = SelectionAction.Resizing;
-                }
-
-                // draw selection
-                else if (canSelect && _isSelectionHovered)
+                CurrentSelectionAction = SelectionAction.Resizing;
+            }
+            // move selection
+            else if (isSelectionHovered)
+            {
+                CurrentSelectionAction = SelectionAction.Moving;
+            }
+            // draw selection
+            else if (canSelect)
+            {
+                // enable only for non-touch pointers.
+                // for Touch pointer, we handle in DoubleTapped event
+                if (pointer.PointerDeviceType != PointerDeviceType.Touch)
                 {
                     CurrentSelectionAction = SelectionAction.Drawing;
                 }
             }
         }
 
-        if (requestRerender) Invalidate();
+
+        return requestRerender;
     }
 
-    protected override void OnPointerReleased(PointerRoutedEventArgs e)
+
+    /// <summary>
+    /// Updates selection logics when <see cref="OnPointerMoved(PointerRoutedEventArgs)"/> occurs.
+    /// </summary>
+    private bool OnSelectionUpdating(PointerPoint pointer)
     {
-        base.OnPointerReleased(e);
-
-        _mouseDownPoint = null;
-        _isLeftButtonPressed = false;
-    }
-
-    protected override void OnPointerCanceled(PointerRoutedEventArgs e)
-    {
-        base.OnPointerCanceled(e);
-
-        _mouseDownPoint = null;
-        _isLeftButtonPressed = false;
-        _mouseMovePoint = null;
-    }
-
-    protected override void OnPointerMoved(PointerRoutedEventArgs e)
-    {
-        base.OnPointerMoved(e);
-        var cursor = e.GetCurrentPoint(this);
-
-        _mouseMovePoint = cursor.Position;
-        CurrentSelectionAction = SelectionAction.None;
-
-        var canSelect = EnableSelection && cursor.Properties.IsLeftButtonPressed;
         var requestRerender = false;
+        var canSelect = EnableSelection && _isLeftButtonPressed;
+        _selectionPointerMovePoint = pointer.Position;
 
 
-        if (cursor.Properties.IsLeftButtonPressed)
+        if (_isLeftButtonPressed)
         {
             // resize the selection
-            if (_selectedResizer != null)
+            if (CurrentSelectionAction == SelectionAction.Resizing && _selectedResizer != null)
             {
-                CurrentSelectionAction = SelectionAction.Resizing;
-                ResizeSelection(cursor.Position, _selectedResizer.Type);
-                requestRerender = true;
-            }
-            // draw new selection
-            else if (_canDrawSelection)
-            {
-                CurrentSelectionAction = SelectionAction.Drawing;
-                UpdateSelectionByMousePosition();
+                ResizeSelection(pointer.Position, _selectedResizer.Type);
                 requestRerender = true;
             }
             // move selection
-            else if (canSelect)
+            else if (CurrentSelectionAction == SelectionAction.Moving)
             {
-                CurrentSelectionAction = SelectionAction.Moving;
-                MoveSelection(cursor.Position);
+                MoveSelection(pointer.Position);
+                requestRerender = true;
+            }
+            // draw new selection
+            else if (CurrentSelectionAction == SelectionAction.Drawing)
+            {
+                CreateNewSelection();
                 requestRerender = true;
             }
         }
 
 
-
         // change cursor
-        if (!EnableSelection)
-        {
-            Cursor = InputSystemCursorShape.Arrow;
-        }
-        else
+        if (EnableSelection)
         {
             // set resizer cursor
-            var dpiCursorPosition = DpiScale(cursor.Position);
+            var dpiCursorPosition = DpiScale(pointer.Position);
             var hoveredResizer = SelectionResizers.Find(i => i.HitRegion.Contains(dpiCursorPosition));
 
             if (hoveredResizer != null)
@@ -316,34 +332,73 @@ public partial class VirtualViewerControl
             _isSelectionHovered = isSelectionHovered;
             _hoveredResizer = hoveredResizer;
         }
+        // restore default cursor
+        else
+        {
+            Cursor = InputSystemCursorShape.Arrow;
+        }
 
 
-        // request re-render control
-        if (requestRerender) Invalidate();
+        return requestRerender;
     }
-
-
-    protected override void OnPointerExited(PointerRoutedEventArgs e)
-    {
-        base.OnPointerExited(e);
-
-        _isSelectionHovered = false;
-        _mouseMovePoint = null;
-    }
-
 
 
     /// <summary>
-    /// Draw selection layer
+    /// Updates selection when one of these occurs:
+    /// <list type="bullet">
+    ///   <item><see cref="OnPointerReleased(PointerRoutedEventArgs)"/></item>
+    ///   <item><see cref="OnPointerCanceled(PointerRoutedEventArgs)"/></item>
+    ///   <item><see cref="OnPointerExited(PointerRoutedEventArgs)"/></item>
+    /// </list>
     /// </summary>
-    protected virtual void DrawSelectionLayer(SwapChainCanvasRenderEventArgs g)
+    private bool OnSelectionEnd(bool isPointerExited)
+    {
+        var requestRerender = false;
+
+        // if the pointer is exited
+        if (isPointerExited)
+        {
+            _isSelectionHovered = false;
+            _selectionPointerMovePoint = null;
+
+            return requestRerender;
+        }
+
+
+        // if the pointer is released or canceled
+        var canSelect = EnableSelection && _isLeftButtonPressed;
+
+        _selectionPointerDownPoint = null;
+        _isLeftButtonPressed = false;
+        _selectedResizer = null;
+
+
+        if (canSelect)
+        {
+            SelectionChanged?.Invoke(this, new SelectionEventArgs(ClientSelection, SourceSelection));
+            requestRerender = true;
+        }
+
+        return requestRerender;
+    }
+
+
+    /// <summary>
+    /// Draws the selection visuals on a canvas, including selection borders, grids, and resizers
+    /// when <see cref="OnRender(SwapChainCanvasRenderEventArgs)"/> occurs.
+    /// </summary>
+    private void OnSelectionDrawing(SwapChainCanvasRenderEventArgs g)
     {
         //if (UseWebview2 || Source == ImageSource.Null || SourceSelection.IsEmpty()) return;
         if (!EnableSelection || SourceSelection.IsEmpty()) return;
 
         // draw the clip selection region
-        using var selectionGeo = g.GetCombinedRectanglesGeometry(ClientSelection, _destRect, 0, 0, Vortice.Direct2D1.CombineMode.Xor);
-        g.DrawGeometry(selectionGeo, Colors.Transparent, Colors.Black.WithAlpha(_isLeftButtonPressed ? 100 : 180));
+        using var selectionGeo = g.GetCombinedRectanglesGeometry(
+            ClientSelection, _destRect, 0, 0,
+            Vortice.Direct2D1.CombineMode.Xor);
+
+        g.DrawGeometry(selectionGeo, Colors.Transparent,
+            Colors.Black.WithAlpha(_isLeftButtonPressed ? 100 : 180));
 
 
         // draw selection grid, resizers
@@ -399,7 +454,7 @@ public partial class VirtualViewerControl
 
             // draw selection size
             var text = $"{_sourceSelection.Width} x {_sourceSelection.Height}";
-            var textSize = g.MeasureText(text, FontFamily.XamlAutoFontFamily.Source, FontSizeActual);
+            var textSize = g.MeasureText(text, FontFamily.XamlAutoFontFamily.Source, FontSize_Dpi);
             var textPadding = new Thickness(10, 5, 10, 5);
             var textX = ClientSelection.X + (ClientSelection.Width / 2 - textSize.Width / 2);
             var textY = ClientSelection.Y + (ClientSelection.Height / 2 - textSize.Height / 2);
@@ -414,7 +469,7 @@ public partial class VirtualViewerControl
             {
                 g.DrawRectangle(textBgRect, (float)textSize.Height / 5, Colors.White.WithAlpha(100), Colors.Black.WithAlpha(100));
                 g.DrawRectangle(textBgRect, (float)textSize.Height / 5, AccentColor.WithAlpha(100), AccentColor.WithAlpha(150));
-                g.DrawText(text, FontFamily.XamlAutoFontFamily.Source, FontSizeActual, textX, textY, Colors.White);
+                g.DrawText(text, FontFamily.XamlAutoFontFamily.Source, FontSize_Dpi, textX, textY, Colors.White);
             }
 
 
@@ -447,11 +502,11 @@ public partial class VirtualViewerControl
                 g.DrawEllipse(resizerRect, AccentColor.WithAlpha(255), fillColor, 2f);
 
 
-                //// draw debug Hit region
-                //if (EnableDebug)
-                //{
-                g.DrawRectangle(rItem.HitRegion, 0, Colors.Red);
-                //}
+                // draw debug Hit region
+                if (EnableDebug)
+                {
+                    g.DrawRectangle(rItem.HitRegion, 0, Colors.Red);
+                }
             }
         }
 
@@ -465,29 +520,15 @@ public partial class VirtualViewerControl
 
 
     /// <summary>
-    /// Select image source area.
+    /// Creates a new selection based on mouse pointer positions.
     /// </summary>
-    public void SetSourceSelection(Rect srcRect, bool triggerEvent = true)
+    private void CreateNewSelection()
     {
-        _sourceSelection = srcRect.GetIntersection((int)SourceWidth, (int)SourceHeight);
-
-        if (triggerEvent)
-        {
-            SelectionChanged?.Invoke(this, new SelectionEventArgs(ClientSelection, SourceSelection));
-        }
-    }
-
-
-    /// <summary>
-    /// Updates <see cref="ClientSelection"/> using <see cref="BHelper.GetSelection"/>.
-    /// </summary>
-    public void UpdateSelectionByMousePosition()
-    {
-        if (_mouseDownPoint == null || _mouseMovePoint == null) return;
+        if (_selectionPointerDownPoint == null || _selectionPointerMovePoint == null) return;
 
         var cliRect = GetSelection__(
-            DpiScale(_mouseDownPoint.Value),
-            DpiScale(_mouseMovePoint.Value),
+            DpiScale(_selectionPointerDownPoint.Value),
+            DpiScale(_selectionPointerMovePoint.Value),
             SelectionAspectRatio,
             SourceWidth, SourceHeight, _destRect);
 
@@ -575,16 +616,15 @@ public partial class VirtualViewerControl
     }
 
 
-
     /// <summary>
-    /// Moves the current selection to the given location
+    /// Moves the current selection to the given location.
     /// </summary>
-    public void MoveSelection(Point clientPoint)
+    private void MoveSelection(Point clientPoint)
     {
-        if (!EnableSelection || _mouseDownPoint == null) return;
+        if (!EnableSelection || _selectionPointerDownPoint == null) return;
 
         var srcPoint = PointClientToSource(DpiScale(clientPoint));
-        var srcMouseDownPoint = PointClientToSource(DpiScale(_mouseDownPoint.Value));
+        var srcMouseDownPoint = PointClientToSource(DpiScale(_selectionPointerDownPoint.Value));
 
 
         // get the distance the source rect moved
@@ -624,12 +664,12 @@ public partial class VirtualViewerControl
     /// <summary>
     /// Resizes the current selection.
     /// </summary>
-    public void ResizeSelection(Point clientCursorPoint, SelectionResizerType direction)
+    private void ResizeSelection(Point clientPoint, SelectionResizerType direction)
     {
-        if (!EnableSelection || _mouseDownPoint == null) return;
+        if (!EnableSelection || _selectionPointerDownPoint == null) return;
 
-        var srcPoint = PointClientToSource(DpiScale(clientCursorPoint));
-        var srcMouseDownPoint = PointClientToSource(DpiScale(_mouseDownPoint.Value));
+        var srcPoint = PointClientToSource(DpiScale(clientPoint));
+        var srcMouseDownPoint = PointClientToSource(DpiScale(_selectionPointerDownPoint.Value));
         var srcSelectionBeforeMoved = _srcSelectionBeforeMoved;
         var finalSrcRect = new Rect();
 
@@ -637,6 +677,7 @@ public partial class VirtualViewerControl
         var newY = SourceSelection.Y;
         var newWidth = SourceSelection.Width;
         var newHeight = SourceSelection.Height;
+
 
         #region 1. Get correct size and location of new selection
 
@@ -865,6 +906,8 @@ public partial class VirtualViewerControl
 
         SetSourceSelection(finalSrcRect, true);
     }
+
+    #endregion // Private Functions
 
 
 }

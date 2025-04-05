@@ -54,8 +54,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private bool _isSelectionHovered = false;
     private SelectionResizer? _hoveredResizer = null;
     private SelectionResizer? _selectedResizer = null;
-    private Point? _mouseDownPoint = null;
-    private Point? _mouseMovePoint = null;
+    private Point? _selectionPointerDownPoint = null;
+    private Point? _selectionPointerMovePoint = null;
     private bool _isLeftButtonPressed = false;
 
 
@@ -63,8 +63,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
     public event EventHandler<EventArgs>? Error;
 
 
-    public double FontSize { get; set; } = 11;
-    public double FontSizeActual => this.DpiScale(FontSize);
+    public double FontSize { get; set; } = 13;
+    public double FontSize_Dpi => this.DpiScale(FontSize);
 
     public int CheckerboardSize { get; set; } = 25;
     //public BitmapInterpolationMode Interpolation { get; set; } = BitmapInterpolationMode.None;
@@ -72,13 +72,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
     public Rect DrawingArea => new(
         Padding.Left,
         Padding.Top,
-        Math.Max(0, Bounds.Width - Padding.Left - Padding.Right),
-        Math.Max(0, Bounds.Height - Padding.Top - Padding.Bottom));
+        Math.Max(0, Bounds_Dpi.Width - Padding.Left - Padding.Right),
+        Math.Max(0, Bounds_Dpi.Height - Padding.Top - Padding.Bottom));
 
     public double SourceWidth { get; private set; } = 0;
     public double SourceHeight { get; private set; } = 0;
 
-    public double ScreenDpiScaling => CompositionScaleX;
+
 
     public double ZoomFactor
     {
@@ -172,18 +172,47 @@ public partial class VirtualViewerControl : SwapChainCanvas
         base.OnLoaded();
 
         ManipulationDelta += VirtualViewer_ManipulationDelta;
+        DoubleTapped += VirtualViewerControl_DoubleTapped;
     }
+
+
+    private void VirtualViewerControl_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        if (e.PointerDeviceType != PointerDeviceType.Touch) return;
+
+
+        // Touch double-tap:
+        // enable double-tapping for drawing selection
+        var canTouchDrawSelection = EnableSelection
+            && e.PointerDeviceType == PointerDeviceType.Touch
+            && _isLeftButtonPressed
+            && CurrentSelectionAction == SelectionAction.None;
+
+        if (canTouchDrawSelection) CurrentSelectionAction = SelectionAction.Drawing;
+    }
+
 
 
     private void VirtualViewer_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
     {
-        var isPinching = e.Delta.Expansion != 0;
+        var isPintching = e.Delta.Expansion != 0;
+
+
+        // if drawing selection
+        if (!isPintching && CurrentSelectionAction != SelectionAction.None)
+        {
+            // stop velocity
+            e.Complete();
+            e.Handled = true;
+            return;
+        }
+
 
         // Panning
-        PanTo(-e.Delta.Translation.X, -e.Delta.Translation.Y, e.Position, !isPinching);
+        PanTo(-e.Delta.Translation.X, -e.Delta.Translation.Y, e.Position, !isPintching);
 
         // Zooming for Pinch gesture
-        if (isPinching)
+        if (isPintching)
         {
             var scaleDelta = e.Delta.Expansion * 8;
 
@@ -228,6 +257,54 @@ public partial class VirtualViewerControl : SwapChainCanvas
         {
             Refresh(true, false, true);
         }
+    }
+
+
+    protected override void OnPointerPressed(PointerRoutedEventArgs e)
+    {
+        base.OnPointerPressed(e);
+
+        var cursor = e.GetCurrentPoint(this);
+        var requestRerender = OnSelectionBegin(cursor);
+
+        // request re-render control
+        if (requestRerender) Invalidate();
+    }
+
+    protected override void OnPointerMoved(PointerRoutedEventArgs e)
+    {
+        base.OnPointerMoved(e);
+
+        var pointer = e.GetCurrentPoint(this);
+        var requestRerender = OnSelectionUpdating(pointer);
+
+        // request re-render control
+        if (requestRerender) Invalidate();
+    }
+
+    protected override void OnPointerExited(PointerRoutedEventArgs e)
+    {
+        base.OnPointerExited(e);
+
+        OnSelectionEnd(true);
+    }
+
+
+    protected override void OnPointerReleased(PointerRoutedEventArgs e)
+    {
+        var requestRerender = OnSelectionEnd(false);
+        if (requestRerender) Invalidate();
+
+        base.OnPointerReleased(e);
+    }
+
+
+    protected override void OnPointerCanceled(PointerRoutedEventArgs e)
+    {
+        var requestRerender = OnSelectionEnd(false);
+        if (requestRerender) Invalidate();
+
+        base.OnPointerCanceled(e);
     }
 
 
@@ -276,21 +353,21 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
         // Draw selection layer
-        DrawSelectionLayer(e);
+        OnSelectionDrawing(e);
 
 
         // debug
         e.DrawText(
             $"""
             Control Size: {ActualWidth} x {ActualHeight}
-            DrawingArea: {DrawingArea}
             Image size: {SourceWidth} x {SourceHeight}
             _srcRect: {_srcRect}
             _destRect: {_destRect}
             _sourceSelection: {_sourceSelection}
             ClientSelection: {ClientSelection}
+            CurrentTouchPoints: {TouchedPoints}
             """,
-            "Consolas", 15d * ScreenDpiScaling, DrawingArea, Colors.Magenta);
+            "Consolas", FontSize_Dpi, DrawingArea, Colors.Magenta);
 
         e.DrawRectangle(_destRect, 0, Colors.Cyan);
 
@@ -300,11 +377,11 @@ public partial class VirtualViewerControl : SwapChainCanvas
         e.DrawEllipse(zoomX, zoomY, 8f, Colors.White, Colors.Red, 3f);
 
 
-        // draw SwapChainSize
-        e.DrawRectangle(e.Sender.Bounds, 0, Colors.Yellow, Colors.Transparent, 3f);
+        //// draw SwapChainSize
+        //e.DrawRectangle(e.Sender.Bounds, 0, Colors.Yellow, Colors.Transparent, 3f);
 
-        // draw DrawingArea
-        e.DrawRectangle(DrawingArea, 0, Colors.GreenYellow, Colors.Transparent, 3f);
+        //// draw DrawingArea
+        //e.DrawRectangle(DrawingArea, 0, Colors.GreenYellow, Colors.Transparent, 3f);
 
         base.OnRender(e);
     }
@@ -561,7 +638,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         var location = point ?? new Point(-1, -1);
 
         // use the center point if the point is outside
-        if (!Bounds.Contains(location))
+        if (!Bounds_Dpi.Contains(location))
         {
             location = ImageViewportCenterPoint;
         }

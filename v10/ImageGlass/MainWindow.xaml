@@ -29,8 +29,8 @@
             x:Name="WinMainTitleBar"
             Grid.Row="0"
             Height="{x:Bind TitleBarHeight.Value}"
-            Margin="{x:Bind TitleBarMargin}"
-            Background="Green"
+            Padding="{x:Bind TitleBarMargin}"
+            Background="#20ff"
             Canvas.ZIndex="100">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -76,7 +76,7 @@
 
         <!--  Viewer  -->
         <Grid Grid.Row="2">
-            <Border BorderBrush="Red" BorderThickness="2">
+            <Border BorderBrush="Red" BorderThickness="0">
                 <winNT:VirtualViewerControl x:Name="Viewer" Loaded="Viewer_Loaded" />
             </Border>
         </Grid>

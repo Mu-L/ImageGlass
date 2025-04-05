@@ -13,10 +13,10 @@ public partial class VirtualViewerControl
     /// <summary>
     /// Scales the given number based on the DPI scaling factor.
     /// </summary>
-    public T DpiScale<T>(T num)
+    public T DpiScale<T>(T number)
     {
         var type = typeof(T);
-        var value = float.Parse($"{num}", System.Globalization.NumberStyles.Number) * CompositionScaleX;
+        var value = float.Parse($"{number}", System.Globalization.NumberStyles.Number) * CompositionScaleX;
 
         return (T)Convert.ChangeType(value, type);
     }
