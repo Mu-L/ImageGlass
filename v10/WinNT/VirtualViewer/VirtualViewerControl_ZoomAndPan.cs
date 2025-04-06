@@ -53,6 +53,14 @@ public partial class VirtualViewerControl
     #region Public Properies
 
     /// <summary>
+    /// Gets the center point of the image viewport.
+    /// </summary>
+    public Point ViewportCenterPoint => new(
+        _destRect.X + _destRect.Width / 2.0,
+        _destRect.Y + _destRect.Height / 2.0);
+
+
+    /// <summary>
     /// Gets, sets zoom mode.
     /// </summary>
     public ZoomMode ZoomMode
@@ -387,7 +395,7 @@ public partial class VirtualViewerControl
     /// <param name="point">
     /// Client's cursor location to zoom out.
     /// If its value is <c>null</c> or outside of the <see cref="VirtualViewerControl"/> control,
-    /// <c><see cref="ImageViewportCenterPoint"/></c> is used.
+    /// <c><see cref="ViewportCenterPoint"/></c> is used.
     /// </param>
     /// <returns>
     ///   <list type="table">
@@ -405,7 +413,7 @@ public partial class VirtualViewerControl
         // use the center point if the point is outside
         if (!Bounds_Dpi.Contains(location))
         {
-            location = ImageViewportCenterPoint;
+            location = ViewportCenterPoint;
         }
 
         // get the gap when the viewport is smaller than the control size
@@ -472,7 +480,7 @@ public partial class VirtualViewerControl
     /// </param>
     /// <param name="point">
     /// Client's cursor location to zoom out.
-    /// <c><see cref="ImageViewportCenterPoint"/></c> is the default value.
+    /// <c><see cref="ViewportCenterPoint"/></c> is the default value.
     /// </param>
     /// <returns>
     ///   <list type="table">
@@ -535,7 +543,7 @@ public partial class VirtualViewerControl
         // use the center point if the point is outside
         if (!Bounds_Dpi.Contains(location))
         {
-            location = ImageViewportCenterPoint;
+            location = ViewportCenterPoint;
         }
 
 

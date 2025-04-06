@@ -5,7 +5,7 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>ImageGlass</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Platforms>x86;x64;ARM64</Platforms>
+    <Platforms>x64;ARM64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <PublishProfile>win-$(Platform).pubxml</PublishProfile>
     <UseWinUI>true</UseWinUI>
@@ -13,6 +13,8 @@
     <Nullable>enable</Nullable>
     <LangVersion>Latest</LangVersion>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 
     <!-- Unpacked app -->
     <WindowsPackageType>None</WindowsPackageType>
@@ -45,9 +47,11 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250310001" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\ImageGlass.Common\ImageGlass.Common.csproj" />
     <ProjectReference Include="..\WinNT\VirtualViewer\ImageGlass.VirtualViewer.csproj" />
   </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <WebView2EnableCsWinRTProjection>True</WebView2EnableCsWinRTProjection>
+  </PropertyGroup>
 
   <!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution

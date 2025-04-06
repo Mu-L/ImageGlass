@@ -58,9 +58,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
 
-    public Point ImageViewportCenterPoint => new(
-        _destRect.X + _destRect.Width / 2.0,
-        _destRect.Y + _destRect.Height / 2.0);
+    
 
 
 
