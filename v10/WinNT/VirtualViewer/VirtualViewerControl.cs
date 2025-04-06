@@ -18,13 +18,14 @@ public partial class VirtualViewerControl : SwapChainCanvas
     // drawing image
     private IWICBitmapSource? _bmpWic;
     private ID2D1Bitmap1? _bmpD2d;
-    private ID2D1BitmapBrush1? _checkerboardBrush;
     private Rect _srcRect = new();
     private Rect _destRect = new();
 
     private bool _isPreviewing = false;
     private ImageInterpolation _interpolationScaleDown = ImageInterpolation.MultiSampleLinear;
     private ImageInterpolation _interpolationScaleUp = ImageInterpolation.NearestNeighbor;
+
+
 
 
     // control
@@ -41,7 +42,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     public double FontSize { get; set; } = 13;
     public double FontSize_Dpi => this.DpiScale(FontSize);
 
-    public int CheckerboardSize { get; set; } = 25;
+
 
 
     public Rect DrawingArea => new(
@@ -321,7 +322,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     protected override void OnRender(SwapChainCanvasRenderEventArgs e)
     {
         // draw checkerboard
-        //context.DrawCheckerboardBrush(ref _checkerboardBitmap, CheckerboardSize, DrawingArea);
+        DrawCheckerboardLayer(e);
 
 
         // draw image
@@ -371,10 +372,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    protected virtual void DrawCheckerboardLayer(SwapChainCanvasRenderEventArgs e)
-    {
-        // TODO:
-    }
+
 
 
     /// <summary>

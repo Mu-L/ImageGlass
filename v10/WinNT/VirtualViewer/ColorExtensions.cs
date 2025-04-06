@@ -25,6 +25,14 @@ namespace ImageGlass.WinNT;
 
 public static class ColorExtensions
 {
+    /// <summary>
+    /// Converts to Vortice color.
+    /// </summary>
+    public static Vortice.Mathematics.Color ToVorticeColor(this Color c)
+    {
+        return new Vortice.Mathematics.Color(c.R, c.G, c.B, c.A);
+    }
+
 
     /// <summary>
     /// Get brightness value from the given color.

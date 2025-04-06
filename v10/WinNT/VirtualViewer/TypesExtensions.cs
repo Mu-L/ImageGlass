@@ -163,6 +163,19 @@ public static class TypesExtensions
             rect.Size().Inflate(thickness));
     }
 
+
+    /// <summary>
+    /// Converts a rectangle object into a <see cref="Vortice.RawRectF"/> object.
+    /// </summary>
+    public static Vortice.RawRectF ToRawRectF(this Rect rect)
+    {
+        return new Vortice.RawRectF(
+            (float)rect.X,
+            (float)rect.Y,
+            (float)(rect.X + rect.Width),
+            (float)(rect.Y + rect.Height));
+    }
+
     #endregion // Windows.Foundation.Rect
 
 }
