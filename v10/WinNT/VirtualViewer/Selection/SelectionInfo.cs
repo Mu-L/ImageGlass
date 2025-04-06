@@ -24,7 +24,7 @@ namespace ImageGlass.WinNT;
 
 
 /// <summary>
-/// Holds information about selection features.
+/// Holds information about selection feature.
 /// </summary>
 internal class SelectionInfo
 {

@@ -11,8 +11,6 @@ using Vortice.WIC;
 using Windows.Foundation;
 using Windows.UI;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace ImageGlass.WinNT;
 
@@ -28,17 +26,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private InputSystemCursorShape _cursor = InputSystemCursorShape.Arrow;
 
     // zooming
-    private ZoomMode _zoomMode = ZoomMode.AutoZoom;
-    private double _zoomSpeed = 0f;
-    private double _minZoom = 0.01f; // 1%
-    private double _maxZoom = 100f; // 10_000%
-    private double[] _zoomLevels = [];
-    private double _zoomFactor = 1f;
-    private double _oldZoomFactor = 1f;
-    private bool _isManualZoom = false;
+    private ZoomInfo _zooming = new();
 
-    private Point _zoomedPoint = default;
-    
 
     // panning
     private float _panDistance = 20f;
@@ -73,44 +62,50 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     public double ZoomFactor
     {
-        get => _zoomFactor;
+        get => _zooming.Factor;
         set => SetZoomFactor(value, true);
     }
+
     public double MinZoom
     {
         get
         {
             if (ZoomLevels.Length > 0) return ZoomLevels[0];
-            return _minZoom;
+            return _zooming.Min;
         }
-        set => _minZoom = Math.Min(Math.Max(0.001f, value), 1000);
+        set => _zooming.Min = Math.Min(Math.Max(0.001f, value), 1000);
     }
+
     public double MaxZoom
     {
         get
         {
             if (ZoomLevels.Length > 0) return ZoomLevels[^1];
-            return _maxZoom;
+            return _zooming.Max;
         }
-        set => _maxZoom = Math.Min(Math.Max(0.001f, value), 1000);
+        set => _zooming.Max = Math.Min(Math.Max(0.001f, value), 1000);
     }
+
     public double[] ZoomLevels
     {
-        get => _zoomLevels;
-        set => _zoomLevels = value.OrderBy(x => x)
+        get => _zooming.Levels;
+        set => _zooming.Levels = value.OrderBy(x => x)
             .Where(i => i > 0)
             .Distinct()
             .ToArray();
     }
+
     public double ZoomSpeed
     {
-        get => _zoomSpeed;
+        get => _zooming.Speed;
         set
         {
-            _zoomSpeed = Math.Min(value, 500f); // max 500f
-            _zoomSpeed = Math.Max(value, -500f); // min -500f
+            _zooming.Speed = Math.Min(value, 500f); // max 500f
+            _zooming.Speed = Math.Max(value, -500f); // min -500f
         }
     }
+
+
     public Point ImageViewportCenterPoint => new(
         _destRect.X + _destRect.Width / 2.0,
         _destRect.Y + _destRect.Height / 2.0);
@@ -194,7 +189,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         CalculateDrawingRegion();
 
         // redraw the control on resizing if it's not manual zoom
-        if (_bmpWic != null && !_isManualZoom)
+        if (_bmpWic != null && !_zooming.IsManual)
         {
             Refresh(true, false, true);
         }
@@ -357,8 +352,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         e.DrawRectangle(_destRect, 0, Colors.Cyan);
 
         // draw zoomed point
-        var zoomX = _zoomedPoint.X * CompositionScaleX;
-        var zoomY = _zoomedPoint.Y * CompositionScaleY;
+        var zoomX = _zooming.ZoomedPoint.X * CompositionScaleX;
+        var zoomY = _zooming.ZoomedPoint.Y * CompositionScaleY;
         e.DrawEllipse(zoomX, zoomY, 8f, Colors.White, Colors.Red, 3f);
 
 
@@ -399,16 +394,16 @@ public partial class VirtualViewerControl : SwapChainCanvas
     {
         if (_bmpWic == null || DrawingArea.IsEmpty()) return;
 
-        var zoomX = _zoomedPoint.X * CompositionScaleX - Padding.Left;
-        var zoomY = _zoomedPoint.Y * CompositionScaleY - Padding.Top;
+        var zoomX = _zooming.ZoomedPoint.X * CompositionScaleX - Padding.Left;
+        var zoomY = _zooming.ZoomedPoint.Y * CompositionScaleY - Padding.Top;
 
         _xOut = false;
         _yOut = false;
 
         var controlW = DrawingArea.Width;
         var controlH = DrawingArea.Height;
-        var scaledImgWidth = SourceWidth * _zoomFactor;
-        var scaledImgHeight = SourceHeight * _zoomFactor;
+        var scaledImgWidth = SourceWidth * _zooming.Factor;
+        var scaledImgHeight = SourceHeight * _zooming.Factor;
 
 
         var srcX = _srcRect.X;
@@ -433,8 +428,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         else
         {
-            srcX += (controlW / _oldZoomFactor - controlW / _zoomFactor) / ((controlW + float.Epsilon) / zoomX);
-            srcWidth = controlW / _zoomFactor;
+            srcX += (controlW / _zooming.OldFactor - controlW / _zooming.Factor) / ((controlW + float.Epsilon) / zoomX);
+            srcWidth = controlW / _zooming.Factor;
 
             destX = DrawingArea.Left;
             destWidth = controlW;
@@ -452,15 +447,15 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         else
         {
-            srcY += (controlH / _oldZoomFactor - controlH / _zoomFactor) / ((controlH + float.Epsilon) / zoomY);
-            srcHeight = controlH / _zoomFactor;
+            srcY += (controlH / _zooming.OldFactor - controlH / _zooming.Factor) / ((controlH + float.Epsilon) / zoomY);
+            srcHeight = controlH / _zooming.Factor;
 
             destY = DrawingArea.Top;
             destHeight = controlH;
         }
 
 
-        _oldZoomFactor = _zoomFactor;
+        _zooming.OldFactor = _zooming.Factor;
         //------------------------
 
         if (srcX < 0)
@@ -493,10 +488,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     public void SetZoomFactor(double zoomValue, bool isManualZoom)
     {
-        if (_zoomFactor == zoomValue) return;
+        if (_zooming.Factor == zoomValue) return;
 
-        _zoomFactor = Math.Min(MaxZoom, Math.Max(zoomValue, MinZoom));
-        _isManualZoom = isManualZoom;
+        _zooming.Factor = Math.Min(MaxZoom, Math.Max(zoomValue, MinZoom));
+        _zooming.IsManual = isManualZoom;
 
 
         // update drawing regions
@@ -509,9 +504,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
     public void SetZoomMode(ZoomMode? mode = null, bool isManualZoom = false, bool zoomedByResizing = false)
     {
         // get zoom factor after applying the zoom mode
-        _zoomMode = mode ?? _zoomMode;
-        _zoomFactor = CalculateZoomFactor(_zoomMode, SourceWidth, SourceHeight);
-        _isManualZoom = isManualZoom;
+        _zooming.Mode = mode ?? _zooming.Mode;
+        _zooming.Factor = CalculateZoomFactor(_zooming.Mode, SourceWidth, SourceHeight);
+        _zooming.IsManual = isManualZoom;
 
         // update drawing regions
         CalculateDrawingRegion();
@@ -526,7 +521,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     public double CalculateZoomFactor(ZoomMode zoomMode, double srcWidth, double srcHeight, double viewportW, double viewportH)
     {
-        if (srcWidth == 0 || srcHeight == 0 || viewportW == 0 || viewportH == 0) return _zoomFactor;
+        if (srcWidth == 0 || srcHeight == 0 || viewportW == 0 || viewportH == 0) return _zooming.Factor;
 
         var widthScale = viewportW / srcWidth;
         var heightScale = viewportH / srcHeight;
@@ -550,7 +545,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         else if (zoomMode == ZoomMode.LockZoom)
         {
-            zoomFactor = ZoomFactor;
+            zoomFactor = _zooming.Factor;
         }
         // AutoZoom
         else
@@ -572,7 +567,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     public bool ZoomByDeltaToPoint(double delta, Point? point = null, bool requestRerender = true)
     {
-        var newZoomFactor = _zoomFactor;
+        var newZoomFactor = _zooming.Factor;
         var isZoomingByMouseWheel = true; // Math.Abs(delta) == SystemInformation.MouseWheelScrollDelta;
 
         // use zoom levels
@@ -584,12 +579,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
             // zoom in
             if (delta > 0)
             {
-                newZoomFactor = ZoomLevels.FirstOrDefault(i => i > _zoomFactor);
+                newZoomFactor = ZoomLevels.FirstOrDefault(i => i > _zooming.Factor);
             }
             // zoom out
             else if (delta < 0)
             {
-                newZoomFactor = ZoomLevels.LastOrDefault(i => i < _zoomFactor);
+                newZoomFactor = ZoomLevels.LastOrDefault(i => i < _zooming.Factor);
             }
             if (newZoomFactor == 0) return false;
 
@@ -605,12 +600,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
             // zoom in
             if (delta > 0)
             {
-                newZoomFactor = _zoomFactor * (1f + speed);
+                newZoomFactor = _zooming.Factor * (1f + speed);
             }
             // zoom out
             else if (delta < 0)
             {
-                newZoomFactor = _zoomFactor / (1f - speed);
+                newZoomFactor = _zooming.Factor / (1f - speed);
             }
 
             // limit zoom factor
@@ -618,7 +613,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
 
-        if (newZoomFactor == _zoomFactor) return false;
+        if (newZoomFactor == _zooming.Factor) return false;
 
         var location = point ?? new Point(-1, -1);
 
@@ -629,10 +624,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
 
-        _oldZoomFactor = _zoomFactor;
-        _zoomFactor = newZoomFactor;
-        _isManualZoom = true;
-        _zoomedPoint = new(location.X, location.Y);
+        _zooming.OldFactor = _zooming.Factor;
+        _zooming.Factor = newZoomFactor;
+        _zooming.IsManual = true;
+        _zooming.ZoomedPoint = new(location.X, location.Y);
 
 
         // update drawing regions
@@ -660,16 +655,16 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // horizontal
         if (hDistance != 0)
         {
-            _srcRect.X += hDistance / _zoomFactor;
+            _srcRect.X += hDistance / _zooming.Factor;
         }
 
         // vertical 
         if (vDistance != 0)
         {
-            _srcRect.Y += vDistance / _zoomFactor;
+            _srcRect.Y += vDistance / _zooming.Factor;
         }
 
-        _zoomedPoint = pointerPosition;
+        _zooming.ZoomedPoint = pointerPosition;
 
         // update drawing regions
         CalculateDrawingRegion();

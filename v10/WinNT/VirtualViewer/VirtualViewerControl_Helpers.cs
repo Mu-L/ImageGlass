@@ -64,8 +64,8 @@ public partial class VirtualViewerControl
     /// </summary>
     public Point PointClientToSource(Point clientPoint)
     {
-        var x = (clientPoint.X - _destRect.X) / _zoomFactor + _srcRect.X;
-        var y = (clientPoint.Y - _destRect.Y) / _zoomFactor + _srcRect.Y;
+        var x = (clientPoint.X - _destRect.X) / _zooming.Factor + _srcRect.X;
+        var y = (clientPoint.Y - _destRect.Y) / _zooming.Factor + _srcRect.Y;
 
         return new Point(x, y);
     }
@@ -121,8 +121,8 @@ public partial class VirtualViewerControl
     /// </summary>
     public Point PointSourceToClient(Point srcPoint)
     {
-        var x = (srcPoint.X - _srcRect.X) * _zoomFactor + _destRect.X;
-        var y = (srcPoint.Y - _srcRect.Y) * _zoomFactor + _destRect.Y;
+        var x = (srcPoint.X - _srcRect.X) * _zooming.Factor + _destRect.X;
+        var y = (srcPoint.Y - _srcRect.Y) * _zooming.Factor + _destRect.Y;
 
         return new Point(x, y);
     }
@@ -136,7 +136,7 @@ public partial class VirtualViewerControl
         var safeRect = rect.Safe();
 
         var loc = PointSourceToClient(new Point(safeRect.X, safeRect.Y));
-        var size = new Size(safeRect.Width * _zoomFactor, safeRect.Height * _zoomFactor);
+        var size = new Size(safeRect.Width * _zooming.Factor, safeRect.Height * _zooming.Factor);
 
         return new Rect(loc, size);
     }
