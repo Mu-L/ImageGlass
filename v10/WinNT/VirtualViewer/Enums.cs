@@ -2,18 +2,7 @@
 namespace ImageGlass.WinNT;
 
 
-/// <summary>
-/// Zoom modes
-/// </summary>
-public enum ZoomMode
-{
-    AutoZoom = 1,
-    LockZoom = 2,
-    ScaleToWidth = 3,
-    ScaleToHeight = 4,
-    ScaleToFit = 5,
-    ScaleToFill = 6,
-}
+
 
 
 /// <summary>
@@ -76,20 +65,4 @@ public enum CheckerboardMode
 }
 
 
-public enum SelectionAction
-{
-    None,
 
-    /// <summary>
-    /// User is dragging to draw the selection.
-    /// </summary>
-    Drawing,
-
-    /// <summary>
-    /// User is resizing the selection.
-    /// </summary>
-    Resizing,
-
-    // User is moving the selection.
-    Moving,
-}
