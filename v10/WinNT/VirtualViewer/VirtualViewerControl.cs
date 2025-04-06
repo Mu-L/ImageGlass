@@ -15,21 +15,21 @@ namespace ImageGlass.WinNT;
 
 public partial class VirtualViewerControl : SwapChainCanvas
 {
+    // drawing image
     private IWICBitmapSource? _bmpWic;
     private ID2D1Bitmap1? _bmpD2d;
     private ID2D1BitmapBrush1? _checkerboardBrush;
     private Rect _srcRect = new();
     private Rect _destRect = new();
 
+    private bool _isPreviewing = false;
+    private ImageInterpolation _interpolationScaleDown = ImageInterpolation.MultiSampleLinear;
+    private ImageInterpolation _interpolationScaleUp = ImageInterpolation.NearestNeighbor;
+
+
+    // control
     private Color _accentColor = Colors.Blue;
     private InputSystemCursorShape _cursor = InputSystemCursorShape.Arrow;
-
-    private bool _isPreviewing = false;
-
-
-
-
-
 
 
 
@@ -42,7 +42,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     public double FontSize_Dpi => this.DpiScale(FontSize);
 
     public int CheckerboardSize { get; set; } = 25;
-    //public BitmapInterpolationMode Interpolation { get; set; } = BitmapInterpolationMode.None;
+
 
     public Rect DrawingArea => new(
         Padding.Left,
@@ -50,18 +50,67 @@ public partial class VirtualViewerControl : SwapChainCanvas
         Math.Max(0, Bounds_Dpi.Width - Padding.Left - Padding.Right),
         Math.Max(0, Bounds_Dpi.Height - Padding.Top - Padding.Bottom));
 
+
     public double SourceWidth { get; private set; } = 0;
+
     public double SourceHeight { get; private set; } = 0;
 
 
 
+    /// <summary>
+    /// Gets, sets interpolation mode used when the
+    /// <see cref="ZoomFactor"/> is less than or equal <c>1.0f</c>.
+    /// </summary>
+    public ImageInterpolation InterpolationScaleDown
+    {
+        get => _interpolationScaleDown;
+        set
+        {
+            if (_interpolationScaleDown != value)
+            {
+                _interpolationScaleDown = value;
+                Invalidate();
+            }
+        }
+    }
 
 
+    /// <summary>
+    /// Gets, sets interpolation mode used when the
+    /// <see cref="ZoomFactor"/> is greater than <c>1.0f</c>.
+    /// </summary>
+    public ImageInterpolation InterpolationScaleUp
+    {
+        get => _interpolationScaleUp;
+        set
+        {
+            if (_interpolationScaleUp != value)
+            {
+                _interpolationScaleUp = value;
+                Invalidate();
+            }
+        }
+    }
 
-    
+
+    /// <summary>
+    /// Gets the current <see cref="ImageInterpolation"/> mode.
+    /// </summary>
+    public ImageInterpolation CurrentInterpolation
+    {
+        get
+        {
+            if (ZoomFactor < 1f) return _interpolationScaleDown;
+            if (ZoomFactor > 1f) return _interpolationScaleUp;
+
+            return ImageInterpolation.NearestNeighbor;
+        }
+    }
 
 
-
+    /// <summary>
+    /// Gets or sets the cursor shape for the input system.
+    /// </summary>
     public InputSystemCursorShape Cursor
     {
         get => _cursor;
@@ -79,6 +128,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
     }
 
+
     /// <summary>
     /// Gets, sets accent color.
     /// </summary>
@@ -88,7 +138,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         set
         {
             _accentColor = value;
-
             //if (Web2 != null) Web2.AccentColor = _accentColor;
         }
     }
@@ -276,10 +325,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
         // draw image
-        if (_bmpD2d != null)
-        {
-            e.DrawBitmap(_bmpD2d, _destRect, _srcRect);
-        }
+        DrawImageLayer(e);
+
 
         // Draw selection layer
         OnSelectionDrawing(e);
@@ -316,7 +363,15 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    protected virtual void DrawCheckerboardLayer(SwapChainCanvasRenderEventArgs g)
+    protected virtual void DrawImageLayer(SwapChainCanvasRenderEventArgs e)
+    {
+        if (_bmpD2d == null) return;
+
+        e.DrawBitmap(_bmpD2d, _destRect, _srcRect, (InterpolationMode)CurrentInterpolation);
+    }
+
+
+    protected virtual void DrawCheckerboardLayer(SwapChainCanvasRenderEventArgs e)
     {
         // TODO:
     }

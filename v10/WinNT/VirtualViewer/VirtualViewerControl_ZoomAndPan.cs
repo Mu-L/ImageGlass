@@ -53,14 +53,6 @@ public partial class VirtualViewerControl
     #region Public Properies
 
     /// <summary>
-    /// Gets the center point of the image viewport.
-    /// </summary>
-    public Point ViewportCenterPoint => new(
-        _destRect.X + _destRect.Width / 2.0,
-        _destRect.Y + _destRect.Height / 2.0);
-
-
-    /// <summary>
     /// Gets, sets zoom mode.
     /// </summary>
     public ZoomMode ZoomMode
@@ -157,6 +149,14 @@ public partial class VirtualViewerControl
             _panSpeed = Math.Max(value, 0); // min 0
         }
     }
+
+
+    /// <summary>
+    /// Gets the center point of the image viewport.
+    /// </summary>
+    public Point ViewportCenterPoint => new(
+        _destRect.X + _destRect.Width / 2.0,
+        _destRect.Y + _destRect.Height / 2.0);
 
 
     #endregion // Public Properies
