@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageGlass.WinNT.Common", "WinNT\ImageGlass.WinNT.Common\ImageGlass.WinNT.Common.csproj", "{91B6D839-94A3-4F76-81F4-51585D8C5A93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -64,6 +66,14 @@ Global
 		{4A544C6D-B7C4-BF24-35CD-D6C7B9F6B50E}.Release|ARM64.Build.0 = Release|ARM64
 		{4A544C6D-B7C4-BF24-35CD-D6C7B9F6B50E}.Release|x64.ActiveCfg = Release|x64
 		{4A544C6D-B7C4-BF24-35CD-D6C7B9F6B50E}.Release|x64.Build.0 = Release|x64
+		{91B6D839-94A3-4F76-81F4-51585D8C5A93}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{91B6D839-94A3-4F76-81F4-51585D8C5A93}.Debug|ARM64.Build.0 = Debug|ARM64
+		{91B6D839-94A3-4F76-81F4-51585D8C5A93}.Debug|x64.ActiveCfg = Debug|x64
+		{91B6D839-94A3-4F76-81F4-51585D8C5A93}.Debug|x64.Build.0 = Debug|x64
+		{91B6D839-94A3-4F76-81F4-51585D8C5A93}.Release|ARM64.ActiveCfg = Release|ARM64
+		{91B6D839-94A3-4F76-81F4-51585D8C5A93}.Release|ARM64.Build.0 = Release|ARM64
+		{91B6D839-94A3-4F76-81F4-51585D8C5A93}.Release|x64.ActiveCfg = Release|x64
+		{91B6D839-94A3-4F76-81F4-51585D8C5A93}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +82,7 @@ Global
 		{E8E4862D-4DCB-472D-86D9-BDA3B0AEC8CF} = {1B784172-0A9B-4BE2-BE6B-CA0590827D79}
 		{1E26ABCF-2B87-48A5-818E-04A7B448436E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{4A544C6D-B7C4-BF24-35CD-D6C7B9F6B50E} = {1B784172-0A9B-4BE2-BE6B-CA0590827D79}
+		{91B6D839-94A3-4F76-81F4-51585D8C5A93} = {1B784172-0A9B-4BE2-BE6B-CA0590827D79}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ECDBED3E-4C15-4136-9482-989494E3E080}
