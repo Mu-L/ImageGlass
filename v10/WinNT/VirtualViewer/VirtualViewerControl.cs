@@ -1,11 +1,14 @@
 ﻿using D2Phap.Canvas2D;
+using ImageGlass.WinNT.Common;
 using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using SharpGen.Runtime;
 using System;
+using System.Threading.Tasks;
 using Vortice.Direct2D1;
+using Vortice.Direct2D1.Effects;
 using Vortice.WIC;
 using Windows.Foundation;
 using Windows.UI;
@@ -16,7 +19,7 @@ namespace ImageGlass.WinNT;
 public partial class VirtualViewerControl : SwapChainCanvas
 {
     // drawing image
-    private IWICBitmapSource? _bmpWic;
+    private Photo? _photo;
     private ID2D1Bitmap1? _bmpD2d;
     private Rect _srcRect = new();
     private Rect _destRect = new();
@@ -166,8 +169,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         _bmpD2d?.Dispose();
         _bmpD2d = null;
 
-        _bmpWic?.Dispose();
-        _bmpWic = null;
+        _photo?.Dispose();
+        _photo = null;
 
         _checkerboardBrush?.Dispose();
         _checkerboardBrush = null;
@@ -189,7 +192,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         CalculateDrawingRegion();
 
         // redraw the control on resizing if it's not manual zoom
-        if (_bmpWic != null && !_zooming.IsManual)
+        if (_photo != null && !_zooming.IsManual)
         {
             Refresh(true, false, true);
         }
@@ -405,15 +408,15 @@ public partial class VirtualViewerControl : SwapChainCanvas
         _bmpD2d?.Dispose();
         _bmpD2d = null;
 
-        _bmpWic?.Dispose();
-        _bmpWic = null;
+        _photo?.Dispose();
+        _photo = null;
 
 
-        _bmpWic = Wic.Load(path);
-        SourceWidth = _bmpWic?.Size.Width ?? 0;
-        SourceHeight = _bmpWic?.Size.Height ?? 0;
+        _photo = Photo.Decode(path);
+        SourceWidth = _photo?.Width ?? 0;
+        SourceHeight = _photo?.Height ?? 0;
 
-        if (_bmpWic == null)
+        if (_photo == null)
         {
             Refresh();
             return;
@@ -424,14 +427,33 @@ public partial class VirtualViewerControl : SwapChainCanvas
         UseHardwareAcceleration = !exceededMaxBitmapSize;
 
 
-        try
-        {
-            _bmpD2d = D2dContext.CreateBitmapFromWicBitmap(_bmpWic);
-        }
-        catch (SharpGenException ex)
-        {
-            // TODO:
-        }
+        _bmpD2d = _photo.CreateDirect2dBitmap(D2dContext);
+
+
+        //using var srcD2dBmp = _photo.CreateDirect2dBitmap(D2dContext);
+
+        //try
+        //{
+        //    using var colorEffect = new ColorManagement(D2dContext);
+        //    colorEffect.SetInput(0, srcD2dBmp, false);
+        //    colorEffect.Quality = ColormanagementQuality.Best;
+
+        //    using var srcColorContext = D2dContext.CreateColorContext(ColorSpace.Srgb, []);
+        //    colorEffect.SourceColorContext = srcColorContext;
+
+        //    using var destColorContext = MonitorColorProfile.Instance.Data != null
+        //        ? D2dContext.CreateColorContext(ColorSpace.Custom, MonitorColorProfile.Instance.Data)
+        //        : D2dContext.CreateColorContext(ColorSpace.Srgb, []);
+        //    colorEffect.DestinationColorContext = destColorContext;
+
+
+        //    _bmpD2d = colorEffect.GetD2D1Bitmap1(D2dContext);
+        //}
+        //catch (Exception ex)
+        //{
+        //    Log.Error(ex);
+        //}
+
 
         Refresh();
     }

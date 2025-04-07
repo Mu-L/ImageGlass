@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using ImageGlass.WinNT.Common;
 using Microsoft.UI;
 using Windows.Foundation;
 using Windows.UI;
@@ -32,7 +33,7 @@ internal class CheckerboardInfo
     /// <summary>
     /// Represents the current mode of the checkerboard.
     /// </summary>
-    public CheckerboardMode Mode { get; set; } = CheckerboardMode.Client;
+    public CheckerboardMode Mode { get; set; } = CheckerboardMode.None;
 
 
     /// <summary>

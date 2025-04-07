@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageGlass.WinNT.Common;
+using System;
 using Windows.Foundation;
 
 namespace ImageGlass.WinNT;

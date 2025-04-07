@@ -30,7 +30,7 @@
             Grid.Row="0"
             Height="{x:Bind TitleBarHeight.Value}"
             Padding="{x:Bind TitleBarMargin}"
-            Background="#20ff"
+            Background="#10ff"
             Canvas.ZIndex="100">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -58,7 +58,7 @@
         <Grid
             Grid.Row="1"
             VerticalAlignment="Top"
-            Background="#20ff"
+            Background="#10ff"
             Canvas.ZIndex="99">
 
             <Button Click="Button_Click">Open</Button>
@@ -68,9 +68,9 @@
         <!--  Gallery  -->
         <Grid
             Grid.Row="3"
-            Height="100"
+            Height="80"
             VerticalAlignment="Bottom"
-            Background="#20ff"
+            Background="#10ff"
             Canvas.ZIndex="98" />
 
 

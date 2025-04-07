@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using D2Phap.Canvas2D;
+using ImageGlass.WinNT.Common;
 using Vortice.Direct2D1;
 using Windows.Foundation;
 
@@ -142,12 +143,12 @@ public partial class VirtualViewerControl
         var height = (int)size.Height * 2;
 
         // 1. create empty WIC bitmap
-        var tileImg = Wic.CreateBitmap(width, height);
+        var tileImg = Photo.Create(width, height);
         if (tileImg == null) return null;
 
 
         // 2. create render target from WIC bitmap
-        using var tileImgDc = Wic.CreateRenderTarget(tileImg);
+        using var tileImgDc = tileImg.CreateDirect2dRenderTarget();
         if (tileImgDc == null) return null;
 
 
@@ -175,7 +176,7 @@ public partial class VirtualViewerControl
 
 
         // 4. create D2DBitmap from WICBitmapSource
-        using var bmp = D2dContext.CreateBitmapFromWicBitmap(tileImg);
+        using var bmp = tileImg.CreateDirect2dBitmap(D2dContext);
         var bmpProps = new BitmapBrushProperties1()
         {
             ExtendModeX = ExtendMode.Wrap,
