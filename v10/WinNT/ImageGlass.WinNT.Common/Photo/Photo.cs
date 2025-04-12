@@ -20,45 +20,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Common;
 using SharpGen.Runtime;
 using System;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using Vortice.Direct2D1;
 using Vortice.WIC;
 
 
 namespace ImageGlass.WinNT.Common;
-
-
-/// <summary>
-/// An interface for handling photo objects.
-/// </summary>
-/// <typeparam name="T">Represents the type of the native bitmap associated with the photo.</typeparam>
-public interface IPhoto<T> : IDisposable
-{
-    /// <summary>
-    /// Gets the native bitmap.
-    /// </summary>
-    T? Bitmap { get; }
-
-
-    /// <summary>
-    /// Gets the width of the photo
-    /// </summary>
-    int Width { get; }
-
-
-    /// <summary>
-    /// Gets the height of the photo.
-    /// </summary>
-    int Height { get; }
-
-
-    /// <summary>
-    /// Loads photo from file.
-    /// </summary>
-    void Load(string filePath, uint frameIndex = 0);
-
-}
-
 
 
 public partial class Photo : IPhoto<IWICBitmapSource>
@@ -99,7 +68,8 @@ public partial class Photo : IPhoto<IWICBitmapSource>
 
 
     private IWICBitmapSource? _bitmap;
-    private IWICColorContext[]? _colorContexts;
+    private PhotoColorContext? _colorContext;
+    private IWICPixelFormatInfo2? _pixelFormatInfo;
 
 
     public IWICBitmapSource? Bitmap => _bitmap;
@@ -112,8 +82,15 @@ public partial class Photo : IPhoto<IWICBitmapSource>
     /// <summary>
     /// Gets the color contexts of the photo.
     /// </summary>
-    public IWICColorContext[] ColorContexts => LazyInitializer.EnsureInitialized(
-        ref _colorContexts, GetColorContexts);
+    public PhotoColorContext ColorContext => LazyInitializer.EnsureInitialized(
+        ref _colorContext, GetColorContext);
+
+
+    /// <summary>
+    /// Gets the pixel information of the photo.
+    /// </summary>
+    public IWICPixelFormatInfo2? PixelFormatInfo => LazyInitializer.EnsureInitialized(
+        ref _pixelFormatInfo, LoadPixelInfo);
 
 
     public Photo() { }
@@ -168,8 +145,8 @@ public partial class Photo : IPhoto<IWICBitmapSource>
         try
         {
             var newBmp = WIC.WICConvertBitmapSource(
-            Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA,
-            _bitmap);
+                Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA,
+                _bitmap);
 
             return new Photo(newBmp);
         }
@@ -227,6 +204,7 @@ public partial class Photo : IPhoto<IWICBitmapSource>
         return null;
     }
 
+
     #endregion // Public Functions
 
 
@@ -239,14 +217,14 @@ public partial class Photo : IPhoto<IWICBitmapSource>
     private void DisposeNativeResources()
     {
         // dispose color contexts
-        if (_colorContexts != null)
-        {
-            foreach (var colorContext in _colorContexts)
-            {
-                colorContext?.Dispose();
-            }
-            _colorContexts = null;
-        }
+        _colorContext?.Dispose();
+        _colorContext = null;
+
+
+        // dispose pixel format info
+        _pixelFormatInfo?.Dispose();
+        _pixelFormatInfo = null;
+
 
         //  dispose bitmap
         _bitmap?.Dispose();
@@ -257,39 +235,98 @@ public partial class Photo : IPhoto<IWICBitmapSource>
     /// <summary>
     /// Retrieves an array of color contexts from a bitmap if available.
     /// </summary>
-    private IWICColorContext[] GetColorContexts()
+    private unsafe PhotoColorContext GetColorContext()
     {
-        if (_bitmap == null) return [];
-        if (_colorContexts != null) return _colorContexts;
-
+        if (_bitmap == null) return new();
 
         using var wicFactory = new IWICImagingFactory2();
         var frame = _bitmap.As<IWICBitmapFrameDecode>();
 
         try
         {
-            frame.GetColorContexts(0, [], out var pcActualCount);
+            IWICColorContext? bestContext = null;
+            var contexts = frame.TryGetColorContexts(wicFactory);
 
-            if (pcActualCount > 0)
+            if (contexts.Length == 1)
             {
-                var colorContexts = new IWICColorContext[pcActualCount];
+                bestContext = contexts[0];
+            }
 
-                for (int i = 0; i < pcActualCount; i++)
+            // try to get the best color context
+            else if (contexts.Length > 1)
+            {
+                // https://stackoverflow.com/a/70215280/403671
+                // get last not uncalibrated color context
+                foreach (var ctx in contexts.Reverse())
                 {
-                    colorContexts[i] = wicFactory.CreateColorContext();
+                    // Uncalibrated
+                    if (ctx.ExifColorSpace == 0xFFFF)
+                        continue;
+
+                    bestContext = ctx;
                 }
 
-                frame.GetColorContexts(pcActualCount, colorContexts, out var _);
-
-                return colorContexts;
+                // last resort
+                bestContext ??= contexts[contexts.Length - 1];
             }
+
+            if (bestContext == null) return new PhotoColorContext();
+
+
+            // get color space
+            var exitColorSpace = bestContext.ExifColorSpace;
+            var colorSpace = PhotoColorSpace.Unknown;
+
+            if (exitColorSpace == 1)
+            {
+                colorSpace = PhotoColorSpace.sRGB;
+            }
+            else if (exitColorSpace == 2)
+            {
+                colorSpace = PhotoColorSpace.AdobeRGB;
+            }
+            else if (exitColorSpace == 0xFFFF)
+            {
+                colorSpace = PhotoColorSpace.Uncalibrated;
+            }
+
+
+            // get color profile
+            using var ms = new MemoryStream();
+            bestContext.Profile?.CopyTo(ms);
+            var profileBytes = ms.ToArray();
+
+
+            // dispose native color context
+            foreach (var ctx in contexts)
+            {
+                ctx.Dispose();
+            }
+
+
+            var colorContext = new PhotoColorContext(colorSpace, profileBytes);
+            return colorContext;
         }
         catch (Exception ex)
         {
             Log.Error(ex);
         }
 
-        return [];
+        return new PhotoColorContext();
+    }
+
+
+    /// <summary>
+    /// Loads pixel format information for a bitmap.
+    /// </summary>
+    private IWICPixelFormatInfo2 LoadPixelInfo()
+    {
+        if (_bitmap == null) return new IWICPixelFormatInfo2(IntPtr.Zero);
+
+        using var wicFactory = new IWICImagingFactory2();
+
+        var comInfo = wicFactory.CreateComponentInfo(_bitmap.PixelFormat);
+        return comInfo.As<IWICPixelFormatInfo2>();
     }
 
     #endregion // Private Functions

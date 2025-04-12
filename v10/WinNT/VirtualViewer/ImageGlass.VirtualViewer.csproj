@@ -23,7 +23,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250310001" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250401001" />
     <PackageReference Include="Vortice.Win32.Graphics.Imaging" Version="2.2.7" />
   </ItemGroup>
     

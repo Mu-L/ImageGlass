@@ -4,9 +4,8 @@ using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
-using SharpGen.Runtime;
 using System;
-using System.Threading.Tasks;
+using System.Linq;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
 using Vortice.WIC;
@@ -429,35 +428,59 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         _bmpD2d = _photo.CreateDirect2dBitmap(D2dContext);
 
-
-        //using var srcD2dBmp = _photo.CreateDirect2dBitmap(D2dContext);
-
-        //try
-        //{
-        //    using var colorEffect = new ColorManagement(D2dContext);
-        //    colorEffect.SetInput(0, srcD2dBmp, false);
-        //    colorEffect.Quality = ColormanagementQuality.Best;
-
-        //    using var srcColorContext = D2dContext.CreateColorContext(ColorSpace.Srgb, []);
-        //    colorEffect.SourceColorContext = srcColorContext;
-
-        //    using var destColorContext = MonitorColorProfile.Instance.Data != null
-        //        ? D2dContext.CreateColorContext(ColorSpace.Custom, MonitorColorProfile.Instance.Data)
-        //        : D2dContext.CreateColorContext(ColorSpace.Srgb, []);
-        //    colorEffect.DestinationColorContext = destColorContext;
-
-
-        //    _bmpD2d = colorEffect.GetD2D1Bitmap1(D2dContext);
-        //}
-        //catch (Exception ex)
-        //{
-        //    Log.Error(ex);
-        //}
-
+        ApplyColorManagementEffect();
 
         Refresh();
     }
 
+
+    private void ApplyColorManagementEffect()
+    {
+        if (_bmpD2d == null || _photo == null) return;
+
+        // create color management effect
+        using var colorEffect = new ColorManagement(D2dContext);
+        colorEffect.SetInput(0, _bmpD2d, false);
+        colorEffect.Quality = ColormanagementQuality.Best;
+
+
+        // get color context
+        if (_photo.ColorContext?.Profile is null) return;
+
+        // GUID_WICPixelFormat32bppCMYK
+
+        // create destination color context
+        ID2D1ColorContext? destColorContext = null;
+        if (WindowColorProfile.Instance.Data != null)
+        {
+            destColorContext = D2dContext.CreateColorContext(ColorSpace.Custom, WindowColorProfile.Instance.Data);
+        }
+        else if (_photo.PixelFormatInfo?.NumericRepresentation == PixelFormatNumericRepresentation.PixelFormatNumericRepresentationFloat)
+        {
+            destColorContext = D2dContext.CreateColorContext(ColorSpace.ScRgb, []);
+        }
+        else
+        {
+            destColorContext = D2dContext.CreateColorContext(ColorSpace.Srgb, []);
+        }
+
+        using var srcColorContext = D2dContext.CreateColorContext(
+            (ColorSpace)_photo.ColorContext.ColorSpace,
+            _photo.ColorContext.Profile);
+
+
+        // set color effect
+        colorEffect.SourceColorContext = srcColorContext;
+        colorEffect.DestinationColorContext = destColorContext;
+
+
+        _bmpD2d?.Dispose();
+        _bmpD2d = null;
+        _bmpD2d = colorEffect.GetD2D1Bitmap1(D2dContext);
+
+        srcColorContext?.Dispose();
+        destColorContext?.Dispose();
+    }
 
 
 }
