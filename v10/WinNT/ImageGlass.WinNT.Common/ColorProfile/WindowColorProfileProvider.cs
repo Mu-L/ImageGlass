@@ -17,9 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using ImageGlass.Common;
 using Microsoft.Graphics.Display;
 using Microsoft.UI;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ImageGlass.WinNT.Common;
@@ -28,7 +30,7 @@ namespace ImageGlass.WinNT.Common;
 /// <summary>
 /// Manages the color profile for a window.
 /// </summary>
-public interface IWindowColorProfile : IDisposable
+public interface IWindowColorProfileProvider : IDisposable
 {
     /// <summary>
     /// Occurs when a physical display's color profile is changed.
@@ -59,7 +61,7 @@ public interface IWindowColorProfile : IDisposable
 /// <summary>
 /// Manages the color profile for a window.
 /// </summary>
-public partial class WindowColorProfile : IWindowColorProfile
+public partial class WindowColorProfileProvider : IWindowColorProfileProvider
 {
     #region IDisposable Disposing
 
@@ -95,7 +97,7 @@ public partial class WindowColorProfile : IWindowColorProfile
         GC.SuppressFinalize(this);
     }
 
-    ~WindowColorProfile()
+    ~WindowColorProfileProvider()
     {
         Dispose(false);
     }
@@ -103,22 +105,25 @@ public partial class WindowColorProfile : IWindowColorProfile
     #endregion
 
 
-    private DisplayInformation? _display;
+    private static readonly Lazy<WindowColorProfileProvider> _instance = new(() => new WindowColorProfileProvider(), LazyThreadSafetyMode.ExecutionAndPublication);
 
 
     /// <summary>
-    /// Provides a singleton instance of the <see cref="WindowColorProfile"/> class.
+    /// Provides a singleton instance of the <see cref="WindowColorProfileProvider"/> class.
     /// </summary>
-    public static WindowColorProfile Instance { get; } = new();
+    public static WindowColorProfileProvider Instance => _instance.Value;
 
 
+    private DisplayInformation? _display;
 
     public event EventHandler? Changed;
     public byte[]? Data { get; private set; }
     public bool IsInitialized { get; private set; } = false;
 
 
-
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public async Task InitializeAsync(WindowId windowId)
     {
         if (IsInitialized) return;

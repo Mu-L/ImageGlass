@@ -1,4 +1,6 @@
-﻿using ImageGlass.WinNT.Common;
+﻿using ImageGlass.Common;
+using ImageGlass.WinNT.Common;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -32,6 +34,8 @@ public partial class App : Application
         _window = new MainWindow();
         _window.Activate();
 
-        _ = WindowColorProfile.Instance.InitializeAsync(_window.AppWindow.Id);
+        // TODO: dispose
+        _ = WindowColorProfileProvider.Instance.InitializeAsync(_window.AppWindow.Id);
     }
+
 }

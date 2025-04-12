@@ -297,7 +297,7 @@ public partial class Photo : IPhoto<IWICBitmapSource>
             var profileBytes = ms.ToArray();
 
 
-            // dispose native color context
+            // dispose native color contexts
             foreach (var ctx in contexts)
             {
                 ctx.Dispose();
