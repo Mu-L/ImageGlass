@@ -22,6 +22,7 @@ using SharpGen.Runtime;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Vortice.Direct2D1;
 using Vortice.WIC;
@@ -68,7 +69,7 @@ public partial class Photo : IPhoto<IWICBitmapSource>
 
 
     private IWICBitmapSource? _bitmap;
-    private PhotoColorContext? _colorContext;
+    private PhotoColorProfile? _colorContext;
     private IWICPixelFormatInfo2? _pixelFormatInfo;
 
 
@@ -80,10 +81,10 @@ public partial class Photo : IPhoto<IWICBitmapSource>
 
 
     /// <summary>
-    /// Gets the color contexts of the photo.
+    /// Gets the color profile of the photo.
     /// </summary>
-    public PhotoColorContext ColorContext => LazyInitializer.EnsureInitialized(
-        ref _colorContext, GetColorContext);
+    public PhotoColorProfile ColorProfile => LazyInitializer.EnsureInitialized(
+        ref _colorContext, GetColorProfile);
 
 
     /// <summary>
@@ -233,9 +234,9 @@ public partial class Photo : IPhoto<IWICBitmapSource>
 
 
     /// <summary>
-    /// Retrieves an array of color contexts from a bitmap if available.
+    /// Gets color profile of the photo.
     /// </summary>
-    private unsafe PhotoColorContext GetColorContext()
+    private PhotoColorProfile GetColorProfile()
     {
         if (_bitmap == null) return new();
 
@@ -244,44 +245,26 @@ public partial class Photo : IPhoto<IWICBitmapSource>
 
         try
         {
-            IWICColorContext? bestContext = null;
             var contexts = frame.TryGetColorContexts(wicFactory);
+            var bestProfile = FindBestColorProfile(contexts);
 
-            if (contexts.Length == 1)
-            {
-                bestContext = contexts[0];
-            }
 
-            // try to get the best color context
-            else if (contexts.Length > 1)
-            {
-                // https://stackoverflow.com/a/70215280/403671
-                // get last not uncalibrated color context
-                foreach (var ctx in contexts.Reverse())
-                {
-                    // Uncalibrated
-                    if (ctx.ExifColorSpace == 0xFFFF)
-                        continue;
-
-                    bestContext = ctx;
-                }
-
-                // last resort
-                bestContext ??= contexts[contexts.Length - 1];
-            }
-
-            if (bestContext == null) return new PhotoColorContext();
+            // get color profile
+            using var ms = new MemoryStream();
+            bestProfile?.Profile?.CopyTo(ms);
+            var profileBytes = ms.ToArray();
 
 
             // get color space
-            var exitColorSpace = bestContext.ExifColorSpace;
-            var colorSpace = PhotoColorSpace.Unknown;
+            var exitColorSpace = bestProfile?.ExifColorSpace;
+            var colorSpace = PhotoColorSpace.None;
 
             if (exitColorSpace == 1)
             {
                 colorSpace = PhotoColorSpace.sRGB;
             }
-            else if (exitColorSpace == 2)
+            else if (exitColorSpace == 2
+                || (profileBytes != null && Encoding.ASCII.GetString(profileBytes).Contains("Adobe RGB")))
             {
                 colorSpace = PhotoColorSpace.AdobeRGB;
             }
@@ -289,22 +272,24 @@ public partial class Photo : IPhoto<IWICBitmapSource>
             {
                 colorSpace = PhotoColorSpace.Uncalibrated;
             }
+            else if (exitColorSpace != null)
+            {
+                colorSpace = PhotoColorSpace.Unknown;
+            }
 
 
-            // get color profile
-            using var ms = new MemoryStream();
-            bestContext.Profile?.CopyTo(ms);
-            var profileBytes = ms.ToArray();
+            var colorContext = new PhotoColorProfile(colorSpace, profileBytes, bestProfile);
 
 
             // dispose native color contexts
             foreach (var ctx in contexts)
             {
-                ctx.Dispose();
+                if (ctx.NativePointer != bestProfile?.NativePointer)
+                {
+                    ctx.Dispose();
+                }
             }
 
-
-            var colorContext = new PhotoColorContext(colorSpace, profileBytes);
             return colorContext;
         }
         catch (Exception ex)
@@ -312,7 +297,35 @@ public partial class Photo : IPhoto<IWICBitmapSource>
             Log.Error(ex);
         }
 
-        return new PhotoColorContext();
+        return new PhotoColorProfile();
+    }
+
+
+    /// <summary>
+    /// Finds the best color profile.
+    /// </summary>
+    private static IWICColorContext? FindBestColorProfile(IWICColorContext[]? contexts)
+    {
+        IWICColorContext? bestProfile = null;
+        if (contexts == null) return bestProfile;
+
+
+        // get the last non-uncalibrated color context
+        // https://stackoverflow.com/a/70215280/403671
+        foreach (var ctx in contexts.Reverse())
+        {
+            // Uncalibrated
+            if (ctx.ExifColorSpace == 0xFFFF)
+                continue;
+
+            if (ctx.Type == Vortice.WIC.ColorContextType.Profile)
+            {
+                bestProfile = ctx;
+            }
+        }
+
+
+        return bestProfile;
     }
 
 

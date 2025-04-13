@@ -5,12 +5,12 @@ using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using System;
-using System.Linq;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
 using Vortice.WIC;
 using Windows.Foundation;
 using Windows.UI;
+using WinRT;
 
 
 namespace ImageGlass.WinNT;
@@ -445,9 +445,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
         // get color context
-        if (_photo.ColorContext?.Profile is null) return;
+        if (_photo.ColorProfile?.Data is null) return;
 
-        // GUID_WICPixelFormat32bppCMYK
 
         // create destination color context
         ID2D1ColorContext? destColorContext = null;
@@ -464,9 +463,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
             destColorContext = D2dContext.CreateColorContext(ColorSpace.Srgb, []);
         }
 
-        using var srcColorContext = D2dContext.CreateColorContext(
-            (ColorSpace)_photo.ColorContext.ColorSpace,
-            _photo.ColorContext.Profile);
+        // create source color context
+        using var srcColorContext = _photo.ColorProfile.Native != null
+            ? D2dContext.CreateColorContextFromWicColorContext(_photo.ColorProfile.Native.As<IWICColorContext>())
+            : null;
 
 
         // set color effect
