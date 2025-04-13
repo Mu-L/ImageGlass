@@ -32,8 +32,8 @@ public partial class Photo : IPhoto<IWICBitmapSource>
     /// </summary>
     public static Photo? Decode(string filePath, uint frameIndex = 0)
     {
-        var photo = new Photo();
-        photo.Load(filePath, frameIndex);
+        var photo = new Photo(filePath);
+        photo.Load(frameIndex);
 
         return photo;
     }

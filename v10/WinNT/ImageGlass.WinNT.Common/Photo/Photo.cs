@@ -24,6 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Vortice.Direct2D1;
 using Vortice.WIC;
 
@@ -31,53 +32,17 @@ using Vortice.WIC;
 namespace ImageGlass.WinNT.Common;
 
 
-public partial class Photo : IPhoto<IWICBitmapSource>
+public partial class Photo : PhotoImpl<IWICBitmapSource>
 {
-
-    #region IDisposable Disposing
-
-    public bool IsDisposed { get; private set; } = false;
-
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (IsDisposed) return;
-
-        if (disposing)
-        {
-            // Free any other managed objects here.
-            DisposeNativeResources();
-        }
-
-        // Free any unmanaged objects here.
-        IsDisposed = true;
-    }
-
-    public virtual void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    ~Photo()
-    {
-        Dispose(false);
-    }
-
-    #endregion
-
-
-
-    private IWICBitmapSource? _bitmap;
     private PhotoColorProfile? _colorContext;
     private IWICPixelFormatInfo2? _pixelFormatInfo;
 
 
-    public IWICBitmapSource? Bitmap => _bitmap;
+    public override IWICBitmapSource? Bitmap => _bitmap;
 
-    public int Width => _bitmap == null ? 0 : _bitmap.Size.Width;
+    public override int Width => _bitmap?.Size.Width ?? 0;
 
-    public int Height => _bitmap == null ? 0 : _bitmap.Size.Height;
+    public override int Height => _bitmap?.Size.Height ?? 0;
 
 
     /// <summary>
@@ -94,15 +59,15 @@ public partial class Photo : IPhoto<IWICBitmapSource>
         ref _pixelFormatInfo, LoadPixelInfo);
 
 
-    public Photo() { }
+    /// <summary>
+    /// Initializes a new instance using the specified file path for the image file.
+    /// </summary>
+    public Photo(string filePath = "") : base(filePath) { }
 
 
-    public Photo(string filePath)
-    {
-        Load(filePath);
-    }
-
-
+    /// <summary>
+    /// Initializes a new instance using a bitmap source for rendering.
+    /// </summary>
     public Photo(IWICBitmapSource wicSrc)
     {
         DisposeNativeResources();
@@ -115,24 +80,42 @@ public partial class Photo : IPhoto<IWICBitmapSource>
     #region Public Functions
 
     /// <summary>
-    /// Loads an image from file.
+    /// <inheritdoc/>
     /// </summary>
-    public void Load(string filePath, uint frameIndex = 0)
+    public override void Load(uint frameIndex = 0)
     {
         DisposeNativeResources();
 
-        try
-        {
-            using var wicFactory = new IWICImagingFactory2();
-            using var decoder = wicFactory.CreateDecoderFromFileName(filePath);
-            var frameBmp = decoder.GetFrame(frameIndex);
+        _ = LoadAsync___(frameIndex);
+    }
 
-            _bitmap = frameBmp;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
-        }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public override async Task LoadAsync(uint frameIndex = 0)
+    {
+        DisposeNativeResources();
+
+        await Task.Run(() => LoadAsync___(frameIndex));
+    }
+
+
+    /// <summary>
+    /// Unload the image and reset the relevant info
+    /// </summary>
+    public override void Unload()
+    {
+        // reset info
+        IsDone = false;
+        Error = null;
+
+        // dispose native resources
+        DisposeNativeResources();
+
+        // unload image
+        _bitmap?.Dispose();
+        _bitmap = null;
     }
 
 
@@ -212,6 +195,90 @@ public partial class Photo : IPhoto<IWICBitmapSource>
     // Private Functions
     #region Private Functions
 
+    private async Task LoadAsync___(uint frameIndex)
+    {
+        // reset dispose status
+        IsDisposed = false;
+
+        // reset done status
+        IsDone = false;
+
+        // reset error
+        Error = null;
+
+        //options ??= new();
+
+        try
+        {
+            //// load image data
+            //Metadata ??= PhotoCodec.LoadMetadata(FilePath, options);
+            //FrameCount = Metadata?.FrameCount ?? 0;
+
+            //if (options.FirstFrameOnly == null)
+            //{
+            //    options = options with
+            //    {
+            //        FirstFrameOnly = FrameCount < 2,
+            //    };
+            //}
+
+            // cancel if requested
+            if (_tokenSrc is not null && _tokenSrc.IsCancellationRequested)
+            {
+                _tokenSrc.Token.ThrowIfCancellationRequested();
+            }
+
+            // load image
+            using var wicFactory = new IWICImagingFactory2();
+            using var decoder = wicFactory.CreateDecoderFromFileName(FilePath);
+            var frameBmp = decoder.GetFrame(frameIndex);
+
+            _bitmap = frameBmp;
+
+            //ImgData = await PhotoCodec.LoadAsync(FilePath, options, null, _tokenSrc?.Token);
+
+            //// update metadata for JXR format
+            //if (Metadata.FileExtension == ".JXR")
+            //{
+            //    Metadata.RenderedWidth = Metadata.OriginalWidth = (uint)(ImgData.Image?.Width ?? 0);
+            //    Metadata.RenderedHeight = Metadata.OriginalHeight = (uint)(ImgData.Image?.Height ?? 0);
+            //}
+
+            // cancel if requested
+            if (_tokenSrc is not null && _tokenSrc.IsCancellationRequested)
+            {
+                _tokenSrc.Token.ThrowIfCancellationRequested();
+            }
+
+            // done loading
+            IsDone = true;
+        }
+        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+        {
+            Unload();
+            Dispose();
+        }
+        catch (Exception ex)
+        {
+            // save the error
+            Error = ex;
+
+            // done loading
+            IsDone = true;
+
+            Log.Error(ex);
+        }
+    }
+
+
+
+    protected override void OnDisposing()
+    {
+        base.OnDisposing();
+        DisposeNativeResources();
+    }
+
+
     /// <summary>
     /// Releases unmanaged resources.
     /// </summary>
@@ -221,15 +288,9 @@ public partial class Photo : IPhoto<IWICBitmapSource>
         _colorContext?.Dispose();
         _colorContext = null;
 
-
         // dispose pixel format info
         _pixelFormatInfo?.Dispose();
         _pixelFormatInfo = null;
-
-
-        //  dispose bitmap
-        _bitmap?.Dispose();
-        _bitmap = null;
     }
 
 
