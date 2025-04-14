@@ -19,8 +19,47 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace ImageGlass.Common;
 
 
-public class IgMetadata
+public class IgMetadata : IDisposable
 {
+
+    #region IDisposable Disposing
+
+    public bool IsDisposed { get; protected set; } = false;
+
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (IsDisposed) return;
+
+        if (disposing)
+        {
+            // Free any other managed objects here.
+            if (ColorProfileData != null)
+            {
+                Array.Clear(ColorProfileData);
+                ColorProfileData = null;
+            }
+        }
+
+        // Free any unmanaged objects here.
+        IsDisposed = true;
+    }
+
+    public virtual void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    ~IgMetadata()
+    {
+        Dispose(false);
+    }
+
+    #endregion
+
+
+
     // File metadata
     public string FilePath { get; set; } = string.Empty;
     public string FileName { get; set; } = string.Empty;
@@ -62,6 +101,8 @@ public class IgMetadata
 
     public string ColorSpace { get; set; } = string.Empty;
     public string ColorProfile { get; set; } = string.Empty;
+
+    public byte[]? ColorProfileData { get; set; } = null;
 
 
     // EXIF metadata

@@ -445,13 +445,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
     {
         if (_bmpD2d == null || _photo == null) return;
 
+        // no embedded color profile
+        if (_photo.Metadata?.ColorProfileData is null) return;
+
+
         // create color management effect
         using var colorEffect = new ColorManagement(D2dContext);
         colorEffect.SetInput(0, _bmpD2d, false);
-
-
-        // get color context
-        if (_photo.ColorProfile?.Data is null) return;
 
 
         // create destination color context
@@ -470,9 +470,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
         // create source color context
-        using var srcColorContext = _photo.ColorProfile.Native != null
-            ? D2dContext.CreateColorContextFromWicColorContext(_photo.ColorProfile.Native.As<IWICColorContext>())
-            : null;
+        using var srcColorContext = D2dContext.CreateColorContext(ColorSpace.Custom, _photo.Metadata.ColorProfileData);
 
 
         // set color effect

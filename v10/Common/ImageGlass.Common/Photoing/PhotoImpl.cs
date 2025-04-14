@@ -38,7 +38,7 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
         if (disposing)
         {
             // Free any other managed objects here.
-            OnDisposing();
+            OnDisposing(true);
         }
 
         // Free any unmanaged objects here.
@@ -102,13 +102,22 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
     /// <summary>
     /// Handles the disposal of resources when an object is being disposed.
     /// </summary>
-    protected virtual void OnDisposing()
+    /// <param name="disposeMetadata">
+    /// Option to dispose <see cref="Metadata"/> object.
+    /// </param>
+    protected virtual void OnDisposing(bool disposeMetadata)
     {
         CancelPhotoLoading();
         CancelMetadataLoading();
 
         _bitmap?.Dispose();
         _bitmap = default(T);
+
+        if (disposeMetadata)
+        {
+            Metadata?.Dispose();
+            Metadata = null;
+        }
     }
 
 
@@ -169,14 +178,14 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual void Unload()
+    public virtual void Unload(bool disposeMetadata = false)
     {
         // reset info
         IsDone = false;
         Error = null;
 
         // unload image
-        OnDisposing();
+        OnDisposing(disposeMetadata);
     }
 
 

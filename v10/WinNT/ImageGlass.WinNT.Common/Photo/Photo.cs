@@ -101,9 +101,11 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    protected override void OnDisposing()
+    protected override void OnDisposing(bool disposeMetadata)
     {
-        base.OnDisposing();
+        base.OnDisposing(disposeMetadata);
+
+        // dispose native resources
         DisposeNativeResources();
     }
 
@@ -116,24 +118,6 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
         DisposeNativeResources();
 
         await LoadAsync___(options);
-    }
-
-
-    /// <summary>
-    /// Unload the image and reset the relevant info
-    /// </summary>
-    public override void Unload()
-    {
-        // reset info
-        IsDone = false;
-        Error = null;
-
-        // dispose native resources
-        DisposeNativeResources();
-
-        // unload image
-        _bitmap?.Dispose();
-        _bitmap = null;
     }
 
 
@@ -162,7 +146,7 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
         Error = null;
 
         options ??= new();
-        
+
         await LoadMetadataAsync(options);
 
         try

@@ -66,7 +66,7 @@ public sealed partial class MainWindow : Window
 
         Title = file.Path;
 
-        Viewer.LoadImage(file.Path);
+        _ = Viewer.LoadImageAsync(file.Path);
 
     }
 

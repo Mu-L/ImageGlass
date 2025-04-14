@@ -114,7 +114,10 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
     /// <summary>
     /// Unload the <c><see cref="Bitmap"/></c> and reset the relevant info.
     /// </summary>
-    void Unload();
+    /// <param name="disposeMetadata">
+    /// Option to dispose <see cref="Metadata"/> object.
+    /// </param>
+    void Unload(bool disposeMetadata = false);
 }
 
 

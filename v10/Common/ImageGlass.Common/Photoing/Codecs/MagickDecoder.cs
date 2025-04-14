@@ -196,6 +196,7 @@ public class MagickDecoder
             if (imgM.GetColorProfile() is IColorProfile colorProfile)
             {
                 meta.ColorProfile = colorProfile.ColorSpace.ToString();
+                meta.ColorProfileData = colorProfile.ToByteArray();
 
                 if (!string.IsNullOrWhiteSpace(colorProfile.Description))
                 {
