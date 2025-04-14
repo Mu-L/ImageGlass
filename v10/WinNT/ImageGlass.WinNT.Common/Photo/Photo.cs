@@ -97,7 +97,7 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
     {
         DisposeNativeResources();
 
-        await Task.Run(() => LoadAsync___(frameIndex));
+        await LoadAsync___(frameIndex);
     }
 
 
@@ -197,6 +197,9 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
 
     private async Task LoadAsync___(uint frameIndex)
     {
+        CancelLoading();
+        _tokenSrc = new();
+
         // reset dispose status
         IsDisposed = false;
 
@@ -223,10 +226,11 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
             //}
 
             // cancel if requested
-            if (_tokenSrc is not null && _tokenSrc.IsCancellationRequested)
+            if (_tokenSrc.IsCancellationRequested)
             {
                 _tokenSrc.Token.ThrowIfCancellationRequested();
             }
+
 
             // load image
             using var wicFactory = new IWICImagingFactory2();
@@ -245,7 +249,7 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
             //}
 
             // cancel if requested
-            if (_tokenSrc is not null && _tokenSrc.IsCancellationRequested)
+            if (_tokenSrc.IsCancellationRequested)
             {
                 _tokenSrc.Token.ThrowIfCancellationRequested();
             }
@@ -257,6 +261,7 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
         {
             Unload();
             Dispose();
+            Log.Error($"Cancelled {FilePath}");
         }
         catch (Exception ex)
         {
@@ -306,14 +311,18 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
 
         try
         {
-            var contexts = frame.TryGetColorContexts(wicFactory);
+            var contexts = frame.TryGetColorContexts(wicFactory) ?? [];
             var bestProfile = FindBestColorProfile(contexts);
+            byte[]? profileBytes = null;
 
 
             // get color profile
-            using var ms = new MemoryStream();
-            bestProfile?.Profile?.CopyTo(ms);
-            var profileBytes = ms.ToArray();
+            if (bestProfile?.Profile is not null)
+            {
+                using var ms = new MemoryStream();
+                bestProfile.Profile.CopyTo(ms);
+                profileBytes = ms.ToArray();
+            }
 
 
             // get color space

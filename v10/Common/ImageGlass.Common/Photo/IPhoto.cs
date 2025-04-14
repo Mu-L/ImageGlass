@@ -7,7 +7,7 @@ namespace ImageGlass.Common;
 /// An interface for handling photo objects.
 /// </summary>
 /// <typeparam name="T">Represents the type of the native bitmap associated with the photo.</typeparam>
-public interface IPhoto<T> : IDisposable where T: IDisposable
+public interface IPhoto<T> : IDisposable where T : IDisposable
 {
     /// <summary>
     /// Gets file path of the photo.
@@ -94,7 +94,7 @@ public interface IPhoto : IPhoto<IDisposable>
 }
 
 
-public class PhotoImpl<T> : IPhoto<T> where T: IDisposable
+public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 {
 
     #region IDisposable Disposing

@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
 using System;
+using System.Threading.Tasks;
 using Vortice.WIC;
 
 
@@ -26,18 +27,6 @@ namespace ImageGlass.WinNT.Common;
 
 public partial class Photo : IPhoto<IWICBitmapSource>
 {
-
-    /// <summary>
-    /// Decodes a photo from a file.
-    /// </summary>
-    public static Photo? Decode(string filePath, uint frameIndex = 0)
-    {
-        var photo = new Photo(filePath);
-        photo.Load(frameIndex);
-
-        return photo;
-    }
-
 
     /// <summary>
     /// Creates a bitmap image with specified dimensions and pixel format.

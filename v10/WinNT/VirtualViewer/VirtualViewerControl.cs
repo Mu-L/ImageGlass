@@ -5,6 +5,7 @@ using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using System;
+using System.Threading.Tasks;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
 using Vortice.WIC;
@@ -402,16 +403,22 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
 
-    public void LoadImage(string path)
+    public async Task LoadImageAsync(string path)
     {
+        // dispose current resources
         _bmpD2d?.Dispose();
         _bmpD2d = null;
 
         _photo?.Dispose();
         _photo = null;
 
+        SetSourceSelection(Rect.Empty, false);
 
-        _photo = Photo.Decode(path);
+
+        // start loading new photo
+        _photo = new Photo(path);
+        await _photo.LoadAsync();
+
         SourceWidth = _photo?.Width ?? 0;
         SourceHeight = _photo?.Height ?? 0;
 
@@ -441,7 +448,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // create color management effect
         using var colorEffect = new ColorManagement(D2dContext);
         colorEffect.SetInput(0, _bmpD2d, false);
-        colorEffect.Quality = ColormanagementQuality.Best;
 
 
         // get color context
