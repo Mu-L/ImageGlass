@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common.Photoing;
+
 namespace ImageGlass.Common;
 
 
@@ -44,9 +46,15 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
 
 
     /// <summary>
+    /// Gets, sets options for reading photo.
+    /// </summary>
+    public PhotoReadOptions ReadOptions { get; internal set; }
+
+
+    /// <summary>
     /// Gets, sets image metadata
     /// </summary>
-    public IgMetadata? Metadata { get; set; }
+    public IgMetadata? Metadata { get; internal set; }
 
 
     /// <summary>
@@ -80,25 +88,31 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
 
 
     /// <summary>
-    /// Loads photo from file.
+    /// Loads <c><see cref="Bitmap"/></c> from file.
     /// </summary>
-    Task LoadAsync(uint frameIndex = 0);
+    Task LoadAsync(PhotoReadOptions? options = null);
 
 
     /// <summary>
-    /// Loads <c><see cref="Metadata"/></c> of photo.
+    /// Loads <c><see cref="Metadata"/></c> for a photo asynchronously.
     /// </summary>
-    Task LoadMetadataAsync(uint frameIndex = 0);
+    Task LoadMetadataAsync(PhotoReadOptions? options = null);
 
 
     /// <summary>
-    /// Stops any ongoing loading process.
+    /// Stops any ongoing photo loading process.
     /// </summary>
-    void CancelLoading();
+    void CancelPhotoLoading();
 
 
     /// <summary>
-    /// Unload the image and reset the relevant info
+    /// Stops any ongoing metadata loading process.
+    /// </summary>
+    void CancelMetadataLoading();
+
+
+    /// <summary>
+    /// Unload the <c><see cref="Bitmap"/></c> and reset the relevant info.
     /// </summary>
     void Unload();
 }

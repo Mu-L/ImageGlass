@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common.Photoing;
 using System.Numerics;
 
 namespace ImageGlass.Common;
@@ -60,7 +61,8 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
     protected T? _bitmap;
     protected Lazy<string> _hashKey;
-    protected CancellationTokenSource? _tokenSrc;
+    protected CancellationTokenSource? _tokenSrcPhoto;
+    protected CancellationTokenSource? _tokenSrcMetadata;
 
 
     public virtual T? Bitmap => _bitmap;
@@ -75,15 +77,24 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
     public virtual Exception? Error { get; set; } = null;
 
+    public virtual PhotoReadOptions ReadOptions { get; set; } = new();
+
     public virtual IgMetadata? Metadata { get; set; } = null;
 
     public string HashKey => _hashKey.Value;
 
 
-    public PhotoImpl(string filePath = "")
+
+    /// <summary>
+    /// Initializes new instance of <see cref="PhotoImpl{T}"/>
+    /// </summary>
+    public PhotoImpl(string filePath = "", PhotoReadOptions? options = null)
     {
+        _tokenSrcPhoto ??= new();
+        _tokenSrcMetadata ??= new();
+
         FilePath = filePath;
-        _tokenSrc ??= new();
+        ReadOptions = options ?? new();
         _hashKey = new Lazy<string>(() => BHelper.CreateUniqueFileKey(FilePath, new Vector2(Width, Height)));
     }
 
@@ -93,7 +104,8 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
     /// </summary>
     protected virtual void OnDisposing()
     {
-        CancelLoading();
+        CancelPhotoLoading();
+        CancelMetadataLoading();
 
         _bitmap?.Dispose();
         _bitmap = default(T);
@@ -103,17 +115,10 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
     /// <summary>
     /// Not implemented. Throws <see cref="NotImplementedException"/>.
     /// </summary>
-    public virtual Task LoadAsync(uint frameIndex = 0)
+    public virtual Task LoadAsync(PhotoReadOptions? newOptions = null)
     {
-        throw new NotImplementedException();
-    }
+        ReadOptions = newOptions ?? ReadOptions;
 
-
-    /// <summary>
-    /// Not implemented. Throws <see cref="NotImplementedException"/>.
-    /// </summary>
-    public virtual Task LoadMetadataAsync(uint frameIndex = 0)
-    {
         throw new NotImplementedException();
     }
 
@@ -121,22 +126,57 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual void CancelLoading()
+    public virtual async Task LoadMetadataAsync(PhotoReadOptions? newOptions = null)
+    {
+        CancelMetadataLoading();
+        _tokenSrcMetadata = new();
+
+        ReadOptions = newOptions ?? ReadOptions;
+        Metadata = await MagickDecoder.LoadMetadataAsync(FilePath, ReadOptions, _tokenSrcMetadata.Token);
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public virtual void CancelPhotoLoading()
     {
         try
         {
-            _tokenSrc?.Cancel();
+            _tokenSrcPhoto?.Cancel();
+            _tokenSrcPhoto?.Dispose();
+            _tokenSrcPhoto = null;
         }
         catch (ObjectDisposedException) { }
     }
 
 
     /// <summary>
-    /// Not implemented. Throws <see cref="NotImplementedException"/>.
+    /// <inheritdoc/>
+    /// </summary>
+    public virtual void CancelMetadataLoading()
+    {
+        try
+        {
+            _tokenSrcMetadata?.Cancel();
+            _tokenSrcMetadata?.Dispose();
+            _tokenSrcMetadata = null;
+        }
+        catch (ObjectDisposedException) { }
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
     /// </summary>
     public virtual void Unload()
     {
-        throw new NotImplementedException();
+        // reset info
+        IsDone = false;
+        Error = null;
+
+        // unload image
+        OnDisposing();
     }
 
 

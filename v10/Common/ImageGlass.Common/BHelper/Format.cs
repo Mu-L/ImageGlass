@@ -44,10 +44,8 @@ public partial class BHelper
     }
 
     /// <summary>
-    /// Formats date time string to string
+    /// Formats date time string to string.
     /// </summary>
-    /// <param name="str"></param>
-    /// <returns></returns>
     public static string FormatDateTime(string? str, bool includeTime = true)
     {
         var dt = ConvertDateTime(str);
@@ -56,11 +54,8 @@ public partial class BHelper
     }
 
     /// <summary>
-    /// Formats <see cref="DateTime"/> to string
+    /// Formats <see cref="DateTime"/> to string.
     /// </summary>
-    /// <param name="dt"></param>
-    /// <param name="includeTime"></param>
-    /// <returns></returns>
     public static string FormatDateTime(DateTime? dt, bool includeTime = true)
     {
         if (dt != null)
@@ -75,10 +70,8 @@ public partial class BHelper
     }
 
     /// <summary>
-    /// Convert date time string to <see cref="DateTime"/>
+    /// Convert date time string to <see cref="DateTime"/>.
     /// </summary>
-    /// <param name="dt"></param>
-    /// <returns></returns>
     public static DateTime? ConvertDateTime(string? dt)
     {
         if (DateTime.TryParseExact(dt,

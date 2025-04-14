@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using ImageGlass.Common;
+using ImageGlass.Common.Photoing;
 using SharpGen.Runtime;
 using System;
 using System.IO;
@@ -110,11 +111,11 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
     /// <summary>
     /// Loads photo.
     /// </summary>
-    public override async Task LoadAsync(uint frameIndex = 0)
+    public override async Task LoadAsync(PhotoReadOptions? options = null)
     {
         DisposeNativeResources();
 
-        await LoadAsync___(frameIndex);
+        await LoadAsync___(options);
     }
 
 
@@ -146,10 +147,10 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
     /// <summary>
     /// Loads photo.
     /// </summary>
-    private async Task LoadAsync___(uint frameIndex)
+    private async Task LoadAsync___(PhotoReadOptions? options = null)
     {
-        CancelLoading();
-        _tokenSrc = new();
+        CancelPhotoLoading();
+        _tokenSrcPhoto = new();
 
         // reset dispose status
         IsDisposed = false;
@@ -160,33 +161,23 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
         // reset error
         Error = null;
 
-        //options ??= new();
+        options ??= new();
+        
+        await LoadMetadataAsync(options);
 
         try
         {
-            //// load image data
-            //Metadata ??= PhotoCodec.LoadMetadata(FilePath, options);
-            //FrameCount = Metadata?.FrameCount ?? 0;
-
-            //if (options.FirstFrameOnly == null)
-            //{
-            //    options = options with
-            //    {
-            //        FirstFrameOnly = FrameCount < 2,
-            //    };
-            //}
+            // load image data
+            options.FirstFrameOnly ??= Metadata?.FrameCount < 2;
 
             // cancel if requested
-            if (_tokenSrc.IsCancellationRequested)
-            {
-                _tokenSrc.Token.ThrowIfCancellationRequested();
-            }
+            _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
 
 
             // load image
             using var wicFactory = new IWICImagingFactory2();
             using var decoder = wicFactory.CreateDecoderFromFileName(FilePath);
-            var frameBmp = decoder.GetFrame(frameIndex);
+            var frameBmp = decoder.GetFrame((uint)(options.FrameIndex ?? 0));
 
             _bitmap = frameBmp;
 
@@ -200,19 +191,17 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
             //}
 
             // cancel if requested
-            if (_tokenSrc.IsCancellationRequested)
-            {
-                _tokenSrc.Token.ThrowIfCancellationRequested();
-            }
+            _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
 
             // done loading
             IsDone = true;
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
+            Log.Error($"Cancelled loading: {FilePath}");
+
             Unload();
             Dispose();
-            Log.Error($"Cancelled {FilePath}");
         }
         catch (Exception ex)
         {
