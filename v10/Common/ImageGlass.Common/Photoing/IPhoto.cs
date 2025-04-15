@@ -94,7 +94,7 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
 
 
     /// <summary>
-    /// Loads <c><see cref="Metadata"/></c> for a photo asynchronously.
+    /// Loads <c><see cref="Metadata"/></c> for the photo.
     /// </summary>
     Task LoadMetadataAsync(PhotoReadOptions? options = null);
 

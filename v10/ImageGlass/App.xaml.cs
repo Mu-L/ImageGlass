@@ -32,10 +32,16 @@ public partial class App : Application
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         _window = new MainWindow();
+        _window.Closed += Window_Closed;
         _window.Activate();
 
-        // TODO: dispose
+        // get current monitor profile
         _ = WindowColorProfileProvider.Instance.InitializeAsync(_window.AppWindow.Id);
     }
 
+
+    private void Window_Closed(object sender, WindowEventArgs args)
+    {
+        WindowColorProfileProvider.Instance.Dispose();
+    }
 }

@@ -113,11 +113,36 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
     /// <summary>
     /// Loads photo.
     /// </summary>
-    public override async Task LoadAsync(PhotoReadOptions? options = null)
+    public override Task LoadAsync(PhotoReadOptions? newOptions = null)
     {
         DisposeNativeResources();
 
-        await LoadAsync___(options);
+        return base.LoadAsync(newOptions);
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    /// <param name="fileBytes"><inheritdoc/></param>
+    protected override async Task OnDecodingAsync(IgMetadata meta)
+    {
+        var extWIC = new string[] { ".JPG", ".HEIC" };
+
+        // use WIC decoders
+        if (extWIC.Contains(meta.FileExtension))
+        {
+            using var wicFactory = new IWICImagingFactory2();
+            using var decoder = wicFactory.CreateDecoderFromFileName(FilePath);
+            var frameBmp = decoder.GetFrame((uint)(Metadata?.FrameIndex ?? 0));
+
+            _bitmap = frameBmp;
+            return;
+        }
+
+
+        // use default decoders
+        await base.OnDecodingAsync(meta);
     }
 
 
@@ -127,78 +152,6 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
 
     // Private Functions
     #region Private Functions
-
-    /// <summary>
-    /// Loads photo.
-    /// </summary>
-    private async Task LoadAsync___(PhotoReadOptions? options = null)
-    {
-        CancelPhotoLoading();
-        _tokenSrcPhoto = new();
-
-        // reset dispose status
-        IsDisposed = false;
-
-        // reset done status
-        IsDone = false;
-
-        // reset error
-        Error = null;
-
-        options ??= new();
-
-        await LoadMetadataAsync(options);
-
-        try
-        {
-            // load image data
-            options.FirstFrameOnly ??= Metadata?.FrameCount < 2;
-
-            // cancel if requested
-            _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
-
-
-            // load image
-            using var wicFactory = new IWICImagingFactory2();
-            using var decoder = wicFactory.CreateDecoderFromFileName(FilePath);
-            var frameBmp = decoder.GetFrame((uint)(options.FrameIndex ?? 0));
-
-            _bitmap = frameBmp;
-
-            //ImgData = await PhotoCodec.LoadAsync(FilePath, options, null, _tokenSrc?.Token);
-
-            //// update metadata for JXR format
-            //if (Metadata.FileExtension == ".JXR")
-            //{
-            //    Metadata.RenderedWidth = Metadata.OriginalWidth = (uint)(ImgData.Image?.Width ?? 0);
-            //    Metadata.RenderedHeight = Metadata.OriginalHeight = (uint)(ImgData.Image?.Height ?? 0);
-            //}
-
-            // cancel if requested
-            _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
-
-            // done loading
-            IsDone = true;
-        }
-        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
-        {
-            Log.Error($"Cancelled loading: {FilePath}");
-
-            Unload();
-            Dispose();
-        }
-        catch (Exception ex)
-        {
-            // save the error
-            Error = ex;
-
-            // done loading
-            IsDone = true;
-
-            Log.Error(ex);
-        }
-    }
-
 
     /// <summary>
     /// Releases unmanaged resources.

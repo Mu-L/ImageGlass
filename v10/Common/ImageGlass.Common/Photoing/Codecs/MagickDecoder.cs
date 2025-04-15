@@ -22,16 +22,15 @@ using ImageMagick.Formats;
 namespace ImageGlass.Common.Photoing;
 
 
-
 public class MagickDecoder
 {
-
 
     /// <summary>
     /// Loads metadata from file.
     /// </summary>
     /// <param name="filePath">Full path of the file</param>
-    public static async Task<IgMetadata?> LoadMetadataAsync(string? filePath, PhotoReadOptions? options = null, CancellationToken token = default)
+    public static async Task<IgMetadata> LoadMetadataAsync(string? filePath,
+        PhotoReadOptions? options = null, CancellationToken token = default)
     {
         FileInfo? fi = null;
         filePath ??= string.Empty;
@@ -43,20 +42,19 @@ public class MagickDecoder
             token.ThrowIfCancellationRequested();
 
             fi = new FileInfo(filePath);
+
+            meta.FileName = fi.Name;
+            meta.FileExtension = fi.Extension.ToUpperInvariant();
+            meta.FolderPath = fi.DirectoryName ?? string.Empty;
+            meta.FolderName = fi.Directory?.Name ?? string.Empty;
+
+            meta.FileSize = fi.Length;
+            meta.FileCreationTime = fi.CreationTime;
+            meta.FileLastWriteTime = fi.LastWriteTime;
+            meta.FileLastAccessTime = fi.LastAccessTime;
         }
         catch { }
         if (fi == null) return meta;
-        var ext = fi.Extension.ToUpperInvariant();
-
-        meta.FileName = fi.Name;
-        meta.FileExtension = ext;
-        meta.FolderPath = fi.DirectoryName ?? string.Empty;
-        meta.FolderName = Path.GetFileName(meta.FolderPath);
-
-        meta.FileSize = fi.Length;
-        meta.FileCreationTime = fi.CreationTime;
-        meta.FileLastWriteTime = fi.LastWriteTime;
-        meta.FileLastAccessTime = fi.LastAccessTime;
 
 
         var settings = ParseSettings(options, false, filePath);
@@ -65,149 +63,113 @@ public class MagickDecoder
         // read metadata
         try
         {
-            var allBytes = await File.ReadAllBytesAsync(filePath, token);
-            imgC.Ping(allBytes, settings);
+            using var fs = File.OpenRead(filePath);
+            imgC.Ping(fs, settings);
 
             meta.FrameIndex = 0;
             meta.FrameCount = imgC.Count;
         }
         catch { }
-
         if (imgC.Count == 0) return meta;
 
 
         // parse metadata
         try
         {
-            // cancel if requested
-            token.ThrowIfCancellationRequested();
-
-            var frameIndex = options?.FrameIndex ?? 0;
-
-            // Check if frame index is greater than upper limit
-            if (frameIndex >= imgC.Count)
-                frameIndex = 0;
-
-            // Check if frame index is less than lower limit
-            else if (frameIndex < 0)
-                frameIndex = imgC.Count - 1;
-
-            meta.FrameIndex = (uint)frameIndex;
-            using var imgM = imgC[frameIndex];
-
-
-            // image size
-            meta.OriginalWidth = imgM.BaseWidth;
-            meta.OriginalHeight = imgM.BaseHeight;
-            meta.RenderedWidth = imgM.Width;
-            meta.RenderedHeight = imgM.Height;
-
-            // image color
-            meta.HasAlpha = imgC.Any(i => i.HasAlpha);
-            meta.ColorSpace = imgM.ColorSpace.ToString();
-            meta.CanAnimate = CheckAnimatedFormat(imgC, ext);
-
-            // cancel if requested
-            token.ThrowIfCancellationRequested();
-
-
-            // EXIF profile
-            if (imgM.GetExifProfile() is IExifProfile exifProfile)
+            await Task.Run(() =>
             {
-                // ExifRatingPercent
-                meta.ExifRatingPercent = GetExifValue(exifProfile, ExifTag.RatingPercent);
+                // cancel if requested
+                token.ThrowIfCancellationRequested();
 
-                // ExifDateTimeOriginal
-                var dt = GetExifValue(exifProfile, ExifTag.DateTimeOriginal);
-                meta.ExifDateTimeOriginal = BHelper.ConvertDateTime(dt);
+                var frameIndex = options?.FrameIndex ?? 0;
 
-                // ExifDateTime
-                dt = GetExifValue(exifProfile, ExifTag.DateTime);
-                meta.ExifDateTime = BHelper.ConvertDateTime(dt);
+                // Check if frame index is greater than upper limit
+                if (frameIndex >= imgC.Count)
+                    frameIndex = 0;
 
-                meta.ExifArtist = GetExifValue(exifProfile, ExifTag.Artist);
-                meta.ExifCopyright = GetExifValue(exifProfile, ExifTag.Copyright);
-                meta.ExifSoftware = GetExifValue(exifProfile, ExifTag.Software);
-                meta.ExifImageDescription = GetExifValue(exifProfile, ExifTag.ImageDescription);
-                meta.ExifModel = GetExifValue(exifProfile, ExifTag.Model);
-                meta.ExifISOSpeed = (int?)GetExifValue(exifProfile, ExifTag.ISOSpeed);
+                // Check if frame index is less than lower limit
+                else if (frameIndex < 0)
+                    frameIndex = imgC.Count - 1;
 
-                var rational = GetExifValue(exifProfile, ExifTag.ExposureTime);
-                meta.ExifExposureTime = rational.Denominator == 0
-                    ? null
-                    : rational.Numerator / rational.Denominator;
-
-                rational = GetExifValue(exifProfile, ExifTag.FNumber);
-                meta.ExifFNumber = rational.Denominator == 0
-                    ? null
-                    : rational.Numerator / rational.Denominator;
-
-                rational = GetExifValue(exifProfile, ExifTag.FocalLength);
-                meta.ExifFocalLength = rational.Denominator == 0
-                    ? null
-                    : rational.Numerator / rational.Denominator;
-            }
-            else
-            {
-                //try
-                //{
-                //    using var fs = File.OpenRead(filePath);
-                //    using var img = Image.FromStream(fs, false, false);
-                //    var enc = new ASCIIEncoding();
-
-                //    var EXIF_DateTimeOriginal = 0x9003; //36867
-                //    var EXIF_DateTime = 0x0132;
-
-                //    try
-                //    {
-                //        // get EXIF_DateTimeOriginal
-                //        var pi = img.GetPropertyItem(EXIF_DateTimeOriginal);
-                //        var dateTimeText = enc.GetString(pi.Value, 0, pi.Len - 1);
-
-                //        if (DateTime.TryParseExact(dateTimeText, "yyyy:MM:dd HH:mm:ss", null, System.Globalization.DateTimeStyles.None, out var exifDateTimeOriginal))
-                //        {
-                //            meta.ExifDateTimeOriginal = exifDateTimeOriginal;
-                //        }
-                //    }
-                //    catch { }
+                meta.FrameIndex = (uint)frameIndex;
+                using var imgM = imgC[frameIndex];
 
 
-                //    try
-                //    {
-                //        // get EXIF_DateTime
-                //        var pi = img.GetPropertyItem(EXIF_DateTime);
-                //        var dateTimeText = enc.GetString(pi.Value, 0, pi.Len - 1);
+                // image size
+                meta.OriginalWidth = imgM.BaseWidth;
+                meta.OriginalHeight = imgM.BaseHeight;
+                meta.RenderedWidth = imgM.Width;
+                meta.RenderedHeight = imgM.Height;
 
-                //        if (DateTime.TryParseExact(dateTimeText, "yyyy:MM:dd HH:mm:ss", null, System.Globalization.DateTimeStyles.None, out var exifDateTime))
-                //        {
-                //            meta.ExifDateTime = exifDateTime;
-                //        }
-                //    }
-                //    catch { }
-                //}
-                //catch { }
-            }
+                // image color
+                meta.HasAlpha = imgC.Any(i => i.HasAlpha);
+                meta.ColorSpace = imgM.ColorSpace.ToString();
+                meta.CanAnimate = CheckAnimatedFormat(imgC, meta.FileExtension);
+
+                // cancel if requested
+                token.ThrowIfCancellationRequested();
 
 
-            // cancel if requested
-            token.ThrowIfCancellationRequested();
-
-            // Color profile
-            if (imgM.GetColorProfile() is IColorProfile colorProfile)
-            {
-                meta.ColorProfile = colorProfile.ColorSpace.ToString();
-                meta.ColorProfileData = colorProfile.ToByteArray();
-
-                if (!string.IsNullOrWhiteSpace(colorProfile.Description))
+                // EXIF profile
+                if (imgM.GetExifProfile() is IExifProfile exifProfile)
                 {
-                    meta.ColorProfile = $"{colorProfile.Description} ({meta.ColorProfile})";
+                    // ExifRatingPercent
+                    meta.ExifRatingPercent = GetExifValue(exifProfile, ExifTag.RatingPercent);
+
+                    // ExifDateTimeOriginal
+                    var dt = GetExifValue(exifProfile, ExifTag.DateTimeOriginal);
+                    meta.ExifDateTimeOriginal = BHelper.ConvertDateTime(dt);
+
+                    // ExifDateTime
+                    dt = GetExifValue(exifProfile, ExifTag.DateTime);
+                    meta.ExifDateTime = BHelper.ConvertDateTime(dt);
+
+                    meta.ExifArtist = GetExifValue(exifProfile, ExifTag.Artist);
+                    meta.ExifCopyright = GetExifValue(exifProfile, ExifTag.Copyright);
+                    meta.ExifSoftware = GetExifValue(exifProfile, ExifTag.Software);
+                    meta.ExifImageDescription = GetExifValue(exifProfile, ExifTag.ImageDescription);
+                    meta.ExifModel = GetExifValue(exifProfile, ExifTag.Model);
+                    meta.ExifISOSpeed = (int?)GetExifValue(exifProfile, ExifTag.ISOSpeed);
+
+                    var rational = GetExifValue(exifProfile, ExifTag.ExposureTime);
+                    meta.ExifExposureTime = rational.Denominator == 0
+                        ? null
+                        : rational.Numerator / rational.Denominator;
+
+                    rational = GetExifValue(exifProfile, ExifTag.FNumber);
+                    meta.ExifFNumber = rational.Denominator == 0
+                        ? null
+                        : rational.Numerator / rational.Denominator;
+
+                    rational = GetExifValue(exifProfile, ExifTag.FocalLength);
+                    meta.ExifFocalLength = rational.Denominator == 0
+                        ? null
+                        : rational.Numerator / rational.Denominator;
                 }
-            }
+
+
+                // cancel if requested
+                token.ThrowIfCancellationRequested();
+
+                // Color profile
+                if (imgM.GetColorProfile() is IColorProfile colorProfile)
+                {
+                    meta.ColorProfile = colorProfile.ColorSpace.ToString();
+                    meta.ColorProfileData = colorProfile.ToByteArray();
+
+                    if (!string.IsNullOrWhiteSpace(colorProfile.Description))
+                    {
+                        meta.ColorProfile = $"{colorProfile.Description} ({meta.ColorProfile})";
+                    }
+                }
+
+            }, token).ConfigureAwait(false);
         }
         catch { }
 
         return meta;
     }
+
 
 
 

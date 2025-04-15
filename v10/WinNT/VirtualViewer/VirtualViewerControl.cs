@@ -11,7 +11,6 @@ using Vortice.Direct2D1.Effects;
 using Vortice.WIC;
 using Windows.Foundation;
 using Windows.UI;
-using WinRT;
 
 
 namespace ImageGlass.WinNT;

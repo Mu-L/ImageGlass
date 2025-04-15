@@ -124,11 +124,67 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
     /// <summary>
     /// Not implemented. Throws <see cref="NotImplementedException"/>.
     /// </summary>
-    public virtual Task LoadAsync(PhotoReadOptions? newOptions = null)
+    public virtual async Task LoadAsync(PhotoReadOptions? newOptions = null)
     {
+        CancelPhotoLoading();
+        _tokenSrcPhoto = new();
+
+        // reset dispose status
+        IsDisposed = false;
+        IsDone = false;
+        Error = null;
         ReadOptions = newOptions ?? ReadOptions;
 
-        throw new NotImplementedException();
+
+        try
+        {
+            // cancel if requested
+            _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
+
+            // load metadata
+            await LoadMetadataAsync();
+
+
+            // load image data
+            ReadOptions.FirstFrameOnly ??= Metadata?.FrameCount < 2;
+
+            // cancel if requested
+            _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
+
+            // decode the photo
+            await OnDecodingAsync(Metadata!);
+
+            // cancel if requested
+            _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
+
+
+            // done loading
+            IsDone = true;
+        }
+        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+        {
+            Log.Error($"Cancelled loading: {FilePath}");
+
+            Unload();
+            Dispose();
+        }
+        catch (Exception ex)
+        {
+            Error = ex;
+            IsDone = true;
+
+            Log.Error(ex);
+        }
+    }
+
+
+    /// <summary>
+    /// Handles the decoding of a byte array representing file data.
+    /// </summary>
+    protected virtual async Task OnDecodingAsync(IgMetadata meta)
+    {
+        // TODO:
+        // decode with magick decoder
     }
 
 
