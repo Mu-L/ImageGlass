@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageMagick;
+
 namespace ImageGlass.Common;
 
 
@@ -39,6 +41,9 @@ public class IgMetadata : IDisposable
                 Array.Clear(ColorProfileData);
                 ColorProfileData = null;
             }
+
+            RawThumbnail = null;
+            ExifProfile = null;
         }
 
         // Free any unmanaged objects here.
@@ -99,13 +104,16 @@ public class IgMetadata : IDisposable
     public bool HasAlpha { get; set; } = false;
     public bool CanAnimate { get; set; } = false;
 
-    public string ColorSpace { get; set; } = string.Empty;
-    public string ColorProfile { get; set; } = string.Empty;
+    public ColorSpace ColorSpace { get; set; } = ColorSpace.Undefined;
+    public string ColorProfileName { get; set; } = string.Empty;
 
     public byte[]? ColorProfileData { get; set; } = null;
 
+    public IImageProfile? RawThumbnail { get; set; } = null;
+
 
     // EXIF metadata
+    public IExifProfile? ExifProfile { get; set; } = null;
     public int ExifRatingPercent { get; set; } = 0;
     public DateTime? ExifDateTimeOriginal { get; set; } = null; // local time
     public DateTime? ExifDateTime { get; set; } = null; // local time

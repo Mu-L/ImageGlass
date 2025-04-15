@@ -445,7 +445,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (_bmpD2d == null || _photo == null) return;
 
         // no embedded color profile
-        if (_photo.Metadata?.ColorProfileData is null) return;
+        if (_photo.Metadata.ColorSpace == ImageMagick.ColorSpace.CMYK
+            || _photo.Metadata.ColorProfileData is null) return;
 
 
         // create color management effect

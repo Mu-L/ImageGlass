@@ -52,9 +52,9 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
 
 
     /// <summary>
-    /// Gets, sets image metadata
+    /// Gets image metadata.
     /// </summary>
-    public IgMetadata? Metadata { get; internal set; }
+    public IgMetadata Metadata { get; }
 
 
     /// <summary>

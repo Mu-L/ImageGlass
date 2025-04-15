@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Photoing;
+using ImageMagick;
 using System.Numerics;
 
 namespace ImageGlass.Common;
@@ -60,7 +61,8 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
 
     protected T? _bitmap;
-    protected Lazy<string> _hashKey;
+    protected IgMetadata? _metadata;
+    protected Lazy<string> _lazyHashKey;
     protected CancellationTokenSource? _tokenSrcPhoto;
     protected CancellationTokenSource? _tokenSrcMetadata;
 
@@ -79,9 +81,12 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
     public virtual PhotoReadOptions ReadOptions { get; set; } = new();
 
-    public virtual IgMetadata? Metadata { get; set; } = null;
+    public MagickReadSettings? ReadSettings { get; set; } = null;
 
-    public string HashKey => _hashKey.Value;
+    public virtual IgMetadata Metadata => _metadata!;
+
+    public string HashKey => _lazyHashKey.Value;
+
 
 
 
@@ -95,7 +100,8 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
         FilePath = filePath;
         ReadOptions = options ?? new();
-        _hashKey = new Lazy<string>(() => BHelper.CreateUniqueFileKey(FilePath, new Vector2(Width, Height)));
+
+        _lazyHashKey = new Lazy<string>(() => BHelper.CreateUniqueFileKey(FilePath, new Vector2(Width, Height)));
     }
 
 
@@ -115,14 +121,14 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
         if (disposeMetadata)
         {
-            Metadata?.Dispose();
-            Metadata = null;
+            _metadata?.Dispose();
+            _metadata = null;
         }
     }
 
 
     /// <summary>
-    /// Not implemented. Throws <see cref="NotImplementedException"/>.
+    /// <inheritdoc/>
     /// </summary>
     public virtual async Task LoadAsync(PhotoReadOptions? newOptions = null)
     {
@@ -144,15 +150,14 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
             // load metadata
             await LoadMetadataAsync();
 
-
             // load image data
-            ReadOptions.FirstFrameOnly ??= Metadata?.FrameCount < 2;
+            ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
 
             // cancel if requested
             _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
 
             // decode the photo
-            await OnDecodingAsync(Metadata!);
+            await OnDecodingAsync(Metadata, _tokenSrcPhoto.Token);
 
             // cancel if requested
             _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
@@ -179,25 +184,27 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
 
     /// <summary>
-    /// Handles the decoding of a byte array representing file data.
+    /// Not implemented. Throws <see cref="NotImplementedException"/>.
     /// </summary>
-    protected virtual async Task OnDecodingAsync(IgMetadata meta)
+    protected virtual Task OnDecodingAsync(IgMetadata meta, CancellationToken token)
     {
-        // TODO:
-        // decode with magick decoder
+        throw new NotImplementedException();
     }
 
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual async Task LoadMetadataAsync(PhotoReadOptions? newOptions = null)
+    public async Task LoadMetadataAsync(PhotoReadOptions? newOptions = null)
     {
         CancelMetadataLoading();
         _tokenSrcMetadata = new();
 
         ReadOptions = newOptions ?? ReadOptions;
-        Metadata = await MagickDecoder.LoadMetadataAsync(FilePath, ReadOptions, _tokenSrcMetadata.Token);
+        ReadSettings ??= MagickDecoder.ParseSettings(ReadOptions, false, FilePath);
+
+        _metadata = await MagickDecoder.LoadMetadataAsync(FilePath,
+            ReadOptions, ReadSettings, _tokenSrcMetadata.Token);
     }
 
 

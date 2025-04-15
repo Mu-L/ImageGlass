@@ -17,7 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using Microsoft.Win32.SafeHandles;
 using System;
+using System.Reflection;
 using Vortice.Direct2D1;
 using Vortice.WIC;
 using WinRT;
@@ -28,7 +30,6 @@ namespace ImageGlass.WinNT.Common;
 
 public partial class Photo : IPhoto<IWICBitmapSource>
 {
-
 
     /// <summary>
     /// Converts the current bitmap to a 32bpp PBGRA format.
@@ -99,6 +100,27 @@ public partial class Photo : IPhoto<IWICBitmapSource>
         return null;
     }
 
+
+    /// <summary>
+    /// Converts <see cref="System.Windows.Media.Imaging.BitmapSource"/>
+    /// to <see cref="IWICBitmapSource"/> object.
+    /// </summary>
+    public static IWICBitmapSource? ToWicBitmapSource(System.Windows.Media.Imaging.BitmapSource? bmp, bool hasAlpha = true)
+    {
+        if (bmp == null) return null;
+
+        var prop = bmp.GetType().GetProperty("WicSourceHandle",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var srcHandle = (SafeHandleZeroOrMinusOneIsInvalid?)prop?.GetValue(bmp);
+        if (srcHandle == null) return null;
+
+
+        var bmpHandle = srcHandle.DangerousGetHandle();
+        var wicSrc = new IWICBitmapSource(bmpHandle);
+
+        return wicSrc;
+    }
 
 
 

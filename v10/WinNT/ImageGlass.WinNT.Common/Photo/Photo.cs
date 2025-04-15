@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
+using ImageMagick;
 using SharpGen.Runtime;
 using System;
 using System.IO;
@@ -121,20 +122,20 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
     }
 
 
+
     /// <summary>
-    /// <inheritdoc/>
+    /// Handles the decoding of image files based on their metadata.
     /// </summary>
-    /// <param name="fileBytes"><inheritdoc/></param>
-    protected override async Task OnDecodingAsync(IgMetadata meta)
+    protected override async Task OnDecodingAsync(IgMetadata meta, CancellationToken token)
     {
-        var extWIC = new string[] { ".JPG", ".HEIC" };
+        var extWIC = new string[] { ".HEIC" };
 
         // use WIC decoders
-        if (extWIC.Contains(meta.FileExtension))
+        if (meta.ColorSpace != ColorSpace.CMYK && extWIC.Contains(meta.FileExtension))
         {
             using var wicFactory = new IWICImagingFactory2();
             using var decoder = wicFactory.CreateDecoderFromFileName(FilePath);
-            var frameBmp = decoder.GetFrame((uint)(Metadata?.FrameIndex ?? 0));
+            var frameBmp = decoder.GetFrame((uint)(_metadata?.FrameIndex ?? 0));
 
             _bitmap = frameBmp;
             return;
@@ -142,7 +143,41 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
 
 
         // use default decoders
-        await base.OnDecodingAsync(meta);
+        var data = await MagickDecoder.DecodeImageAsync(meta, ReadOptions, ReadSettings, null, token);
+
+        // multi-frame
+        if (data.MultiFrameImage != null)
+        {
+            // animated format
+            if (meta.CanAnimate)
+            {
+                //// fall back to use Magick.NET
+                //data.MultiFrameImage.Coalesce();
+                //var frames = data.MultiFrameImage.AsEnumerable().Select(frame =>
+                //{
+                //    var duration = frame.AnimationDelay > 0 ? frame.AnimationDelay : 10;
+                //    duration = duration * 1000 / (uint)frame.AnimationTicksPerSecond;
+
+                //    return new AnimatedImgFrame(frame.ToBitmap(), duration);
+                //});
+
+                //Source = new AnimatedImg(frames, data.FrameCount);
+            }
+
+            // multi-frame formats
+            else
+            {
+                //var bytes = data.MultiFrameImage.ToByteArray(MagickFormat.Tiff);
+                //Source = WicBitmapDecoder.Load(new MemoryStream(bytes) { Position = 0 });
+            }
+        }
+
+        // single-frame formats
+        else
+        {
+            var bmpSrc = data.SingleFrameImage?.ToBitmapSourceWithDensity();
+            _bitmap = Photo.ToWicBitmapSource(bmpSrc, meta.HasAlpha);
+        }
     }
 
 
