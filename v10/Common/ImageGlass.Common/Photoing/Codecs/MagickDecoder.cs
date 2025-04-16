@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageMagick;
 using ImageMagick.Formats;
+using System.Collections.Immutable;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -190,6 +191,19 @@ public class MagickDecoder
 
             meta.FrameIndex = 0;
             meta.FrameCount = imgC.Count;
+            meta.Frames = imgC.Select(item => new FrameMetadata()
+            {
+                BackgroundColor = item.BackgroundColor ?? MagickColors.Transparent,
+                Width = item.Page.Width,
+                Height = item.Page.Height,
+                X = item.Page.X,
+                Y = item.Page.Y,
+
+                AnimationDelay = item.AnimationDelay,
+                AnimationTicksPerSecond = (uint)item.AnimationTicksPerSecond,
+                AnimationLoop = item.AnimationIterations,
+                GifDisposeMethod = item.GifDisposeMethod,
+            }).ToImmutableList();
         }
         catch { }
         if (imgC.Count == 0) return meta;
@@ -218,10 +232,9 @@ public class MagickDecoder
 
 
                 // image size
-                meta.OriginalWidth = imgM.BaseWidth;
-                meta.OriginalHeight = imgM.BaseHeight;
-                meta.RenderedWidth = imgM.Width;
-                meta.RenderedHeight = imgM.Height;
+                meta.OriginalWidth = imgM.Page.Width;
+                meta.OriginalHeight = imgM.Page.Height;
+
 
                 // image color
                 meta.HasAlpha = imgC.Any(i => i.HasAlpha);

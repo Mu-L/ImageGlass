@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageMagick;
+using System.Collections.Immutable;
 
 namespace ImageGlass.Common;
 
@@ -90,17 +91,23 @@ public class IgMetadata : IDisposable
     public string FileSizeFormated => BHelper.FormatSize(FileSize);
 
 
-    // Image data
+
+    /// <summary>
+    /// Gets the original width before processing orientation.
+    /// </summary>
     public uint OriginalWidth { get; set; } = 0;
+
+    /// <summary>
+    /// Gets the original height before processing orientation.
+    /// </summary>
     public uint OriginalHeight { get; set; } = 0;
-    public uint RenderedWidth { get; set; } = 0;
-    public uint RenderedHeight { get; set; } = 0;
 
     /// <summary>
     /// Gets the frame index of this metadata.
     /// </summary>
     public uint FrameIndex { get; set; } = 0;
     public int FrameCount { get; set; } = 0;
+    public IImmutableList<FrameMetadata> Frames { get; set; } = [];
     public bool HasAlpha { get; set; } = false;
     public bool CanAnimate { get; set; } = false;
 
@@ -128,3 +135,20 @@ public class IgMetadata : IDisposable
     public float? ExifFocalLength { get; set; } = null;
 
 }
+
+
+public class FrameMetadata
+{
+    public IMagickColor<byte> BackgroundColor { get; set; } = MagickColors.Transparent;
+    public uint Width { get; set; } = 0;
+    public uint Height { get; set; } = 0;
+    public int X { get; set; } = 0;
+    public int Y { get; set; } = 0;
+
+    public uint AnimationDelay { get; set; } = 0;
+    public uint AnimationTicksPerSecond { get; set; } = 0;
+    public uint AnimationLoop { get; set; } = 0;
+    public GifDisposeMethod GifDisposeMethod { get; set; } = GifDisposeMethod.Undefined;
+
+}
+
