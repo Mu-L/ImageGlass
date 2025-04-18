@@ -92,7 +92,7 @@ public static partial class PhotoWIC
             var newBmp = ConvertToWic32bppPBGRA(wicBmp);
             if (newBmp == null) return null;
 
-            return dc.CreateBitmapFromWicBitmap(newBmp.As<IWICBitmapSource>(), bmpProps);
+            return dc.CreateBitmapFromWicBitmap(newBmp, bmpProps);
         }
         catch (Exception ex)
         {
@@ -222,29 +222,6 @@ public static partial class PhotoWIC
 
 
     /// <summary>
-    /// Converts <see cref="System.Windows.Media.Imaging.BitmapSource"/>
-    /// to <see cref="IWICBitmapSource"/> object.
-    /// </summary>
-    public static IWICBitmapSource? ToWicBitmapSource(System.Windows.Media.Imaging.BitmapSource? bmp, bool hasAlpha = true)
-    {
-        if (bmp == null) return null;
-
-        var prop = bmp.GetType().GetProperty("WicSourceHandle",
-            BindingFlags.NonPublic | BindingFlags.Instance);
-
-        var srcHandle = (SafeHandleZeroOrMinusOneIsInvalid?)prop?.GetValue(bmp);
-        if (srcHandle == null) return null;
-
-
-        var bmpHandle = srcHandle.DangerousGetHandle();
-        var wicSrc = new IWICBitmapSource(bmpHandle);
-
-        return wicSrc;
-    }
-
-
-
-    /// <summary>
     /// Creates a WIC bitmap image with specified dimensions and pixel format.
     /// </summary>
     /// <param name="width">Bitmap width</param>
@@ -269,6 +246,66 @@ public static partial class PhotoWIC
 
         return null;
     }
+
+
+
+    /// <summary>
+    /// Converts <see cref="System.Windows.Media.Imaging.BitmapSource"/>
+    /// to <see cref="IWICBitmapSource"/> object.
+    /// </summary>
+    public static IWICBitmapSource? ToWicBitmapSource(System.Windows.Media.Imaging.BitmapSource? bmp, bool hasAlpha = true)
+    {
+        if (bmp == null) return null;
+
+        try
+        {
+            var prop = bmp.GetType().GetProperty("WicSourceHandle",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var srcHandle = (SafeHandleZeroOrMinusOneIsInvalid?)prop?.GetValue(bmp);
+            if (srcHandle == null) return null;
+
+
+            var bmpHandle = srcHandle.DangerousGetHandle();
+            var wicSrc = new IWICBitmapSource(bmpHandle);
+
+            return wicSrc;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
+
+        return null;
+    }
+
+
+
+    /// <summary>
+    /// Converts a byte array to <see cref="IWICBitmapSource"/> object.
+    /// </summary>
+    public static IWICBitmapSource? ToWicBitmapSource(byte[] bytes)
+    {
+        try
+        {
+            var ms = new MemoryStream(bytes) { Position = 0 };
+
+            using var wicFactory = new IWICImagingFactory2();
+            var decoder = wicFactory.CreateDecoderFromStream(ms);
+
+            var wicBmp = ConvertToWic32bppPBGRA(decoder.GetFrame(0));
+
+            return wicBmp;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
+
+        return null;
+    }
+
+
 
 
 }

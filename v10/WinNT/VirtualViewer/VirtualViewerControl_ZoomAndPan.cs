@@ -174,7 +174,7 @@ public partial class VirtualViewerControl
     /// </summary>
     public virtual void CalculateDrawingRegion()
     {
-        if (_bmpD2d == null || DrawingArea.IsEmpty()) return;
+        if (DrawingArea.IsEmpty()) return;
 
         // 1. scale the values according to DPI
         // 1.1 zoom point
@@ -317,8 +317,6 @@ public partial class VirtualViewerControl
         // update drawing regions
         CalculateDrawingRegion();
 
-
-        if (_bmpD2d == null) return;
 
         OnZoomChanged?.Invoke(this, new ZoomEventArgs()
         {
@@ -590,7 +588,6 @@ public partial class VirtualViewerControl
     /// </returns>
     public bool PanTo(double hDistance, double vDistance, Point? pointerPosition, bool requestRerender = true)
     {
-        if (_bmpD2d == null) return false;
         if (hDistance == 0 && vDistance == 0) return false;
 
         hDistance *= DpiX;

@@ -24,7 +24,7 @@ namespace ImageGlass.Common;
 
 
 
-public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
+public class PhotoImpl : IPhoto<IDisposable>
 {
 
     #region IDisposable Disposing
@@ -60,18 +60,30 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
     #endregion
 
 
-    protected T? _bitmap;
+    protected IDisposable? _bitmap;
     protected uint _width = 0;
     protected uint _height = 0;
     protected IgMetadata? _metadata;
     protected CancellationTokenSource? _tokenSrcPhoto;
     protected CancellationTokenSource? _tokenSrcMetadata;
 
+    protected event TEventHandler<PhotoImpl, PhotoLoadingEventArgs>? _onLoading;
+
+
+    /// <summary>
+    /// An event that occurs during the decoding of a photo.
+    /// </summary>
+    public event TEventHandler<PhotoImpl, PhotoLoadingEventArgs>? Loading
+    {
+        add { _onLoading += value; }
+        remove { _onLoading -= value; }
+    }
+
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual T? Bitmap => _bitmap;
+    public virtual IDisposable? Bitmap => _bitmap;
 
     /// <summary>
     /// <inheritdoc/>
@@ -120,7 +132,6 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
 
 
-
     /// <summary>
     /// Initializes new instance of <see cref="PhotoImpl{T}"/>
     /// </summary>
@@ -146,7 +157,7 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
         CancelMetadataLoading();
 
         _bitmap?.Dispose();
-        _bitmap = default(T);
+        _bitmap = null;
 
         if (disposeMetadata)
         {
@@ -173,6 +184,7 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
         try
         {
+            // 1. load metadata ===================
             // cancel if requested
             _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
 
@@ -182,6 +194,11 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
             // load image data
             ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
 
+            OnLoading(new PhotoLoadingEventArgs(this));
+
+
+
+            // 2. load image data ===================
             // cancel if requested
             _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
 
@@ -191,9 +208,10 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
             // cancel if requested
             _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
 
-
             // done loading
             IsDone = true;
+
+            OnLoading(new PhotoLoadingEventArgs(this));
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
@@ -209,6 +227,15 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
             Log.Error(ex);
         }
+    }
+
+
+    /// <summary>
+    /// Emits <see cref="Loading"/> event.
+    /// </summary>
+    protected virtual void OnLoading(PhotoLoadingEventArgs e)
+    {
+        _onLoading?.Invoke(this, e);
     }
 
 

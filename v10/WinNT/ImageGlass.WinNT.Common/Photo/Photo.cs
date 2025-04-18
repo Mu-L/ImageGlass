@@ -30,7 +30,7 @@ using Vortice.WIC;
 namespace ImageGlass.WinNT.Common;
 
 
-public partial class Photo : PhotoImpl<IDisposable>
+public partial class Photo : PhotoImpl
 {
     // private properties
     private PhotoColorProfile? _colorContext;
@@ -92,13 +92,13 @@ public partial class Photo : PhotoImpl<IDisposable>
     /// </summary>
     protected override async Task OnDecodingAsync(IgMetadata meta, CancellationToken token)
     {
-        var extWIC = new string[] { ".GIF", ".WEBP", ".HEIC" };
+        var extWIC = new string[] { ".GIF", ".WEBP", ".HEIC", ".CR2" };
 
 
         // use WIC decoders
         if (meta.ColorSpace != ImageMagick.ColorSpace.CMYK && extWIC.Contains(meta.FileExtension))
         {
-            await LoadWithWicAsync(meta, token);
+            await LoadWithWICAsync(meta, token);
         }
 
         // use default decoders
@@ -134,7 +134,7 @@ public partial class Photo : PhotoImpl<IDisposable>
     /// <summary>
     /// Loads an image using WIC.
     /// </summary>
-    private async Task LoadWithWicAsync(IgMetadata meta, CancellationToken token)
+    private async Task LoadWithWICAsync(IgMetadata meta, CancellationToken token)
     {
         _bitmap = await Task.Run<IDisposable>(() =>
         {
