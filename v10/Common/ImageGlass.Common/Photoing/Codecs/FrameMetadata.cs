@@ -16,20 +16,23 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageMagick;
+
 namespace ImageGlass.Common.Photoing;
 
 
-public delegate void TEventHandler<TSender, TResult>(TSender sender, TResult e);
-
-
-
-public class PhotoLoadingEventArgs(PhotoImpl photo) : EventArgs
+public class FrameMetadata
 {
-    public PhotoImpl Photo => photo;
+    public IMagickColor<byte> BackgroundColor { get; set; } = MagickColors.Transparent;
+    public uint Width { get; set; } = 0;
+    public uint Height { get; set; } = 0;
+    public int X { get; set; } = 0;
+    public int Y { get; set; } = 0;
 
-    public PhotoMetadata Metadata => photo.Metadata;
-
-    public bool IsDone => photo.IsDone;
+    public uint AnimationDelay { get; set; } = 0;
+    public uint AnimationTicksPerSecond { get; set; } = 0;
+    public uint AnimationLoop { get; set; } = 0;
+    public GifDisposeMethod GifDisposeMethod { get; set; } = GifDisposeMethod.Undefined;
 
 }
 

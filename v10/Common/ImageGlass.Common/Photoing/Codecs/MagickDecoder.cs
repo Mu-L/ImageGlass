@@ -151,14 +151,14 @@ public class MagickDecoder
     /// Loads metadata from file.
     /// </summary>
     /// <param name="filePath">Full path of the file</param>
-    public static async Task<IgMetadata> LoadMetadataAsync(string? filePath,
+    public static async Task<PhotoMetadata> LoadMetadataAsync(string? filePath,
         PhotoReadOptions? options = null,
         MagickReadSettings? readSettings = null,
         CancellationToken token = default)
     {
         FileInfo? fi = null;
         filePath ??= string.Empty;
-        var meta = new IgMetadata() { FilePath = filePath };
+        var meta = new PhotoMetadata() { FilePath = filePath };
 
         try
         {
@@ -312,7 +312,7 @@ public class MagickDecoder
     /// Reads and processes image file with Magick.NET.
     /// </summary>
     public static async Task<IgMagickReadData> DecodeImageAsync(
-        IgMetadata meta,
+        PhotoMetadata meta,
         PhotoReadOptions options, MagickReadSettings? settings,
         ImgTransform? transform, CancellationToken cancelToken)
     {
@@ -493,7 +493,7 @@ public class MagickDecoder
     /// Returns thumbnail image if requested.
     /// </summary>
     /// <param name="refImgM">Input Magick image to process</param>
-    private static MagickImage? ProcessMagickImage(MagickImage refImgM, PhotoReadOptions options, IgMetadata meta, bool requestThumbnail)
+    private static MagickImage? ProcessMagickImage(MagickImage refImgM, PhotoReadOptions options, PhotoMetadata meta, bool requestThumbnail)
     {
         IMagickImage? thumbM = null;
 

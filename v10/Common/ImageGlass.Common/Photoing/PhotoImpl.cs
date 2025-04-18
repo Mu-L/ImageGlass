@@ -63,7 +63,7 @@ public class PhotoImpl : IPhoto<IDisposable>
     protected IDisposable? _bitmap;
     protected uint _width = 0;
     protected uint _height = 0;
-    protected IgMetadata? _metadata;
+    protected PhotoMetadata? _metadata;
     protected CancellationTokenSource? _tokenSrcPhoto;
     protected CancellationTokenSource? _tokenSrcMetadata;
 
@@ -123,7 +123,7 @@ public class PhotoImpl : IPhoto<IDisposable>
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual IgMetadata Metadata => _metadata!;
+    public virtual PhotoMetadata Metadata => _metadata!;
 
     /// <summary>
     /// <inheritdoc/>
@@ -242,7 +242,7 @@ public class PhotoImpl : IPhoto<IDisposable>
     /// <summary>
     /// Not implemented. Throws <see cref="NotImplementedException"/>.
     /// </summary>
-    protected virtual Task OnDecodingAsync(IgMetadata meta, CancellationToken token)
+    protected virtual Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
         throw new NotImplementedException();
     }

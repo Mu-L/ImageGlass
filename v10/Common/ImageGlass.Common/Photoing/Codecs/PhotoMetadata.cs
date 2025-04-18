@@ -19,10 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageMagick;
 using System.Collections.Immutable;
 
-namespace ImageGlass.Common;
+namespace ImageGlass.Common.Photoing;
 
 
-public class IgMetadata : IDisposable
+public class PhotoMetadata : IDisposable
 {
 
     #region IDisposable Disposing
@@ -57,7 +57,7 @@ public class IgMetadata : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    ~IgMetadata()
+    ~PhotoMetadata()
     {
         Dispose(false);
     }
@@ -133,22 +133,6 @@ public class IgMetadata : IDisposable
     public float? ExifFNumber { get; set; } = null;
     public int? ExifISOSpeed { get; set; } = null;
     public float? ExifFocalLength { get; set; } = null;
-
-}
-
-
-public class FrameMetadata
-{
-    public IMagickColor<byte> BackgroundColor { get; set; } = MagickColors.Transparent;
-    public uint Width { get; set; } = 0;
-    public uint Height { get; set; } = 0;
-    public int X { get; set; } = 0;
-    public int Y { get; set; } = 0;
-
-    public uint AnimationDelay { get; set; } = 0;
-    public uint AnimationTicksPerSecond { get; set; } = 0;
-    public uint AnimationLoop { get; set; } = 0;
-    public GifDisposeMethod GifDisposeMethod { get; set; } = GifDisposeMethod.Undefined;
 
 }
 

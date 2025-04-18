@@ -55,7 +55,7 @@ public partial class Photo : PhotoImpl
         _height = (uint)wicSrc.Size.Height;
 
         _metadata?.Dispose();
-        _metadata = new IgMetadata();
+        _metadata = new PhotoMetadata();
     }
 
 
@@ -90,7 +90,7 @@ public partial class Photo : PhotoImpl
     /// <summary>
     /// Handles the decoding of image files based on their metadata.
     /// </summary>
-    protected override async Task OnDecodingAsync(IgMetadata meta, CancellationToken token)
+    protected override async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
         var extWIC = new string[] { ".GIF", ".WEBP", ".HEIC", ".CR2" };
 
@@ -134,7 +134,7 @@ public partial class Photo : PhotoImpl
     /// <summary>
     /// Loads an image using WIC.
     /// </summary>
-    private async Task LoadWithWICAsync(IgMetadata meta, CancellationToken token)
+    private async Task LoadWithWICAsync(PhotoMetadata meta, CancellationToken token)
     {
         _bitmap = await Task.Run<IDisposable>(() =>
         {
@@ -168,7 +168,7 @@ public partial class Photo : PhotoImpl
     /// <summary>
     /// Loads an image using Magick.
     /// </summary>
-    private async Task LoadWithMagickAsync(IgMetadata meta, CancellationToken token)
+    private async Task LoadWithMagickAsync(PhotoMetadata meta, CancellationToken token)
     {
         var data = await MagickDecoder.DecodeImageAsync(meta, ReadOptions, ReadSettings, null, token);
 
