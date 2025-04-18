@@ -61,33 +61,62 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
 
     protected T? _bitmap;
-    protected int _width = 0;
-    protected int _height = 0;
+    protected uint _width = 0;
+    protected uint _height = 0;
     protected IgMetadata? _metadata;
-    protected Lazy<string> _lazyHashKey;
     protected CancellationTokenSource? _tokenSrcPhoto;
     protected CancellationTokenSource? _tokenSrcMetadata;
 
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public virtual T? Bitmap => _bitmap;
 
-    public virtual int Width => _width;
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public virtual uint Width => _width;
 
-    public virtual int Height => _height;
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public virtual uint Height => _height;
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public virtual bool IsDone { get; set; } = false;
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public virtual string FilePath { get; set; } = string.Empty;
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public virtual Exception? Error { get; set; } = null;
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public virtual PhotoReadOptions ReadOptions { get; set; } = new();
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public MagickReadSettings? ReadSettings { get; set; } = null;
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public virtual IgMetadata Metadata => _metadata!;
 
-    public string HashKey => _lazyHashKey.Value;
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public string HashKey => BHelper.CreateUniqueFileKey(FilePath, new Vector2(Width, Height));
 
 
 
@@ -102,8 +131,6 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
         FilePath = filePath;
         ReadOptions = options ?? new();
-
-        _lazyHashKey = new Lazy<string>(() => BHelper.CreateUniqueFileKey(FilePath, new Vector2(Width, Height)));
     }
 
 

@@ -8,8 +8,10 @@ using System;
 using System.Threading.Tasks;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
+using Vortice.WIC;
 using Windows.Foundation;
 using Windows.UI;
+using WinRT;
 
 
 namespace ImageGlass.WinNT;
@@ -431,7 +433,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         UseHardwareAcceleration = !exceededMaxBitmapSize;
 
 
-        _bmpD2d = _photo.CreateD2dBitmap(D2dContext);
+        _bmpD2d = PhotoWIC.CreateD2dBitmap(_photo.Bitmap.As<IWICBitmapSource>(), D2dContext);
 
         ApplyColorManagementEffect();
 

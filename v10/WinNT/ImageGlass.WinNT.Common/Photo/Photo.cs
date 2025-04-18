@@ -51,8 +51,8 @@ public partial class Photo : PhotoImpl<IDisposable>
         DisposeNativeResources();
 
         _bitmap = wicSrc;
-        _width = wicSrc.Size.Width;
-        _height = wicSrc.Size.Height;
+        _width = (uint)wicSrc.Size.Width;
+        _height = (uint)wicSrc.Size.Height;
 
         _metadata?.Dispose();
         _metadata = new IgMetadata();
@@ -136,19 +136,32 @@ public partial class Photo : PhotoImpl<IDisposable>
     /// </summary>
     private async Task LoadWithWicAsync(IgMetadata meta, CancellationToken token)
     {
-        _bitmap = await Task.Run(() =>
+        _bitmap = await Task.Run<IDisposable>(() =>
         {
             using var wicFactory = new IWICImagingFactory2();
-            using var decoder = wicFactory.CreateDecoderFromFileName(meta.FilePath);
+            var decoder = wicFactory.CreateDecoderFromFileName(meta.FilePath);
+
+            // read multi-frame as IWICBitmapDecoder
+            if (meta.CanAnimate)
+            {
+                _width = meta.OriginalWidth;
+                _height = meta.OriginalHeight;
+
+                return decoder;
+            }
+
+
+            // read single frame
             var frameBmp = decoder.GetFrame((uint)meta.FrameIndex + 1);
 
-            _width = frameBmp.Size.Width;
-            _height = frameBmp.Size.Height;
+            _width = (uint)frameBmp.Size.Width;
+            _height = (uint)frameBmp.Size.Height;
+
+            decoder.Dispose();
+            decoder = null;
 
             return frameBmp;
         }, token).ConfigureAwait(false);
-
-
     }
 
 
@@ -162,8 +175,8 @@ public partial class Photo : PhotoImpl<IDisposable>
         // multi-frame
         if (data.MultiFrameImage != null)
         {
-            _width = (int)meta.OriginalWidth;
-            _height = (int)meta.OriginalHeight;
+            _width = meta.OriginalWidth;
+            _height = meta.OriginalHeight;
 
             // animated format
             if (meta.CanAnimate)
@@ -193,10 +206,10 @@ public partial class Photo : PhotoImpl<IDisposable>
         else
         {
             var bmpSrc = data.SingleFrameImage?.ToBitmapSourceWithDensity();
-            _bitmap = Photo.ToWicBitmapSource(bmpSrc, meta.HasAlpha);
+            _bitmap = PhotoWIC.ToWicBitmapSource(bmpSrc, meta.HasAlpha);
 
-            _width = (int)(bmpSrc?.PixelWidth ?? 0);
-            _height = (int)(bmpSrc?.PixelHeight ?? 0);
+            _width = (uint)(bmpSrc?.PixelWidth ?? 0);
+            _height = (uint)(bmpSrc?.PixelHeight ?? 0);
         }
     }
 

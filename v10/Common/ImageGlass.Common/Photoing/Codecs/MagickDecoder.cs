@@ -482,7 +482,7 @@ public class MagickDecoder
         var isAnimatedExtension = ext == ".GIF" || ext == ".GIFV" || ext == ".WEBP" || ext == ".JXL";
 
         var canAnimate = imgC.Count > 1
-            && (isAnimatedExtension || imgC.Any(i => i.GifDisposeMethod != GifDisposeMethod.Undefined));
+            && (isAnimatedExtension || imgC.Any(i => i.AnimationDelay > 0));
 
         return canAnimate;
     }

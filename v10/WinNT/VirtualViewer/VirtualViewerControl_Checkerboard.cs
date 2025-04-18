@@ -143,40 +143,40 @@ public partial class VirtualViewerControl
         var height = (int)size.Height * 2;
 
         // 1. create empty WIC bitmap
-        var tileImg = Photo.Create(width, height);
-        if (tileImg == null) return null;
+        var tileBmp = PhotoWIC.CreateWicBitmapSource(width, height);
+        if (tileBmp == null) return null;
 
 
         // 2. create render target from WIC bitmap
-        using var tileImgDc = tileImg.CreateD2dRenderTarget();
-        if (tileImgDc == null) return null;
+        using var tileBmpRt = PhotoWIC.CreateD2dRenderTarget(tileBmp);
+        if (tileBmpRt == null) return null;
 
 
         // 3. start drawing
-        tileImgDc.AntialiasMode = AntialiasMode.Aliased;
-        tileImgDc.BeginDraw();
+        tileBmpRt.AntialiasMode = AntialiasMode.Aliased;
+        tileBmpRt.BeginDraw();
 
         // 3.1 draw X cells -------------------------------
-        using var brush1 = tileImgDc.CreateSolidColorBrush(_checkerboard.Color1.ToVorticeColor());
+        using var brush1 = tileBmpRt.CreateSolidColorBrush(_checkerboard.Color1.ToVorticeColor());
 
         // draw cell: [X, ]
         //            [ ,X]
-        tileImgDc.FillRectangle(new Rect(0, 0, size.Width, size.Height).ToRawRectF(), brush1);
-        tileImgDc.FillRectangle(new Rect(size.Width, size.Height, size.Width, size.Height).ToRawRectF(), brush1);
+        tileBmpRt.FillRectangle(new Rect(0, 0, size.Width, size.Height).ToRawRectF(), brush1);
+        tileBmpRt.FillRectangle(new Rect(size.Width, size.Height, size.Width, size.Height).ToRawRectF(), brush1);
 
         // 3.2 draw O cells -------------------------------
-        using var brush2 = tileImgDc.CreateSolidColorBrush(_checkerboard.Color2.ToVorticeColor());
+        using var brush2 = tileBmpRt.CreateSolidColorBrush(_checkerboard.Color2.ToVorticeColor());
 
         // draw cell: [X,O]
         //            [O,X]
-        tileImgDc.FillRectangle(new Rect(size.Width, 0, size.Width, size.Height).ToRawRectF(), brush2);
-        tileImgDc.FillRectangle(new Rect(0, size.Height, size.Width, size.Height).ToRawRectF(), brush2);
+        tileBmpRt.FillRectangle(new Rect(size.Width, 0, size.Width, size.Height).ToRawRectF(), brush2);
+        tileBmpRt.FillRectangle(new Rect(0, size.Height, size.Width, size.Height).ToRawRectF(), brush2);
 
-        tileImgDc.EndDraw();
+        tileBmpRt.EndDraw();
 
 
         // 4. create D2DBitmap from WICBitmapSource
-        using var bmp = tileImg.CreateD2dBitmap(D2dContext);
+        using var tileD2 = PhotoWIC.CreateD2dBitmap(tileBmp, D2dContext);
         var bmpProps = new BitmapBrushProperties1()
         {
             ExtendModeX = ExtendMode.Wrap,
@@ -185,9 +185,9 @@ public partial class VirtualViewerControl
 
 
         // 5. create bitmap brush
-        var bmpBrush = D2dContext.CreateBitmapBrush(bmp, bmpProps);
+        var tileBrush = D2dContext.CreateBitmapBrush(tileD2, bmpProps);
 
-        return bmpBrush;
+        return tileBrush;
     }
 
 

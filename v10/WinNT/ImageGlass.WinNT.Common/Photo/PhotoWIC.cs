@@ -31,15 +31,15 @@ using WinRT;
 namespace ImageGlass.WinNT.Common;
 
 
-public partial class Photo
+public static partial class PhotoWIC
 {
 
     /// <summary>
-    /// Converts the current bitmap to a 32bpp PBGRA format.
+    /// Converts the given WIC bitmap to a 32bpp PBGRA format.
     /// </summary>
-    public Photo? ConvertTo32bppPBGRA()
+    public static IWICBitmapSource? ConvertToWic32bppPBGRA(IWICBitmapSource? wicBmp)
     {
-        if (_bitmap is not IWICBitmapSource wicBmp) return null;
+        if (wicBmp is null) return null;
 
         try
         {
@@ -47,7 +47,7 @@ public partial class Photo
                 Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA,
                 wicBmp);
 
-            return new Photo(newBmp);
+            return newBmp;
         }
         catch (Exception ex)
         {
@@ -61,15 +61,16 @@ public partial class Photo
     /// <summary>
     /// Creates a render target from a bitmap source for drawing operations.
     /// </summary>
-    public ID2D1RenderTarget? CreateD2dRenderTarget()
+    public static ID2D1RenderTarget? CreateD2dRenderTarget(IWICBitmapSource? wicBmp)
     {
+        if (wicBmp is null) return null;
         ID2D1RenderTarget? target = null;
 
         try
         {
             using var factory = D2D1.D2D1CreateFactory<ID2D1Factory8>(FactoryType.MultiThreaded);
 
-            target = factory.CreateWicBitmapRenderTarget(_bitmap.As<IWICBitmap>(),
+            target = factory.CreateWicBitmapRenderTarget(wicBmp.As<IWICBitmap>(),
                 new(Vortice.DCommon.PixelFormat.Premultiplied));
         }
         catch (Exception ex)
@@ -82,18 +83,16 @@ public partial class Photo
 
 
     /// <summary>
-    /// Creates a Direct2D bitmap from an existing bitmap if available.
+    /// Creates a Direct2D bitmap from the given WIC bitmap.
     /// </summary>
-    public ID2D1Bitmap1? CreateD2dBitmap(ID2D1DeviceContext dc, BitmapProperties1? bmpProps = null)
+    public static ID2D1Bitmap1? CreateD2dBitmap(IWICBitmapSource? wicBmp, ID2D1DeviceContext dc, BitmapProperties1? bmpProps = null)
     {
-        if (_bitmap == null) return null;
-
         try
         {
-            var newPhoto = ConvertTo32bppPBGRA();
-            if (newPhoto == null) return null;
+            var newBmp = ConvertToWic32bppPBGRA(wicBmp);
+            if (newBmp == null) return null;
 
-            return dc.CreateBitmapFromWicBitmap(newPhoto.Bitmap.As<IWICBitmapSource>(), bmpProps);
+            return dc.CreateBitmapFromWicBitmap(newBmp.As<IWICBitmapSource>(), bmpProps);
         }
         catch (Exception ex)
         {
@@ -107,12 +106,12 @@ public partial class Photo
     /// <summary>
     /// Gets color profile of the photo.
     /// </summary>
-    private PhotoColorProfile GetWicColorProfile()
+    private static PhotoColorProfile GetWicColorProfile(IWICBitmapSource? wicBmp)
     {
-        if (_bitmap is not IWICBitmapSource bmp) return new();
+        if (wicBmp is null) return new();
 
         using var wicFactory = new IWICImagingFactory2();
-        var frame = _bitmap.As<IWICBitmapFrameDecode>();
+        var frame = wicBmp.As<IWICBitmapFrameDecode>();
 
         try
         {
@@ -207,13 +206,13 @@ public partial class Photo
     /// <summary>
     /// Loads pixel format information for a bitmap.
     /// </summary>
-    private IWICPixelFormatInfo2 LoadWicPixelInfo()
+    private static IWICPixelFormatInfo2 LoadWicPixelInfo(IWICBitmapSource? wicBmp)
     {
-        if (_bitmap is not IWICBitmapSource bmp) return new IWICPixelFormatInfo2(IntPtr.Zero);
+        if (wicBmp is null) return new IWICPixelFormatInfo2(IntPtr.Zero);
 
         using var wicFactory = new IWICImagingFactory2();
 
-        var comInfo = wicFactory.CreateComponentInfo(bmp.PixelFormat);
+        var comInfo = wicFactory.CreateComponentInfo(wicBmp.PixelFormat);
         return comInfo.As<IWICPixelFormatInfo2>();
     }
 
@@ -246,22 +245,22 @@ public partial class Photo
 
 
     /// <summary>
-    /// Creates a bitmap image with specified dimensions and pixel format.
+    /// Creates a WIC bitmap image with specified dimensions and pixel format.
     /// </summary>
     /// <param name="width">Bitmap width</param>
     /// <param name="height">Bitmap height</param>
     /// <param name="pixelFormat">By default, use <c><see cref="Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA"/></c></param>
-    public static Photo? Create(double width, double height, Guid? pixelFormat = null)
+    public static IWICBitmapSource? CreateWicBitmapSource(double width, double height, Guid? pixelFormat = null)
     {
         pixelFormat ??= Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA;
 
         try
         {
             using var wicFactory = new IWICImagingFactory2();
-            var bmp = wicFactory.CreateBitmap((uint)width, (uint)height,
+            var wicBmp = wicFactory.CreateBitmap((uint)width, (uint)height,
                 pixelFormat.Value, BitmapCreateCacheOption.CacheOnLoad);
 
-            return new Photo(bmp);
+            return wicBmp;
         }
         catch (Exception ex)
         {

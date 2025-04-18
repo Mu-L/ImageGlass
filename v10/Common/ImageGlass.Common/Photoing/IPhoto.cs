@@ -78,13 +78,13 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
     /// <summary>
     /// Gets the width of the <c><see cref="Bitmap"/></c>.
     /// </summary>
-    int Width { get; }
+    uint Width { get; }
 
 
     /// <summary>
     /// Gets the height of the <c><see cref="Bitmap"/></c>.
     /// </summary>
-    int Height { get; }
+    uint Height { get; }
 
 
     /// <summary>
