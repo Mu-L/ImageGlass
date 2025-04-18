@@ -1,4 +1,5 @@
 ﻿using ImageGlass.WinNT;
+using ImageGlass.WinNT.Common;
 using Microsoft.Graphics.Display;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -66,13 +67,21 @@ public sealed partial class MainWindow : Window
 
         Title = file.Path;
 
-        _ = Viewer.LoadImageAsync(file.Path);
+        var photo = new Photo(file.Path);
+        _ = photo.LoadAsync();
 
+        _ = Viewer.SetPhotoAsync(photo);
     }
 
 
     private void Viewer_Loaded(object sender, RoutedEventArgs e)
     {
+
+        var photo = new Photo(path);
+        _ = photo.LoadAsync();
+
+        _ = Viewer.SetPhotoAsync(photo);
+
     }
 
 }

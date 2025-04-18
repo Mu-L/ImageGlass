@@ -152,7 +152,7 @@ public partial class Photo : PhotoImpl<IDisposable>
 
 
             // read single frame
-            var frameBmp = decoder.GetFrame((uint)meta.FrameIndex + 1);
+            var frameBmp = decoder.GetFrame(meta.FrameIndex);
 
             _width = (uint)frameBmp.Size.Width;
             _height = (uint)frameBmp.Size.Height;

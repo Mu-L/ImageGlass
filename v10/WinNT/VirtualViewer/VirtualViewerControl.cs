@@ -403,7 +403,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
 
-    public async Task LoadImageAsync(string path)
+    public async Task SetPhotoAsync(Photo inputPhoto)
     {
         // dispose current resources
         _bmpD2d?.Dispose();
@@ -416,8 +416,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
         // start loading new photo
-        _photo = new Photo(path);
-        await _photo.LoadAsync();
+        _photo = inputPhoto;
+        await _photo.WaitUntilDoneLoading();
 
         SourceWidth = _photo?.Width ?? 0;
         SourceHeight = _photo?.Height ?? 0;

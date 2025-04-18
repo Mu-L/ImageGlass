@@ -238,6 +238,18 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
 
     /// <summary>
+    /// Waits until the loading process is complete: <c><see cref="IsDone"/> = true</c>.
+    /// </summary>
+    public async Task WaitUntilDoneLoading()
+    {
+        while (!IsDone)
+        {
+            await Task.Delay(10);
+        }
+    }
+
+
+    /// <summary>
     /// <inheritdoc/>
     /// </summary>
     public virtual void CancelPhotoLoading()
