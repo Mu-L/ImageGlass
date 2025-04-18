@@ -89,7 +89,7 @@ public static partial class PhotoWIC
     {
         try
         {
-            var newBmp = ConvertToWic32bppPBGRA(wicBmp);
+            using var newBmp = ConvertToWic32bppPBGRA(wicBmp);
             if (newBmp == null) return null;
 
             return dc.CreateBitmapFromWicBitmap(newBmp, bmpProps);
@@ -265,7 +265,7 @@ public static partial class PhotoWIC
             var srcHandle = (SafeHandleZeroOrMinusOneIsInvalid?)prop?.GetValue(bmp);
             if (srcHandle == null) return null;
 
-
+            // TODO: Memory leak!!
             var bmpHandle = srcHandle.DangerousGetHandle();
             var wicSrc = new IWICBitmapSource(bmpHandle);
 

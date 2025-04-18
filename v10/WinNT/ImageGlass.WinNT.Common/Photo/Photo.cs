@@ -170,7 +170,7 @@ public partial class Photo : PhotoImpl
     /// </summary>
     private async Task LoadWithMagickAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var data = await MagickDecoder.DecodeImageAsync(meta, ReadOptions, ReadSettings, null, token);
+        using var data = await MagickDecoder.DecodeImageAsync(meta, ReadOptions, ReadSettings, null, token);
 
         // multi-frame
         if (data.MultiFrameImage != null)

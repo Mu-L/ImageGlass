@@ -612,7 +612,10 @@ public class IgMagickReadData : IDisposable
         {
             // Free any other managed objects here.
             MultiFrameImage?.Dispose();
+            MultiFrameImage = null;
+
             SingleFrameImage?.Dispose();
+            SingleFrameImage = null;
         }
 
         // Free any unmanaged objects here.
