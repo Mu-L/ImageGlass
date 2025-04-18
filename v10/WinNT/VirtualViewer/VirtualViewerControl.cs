@@ -495,6 +495,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             Refresh(false);
         }
+
+
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
     }
 
 
@@ -513,7 +519,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             if (thumbBytes is not null)
             {
-                using var wicThumb = PhotoWIC.ToWicBitmapSource(thumbBytes);
+                using var wicThumb = PhotoWIC.ConvertFromBytes(thumbBytes);
 
                 _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
                 _bmpPreview = ApplyColorManagementEffect(_bmpPreview);
@@ -534,6 +540,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
     {
         // cancel the preview process
         _previewTokenSrc?.Cancel();
+
+        if (e.Photo.Bitmap is null) return;
 
         await Task.Run(() =>
         {

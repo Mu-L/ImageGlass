@@ -17,11 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
-using Microsoft.Win32.SafeHandles;
+using ImageMagick;
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using Vortice.Direct2D1;
 using Vortice.WIC;
@@ -250,24 +249,37 @@ public static partial class PhotoWIC
 
 
     /// <summary>
-    /// Converts <see cref="System.Windows.Media.Imaging.BitmapSource"/>
+    /// Converts <see cref="MagickImage"/>
     /// to <see cref="IWICBitmapSource"/> object.
     /// </summary>
-    public static IWICBitmapSource? ToWicBitmapSource(System.Windows.Media.Imaging.BitmapSource? bmp, bool hasAlpha = true)
+    public static IWICBitmapSource? ConvertFromMagick(IMagickImage<byte>? imgM)
     {
-        if (bmp == null) return null;
+        if (imgM == null) return null;
 
         try
         {
-            var prop = bmp.GetType().GetProperty("WicSourceHandle",
-            BindingFlags.NonPublic | BindingFlags.Instance);
+            using var pixels = imgM.GetPixelsUnsafe();
+            if (pixels is null) return null;
 
-            var srcHandle = (SafeHandleZeroOrMinusOneIsInvalid?)prop?.GetValue(bmp);
-            if (srcHandle == null) return null;
+            var bytes = pixels.ToArray().AsSpan<byte>();
 
-            // TODO: Memory leak!!
-            var bmpHandle = srcHandle.DangerousGetHandle();
-            var wicSrc = new IWICBitmapSource(bmpHandle);
+            // RGBA (with alpha)
+            var format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppRGBA;
+
+            // Grayscale
+            if (imgM.ChannelCount == 1)
+            {
+                format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat8bppGray;
+            }
+            // RGB (no alpha)
+            else if (imgM.ChannelCount == 3)
+            {
+                format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat24bppRGB;
+            }
+
+
+            using var fac = new IWICImagingFactory2();
+            var wicSrc = fac.CreateBitmapFromMemory<byte>(imgM.Width, imgM.Height, format, bytes);
 
             return wicSrc;
         }
@@ -284,7 +296,28 @@ public static partial class PhotoWIC
     /// <summary>
     /// Converts a byte array to <see cref="IWICBitmapSource"/> object.
     /// </summary>
-    public static IWICBitmapSource? ToWicBitmapSource(byte[] bytes)
+    public static IWICBitmapSource? ConvertFromBytes(byte[] bytes)
+    {
+        try
+        {
+            var decoder = ConvertFromBytesToDecoder(bytes);
+            var wicBmp = ConvertToWic32bppPBGRA(decoder?.GetFrame(0));
+
+            return wicBmp;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
+
+        return null;
+    }
+
+
+    /// <summary>
+    /// Converts a byte array to <see cref="IWICBitmapDecoder"/> object.
+    /// </summary>
+    public static IWICBitmapDecoder? ConvertFromBytesToDecoder(byte[] bytes)
     {
         try
         {
@@ -293,9 +326,7 @@ public static partial class PhotoWIC
             using var wicFactory = new IWICImagingFactory2();
             var decoder = wicFactory.CreateDecoderFromStream(ms);
 
-            var wicBmp = ConvertToWic32bppPBGRA(decoder.GetFrame(0));
-
-            return wicBmp;
+            return decoder;
         }
         catch (Exception ex)
         {

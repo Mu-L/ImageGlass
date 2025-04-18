@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
-using ImageMagick;
 using System;
 using System.Linq;
 using System.Threading;
@@ -92,7 +91,7 @@ public partial class Photo : PhotoImpl
     /// </summary>
     protected override async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var extWIC = new string[] { ".GIF", ".WEBP", ".HEIC", ".CR2" };
+        var extWIC = new string[] { ".HEIC", ".CR2" };
 
 
         // use WIC decoders
@@ -197,19 +196,19 @@ public partial class Photo : PhotoImpl
             // multi-frame formats
             else
             {
-                //var bytes = data.MultiFrameImage.ToByteArray(MagickFormat.Tiff);
-                //Source = WicBitmapDecoder.Load(new MemoryStream(bytes) { Position = 0 });
+                var bytes = data.MultiFrameImage.ToByteArray(ImageMagick.MagickFormat.Tiff);
+                _bitmap = PhotoWIC.ConvertFromBytesToDecoder(bytes);
             }
         }
 
         // single-frame formats
         else
         {
-            var bmpSrc = data.SingleFrameImage?.ToBitmapSourceWithDensity();
-            _bitmap = PhotoWIC.ToWicBitmapSource(bmpSrc, meta.HasAlpha);
+            var wicBmp = PhotoWIC.ConvertFromMagick(data.SingleFrameImage);
 
-            _width = (uint)(bmpSrc?.PixelWidth ?? 0);
-            _height = (uint)(bmpSrc?.PixelHeight ?? 0);
+            _bitmap = wicBmp;
+            _width = (uint)(wicBmp?.Size.Width ?? 0);
+            _height = (uint)(wicBmp?.Size.Height ?? 0);
         }
     }
 
