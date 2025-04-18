@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-using System;
 using System.Diagnostics;
 
 namespace ImageGlass.Common;
@@ -25,23 +24,51 @@ namespace ImageGlass.Common;
 
 public static class Log
 {
+
     /// <summary>
-    /// Logs an error message to the debug output when in debug mode.
+    /// Outputs a message to the debug console when in debug mode.
     /// </summary>
-    public static void Error(string message)
+    public static void Note(string message)
     {
 #if DEBUG
-        Debug.WriteLine($"❌ {message}");
+        Debug.WriteLine($"[LOG] {message}");
 #endif
     }
 
 
     /// <summary>
-    /// Logs an error message to the debug output when in debug mode.
+    /// Logs an info message.
+    /// </summary>
+    public static void Info(string message)
+    {
+        Note($"ℹ️ℹ️ℹ️ {message}");
+    }
+
+
+    /// <summary>
+    /// Logs a warning message.
+    /// </summary>
+    public static void Warn(string message)
+    {
+        Note($"⚠️⚠️⚠️ {message}");
+    }
+
+
+    /// <summary>
+    /// Logs an error message.
+    /// </summary>
+    public static void Error(string message)
+    {
+        Note($"❌❌❌ {message}");
+    }
+
+
+    /// <summary>
+    /// Logs an error message.
     /// </summary>
     public static void Error(Exception ex)
     {
-        Error(ex.ToString());
+        Note($"⛔⛔⛔ {ex.ToString()}");
     }
 
 }
