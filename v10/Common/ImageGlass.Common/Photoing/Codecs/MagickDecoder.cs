@@ -151,7 +151,8 @@ public class MagickDecoder
     /// Loads metadata from file.
     /// </summary>
     /// <param name="filePath">Full path of the file</param>
-    public static async Task<PhotoMetadata> LoadMetadataAsync(string? filePath,
+    public static async Task<PhotoMetadata> LoadMetadataAsync(
+        string? filePath,
         PhotoReadOptions? options = null,
         MagickReadSettings? readSettings = null,
         CancellationToken token = default)
@@ -160,6 +161,7 @@ public class MagickDecoder
         filePath ??= string.Empty;
         var meta = new PhotoMetadata() { FilePath = filePath };
 
+        // 0. get file info
         try
         {
             // cancel if requested
@@ -180,76 +182,86 @@ public class MagickDecoder
         catch { }
         if (fi == null) return meta;
 
-
         var settings = readSettings ?? ParseSettings(options, false, filePath);
         using var imgC = new MagickImageCollection();
 
-        // read metadata
         try
         {
             imgC.Ping(filePath, settings);
-
-            meta.FrameIndex = 0;
-            meta.FrameCount = imgC.Count;
-            meta.Frames = imgC.Select(item => new FrameMetadata()
-            {
-                BackgroundColor = item.BackgroundColor ?? MagickColors.Transparent,
-                Width = item.Page.Width,
-                Height = item.Page.Height,
-                X = item.Page.X,
-                Y = item.Page.Y,
-
-                AnimationDelay = item.AnimationDelay,
-                AnimationTicksPerSecond = (uint)item.AnimationTicksPerSecond,
-                AnimationLoop = item.AnimationIterations,
-                GifDisposeMethod = item.GifDisposeMethod,
-            }).ToImmutableList();
         }
         catch { }
         if (imgC.Count == 0) return meta;
 
 
-        // parse metadata
-        try
+        // 1. calculate the specific frame index
+        var frameIndex = options?.FrameIndex ?? 0;
+
+        // make sure frame index is within range
+        if (frameIndex >= imgC.Count) frameIndex = 0;
+        else if (frameIndex < 0) frameIndex = imgC.Count - 1;
+
+        meta.FrameIndex = (uint)frameIndex;
+
+
+        var readingTask = Task.Run(() =>
         {
-            await Task.Run(() =>
+            // cancel if requested
+            token.ThrowIfCancellationRequested();
+
+
+            // 2. read metadata of all frames
+            try
             {
-                // cancel if requested
-                token.ThrowIfCancellationRequested();
+                meta.FrameIndex = 0;
+                meta.FrameCount = imgC.Count;
+                meta.Frames = imgC.Select(item => new FrameMetadata()
+                {
+                    BackgroundColor = item.BackgroundColor ?? MagickColors.Transparent,
+                    Width = item.Page.Width,
+                    Height = item.Page.Height,
+                    X = item.Page.X,
+                    Y = item.Page.Y,
 
-                var frameIndex = options?.FrameIndex ?? 0;
-
-                // Check if frame index is greater than upper limit
-                if (frameIndex >= imgC.Count)
-                    frameIndex = 0;
-
-                // Check if frame index is less than lower limit
-                else if (frameIndex < 0)
-                    frameIndex = imgC.Count - 1;
-
-                meta.FrameIndex = (uint)frameIndex;
-                using var imgM = imgC[frameIndex];
+                    AnimationDelay = item.AnimationDelay,
+                    AnimationTicksPerSecond = (uint)item.AnimationTicksPerSecond,
+                    AnimationLoop = item.AnimationIterations,
+                    GifDisposeMethod = item.GifDisposeMethod,
+                }).ToImmutableList();
+            }
+            catch { }
 
 
+            // cancel if requested
+            token.ThrowIfCancellationRequested();
+
+
+            // 3. read metadata of a specific frame
+            try
+            {
                 // image size
-                meta.OriginalWidth = imgM.Page.Width;
-                meta.OriginalHeight = imgM.Page.Height;
+                meta.OriginalWidth = imgC[frameIndex].Page.Width;
+                meta.OriginalHeight = imgC[frameIndex].Page.Height;
 
 
                 // image color
                 meta.HasAlpha = imgC.Any(i => i.HasAlpha);
-                meta.ColorSpace = imgM.ColorSpace;
+                meta.ColorSpace = imgC[frameIndex].ColorSpace;
                 meta.CanAnimate = CheckAnimatedFormat(imgC, meta.FileExtension);
 
-                // cancel if requested
-                token.ThrowIfCancellationRequested();
-
                 // get RAW thumbnail
-                meta.RawThumbnail = imgM.GetProfile("dng:thumbnail");
+                meta.RawThumbnail = imgC[frameIndex].GetProfile("dng:thumbnail");
+            }
+            catch { }
 
 
-                // EXIF profile
-                if (imgM.GetExifProfile() is IExifProfile exifProfile)
+            // cancel if requested
+            token.ThrowIfCancellationRequested();
+
+
+            // 4 read frame exif profile
+            try
+            {
+                if (imgC[frameIndex].GetExifProfile() is IExifProfile exifProfile)
                 {
                     meta.ExifProfile = exifProfile;
 
@@ -286,23 +298,39 @@ public class MagickDecoder
                         ? null
                         : rational.Numerator / rational.Denominator;
                 }
+            }
+            catch { }
 
 
-                // cancel if requested
-                token.ThrowIfCancellationRequested();
+            // cancel if requested
+            token.ThrowIfCancellationRequested();
 
+
+            // 5 read color profile
+            try
+            {
                 // Color profile
-                if (imgM.GetColorProfile() is IColorProfile colorProfile)
+                if (imgC[frameIndex].GetColorProfile() is IColorProfile colorProfile)
                 {
                     meta.ColorSpace = colorProfile.ColorSpace;
                     meta.ColorProfileName = colorProfile.Description ?? "";
                     meta.ColorProfileData = colorProfile.ToByteArray();
                 }
+            }
+            catch { }
+
+        }, token);
 
 
-            }, token).ConfigureAwait(false);
+
+        try
+        {
+            await readingTask;
         }
-        catch { }
+        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+        {
+            Log.Info($"Cancelled LoadMetadataAsync() for {filePath}");
+        }
 
         return meta;
     }
@@ -319,7 +347,7 @@ public class MagickDecoder
         settings ??= ParseSettings(options, false, meta.FilePath);
         var result = new IgMagickReadData();
 
-        // standardize first frame reading option
+        // 1. standardize first frame reading option
         bool readFirstFrameOnly;
         if (options.FirstFrameOnly == null)
         {
@@ -331,7 +359,7 @@ public class MagickDecoder
         }
 
 
-        // read all frames
+        // 2. read all frames if requested
         if (meta.FrameCount > 1 && readFirstFrameOnly is false)
         {
             var imgColl = new MagickImageCollection();
@@ -356,10 +384,11 @@ public class MagickDecoder
         }
 
 
-        // read a single frame only
+        // 3. read a single frame only
         var imgM = new MagickImage();
         var hasRequestedThumbnail = false;
 
+        // 3.1 read embedded thumbnail only
         if (options.UseEmbeddedThumbnailRawFormats is true)
         {
             try
@@ -385,7 +414,7 @@ public class MagickDecoder
         }
 
 
-        // read full image data
+        // 3.2 read full image data
         if (!hasRequestedThumbnail)
         {
             imgM.Dispose();
@@ -393,17 +422,19 @@ public class MagickDecoder
         }
 
 
-        // process image
+        // 3.3 process image
         var thumbM = ProcessMagickImage(imgM, options, meta, true);
         if (thumbM != null) imgM = thumbM;
 
 
-        // apply final changes
+        // 3.4 apply final changes
         TransformImage(imgM, transform);
         result.SingleFrameImage = imgM;
 
         return result;
     }
+
+
 
 
     /// <summary>
