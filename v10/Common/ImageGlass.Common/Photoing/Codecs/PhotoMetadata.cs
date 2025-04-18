@@ -134,5 +134,67 @@ public class PhotoMetadata : IDisposable
     public int? ExifISOSpeed { get; set; } = null;
     public float? ExifFocalLength { get; set; } = null;
 
+
+
+    /// <summary>
+    /// Retrieves a byte array representing a preview image from either a RAW format or an EXIF profile.
+    /// </summary>
+    public async Task<byte[]?> GetPreviewAsync(CancellationToken token)
+    {
+        if (RawThumbnail is null && ExifProfile is null) return null;
+
+
+        byte[]? thumbBytes = await Task.Run<byte[]?>(() =>
+        {
+            try
+            {
+                // cancel if requested
+                token.ThrowIfCancellationRequested();
+
+                if (RawThumbnail is not null)
+                {
+                    Log.Info("Retrieving embedded preview from RAW format...");
+                    return RawThumbnail.ToByteArray();
+                }
+
+
+                // cancel if requested
+                token.ThrowIfCancellationRequested();
+
+                if (ExifProfile is not null)
+                {
+                    Log.Info("Retrieving embedded preview from EXIF profile...");
+
+                    var thumbnailLength = (int)ExifProfile.ThumbnailLength;
+                    var thumbnailOffset = (int)ExifProfile.ThumbnailOffset;
+
+                    if (thumbnailLength > 0 && thumbnailOffset > 0)
+                    {
+                        var data = ExifProfile.ToReadOnlySpan();
+                        if (data.Length >= (thumbnailOffset + thumbnailLength))
+                        {
+                            return data.Slice(thumbnailOffset, thumbnailLength).ToArray();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+            {
+                Log.Info($"Cancelled GetPreviewAsync()!");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+            }
+
+            return null;
+
+        }, token).ConfigureAwait(false);
+
+
+        return thumbBytes;
+    }
+
+
 }
 

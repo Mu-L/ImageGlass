@@ -384,6 +384,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
+    private readonly Lock _lock = new();
+
     protected virtual void DrawImageLayer(SwapChainCanvasRenderEventArgs e)
     {
         if (_bmpD2d is null)
@@ -398,7 +400,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
         // draw full resolution bitmap
-        e.DrawBitmap(_bmpD2d, _destRect, _srcRect, (InterpolationMode)CurrentInterpolation);
+        lock (_lock)
+        {
+            if (_bmpD2d is not null)
+            {
+                e.DrawBitmap(_bmpD2d, _destRect, _srcRect, (InterpolationMode)CurrentInterpolation);
+            }
+        }
     }
 
 
@@ -493,34 +501,32 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     private async Task HandlePhotoPreviewAsync(PhotoLoadingEventArgs e, CancellationToken token)
     {
-        if (e.Metadata.RawThumbnail is null) return;
+        // try to get photo preview
+        var thumbBytes = await e.Metadata.GetPreviewAsync(token);
+        if (thumbBytes is null) return;
 
-        await Task.Run(() =>
+
+        try
         {
-            try
+            // cancel if requested
+            token.ThrowIfCancellationRequested();
+
+            if (thumbBytes is not null)
             {
-                // cancel if requested
-                token.ThrowIfCancellationRequested();
-                Log.Info("Previewing photo...");
-
-                var bytes = e.Metadata.RawThumbnail.ToByteArray();
-                using var wicThumb = PhotoWIC.ToWicBitmapSource(bytes);
-
-                // cancel if requested
-                token.ThrowIfCancellationRequested();
+                using var wicThumb = PhotoWIC.ToWicBitmapSource(thumbBytes);
 
                 _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
                 _bmpPreview = ApplyColorManagementEffect(_bmpPreview);
             }
-            catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
-            {
-                Log.Info($"Previewing cancelled!");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex);
-            }
-        }, token);
+        }
+        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+        {
+            Log.Info($"Cancelled HandlePhotoPreviewAsync()!");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
     }
 
 
