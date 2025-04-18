@@ -8,7 +8,6 @@ using System;
 using System.Threading.Tasks;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
-using Vortice.WIC;
 using Windows.Foundation;
 using Windows.UI;
 
@@ -432,7 +431,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         UseHardwareAcceleration = !exceededMaxBitmapSize;
 
 
-        _bmpD2d = _photo.CreateDirect2dBitmap(D2dContext);
+        _bmpD2d = _photo.CreateD2dBitmap(D2dContext);
 
         ApplyColorManagementEffect();
 
@@ -460,10 +459,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
         {
             destColorContext = D2dContext.CreateColorContext(ColorSpace.Custom, WindowColorProfileProvider.Instance.Data);
         }
-        else if (_photo.PixelFormatInfo?.NumericRepresentation == PixelFormatNumericRepresentation.PixelFormatNumericRepresentationFloat)
-        {
-            destColorContext = D2dContext.CreateColorContext(ColorSpace.ScRgb, []);
-        }
+        //else if (_photo.PixelFormatInfo?.NumericRepresentation == PixelFormatNumericRepresentation.PixelFormatNumericRepresentationFloat)
+        //{
+        //    destColorContext = D2dContext.CreateColorContext(ColorSpace.ScRgb, []);
+        //}
         else
         {
             destColorContext = D2dContext.CreateColorContext(ColorSpace.Srgb, []);

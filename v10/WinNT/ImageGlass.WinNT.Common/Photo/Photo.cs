@@ -20,11 +20,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageMagick;
-using SharpGen.Runtime;
 using System;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Vortice.WIC;
@@ -33,49 +30,11 @@ using Vortice.WIC;
 namespace ImageGlass.WinNT.Common;
 
 
-public partial class Photo : PhotoImpl<IWICBitmapSource>
+public partial class Photo : PhotoImpl<IDisposable>
 {
     // private properties
     private PhotoColorProfile? _colorContext;
     private IWICPixelFormatInfo2? _pixelFormatInfo;
-
-
-    // Public Properties
-    #region Public Properties
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public override IWICBitmapSource? Bitmap => _bitmap;
-
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public override int Width => _bitmap?.Size.Width ?? 0;
-
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public override int Height => _bitmap?.Size.Height ?? 0;
-
-
-    /// <summary>
-    /// Gets the color profile of the photo.
-    /// </summary>
-    public PhotoColorProfile ColorProfile => LazyInitializer.EnsureInitialized(
-        ref _colorContext, GetColorProfile);
-
-
-    /// <summary>
-    /// Gets the pixel information of the photo.
-    /// </summary>
-    public IWICPixelFormatInfo2? PixelFormatInfo => LazyInitializer.EnsureInitialized(
-        ref _pixelFormatInfo, LoadPixelInfo);
-
-    #endregion // Public Properties
-
 
 
     /// <summary>
@@ -92,6 +51,11 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
         DisposeNativeResources();
 
         _bitmap = wicSrc;
+        _width = wicSrc.Size.Width;
+        _height = wicSrc.Size.Height;
+
+        _metadata?.Dispose();
+        _metadata = new IgMetadata();
     }
 
 
@@ -168,120 +132,6 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
 
 
     /// <summary>
-    /// Gets color profile of the photo.
-    /// </summary>
-    private PhotoColorProfile GetColorProfile()
-    {
-        if (_bitmap == null) return new();
-
-        using var wicFactory = new IWICImagingFactory2();
-        var frame = _bitmap.As<IWICBitmapFrameDecode>();
-
-        try
-        {
-            var contexts = frame.TryGetColorContexts(wicFactory) ?? [];
-            var bestProfile = FindBestColorProfile(contexts);
-            byte[]? profileBytes = null;
-
-
-            // get color profile
-            if (bestProfile?.Profile is not null)
-            {
-                using var ms = new MemoryStream();
-                bestProfile.Profile.CopyTo(ms);
-                profileBytes = ms.ToArray();
-            }
-
-
-            // get color space
-            var exitColorSpace = bestProfile?.ExifColorSpace;
-            var colorSpace = PhotoColorSpace.None;
-
-            if (exitColorSpace == 1)
-            {
-                colorSpace = PhotoColorSpace.sRGB;
-            }
-            else if (exitColorSpace == 2
-                || (profileBytes != null && Encoding.ASCII.GetString(profileBytes).Contains("Adobe RGB")))
-            {
-                colorSpace = PhotoColorSpace.AdobeRGB;
-            }
-            else if (exitColorSpace == 0xFFFF)
-            {
-                colorSpace = PhotoColorSpace.Uncalibrated;
-            }
-            else if (exitColorSpace != null)
-            {
-                colorSpace = PhotoColorSpace.Unknown;
-            }
-
-
-            var colorContext = new PhotoColorProfile(colorSpace, profileBytes, bestProfile);
-
-
-            // dispose native color contexts
-            foreach (var ctx in contexts)
-            {
-                if (ctx.NativePointer != bestProfile?.NativePointer)
-                {
-                    ctx.Dispose();
-                }
-            }
-
-            return colorContext;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
-        }
-
-        return new PhotoColorProfile();
-    }
-
-
-    /// <summary>
-    /// Finds the best color profile.
-    /// </summary>
-    private static IWICColorContext? FindBestColorProfile(IWICColorContext[]? contexts)
-    {
-        IWICColorContext? bestProfile = null;
-        if (contexts == null) return bestProfile;
-
-
-        // get the last non-uncalibrated color context
-        // https://stackoverflow.com/a/70215280/403671
-        foreach (var ctx in contexts.Reverse())
-        {
-            // Uncalibrated
-            if (ctx.ExifColorSpace == 0xFFFF)
-                continue;
-
-            if (ctx.Type == Vortice.WIC.ColorContextType.Profile)
-            {
-                bestProfile = ctx;
-            }
-        }
-
-
-        return bestProfile;
-    }
-
-
-    /// <summary>
-    /// Loads pixel format information for a bitmap.
-    /// </summary>
-    private IWICPixelFormatInfo2 LoadPixelInfo()
-    {
-        if (_bitmap == null) return new IWICPixelFormatInfo2(IntPtr.Zero);
-
-        using var wicFactory = new IWICImagingFactory2();
-
-        var comInfo = wicFactory.CreateComponentInfo(_bitmap.PixelFormat);
-        return comInfo.As<IWICPixelFormatInfo2>();
-    }
-
-
-    /// <summary>
     /// Loads an image using WIC.
     /// </summary>
     private async Task LoadWithWicAsync(IgMetadata meta, CancellationToken token)
@@ -292,8 +142,13 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
             using var decoder = wicFactory.CreateDecoderFromFileName(meta.FilePath);
             var frameBmp = decoder.GetFrame((uint)meta.FrameIndex + 1);
 
+            _width = frameBmp.Size.Width;
+            _height = frameBmp.Size.Height;
+
             return frameBmp;
         }, token).ConfigureAwait(false);
+
+
     }
 
 
@@ -307,6 +162,9 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
         // multi-frame
         if (data.MultiFrameImage != null)
         {
+            _width = (int)meta.OriginalWidth;
+            _height = (int)meta.OriginalHeight;
+
             // animated format
             if (meta.CanAnimate)
             {
@@ -336,6 +194,9 @@ public partial class Photo : PhotoImpl<IWICBitmapSource>
         {
             var bmpSrc = data.SingleFrameImage?.ToBitmapSourceWithDensity();
             _bitmap = Photo.ToWicBitmapSource(bmpSrc, meta.HasAlpha);
+
+            _width = (int)(bmpSrc?.PixelWidth ?? 0);
+            _height = (int)(bmpSrc?.PixelHeight ?? 0);
         }
     }
 

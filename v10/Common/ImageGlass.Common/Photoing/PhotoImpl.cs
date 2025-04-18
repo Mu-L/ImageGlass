@@ -61,6 +61,8 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
 
     protected T? _bitmap;
+    protected int _width = 0;
+    protected int _height = 0;
     protected IgMetadata? _metadata;
     protected Lazy<string> _lazyHashKey;
     protected CancellationTokenSource? _tokenSrcPhoto;
@@ -69,9 +71,9 @@ public class PhotoImpl<T> : IPhoto<T> where T : IDisposable
 
     public virtual T? Bitmap => _bitmap;
 
-    public virtual int Width => 0;
+    public virtual int Width => _width;
 
-    public virtual int Height => 0;
+    public virtual int Height => _height;
 
     public virtual bool IsDone { get; set; } = false;
 

@@ -148,7 +148,7 @@ public partial class VirtualViewerControl
 
 
         // 2. create render target from WIC bitmap
-        using var tileImgDc = tileImg.CreateDirect2dRenderTarget();
+        using var tileImgDc = tileImg.CreateD2dRenderTarget();
         if (tileImgDc == null) return null;
 
 
@@ -176,7 +176,7 @@ public partial class VirtualViewerControl
 
 
         // 4. create D2DBitmap from WICBitmapSource
-        using var bmp = tileImg.CreateDirect2dBitmap(D2dContext);
+        using var bmp = tileImg.CreateD2dBitmap(D2dContext);
         var bmpProps = new BitmapBrushProperties1()
         {
             ExtendModeX = ExtendMode.Wrap,

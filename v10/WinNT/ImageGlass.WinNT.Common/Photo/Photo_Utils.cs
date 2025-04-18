@@ -19,7 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Common;
 using Microsoft.Win32.SafeHandles;
 using System;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 using Vortice.Direct2D1;
 using Vortice.WIC;
 using WinRT;
@@ -28,7 +31,7 @@ using WinRT;
 namespace ImageGlass.WinNT.Common;
 
 
-public partial class Photo : IPhoto<IWICBitmapSource>
+public partial class Photo
 {
 
     /// <summary>
@@ -36,13 +39,13 @@ public partial class Photo : IPhoto<IWICBitmapSource>
     /// </summary>
     public Photo? ConvertTo32bppPBGRA()
     {
-        if (_bitmap == null) return null;
+        if (_bitmap is not IWICBitmapSource wicBmp) return null;
 
         try
         {
             var newBmp = WIC.WICConvertBitmapSource(
                 Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA,
-                _bitmap);
+                wicBmp);
 
             return new Photo(newBmp);
         }
@@ -58,7 +61,7 @@ public partial class Photo : IPhoto<IWICBitmapSource>
     /// <summary>
     /// Creates a render target from a bitmap source for drawing operations.
     /// </summary>
-    public ID2D1RenderTarget? CreateDirect2dRenderTarget()
+    public ID2D1RenderTarget? CreateD2dRenderTarget()
     {
         ID2D1RenderTarget? target = null;
 
@@ -81,7 +84,7 @@ public partial class Photo : IPhoto<IWICBitmapSource>
     /// <summary>
     /// Creates a Direct2D bitmap from an existing bitmap if available.
     /// </summary>
-    public ID2D1Bitmap1? CreateDirect2dBitmap(ID2D1DeviceContext dc, BitmapProperties1? bmpProps = null)
+    public ID2D1Bitmap1? CreateD2dBitmap(ID2D1DeviceContext dc, BitmapProperties1? bmpProps = null)
     {
         if (_bitmap == null) return null;
 
@@ -90,7 +93,7 @@ public partial class Photo : IPhoto<IWICBitmapSource>
             var newPhoto = ConvertTo32bppPBGRA();
             if (newPhoto == null) return null;
 
-            return dc.CreateBitmapFromWicBitmap(newPhoto.Bitmap, bmpProps);
+            return dc.CreateBitmapFromWicBitmap(newPhoto.Bitmap.As<IWICBitmapSource>(), bmpProps);
         }
         catch (Exception ex)
         {
@@ -99,6 +102,124 @@ public partial class Photo : IPhoto<IWICBitmapSource>
 
         return null;
     }
+
+
+    /// <summary>
+    /// Gets color profile of the photo.
+    /// </summary>
+    private PhotoColorProfile GetWicColorProfile()
+    {
+        if (_bitmap is not IWICBitmapSource bmp) return new();
+
+        using var wicFactory = new IWICImagingFactory2();
+        var frame = _bitmap.As<IWICBitmapFrameDecode>();
+
+        try
+        {
+            var contexts = frame.TryGetColorContexts(wicFactory) ?? [];
+            var bestProfile = FindBestWicColorProfile(contexts);
+            byte[]? profileBytes = null;
+
+
+            // get color profile
+            if (bestProfile?.Profile is not null)
+            {
+                using var ms = new MemoryStream();
+                bestProfile.Profile.CopyTo(ms);
+                profileBytes = ms.ToArray();
+            }
+
+
+            // get color space
+            var exitColorSpace = bestProfile?.ExifColorSpace;
+            var colorSpace = PhotoColorSpace.None;
+
+            if (exitColorSpace == 1)
+            {
+                colorSpace = PhotoColorSpace.sRGB;
+            }
+            else if (exitColorSpace == 2
+                || (profileBytes != null && Encoding.ASCII.GetString(profileBytes).Contains("Adobe RGB")))
+            {
+                colorSpace = PhotoColorSpace.AdobeRGB;
+            }
+            else if (exitColorSpace == 0xFFFF)
+            {
+                colorSpace = PhotoColorSpace.Uncalibrated;
+            }
+            else if (exitColorSpace != null)
+            {
+                colorSpace = PhotoColorSpace.Unknown;
+            }
+
+
+            var colorContext = new PhotoColorProfile(colorSpace, profileBytes, bestProfile);
+
+
+            // dispose native color contexts
+            foreach (var ctx in contexts)
+            {
+                if (ctx.NativePointer != bestProfile?.NativePointer)
+                {
+                    ctx.Dispose();
+                }
+            }
+
+            return colorContext;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
+
+        return new PhotoColorProfile();
+    }
+
+
+    /// <summary>
+    /// Finds the best color profile.
+    /// </summary>
+    private static IWICColorContext? FindBestWicColorProfile(IWICColorContext[]? contexts)
+    {
+        IWICColorContext? bestProfile = null;
+        if (contexts == null) return bestProfile;
+
+
+        // get the last non-uncalibrated color context
+        // https://stackoverflow.com/a/70215280/403671
+        foreach (var ctx in contexts.Reverse())
+        {
+            // Uncalibrated
+            if (ctx.ExifColorSpace == 0xFFFF)
+                continue;
+
+            if (ctx.Type == Vortice.WIC.ColorContextType.Profile)
+            {
+                bestProfile = ctx;
+            }
+        }
+
+
+        return bestProfile;
+    }
+
+
+    /// <summary>
+    /// Loads pixel format information for a bitmap.
+    /// </summary>
+    private IWICPixelFormatInfo2 LoadWicPixelInfo()
+    {
+        if (_bitmap is not IWICBitmapSource bmp) return new IWICPixelFormatInfo2(IntPtr.Zero);
+
+        using var wicFactory = new IWICImagingFactory2();
+
+        var comInfo = wicFactory.CreateComponentInfo(bmp.PixelFormat);
+        return comInfo.As<IWICPixelFormatInfo2>();
+    }
+
+
+
+
 
 
     /// <summary>
