@@ -143,8 +143,8 @@ public partial class Photo : PhotoImpl
             // read multi-frame as IWICBitmapDecoder
             if (meta.CanAnimate)
             {
-                _width = meta.OriginalWidth;
-                _height = meta.OriginalHeight;
+                _width = meta.Width;
+                _height = meta.Height;
 
                 return decoder;
             }
@@ -174,8 +174,8 @@ public partial class Photo : PhotoImpl
         // multi-frame
         if (data.MultiFrameImage != null)
         {
-            _width = meta.OriginalWidth;
-            _height = meta.OriginalHeight;
+            _width = meta.Width;
+            _height = meta.Width;
 
             // animated format
             if (meta.CanAnimate)

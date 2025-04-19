@@ -502,8 +502,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
             {
                 using var wicThumb = PhotoWIC.ConvertFromMagick(thumbM);
 
-                SourceWidth = wicThumb?.Size.Width ?? 0;
-                SourceHeight = wicThumb?.Size.Height ?? 0;
+                SourceWidth = e.Metadata.Width;
+                SourceHeight = e.Metadata.Height;
 
                 _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
                 _bmpPreview = ApplyColorManagementEffect(_bmpPreview);

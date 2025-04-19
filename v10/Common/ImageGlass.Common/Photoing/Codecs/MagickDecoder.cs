@@ -239,9 +239,17 @@ public class MagickDecoder
             try
             {
                 // image size
-                meta.OriginalWidth = imgC[frameIndex].Page.Width;
-                meta.OriginalHeight = imgC[frameIndex].Page.Height;
+                meta.OriginalWidth = meta.Width = imgC[frameIndex].Page.Width;
+                meta.OriginalHeight = meta.Height = imgC[frameIndex].Page.Height;
                 meta.Orientation = imgC[frameIndex].Orientation;
+
+                // correct the image size according to orientation
+                if (meta.Orientation != OrientationType.Undefined)
+                {
+                    // swap width and height
+                    meta.Width = meta.OriginalHeight;
+                    meta.Height = meta.OriginalWidth;
+                }
 
 
                 // image color

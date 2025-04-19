@@ -102,6 +102,16 @@ public class PhotoMetadata : IDisposable
     public uint OriginalHeight { get; set; } = 0;
 
     /// <summary>
+    /// Gets the desired width after processing orientation.
+    /// </summary>
+    public uint Width { get; set; } = 0;
+
+    /// <summary>
+    /// Gets the desired height after processing orientation.
+    /// </summary>
+    public uint Height { get; set; } = 0;
+
+    /// <summary>
     /// Gets the frame index of this metadata.
     /// </summary>
     public uint FrameIndex { get; set; } = 0;
@@ -157,28 +167,27 @@ public class PhotoMetadata : IDisposable
                 Log.Info("Retrieving embedded preview from RAW format...");
 
                 thumbM = new MagickImage(RawThumbnail.ToReadOnlySpan());
-                thumbM?.AutoOrient();
-
-                return thumbM;
             }
 
 
             // cancel if requested
             token.ThrowIfCancellationRequested();
 
-            if (ExifProfile is not null)
+            if (thumbM is null && ExifProfile is not null)
             {
                 Log.Info("Retrieving embedded preview from EXIF profile...");
 
                 thumbM = ExifProfile.CreateThumbnail();
-                if (thumbM is not null)
-                {
-                    thumbM.Orientation = Orientation;
-                    thumbM?.AutoOrient();
-                }
-
-                return thumbM;
             }
+
+
+            if (thumbM is not null)
+            {
+                thumbM.Orientation = Orientation;
+                thumbM?.AutoOrient();
+            }
+
+            return thumbM;
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
