@@ -23,13 +23,14 @@ public partial class VirtualViewerControl : SwapChainCanvas
 {
     // drawing image
     private Photo? _photo;
-    private ID2D1Bitmap1? _bmpD2d;
+    private ID2D1Bitmap1? _bmpSource;
     private ID2D1Bitmap1? _bmpPreview;
     private Rect _srcRect = new();
     private Rect _destRect = new();
 
     private bool _isPreviewing = false;
     private CancellationTokenSource? _previewTokenSrc;
+    private readonly Lock _lock = new();
 
     private ImageInterpolation _interpolationScaleDown = ImageInterpolation.MultiSampleLinear;
     private ImageInterpolation _interpolationScaleUp = ImageInterpolation.NearestNeighbor;
@@ -180,8 +181,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         _bmpPreview = null;
 
         // dispose native bitmap
-        _bmpD2d?.Dispose();
-        _bmpD2d = null;
+        _bmpSource?.Dispose();
+        _bmpSource = null;
 
         // dispose photo
         if (_photo != null)
@@ -384,32 +385,31 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    private readonly Lock _lock = new();
-
     protected virtual void DrawImageLayer(SwapChainCanvasRenderEventArgs e)
     {
-        if (_bmpD2d is null)
-        {
-            // draw preview bitmap
-            if (_bmpPreview is not null)
-            {
-                e.DrawBitmap(_bmpPreview, _destRect, _srcRect, (InterpolationMode)CurrentInterpolation);
-            }
-
-            return;
-        }
-
         // draw full resolution bitmap
-        lock (_lock)
+        if (_bmpSource is not null)
         {
-            if (_bmpD2d is not null)
+            lock (_lock)
             {
-                e.DrawBitmap(_bmpD2d, _destRect, _srcRect, (InterpolationMode)CurrentInterpolation);
+                if (_bmpSource is not null)
+                {
+                    e.DrawBitmap(_bmpSource, _destRect, _srcRect, (InterpolationMode)CurrentInterpolation);
+                }
+            }
+        }
+        // draw preview bitmap
+        else
+        {
+            lock (_lock)
+            {
+                if (_bmpPreview is not null)
+                {
+                    e.DrawBitmap(_bmpPreview, _destRect, _srcRect, (InterpolationMode)CurrentInterpolation);
+                }
             }
         }
     }
-
-
 
 
 
@@ -450,11 +450,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // start loading new photo
         _photo = inputPhoto;
 
-        if (_photo == null)
-        {
-            Refresh(true);
-            return;
-        }
+        Refresh(true);
+        if (_photo == null) return;
 
         _photo.Loading += Photo_Loading;
     }
@@ -465,38 +462,22 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // previewing
         if (!e.IsDone)
         {
-            SourceWidth = e.Metadata.OriginalWidth;
-            SourceHeight = e.Metadata.OriginalHeight;
+            _previewTokenSrc ??= new();
+            _isPreviewing = true;
+            await Task.Run(() => HandlePhotoPreview(e, _previewTokenSrc.Token));
         }
+        // load full resolution photo
         else
         {
-            SourceWidth = sender.Width;
-            SourceHeight = sender.Height;
+            await Task.Run(() => HandlePhotoLoaded(e));
+            _isPreviewing = false;
         }
 
         // check if we can use hardware acceleration
         UseHardwareAcceleration = !IsExceededD2dBitmapSize;
 
 
-        // previewing
-        if (!e.IsDone)
-        {
-            _previewTokenSrc ??= new();
-            _isPreviewing = true;
-            await HandlePhotoPreviewAsync(e, _previewTokenSrc.Token);
-
-            Refresh(true);
-        }
-        // load full resolution photo
-        else
-        {
-            await HandlePhotoLoadedAsync(e);
-            _isPreviewing = false;
-
-            Refresh(false);
-        }
-
-
+        Refresh(!_zooming.IsManual);
 
         GC.Collect();
         GC.WaitForPendingFinalizers();
@@ -505,11 +486,11 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
 
-    private async Task HandlePhotoPreviewAsync(PhotoLoadingEventArgs e, CancellationToken token)
+    private void HandlePhotoPreview(PhotoLoadingEventArgs e, CancellationToken token)
     {
         // try to get photo preview
-        var thumbBytes = await e.Metadata.GetPreviewAsync(token);
-        if (thumbBytes is null) return;
+        using var thumbM = e.Metadata.GetPreview(token);
+        if (thumbM is null) return;
 
 
         try
@@ -517,17 +498,26 @@ public partial class VirtualViewerControl : SwapChainCanvas
             // cancel if requested
             token.ThrowIfCancellationRequested();
 
-            if (thumbBytes is not null)
+            if (thumbM is not null)
             {
-                using var wicThumb = PhotoWIC.ConvertFromBytes(thumbBytes);
+                using var wicThumb = PhotoWIC.ConvertFromMagick(thumbM);
+
+                SourceWidth = wicThumb?.Size.Width ?? 0;
+                SourceHeight = wicThumb?.Size.Height ?? 0;
 
                 _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
                 _bmpPreview = ApplyColorManagementEffect(_bmpPreview);
+
+                // cancel if requested
+                token.ThrowIfCancellationRequested();
             }
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
             Log.Info($"Cancelled HandlePhotoPreviewAsync()!");
+
+            _bmpPreview?.Dispose();
+            _bmpPreview = null;
         }
         catch (Exception ex)
         {
@@ -536,20 +526,29 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    private async Task HandlePhotoLoadedAsync(PhotoLoadingEventArgs e)
+    private void HandlePhotoLoaded(PhotoLoadingEventArgs e)
     {
-        // cancel the preview process
-        _previewTokenSrc?.Cancel();
-
-        if (e.Photo.Bitmap is null) return;
-
-        await Task.Run(() =>
+        try
         {
-            Log.Info("Loading full resolution photo...");
+            // cancel the preview process
+            _previewTokenSrc?.Cancel();
 
-            _bmpD2d = PhotoWIC.CreateD2dBitmap(e.Photo.Bitmap.As<IWICBitmapSource>(), D2dContext);
-            _bmpD2d = ApplyColorManagementEffect(_bmpD2d);
-        });
+            Log.Info("Loading full resolution photo...");
+            if (e.Photo.Bitmap is null) return;
+
+            SourceWidth = e.Photo.Width;
+            SourceHeight = e.Photo.Height;
+
+            _bmpSource = PhotoWIC.CreateD2dBitmap(e.Photo.Bitmap.As<IWICBitmapSource>(), D2dContext);
+            _bmpSource = ApplyColorManagementEffect(_bmpSource);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+
+            _bmpSource?.Dispose();
+            _bmpSource = null;
+        }
     }
 
 
@@ -565,7 +564,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         // create color management effect
         using var colorEffect = new ColorManagement(D2dContext);
-        colorEffect.SetInput(0, _bmpD2d, false);
+        colorEffect.SetInput(0, _bmpSource, false);
 
 
         // create destination color context

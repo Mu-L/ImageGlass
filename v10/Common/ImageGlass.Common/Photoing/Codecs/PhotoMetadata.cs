@@ -26,9 +26,7 @@ public class PhotoMetadata : IDisposable
 {
 
     #region IDisposable Disposing
-
     public bool IsDisposed { get; protected set; } = false;
-
 
     protected virtual void Dispose(bool disposing)
     {
@@ -45,6 +43,7 @@ public class PhotoMetadata : IDisposable
 
             RawThumbnail = null;
             ExifProfile = null;
+            Frames.Clear();
         }
 
         // Free any unmanaged objects here.
@@ -110,6 +109,9 @@ public class PhotoMetadata : IDisposable
     public IImmutableList<FrameMetadata> Frames { get; set; } = [];
     public bool HasAlpha { get; set; } = false;
     public bool CanAnimate { get; set; } = false;
+    public OrientationType Orientation { get; set; } = OrientationType.Undefined;
+
+
 
     public ColorSpace ColorSpace { get; set; } = ColorSpace.Undefined;
     public string ColorProfileName { get; set; } = string.Empty;
@@ -139,60 +141,59 @@ public class PhotoMetadata : IDisposable
     /// <summary>
     /// Retrieves a byte array representing a preview image from either a RAW format or an EXIF profile.
     /// </summary>
-    public async Task<byte[]?> GetPreviewAsync(CancellationToken token)
+    public IMagickImage<byte>? GetPreview(CancellationToken token)
     {
         if (RawThumbnail is null && ExifProfile is null) return null;
 
+        IMagickImage<byte>? thumbM = null;
 
-        byte[]? thumbBytes = await Task.Run<byte[]?>(() =>
+        try
         {
-            try
-            {
-                // cancel if requested
-                token.ThrowIfCancellationRequested();
+            // cancel if requested
+            token.ThrowIfCancellationRequested();
 
-                if (RawThumbnail is not null)
+            if (RawThumbnail is not null)
+            {
+                Log.Info("Retrieving embedded preview from RAW format...");
+
+                thumbM = new MagickImage(RawThumbnail.ToReadOnlySpan());
+                thumbM?.AutoOrient();
+
+                return thumbM;
+            }
+
+
+            // cancel if requested
+            token.ThrowIfCancellationRequested();
+
+            if (ExifProfile is not null)
+            {
+                Log.Info("Retrieving embedded preview from EXIF profile...");
+
+                thumbM = ExifProfile.CreateThumbnail();
+                if (thumbM is not null)
                 {
-                    Log.Info("Retrieving embedded preview from RAW format...");
-                    return RawThumbnail.ToByteArray();
+                    thumbM.Orientation = Orientation;
+                    thumbM?.AutoOrient();
                 }
 
-
-                // cancel if requested
-                token.ThrowIfCancellationRequested();
-
-                if (ExifProfile is not null)
-                {
-                    Log.Info("Retrieving embedded preview from EXIF profile...");
-
-                    var thumbnailLength = (int)ExifProfile.ThumbnailLength;
-                    var thumbnailOffset = (int)ExifProfile.ThumbnailOffset;
-
-                    if (thumbnailLength > 0 && thumbnailOffset > 0)
-                    {
-                        var data = ExifProfile.ToReadOnlySpan();
-                        if (data.Length >= (thumbnailOffset + thumbnailLength))
-                        {
-                            return data.Slice(thumbnailOffset, thumbnailLength).ToArray();
-                        }
-                    }
-                }
+                return thumbM;
             }
-            catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
-            {
-                Log.Info($"Cancelled GetPreviewAsync()!");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex);
-            }
+        }
+        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+        {
+            Log.Info($"Cancelled GetPreviewAsync()!");
 
-            return null;
+            thumbM?.Dispose();
+            thumbM = null;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
 
-        }, token).ConfigureAwait(false);
 
-
-        return thumbBytes;
+        return thumbM;
     }
 
 

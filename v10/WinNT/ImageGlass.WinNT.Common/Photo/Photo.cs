@@ -91,7 +91,7 @@ public partial class Photo : PhotoImpl
     /// </summary>
     protected override async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var extWIC = new string[] { ".HEIC", ".CR2" };
+        var extWIC = new string[] { ".GIF", ".GIFV", ".FAX", ".JXR" };
 
 
         // use WIC decoders

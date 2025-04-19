@@ -241,6 +241,7 @@ public class MagickDecoder
                 // image size
                 meta.OriginalWidth = imgC[frameIndex].Page.Width;
                 meta.OriginalHeight = imgC[frameIndex].Page.Height;
+                meta.Orientation = imgC[frameIndex].Orientation;
 
 
                 // image color

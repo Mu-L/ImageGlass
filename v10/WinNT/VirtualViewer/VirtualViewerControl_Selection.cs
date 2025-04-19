@@ -245,7 +245,7 @@ public partial class VirtualViewerControl
     /// </summary>
     private bool OnSelectionBegin(PointerPoint pointer)
     {
-        if (_bmpD2d == null) return false;
+        if (_bmpSource == null) return false;
 
 
         var dpiCursorPosition = DpiScale(pointer.Position);
