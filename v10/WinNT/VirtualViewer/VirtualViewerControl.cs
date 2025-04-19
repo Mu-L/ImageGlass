@@ -7,6 +7,7 @@ using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using System;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Vortice.Direct2D1;
@@ -175,6 +176,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
     {
         // reset selection
         SetSourceSelection(Rect.Empty, false);
+
+        SourceWidth = 0;
+        SourceHeight = 0;
 
         // dispose preview bitmap
         _bmpPreview?.Dispose();
@@ -465,23 +469,59 @@ public partial class VirtualViewerControl : SwapChainCanvas
             _previewTokenSrc ??= new();
             _isPreviewing = true;
             await Task.Run(() => HandlePhotoPreview(e, _previewTokenSrc.Token));
+
+            Refresh(true);
         }
         // load full resolution photo
         else
         {
-            await Task.Run(() => HandlePhotoLoaded(e));
+            // back up size of preview image
+            var prevSize = new Size(SourceWidth, SourceHeight);
+
+            await Task.Run(async () =>
+            {
+                HandlePhotoLoaded(e);
+            });
+
             _isPreviewing = false;
+
+            var diffRatio = new Vector2(
+                (float)(prevSize.Width / SourceWidth),
+                (float)(prevSize.Height / SourceHeight));
+
+            // calculate new source rect
+            var newSrcRect = _srcRect;
+            newSrcRect.X /= diffRatio.X;
+            newSrcRect.Y /= diffRatio.Y;
+            newSrcRect.Width /= diffRatio.X;
+            newSrcRect.Height /= diffRatio.Y;
+
+            // translate zoomed point
+            var newZoomX = _zooming.ZoomedPoint.X / diffRatio.X;
+            var newZoomY = _zooming.ZoomedPoint.Y / diffRatio.Y;
+
+            // update zoom source
+            _srcRect = newSrcRect.Safe();
+            _zooming.ZoomedPoint = new Point(newZoomX, newZoomY);
+            _zooming.Factor *= diffRatio.X;
+
+
+
+            var hasPreview = _bmpPreview != null;
+            var resetZoom = !hasPreview || !_zooming.IsManual;
+            Refresh(resetZoom);
         }
 
         // check if we can use hardware acceleration
         UseHardwareAcceleration = !IsExceededD2dBitmapSize;
 
 
-        Refresh(!_zooming.IsManual);
-
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
+        if (e.IsDone)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+        }
     }
 
 
@@ -502,8 +542,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
             {
                 using var wicThumb = PhotoWIC.ConvertFromMagick(thumbM);
 
-                SourceWidth = e.Metadata.Width;
-                SourceHeight = e.Metadata.Height;
+                SourceWidth = wicThumb?.Size.Width ?? (int)e.Metadata.Width;
+                SourceHeight = wicThumb?.Size.Height ?? (int)e.Metadata.Height;
 
                 _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
                 _bmpPreview = ApplyColorManagementEffect(_bmpPreview);

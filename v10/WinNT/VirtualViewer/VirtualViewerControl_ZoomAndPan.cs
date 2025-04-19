@@ -174,7 +174,7 @@ public partial class VirtualViewerControl
     /// </summary>
     public virtual void CalculateDrawingRegion()
     {
-        if (DrawingArea.IsEmpty()) return;
+        if (DrawingArea.IsEmpty() || SourceWidth == 0 || SourceHeight == 0) return;
 
         // 1. scale the values according to DPI
         // 1.1 zoom point
@@ -185,6 +185,7 @@ public partial class VirtualViewerControl
         // 1.2 source and viewport size
         var controlW = DrawingArea.Width;
         var controlH = DrawingArea.Height;
+
         var scaledImgWidth = SourceWidth * _zooming.Factor;
         var scaledImgHeight = SourceHeight * _zooming.Factor;
 
