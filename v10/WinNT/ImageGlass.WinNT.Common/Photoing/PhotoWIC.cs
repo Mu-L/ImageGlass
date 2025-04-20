@@ -252,14 +252,19 @@ public static partial class PhotoWIC
     /// Converts <see cref="MagickImage"/>
     /// to <see cref="IWICBitmapSource"/> object.
     /// </summary>
-    public static IWICBitmapSource? ConvertFromMagick(IMagickImage<byte>? imgM)
+    public static IWICBitmapSource? ConvertFromMagick(MagickImage? imgM)
     {
         if (imgM == null) return null;
 
         try
         {
+            using var pixels = imgM.GetPixelsUnsafe();
+            if (pixels is null) return null;
+
+
             // RGBA (with alpha)
             Guid? format = null;
+            var pxMap = PixelMapping.RGB;
 
             // Grayscale
             if (imgM.ChannelCount == 1)
@@ -274,35 +279,35 @@ public static partial class PhotoWIC
             // RGBA
             else if (imgM.ChannelCount == 4)
             {
-                format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppRGBA;
+                format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppBGRA;
+                pxMap = PixelMapping.BGRA;
             }
 
 
             using var fac = new IWICImagingFactory2();
+            byte[]? bytes = null;
 
             if (format != null)
             {
-                using var pixels = imgM.GetPixelsUnsafe();
-                if (pixels is null) return null;
-
-                var bytes = pixels.ToArray().AsSpan<byte>();
-                var wicSrc = fac.CreateBitmapFromMemory<byte>(imgM.Width, imgM.Height, format.Value, bytes);
-
-                return wicSrc;
+                //bytes = pixels.ToByteArray(pxMap);
+                bytes = pixels.ToArray();
             }
             else
             {
-                var mFormat = imgM.HasAlpha
-                    ? MagickFormat.Bgra
-                    : MagickFormat.Rgb;
+                format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat24bppRGB;
+                if (imgM.HasAlpha)
+                {
+                    pxMap = PixelMapping.BGRA;
+                    format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppBGRA;
+                }
 
-                format = imgM.HasAlpha
-                    ? Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppRGBA
-                    : Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat24bppRGB;
-
-                var bytes = imgM.ToByteArray(mFormat);
-                var wicSrc = fac.CreateBitmapFromMemory<byte>(imgM.Width, imgM.Height, format.Value, bytes);
+                bytes = pixels.ToByteArray(pxMap);
             }
+
+            if (bytes is null) return null;
+            var wicSrc = fac.CreateBitmapFromMemory<byte>(imgM.Width, imgM.Height, format.Value, bytes);
+
+            return wicSrc;
         }
         catch (Exception ex)
         {

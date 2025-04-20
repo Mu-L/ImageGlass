@@ -23,7 +23,7 @@ namespace ImageGlass.Common.Photoing;
 
 public class FrameMetadata
 {
-    public IMagickColor<byte> BackgroundColor { get; set; } = MagickColors.Transparent;
+    public MagickColor BackgroundColor { get; set; } = MagickColors.Transparent;
     public uint Width { get; set; } = 0;
     public uint Height { get; set; } = 0;
     public int X { get; set; } = 0;

@@ -240,7 +240,7 @@ public class MagickDecoder
                 meta.FrameCount = imgC.Count;
                 meta.Frames = imgC.Select(item => new FrameMetadata()
                 {
-                    BackgroundColor = item.BackgroundColor ?? MagickColors.Transparent,
+                    BackgroundColor = (MagickColor?)item.BackgroundColor ?? MagickColors.Transparent,
                     Width = item.Page.Width,
                     Height = item.Page.Height,
                     X = item.Page.X,

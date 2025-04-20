@@ -151,11 +151,11 @@ public class PhotoMetadata : IDisposable
     /// <summary>
     /// Retrieves an embedded thumbnail from either a RAW format or an EXIF profile if exists.
     /// </summary>
-    public IMagickImage<byte>? GetPreview(CancellationToken token)
+    public MagickImage? GetPreview(CancellationToken token)
     {
         if (RawThumbnail is null && ExifProfile is null) return null;
 
-        IMagickImage<byte>? thumbM = null;
+        MagickImage? thumbM = null;
 
         try
         {
@@ -177,7 +177,7 @@ public class PhotoMetadata : IDisposable
             {
                 Log.Info("Retrieving embedded preview from EXIF profile...");
 
-                thumbM = ExifProfile.CreateThumbnail();
+                thumbM = (MagickImage?)ExifProfile.CreateThumbnail();
             }
 
 
