@@ -541,8 +541,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
             // cancel if requested
             token.ThrowIfCancellationRequested();
 
+            var previewHeight = Math.Min(DrawingArea.Height, e.Metadata.Height) / DpiY;
+
             // try to get photo preview
-            using var wicThumb = await e.Metadata.GetPreviewAsync(DrawingArea.Height, token);
+            using var wicThumb = await e.Metadata.GetPreviewAsync(previewHeight, token);
             _isPreviewing = true;
 
 
@@ -581,14 +583,17 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // calculate viewport of preview
         if (_isPreviewing)
         {
-            var prevZoomFactor = ZoomFactor;
             var desiredSrcZoomFactor = CalculateZoomFactor(ZoomMode, e.Metadata.Width, e.Metadata.Height);
-            var fitZoomFactor = CalculateZoomFactor(ZoomMode.ScaleToFit, BitmapSize.Width, BitmapSize.Height);
 
-            if (desiredSrcZoomFactor != 1)
+            // if the source size is bigger than viewport
+            if (desiredSrcZoomFactor < 1)
             {
+                // fit the thumbnail to the viewport
+                var fitZoomFactor = CalculateZoomFactor(ZoomMode.ScaleToFit, BitmapSize.Width, BitmapSize.Height);
+
                 SetZoomFactor(fitZoomFactor, false);
             }
+            // both preview and source size are smaller than viewport
             else
             {
                 SetZoomFactor(1, false);
@@ -654,14 +659,17 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 _srcRect = newSrcRect.Safe();
                 _zooming.Factor *= diffRatio.Width;
 
-                // HACK:
                 // make sure all zoomed point and viewport are synced
                 // by manually applying a very small zoom factor
+                var isManualZoom = _zooming.IsManual;
                 ZoomByDeltaToPoint(double.Epsilon, _zooming.ZoomedPoint, false);
-                _zooming.IsManual = false;
+                _zooming.IsManual = isManualZoom;
 
                 _isPreviewing = false;
-                Refresh(false);
+                Refresh(!isManualZoom);
+
+                _bmpPreview?.Dispose();
+                _bmpPreview = null;
             }
             else
             {
