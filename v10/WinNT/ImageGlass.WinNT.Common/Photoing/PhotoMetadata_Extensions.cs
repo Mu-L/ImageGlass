@@ -33,9 +33,9 @@ public static class PhotoMetadata_Extensions
 {
     /// <summary>
     /// Retrieves an embedded thumbnail from either a RAW format or an EXIF profile if exists.
-    /// Tries to use WinRT to get the thumbnail if it not exist.
+    /// Tries to use WinRT to get the thumbnail if it not exist or size is too small.
     /// </summary>
-    public static async Task<IWICBitmapSource?> GetPreviewAsync(this PhotoMetadata meta, CancellationToken token)
+    public static async Task<IWICBitmapSource?> GetPreviewAsync(this PhotoMetadata meta, double? minHeight, CancellationToken token)
     {
         // try to get photo preview
         using var thumbM = meta.GetPreview(token);
@@ -45,13 +45,14 @@ public static class PhotoMetadata_Extensions
         {
             // cancel if requested
             token.ThrowIfCancellationRequested();
+            minHeight ??= double.MinValue;
 
-            // no embedded thumbnail found
             // get the thumbnail using WinRT
-            if (thumbM is null)
+            // if no embedded thumbnail found or the size is too small
+            if (thumbM is null || thumbM.Height < minHeight)
             {
                 var fi = await StorageFile.GetFileFromPathAsync(meta.FilePath);
-                var fiThumb = await fi.GetScaledImageAsThumbnailAsync(ThumbnailMode.SingleItem);
+                using var fiThumb = await fi.GetScaledImageAsThumbnailAsync(ThumbnailMode.SingleItem);
 
                 // cancel if requested
                 token.ThrowIfCancellationRequested();

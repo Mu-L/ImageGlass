@@ -526,7 +526,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             //await Task.Run(async () =>
             //{
             //    await Task.Delay(5000);
-            //    HandlePhotoLoaded(e);
+            //    await HandlePhotoLoadedAsync(e);
             //});
             await HandlePhotoLoadedAsync(e);
         }
@@ -542,7 +542,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             token.ThrowIfCancellationRequested();
 
             // try to get photo preview
-            using var wicThumb = await e.Metadata.GetPreviewAsync(token);
+            using var wicThumb = await e.Metadata.GetPreviewAsync(DrawingArea.Height, token);
             _isPreviewing = true;
 
 
