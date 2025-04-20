@@ -561,6 +561,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
                 _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
             }
+            else
+            {
+                _isPreviewing = false;
+            }
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
@@ -673,6 +677,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             }
             else
             {
+                _isPreviewing = false;
                 Refresh(true);
             }
         }

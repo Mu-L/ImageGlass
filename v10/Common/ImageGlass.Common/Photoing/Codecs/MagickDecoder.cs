@@ -189,7 +189,10 @@ public class MagickDecoder
         {
             imgC.Ping(filePath, settings);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
         if (imgC.Count == 0) return meta;
 
 
