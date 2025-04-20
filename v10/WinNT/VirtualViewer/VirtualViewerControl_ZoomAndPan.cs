@@ -430,8 +430,8 @@ public partial class VirtualViewerControl
         // the distance of 2 points after zoomed
         var zoomedDistance = new Size()
         {
-            Width = zoomedLocation.X - location.X,
-            Height = zoomedLocation.Y - location.Y,
+            Width = Math.Max(0, zoomedLocation.X - location.X),
+            Height = Math.Max(0, zoomedLocation.Y - location.Y),
         };
 
         // perform zoom if the new zoom factor is different

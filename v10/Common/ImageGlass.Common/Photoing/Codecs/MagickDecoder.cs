@@ -338,7 +338,7 @@ public class MagickDecoder
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Info($"Cancelled LoadMetadataAsync() for {filePath}");
+            Log.Info($"Cancelled {nameof(LoadMetadataAsync)} for {filePath}");
         }
 
         return meta;

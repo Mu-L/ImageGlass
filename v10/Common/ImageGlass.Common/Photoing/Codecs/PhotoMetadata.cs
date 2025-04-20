@@ -191,7 +191,7 @@ public class PhotoMetadata : IDisposable
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Info($"Cancelled GetPreviewAsync()!");
+            Log.Info($"Cancelled {nameof(GetPreview)}!");
 
             thumbM?.Dispose();
             thumbM = null;

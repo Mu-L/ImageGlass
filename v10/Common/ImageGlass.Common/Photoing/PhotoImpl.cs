@@ -215,7 +215,7 @@ public class PhotoImpl : IPhoto<IDisposable>
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Error($"Cancelled loading: {FilePath}");
+            Log.Error($"Cancelled {nameof(LoadAsync)} for {FilePath}");
 
             Unload();
             Dispose();

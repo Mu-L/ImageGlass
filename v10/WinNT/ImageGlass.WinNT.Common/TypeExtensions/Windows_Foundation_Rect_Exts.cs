@@ -2,9 +2,7 @@
 
 using Microsoft.UI.Xaml;
 using System;
-using System.Threading.Tasks;
 using Windows.Foundation;
-using Windows.Storage.Streams;
 
 
 namespace ImageGlass.WinNT.Common;
@@ -43,14 +41,14 @@ public static class Windows_Foundation_Rect_Exts
 
 
     /// <summary>
-    /// Ensures the rectangle location and size are not negative infinite.
+    /// Ensures the rectangle location and size values are finite numbers.
     /// </summary>
     public static Rect Safe(this Rect rect)
     {
-        var x = rect.X == double.NegativeInfinity ? 0 : rect.X;
-        var y = rect.Y == double.NegativeInfinity ? 0 : rect.Y;
-        var w = Math.Max(0, rect.Width);
-        var h = Math.Max(0, rect.Height);
+        var x = double.IsFinite(rect.X) ? rect.X : 0;
+        var y = double.IsFinite(rect.Y) ? rect.Y : 0;
+        var w = double.IsFinite(rect.Width) ? rect.Width : 0;
+        var h = double.IsFinite(rect.Height) ? rect.Height : 0;
 
         return new Rect(rect.X, rect.Y, w, h);
     }

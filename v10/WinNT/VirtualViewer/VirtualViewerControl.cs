@@ -7,7 +7,6 @@ using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using System;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Vortice.Direct2D1;
@@ -31,7 +30,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     private bool _isPreviewing = false;
     private CancellationTokenSource? _previewTokenSrc;
-    private readonly Lock _lock = new();
+    private readonly Lock _lockSource = new();
+    private readonly Lock _lockPreview = new();
 
     private ImageInterpolation _interpolationScaleDown = ImageInterpolation.MultiSampleLinear;
     private ImageInterpolation _interpolationScaleUp = ImageInterpolation.NearestNeighbor;
@@ -366,9 +366,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
             Image size: {SourceWidth} x {SourceHeight}
             _srcRect: {_srcRect}
             _destRect: {_destRect}
-            _sourceSelection: {_selection.SourceRect}
-            ClientSelection: {ClientSelection}
-            CurrentTouchPoints: {TouchedPoints}
+            _zoomFactor: {_zooming.Factor}
+            _zoomedPoint: {_zooming.ZoomedPoint}
+            _isPreviewing: {_isPreviewing}
             """,
             "Consolas", FontSize_Dpi, DrawingArea, Colors.Magenta);
 
@@ -394,7 +394,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // draw full resolution bitmap
         if (_bmpSource is not null)
         {
-            lock (_lock)
+            lock (_lockSource)
             {
                 if (_bmpSource is not null)
                 {
@@ -403,9 +403,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
             }
         }
         // draw preview bitmap
-        else
+        else if (_bmpPreview is not null)
         {
-            lock (_lock)
+            lock (_lockPreview)
             {
                 if (_bmpPreview is not null)
                 {
@@ -454,8 +454,11 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // start loading new photo
         _photo = inputPhoto;
 
-        Refresh(true);
-        if (_photo == null) return;
+        if (_photo == null)
+        {
+            Refresh(true);
+            return;
+        }
 
         _photo.Loading += Photo_Loading;
     }
@@ -467,10 +470,29 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (!e.IsDone)
         {
             _previewTokenSrc ??= new();
-            _isPreviewing = true;
             await Task.Run(() => HandlePhotoPreview(e, _previewTokenSrc.Token));
 
-            Refresh(true);
+            // calculate viewport of preview
+            if (_isPreviewing)
+            {
+                var prevZoomFactor = ZoomFactor;
+                var desiredSrcZoomFactor = CalculateZoomFactor(ZoomMode, e.Metadata.Width, e.Metadata.Height);
+                var fitZoomFactor = CalculateZoomFactor(ZoomMode.ScaleToFit, SourceWidth, SourceHeight);
+
+                if (desiredSrcZoomFactor != 1)
+                {
+                    SetZoomFactor(fitZoomFactor, false);
+                }
+                else
+                {
+                    SetZoomFactor(1, false);
+                }
+
+                // check if we can use hardware acceleration
+                UseHardwareAcceleration = !IsExceededD2dBitmapSize;
+
+                Refresh(false);
+            }
         }
         // load full resolution photo
         else
@@ -478,42 +500,44 @@ public partial class VirtualViewerControl : SwapChainCanvas
             // back up size of preview image
             var prevSize = new Size(SourceWidth, SourceHeight);
 
-            await Task.Run(async () =>
+            //await Task.Run(async () =>
+            //{
+            //    await Task.Delay(5000);
+            //    HandlePhotoLoaded(e);
+            //});
+            await Task.Run(() => HandlePhotoLoaded(e));
+
+            // check if we can use hardware acceleration
+            UseHardwareAcceleration = !IsExceededD2dBitmapSize;
+
+            // calculate the source viewport to match with the preview
+            if (_isPreviewing)
             {
-                HandlePhotoLoaded(e);
-            });
+                var diffRatio = new Size(
+                    prevSize.Width / SourceWidth,
+                    prevSize.Height / SourceHeight);
 
-            _isPreviewing = false;
+                // calculate new source rect
+                var newSrcRect = _srcRect;
+                newSrcRect.X /= diffRatio.Width;
+                newSrcRect.Y /= diffRatio.Height;
+                newSrcRect.Width /= diffRatio.Width;
+                newSrcRect.Height /= diffRatio.Height;
 
-            var diffRatio = new Vector2(
-                (float)(prevSize.Width / SourceWidth),
-                (float)(prevSize.Height / SourceHeight));
+                // update zoom source
+                _srcRect = newSrcRect.Safe();
+                _zooming.Factor *= diffRatio.Width;
 
-            // calculate new source rect
-            var newSrcRect = _srcRect;
-            newSrcRect.X /= diffRatio.X;
-            newSrcRect.Y /= diffRatio.Y;
-            newSrcRect.Width /= diffRatio.X;
-            newSrcRect.Height /= diffRatio.Y;
+                ZoomByDeltaToPoint(1, _zooming.ZoomedPoint, false);
 
-            // translate zoomed point
-            var newZoomX = _zooming.ZoomedPoint.X / diffRatio.X;
-            var newZoomY = _zooming.ZoomedPoint.Y / diffRatio.Y;
-
-            // update zoom source
-            _srcRect = newSrcRect.Safe();
-            _zooming.ZoomedPoint = new Point(newZoomX, newZoomY);
-            _zooming.Factor *= diffRatio.X;
-
-
-
-            var hasPreview = _bmpPreview != null;
-            var resetZoom = !hasPreview || !_zooming.IsManual;
-            Refresh(resetZoom);
+                _isPreviewing = false;
+                Refresh(false);
+            }
+            else
+            {
+                Refresh(true);
+            }
         }
-
-        // check if we can use hardware acceleration
-        UseHardwareAcceleration = !IsExceededD2dBitmapSize;
 
 
         if (e.IsDone)
@@ -532,6 +556,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         using var thumbM = e.Metadata.GetPreview(token);
         if (thumbM is null) return;
 
+        _isPreviewing = true;
 
         try
         {
@@ -546,7 +571,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 SourceHeight = wicThumb?.Size.Height ?? (int)e.Metadata.Height;
 
                 _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
-                _bmpPreview = ApplyColorManagementEffect(_bmpPreview);
 
                 // cancel if requested
                 token.ThrowIfCancellationRequested();
@@ -554,14 +578,19 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Info($"Cancelled HandlePhotoPreviewAsync()!");
+            Log.Info($"Cancelled {nameof(HandlePhotoPreview)}!");
 
             _bmpPreview?.Dispose();
             _bmpPreview = null;
+            _isPreviewing = false;
         }
         catch (Exception ex)
         {
             Log.Error(ex);
+
+            _bmpPreview?.Dispose();
+            _bmpPreview = null;
+            _isPreviewing = false;
         }
     }
 
