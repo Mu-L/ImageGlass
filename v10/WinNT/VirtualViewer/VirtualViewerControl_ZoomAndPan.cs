@@ -174,7 +174,7 @@ public partial class VirtualViewerControl
     /// </summary>
     public virtual void CalculateDrawingRegion()
     {
-        if (DrawingArea.IsEmpty() || SourceWidth == 0 || SourceHeight == 0) return;
+        if (DrawingArea.IsEmpty() || BitmapSize.IsEmpty()) return;
 
         // 1. scale the values according to DPI
         // 1.1 zoom point
@@ -186,8 +186,8 @@ public partial class VirtualViewerControl
         var controlW = DrawingArea.Width;
         var controlH = DrawingArea.Height;
 
-        var scaledImgWidth = SourceWidth * _zooming.Factor;
-        var scaledImgHeight = SourceHeight * _zooming.Factor;
+        var scaledImgWidth = BitmapSize.Width * _zooming.Factor;
+        var scaledImgHeight = BitmapSize.Height * _zooming.Factor;
 
 
         // 1.3 initialize new values for source and destination rectangles
@@ -206,7 +206,7 @@ public partial class VirtualViewerControl
         if (scaledImgWidth <= controlW)
         {
             srcX = 0;
-            srcWidth = SourceWidth;
+            srcWidth = BitmapSize.Width;
 
             destX = (controlW - scaledImgWidth) / 2.0f + DrawingArea.Left;
             destWidth = scaledImgWidth;
@@ -228,7 +228,7 @@ public partial class VirtualViewerControl
         if (scaledImgHeight <= controlH)
         {
             srcY = 0;
-            srcHeight = SourceHeight;
+            srcHeight = BitmapSize.Height;
 
             destY = (controlH - scaledImgHeight) / 2f + DrawingArea.Top;
             destHeight = scaledImgHeight;
@@ -254,14 +254,14 @@ public partial class VirtualViewerControl
         {
             srcX = 0;
         }
-        else if (srcX + srcWidth > SourceWidth)
+        else if (srcX + srcWidth > BitmapSize.Width)
         {
-            srcX = SourceWidth - srcWidth;
+            srcX = BitmapSize.Width - srcWidth;
         }
 
-        if (srcY + srcHeight > SourceHeight)
+        if (srcY + srcHeight > BitmapSize.Height)
         {
-            srcY = SourceHeight - srcHeight;
+            srcY = BitmapSize.Height - srcHeight;
         }
 
         if (srcY < 0)
@@ -312,7 +312,7 @@ public partial class VirtualViewerControl
     {
         // get zoom factor after applying the zoom mode
         _zooming.Mode = mode ?? _zooming.Mode;
-        _zooming.Factor = CalculateZoomFactor(_zooming.Mode, SourceWidth, SourceHeight);
+        _zooming.Factor = CalculateZoomFactor(_zooming.Mode, BitmapSize.Width, BitmapSize.Height);
         _zooming.IsManual = isManualZoom;
 
         // update drawing regions

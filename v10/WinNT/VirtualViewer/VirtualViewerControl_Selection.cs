@@ -225,7 +225,7 @@ public partial class VirtualViewerControl
     /// </summary>
     public void SetSourceSelection(Rect srcRect, bool triggerEvent = true)
     {
-        _selection.SourceRect = srcRect.GetIntersection((int)SourceWidth, (int)SourceHeight);
+        _selection.SourceRect = srcRect.GetIntersection((int)BitmapSize.Width, (int)BitmapSize.Height);
 
         if (triggerEvent)
         {
@@ -575,7 +575,7 @@ public partial class VirtualViewerControl
             DpiScale(_selection.PointerDownPoint.Value),
             DpiScale(_selection.PointerMovePoint.Value),
             SelectionAspectRatio,
-            SourceWidth, SourceHeight, _destRect);
+            BitmapSize.Width, BitmapSize.Height, _destRect);
 
         // limit the selected area to the image
         cliRect = cliRect.GetIntersection(_destRect);
@@ -686,14 +686,14 @@ public partial class VirtualViewerControl
         if (newSrcPoint.Y < 0) newSrcPoint.Y = 0; // right edge
 
         // right edge
-        if (newSrcPoint.X + _selection.SourceRectBeforeMoved.Width > SourceWidth)
+        if (newSrcPoint.X + _selection.SourceRectBeforeMoved.Width > BitmapSize.Width)
         {
-            newSrcPoint.X = SourceWidth - _selection.SourceRectBeforeMoved.Width;
+            newSrcPoint.X = BitmapSize.Width - _selection.SourceRectBeforeMoved.Width;
         }
         // bottom edge
-        if (newSrcPoint.Y + _selection.SourceRectBeforeMoved.Height > SourceHeight)
+        if (newSrcPoint.Y + _selection.SourceRectBeforeMoved.Height > BitmapSize.Height)
         {
-            newSrcPoint.Y = SourceHeight - _selection.SourceRectBeforeMoved.Height;
+            newSrcPoint.Y = BitmapSize.Height - _selection.SourceRectBeforeMoved.Height;
         }
 
 
@@ -783,7 +783,7 @@ public partial class VirtualViewerControl
 
         // limit the selected client rect to the image source
         var newSrcRect = new Rect(newX, newY, newWidth, newHeight)
-            .GetIntersection(SourceWidth, SourceHeight);
+            .GetIntersection(BitmapSize.Width, BitmapSize.Height);
 
         #endregion // 1. Get correct size and location of new selection
 
@@ -807,9 +807,9 @@ public partial class VirtualViewerControl
                 {
                     newSrcRect.Width = newSrcRect.Height / hRatio;
 
-                    if (newSrcRect.Right >= SourceWidth)
+                    if (newSrcRect.Right >= BitmapSize.Width)
                     {
-                        var maxWidth = SourceWidth - newSrcRect.X; ;
+                        var maxWidth = BitmapSize.Width - newSrcRect.X; ;
                         newSrcRect.Width = maxWidth;
                         newSrcRect.Height = maxWidth * hRatio;
                     }
@@ -820,9 +820,9 @@ public partial class VirtualViewerControl
                 }
 
 
-                if (newSrcRect.Bottom >= SourceHeight)
+                if (newSrcRect.Bottom >= BitmapSize.Height)
                 {
-                    var maxHeight = SourceHeight - newSrcRect.Y;
+                    var maxHeight = BitmapSize.Height - newSrcRect.Y;
                     newSrcRect.Width = maxHeight * wRatio;
                     newSrcRect.Height = maxHeight;
                 }
@@ -838,9 +838,9 @@ public partial class VirtualViewerControl
                 {
                     newSrcRect.Height = newSrcRect.Width / wRatio;
 
-                    if (newSrcRect.Bottom >= SourceHeight)
+                    if (newSrcRect.Bottom >= BitmapSize.Height)
                     {
-                        var maxHeight = SourceHeight - newSrcRect.Y;
+                        var maxHeight = BitmapSize.Height - newSrcRect.Y;
                         newSrcRect.Width = maxHeight * wRatio;
                         newSrcRect.Height = maxHeight;
                     }
@@ -851,9 +851,9 @@ public partial class VirtualViewerControl
                 }
 
 
-                if (newSrcRect.Right >= SourceWidth)
+                if (newSrcRect.Right >= BitmapSize.Width)
                 {
-                    var maxWidth = SourceWidth - newSrcRect.X;
+                    var maxWidth = BitmapSize.Width - newSrcRect.X;
                     newSrcRect.Width = maxWidth;
                     newSrcRect.Height = maxWidth * hRatio;
                 }

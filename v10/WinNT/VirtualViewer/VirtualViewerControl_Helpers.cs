@@ -89,8 +89,8 @@ public partial class VirtualViewerControl
 
         if (floorP1.X < 0) floorP1.X = 0;
         if (floorP1.Y < 0) floorP1.Y = 0;
-        if (floorP1.X > SourceWidth) floorP1.X = SourceWidth;
-        if (floorP1.Y > SourceHeight) floorP1.Y = SourceHeight;
+        if (floorP1.X > BitmapSize.Width) floorP1.X = BitmapSize.Width;
+        if (floorP1.Y > BitmapSize.Height) floorP1.Y = BitmapSize.Height;
 
         if (p1 == p2)
         {
@@ -104,8 +104,8 @@ public partial class VirtualViewerControl
             (float)Math.Ceiling(Math.Round(p2.Y, 1)));
         if (ceilP2.X < 0) ceilP2.X = 0;
         if (ceilP2.Y < 0) ceilP2.Y = 0;
-        if (ceilP2.X > SourceWidth) ceilP2.X = SourceWidth;
-        if (ceilP2.Y > SourceHeight) ceilP2.Y = SourceHeight;
+        if (ceilP2.X > BitmapSize.Width) ceilP2.X = BitmapSize.Width;
+        if (ceilP2.Y > BitmapSize.Height) ceilP2.Y = BitmapSize.Height;
 
 
         var width = Math.Max(0, ceilP2.X - floorP1.X);
