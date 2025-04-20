@@ -149,7 +149,7 @@ public class PhotoMetadata : IDisposable
 
 
     /// <summary>
-    /// Retrieves a byte array representing a preview image from either a RAW format or an EXIF profile.
+    /// Retrieves an embedded thumbnail from either a RAW format or an EXIF profile if exists.
     /// </summary>
     public IMagickImage<byte>? GetPreview(CancellationToken token)
     {

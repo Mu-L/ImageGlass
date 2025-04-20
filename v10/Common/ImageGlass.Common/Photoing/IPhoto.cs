@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Photoing;
+using System.Numerics;
 
 namespace ImageGlass.Common;
 
@@ -73,6 +74,12 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
     /// Gets the native bitmap.
     /// </summary>
     T? Bitmap { get; }
+
+
+    /// <summary>
+    /// Gets the size of the <c><see cref="Bitmap"/></c>.
+    /// </summary>
+    Vector2 Size { get; }
 
 
     /// <summary>

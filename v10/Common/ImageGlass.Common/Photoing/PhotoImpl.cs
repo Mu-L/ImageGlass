@@ -88,12 +88,17 @@ public class PhotoImpl : IPhoto<IDisposable>
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual uint Width => _width;
+    public Vector2 Size => new Vector2(_width, _height);
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual uint Height => _height;
+    public virtual uint Width => (uint)Size.X;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public virtual uint Height => (uint)Size.Y;
 
     /// <summary>
     /// <inheritdoc/>
