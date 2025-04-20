@@ -1,6 +1,5 @@
-﻿using ImageGlass.Common;
+﻿using ImageGlass.Common.Photoing;
 using ImageGlass.WinNT.Common;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -37,6 +36,9 @@ public partial class App : Application
 
         // get current monitor profile
         _ = WindowColorProfileProvider.Instance.InitializeAsync(_window.AppWindow.Id);
+
+        // initialize Magick decoder
+        MagickDecoder.Initialize();
     }
 
 

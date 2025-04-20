@@ -25,6 +25,27 @@ namespace ImageGlass.Common.Photoing;
 
 public class MagickDecoder
 {
+    /// <summary>
+    /// Indicates whether <see cref="MagickDecoder"/> is initialized or not.
+    /// </summary>
+    public static bool IsInitialized { get; private set; } = false;
+
+
+    /// <summary>
+    /// Initializes ImageMagick decoder with OpenCL support.
+    /// </summary>
+    public static void Initialize()
+    {
+        if (IsInitialized) return;
+
+        if (!ImageMagick.OpenCL.IsEnabled)
+        {
+            ImageMagick.OpenCL.IsEnabled = true;
+        }
+
+        IsInitialized = true;
+    }
+
 
     /// <summary>
     /// Parse <see cref="PhotoReadOptions"/> to <see cref="MagickReadSettings"/>
