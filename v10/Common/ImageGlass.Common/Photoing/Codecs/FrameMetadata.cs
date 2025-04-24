@@ -31,7 +31,6 @@ public class FrameMetadata
 
     public uint AnimationDelay { get; set; } = 0;
     public uint AnimationTicksPerSecond { get; set; } = 0;
-    public uint AnimationLoop { get; set; } = 0;
     public GifDisposeMethod GifDisposeMethod { get; set; } = GifDisposeMethod.Undefined;
 
 }

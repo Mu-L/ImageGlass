@@ -237,7 +237,8 @@ public class MagickDecoder
             try
             {
                 meta.FrameIndex = 0;
-                meta.FrameCount = imgC.Count;
+                meta.FrameCount = (uint)imgC.Count;
+                meta.AnimationLoop = imgC[0].AnimationIterations;
                 meta.Frames = imgC.Select(item => new FrameMetadata()
                 {
                     BackgroundColor = (MagickColor?)item.BackgroundColor ?? MagickColors.Transparent,
@@ -248,7 +249,6 @@ public class MagickDecoder
 
                     AnimationDelay = item.AnimationDelay,
                     AnimationTicksPerSecond = (uint)item.AnimationTicksPerSecond,
-                    AnimationLoop = item.AnimationIterations,
                     GifDisposeMethod = item.GifDisposeMethod,
                 }).ToImmutableList();
             }

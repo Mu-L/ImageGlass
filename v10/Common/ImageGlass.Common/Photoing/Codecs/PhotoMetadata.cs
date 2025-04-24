@@ -115,7 +115,8 @@ public class PhotoMetadata : IDisposable
     /// Gets the frame index of this metadata.
     /// </summary>
     public uint FrameIndex { get; set; } = 0;
-    public int FrameCount { get; set; } = 0;
+    public uint FrameCount { get; set; } = 0;
+    public uint AnimationLoop { get; set; } = 0;
     public IImmutableList<FrameMetadata> Frames { get; set; } = [];
     public bool HasAlpha { get; set; } = false;
     public bool CanAnimate { get; set; } = false;
