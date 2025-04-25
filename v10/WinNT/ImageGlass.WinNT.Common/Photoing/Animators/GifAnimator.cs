@@ -16,14 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageMagick;
 using Microsoft.UI.Xaml.Media;
-using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Vortice;
 using Vortice.Direct2D1;
 using Vortice.WIC;
+using WinRT;
 
 namespace ImageGlass.WinNT.Common.Photoing;
 
@@ -33,8 +35,8 @@ namespace ImageGlass.WinNT.Common.Photoing;
 /// </summary>
 public partial class GifAnimator : AnimatorImpl
 {
-    private IWICBitmapDecoder _decoder;
-    private ID2D1DeviceContext _dc;
+    private IWICBitmapDecoder? _decoder;
+    private ID2D1DeviceContext? _dc;
     private ConcurrentDictionary<int, ID2D1Bitmap1?> _decodedFrames = new();
 
     private ID2D1BitmapRenderTarget? _compositeSurface;
@@ -44,11 +46,9 @@ public partial class GifAnimator : AnimatorImpl
     /// <summary>
     /// Initializes a new instance of the <see cref="GifAnimator"/> class.
     /// </summary>
-    public GifAnimator(PhotoMetadata meta, IWICBitmapDecoder decoder, ID2D1DeviceContext dc) : base(meta)
+    public GifAnimator(IWICBitmapDecoder decoder, PhotoMetadata meta) : base(meta)
     {
         _decoder = decoder;
-        _dc = dc;
-        _compositeSurface = _dc.CreateCompatibleRenderTarget();
     }
 
 
@@ -59,66 +59,79 @@ public partial class GifAnimator : AnimatorImpl
     {
         base.OnDisposing();
 
-        _compositeSurface?.Dispose();
-        _compositeSurface = null;
+        DisposeD2dResources();
 
-        _backupSurface?.Dispose();
-        _backupSurface = null;
+        _decoder?.Dispose();
+        _decoder = null;
+    }
 
 
-        // dispose frames
-        foreach (var frame in _decodedFrames.Values)
-        {
-            frame?.Dispose();
-        }
-        _decodedFrames.Clear();
+    /// <summary>
+    /// Creates the Direct2D resources required for rendering, also disposes the old resources.
+    /// </summary>
+    public void Initialize(ID2D1DeviceContext dc)
+    {
+        // dispose old Direct2D resources
+        DisposeD2dResources();
+
+        _isStarted = false;
+        _isPaused = true;
+
+        _dc = dc;
+        _compositeSurface = _dc.CreateCompatibleRenderTarget();
     }
 
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    protected override void Initialize()
+    protected override void DecodeFrames()
     {
         // start decoding frames in background
-        for (int i = 0; i < _frameCount; i++)
+        Task.Run(() =>
         {
-            var frameIndex = i;
-            _ = Task.Run(() => DecodeFrame(frameIndex));
-        }
+            for (int i = 0; i < _frameCount; i++)
+            {
+                var frameIndex = i;
+                DecodeFrame(frameIndex);
+            }
+        });
     }
 
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    protected override IDisposable? GetRenderedFrameBitmap()
+    public override T? GetRenderedFrameBitmap<T>() where T : default
     {
         var frameBmp = GetFrame(_currentFrame);
-        if (frameBmp is null || _compositeSurface is null) return null;
+        if (frameBmp is null
+            || _dc is null
+            || _compositeSurface is null) return default;
 
-
-        var currRect = new Vortice.Mathematics.Rect(GetFrameBounds(_currentFrame));
 
         // apply previous frame disposal
         if (_currentFrame > 0)
         {
-            var prevRect = new Vortice.Mathematics.Rect(GetFrameBounds(_currentFrame - 1));
-            var prevDisposal = GetFrameDisposal(_currentFrame - 1);
+            var prevFrameIndex = _currentFrame - 1;
+            var prevFrameMeta = _meta.Frames[prevFrameIndex];
+            var prevRect = new Vortice.Mathematics.Rect(GetFrameBounds(prevFrameIndex));
+            var prevDisposal = GetFrameDisposal(prevFrameIndex);
 
             _compositeSurface.BeginDraw();
 
             // restore to background
             if (prevDisposal == ImageMagick.GifDisposeMethod.Background)
             {
-                using var vBrush = _dc.CreateSolidColorBrush(Vortice.Mathematics.Colors.Transparent);
-
-                _compositeSurface.FillRectangle(prevRect, vBrush);
+                var rawRect = new RawRectF(prevRect.X, prevRect.Y, prevRect.Right, prevRect.Bottom);
+                _compositeSurface.PushAxisAlignedClip(rawRect, AntialiasMode.Aliased);
+                _compositeSurface.Clear(Vortice.Mathematics.Colors.Transparent);
+                _compositeSurface.PopAxisAlignedClip();
             }
             // restore saved composite before last frame
             else if (prevDisposal == GifDisposeMethod.Previous && _backupSurface != null)
             {
-                var backupRect = new Vortice.Mathematics.Rect(0, 0,
+                var backupRect = new Vortice.Mathematics.Rect(
                     _backupSurface.PixelSize.Width,
                     _backupSurface.PixelSize.Height);
 
@@ -140,13 +153,20 @@ public partial class GifAnimator : AnimatorImpl
 
 
         // draw current frame to composite surface
+        var currRect = new Vortice.Mathematics.Rect(GetFrameBounds(_currentFrame));
         _compositeSurface.BeginDraw();
-        _compositeSurface.DrawBitmap(frameBmp, 1.0f, Vortice.Direct2D1.BitmapInterpolationMode.Linear, currRect);
+        _compositeSurface.DrawBitmap(frameBmp,
+            currRect, 1.0f,
+            Vortice.Direct2D1.BitmapInterpolationMode.Linear,
+            new Vortice.Mathematics.Rect(currRect.Width, currRect.Height));
+
         _compositeSurface.EndDraw();
 
 
         // return the bitmap
-        return _compositeSurface.Bitmap;
+        var bmp1 = PhotoWIC.CreateD2dBitmap1(_compositeSurface.Bitmap, _dc);
+
+        return bmp1.As<T>();
     }
 
 
@@ -182,9 +202,9 @@ public partial class GifAnimator : AnimatorImpl
     /// </summary>
     private void DecodeFrame(int frameIndex)
     {
-        _decodedFrames[frameIndex]?.Dispose();
-        _decodedFrames[frameIndex] = null;
+        if (_decoder is null || _dc is null) return;
 
+        Log.Info($"Decoding frame ${frameIndex}");
         using var frameBmp = _decoder.GetFrame((uint)frameIndex);
 
         var bmp = PhotoWIC.CreateD2dBitmap(frameBmp, _dc);
@@ -209,5 +229,27 @@ public partial class GifAnimator : AnimatorImpl
         return _decodedFrames[frameIndex];
     }
 
+
+    /// <summary>
+    /// Releases all Direct2D resources associated with this instance.
+    /// </summary>
+    private void DisposeD2dResources()
+    {
+        StopTimer();
+
+        _compositeSurface?.Dispose();
+        _compositeSurface = null;
+
+        _backupSurface?.Dispose();
+        _backupSurface = null;
+
+
+        // dispose frames
+        foreach (var frame in _decodedFrames.Values)
+        {
+            frame?.Dispose();
+        }
+        _decodedFrames.Clear();
+    }
 
 }

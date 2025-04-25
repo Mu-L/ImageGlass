@@ -103,15 +103,9 @@ public abstract class AnimatorImpl : IDisposable
 
 
     /// <summary>
-    /// Initializes the animator and begins decoding frames in the background.
+    /// Begins decoding frames in the background.
     /// </summary>
-    protected abstract void Initialize();
-
-
-    /// <summary>
-    /// Renders the current frame of the animation and returns the resulting bitmap.
-    /// </summary>
-    protected abstract IDisposable? GetRenderedFrameBitmap();
+    protected abstract void DecodeFrames();
 
 
     /// <summary>
@@ -124,6 +118,13 @@ public abstract class AnimatorImpl : IDisposable
     /// Stop the animator timer.
     /// </summary>
     protected abstract void StopTimer();
+
+
+    /// <summary>
+    /// Renders the current frame of the animation and returns the resulting bitmap.
+    /// </summary>
+    public abstract T? GetRenderedFrameBitmap<T>() where T : IDisposable;
+
 
 
     // Public methods
@@ -140,7 +141,7 @@ public abstract class AnimatorImpl : IDisposable
     {
         if (!_isStarted)
         {
-            Initialize();
+            DecodeFrames();
 
             _isStarted = true;
             _stopwatch.Restart();
@@ -265,8 +266,13 @@ public abstract class AnimatorImpl : IDisposable
     /// </summary>
     protected virtual TimeSpan GetFrameDelay(int frameIndex)
     {
+        var ticksPerMs = 1000 / _meta.Frames[frameIndex].AnimationTicksPerSecond;
         var rawDelay = _meta.Frames[frameIndex].AnimationDelay;
-        var delayMs = Math.Max(10, rawDelay * 10);
+
+        // set minimum delay time if frame delay time is too small
+        if (rawDelay <= 2) rawDelay = 10;
+
+        var delayMs = rawDelay * ticksPerMs;
 
         return TimeSpan.FromMilliseconds(delayMs);
     }

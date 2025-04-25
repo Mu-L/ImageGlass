@@ -2,6 +2,7 @@
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.WinNT.Common;
+using ImageGlass.WinNT.Common.Photoing;
 using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
@@ -15,7 +16,6 @@ using Vortice.Direct2D1.Effects;
 using Vortice.WIC;
 using Windows.Foundation;
 using Windows.UI;
-using WinRT;
 
 
 namespace ImageGlass.WinNT;
@@ -382,13 +382,14 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // debug
         e.DrawText(
             $"""
-            Control Size: {ActualWidth} x {ActualHeight}
-            Image size: {BitmapSize}
-            _srcRect: {_srcRect}
-            _destRect: {_destRect}
-            _zoomFactor: {_zooming.Factor}
-            _zoomedPoint: {_zooming.ZoomedPoint}
-            _isPreviewing: {_isPreviewing}
+            Control Size = {ActualWidth} x {ActualHeight}
+            DrawingArea = {DrawingArea}
+            Image size = {BitmapSize}
+            _srcRect = {_srcRect}
+            _destRect = {_destRect}
+            _zoomFactor = {_zooming.Factor}
+            _zoomedPoint = {_zooming.ZoomedPoint}
+            _isPreviewing = {_isPreviewing}
             """,
             "Consolas", FontSize_Dpi, DrawingArea, Colors.Magenta);
 
@@ -612,6 +613,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     {
         // back up size of preview image
         var prevSize = BitmapSize;
+        var hasSource = false;
 
         try
         {
@@ -621,18 +623,40 @@ public partial class VirtualViewerControl : SwapChainCanvas
             Log.Info("Loading full resolution photo...");
             if (e.Photo.Bitmap is null) return;
 
-
             // update bitmap size
             SetBitmapSize(e.Photo.Size.ToSize(), true);
 
 
-            // create new native bitmap
-            _bmpSource = await Task
-              .Run(() => PhotoWIC.CreateD2dBitmap(e.Photo.Bitmap.As<IWICBitmapSource>(), D2dContext))
-              .ConfigureAwait(true);
+            // native bitmap is a single-frame bitmap
+            if (e.Photo.Bitmap is IWICBitmapSource bmpSrc)
+            {
+                // create new native bitmap
+                _bmpSource = await Task
+                  .Run(() => PhotoWIC.CreateD2dBitmap(bmpSrc, D2dContext))
+                  .ConfigureAwait(true);
 
-            // apply color effect
-            _bmpSource = ApplyColorManagementEffect(_bmpSource);
+                hasSource = _bmpSource != null;
+            }
+            // native bitmap is a animated GIF bitmap
+            else if (e.Photo.Bitmap is GifAnimator gifAnimator)
+            {
+                gifAnimator.FrameChanged += GifAnimator_FrameChanged;
+                gifAnimator.Initialize(D2dContext);
+                gifAnimator.Play();
+
+                hasSource = true;
+            }
+            // native bitmap is a multi-frame bitmap
+            else if (e.Photo.Bitmap is IWICBitmapDecoder decoder)
+            {
+                using var frame = decoder.GetFrame(0);
+
+                _bmpSource = await Task
+                  .Run(() => PhotoWIC.CreateD2dBitmap(frame, D2dContext))
+                  .ConfigureAwait(true);
+
+                hasSource = _bmpSource != null;
+            }
         }
         catch (Exception ex)
         {
@@ -644,8 +668,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
         // calculate the source viewport to match with the preview
-        if (_bmpSource is not null)
+        if (hasSource)
         {
+            // apply color effect
+            _bmpSource = ApplyColorManagementEffect(_bmpSource);
+
+
             if (_isPreviewing)
             {
                 var diffRatio = new Size(
@@ -688,6 +716,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
         GC.Collect();
     }
 
+    private void GifAnimator_FrameChanged(AnimatorImpl sender, AnimatorFrameChangedEventArgs e)
+    {
+        DisposeNativePhotoResources();
+
+        _bmpSource = sender.GetRenderedFrameBitmap<ID2D1Bitmap1>();
+        Invalidate();
+    }
 
     private ID2D1Bitmap1? ApplyColorManagementEffect(ID2D1Bitmap1? bmpD2)
     {

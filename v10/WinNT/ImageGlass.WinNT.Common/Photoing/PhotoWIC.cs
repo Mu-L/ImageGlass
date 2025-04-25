@@ -84,12 +84,18 @@ public static partial class PhotoWIC
     /// <summary>
     /// Creates a Direct2D bitmap from the given WIC bitmap.
     /// </summary>
-    public static ID2D1Bitmap1? CreateD2dBitmap(IWICBitmapSource? wicBmp, ID2D1DeviceContext dc, BitmapProperties1? bmpProps = null)
+    public static ID2D1Bitmap1? CreateD2dBitmap(IWICBitmapSource? wicBmp, ID2D1DeviceContext dc)
     {
         try
         {
             using var newBmp = ConvertToWic32bppPBGRA(wicBmp);
             if (newBmp == null) return null;
+
+            var bmpProps = new BitmapProperties1(new Vortice.DCommon.PixelFormat()
+            {
+                Format = Vortice.DXGI.Format.B8G8R8A8_UNorm,
+                AlphaMode = Vortice.DCommon.AlphaMode.Premultiplied,
+            });
 
             return dc.CreateBitmapFromWicBitmap(newBmp, bmpProps);
         }
@@ -100,6 +106,35 @@ public static partial class PhotoWIC
 
         return null;
     }
+
+
+    /// <summary>
+    /// Creates a new <see cref="ID2D1Bitmap1"/> instance from <see cref="ID2D1Bitmap"/>.
+    /// </summary>
+    public static ID2D1Bitmap1? CreateD2dBitmap1(ID2D1Bitmap srcBmp, ID2D1DeviceContext dc)
+    {
+        try
+        {
+            // Get size and pixel format of the source bitmap
+            var size = srcBmp.Size.ToSizeI();
+
+            // Create a compatible ID2D1Bitmap1 with same size and pixel format
+            var bmpProps = new BitmapProperties1(srcBmp.PixelFormat);
+            var bmp1 = dc.CreateBitmap(size, IntPtr.Zero, 0, bmpProps);
+
+            // Copy from source bitmap
+            bmp1.CopyFromBitmap(srcBmp);
+
+            return bmp1;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
+
+        return null;
+    }
+
 
 
     /// <summary>

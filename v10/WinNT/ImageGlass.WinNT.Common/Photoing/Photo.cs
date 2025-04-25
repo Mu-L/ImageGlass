@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
+using ImageGlass.WinNT.Common.Photoing;
 using System;
 using System.Linq;
 using System.Threading;
@@ -91,7 +92,7 @@ public partial class Photo : PhotoImpl
     /// </summary>
     protected override async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var extWIC = new string[] { ".GIF", ".GIFV", ".FAX", ".JXR", ".APNG" };
+        var extWIC = new string[] { ".GIF", ".GIFV", ".WEBP", ".FAX", ".JXR", ".APNG" };
 
 
         // use WIC decoders
@@ -140,8 +141,17 @@ public partial class Photo : PhotoImpl
             using var wicFactory = new IWICImagingFactory2();
             var decoder = wicFactory.CreateDecoderFromFileName(meta.FilePath);
 
-            // read multi-frame as IWICBitmapDecoder
+            // 1. read animated formats
             if (meta.CanAnimate)
+            {
+                _width = meta.Width;
+                _height = meta.Height;
+
+                return new GifAnimator(decoder, meta);
+            }
+
+            // 2. read non-animated multi-frame formats
+            if (meta.FrameCount > 1)
             {
                 _width = meta.Width;
                 _height = meta.Height;
@@ -150,7 +160,7 @@ public partial class Photo : PhotoImpl
             }
 
 
-            // read single frame
+            // 3. read single-frame formats
             var frameBmp = decoder.GetFrame(meta.FrameIndex);
 
             _width = (uint)frameBmp.Size.Width;
