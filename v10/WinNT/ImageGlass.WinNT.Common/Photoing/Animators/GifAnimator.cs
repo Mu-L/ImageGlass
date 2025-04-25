@@ -111,35 +111,7 @@ public partial class GifAnimator : AnimatorImpl
 
 
         // apply previous frame disposal
-        if (_currentFrame > 0)
-        {
-            var prevFrameIndex = _currentFrame - 1;
-            var prevFrameMeta = _meta.Frames[prevFrameIndex];
-            var prevRect = new Vortice.Mathematics.Rect(GetFrameBounds(prevFrameIndex));
-            var prevDisposal = GetFrameDisposal(prevFrameIndex);
-
-            _compositeSurface.BeginDraw();
-
-            // restore to background
-            if (prevDisposal == ImageMagick.GifDisposeMethod.Background)
-            {
-                var rawRect = new RawRectF(prevRect.X, prevRect.Y, prevRect.Right, prevRect.Bottom);
-                _compositeSurface.PushAxisAlignedClip(rawRect, AntialiasMode.Aliased);
-                _compositeSurface.Clear(Vortice.Mathematics.Colors.Transparent);
-                _compositeSurface.PopAxisAlignedClip();
-            }
-            // restore saved composite before last frame
-            else if (prevDisposal == GifDisposeMethod.Previous && _backupSurface != null)
-            {
-                var backupRect = new Vortice.Mathematics.Rect(
-                    _backupSurface.PixelSize.Width,
-                    _backupSurface.PixelSize.Height);
-
-                _compositeSurface.DrawBitmap(_backupSurface, 1.0f, Vortice.Direct2D1.BitmapInterpolationMode.Linear, backupRect);
-            }
-
-            _compositeSurface.EndDraw();
-        }
+        ApplyFrameDisposal();
 
 
         // save current composite if disposal 3 is coming next
@@ -160,6 +132,15 @@ public partial class GifAnimator : AnimatorImpl
             Vortice.Direct2D1.BitmapInterpolationMode.Linear,
             new Vortice.Mathematics.Rect(currRect.Width, currRect.Height));
 
+        //// debug
+        //using var debugBrush = _dc.CreateSolidColorBrush(Vortice.Mathematics.Colors.Red);
+        //var debugRect = currRect;
+        //debugRect.Inflate(-1, -1);
+        //var debugFramRect = new Vortice.RawRectF(
+        //    debugRect.X, debugRect.Y,
+        //    debugRect.Right, debugRect.Bottom);
+        //_compositeSurface.DrawRectangle(debugFramRect, debugBrush);
+
         _compositeSurface.EndDraw();
 
 
@@ -169,6 +150,51 @@ public partial class GifAnimator : AnimatorImpl
         return bmp1.As<T>();
     }
 
+
+    /// <summary>
+    /// Applies the disposal method of the previous frame to the composite surface.
+    /// </summary>
+    private void ApplyFrameDisposal()
+    {
+        if (_dc is null || _compositeSurface is null) return;
+
+
+        var prevFrameIndex = _currentFrame - 1;
+        if (prevFrameIndex < 0) prevFrameIndex = (int)_frameCount - 1;
+
+        var prevDisposal = GetFrameDisposal(prevFrameIndex);
+        var prevRect = new Vortice.Mathematics.Rect(GetFrameBounds(prevFrameIndex));
+
+
+        _compositeSurface.BeginDraw();
+
+
+        // Clear background
+        if (prevDisposal == GifDisposeMethod.Background)
+        {
+            //var frameBg = _meta.Frames[prevFrameIndex].BackgroundColor.ToVector4();
+            //var bgColor = new Vortice.Mathematics.Color(frameBg);
+
+            var bgColor = Vortice.Mathematics.Colors.Transparent;
+            var rawRect = new RawRectF(prevRect.X, prevRect.Y, prevRect.Right, prevRect.Bottom);
+
+            _compositeSurface.PushAxisAlignedClip(rawRect, AntialiasMode.Aliased);
+            _compositeSurface.Clear(bgColor);
+            _compositeSurface.PopAxisAlignedClip();
+        }
+
+        // restore saved composite before last frame
+        else if (prevDisposal == GifDisposeMethod.Previous && _backupSurface != null)
+        {
+            var backupRect = new Vortice.Mathematics.Rect(
+                    _backupSurface.PixelSize.Width,
+                    _backupSurface.PixelSize.Height);
+
+            _compositeSurface.DrawBitmap(_backupSurface, 1.0f, Vortice.Direct2D1.BitmapInterpolationMode.Linear, backupRect);
+        }
+
+        _compositeSurface.EndDraw();
+    }
 
 
     /// <summary>
