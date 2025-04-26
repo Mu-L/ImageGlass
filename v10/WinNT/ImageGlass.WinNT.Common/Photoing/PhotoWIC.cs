@@ -86,6 +86,8 @@ public static partial class PhotoWIC
     /// </summary>
     public static ID2D1Bitmap1? CreateD2dBitmap(IWICBitmapSource? wicBmp, ID2D1DeviceContext dc)
     {
+        if (dc.IsDisposed()) return null;
+
         try
         {
             using var newBmp = ConvertToWic32bppPBGRA(wicBmp);
@@ -113,6 +115,8 @@ public static partial class PhotoWIC
     /// </summary>
     public static ID2D1Bitmap1? CreateD2dBitmap1(ID2D1Bitmap srcBmp, ID2D1DeviceContext dc)
     {
+        if (dc.IsDisposed()) return null;
+
         try
         {
             // Get size and pixel format of the source bitmap

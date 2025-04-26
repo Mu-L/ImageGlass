@@ -152,9 +152,15 @@ public partial class Photo : PhotoImpl
                 {
                     return new GifAnimator(decoder, meta);
                 }
+                // .WEBP
+                else if (meta.IsOneOfExtensions(".WEBP"))
+                {
+                    return new WebpAnimator(decoder, meta);
+                }
+                // use default WIC animator
                 else
                 {
-                    return new GifAnimator(decoder, meta);
+                    return new WicAnimator(decoder, meta);
                 }
             }
 

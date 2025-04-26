@@ -27,6 +27,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private Size _bitmapSize = new Size();
     private ID2D1Bitmap1? _bmpSource;
     private ID2D1Bitmap1? _bmpPreview;
+    private WicAnimator? _animator;
     private Rect _srcRect = new();
     private Rect _destRect = new();
 
@@ -175,6 +176,14 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // dispose native resources of photo
         DisposeNativePhotoResources();
         DisposeCheckerboardBrushes();
+
+        // dispose animator
+        if (_animator is not null)
+        {
+            _animator.Unload();
+            _animator.Initialize(D2dContext);
+            _animator.Play();
+        }
     }
 
 
@@ -192,6 +201,14 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // reset selection
         SetSourceSelection(Rect.Empty, false);
         SetBitmapSize(0, 0, false);
+
+        // dispose animator
+        if (_animator is not null)
+        {
+            _animator.FrameChanged -= Animator_FrameChanged;
+            _animator.Dispose();
+            _animator = null;
+        }
 
         // dispose native resources of photo
         DisposeNativePhotoResources();
@@ -637,12 +654,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
                 hasSource = _bmpSource != null;
             }
-            // native bitmap is a animated GIF bitmap
-            else if (e.Photo.Bitmap is GifAnimator gifAnimator)
+            // native bitmap is a animated bitmap
+            else if (e.Photo.Bitmap is WicAnimator animator)
             {
-                gifAnimator.FrameChanged += GifAnimator_FrameChanged;
-                gifAnimator.Initialize(D2dContext);
-                gifAnimator.Play();
+                _animator = animator;
+                _animator.FrameChanged += Animator_FrameChanged;
+                _animator.Initialize(D2dContext);
+                _animator.Play();
 
                 hasSource = true;
             }
@@ -716,11 +734,11 @@ public partial class VirtualViewerControl : SwapChainCanvas
         GC.Collect();
     }
 
-    private void GifAnimator_FrameChanged(AnimatorImpl sender, AnimatorFrameChangedEventArgs e)
+    private void Animator_FrameChanged(AnimatorImpl sender, AnimatorFrameChangedEventArgs e)
     {
         DisposeNativePhotoResources();
 
-        _bmpSource = sender.GetRenderedFrameBitmap<ID2D1Bitmap1>();
+        _bmpSource = (sender as WicAnimator)!.GetRenderedFrameBitmap1();
         Invalidate();
     }
 
