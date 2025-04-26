@@ -148,6 +148,15 @@ public class PhotoMetadata : IDisposable
     public float? ExifFocalLength { get; set; } = null;
 
 
+    /// <summary>
+    /// Checks if the file extension matches any of the specified extensions, ignoring case.
+    /// </summary>
+    /// <param name="exts">The file extension to compare, e.g. <c>.PNG</c>.</param>
+    public bool IsOneOfExtensions(params string[] exts)
+    {
+        return exts.Any(ext => FileExtension.Equals(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
 
     /// <summary>
     /// Retrieves an embedded thumbnail from either a RAW format or an EXIF profile if exists.

@@ -114,13 +114,13 @@ public partial class GifAnimator : AnimatorImpl
         ApplyFrameDisposal();
 
 
-        // save current composite if disposal 3 is coming next
+        // save current composite if disposal 'Previous' is coming next
         var nextFrameIndex = _currentFrame + 1;
-        if (nextFrameIndex < _frameCount
-            && GetFrameDisposal(nextFrameIndex) == GifDisposeMethod.Previous)
+        if (nextFrameIndex >= _frameCount) nextFrameIndex = 0;
+        if (GetFrameDisposal(nextFrameIndex) == GifDisposeMethod.Previous)
         {
             _backupSurface?.Dispose();
-            _backupSurface = _compositeSurface.Bitmap;
+            _backupSurface = PhotoWIC.CreateD2dBitmap1(_compositeSurface.Bitmap, _dc);
         }
 
 
@@ -130,7 +130,7 @@ public partial class GifAnimator : AnimatorImpl
         _compositeSurface.DrawBitmap(frameBmp,
             currRect, 1.0f,
             Vortice.Direct2D1.BitmapInterpolationMode.Linear,
-            new Vortice.Mathematics.Rect(currRect.Width, currRect.Height));
+            new Vortice.Mathematics.Rect(frameBmp.Size.ToVector2()));
 
         //// debug
         //using var debugBrush = _dc.CreateSolidColorBrush(Vortice.Mathematics.Colors.Red);
@@ -168,8 +168,7 @@ public partial class GifAnimator : AnimatorImpl
 
         _compositeSurface.BeginDraw();
 
-
-        // Clear background
+        // clear background
         if (prevDisposal == GifDisposeMethod.Background)
         {
             //var frameBg = _meta.Frames[prevFrameIndex].BackgroundColor.ToVector4();
@@ -230,7 +229,7 @@ public partial class GifAnimator : AnimatorImpl
     {
         if (_decoder is null || _dc is null) return;
 
-        Log.Info($"Decoding frame ${frameIndex}");
+        Log.Info($"Decoding frame {frameIndex}");
         using var frameBmp = _decoder.GetFrame((uint)frameIndex);
 
         var bmp = PhotoWIC.CreateD2dBitmap(frameBmp, _dc);

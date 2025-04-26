@@ -147,7 +147,15 @@ public partial class Photo : PhotoImpl
                 _width = meta.Width;
                 _height = meta.Height;
 
-                return new GifAnimator(decoder, meta);
+                // .GIF
+                if (meta.IsOneOfExtensions(".GIF", ".GIFV"))
+                {
+                    return new GifAnimator(decoder, meta);
+                }
+                else
+                {
+                    return new GifAnimator(decoder, meta);
+                }
             }
 
             // 2. read non-animated multi-frame formats
