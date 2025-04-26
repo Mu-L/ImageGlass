@@ -61,6 +61,15 @@ public partial class WicAnimator : AnimatorImpl
 
         Unload();
 
+
+        // dispose frames
+        foreach (var frame in _decodedFrames.Values)
+        {
+            frame?.Dispose();
+        }
+        _decodedFrames.Clear();
+
+
         _decoder?.Dispose();
         _decoder = null;
     }
@@ -74,11 +83,17 @@ public partial class WicAnimator : AnimatorImpl
         // dispose old Direct2D resources
         Unload();
 
-        _isStarted = false;
-        _isPaused = true;
-
         _dc = dc;
         _compositeSurface = _dc.CreateCompatibleRenderTarget();
+    }
+
+
+    /// <summary>
+    /// Sets the Direct2D device context to be used for rendering operations.
+    /// </summary>
+    public void SetDeviceContext(ID2D1DeviceContext dc)
+    {
+        _dc = dc;
     }
 
 
@@ -96,14 +111,6 @@ public partial class WicAnimator : AnimatorImpl
 
         _backupSurface?.Dispose();
         _backupSurface = null;
-
-
-        // dispose frames
-        foreach (var frame in _decodedFrames.Values)
-        {
-            frame?.Dispose();
-        }
-        _decodedFrames.Clear();
     }
 
 
@@ -119,7 +126,7 @@ public partial class WicAnimator : AnimatorImpl
             for (int i = 0; i < _frameCount; i++)
             {
                 var frameIndex = i;
-                DecodeFrame(frameIndex);
+                _ = DecodeFrame(frameIndex);
             }
         });
     }
@@ -142,10 +149,7 @@ public partial class WicAnimator : AnimatorImpl
     /// </summary>
     public virtual ID2D1Bitmap1? GetRenderedFrameBitmap1()
     {
-        if (_dc is null
-            || _dc.IsDisposed()
-            || _compositeSurface is null
-            || _compositeSurface.IsDisposed()) return null;
+        if (_dc.IsDisposed() || _compositeSurface.IsDisposed()) return null;
 
         var frameBmp = GetFrame(_currentFrame);
         if (frameBmp is null) return null;
@@ -277,15 +281,17 @@ public partial class WicAnimator : AnimatorImpl
     /// <summary>
     /// Decodes the specified frame of an image and stores it.
     /// </summary>
-    private void DecodeFrame(int frameIndex)
+    private ID2D1Bitmap1? DecodeFrame(int frameIndex)
     {
-        if (_decoder is null || _dc is null) return;
-
         Log.Info($"{nameof(WicAnimator)}: Decoding frame {frameIndex}");
-        using var frameBmp = _decoder.GetFrame((uint)frameIndex);
 
-        var bmp = PhotoWIC.CreateD2dBitmap(frameBmp, _dc);
-        _decodedFrames[frameIndex] = bmp;
+        using var frameBmp = _decoder?.GetFrame((uint)frameIndex);
+        if (!_dc.IsDisposed())
+        {
+            _decodedFrames[frameIndex] = PhotoWIC.CreateD2dBitmap(frameBmp, _dc);
+        }
+
+        return _decodedFrames[frameIndex];
     }
 
 
@@ -294,16 +300,16 @@ public partial class WicAnimator : AnimatorImpl
     /// </summary>
     private ID2D1Bitmap1? GetFrame(int frameIndex)
     {
+        ID2D1Bitmap1? frameD2d = null;
+
         // try get from cache
-        if (_decodedFrames.TryGetValue(frameIndex, out var bmp))
+        if (!_decodedFrames.TryGetValue(frameIndex, out frameD2d))
         {
-            return bmp;
+            // no cache, decode frame
+            frameD2d = DecodeFrame(frameIndex);
         }
 
-        // no cache, decode frame
-        DecodeFrame(frameIndex);
-
-        return _decodedFrames[frameIndex];
+        return frameD2d;
     }
 
 }

@@ -76,7 +76,7 @@ public abstract class AnimatorImpl : IDisposable
     protected bool _isPaused = true;
     protected Stopwatch _stopwatch = new();
     protected TimeSpan _lastFrameTime = TimeSpan.Zero;
-    protected TimeSpan _pauseStartTime;
+    protected TimeSpan _pauseStartTime = TimeSpan.Zero;
 
 
     /// <summary>
@@ -131,12 +131,25 @@ public abstract class AnimatorImpl : IDisposable
     #region Public methods
 
     /// <summary>
-    /// Starts or resumes the playback operation.
+    /// Restarts animation.
     /// </summary>
-    /// <remarks>
-    /// If playback has not started previously, it initializes the playback timer.
-    /// If playback is currently paused, it adjusts the timing to account for the paused duration.
-    /// </remarks>
+    public void Restart()
+    {
+        Pause();
+
+        _stopwatch.Restart();
+
+        _lastFrameTime = TimeSpan.Zero;
+        _pauseStartTime = TimeSpan.Zero;
+        _lastFrameTime = TimeSpan.Zero;
+
+        Play();
+    }
+
+
+    /// <summary>
+    /// Starts or resumes the animation.
+    /// </summary>
     public void Play()
     {
         if (!_isStarted)
@@ -161,7 +174,7 @@ public abstract class AnimatorImpl : IDisposable
 
 
     /// <summary>
-    /// Pauses the operation if it is currently running and not already paused.
+    /// Pauses the animation.
     /// </summary>
     public void Pause()
     {

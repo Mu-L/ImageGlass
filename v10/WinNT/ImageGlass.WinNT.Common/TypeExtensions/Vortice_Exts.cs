@@ -19,18 +19,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using SharpGen.Runtime;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ImageGlass.WinNT.Common;
 
 
 public static class Vortice_Exts
 {
+
     /// <summary>
-    /// Checks if the specified <see cref="CppObject"/> instance has been disposed.
+    /// Checks if the object is <c>null</c> or disposed.
     /// </summary>
-    public static bool IsDisposed(this CppObject self)
+    public static bool IsDisposed([NotNullWhen(false)] this CppObject? self)
     {
-        return self == null || self.NativePointer == IntPtr.Zero;
+        return self == null || self?.NativePointer == IntPtr.Zero;
     }
 
 }

@@ -169,20 +169,21 @@ public partial class VirtualViewerControl : SwapChainCanvas
             | ManipulationModes.TranslateInertia;
     }
 
-    protected override void OnDirectXResourcesCreated(DeviceCreatedReason reason)
+
+    protected override void OnDeviceChanged(DeviceChangeReason reason)
     {
-        base.OnDirectXResourcesCreated(reason);
+        base.OnDeviceChanged(reason);
 
-        // dispose native resources of photo
-        DisposeNativePhotoResources();
-        DisposeCheckerboardBrushes();
-
-        // dispose animator
-        if (_animator is not null)
+        if (reason == DeviceChangeReason.Direct2DResized)
         {
-            _animator.Unload();
-            _animator.Initialize(D2dContext);
-            _animator.Play();
+            // set new device context for animator
+            _animator?.SetDeviceContext(D2dContext);
+        }
+        else
+        {
+            // dispose native resources of photo
+            DisposeNativePhotoResources();
+            DisposeCheckerboardBrushes();
         }
     }
 
@@ -243,9 +244,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    protected override void OnResize(SizeChangedEventArgs e)
+    protected override void OnResized(SizeChangedEventArgs e)
     {
-        base.OnResize(e);
+        base.OnResized(e);
         if (e.NewSize.IsEmpty()) return;
 
         // update drawing regions
