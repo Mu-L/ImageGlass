@@ -58,30 +58,6 @@ public static partial class PhotoWIC
 
 
     /// <summary>
-    /// Creates a render target from a bitmap source for drawing operations.
-    /// </summary>
-    public static ID2D1RenderTarget? CreateD2dRenderTarget(IWICBitmapSource? wicBmp)
-    {
-        if (wicBmp is null) return null;
-        ID2D1RenderTarget? target = null;
-
-        try
-        {
-            using var factory = D2D1.D2D1CreateFactory<ID2D1Factory8>(FactoryType.MultiThreaded);
-
-            target = factory.CreateWicBitmapRenderTarget(wicBmp.As<IWICBitmap>(),
-                new(Vortice.DCommon.PixelFormat.Premultiplied));
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
-        }
-
-        return target;
-    }
-
-
-    /// <summary>
     /// Creates a Direct2D bitmap from the given WIC bitmap.
     /// </summary>
     public static ID2D1Bitmap1? CreateD2dBitmap(IWICBitmapSource? wicBmp, ID2D1DeviceContext dc)
@@ -139,6 +115,58 @@ public static partial class PhotoWIC
         return null;
     }
 
+
+    /// <summary>
+    /// Creates a Direct2D render target from WIC Bitmap for drawing operation.
+    /// </summary>
+    public static ID2D1RenderTarget? CreateWicRenderTarget(IWICBitmapSource? wicBmp, RenderTargetProperties? rtProps = null)
+    {
+        if (wicBmp.IsDisposed()) return null;
+
+        try
+        {
+            using var fac = D2D1.D2D1CreateFactory<ID2D1Factory8>(FactoryType.MultiThreaded);
+            rtProps ??= new RenderTargetProperties(Vortice.DCommon.PixelFormat.Premultiplied);
+
+            var rt = fac.CreateWicBitmapRenderTarget(wicBmp.As<IWICBitmap>(), rtProps.Value);
+
+            return rt;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
+
+        return null;
+    }
+
+
+    /// <summary>
+    /// Creates a Direct2D device context from WIC Bitmap for drawing operation.
+    /// </summary>
+    public static ID2D1DeviceContext7? CreateWicDeviceContext(IWICBitmapSource? wicBmp, RenderTargetProperties? rtProps = null)
+    {
+        var rt = CreateWicDeviceContext(wicBmp);
+        if (rt.IsDisposed()) return null;
+
+        return rt.As<ID2D1DeviceContext7>();
+    }
+
+
+    /// <summary>
+    /// Draws a WIC bitmap using the specified Direct2D device context action.
+    /// </summary>
+    public static void DrawWicBitmap(IWICBitmapSource? wicBmp, Action<ID2D1DeviceContext7> fn)
+    {
+        // create device context
+        using var dc = CreateWicDeviceContext(wicBmp);
+        if (dc.IsDisposed()) return;
+
+        // start drawing
+        dc.BeginDraw();
+        fn(dc);
+        dc.EndDraw();
+    }
 
 
     /// <summary>

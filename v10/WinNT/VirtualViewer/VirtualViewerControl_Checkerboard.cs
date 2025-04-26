@@ -148,7 +148,7 @@ public partial class VirtualViewerControl
 
 
         // 2. create render target from WIC bitmap
-        using var tileBmpRt = PhotoWIC.CreateD2dRenderTarget(tileBmp);
+        using var tileBmpRt = PhotoWIC.CreateWicRenderTarget(tileBmp);
         if (tileBmpRt == null) return null;
 
 
