@@ -72,7 +72,7 @@ public abstract class AnimatorImpl : IDisposable
     protected int _currentFrame = 0;
     protected int _currentLoop = 0;
 
-    protected bool _isStarted = false; // check if animation is started
+    protected bool _isDecoded = false; // check if frames are decoded
     protected bool _isPaused = true;
     protected Stopwatch _stopwatch = new();
     protected TimeSpan _lastFrameTime = TimeSpan.Zero;
@@ -137,11 +137,9 @@ public abstract class AnimatorImpl : IDisposable
     {
         Pause();
 
+        // reset timer
+        ResetTimer();
         _stopwatch.Restart();
-
-        _lastFrameTime = TimeSpan.Zero;
-        _pauseStartTime = TimeSpan.Zero;
-        _lastFrameTime = TimeSpan.Zero;
 
         Play();
     }
@@ -152,11 +150,11 @@ public abstract class AnimatorImpl : IDisposable
     /// </summary>
     public void Play()
     {
-        if (!_isStarted)
+        if (!_isDecoded)
         {
             DecodeFrames();
+            _isDecoded = true;
 
-            _isStarted = true;
             _stopwatch.Restart();
             _lastFrameTime = TimeSpan.Zero;
         }
@@ -178,7 +176,7 @@ public abstract class AnimatorImpl : IDisposable
     /// </summary>
     public void Pause()
     {
-        if (!_isStarted || _isPaused) return;
+        if (!_isDecoded || _isPaused) return;
 
         StopTimer();
         _isPaused = true;
@@ -223,6 +221,22 @@ public abstract class AnimatorImpl : IDisposable
     protected virtual void OnDisposing()
     {
         //
+    }
+
+
+    /// <summary>
+    /// Resets the internal timer and frame, loop index to 0.
+    /// </summary>
+    protected void ResetTimer()
+    {
+        _stopwatch.Reset();
+
+        _lastFrameTime = TimeSpan.Zero;
+        _pauseStartTime = TimeSpan.Zero;
+        _lastFrameTime = TimeSpan.Zero;
+
+        _currentFrame = 0;
+        _currentLoop = 0;
     }
 
 

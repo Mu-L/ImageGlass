@@ -20,7 +20,9 @@ using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageMagick;
 using Microsoft.UI.Xaml.Media;
+using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using Vortice;
 using Vortice.Direct2D1;
@@ -42,6 +44,9 @@ public partial class WicAnimator : AnimatorImpl
     protected ID2D1BitmapRenderTarget? _compositeSurface;
     protected ID2D1Bitmap? _backupSurface; // stores composite before the current frame
 
+    private Lock _lockDc = new Lock();
+    private CancellationTokenSource? _cancelDecoding = null;
+
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WicAnimator"/> class.
@@ -61,14 +66,8 @@ public partial class WicAnimator : AnimatorImpl
 
         Unload();
 
-
-        // dispose frames
-        foreach (var frame in _decodedFrames.Values)
-        {
-            frame?.Dispose();
-        }
-        _decodedFrames.Clear();
-
+        _cancelDecoding?.Dispose();
+        _cancelDecoding = null;
 
         _decoder?.Dispose();
         _decoder = null;
@@ -85,6 +84,8 @@ public partial class WicAnimator : AnimatorImpl
 
         _dc = dc;
         _compositeSurface = _dc.CreateCompatibleRenderTarget();
+
+        _cancelDecoding = new();
     }
 
 
@@ -106,11 +107,24 @@ public partial class WicAnimator : AnimatorImpl
     {
         StopTimer();
 
+        _cancelDecoding?.Cancel();
+        _cancelDecoding?.Dispose();
+        _cancelDecoding = null;
+
         _compositeSurface?.Dispose();
         _compositeSurface = null;
 
         _backupSurface?.Dispose();
         _backupSurface = null;
+
+
+        // dispose frames
+        _isDecoded = false;
+        foreach (var frame in _decodedFrames.Values)
+        {
+            frame?.Dispose();
+        }
+        _decodedFrames.Clear();
     }
 
 
@@ -125,8 +139,33 @@ public partial class WicAnimator : AnimatorImpl
         {
             for (int i = 0; i < _frameCount; i++)
             {
-                var frameIndex = i;
-                _ = DecodeFrame(frameIndex);
+                try
+                {
+                    _cancelDecoding?.Token.ThrowIfCancellationRequested();
+
+                    if (!_dc.IsDisposed())
+                    {
+                        lock (_lockDc)
+                        {
+                            if (!_dc.IsDisposed())
+                            {
+                                var frameIndex = i;
+                                _ = DecodeFrame(frameIndex);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+                {
+                    Log.Info($"Cancelled {nameof(DecodeFrames)} for {_meta.FileName}");
+                    Unload();
+
+                    break;
+                }
+                catch
+                {
+                    break;
+                }
             }
         });
     }
