@@ -24,6 +24,7 @@ using System.Linq;
 using System.Text;
 using Vortice.Direct2D1;
 using Vortice.WIC;
+using Windows.Foundation;
 using WinRT;
 
 
@@ -430,6 +431,53 @@ public static partial class PhotoWIC
     }
 
 
+    /// <summary>
+    /// Saves the input bitmap to a file in the given format.
+    /// </summary>
+    public static void SaveAs(IWICBitmapSource? srcBmp, string destFilePath, Size? size = null,
+        ContainerFormat format = ContainerFormat.Webp)
+    {
+        if (srcBmp.IsDisposed()) return;
+
+        using var fs = new FileStream(destFilePath,
+            FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+
+        SaveAs(srcBmp, fs, size, format);
+    }
+
+
+    /// <summary>
+    /// Saves the input bitmap to a file in the given format.
+    /// </summary>
+    public static void SaveAs(IWICBitmapSource? srcBmp, Stream destStream, Size? size = null,
+        ContainerFormat format = ContainerFormat.Webp)
+    {
+        if (srcBmp.IsDisposed()) return;
+
+
+        using var fac = new IWICImagingFactory2();
+        using var stream = fac.CreateStream(destStream);
+        using var encoder = fac.CreateEncoder(format);
+        encoder.Initialize(stream, BitmapEncoderCacheOption.NoCache);
+
+        // writing a frame
+        using (var frameEncode = encoder.CreateNewFrame(out _))
+        {
+            frameEncode.Initialize();
+
+            if (size is not null)
+            {
+                frameEncode.SetSize((uint)size.Value.Width, (uint)size.Value.Height);
+            }
+
+            frameEncode.SetPixelFormat(Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA);
+
+            frameEncode.WriteSource(srcBmp);
+            frameEncode.Commit();
+        }
+
+        encoder.Commit();
+    }
 
 
 }
