@@ -178,7 +178,6 @@ public class MagickDecoder
         MagickReadSettings? readSettings = null,
         CancellationToken token = default)
     {
-        FileInfo? fi = null;
         filePath ??= string.Empty;
         var meta = new PhotoMetadata() { FilePath = filePath };
 
@@ -188,20 +187,10 @@ public class MagickDecoder
             // cancel if requested
             token.ThrowIfCancellationRequested();
 
-            fi = new FileInfo(filePath);
-
-            meta.FileName = fi.Name;
-            meta.FileExtension = fi.Extension.ToUpperInvariant();
-            meta.FolderPath = fi.DirectoryName ?? string.Empty;
-            meta.FolderName = fi.Directory?.Name ?? string.Empty;
-
-            meta.FileSize = fi.Length;
-            meta.FileCreationTime = fi.CreationTime;
-            meta.FileLastWriteTime = fi.LastWriteTime;
-            meta.FileLastAccessTime = fi.LastAccessTime;
+            meta.SetFilePath(filePath);
         }
         catch { }
-        if (fi == null) return meta;
+        if (string.IsNullOrWhiteSpace(meta.FilePath)) return meta;
 
         var settings = readSettings ?? ParseSettings(options, false, filePath);
         using var imgC = new MagickImageCollection();

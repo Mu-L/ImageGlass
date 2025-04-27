@@ -67,28 +67,23 @@ public class PhotoMetadata : IDisposable
 
     // File metadata
     public string FilePath { get; set; } = string.Empty;
-    public string FileName { get; set; } = string.Empty;
-    public string FileExtension { get; set; } = string.Empty;
-    public string FolderPath { get; set; } = string.Empty;
-    public string FolderName { get; set; } = string.Empty;
-
-    public DateTime FileCreationTime { get; set; } // local time
-    public DateTime FileLastAccessTime { get; set; } // local time
-    public DateTime FileLastWriteTime { get; set; } // local time
-    public string FileCreationTimeFormated => BHelper.FormatDateTime(FileCreationTime);
-    public string FileLastAccessTimeFormated => BHelper.FormatDateTime(FileLastAccessTime);
-    public string FileLastWriteTimeFormated => BHelper.FormatDateTime(FileLastWriteTime);
-
-    /// <summary>
-    /// File size in bytes.
-    /// </summary>
-    public long FileSize { get; set; } = 0;
+    public string FileName { get; private set; } = string.Empty;
+    public string FileExtension { get; private set; } = string.Empty;
+    public string FolderPath { get; private set; } = string.Empty;
+    public string FolderName { get; private set; } = string.Empty;
+    public long FileSizeInBytes { get; private set; } = 0;
 
     /// <summary>
     /// The formated file size. E.g. <c>32.09 MB</c>.
     /// </summary>
-    public string FileSizeFormated => BHelper.FormatSize(FileSize);
+    public string FileSizeFormated => BHelper.FormatSize(FileSizeInBytes);
 
+    public DateTime FileCreationTime { get; private set; } // local time
+    public DateTime FileLastAccessTime { get; private set; } // local time
+    public DateTime FileLastWriteTime { get; private set; } // local time
+    public string FileCreationTimeFormated => BHelper.FormatDateTime(FileCreationTime);
+    public string FileLastAccessTimeFormated => BHelper.FormatDateTime(FileLastAccessTime);
+    public string FileLastWriteTimeFormated => BHelper.FormatDateTime(FileLastWriteTime);
 
 
     /// <summary>
@@ -146,6 +141,32 @@ public class PhotoMetadata : IDisposable
     public float? ExifFNumber { get; set; } = null;
     public int? ExifISOSpeed { get; set; } = null;
     public float? ExifFocalLength { get; set; } = null;
+
+
+
+    /// <summary>
+    /// Sets the file path and extracts file-related metadata.
+    /// </summary>
+    public void SetFilePath(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath)) return;
+
+        try
+        {
+            var fi = new FileInfo(filePath);
+
+            FileName = fi.Name;
+            FileExtension = fi.Extension.ToUpperInvariant();
+            FolderPath = fi.DirectoryName ?? string.Empty;
+            FolderName = fi.Directory?.Name ?? string.Empty;
+
+            FileSizeInBytes = fi.Length;
+            FileCreationTime = fi.CreationTime;
+            FileLastWriteTime = fi.LastWriteTime;
+            FileLastAccessTime = fi.LastAccessTime;
+        }
+        catch { }
+    }
 
 
     /// <summary>
