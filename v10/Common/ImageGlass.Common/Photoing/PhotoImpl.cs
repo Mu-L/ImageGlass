@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Photoing;
 using ImageMagick;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 namespace ImageGlass.Common;
@@ -64,8 +65,12 @@ public class PhotoImpl : IPhoto<IDisposable>
     protected uint _width = 0;
     protected uint _height = 0;
     protected PhotoMetadata? _metadata;
-    protected CancellationTokenSource? _tokenSrcPhoto;
-    protected CancellationTokenSource? _tokenSrcMetadata;
+
+    private readonly SemaphoreSlim _lockCancelSrcPhoto = new(1, 1);
+    private readonly SemaphoreSlim _lockCancelSrcMetadata = new(1, 1);
+
+    protected CancellationTokenSource? _tokenSrcPhoto = new();
+    protected CancellationTokenSource? _tokenSrcMetadata = new();
 
     protected event TEventHandler<PhotoImpl, PhotoLoadingEventArgs>? _onLoading;
 
@@ -142,9 +147,6 @@ public class PhotoImpl : IPhoto<IDisposable>
     /// </summary>
     public PhotoImpl(string filePath = "", PhotoReadOptions? options = null)
     {
-        _tokenSrcPhoto ??= new();
-        _tokenSrcMetadata ??= new();
-
         FilePath = filePath;
         ReadOptions = options ?? new();
     }
@@ -156,10 +158,10 @@ public class PhotoImpl : IPhoto<IDisposable>
     /// <param name="disposeMetadata">
     /// Option to dispose <see cref="Metadata"/> object.
     /// </param>
-    protected virtual void OnDisposing(bool disposeMetadata)
+    protected virtual async void OnDisposing(bool disposeMetadata)
     {
-        CancelPhotoLoading();
-        CancelMetadataLoading();
+        await CancelPhotoLoadingAsync();
+        await CancelMetadataLoadingAsync();
 
         _bitmap?.Dispose();
         _bitmap = null;
@@ -169,6 +171,14 @@ public class PhotoImpl : IPhoto<IDisposable>
             _metadata?.Dispose();
             _metadata = null;
         }
+
+        _tokenSrcPhoto?.Dispose();
+        _tokenSrcPhoto = null;
+        _tokenSrcMetadata?.Dispose();
+        _tokenSrcMetadata = null;
+
+        _lockCancelSrcPhoto?.Dispose();
+        _lockCancelSrcMetadata?.Dispose();
     }
 
 
@@ -177,8 +187,7 @@ public class PhotoImpl : IPhoto<IDisposable>
     /// </summary>
     public virtual async Task LoadAsync(PhotoReadOptions? newOptions = null)
     {
-        CancelPhotoLoading();
-        _tokenSrcPhoto = new();
+        await CancelPhotoLoadingAsync();
 
         // reset dispose status
         IsDisposed = false;
@@ -258,8 +267,7 @@ public class PhotoImpl : IPhoto<IDisposable>
     /// </summary>
     public async Task LoadMetadataAsync(PhotoReadOptions? newOptions = null)
     {
-        CancelMetadataLoading();
-        _tokenSrcMetadata = new();
+        await CancelMetadataLoadingAsync();
 
         ReadOptions = newOptions ?? ReadOptions;
         ReadSettings ??= MagickDecoder.ParseSettings(ReadOptions, false, FilePath);
@@ -284,30 +292,44 @@ public class PhotoImpl : IPhoto<IDisposable>
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual void CancelPhotoLoading()
+    [MemberNotNull(nameof(_tokenSrcPhoto))]
+    public virtual async Task CancelPhotoLoadingAsync()
     {
+        await _lockCancelSrcPhoto.WaitAsync();
+
         try
         {
             _tokenSrcPhoto?.Cancel();
             _tokenSrcPhoto?.Dispose();
-            _tokenSrcPhoto = null;
+            _tokenSrcPhoto = new();
         }
         catch (ObjectDisposedException) { }
+        finally
+        {
+            _lockCancelSrcPhoto.Release();
+        }
     }
 
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual void CancelMetadataLoading()
+    [MemberNotNull(nameof(_tokenSrcMetadata))]
+    public virtual async Task CancelMetadataLoadingAsync()
     {
+        await _lockCancelSrcMetadata.WaitAsync();
+
         try
         {
             _tokenSrcMetadata?.Cancel();
             _tokenSrcMetadata?.Dispose();
-            _tokenSrcMetadata = null;
+            _tokenSrcMetadata = new();
         }
         catch (ObjectDisposedException) { }
+        finally
+        {
+            _lockCancelSrcMetadata.Release();
+        }
     }
 
 
