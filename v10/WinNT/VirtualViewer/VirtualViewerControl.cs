@@ -535,7 +535,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         else
         {
             _photo.Loading += Photo_Loading;
-            _ = _photo.LoadAsync();
+            _ = _photo.LoadAsync(true);
         }
     }
 

@@ -185,9 +185,13 @@ public class PhotoImpl : IPhoto<IDisposable>
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual async Task LoadAsync(PhotoReadOptions? newOptions = null)
+    public virtual async Task LoadAsync(bool useCache, PhotoReadOptions? newOptions = null)
     {
         await CancelPhotoLoadingAsync();
+
+        // use cached data
+        if (useCache && IsDone) return;
+
 
         // reset dispose status
         IsDisposed = false;
