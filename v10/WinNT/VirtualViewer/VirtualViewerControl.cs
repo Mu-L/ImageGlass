@@ -527,7 +527,16 @@ public partial class VirtualViewerControl : SwapChainCanvas
             return;
         }
 
-        _photo.Loading += Photo_Loading;
+        // photo is cached
+        if (_photo.IsDone)
+        {
+            _ = HandlePhotoLoadedAsync(new PhotoLoadingEventArgs(_photo));
+        }
+        else
+        {
+            _photo.Loading += Photo_Loading;
+            _ = _photo.LoadAsync();
+        }
     }
 
 

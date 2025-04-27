@@ -51,7 +51,6 @@ public sealed partial class MainWindow : Window
         Title = file.Path;
 
         var photo = new Photo(file.Path);
-        _ = photo.LoadAsync();
 
         Viewer.SetPhoto(photo);
     }
@@ -61,7 +60,6 @@ public sealed partial class MainWindow : Window
     {
 
         var photo = new Photo(path);
-        _ = photo.LoadAsync();
 
         Viewer.SetPhoto(photo);
 
