@@ -26,41 +26,8 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// Class for managing a collection of photos.
 /// </summary>
-public abstract class PhotoManagerImpl<T> : IDisposable where T : PhotoImpl
+public abstract class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
 {
-
-    #region IDisposable Disposing
-
-    public bool IsDisposed { get; protected set; } = false;
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (IsDisposed) return;
-
-        if (disposing)
-        {
-            // Free any other managed objects here.
-            OnDisposing();
-        }
-
-        // Free any unmanaged objects here.
-        IsDisposed = true;
-    }
-
-    public virtual void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    ~PhotoManagerImpl()
-    {
-        Dispose(false);
-    }
-
-    #endregion
-
-
     // photo list
     protected readonly List<T> _photos = new();
 
@@ -149,8 +116,10 @@ public abstract class PhotoManagerImpl<T> : IDisposable where T : PhotoImpl
     /// <summary>
     /// Clears and disposes the resources of <see cref="PhotoManagerImpl{T}"/> instance.
     /// </summary>
-    protected virtual void OnDisposing()
+    protected new virtual void OnDisposing()
     {
+        base.OnDisposing();
+
         Clear();
 
         _tokenStartCaching?.Cancel();
@@ -230,7 +199,7 @@ public abstract class PhotoManagerImpl<T> : IDisposable where T : PhotoImpl
     /// <summary>
     /// Gets a photo from the list.
     /// </summary>
-    public PhotoImpl? Get(int index)
+    public T? Get(int index)
     {
         if (index < 0 || index >= _photos.Count) return null;
 

@@ -24,6 +24,7 @@ public partial class App : Application
         this.InitializeComponent();
     }
 
+
     /// <summary>
     /// Invoked when the application is launched.
     /// </summary>
@@ -44,6 +45,7 @@ public partial class App : Application
 
     private void Window_Closed(object sender, WindowEventArgs args)
     {
+        Local.Photos.Dispose();
         WindowColorProfileProvider.Instance.Dispose();
     }
 }

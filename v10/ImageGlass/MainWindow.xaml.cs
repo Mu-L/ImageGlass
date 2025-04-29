@@ -1,4 +1,4 @@
-﻿using ImageGlass.WinNT.Common;
+﻿using ImageGlass.WinNT.Common.Photoing;
 using Microsoft.UI.Xaml;
 using System;
 using WinRT.Interop;
