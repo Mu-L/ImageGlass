@@ -509,7 +509,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
 
-    public void SetPhoto(Photo inputPhoto)
+    public void SetPhoto(Photo? inputPhoto)
     {
         // unload current photo resources
         UnloadPhoto();

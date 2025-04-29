@@ -25,17 +25,9 @@ namespace ImageGlass.Common.FileSystem;
 /// </summary>
 public class FileSearchProvider()
 {
-    private static readonly Lazy<FileSearchProvider> _instance = new(() => new FileSearchProvider(), LazyThreadSafetyMode.ExecutionAndPublication);
-
 
     /// <summary>
-    /// Provides a singleton instance of the <see cref="FileSearchProvider"/> class.
-    /// </summary>
-    public static FileSearchProvider Instance => _instance.Value;
-
-
-    /// <summary>
-    /// Occurs when the host is being panned.
+    /// Occurs when files are enumerated.
     /// </summary>
     public event EventHandler<FilesEnumeratedEventArgs>? FilesEnumerated;
 
