@@ -22,49 +22,8 @@ using System.Collections.Immutable;
 namespace ImageGlass.Common.Photoing;
 
 
-public class PhotoMetadata : IDisposable
+public class PhotoMetadata : DisposableImpl
 {
-
-    #region IDisposable Disposing
-    public bool IsDisposed { get; protected set; } = false;
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (IsDisposed) return;
-
-        if (disposing)
-        {
-            // Free any other managed objects here.
-            if (ColorProfileData != null)
-            {
-                Array.Clear(ColorProfileData);
-                ColorProfileData = null;
-            }
-
-            RawThumbnail = null;
-            ExifProfile = null;
-            Frames.Clear();
-        }
-
-        // Free any unmanaged objects here.
-        IsDisposed = true;
-    }
-
-    public virtual void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    ~PhotoMetadata()
-    {
-        Dispose(false);
-    }
-
-    #endregion
-
-
-
     // File metadata
     public string FilePath { get; set; } = string.Empty;
     public string FileName { get; private set; } = string.Empty;
@@ -141,6 +100,25 @@ public class PhotoMetadata : IDisposable
     public float? ExifFNumber { get; set; } = null;
     public int? ExifISOSpeed { get; set; } = null;
     public float? ExifFocalLength { get; set; } = null;
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    protected override void OnDisposing()
+    {
+        base.OnDisposing();
+
+        if (ColorProfileData != null)
+        {
+            Array.Clear(ColorProfileData);
+            ColorProfileData = null;
+        }
+
+        RawThumbnail = null;
+        ExifProfile = null;
+        Frames.Clear();
+    }
 
 
 

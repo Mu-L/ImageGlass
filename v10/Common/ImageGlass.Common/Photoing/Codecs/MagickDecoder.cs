@@ -649,48 +649,25 @@ public class MagickDecoder
 /// <summary>
 /// Contains Magick.NET data after the image file loaded.
 /// </summary>
-public class IgMagickReadData : IDisposable
+public class IgMagickReadData : DisposableImpl
 {
-
-    #region IDisposable Disposing
-
-    public bool IsDisposed { get; protected set; } = false;
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (IsDisposed)
-            return;
-
-        if (disposing)
-        {
-            // Free any other managed objects here.
-            MultiFrameImage?.Dispose();
-            MultiFrameImage = null;
-
-            SingleFrameImage?.Dispose();
-            SingleFrameImage = null;
-        }
-
-        // Free any unmanaged objects here.
-        IsDisposed = true;
-    }
-
-    public virtual void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    ~IgMagickReadData()
-    {
-        Dispose(false);
-    }
-
-    #endregion
-
-
     public MagickImageCollection? MultiFrameImage { get; set; } = null;
     public MagickImage? SingleFrameImage { get; set; } = null;
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    protected override void OnDisposing()
+    {
+        base.OnDisposing();
+
+        MultiFrameImage?.Dispose();
+        MultiFrameImage = null;
+
+        SingleFrameImage?.Dispose();
+        SingleFrameImage = null;
+    }
 
 }
 
