@@ -26,7 +26,7 @@ using Vortice.WIC;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
 
-namespace ImageGlass.WinNT.Common;
+namespace ImageGlass.WinNT.Common.Photoing;
 
 
 public static class PhotoMetadata_Extensions

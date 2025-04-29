@@ -1,12 +1,32 @@
-﻿
+﻿/*
+ImageGlass Project - Image viewer for Windows
+Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
 
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 using ImageMagick;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace ImageGlass.Common.Photoing;
 
-public class PhotoManager : IDisposable
+
+/// <summary>
+/// Class for managing a collection of photos.
+/// </summary>
+public abstract class PhotoManagerImpl<T> : IDisposable where T : PhotoImpl
 {
 
     #region IDisposable Disposing
@@ -33,7 +53,7 @@ public class PhotoManager : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    ~PhotoManager()
+    ~PhotoManagerImpl()
     {
         Dispose(false);
     }
@@ -42,30 +62,32 @@ public class PhotoManager : IDisposable
 
 
     // photo list
-    private readonly List<PhotoImpl> _photos = new();
-    // store file_path and its index in the list
-    private readonly ConcurrentDictionary<string, int> _pathDict = new();
+    protected readonly List<T> _photos = new();
+
+    // store file paths and the index for quick access photo in the list
+    protected readonly ConcurrentDictionary<string, int> _pathDict = new();
 
     // concurrent loads control for photo loading
-    private readonly SemaphoreSlim _lockGetAndCache = new(1, 1);
+    protected readonly SemaphoreSlim _lockGetAndCache = new(1, 1);
 
     // photo preloading
-    private readonly int _preloadRange = 2;
-    private readonly SemaphoreSlim _lockPreloadPhotos = new(4, 4);
-    private CancellationTokenSource? _tokenStartCaching;
+    protected readonly SemaphoreSlim _lockPreloadPhotos = new(4, 4);
+    protected CancellationTokenSource? _tokenStartCaching;
 
     // thumbnail
-    private readonly SemaphoreSlim _lockGetThumbnails = new(4, 4);
-    private readonly SemaphoreSlim _lockManageThumbnailCache = new(1, 1);
-    private CancellationTokenSource? _tokenThumbnail;
-    private readonly long _maxThumbnailCacheSizeInMb = 100; // 100MB
+    protected readonly SemaphoreSlim _lockGetThumbnails = new(4, 4);
+    protected readonly SemaphoreSlim _lockManageThumbnailCache = new(1, 1);
+    protected CancellationTokenSource? _tokenThumbnail;
+    protected readonly long _maxThumbnailCacheSizeInMb = 100; // 100MB
 
 
+    // Public Properties
+    #region Public Properties
 
     /// <summary>
     /// Gets the number of photos currently in the collection.
     /// </summary>
-    public int Count => _photos.Count;
+    public uint Count => (uint)_photos.Count;
 
     /// <summary>
     /// Gets a list of file paths associated with the photos.
@@ -73,9 +95,19 @@ public class PhotoManager : IDisposable
     public IEnumerable<string> FilePaths => _photos.Select(i => i.FilePath);
 
     /// <summary>
+    /// Gets, sets the distinct directories list.
+    /// </summary>
+    public List<string> DistinctDirs { get; set; } = [];
+
+    /// <summary>
     /// Gets, sets options for reading photo.
     /// </summary>
     public PhotoReadOptions ReadOptions { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the range of items to preload in advance (in LRU queue).
+    /// </summary>
+    public uint PreloadRange { get; set; } = 2;
 
     /// <summary>
     /// Gets, sets the maximum image dimension to cache.
@@ -89,18 +121,55 @@ public class PhotoManager : IDisposable
     /// </summary>
     public float MaxFileSizeInMbToCache { get; set; } = 0f;
 
+    #endregion // Public Properties
+
 
 
     /// <summary>
-    /// Initializes a new instance of <see cref="PhotoManager"/>.
+    /// Initializes a new instance of <see cref="PhotoManagerImpl{T}"/>.
     /// </summary>
-    public PhotoManager(IEnumerable<string>? list = null)
+    public PhotoManagerImpl(IEnumerable<string>? list = null)
     {
         if (list != null)
         {
             Add(list);
         }
     }
+
+
+    // Abstract / Virtual functions
+    #region Abstract / Virtual functions
+
+    /// <summary>
+    /// Creates a photo item from the specified file path.
+    /// </summary>
+    protected abstract T CreatePhotoItem(string filePath);
+
+
+    /// <summary>
+    /// Clears and disposes the resources of <see cref="PhotoManagerImpl{T}"/> instance.
+    /// </summary>
+    protected virtual void OnDisposing()
+    {
+        Clear();
+
+        _tokenStartCaching?.Cancel();
+        _tokenStartCaching?.Dispose();
+        _tokenStartCaching = null;
+
+        _tokenThumbnail?.Cancel();
+        _tokenThumbnail?.Dispose();
+        _tokenThumbnail = null;
+
+        _lockGetAndCache?.Dispose();
+        _lockPreloadPhotos?.Dispose();
+        _lockGetThumbnails?.Dispose();
+        _lockManageThumbnailCache?.Dispose();
+    }
+
+    #endregion // Abstract / Virtual functions
+
+
 
 
     /// <summary>
@@ -113,11 +182,11 @@ public class PhotoManager : IDisposable
         if (index < 0)
         {
             addedIndex = _photos.Count;
-            _photos.Add(new PhotoImpl(filePath));
+            _photos.Add(CreatePhotoItem(filePath));
         }
         else
         {
-            _photos.Insert(index, new PhotoImpl(filePath));
+            _photos.Insert(index, CreatePhotoItem(filePath));
         }
 
 
@@ -136,7 +205,7 @@ public class PhotoManager : IDisposable
     public void Add(IEnumerable<string> filePaths, int index = -1)
     {
         var addedIndex = index;
-        var items = filePaths.Select(i => new PhotoImpl(i));
+        var items = filePaths.Select(i => CreatePhotoItem(i));
 
         if (index < 0)
         {
@@ -270,7 +339,7 @@ public class PhotoManager : IDisposable
             // 1. unload the out-of-range items
             for (int i = 0; i < _photos.Count; i++)
             {
-                if (i < index - _preloadRange || i > index + _preloadRange)
+                if (i < index - PreloadRange || i > index + PreloadRange)
                 {
                     // unload image data but keep metadata
                     Get(i)?.Unload(false);
@@ -317,7 +386,7 @@ public class PhotoManager : IDisposable
         var set = new HashSet<int>();
         if (includeCurrentIndex) set.Add(index);
 
-        for (int offset = 1; offset <= _preloadRange; offset++)
+        for (int offset = 1; offset <= PreloadRange; offset++)
         {
             set.Add(index + offset);
             set.Add(index - offset);
@@ -430,27 +499,6 @@ public class PhotoManager : IDisposable
         _photos.Clear();
     }
 
-
-    /// <summary>
-    /// Clears and disposes the resources of <see cref="PhotoManager"/> instance.
-    /// </summary>
-    private void OnDisposing()
-    {
-        Clear();
-
-        _tokenStartCaching?.Cancel();
-        _tokenStartCaching?.Dispose();
-        _tokenStartCaching = null;
-
-        _tokenThumbnail?.Cancel();
-        _tokenThumbnail?.Dispose();
-        _tokenThumbnail = null;
-
-        _lockGetAndCache?.Dispose();
-        _lockPreloadPhotos?.Dispose();
-        _lockGetThumbnails?.Dispose();
-        _lockManageThumbnailCache?.Dispose();
-    }
 
 
 

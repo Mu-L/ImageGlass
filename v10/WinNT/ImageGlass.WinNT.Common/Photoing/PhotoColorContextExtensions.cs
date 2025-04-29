@@ -16,10 +16,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
+using ImageGlass.Common.Photoing;
 using Vortice.Direct2D1;
 
-namespace ImageGlass.WinNT.Common;
+namespace ImageGlass.WinNT.Common.Photoing;
 
 
 public static class PhotoColorContextExtensions

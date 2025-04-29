@@ -16,17 +16,23 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-namespace ImageGlass.Common.FileSystem;
+using ImageGlass.Common.Photoing;
 
+namespace ImageGlass.WinNT.Common.Photoing;
 
 /// <summary>
-/// Event arguments for the <see cref="FileSearchProvider.FilesEnumerated"/> event.
+/// <inheritdoc/>
 /// </summary>
-public class FilesEnumeratedEventArgs(IEnumerable<string> filePaths) : EventArgs
+public partial class PhotoManager : PhotoManagerImpl<Photo>
 {
+
     /// <summary>
-    /// Gets the file paths that have been enumerated.
+    /// <inheritdoc/>
     /// </summary>
-    public IEnumerable<string> FilePaths { get; } = filePaths;
+    protected override Photo CreatePhotoItem(string filePath)
+    {
+        return new Photo(filePath);
+    }
 
 }
+

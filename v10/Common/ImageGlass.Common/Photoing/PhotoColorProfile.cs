@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-namespace ImageGlass.Common;
+namespace ImageGlass.Common.Photoing;
 
 
 public class PhotoColorProfile(PhotoColorSpace colorSpace, byte[]? data, IDisposable? native = null) : IDisposable

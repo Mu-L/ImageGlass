@@ -16,13 +16,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common.Photoing;
 using ImageMagick;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
-namespace ImageGlass.Common;
-
+namespace ImageGlass.Common.Photoing;
 
 
 public class PhotoImpl : IPhoto<IDisposable>
