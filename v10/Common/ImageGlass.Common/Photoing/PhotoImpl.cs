@@ -23,42 +23,8 @@ using System.Numerics;
 namespace ImageGlass.Common.Photoing;
 
 
-public class PhotoImpl : IPhoto<IDisposable>
+public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
 {
-
-    #region IDisposable Disposing
-
-    public bool IsDisposed { get; protected set; } = false;
-
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (IsDisposed) return;
-
-        if (disposing)
-        {
-            // Free any other managed objects here.
-            OnDisposing(true);
-        }
-
-        // Free any unmanaged objects here.
-        IsDisposed = true;
-    }
-
-    public virtual void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    ~PhotoImpl()
-    {
-        Dispose(false);
-    }
-
-    #endregion
-
-
     protected IDisposable? _bitmap;
     protected uint _width = 0;
     protected uint _height = 0;
@@ -147,6 +113,18 @@ public class PhotoImpl : IPhoto<IDisposable>
     {
         FilePath = filePath;
         ReadOptions = options ?? new();
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// Calling this function also disposes <see cref="Metadata"/> object.
+    /// </summary>
+    protected override void OnDisposing()
+    {
+        base.OnDisposing();
+
+        OnDisposing(true);
     }
 
 
