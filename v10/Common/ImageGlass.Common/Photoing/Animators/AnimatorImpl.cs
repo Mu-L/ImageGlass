@@ -25,47 +25,8 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// Provides functionality for animating image frames with customizable frame delays and looping behavior.
 /// </summary>
-public abstract class AnimatorImpl : IDisposable
+public abstract class AnimatorImpl : DisposableImpl
 {
-
-    #region IDisposable Disposing
-    public bool IsDisposed { get; protected set; } = false;
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (IsDisposed) return;
-
-        if (disposing)
-        {
-            // Free any other managed objects here.
-            StopTimer();
-
-            _currentFrame = 0;
-            _frameCount = 0;
-            _loopCount = 0;
-            _currentLoop = 0;
-
-            OnDisposing();
-        }
-
-        // Free any unmanaged objects here.
-        IsDisposed = true;
-    }
-
-    public virtual void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    ~AnimatorImpl()
-    {
-        Dispose(false);
-    }
-
-    #endregion
-
-
     protected PhotoMetadata _meta;
     protected uint _frameCount = 0;
     protected uint _loopCount = 0; // 0 - infinite loop
@@ -218,9 +179,16 @@ public abstract class AnimatorImpl : IDisposable
     /// <summary>
     /// Occurs when the <see cref="AnimatorImpl"/> instance is being disposed.
     /// </summary>
-    protected virtual void OnDisposing()
+    protected override void OnDisposing()
     {
-        //
+        StopTimer();
+
+        _currentFrame = 0;
+        _frameCount = 0;
+        _loopCount = 0;
+        _currentLoop = 0;
+
+        base.OnDisposing();
     }
 
 

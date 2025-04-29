@@ -30,7 +30,7 @@ namespace ImageGlass.WinNT.Common;
 /// <summary>
 /// Manages the color profile for a window.
 /// </summary>
-public interface IWindowColorProfileProvider : IDisposable
+public interface IWindowColorProfileProvider
 {
     /// <summary>
     /// Occurs when a physical display's color profile is changed.
@@ -61,50 +61,8 @@ public interface IWindowColorProfileProvider : IDisposable
 /// <summary>
 /// Manages the color profile for a window.
 /// </summary>
-public partial class WindowColorProfileProvider : IWindowColorProfileProvider
+public partial class WindowColorProfileProvider : DisposableImpl, IWindowColorProfileProvider
 {
-    #region IDisposable Disposing
-
-    public bool IsDisposed { get; private set; } = false;
-
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (IsDisposed) return;
-
-        if (disposing)
-        {
-            // Free any other managed objects here.
-            if (_display != null)
-            {
-                _display.ColorProfileChanged += DisplayInformation_ColorProfileChanged;
-            }
-
-            _display?.Dispose();
-            _display = null;
-
-            Data = [];
-            IsInitialized = false;
-        }
-
-        // Free any unmanaged objects here.
-        IsDisposed = true;
-    }
-
-    public virtual void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    ~WindowColorProfileProvider()
-    {
-        Dispose(false);
-    }
-
-    #endregion
-
-
     private static readonly Lazy<WindowColorProfileProvider> _instance = new(() => new WindowColorProfileProvider(), LazyThreadSafetyMode.ExecutionAndPublication);
 
 
@@ -119,6 +77,27 @@ public partial class WindowColorProfileProvider : IWindowColorProfileProvider
     public event EventHandler? Changed;
     public byte[]? Data { get; private set; }
     public bool IsInitialized { get; private set; } = false;
+
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    protected override void OnDisposing()
+    {
+        base.OnDisposing();
+
+        if (_display != null)
+        {
+            _display.ColorProfileChanged += DisplayInformation_ColorProfileChanged;
+        }
+
+        _display?.Dispose();
+        _display = null;
+
+        Data = [];
+        IsInitialized = false;
+    }
 
 
     /// <summary>
