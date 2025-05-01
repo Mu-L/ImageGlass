@@ -20,13 +20,28 @@ namespace ImageGlass.Common.FileSystem;
 
 
 /// <summary>
-/// Event arguments for the <see cref="FileSearchProvider.FilesEnumerated"/> event.
+/// Event arguments for the <see cref="FileSearchProvider.FileSearching"/> event.
 /// </summary>
-public class FilesEnumeratedEventArgs(IEnumerable<string> filePaths) : EventArgs
+public class FileSearchingEventArgs(IEnumerable<string> filePaths, uint batchIndex, uint batchCount) : EventArgs
 {
     /// <summary>
     /// Gets the file paths that have been enumerated.
     /// </summary>
-    public IEnumerable<string> FilePaths { get; } = filePaths;
+    public IEnumerable<string> Results { get; } = filePaths;
+
+    /// <summary>
+    /// Gets the index of the current batch in a sequence of operations.
+    /// </summary>
+    public uint BatchIndex => batchIndex;
+
+    /// <summary>
+    /// Gets the number of batches processed or available.
+    /// </summary>
+    public uint BatchCount => batchCount;
+
+    /// <summary>
+    /// Gets a value indicating whether the search operation has completed.
+    /// </summary>
+    public bool IsSearchEnded => batchIndex <= batchCount - 1;
 
 }

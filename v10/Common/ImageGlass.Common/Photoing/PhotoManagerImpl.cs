@@ -466,6 +466,7 @@ public abstract class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
         }
 
         _photos.Clear();
+        DistinctDirs.Clear();
     }
 
 

@@ -17,19 +17,42 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace ImageGlass.Common.FileSystem;
 
 
 /// <summary>
 /// Handles file searching, filtering, and sorting based on specified criteria.
 /// </summary>
-public class FileSearchProvider()
+public class FileSearchProvider() : DisposableImpl
 {
+    private CancellationTokenSource? _cancelSearching;
+    private SemaphoreSlim _lockCancelSearching = new(1, 1);
+
 
     /// <summary>
     /// Occurs when files are enumerated.
     /// </summary>
-    public event EventHandler<FilesEnumeratedEventArgs>? FilesEnumerated;
+    public event EventHandler<FileSearchingEventArgs>? FileSearching;
+
+
+    // Protected Properties
+    #region Protected Properties
+
+    /// <summary>
+    /// Gets the file path comparer.
+    /// </summary>
+    protected IComparer<string?> FilePathComparer => new StringNaturalComparer(OrderType == ImageOrderType.Asc, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Gets the directory path comparer.
+    /// </summary>
+    protected IComparer<string?> DirPathComparer => GroupByDir
+        ? new StringNaturalComparer(OrderType == ImageOrderType.Asc, StringComparison.OrdinalIgnoreCase)
+        : (IComparer<string?>)Comparer<string>.Create((a, b) => 0);
+
+    #endregion // Protected Properties
 
 
     // Public Properties
@@ -69,16 +92,19 @@ public class FileSearchProvider()
     public bool IncludeHidden { get; set; } = false;
 
     /// <summary>
-    /// Gets the file path comparer.
+    /// Gets the index of the current batch being processed.
     /// </summary>
-    public IComparer<string?> FilePathComparer => new StringNaturalComparer(OrderType == ImageOrderType.Asc, StringComparison.OrdinalIgnoreCase);
+    public uint CurrentBatchIndex { get; protected set; } = 0;
 
     /// <summary>
-    /// Gets the directory path comparer.
+    /// Gets the current number of batches processed.
     /// </summary>
-    public IComparer<string?> DirPathComparer => GroupByDir
-        ? new StringNaturalComparer(OrderType == ImageOrderType.Asc, StringComparison.OrdinalIgnoreCase)
-        : (IComparer<string?>)Comparer<string>.Create((a, b) => 0);
+    public uint CurrentBatchCount { get; protected set; } = 0;
+
+    /// <summary>
+    /// Gets a value indicating whether the search operation has completed.
+    /// </summary>
+    public bool IsSearchEnded => CurrentBatchIndex <= CurrentBatchCount - 1;
 
     #endregion // Public Properties
 
@@ -93,26 +119,70 @@ public class FileSearchProvider()
     /// </list>
     /// </summary>
     /// <param name="dirs">List of directories to search for files</param>
-    public void Start(IEnumerable<string> dirs)
+    public async Task StartAsync(IEnumerable<string> dirs)
     {
+        // cancel ongoing search
+        await CancelAsync();
+
         // get files from the given directories
+        CurrentBatchIndex = 0;
+        CurrentBatchCount = (uint)dirs.Count();
+
         foreach (var dirPath in dirs)
         {
-            OnSearching(dirPath);
+            OnSearching(dirPath, CurrentBatchIndex, CurrentBatchCount, _cancelSearching.Token);
+            CurrentBatchIndex++;
         }
     }
+
+
+    /// <summary>
+    /// Cancels an ongoing file searching operation.
+    /// </summary>
+    [MemberNotNull(nameof(_cancelSearching))]
+    public async Task CancelAsync()
+    {
+        await _lockCancelSearching.WaitAsync();
+
+        try
+        {
+            _cancelSearching?.Cancel();
+            _cancelSearching?.Dispose();
+            _cancelSearching = new();
+        }
+        finally
+        {
+            _lockCancelSearching.Release();
+        }
+    }
+
 
 
     // Protected Functions
     #region Protected Functions
 
     /// <summary>
-    /// Finds files in the given directory, emits <see cref="FilesEnumerated"/> event.
+    /// <inheritdoc/>
+    /// </summary>
+    protected override void OnDisposing()
+    {
+        base.OnDisposing();
+
+        _cancelSearching?.Cancel();
+        _cancelSearching?.Dispose();
+        _cancelSearching = null;
+
+        _lockCancelSearching?.Dispose();
+    }
+
+
+    /// <summary>
+    /// Finds files in the given directory, emits <see cref="FileSearching"/> event.
     /// </summary>
     /// <param name="dirPath">The current path of directory to find</param>
-    protected virtual void OnSearching(string dirPath)
+    protected virtual void OnSearching(string dirPath, uint batchIndex, uint batchCount, CancellationToken token)
     {
-        FindFiles__(dirPath);
+        FindFiles__(dirPath, batchIndex, batchCount, token);
     }
 
 
@@ -135,10 +205,13 @@ public class FileSearchProvider()
 
 
     /// <summary>
-    /// Finds files in the given directory, emits <see cref="FilesEnumerated"/> event.
+    /// Finds files in the given directory, emits <see cref="FileSearching"/> event.
     /// </summary>
-    protected void FindFiles__(string dirPath)
+    protected void FindFiles__(string dirPath, uint batchIndex, uint batchCount, CancellationToken token)
     {
+        // cancel if requested
+        if (token.IsCancellationRequested) return;
+
         // check attributes to skip
         var skipAttrs = FileAttributes.System;
         if (!IncludeHidden) skipAttrs |= FileAttributes.Hidden;
@@ -151,14 +224,26 @@ public class FileSearchProvider()
             RecurseSubdirectories = SearchSubDirectories,
         });
 
+
+        // cancel if requested
+        if (token.IsCancellationRequested) return;
+
         // filter list
         filePaths = OnFiltering(filePaths);
+
+
+        // cancel if requested
+        if (token.IsCancellationRequested) return;
 
         // sort list
         filePaths = OnSorting(filePaths);
 
+
+        // cancel if requested
+        if (token.IsCancellationRequested) return;
+
         // emits results
-        FilesEnumerated?.Invoke(this, new FilesEnumeratedEventArgs(filePaths));
+        FileSearching?.Invoke(this, new(filePaths, batchIndex, batchCount));
     }
 
 
