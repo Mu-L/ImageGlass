@@ -20,7 +20,7 @@ namespace ImageGlass.Common.FileSystem;
 
 
 /// <summary>
-/// Event arguments for the <see cref="FileSearchProvider.FileSearching"/> event.
+/// Event arguments for the <see cref="FilesSearcher.FileSearching"/> event.
 /// </summary>
 public class FileSearchingEventArgs(IEnumerable<string> filePaths, uint batchIndex, uint batchCount) : EventArgs
 {

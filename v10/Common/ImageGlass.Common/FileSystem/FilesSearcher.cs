@@ -25,10 +25,11 @@ namespace ImageGlass.Common.FileSystem;
 /// <summary>
 /// Handles file searching, filtering, and sorting based on specified criteria.
 /// </summary>
-public class FileSearchProvider() : DisposableImpl
+public partial class FilesSearcher() : DisposableImpl
 {
     private CancellationTokenSource? _cancelSearching;
     private SemaphoreSlim _lockCancelSearching = new(1, 1);
+    private SemaphoreSlim _lockSearching = new(1, 1);
 
 
     /// <summary>
@@ -124,14 +125,26 @@ public class FileSearchProvider() : DisposableImpl
         // cancel ongoing search
         await CancelAsync();
 
-        // get files from the given directories
-        CurrentBatchIndex = 0;
-        CurrentBatchCount = (uint)dirs.Count();
+        await _lockSearching.WaitAsync();
 
-        foreach (var dirPath in dirs)
+        try
         {
-            OnSearching(dirPath, CurrentBatchIndex, CurrentBatchCount, _cancelSearching.Token);
-            CurrentBatchIndex++;
+            // get files from the given directories
+            CurrentBatchIndex = 0;
+            CurrentBatchCount = (uint)dirs.Count();
+
+            await Task.Run(() =>
+            {
+                foreach (var dirPath in dirs)
+                {
+                    OnSearching(dirPath, CurrentBatchIndex, CurrentBatchCount, _cancelSearching.Token);
+                    CurrentBatchIndex++;
+                }
+            });
+        }
+        finally
+        {
+            _lockSearching.Release();
         }
     }
 
