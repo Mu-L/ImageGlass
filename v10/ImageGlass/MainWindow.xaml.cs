@@ -1,5 +1,4 @@
-﻿using ImageGlass.WinNT.Common.Photoing;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using System;
 using WinRT.Interop;
 
@@ -30,42 +29,67 @@ public sealed partial class MainWindow : Window
     public GridLength TitleBarHeight => new(AppWindow.TitleBar.Height / 2.5f);
     public Thickness TitleBarMargin => new Thickness(0, 0, AppWindow.TitleBar.RightInset / 2.5f, 0);
 
+    public nint Handle => WindowNative.GetWindowHandle(this);
+
 
     private void Window_Closed(object sender, WindowEventArgs args)
     {
 
     }
 
-    private async void Button_Click(object sender, RoutedEventArgs e)
+
+    private void Viewer_Loaded(object sender, RoutedEventArgs e)
     {
-        var hWnd = WindowNative.GetWindowHandle(this);
 
-        //var fp = new Windows.Storage.Pickers.FolderPicker();
-        //InitializeWithWindow.Initialize(fp, hWnd);
 
+        SetPhotoAsync(path);
+    }
+
+
+    private async void SetPhotoAsync(string path)
+    {
+        Title = path;
+
+        var photo = await Local.Photos.LoadFolderAsync(path);
+        Viewer.SetPhoto(photo);
+    }
+
+
+    private async void BtnOpenFile_Clicked(object sender, RoutedEventArgs e)
+    {
         var op = new Windows.Storage.Pickers.FileOpenPicker();
         op.FileTypeFilter.Add("*");
-        InitializeWithWindow.Initialize(op, hWnd);
+        InitializeWithWindow.Initialize(op, Handle);
 
         var file = await op.PickSingleFileAsync();
         if (file == null) return;
 
 
-        Title = file.Path;
-
-        var photo = await Local.Photos.LoadFolderAsync(file.Path);
-
-        Viewer.SetPhoto(photo);
+        SetPhotoAsync(file.Path);
     }
 
 
-    private void Viewer_Loaded(object sender, RoutedEventArgs e)
+    private async void BtnOpenFolder_Clicked(object sender, RoutedEventArgs e)
+    {
+        var fp = new Windows.Storage.Pickers.FolderPicker();
+        InitializeWithWindow.Initialize(fp, Handle);
+
+        var dir = await fp.PickSingleFolderAsync();
+        if (dir == null) return;
+
+
+        SetPhotoAsync(dir.Path);
+    }
+
+    private void BtnViewNext_Clicked(object sender, RoutedEventArgs e)
     {
 
-        var photo = new Photo(path);
+    }
 
-        Viewer.SetPhoto(photo);
+    private void BtnViewPrevious_Clicked(object sender, RoutedEventArgs e)
+    {
 
     }
+
 
 }

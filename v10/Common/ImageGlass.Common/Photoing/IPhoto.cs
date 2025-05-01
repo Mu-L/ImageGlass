@@ -109,13 +109,13 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
     /// <summary>
     /// Stops any ongoing photo loading process.
     /// </summary>
-    Task CancelPhotoLoadingAsync();
+    void CancelPhotoLoading();
 
 
     /// <summary>
     /// Stops any ongoing metadata loading process.
     /// </summary>
-    Task CancelMetadataLoadingAsync();
+    void CancelMetadataLoading();
 
 
     /// <summary>

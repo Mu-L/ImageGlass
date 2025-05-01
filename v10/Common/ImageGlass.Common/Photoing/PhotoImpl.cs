@@ -122,10 +122,10 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     /// <param name="disposeMetadata">
     /// Option to dispose <see cref="Metadata"/> object.
     /// </param>
-    protected virtual async void OnDisposing(bool disposeMetadata)
+    protected virtual void OnDisposing(bool disposeMetadata)
     {
-        await CancelPhotoLoadingAsync();
-        await CancelMetadataLoadingAsync();
+        CancelPhotoLoading();
+        CancelMetadataLoading();
 
         _bitmap?.Dispose();
         _bitmap = null;
@@ -152,21 +152,22 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     public virtual async Task LoadAsync(bool useCache,
         PhotoReadOptions? newOptions = null, IProgress<PhotoLoadingEventArgs>? progress = null)
     {
-        await CancelPhotoLoadingAsync();
-
         // use cached data
         if (useCache && IsDone) return;
 
-
-        // reset dispose status
-        IsDisposed = false;
-        IsDone = false;
-        Error = null;
-        ReadOptions = newOptions ?? ReadOptions;
-
+        await _lockCancelSrcPhoto.WaitAsync();
 
         try
         {
+            CancelPhotoLoading();
+
+            // reset dispose status
+            IsDisposed = false;
+            IsDone = false;
+            Error = null;
+            ReadOptions = newOptions ?? ReadOptions;
+
+
             // 1. load metadata ===================
             // cancel if requested
             _tokenSrcPhoto.Token.ThrowIfCancellationRequested();
@@ -198,7 +199,6 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
             Log.Error($"Cancelled {nameof(LoadAsync)} for {FilePath}");
-
             Unload();
         }
         catch (Exception ex)
@@ -207,6 +207,10 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
             IsDone = true;
 
             Log.Error(ex);
+        }
+        finally
+        {
+            _lockCancelSrcPhoto.Release();
         }
     }
 
@@ -225,13 +229,22 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     /// </summary>
     public async Task LoadMetadataAsync(PhotoReadOptions? newOptions = null)
     {
-        await CancelMetadataLoadingAsync();
+        await _lockCancelSrcMetadata.WaitAsync();
 
-        ReadOptions = newOptions ?? ReadOptions;
-        ReadSettings ??= MagickDecoder.ParseSettings(ReadOptions, false, FilePath);
+        try
+        {
+            CancelMetadataLoading();
 
-        _metadata = await MagickDecoder.LoadMetadataAsync(FilePath,
-            ReadOptions, ReadSettings, _tokenSrcMetadata.Token);
+            ReadOptions = newOptions ?? ReadOptions;
+            ReadSettings ??= MagickDecoder.ParseSettings(ReadOptions, false, FilePath);
+
+            _metadata = await MagickDecoder.LoadMetadataAsync(FilePath,
+                ReadOptions, ReadSettings, _tokenSrcMetadata.Token);
+        }
+        finally
+        {
+            _lockCancelSrcMetadata.Release();
+        }
     }
 
 
@@ -251,21 +264,11 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     /// <inheritdoc/>
     /// </summary>
     [MemberNotNull(nameof(_tokenSrcPhoto))]
-    public virtual async Task CancelPhotoLoadingAsync()
+    public virtual void CancelPhotoLoading()
     {
-        await _lockCancelSrcPhoto.WaitAsync();
-
-        try
-        {
-            _tokenSrcPhoto?.Cancel();
-            _tokenSrcPhoto?.Dispose();
-            _tokenSrcPhoto = new();
-        }
-        catch (ObjectDisposedException) { }
-        finally
-        {
-            _lockCancelSrcPhoto.Release();
-        }
+        _tokenSrcPhoto?.Cancel();
+        _tokenSrcPhoto?.Dispose();
+        _tokenSrcPhoto = new();
     }
 
 
@@ -273,21 +276,11 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     /// <inheritdoc/>
     /// </summary>
     [MemberNotNull(nameof(_tokenSrcMetadata))]
-    public virtual async Task CancelMetadataLoadingAsync()
+    public virtual void CancelMetadataLoading()
     {
-        await _lockCancelSrcMetadata.WaitAsync();
-
-        try
-        {
-            _tokenSrcMetadata?.Cancel();
-            _tokenSrcMetadata?.Dispose();
-            _tokenSrcMetadata = new();
-        }
-        catch (ObjectDisposedException) { }
-        finally
-        {
-            _lockCancelSrcMetadata.Release();
-        }
+        _tokenSrcMetadata?.Cancel();
+        _tokenSrcMetadata?.Dispose();
+        _tokenSrcMetadata = new();
     }
 
 
@@ -303,7 +296,6 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
         // unload image
         OnDisposing(disposeMetadata);
     }
-
 
 
 }

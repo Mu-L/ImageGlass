@@ -52,7 +52,7 @@ public partial class PhotoManagerImpl<T>
 
 
         // 1. stop any ongoing search
-        await _fileSearcher.CancelAsync();
+        _fileSearcher.CancelSearching();
         _fileSearcher.FileSearching -= FileSearchProvider_FileSearching;
         _fileSearcher.FileSearching += FileSearchProvider_FileSearching;
 
@@ -90,7 +90,7 @@ public partial class PhotoManagerImpl<T>
         // 4. start new file search
         if (!string.IsNullOrWhiteSpace(dirPath))
         {
-            await _fileSearcher.StartAsync([dirPath]);
+            _ = _fileSearcher.StartAsync([dirPath]);
 
             if (initPhoto is null)
             {
@@ -101,7 +101,7 @@ public partial class PhotoManagerImpl<T>
                 }
 
                 // get the first item as the init photo
-                initPhoto = GetAndCache(0, true);
+                initPhoto = GetAndCache(0, false);
 
                 CurrentIndex = 0;
                 InitialInputPath = initPhoto?.FilePath ?? InitialInputPath;

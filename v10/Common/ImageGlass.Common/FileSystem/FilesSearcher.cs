@@ -28,7 +28,6 @@ namespace ImageGlass.Common.FileSystem;
 public partial class FilesSearcher() : DisposableImpl
 {
     private CancellationTokenSource? _cancelSearching;
-    private SemaphoreSlim _lockCancelSearching = new(1, 1);
     private SemaphoreSlim _lockSearching = new(1, 1);
 
 
@@ -122,13 +121,13 @@ public partial class FilesSearcher() : DisposableImpl
     /// <param name="dirs">List of directories to search for files</param>
     public async Task StartAsync(IEnumerable<string> dirs)
     {
-        // cancel ongoing search
-        await CancelAsync();
-
         await _lockSearching.WaitAsync();
 
         try
         {
+            // cancel ongoing search
+            CancelSearching();
+
             // get files from the given directories
             CurrentBatchIndex = 0;
             CurrentBatchCount = (uint)dirs.Count();
@@ -153,20 +152,11 @@ public partial class FilesSearcher() : DisposableImpl
     /// Cancels an ongoing file searching operation.
     /// </summary>
     [MemberNotNull(nameof(_cancelSearching))]
-    public async Task CancelAsync()
+    public void CancelSearching()
     {
-        await _lockCancelSearching.WaitAsync();
-
-        try
-        {
-            _cancelSearching?.Cancel();
-            _cancelSearching?.Dispose();
-            _cancelSearching = new();
-        }
-        finally
-        {
-            _lockCancelSearching.Release();
-        }
+        _cancelSearching?.Cancel();
+        _cancelSearching?.Dispose();
+        _cancelSearching = new();
     }
 
 
@@ -181,11 +171,8 @@ public partial class FilesSearcher() : DisposableImpl
     {
         base.OnDisposing();
 
-        _cancelSearching?.Cancel();
-        _cancelSearching?.Dispose();
-        _cancelSearching = null;
-
-        _lockCancelSearching?.Dispose();
+        CancelSearching();
+        _lockSearching.Dispose();
     }
 
 

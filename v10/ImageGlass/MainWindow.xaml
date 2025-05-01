@@ -61,14 +61,24 @@
             Background="#10ff"
             Canvas.ZIndex="99">
 
-            <Button Click="Button_Click">Open</Button>
+            <StackPanel
+                Padding="10"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal">
+
+                <Button Click="BtnOpenFile_Clicked">Open File</Button>
+                <Button Click="BtnOpenFolder_Clicked">Open Folder</Button>
+
+                <Button Margin="50,0,0,0" Click="BtnViewPrevious_Clicked">View Previous</Button>
+                <Button Click="BtnViewNext_Clicked">View Next</Button>
+            </StackPanel>
         </Grid>
 
 
         <!--  Gallery  -->
         <Grid
             Grid.Row="3"
-            Height="80"
+            Height="0"
             VerticalAlignment="Bottom"
             Background="#10ff"
             Canvas.ZIndex="98" />
