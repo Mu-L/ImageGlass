@@ -30,8 +30,6 @@ public partial class FilesSearcher() : DisposableImpl
     private CancellationTokenSource? _cancelSearching;
     private SemaphoreSlim _lockSearching = new(1, 1);
 
-    private HashSet<string> _allowedExtensions = new HashSet<string>();
-
 
     /// <summary>
     /// Occurs when files are enumerated.
@@ -45,13 +43,13 @@ public partial class FilesSearcher() : DisposableImpl
     /// <summary>
     /// Gets the file path comparer.
     /// </summary>
-    protected IComparer<string?> FilePathComparer => new StringNaturalComparer(OrderType == ImageOrderType.Asc, StringComparison.OrdinalIgnoreCase);
+    protected IComparer<string?> FilePathComparer => new StringNaturalComparer(Options.OrderType == ImageOrderType.Asc, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Gets the directory path comparer.
     /// </summary>
-    protected IComparer<string?> DirPathComparer => GroupByDir
-        ? new StringNaturalComparer(OrderType == ImageOrderType.Asc, StringComparison.OrdinalIgnoreCase)
+    protected IComparer<string?> DirPathComparer => Options.GroupByDir
+        ? new StringNaturalComparer(Options.OrderType == ImageOrderType.Asc, StringComparison.OrdinalIgnoreCase)
         : (IComparer<string?>)Comparer<string>.Create((a, b) => 0);
 
     #endregion // Protected Properties
@@ -61,37 +59,9 @@ public partial class FilesSearcher() : DisposableImpl
     #region Public Properties
 
     /// <summary>
-    /// Specifies the order in which images are sorted.
-    /// Defaults to <c><see cref="ImageOrderBy.Name"/></c>.
+    /// Gets the options used to configure the file search operation.
     /// </summary>
-    public ImageOrderBy OrderBy { get; set; } = ImageOrderBy.Name;
-
-    /// <summary>
-    /// Represents the order type for images.
-    /// Defaults to <c><see cref="ImageOrderType.Asc"/></c>.
-    /// </summary>
-    public ImageOrderType OrderType { get; set; } = ImageOrderType.Asc;
-
-    /// <summary>
-    /// Defines the mode of string comparison used.
-    /// Defaults to <c><see cref="StringComparison.OrdinalIgnoreCase"/></c>
-    /// </summary>
-    public StringComparison CompareMode { get; set; } = StringComparison.OrdinalIgnoreCase;
-
-    /// <summary>
-    /// Indicates whether to group items by their directory. Defaults to <c>true</c>.
-    /// </summary>
-    public bool GroupByDir { get; set; } = true;
-
-    /// <summary>
-    /// Indicates whether to search in subdirectories. Defaults to <c>false</c>.
-    /// </summary>
-    public bool SearchSubDirectories { get; set; } = false;
-
-    /// <summary>
-    /// Indicates whether hidden items should be included. Defaults to <c>false</c>.
-    /// </summary>
-    public bool IncludeHidden { get; set; } = false;
+    public FilesSearchOptions Options { get; private set; } = new();
 
     /// <summary>
     /// Gets the index of the current batch being processed.
@@ -121,7 +91,7 @@ public partial class FilesSearcher() : DisposableImpl
     /// </list>
     /// </summary>
     /// <param name="dirs">List of directories to search for files</param>
-    public async Task StartAsync(IEnumerable<string> dirs, HashSet<string> allowedExtensions)
+    public async Task StartAsync(IEnumerable<string> dirs, FilesSearchOptions options)
     {
         await _lockSearching.WaitAsync();
 
@@ -130,13 +100,12 @@ public partial class FilesSearcher() : DisposableImpl
             // cancel ongoing search
             CancelSearching();
 
-            // get files from the given directories
+            // set search options
+            Options = options;
             CurrentBatchIndex = 0;
             CurrentBatchCount = (uint)dirs.Count();
 
-            _allowedExtensions.Clear();
-            _allowedExtensions = allowedExtensions;
-
+            // get files from the given directories
             await Task.Run(() =>
             {
                 foreach (var dirPath in dirs)
@@ -178,7 +147,6 @@ public partial class FilesSearcher() : DisposableImpl
 
         CancelSearching();
         _lockSearching.Dispose();
-        _allowedExtensions.Clear();
     }
 
 
@@ -197,11 +165,13 @@ public partial class FilesSearcher() : DisposableImpl
     /// </summary>
     protected virtual IEnumerable<string> OnFiltering(IEnumerable<string> fileList)
     {
+        if (Options.AllowedExtensions is null) return fileList;
+
         return fileList.Where(path =>
         {
             var ext = Path.GetExtension(path).ToLowerInvariant();
 
-            return _allowedExtensions.Contains(ext);
+            return Options.AllowedExtensions.Contains(ext);
         });
     }
 
@@ -225,14 +195,14 @@ public partial class FilesSearcher() : DisposableImpl
 
         // check attributes to skip
         var skipAttrs = FileAttributes.System;
-        if (!IncludeHidden) skipAttrs |= FileAttributes.Hidden;
+        if (!Options.IncludeHidden) skipAttrs |= FileAttributes.Hidden;
 
         // search files
         var filePaths = Directory.EnumerateFiles(dirPath, "*", new EnumerationOptions()
         {
             IgnoreInaccessible = true,
             AttributesToSkip = skipAttrs,
-            RecurseSubdirectories = SearchSubDirectories,
+            RecurseSubdirectories = Options.SearchSubDirectories,
         });
 
 
@@ -266,9 +236,9 @@ public partial class FilesSearcher() : DisposableImpl
         var query = fileList.AsParallel();
 
         // sort by FileSize
-        if (OrderBy == ImageOrderBy.FileSize)
+        if (Options.OrderBy == ImageOrderBy.FileSize)
         {
-            if (OrderType == ImageOrderType.Desc)
+            if (Options.OrderType == ImageOrderType.Desc)
             {
                 return query
                     .OrderBy(f => Path.GetDirectoryName(f), DirPathComparer)
@@ -285,9 +255,9 @@ public partial class FilesSearcher() : DisposableImpl
         }
 
         // sort by DateCreated
-        if (OrderBy == ImageOrderBy.DateCreated)
+        if (Options.OrderBy == ImageOrderBy.DateCreated)
         {
-            if (OrderType == ImageOrderType.Desc)
+            if (Options.OrderType == ImageOrderType.Desc)
             {
                 return query
                     .OrderBy(f => Path.GetDirectoryName(f), DirPathComparer)
@@ -304,9 +274,9 @@ public partial class FilesSearcher() : DisposableImpl
         }
 
         // sort by Extension
-        if (OrderBy == ImageOrderBy.Extension)
+        if (Options.OrderBy == ImageOrderBy.Extension)
         {
-            if (OrderType == ImageOrderType.Desc)
+            if (Options.OrderType == ImageOrderType.Desc)
             {
                 return query
                     .OrderBy(f => Path.GetDirectoryName(f), DirPathComparer)
@@ -323,9 +293,9 @@ public partial class FilesSearcher() : DisposableImpl
         }
 
         // sort by DateAccessed
-        if (OrderBy == ImageOrderBy.DateAccessed)
+        if (Options.OrderBy == ImageOrderBy.DateAccessed)
         {
-            if (OrderType == ImageOrderType.Desc)
+            if (Options.OrderType == ImageOrderType.Desc)
             {
                 return query
                     .OrderBy(f => Path.GetDirectoryName(f), DirPathComparer)
@@ -342,9 +312,9 @@ public partial class FilesSearcher() : DisposableImpl
         }
 
         // sort by DateModified
-        if (OrderBy == ImageOrderBy.DateModified)
+        if (Options.OrderBy == ImageOrderBy.DateModified)
         {
-            if (OrderType == ImageOrderType.Desc)
+            if (Options.OrderType == ImageOrderType.Desc)
             {
                 return query
                     .OrderBy(f => Path.GetDirectoryName(f), DirPathComparer)
@@ -361,7 +331,7 @@ public partial class FilesSearcher() : DisposableImpl
         }
 
         // sort by Random
-        if (OrderBy == ImageOrderBy.Random)
+        if (Options.OrderBy == ImageOrderBy.Random)
         {
             // NOTE: ignoring the 'descending order' setting
             return query

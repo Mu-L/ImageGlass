@@ -48,7 +48,7 @@ public partial class PhotoManagerImpl<T>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
     /// <param name="path">Full path of file or directory</param>
-    public async Task<T?> LoadFolderAsync(string path)
+    public async Task<T?> LoadFolderAsync(string path, FilesSearchOptions searchOptions)
     {
         if (string.IsNullOrEmpty(path)) return null;
 
@@ -91,7 +91,7 @@ public partial class PhotoManagerImpl<T>
         // 4. start new file search
         if (!string.IsNullOrWhiteSpace(dirPath))
         {
-            _ = _fileSearcher.StartAsync([dirPath], Const.FileFormats);
+            _ = _fileSearcher.StartAsync([dirPath], searchOptions);
 
             if (InitPhoto is null)
             {

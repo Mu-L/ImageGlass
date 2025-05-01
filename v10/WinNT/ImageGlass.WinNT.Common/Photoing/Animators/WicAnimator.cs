@@ -162,8 +162,9 @@ public partial class WicAnimator : AnimatorImpl
 
                     break;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Log.Error(ex);
                     break;
                 }
             }

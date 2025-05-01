@@ -74,19 +74,19 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// <summary>
     /// Gets or sets the range of items to preload in advance (in LRU queue).
     /// </summary>
-    public uint PreloadRange { get; set; } = 1;
+    public uint PreloadRange { get; set; } = 0;
 
     /// <summary>
     /// Gets, sets the maximum image dimension to cache.
     /// If this value is <c>≤ 0</c>, the option will be ignored.
     /// </summary>
-    public int MaxImageDimensionToCache { get; set; } = 0;
+    public int MaxImageDimensionToCache { get; set; } = 8_000;
 
     /// <summary>
     /// Gets, sets the maximum image file size (in MB) to cache.
     /// If this value is <c>≤ 0</c>, the option will be ignored.
     /// </summary>
-    public float MaxFileSizeInMbToCache { get; set; } = 0f;
+    public float MaxFileSizeInMbToCache { get; set; } = 100f;
 
     #endregion // Public Properties
 

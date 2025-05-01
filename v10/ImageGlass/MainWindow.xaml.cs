@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml;
+﻿using ImageGlass.Common;
+using ImageGlass.Common.FileSystem;
+using Microsoft.UI.Xaml;
 using System;
 using WinRT.Interop;
 
@@ -50,7 +52,11 @@ public sealed partial class MainWindow : Window
     {
         Title = path;
 
-        var photo = await Local.Photos.LoadFolderAsync(path);
+        var photo = await Local.Photos.LoadFolderAsync(path, new FilesSearchOptions()
+        {
+            AllowedExtensions = Const.FileFormats,
+        });
+
         Viewer.SetPhoto(photo);
     }
 
