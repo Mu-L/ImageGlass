@@ -25,6 +25,62 @@ namespace ImageGlass.Common;
 
 public partial class BHelper
 {
+    /// <summary>
+    /// Generates a list of unique indexes within a specified range,
+    /// wrapping around the center index, in the Right-Left-Center order (RLU).
+    /// Example:
+    /// <list type="bullet">
+    ///   <item><c>GenerateWrappedIndexes(0, 2, 10, true) => [0, 1, 9, 2, 8]</c></item>
+    ///   <item><c>GenerateWrappedIndexes(0, 2, 10, false) => [1, 9, 2, 8]</c></item>
+    ///   <item><c>GenerateWrappedIndexes(0, 2, 1, true) => [0]</c></item>
+    ///   <item><c>GenerateWrappedIndexes(-1, 2, 10, true) => []</c></item>
+    /// </list>
+    /// </summary>
+    public static List<int> GenerateWrappedIndexes(int centerIndex, int range, int count, bool includeCenterIndex)
+    {
+        if (centerIndex < 0 || centerIndex >= count - 1) return [];
+
+        var unloadSet = new HashSet<int>();
+
+        // include the center index
+        if (includeCenterIndex)
+        {
+            unloadSet.Add(centerIndex);
+        }
+
+        // generate range [-range, centerIndex, +range]
+        for (var i = 1; i <= range; i++)
+        {
+            var rightIndex = ComputeIndexInRange(centerIndex + i, count);
+            var leftIndex = ComputeIndexInRange(centerIndex - i, count);
+
+            unloadSet.Add(rightIndex);
+            unloadSet.Add(leftIndex);
+        }
+
+        return unloadSet.ToList();
+    }
+
+    /// <summary>
+    /// Calculates a valid index within a circular range. Example:
+    /// <list type="bullet">
+    ///   <item><c>CalculateIndexInRange(1, 10) => 1</c></item>
+    ///   <item><c>CalculateIndexInRange(0, 10) => 0</c></item>
+    ///   <item><c>CalculateIndexInRange(-1, 10) => 9</c></item>
+    ///   <item><c>CalculateIndexInRange(-2, 10) => 8</c></item>
+    /// </list>
+    /// </summary>
+    /// <remarks>
+    /// Use modulo expression <c>((i % count) + count) % count</c>
+    /// to ensure the index stays within <c>[0, count-1]</c>, even for negative values.
+    /// </remarks>
+    public static int ComputeIndexInRange(int index, int count)
+    {
+        var newIndex = (((index) % count) + count) % count;
+
+        return newIndex;
+    }
+
 
     /// <summary>
     /// Create an unique key for the input file.
