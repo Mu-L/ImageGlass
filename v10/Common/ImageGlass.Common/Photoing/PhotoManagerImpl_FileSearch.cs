@@ -91,7 +91,7 @@ public partial class PhotoManagerImpl<T>
         // 4. start new file search
         if (!string.IsNullOrWhiteSpace(dirPath))
         {
-            _ = _fileSearcher.StartAsync([dirPath]);
+            _ = _fileSearcher.StartAsync([dirPath], Const.FileFormats);
 
             if (InitPhoto is null)
             {

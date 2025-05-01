@@ -30,6 +30,8 @@ public partial class FilesSearcher() : DisposableImpl
     private CancellationTokenSource? _cancelSearching;
     private SemaphoreSlim _lockSearching = new(1, 1);
 
+    private HashSet<string> _allowedExtensions = new HashSet<string>();
+
 
     /// <summary>
     /// Occurs when files are enumerated.
@@ -119,7 +121,7 @@ public partial class FilesSearcher() : DisposableImpl
     /// </list>
     /// </summary>
     /// <param name="dirs">List of directories to search for files</param>
-    public async Task StartAsync(IEnumerable<string> dirs)
+    public async Task StartAsync(IEnumerable<string> dirs, HashSet<string> allowedExtensions)
     {
         await _lockSearching.WaitAsync();
 
@@ -131,6 +133,9 @@ public partial class FilesSearcher() : DisposableImpl
             // get files from the given directories
             CurrentBatchIndex = 0;
             CurrentBatchCount = (uint)dirs.Count();
+
+            _allowedExtensions.Clear();
+            _allowedExtensions = allowedExtensions;
 
             await Task.Run(() =>
             {
@@ -173,6 +178,7 @@ public partial class FilesSearcher() : DisposableImpl
 
         CancelSearching();
         _lockSearching.Dispose();
+        _allowedExtensions.Clear();
     }
 
 
@@ -191,7 +197,12 @@ public partial class FilesSearcher() : DisposableImpl
     /// </summary>
     protected virtual IEnumerable<string> OnFiltering(IEnumerable<string> fileList)
     {
-        return fileList;
+        return fileList.Where(path =>
+        {
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+
+            return _allowedExtensions.Contains(ext);
+        });
     }
 
 
