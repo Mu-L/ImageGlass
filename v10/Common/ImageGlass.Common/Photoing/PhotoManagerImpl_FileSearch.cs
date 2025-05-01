@@ -27,6 +27,19 @@ public partial class PhotoManagerImpl<T>
 
 
     /// <summary>
+    /// Gets, sets index of the viewing photo.
+    /// </summary>
+    public int CurrentIndex { get; set; } = -1;
+
+    /// <summary>
+    /// The current "initial" path (file or dir) we're viewing for rebuilding the photo list.
+    /// </summary>
+    public string InitialInputPath { get; set; } = string.Empty;
+
+
+
+
+    /// <summary>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
     /// <param name="path">Full path of file or directory</param>
@@ -43,7 +56,10 @@ public partial class PhotoManagerImpl<T>
         _fileSearcher.FileSearching -= FileSearchProvider_FileSearching;
         _fileSearcher.FileSearching += FileSearchProvider_FileSearching;
 
+        // reset the photo list
         Clear();
+        CurrentIndex = -1;
+        InitialInputPath = path;
 
 
         string? dirPath = null;
@@ -86,6 +102,9 @@ public partial class PhotoManagerImpl<T>
 
                 // get the first item as the init photo
                 initPhoto = GetAndCache(0, true);
+
+                CurrentIndex = 0;
+                InitialInputPath = initPhoto?.FilePath ?? InitialInputPath;
             }
         }
 
@@ -98,7 +117,14 @@ public partial class PhotoManagerImpl<T>
     {
         Add(e.Results);
 
-        Log.Info($"Added {e.Results.Count()} files to the list");
+        // find the current index
+        if (CurrentIndex == -1)
+        {
+            CurrentIndex = IndexOf(InitialInputPath);
+        }
+
+        Log.Info($"Added {e.Results.Count()} files to the list, " +
+            $"{nameof(CurrentIndex)}={CurrentIndex}/{Count}.");
     }
 
 

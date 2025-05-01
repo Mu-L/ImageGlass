@@ -88,6 +88,16 @@ public partial class PhotoManagerImpl<T>
 
 
     /// <summary>
+    /// Gets a photo from the list.
+    /// </summary>
+    public T? Get(string filePath)
+    {
+        var index = IndexOf(filePath);
+        return Get(index);
+    }
+
+
+    /// <summary>
     /// Get file path of the photo at the specified index.
     /// </summary>
     public string GetFilePath(int index)
