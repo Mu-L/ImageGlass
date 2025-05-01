@@ -145,7 +145,9 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// <summary>
     /// Loads the photo at the specified index if it has not already been loaded.
     /// </summary>
-    public async Task LoadAsync(int index, bool useCache = true, CancellationToken token = default)
+    public async Task LoadAsync(int index, bool useCache = true,
+        IProgress<PhotoLoadingEventArgs>? progress = null,
+        CancellationToken token = default)
     {
         var photo = Get(index);
         if (photo is null) return;
@@ -161,7 +163,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
             // start loading photo
             if (!photo.IsDone)
             {
-                await photo.LoadAsync(useCache, ReadOptions);
+                await photo.LoadAsync(useCache, ReadOptions, progress);
             }
         }
         finally
@@ -220,7 +222,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// Caches the specified photo and its surrounding,
     /// Unloads the photos those are not in the range.
     /// </summary>
-    private async Task CacheAsync__(int index, bool includeCurrentIndex, CancellationToken token)
+    private async Task CacheAsync__(int index, bool cacheCurrentIndex, CancellationToken token)
     {
         var cachingIndex = index;
 
@@ -242,15 +244,16 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
 
 
             // 2. start caching items in the range
-            var indexes = await GetIndexesForCaching__(index, includeCurrentIndex);
+            var indexes = await GetIndexesForCaching__(index, cacheCurrentIndex);
             for (var i = 0; i < indexes.Count; i++)
             {
                 cachingIndex = i;
+                Log.Info($"Caching photo index={cachingIndex}");
 
                 // cancel if requested
                 token.ThrowIfCancellationRequested();
 
-                await LoadAsync(cachingIndex, true, token);
+                await LoadAsync(cachingIndex, true, null, token);
                 Log.Info($"Cached photo index={cachingIndex}");
             }
         }
@@ -269,8 +272,8 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// Gets the list of indexes for caching.
     /// </summary>
     /// <param name="index">The center index to cache the surrounding photos.</param>
-    /// <param name="includeCurrentIndex">Should cache the <paramref name="index"/>?</param>
-    private async Task<List<int>> GetIndexesForCaching__(int index, bool includeCurrentIndex)
+    /// <param name="cacheCurrentIndex">Should cache the <paramref name="index"/>?</param>
+    private async Task<List<int>> GetIndexesForCaching__(int index, bool cacheCurrentIndex)
     {
         // 1. check valid index
         if (index < 0 || index >= Count) return [];
@@ -278,7 +281,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
 
         // 2. get the list of index for caching
         var set = new HashSet<int>();
-        if (includeCurrentIndex) set.Add(index);
+        if (cacheCurrentIndex) set.Add(index);
 
         for (int offset = 1; offset <= PreloadRange; offset++)
         {

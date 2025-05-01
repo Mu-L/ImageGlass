@@ -96,7 +96,8 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
     /// <summary>
     /// Loads <c><see cref="Bitmap"/></c> from file.
     /// </summary>
-    Task LoadAsync(bool useCache, PhotoReadOptions? options = null);
+    Task LoadAsync(bool useCache,
+        PhotoReadOptions? options = null, IProgress<PhotoLoadingEventArgs>? progress = null);
 
 
     /// <summary>

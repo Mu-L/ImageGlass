@@ -31,6 +31,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private Rect _srcRect = new();
     private Rect _destRect = new();
 
+    private Progress<PhotoLoadingEventArgs> _loadingProgress;
     private bool _isPreviewing = false;
     private CancellationTokenSource? _previewTokenSrc;
     private readonly Lock _lockSource = new();
@@ -167,6 +168,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         ManipulationMode = ManipulationModes.Scale
             | ManipulationModes.TranslateX | ManipulationModes.TranslateY
             | ManipulationModes.TranslateInertia;
+
+        _loadingProgress = new(Photo_Loading);
     }
 
 
@@ -215,11 +218,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         DisposeNativePhotoResources();
 
         // dispose photo
-        if (_photo != null)
-        {
-            _photo.Loading -= Photo_Loading;
-        }
-
         // TODO: don't dispose photo here for cache
         _photo?.Dispose();
         _photo = null;
@@ -534,13 +532,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         else
         {
-            _photo.Loading += Photo_Loading;
-            _ = _photo.LoadAsync(true);
+            _ = _photo.LoadAsync(true, null, _loadingProgress);
         }
     }
 
 
-    private async void Photo_Loading(PhotoImpl sender, PhotoLoadingEventArgs e)
+    private async void Photo_Loading(PhotoLoadingEventArgs e)
     {
         // previewing
         if (!e.IsDone)

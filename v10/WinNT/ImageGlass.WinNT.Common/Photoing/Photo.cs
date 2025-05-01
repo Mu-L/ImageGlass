@@ -76,11 +76,12 @@ public partial class Photo : PhotoImpl
     /// <summary>
     /// Loads photo.
     /// </summary>
-    public override Task LoadAsync(bool useCache, PhotoReadOptions? newOptions = null)
+    public override Task LoadAsync(bool useCache,
+        PhotoReadOptions? newOptions = null, IProgress<PhotoLoadingEventArgs>? progress = null)
     {
         DisposeNativeResources();
 
-        return base.LoadAsync(useCache, newOptions);
+        return base.LoadAsync(useCache, newOptions, progress);
     }
 
 

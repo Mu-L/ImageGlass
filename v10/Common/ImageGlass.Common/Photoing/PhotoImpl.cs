@@ -36,18 +36,6 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     protected CancellationTokenSource? _tokenSrcPhoto = new();
     protected CancellationTokenSource? _tokenSrcMetadata = new();
 
-    protected event TEventHandler<PhotoImpl, PhotoLoadingEventArgs>? _onLoading;
-
-
-    /// <summary>
-    /// An event that occurs during the decoding of a photo.
-    /// </summary>
-    public event TEventHandler<PhotoImpl, PhotoLoadingEventArgs>? Loading
-    {
-        add { _onLoading += value; }
-        remove { _onLoading -= value; }
-    }
-
 
     /// <summary>
     /// <inheritdoc/>
@@ -161,7 +149,8 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual async Task LoadAsync(bool useCache, PhotoReadOptions? newOptions = null)
+    public virtual async Task LoadAsync(bool useCache,
+        PhotoReadOptions? newOptions = null, IProgress<PhotoLoadingEventArgs>? progress = null)
     {
         await CancelPhotoLoadingAsync();
 
@@ -188,8 +177,7 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
             // load image data
             ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
 
-            OnLoading(new PhotoLoadingEventArgs(this));
-
+            progress?.Report(new PhotoLoadingEventArgs(this));
 
 
             // 2. load image data ===================
@@ -205,14 +193,13 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
             // done loading
             IsDone = true;
 
-            OnLoading(new PhotoLoadingEventArgs(this));
+            progress?.Report(new PhotoLoadingEventArgs(this));
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
             Log.Error($"Cancelled {nameof(LoadAsync)} for {FilePath}");
 
             Unload();
-            Dispose();
         }
         catch (Exception ex)
         {
@@ -221,15 +208,6 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
 
             Log.Error(ex);
         }
-    }
-
-
-    /// <summary>
-    /// Emits <see cref="Loading"/> event.
-    /// </summary>
-    protected virtual void OnLoading(PhotoLoadingEventArgs e)
-    {
-        _onLoading?.Invoke(this, e);
     }
 
 
