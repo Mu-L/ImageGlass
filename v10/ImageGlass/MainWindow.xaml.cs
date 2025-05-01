@@ -38,19 +38,22 @@ public sealed partial class MainWindow : Window
 
     private async void Button_Click(object sender, RoutedEventArgs e)
     {
-        var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
-        openPicker.FileTypeFilter.Add("*");
         var hWnd = WindowNative.GetWindowHandle(this);
 
-        InitializeWithWindow.Initialize(openPicker, hWnd);
+        //var fp = new Windows.Storage.Pickers.FolderPicker();
+        //InitializeWithWindow.Initialize(fp, hWnd);
 
-        var file = await openPicker.PickSingleFileAsync();
+        var op = new Windows.Storage.Pickers.FileOpenPicker();
+        op.FileTypeFilter.Add("*");
+        InitializeWithWindow.Initialize(op, hWnd);
+
+        var file = await op.PickSingleFileAsync();
         if (file == null) return;
 
 
         Title = file.Path;
 
-        var photo = new Photo(file.Path);
+        var photo = await Local.Photos.LoadFolderAsync(file.Path);
 
         Viewer.SetPhoto(photo);
     }
