@@ -1,4 +1,22 @@
-﻿using D2Phap.Canvas2D;
+﻿/*
+ImageGlass Project - Image viewer for Windows
+Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+using D2Phap.Canvas2D;
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.WinNT.Common;
@@ -8,6 +26,7 @@ using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +52,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     private Progress<PhotoLoadingEventArgs> _loadingProgress;
     private bool _isPreviewing = false;
-    private CancellationTokenSource? _previewTokenSrc;
+    private CancellationTokenSource? _cancelPreview;
+    private readonly SemaphoreSlim _lockCancelPreview = new(1, 1);
     private readonly Lock _lockSource = new();
     private readonly Lock _lockPreview = new();
 
@@ -200,8 +220,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
+    [MemberNotNull(nameof(_cancelPreview))]
+    [MemberNotNullWhen(false, nameof(_photo))]
     private void UnloadPhoto()
     {
+        CancelPreview();
+
         // reset selection
         SetSourceSelection(Rect.Empty, false);
         SetBitmapSize(0, 0, false);
@@ -217,9 +241,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // dispose native resources of photo
         DisposeNativePhotoResources();
 
-        // dispose photo
-        // TODO: don't dispose photo here for cache
-        _photo?.Dispose();
         _photo = null;
     }
 
@@ -409,12 +430,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
             """,
             "Consolas", FontSize_Dpi, DrawingArea, Colors.Magenta);
 
-        e.DrawRectangle(_destRect, 0, Colors.Cyan);
 
-        // draw zoomed point
-        var zoomPoint = DpiScale(_zooming.ZoomedPoint);
-        e.DrawEllipse(zoomPoint.X, zoomPoint.Y, 8f, Colors.White, Colors.Red, 3f);
+        //// draw zoomed point
+        //var zoomPoint = DpiScale(_zooming.ZoomedPoint);
+        //e.DrawEllipse(zoomPoint.X, zoomPoint.Y, 8f, Colors.White, Colors.Red, 3f);
 
+        //// draw dest rect
+        //e.DrawRectangle(_destRect, 0, Colors.Cyan);
 
         //// draw SwapChainSize
         //e.DrawRectangle(e.Sender.Bounds, 0, Colors.Yellow, Colors.Transparent, 3f);
@@ -505,6 +527,18 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
+    /// <summary>
+    /// Cancels any ongoing preview operation.
+    /// </summary>
+    [MemberNotNull(nameof(_cancelPreview))]
+    private void CancelPreview()
+    {
+        _cancelPreview?.Cancel();
+        _cancelPreview?.Dispose();
+        _cancelPreview = new();
+    }
+
+
 
 
     public void SetPhoto(Photo? inputPhoto)
@@ -512,14 +546,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // unload current photo resources
         UnloadPhoto();
 
-        _previewTokenSrc?.Cancel();
-        _previewTokenSrc?.Dispose();
-        _previewTokenSrc = new();
-
         // start loading new photo
         _photo = inputPhoto;
 
-        if (_photo == null)
+        if (_photo is null)
         {
             Refresh(true);
             return;
@@ -530,6 +560,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         {
             _ = HandlePhotoLoadedAsync(new PhotoLoadingEventArgs(_photo));
         }
+        // photo is not cached
         else
         {
             _ = _photo.LoadAsync(true, null, _loadingProgress);
@@ -542,8 +573,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // previewing
         if (!e.IsDone)
         {
-            _previewTokenSrc ??= new();
-            await HandlePhotoPreviewAsync(e, _previewTokenSrc.Token);
+            await HandlePhotoPreviewAsync(e, _cancelPreview?.Token ?? default);
         }
         // load full resolution photo
         else
@@ -593,7 +623,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Info($"Cancelled {nameof(HandlePhotoPreviewAsync)}!");
+            Log.Info($"{nameof(HandlePhotoPreviewAsync)}: Cancelled previewing {e.Metadata.FilePath}");
 
             _bmpPreview?.Dispose();
             _bmpPreview = null;
@@ -635,6 +665,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     private async Task HandlePhotoLoadedAsync(PhotoLoadingEventArgs e)
     {
+        await _lockCancelPreview.WaitAsync();
+
         // back up size of preview image
         var prevSize = BitmapSize;
         var hasSource = false;
@@ -642,9 +674,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
         try
         {
             // cancel the preview process
-            _previewTokenSrc?.Cancel();
+            CancelPreview();
 
-            Log.Info("Loading full resolution photo...");
+            Log.Info($"{nameof(HandlePhotoLoadedAsync)}: Loading full resolution photo...");
             if (e.Photo.Bitmap is null) return;
 
             // update bitmap size
@@ -689,6 +721,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             _bmpSource?.Dispose();
             _bmpSource = null;
+        }
+        finally
+        {
+            _lockCancelPreview.Release();
         }
 
 
@@ -757,7 +793,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (_photo.Metadata.ColorSpace == ImageMagick.ColorSpace.CMYK
             || _photo.Metadata.ColorProfileData is null) return bmpD2;
 
-        Log.Info("Applying color management effect...");
+        Log.Info($"{nameof(ApplyColorManagementEffect)}: Applying color management effect...");
 
         // create color management effect
         using var colorEffect = new ColorManagement(D2dContext);

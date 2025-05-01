@@ -74,7 +74,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// <summary>
     /// Gets or sets the range of items to preload in advance (in LRU queue).
     /// </summary>
-    public uint PreloadRange { get; set; } = 2;
+    public uint PreloadRange { get; set; } = 1;
 
     /// <summary>
     /// Gets, sets the maximum image dimension to cache.
@@ -203,7 +203,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
         {
             _tokenStartCaching?.Cancel();
             _tokenStartCaching?.Dispose();
-            _tokenStartCaching = new CancellationTokenSource();
+            _tokenStartCaching = new();
 
 
             // preload the surrounding items
@@ -232,34 +232,41 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
             token.ThrowIfCancellationRequested();
 
 
-            // 1. unload the out-of-range items
+            // 1. get the range to cache
+            var rangeToCache = BHelper.GenerateWrappedIndexes(
+                index, (int)PreloadRange, _photos.Count, cacheCurrentIndex);
+            Log.Info($"{nameof(CacheAsync__)}: Range to cache {nameof(rangeToCache)}=[{string.Join(",", rangeToCache)}]");
+
+
+            // 2. unload the out-of-range items
             for (int i = 0; i < _photos.Count; i++)
             {
-                if (i < index - PreloadRange || i > index + PreloadRange)
+                if (rangeToCache.IndexOf(i) == -1)
                 {
                     // unload image data but keep metadata
                     Get(i)?.Unload(false);
+                    Log.Info($"{nameof(CacheAsync__)}: \t⤷ Unloaded index={i}, {GetFilePath(i)}");
                 }
             }
 
 
-            // 2. start caching items in the range
+            // 3. start caching items in the range
             var indexes = await GetIndexesForCaching__(index, cacheCurrentIndex);
             for (var i = 0; i < indexes.Count; i++)
             {
                 cachingIndex = i;
-                Log.Info($"Caching photo index={cachingIndex}");
+                Log.Info($"{nameof(CacheAsync__)}: \t⤷ Caching index={cachingIndex}, {GetFilePath(cachingIndex)}");
 
                 // cancel if requested
                 token.ThrowIfCancellationRequested();
 
                 await LoadAsync(cachingIndex, true, null, token);
-                Log.Info($"Cached photo index={cachingIndex}");
+                Log.Info($"{nameof(CacheAsync__)}: \t\t⤷ Cached index={cachingIndex}, {GetFilePath(cachingIndex)}");
             }
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Error($"Cancelled {nameof(CacheAsync__)} for index={cachingIndex}");
+            Log.Info($"{nameof(CacheAsync__)}: Cancelled caching index={cachingIndex}, {GetFilePath(cachingIndex)}");
         }
         catch (Exception ex)
         {
@@ -275,25 +282,16 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// <param name="cacheCurrentIndex">Should cache the <paramref name="index"/>?</param>
     private async Task<List<int>> GetIndexesForCaching__(int index, bool cacheCurrentIndex)
     {
-        // 1. check valid index
-        if (index < 0 || index >= Count) return [];
+        // 1. get the list of index for caching
+        var rangeToCache = BHelper.GenerateWrappedIndexes(
+            index, (int)PreloadRange, _photos.Count, cacheCurrentIndex);
+        if (rangeToCache.Count == 0) return [];
 
 
-        // 2. get the list of index for caching
-        var set = new HashSet<int>();
-        if (cacheCurrentIndex) set.Add(index);
-
-        for (int offset = 1; offset <= PreloadRange; offset++)
-        {
-            set.Add(index + offset);
-            set.Add(index - offset);
-        }
-
-
-        // 3. check if the photo can be cached
+        // 2. check if the photo can be cached
         var newQueueList = new List<int>();
 
-        foreach (var itemIndex in set)
+        foreach (var itemIndex in rangeToCache)
         {
             try
             {
@@ -423,7 +421,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
                 // cancel if requested
                 if (token.IsCancellationRequested)
                 {
-                    Log.Info($"Cancelled {nameof(ManageThumbnailsDiskCacheAsync)} totalCacheSizeInMb={totalCacheSizeInMb}");
+                    Log.Info($"{nameof(ManageThumbnailsDiskCacheAsync)}: Cancelled {nameof(totalCacheSizeInMb)}={totalCacheSizeInMb}");
                     break;
                 }
 

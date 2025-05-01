@@ -184,13 +184,21 @@ public partial class PhotoManagerImpl<T>
     /// </summary>
     public void Clear()
     {
+        InitPhoto?.Dispose();
+        InitPhoto = null;
+
         foreach (var item in _photos)
         {
-            item.Dispose();
+            item?.Dispose();
         }
 
         _photos.Clear();
         DistinctDirs.Clear();
+
+        CurrentIndex = -1;
+        InitInputPath = string.Empty;
+
+        Log.Info($"{nameof(Clear)}: Cleared photo list!");
     }
 
 }
