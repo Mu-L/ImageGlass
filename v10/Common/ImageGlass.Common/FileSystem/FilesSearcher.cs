@@ -105,7 +105,7 @@ public partial class FilesSearcher() : DisposableImpl
     /// <summary>
     /// Gets a value indicating whether the search operation has completed.
     /// </summary>
-    public bool IsSearchEnded => CurrentBatchIndex <= CurrentBatchCount - 1;
+    public bool IsSearchEnded => CurrentBatchIndex >= CurrentBatchCount;
 
     #endregion // Public Properties
 
