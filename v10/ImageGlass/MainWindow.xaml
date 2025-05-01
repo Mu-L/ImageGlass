@@ -58,19 +58,19 @@
         <Grid
             Grid.Row="1"
             VerticalAlignment="Top"
-            Background="#10ff"
+            Background="#1ff0"
             Canvas.ZIndex="99">
 
             <StackPanel
-                Padding="10"
+                Padding="5"
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
 
-                <Button Click="BtnOpenFile_Clicked">Open File</Button>
-                <Button Click="BtnOpenFolder_Clicked">Open Folder</Button>
+                <Button Margin="1" Click="BtnOpenFile_Clicked">Open File</Button>
+                <Button Margin="1" Click="BtnOpenFolder_Clicked">Open Folder</Button>
 
-                <Button Margin="50,0,0,0" Click="BtnViewPrevious_Clicked">View Previous</Button>
-                <Button Click="BtnViewNext_Clicked">View Next</Button>
+                <Button Margin="50,1,1,1" Click="BtnViewPrevious_Clicked">View Previous</Button>
+                <Button Margin="1" Click="BtnViewNext_Clicked">View Next</Button>
             </StackPanel>
         </Grid>
 

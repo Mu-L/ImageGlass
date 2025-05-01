@@ -157,7 +157,7 @@ public partial class WicAnimator : AnimatorImpl
                 }
                 catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
                 {
-                    Log.Info($"Cancelled {nameof(DecodeFrames)} for {_meta.FileName}");
+                    Log.Info($"{nameof(DecodeFrames)}: Cancelled decoding frame {_meta.FileName}");
                     Unload();
 
                     break;

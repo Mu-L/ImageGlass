@@ -70,7 +70,7 @@ public static class PhotoMetadata_Extensions
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Info($"Cancelled {nameof(GetPreviewAsync)}!");
+            Log.Info($"{nameof(GetPreviewAsync)}: Cancelled retrieving preview");
         }
         catch (Exception ex)
         {
