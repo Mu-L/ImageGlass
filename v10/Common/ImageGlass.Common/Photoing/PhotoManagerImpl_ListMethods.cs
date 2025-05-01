@@ -30,7 +30,7 @@ public partial class PhotoManagerImpl<T>
 
         if (index < 0)
         {
-            addedIndex = _photos.Count;
+            addedIndex = (int)Count;
             _photos.Add(CreatePhotoItem(filePath));
         }
         else
@@ -40,7 +40,7 @@ public partial class PhotoManagerImpl<T>
 
 
         // update path dictionary
-        for (int i = addedIndex; i < _photos.Count; i++)
+        for (int i = addedIndex; i < Count; i++)
         {
             var key = _photos[i].FilePath.ToLowerInvariant();
             _pathDict.AddOrUpdate(key, i, (fIndex, oldValue) => i);
@@ -58,7 +58,7 @@ public partial class PhotoManagerImpl<T>
 
         if (index < 0)
         {
-            addedIndex = _photos.Count;
+            addedIndex = (int)Count;
             _photos.AddRange(items);
         }
         else
@@ -68,7 +68,7 @@ public partial class PhotoManagerImpl<T>
 
 
         // update path dictionary
-        for (int i = addedIndex; i < _photos.Count; i++)
+        for (int i = addedIndex; i < Count; i++)
         {
             var key = _photos[i].FilePath.ToLowerInvariant();
             _pathDict.AddOrUpdate(key, i, (fIndex, oldValue) => i);
@@ -81,7 +81,7 @@ public partial class PhotoManagerImpl<T>
     /// </summary>
     public T? Get(int index)
     {
-        if (index < 0 || index >= _photos.Count) return null;
+        if (index < 0 || index >= Count) return null;
 
         return _photos[index];
     }
@@ -187,10 +187,11 @@ public partial class PhotoManagerImpl<T>
         InitPhoto?.Dispose();
         InitPhoto = null;
 
-        foreach (var item in _photos)
+
+        Parallel.ForEach(_photos, item =>
         {
             item?.Dispose();
-        }
+        });
 
         _photos.Clear();
         DistinctDirs.Clear();

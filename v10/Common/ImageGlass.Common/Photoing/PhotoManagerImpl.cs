@@ -232,29 +232,32 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
             token.ThrowIfCancellationRequested();
 
 
-            // 1. get the range to cache
-            var rangeToCache = BHelper.GenerateWrappedIndexes(
-                index, (int)PreloadRange, _photos.Count, cacheCurrentIndex);
-            Log.Info($"{nameof(CacheAsync__)}: Range to cache {nameof(rangeToCache)}=[{string.Join(",", rangeToCache)}]");
+            // 1. get the range
+            var oldRange = BHelper.GenerateWrappedIndexes(CurrentIndex, (int)PreloadRange, (int)Count, true);
+            var newRange = await GetIndexesForCaching__(index, cacheCurrentIndex);
+
+            Log.Info($"{nameof(CacheAsync__)}: Old range {nameof(oldRange)}=[{string.Join(",", oldRange)}]");
+            Log.Info($"{nameof(CacheAsync__)}: New range {nameof(newRange)}=[{string.Join(",", newRange)}]");
 
 
-            // 2. unload the out-of-range items
-            for (int i = 0; i < _photos.Count; i++)
+            // 2. unload the old range
+            for (int i = 0; i < oldRange.Count; i++)
             {
-                if (rangeToCache.IndexOf(i) == -1)
+                var oIndex = oldRange[i];
+
+                if (newRange.IndexOf(oIndex) == -1)
                 {
                     // unload image data but keep metadata
-                    Get(i)?.Unload(false);
-                    Log.Info($"{nameof(CacheAsync__)}: \t⤷ Unloaded index={i}, {GetFilePath(i)}");
+                    Get(oIndex)?.Unload(false);
+                    Log.Info($"{nameof(CacheAsync__)}: \t⤷ Unloaded index={oIndex}, {GetFilePath(oIndex)}");
                 }
             }
 
 
             // 3. start caching items in the range
-            var indexes = await GetIndexesForCaching__(index, cacheCurrentIndex);
-            for (var i = 0; i < indexes.Count; i++)
+            for (var i = 0; i < newRange.Count; i++)
             {
-                cachingIndex = i;
+                cachingIndex = newRange[i];
                 Log.Info($"{nameof(CacheAsync__)}: \t⤷ Caching index={cachingIndex}, {GetFilePath(cachingIndex)}");
 
                 // cancel if requested
@@ -284,7 +287,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     {
         // 1. get the list of index for caching
         var rangeToCache = BHelper.GenerateWrappedIndexes(
-            index, (int)PreloadRange, _photos.Count, cacheCurrentIndex);
+            index, (int)PreloadRange, (int)Count, cacheCurrentIndex);
         if (rangeToCache.Count == 0) return [];
 
 
