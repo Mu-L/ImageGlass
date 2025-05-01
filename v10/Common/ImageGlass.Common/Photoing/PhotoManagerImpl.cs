@@ -26,7 +26,7 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// Class for managing a collection of photos.
 /// </summary>
-public abstract class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
+public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
 {
     // photo list
     protected readonly List<T> _photos = new();
@@ -121,6 +121,7 @@ public abstract class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
         base.OnDisposing();
 
         Clear();
+        DisposeFileSearcher();
 
         _tokenStartCaching?.Cancel();
         _tokenStartCaching?.Dispose();
@@ -142,123 +143,47 @@ public abstract class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
 
 
     /// <summary>
-    /// Adds a file path to the collection.
+    /// Loads the photo at the specified index if it has not already been loaded.
     /// </summary>
-    public void Add(string filePath, int index = -1)
-    {
-        var addedIndex = index;
-
-        if (index < 0)
-        {
-            addedIndex = _photos.Count;
-            _photos.Add(CreatePhotoItem(filePath));
-        }
-        else
-        {
-            _photos.Insert(index, CreatePhotoItem(filePath));
-        }
-
-
-        // update path dictionary
-        for (int i = addedIndex; i < _photos.Count; i++)
-        {
-            var key = _photos[i].FilePath.ToLowerInvariant();
-            _pathDict.AddOrUpdate(key, i, (fIndex, oldValue) => i);
-        }
-    }
-
-
-    /// <summary>
-    /// Adds a list of file paths to the collection.
-    /// </summary>
-    public void Add(IEnumerable<string> filePaths, int index = -1)
-    {
-        var addedIndex = index;
-        var items = filePaths.Select(i => CreatePhotoItem(i));
-
-        if (index < 0)
-        {
-            addedIndex = _photos.Count;
-            _photos.AddRange(items);
-        }
-        else
-        {
-            _photos.InsertRange(index, items);
-        }
-
-
-        // update path dictionary
-        for (int i = addedIndex; i < _photos.Count; i++)
-        {
-            var key = _photos[i].FilePath.ToLowerInvariant();
-            _pathDict.AddOrUpdate(key, i, (fIndex, oldValue) => i);
-        }
-    }
-
-
-    /// <summary>
-    /// Gets a photo from the list.
-    /// </summary>
-    public T? Get(int index)
-    {
-        if (index < 0 || index >= _photos.Count) return null;
-
-        return _photos[index];
-    }
-
-
-    /// <summary>
-    /// Get file path of the photo at the specified index.
-    /// </summary>
-    public string GetFilePath(int index)
-    {
-        return Get(index)?.FilePath ?? string.Empty;
-    }
-
-
-    /// <summary>
-    /// Set file path of the photo at the specified index.
-    /// </summary>
-    public void SetFilePath(int index, string filePath)
+    public async Task LoadAsync(int index, bool useCache = true, CancellationToken token = default)
     {
         var photo = Get(index);
         if (photo is null) return;
 
-        photo.FilePath = filePath;
-        photo.Metadata.SetFilePath(filePath);
+        // use cached data
+        if (useCache && photo.IsDone) return;
 
-        var key = filePath.ToLowerInvariant();
-        _pathDict.Remove(key, out _);
-        _pathDict.AddOrUpdate(key, index, (fIndex, oldValue) => index);
-    }
+        // limit the number of concurrent loads
+        await _lockPreloadPhotos.WaitAsync(token);
 
-
-    /// <summary>
-    /// Find index of the photo with the given file path.
-    /// </summary>
-    public int IndexOf(string filePath)
-    {
-        if (string.IsNullOrWhiteSpace(filePath)) return -1;
-
-        var key = filePath.ToLowerInvariant();
-        if (_pathDict.TryGetValue(key, out var index))
+        try
         {
-            return index;
+            // start loading photo
+            if (!photo.IsDone)
+            {
+                await photo.LoadAsync(useCache, ReadOptions);
+            }
         }
-
-        return -1;
+        finally
+        {
+            _lockPreloadPhotos.Release();
+        }
     }
 
 
     /// <summary>
-    /// Checks if the photo is cached.
+    /// Gets a photo at the specified index and initiates caching for surrounding photos.
     /// </summary>
-    public bool IsCached(int index)
+    public T? GetAndCache(int index, bool cacheCurrentIndex)
     {
         var photo = Get(index);
-        if (photo == null) return false;
 
-        return photo.IsDone;
+        if (photo is not null)
+        {
+            _ = StartCachingAsync(index, cacheCurrentIndex);
+        }
+
+        return photo;
     }
 
 
@@ -266,8 +191,8 @@ public abstract class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
     /// Start caching photos.
     /// </summary>
     /// <param name="index">The center index to cache the surrounding photos.</param>
-    /// <param name="includeCurrentIndex">Should cache the <paramref name="index"/>?</param>
-    public async Task StartCachingAsync(int index, bool includeCurrentIndex)
+    /// <param name="cacheCurrentIndex">Should cache the <paramref name="index"/>?</param>
+    public async Task StartCachingAsync(int index, bool cacheCurrentIndex)
     {
         // limit only 1 concurrent access
         await _lockGetAndCache.WaitAsync();
@@ -281,7 +206,7 @@ public abstract class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
 
             // preload the surrounding items
             _ = Task.Run(
-                () => CacheAsync__(index, includeCurrentIndex, _tokenStartCaching.Token),
+                () => CacheAsync__(index, cacheCurrentIndex, _tokenStartCaching.Token),
                 _tokenStartCaching.Token);
         }
         finally
@@ -331,7 +256,7 @@ public abstract class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Error($"Cancelled {nameof(StartCachingAsync)} for index={cachingIndex}");
+            Log.Error($"Cancelled {nameof(CacheAsync__)} for index={cachingIndex}");
         }
         catch (Exception ex)
         {
@@ -400,74 +325,15 @@ public abstract class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
     }
 
 
-    /// <summary>
-    /// Loads the photo at the specified index if it has not already been loaded.
-    /// </summary>
-    public async Task LoadAsync(int index, bool useCache = true, CancellationToken token = default)
-    {
-        var photo = Get(index);
-        if (photo is null) return;
-
-        // use cached data
-        if (useCache && photo.IsDone) return;
-
-        // limit the number of concurrent loads
-        await _lockPreloadPhotos.WaitAsync(token);
-
-        try
-        {
-            // start loading photo
-            if (!photo.IsDone)
-            {
-                await photo.LoadAsync(useCache, ReadOptions);
-            }
-        }
-        finally
-        {
-            _lockPreloadPhotos.Release();
-        }
-    }
 
 
-    /// <summary>
-    /// Unloads and releases resources of the photo at the specified index from the collection.
-    /// </summary>
-    public void Unload(int index, bool disposeMetadata = false)
-    {
-        Get(index)?.Unload(disposeMetadata);
-    }
 
 
-    /// <summary>
-    /// Removes the photo at the specified index from the collection.
-    /// </summary>
-    public void Remove(int index)
-    {
-        Unload(index, true);
-
-        var photo = Get(index);
-        if (photo is null) return;
-
-        _photos.RemoveAt(index);
-
-        var key = photo.FilePath.ToLowerInvariant();
-        _pathDict.Remove(key, out _);
-    }
 
 
-    /// <summary>
-    /// Clears all photos from the collection and releases any associated resources.
-    /// </summary>
-    public void Clear()
-    {
-        foreach (var item in _photos)
-        {
-            item.Dispose();
-        }
 
-        _photos.Clear();
-        DistinctDirs.Clear();
-    }
+
+
 
 
 
