@@ -119,10 +119,10 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     /// <summary>
     /// Handles the disposal of resources when an object is being disposed.
     /// </summary>
-    /// <param name="disposeMetadata">
-    /// Option to dispose <see cref="Metadata"/> object.
+    /// <param name="disposeEverything">
+    /// Option to dispose everything or only the <see cref="Bitmap"/> object.
     /// </param>
-    protected virtual void OnDisposing(bool disposeMetadata)
+    protected virtual void OnDisposing(bool disposeEverything)
     {
         CancelPhotoLoading();
         CancelMetadataLoading();
@@ -130,19 +130,20 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
         _bitmap?.Dispose();
         _bitmap = null;
 
-        if (disposeMetadata)
+        // dispose everything
+        if (disposeEverything)
         {
             _metadata?.Dispose();
             _metadata = null;
+
+            _cancelPhotoLoading?.Dispose();
+            _cancelPhotoLoading = null;
+            _cancelMetadataLoading?.Dispose();
+            _cancelMetadataLoading = null;
+
+            _lockCancelPhotoLoading?.Dispose();
+            _lockCancelMetadataLoading?.Dispose();
         }
-
-        _cancelPhotoLoading?.Dispose();
-        _cancelPhotoLoading = null;
-        _cancelMetadataLoading?.Dispose();
-        _cancelMetadataLoading = null;
-
-        _lockCancelPhotoLoading?.Dispose();
-        _lockCancelMetadataLoading?.Dispose();
     }
 
 
@@ -291,14 +292,14 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual void Unload(bool disposeMetadata = false)
+    public virtual void Unload()
     {
         // reset info
         IsDone = false;
         Error = null;
 
         // unload image
-        OnDisposing(disposeMetadata);
+        OnDisposing(false);
     }
 
 

@@ -156,9 +156,9 @@ public partial class PhotoManagerImpl<T>
     /// <summary>
     /// Unloads and releases resources of the photo at the specified index from the collection.
     /// </summary>
-    public void Unload(int index, bool disposeMetadata = false)
+    public void Unload(int index)
     {
-        Get(index)?.Unload(disposeMetadata);
+        Get(index)?.Unload();
     }
 
 
@@ -167,15 +167,16 @@ public partial class PhotoManagerImpl<T>
     /// </summary>
     public void Remove(int index)
     {
-        Unload(index, true);
-
         var photo = Get(index);
         if (photo is null) return;
 
-        _photos.RemoveAt(index);
-
+        // remove from mapping
         var key = photo.FilePath.ToLowerInvariant();
         _pathDict.Remove(key, out _);
+
+        // remove from the collection
+        photo.Dispose();
+        _photos.RemoveAt(index);
     }
 
 

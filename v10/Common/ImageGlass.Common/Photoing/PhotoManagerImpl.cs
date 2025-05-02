@@ -252,7 +252,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
                 if (newRange.IndexOf(oIndex) == -1)
                 {
                     // unload image data but keep metadata
-                    Get(oIndex)?.Unload(false);
+                    Get(oIndex)?.Unload();
                     Log.Info($"{nameof(CacheAsync__)}: \t⤷ Unloaded index={oIndex}, {GetFilePath(oIndex)}");
                 }
             }

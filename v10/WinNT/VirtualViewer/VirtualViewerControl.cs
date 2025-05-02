@@ -234,7 +234,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (_animator is not null)
         {
             _animator.FrameChanged -= Animator_FrameChanged;
-            _animator.Dispose();
+            _animator.Unload();
             _animator = null;
         }
 
