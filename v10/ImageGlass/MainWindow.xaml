@@ -45,6 +45,7 @@
                 Source="/Assets/Square44x44Logo.png" />
 
             <TextBlock
+                x:Name="WinMainTitleBarText"
                 Grid.Column="1"
                 VerticalAlignment="Center"
                 Style="{StaticResource CaptionTextBlockStyle}"

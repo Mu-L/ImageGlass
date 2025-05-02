@@ -174,6 +174,23 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
 
 
     /// <summary>
+    /// Gets a photo by given step,
+    /// optionally loop back the index if its new value is out of range.
+    /// </summary>
+    public T? GetByStep(int step, bool loopBackNavigation)
+    {
+        // calculate new index
+        var newIndex = CurrentIndex + step;
+        var safeIndex = BHelper.ComputeIndexInRange(newIndex, Count, loopBackNavigation);
+
+        var photo = GetAndCache(safeIndex, false);
+
+        CurrentIndex = safeIndex;
+        return photo;
+    }
+
+
+    /// <summary>
     /// Gets a photo at the specified index and initiates caching for surrounding photos.
     /// </summary>
     public T? GetAndCache(int index, bool cacheCurrentIndex)
@@ -182,7 +199,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
 
         if (photo is not null)
         {
-            _ = StartCachingAsync(index, cacheCurrentIndex);
+            _ = StartCachingAsync(index, CurrentIndex, cacheCurrentIndex);
         }
 
         return photo;
@@ -192,9 +209,9 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// <summary>
     /// Start caching photos.
     /// </summary>
-    /// <param name="index">The center index to cache the surrounding photos.</param>
-    /// <param name="cacheCurrentIndex">Should cache the <paramref name="index"/>?</param>
-    public async Task StartCachingAsync(int index, bool cacheCurrentIndex)
+    /// <param name="newIndex">The center index to cache the surrounding photos.</param>
+    /// <param name="cacheCurrentIndex">Should cache the <paramref name="newIndex"/>?</param>
+    public async Task StartCachingAsync(int newIndex, int oldIndex, bool cacheCurrentIndex)
     {
         // limit only 1 concurrent access
         await _lockGetAndCache.WaitAsync();
@@ -208,7 +225,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
 
             // preload the surrounding items
             _ = Task.Run(
-                () => CacheAsync__(index, cacheCurrentIndex, _tokenStartCaching.Token),
+                () => CacheAsync__(newIndex, oldIndex, cacheCurrentIndex, _tokenStartCaching.Token),
                 _tokenStartCaching.Token);
         }
         catch (Exception ex)
@@ -226,9 +243,10 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// Caches the specified photo and its surrounding,
     /// Unloads the photos those are not in the range.
     /// </summary>
-    private async Task CacheAsync__(int index, bool cacheCurrentIndex, CancellationToken token)
+    private async Task CacheAsync__(int newIndex, int oldIndex, bool cacheCurrentIndex,
+        CancellationToken token)
     {
-        var cachingIndex = index;
+        var cachingIndex = newIndex;
 
         try
         {
@@ -237,11 +255,15 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
 
 
             // 1. get the range
-            var oldRange = BHelper.GenerateWrappedIndexes(CurrentIndex, (int)PreloadRange, (int)Count, cacheCurrentIndex);
-            var newRange = await GetIndexesForCaching__(index, cacheCurrentIndex);
+            var oldRange = BHelper.GenerateWrappedIndexes(oldIndex, PreloadRange, Count, true);
+            var newRange = BHelper.GenerateWrappedIndexes(newIndex, PreloadRange, Count, true);
+            var cacheRange = await GetIndexesForCaching__(newIndex, cacheCurrentIndex);
 
-            Log.Info($"{nameof(CacheAsync__)}: Old range {nameof(oldRange)}=[{string.Join(",", oldRange)}]");
-            Log.Info($"{nameof(CacheAsync__)}: New range {nameof(newRange)}=[{string.Join(",", newRange)}]");
+            Log.Info($"{nameof(CacheAsync__)}: {nameof(oldIndex)}={oldIndex}, {nameof(newIndex)}={newIndex}");
+            Log.Info($"{nameof(CacheAsync__)}: " +
+                $"{nameof(oldRange)}=[{string.Join(",", oldRange)}], " +
+                $"{nameof(newRange)}=[{string.Join(",", newRange)}], " +
+                $"{nameof(cacheRange)}=[{string.Join(",", cacheRange)}]");
 
 
             // 2. unload the old range
@@ -259,9 +281,9 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
 
 
             // 3. start caching items in the range
-            for (var i = 0; i < newRange.Count; i++)
+            for (var i = 0; i < cacheRange.Count; i++)
             {
-                cachingIndex = newRange[i];
+                cachingIndex = cacheRange[i];
                 Log.Info($"{nameof(CacheAsync__)}: \t⤷ Caching index={cachingIndex}, {GetFilePath(cachingIndex)}");
 
                 // cancel if requested
@@ -290,8 +312,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     private async Task<List<int>> GetIndexesForCaching__(int index, bool cacheCurrentIndex)
     {
         // 1. get the list of index for caching
-        var rangeToCache = BHelper.GenerateWrappedIndexes(
-            index, (int)PreloadRange, (int)Count, cacheCurrentIndex);
+        var rangeToCache = BHelper.GenerateWrappedIndexes(index, PreloadRange, Count, cacheCurrentIndex);
         if (rangeToCache.Count == 0) return [];
 
 

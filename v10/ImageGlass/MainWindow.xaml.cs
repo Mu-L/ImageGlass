@@ -20,7 +20,7 @@ public sealed partial class MainWindow : Window
 
         AppWindow.TitleBar.PreferredTheme = Microsoft.UI.Windowing.TitleBarTheme.UseDefaultAppMode;
 
-        Title = $".NET {Environment.Version} - {Environment.OSVersion}";
+        WinMainTitleBarText.Text = $".NET {Environment.Version} - {Environment.OSVersion}";
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(WinMainTitleBar);
@@ -44,13 +44,13 @@ public sealed partial class MainWindow : Window
     {
 
 
-        SetPhotoAsync(path);
+        OpenPhotoFromPath(path);
     }
 
 
-    private async void SetPhotoAsync(string path)
+    private async void OpenPhotoFromPath(string path)
     {
-        Title = path;
+        WinMainTitleBarText.Text = path;
 
         var photo = await Local.Photos.LoadFolderAsync(path, new FilesSearchOptions()
         {
@@ -71,7 +71,7 @@ public sealed partial class MainWindow : Window
         if (file == null) return;
 
 
-        SetPhotoAsync(file.Path);
+        OpenPhotoFromPath(file.Path);
     }
 
 
@@ -84,17 +84,23 @@ public sealed partial class MainWindow : Window
         if (dir == null) return;
 
 
-        SetPhotoAsync(dir.Path);
+        OpenPhotoFromPath(dir.Path);
     }
 
     private void BtnViewNext_Clicked(object sender, RoutedEventArgs e)
     {
+        var photo = Local.Photos.GetByStep(1, true);
 
+        WinMainTitleBarText.Text = photo?.FilePath;
+        Viewer.SetPhoto(photo);
     }
 
     private void BtnViewPrevious_Clicked(object sender, RoutedEventArgs e)
     {
+        var photo = Local.Photos.GetByStep(-1, true);
 
+        WinMainTitleBarText.Text = photo?.FilePath;
+        Viewer.SetPhoto(photo);
     }
 
 

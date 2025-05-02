@@ -36,9 +36,9 @@ public partial class BHelper
     ///   <item><c>GenerateWrappedIndexes(-1, 2, 10, true) => []</c></item>
     /// </list>
     /// </summary>
-    public static List<int> GenerateWrappedIndexes(int centerIndex, int range, int count, bool includeCenterIndex)
+    public static List<int> GenerateWrappedIndexes(int centerIndex, uint range, uint count, bool includeCenterIndex)
     {
-        if (centerIndex < 0 || centerIndex >= count - 1) return [];
+        if (centerIndex < 0 || centerIndex > count - 1) return [];
 
         var unloadSet = new HashSet<int>();
 
@@ -51,8 +51,8 @@ public partial class BHelper
         // generate range [-range, centerIndex, +range]
         for (var i = 1; i <= range; i++)
         {
-            var rightIndex = ComputeIndexInRange(centerIndex + i, count);
-            var leftIndex = ComputeIndexInRange(centerIndex - i, count);
+            var rightIndex = ComputeIndexInRange(centerIndex + i, count, true);
+            var leftIndex = ComputeIndexInRange(centerIndex - i, count, true);
 
             unloadSet.Add(rightIndex);
             unloadSet.Add(leftIndex);
@@ -62,23 +62,47 @@ public partial class BHelper
     }
 
     /// <summary>
-    /// Calculates a valid index within a circular range. Example:
-    /// <list type="bullet">
-    ///   <item><c>CalculateIndexInRange(1, 10) => 1</c></item>
-    ///   <item><c>CalculateIndexInRange(0, 10) => 0</c></item>
-    ///   <item><c>CalculateIndexInRange(-1, 10) => 9</c></item>
-    ///   <item><c>CalculateIndexInRange(-2, 10) => 8</c></item>
-    /// </list>
+    /// <para>
+    /// Calculates a valid index within a circular range,
+    /// ensure the index stays within <c>[0, count-1]</c>.
+    /// </para>
+    /// 
+    /// <example>
+    /// When loopIndex == true:
+    /// <code>
+    /// CalculateIndexInRange(1, 10, true); // => 1
+    /// CalculateIndexInRange(0, 10, true); // => 0
+    /// CalculateIndexInRange(-1, 10, true); // => 9
+    /// CalculateIndexInRange(-2, 10, true); // => 8
+    /// CalculateIndexInRange(-2, 0, true); // => 0
+    /// </code>
+    /// 
+    /// When loopIndex == true:
+    /// <code>
+    /// CalculateIndexInRange(-2, 10, false); // => 0
+    /// CalculateIndexInRange(12, 10, false); // => 9
+    /// CalculateIndexInRange(12, 0, false); // => 0
+    /// </code>
+    /// </example>
     /// </summary>
-    /// <remarks>
-    /// Use modulo expression <c>((i % count) + count) % count</c>
-    /// to ensure the index stays within <c>[0, count-1]</c>, even for negative values.
-    /// </remarks>
-    public static int ComputeIndexInRange(int index, int count)
+    public static int ComputeIndexInRange(int index, uint count, bool loopIndex)
     {
-        var newIndex = (((index) % count) + count) % count;
+        long newIndex;
 
-        return newIndex;
+        if (count < 0)
+        {
+            newIndex = 0;
+        }
+        else if (loopIndex)
+        {
+            newIndex = (((index) % count) + count) % count;
+        }
+        else
+        {
+            newIndex = Math.Clamp(index, 0, count - 1);
+        }
+
+        return (int)newIndex;
     }
 
 
@@ -108,5 +132,9 @@ public partial class BHelper
 
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
+
+
+
+
 
 }

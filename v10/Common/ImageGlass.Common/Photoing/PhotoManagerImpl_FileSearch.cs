@@ -44,6 +44,7 @@ public partial class PhotoManagerImpl<T>
 
 
 
+
     /// <summary>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
@@ -130,12 +131,13 @@ public partial class PhotoManagerImpl<T>
                 _photos[CurrentIndex] = InitPhoto;
 
                 // start caching the surrounding items, not the current one
-                _ = StartCachingAsync(CurrentIndex, false);
+                _ = StartCachingAsync(CurrentIndex, CurrentIndex, false);
             }
         }
 
 
-        Log.Info($"{nameof(FileSearchProvider_FileSearching)}: Added {e.Results.Count()} files to the list, " +
+        Log.Info($"{nameof(FileSearchProvider_FileSearching)}: " +
+            $"Added {e.Results.Count()} files to the list, " +
             $"{nameof(CurrentIndex)}={CurrentIndex}/{Count}.");
     }
 
