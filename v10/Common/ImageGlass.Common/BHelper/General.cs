@@ -27,7 +27,7 @@ public partial class BHelper
 {
     /// <summary>
     /// Generates a list of unique indexes within a specified range,
-    /// wrapping around the center index, in the Right-Left-Center order (RLU).
+    /// wrapping around the center index, in the Center-Right-Left order.
     /// Example:
     /// <list type="bullet">
     ///   <item><c>GenerateWrappedIndexes(0, 2, 10, true) => [0, 1, 9, 2, 8]</c></item>

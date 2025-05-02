@@ -72,9 +72,9 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     public PhotoReadOptions ReadOptions { get; set; } = new();
 
     /// <summary>
-    /// Gets or sets the range of items to preload in advance (in LRU queue).
+    /// Gets or sets the range of items to preload in advance (in the Center-Right-Left order).
     /// </summary>
-    public uint PreloadRange { get; set; } = 0;
+    public uint PreloadRange { get; set; } = 1;
 
     /// <summary>
     /// Gets, sets the maximum image dimension to cache.
@@ -211,6 +211,10 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
                 () => CacheAsync__(index, cacheCurrentIndex, _tokenStartCaching.Token),
                 _tokenStartCaching.Token);
         }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
         finally
         {
             _lockGetAndCache.Release();
@@ -233,7 +237,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
 
 
             // 1. get the range
-            var oldRange = BHelper.GenerateWrappedIndexes(CurrentIndex, (int)PreloadRange, (int)Count, true);
+            var oldRange = BHelper.GenerateWrappedIndexes(CurrentIndex, (int)PreloadRange, (int)Count, cacheCurrentIndex);
             var newRange = await GetIndexesForCaching__(index, cacheCurrentIndex);
 
             Log.Info($"{nameof(CacheAsync__)}: Old range {nameof(oldRange)}=[{string.Join(",", oldRange)}]");

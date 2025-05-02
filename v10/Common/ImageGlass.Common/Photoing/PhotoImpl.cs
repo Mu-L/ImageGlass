@@ -241,6 +241,10 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
             _metadata = await MagickDecoder.LoadMetadataAsync(FilePath,
                 ReadOptions, ReadSettings, _cancelMetadataLoading.Token);
         }
+        catch (Exception ex)
+        {
+            Log.Error(ex);
+        }
         finally
         {
             _lockCancelMetadataLoading.Release();

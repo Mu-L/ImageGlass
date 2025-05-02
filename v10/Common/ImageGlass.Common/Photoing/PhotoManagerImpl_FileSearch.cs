@@ -129,8 +129,8 @@ public partial class PhotoManagerImpl<T>
                 _photos[CurrentIndex]?.Dispose();
                 _photos[CurrentIndex] = InitPhoto;
 
-                // start caching
-                _ = StartCachingAsync(CurrentIndex, true);
+                // start caching the surrounding items, not the current one
+                _ = StartCachingAsync(CurrentIndex, false);
             }
         }
 
