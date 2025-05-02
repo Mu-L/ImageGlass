@@ -70,8 +70,18 @@
                 <Button Margin="1" Click="BtnOpenFile_Clicked">Open File</Button>
                 <Button Margin="1" Click="BtnOpenFolder_Clicked">Open Folder</Button>
 
-                <Button Margin="50,1,1,1" Click="BtnViewPrevious_Clicked">View Previous</Button>
-                <Button Margin="1" Click="BtnViewNext_Clicked">View Next</Button>
+                <Button Margin="50,1,1,1" Click="BtnViewPrevious_Clicked">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Left" />
+                    </Button.KeyboardAccelerators>
+                    View Previous
+                </Button>
+                <Button Margin="1" Click="BtnViewNext_Clicked">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Right" />
+                    </Button.KeyboardAccelerators>
+                    View Next
+                </Button>
             </StackPanel>
         </Grid>
 
