@@ -116,7 +116,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// <summary>
     /// Clears and disposes the resources of <see cref="PhotoManagerImpl{T}"/> instance.
     /// </summary>
-    protected new virtual void OnDisposing()
+    protected override void OnDisposing()
     {
         base.OnDisposing();
 

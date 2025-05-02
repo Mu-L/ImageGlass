@@ -147,6 +147,12 @@ public partial class FilesSearcher() : DisposableImpl
 
         CancelSearching();
         _lockSearching.Dispose();
+
+
+        foreach (var eventDelegate in FileSearching?.GetInvocationList() ?? [])
+        {
+            FileSearching -= (EventHandler<FileSearchingEventArgs>)eventDelegate;
+        }
     }
 
 

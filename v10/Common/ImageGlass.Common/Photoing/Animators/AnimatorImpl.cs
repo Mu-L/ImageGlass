@@ -188,6 +188,16 @@ public abstract class AnimatorImpl : DisposableImpl
         _loopCount = 0;
         _currentLoop = 0;
 
+        foreach (var eventDelegate in FrameChanged?.GetInvocationList() ?? [])
+        {
+            FrameChanged -= (TEventHandler<AnimatorImpl, AnimatorFrameChangedEventArgs>)eventDelegate;
+        }
+
+        foreach (var eventDelegate in Stopped?.GetInvocationList() ?? [])
+        {
+            Stopped -= (TEventHandler<AnimatorImpl, EventArgs>)eventDelegate;
+        }
+
         base.OnDisposing();
     }
 
