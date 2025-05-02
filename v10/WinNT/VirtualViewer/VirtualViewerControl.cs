@@ -772,9 +772,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
 
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
+        BHelper.GcCollect();
     }
 
     private void Animator_FrameChanged(AnimatorImpl sender, AnimatorFrameChangedEventArgs e)
