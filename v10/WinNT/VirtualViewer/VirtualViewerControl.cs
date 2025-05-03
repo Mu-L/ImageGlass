@@ -732,7 +732,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (hasSource)
         {
             // apply color effect
-            _bmpSource = ApplyColorManagementEffect(_bmpSource);
+            _bmpSource = ApplyColorManagementEffect(_bmpSource, e.Photo);
 
 
             if (_isPreviewing)
@@ -783,15 +783,15 @@ public partial class VirtualViewerControl : SwapChainCanvas
         Invalidate();
     }
 
-    private ID2D1Bitmap1? ApplyColorManagementEffect(ID2D1Bitmap1? bmpD2)
+    private ID2D1Bitmap1? ApplyColorManagementEffect(ID2D1Bitmap1? bmpD2, PhotoImpl? photo)
     {
-        if (_photo == null) return bmpD2;
+        if (photo is null) return bmpD2;
 
         // no embedded color profile
-        if (_photo.Metadata.ColorSpace == ImageMagick.ColorSpace.CMYK
-            || _photo.Metadata.ColorProfileData is null) return bmpD2;
+        if (photo.Metadata.ColorSpace == ImageMagick.ColorSpace.CMYK
+            || photo.Metadata.ColorProfileData is null) return bmpD2;
 
-        Log.Info($"{nameof(ApplyColorManagementEffect)}: Applying color management effect...");
+        Log.Info($"Applying color management effect", nameof(ApplyColorManagementEffect));
 
         // create color management effect
         using var colorEffect = new ColorManagement(D2dContext);
@@ -804,7 +804,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         {
             destColorContext = D2dContext.CreateColorContext(ColorSpace.Custom, WindowColorProfileProvider.Instance.Data);
         }
-        //else if (_photo.PixelFormatInfo?.NumericRepresentation == PixelFormatNumericRepresentation.PixelFormatNumericRepresentationFloat)
+        //else if (photo.PixelFormatInfo?.NumericRepresentation == PixelFormatNumericRepresentation.PixelFormatNumericRepresentationFloat)
         //{
         //    destColorContext = D2dContext.CreateColorContext(ColorSpace.ScRgb, []);
         //}
@@ -814,7 +814,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
         // create source color context
-        using var srcColorContext = D2dContext.CreateColorContext(ColorSpace.Custom, _photo.Metadata.ColorProfileData);
+        using var srcColorContext = D2dContext.CreateColorContext(ColorSpace.Custom, photo.Metadata.ColorProfileData);
 
 
         // set color effect
