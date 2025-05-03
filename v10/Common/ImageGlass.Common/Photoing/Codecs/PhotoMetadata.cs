@@ -170,12 +170,14 @@ public class PhotoMetadata : DisposableImpl
         {
             // cancel if requested
             token.ThrowIfCancellationRequested();
-            Log.Info($"{nameof(GetPreview)}: Retrieving embedded preview {FilePath}");
+            Log.Info($"Retrieving embedded preview {FilePath}",
+                nameof(GetPreview), nameof(PhotoMetadata));
 
 
             if (RawThumbnail is not null)
             {
-                Log.Info($"{nameof(GetPreview)}: \t⤷ from RAW format...");
+                Log.Info($"\t-> from RAW format...",
+                    nameof(GetPreview), nameof(PhotoMetadata));
 
                 thumbM = new MagickImage(RawThumbnail.ToReadOnlySpan());
             }
@@ -186,7 +188,8 @@ public class PhotoMetadata : DisposableImpl
 
             if (thumbM is null && ExifProfile is not null)
             {
-                Log.Info($"{nameof(GetPreview)}: \t⤷ from EXIF profile...");
+                Log.Info($"\t-> from EXIF profile...",
+                    nameof(GetPreview), nameof(PhotoMetadata));
 
                 thumbM = (MagickImage?)ExifProfile.CreateThumbnail();
             }
@@ -202,7 +205,8 @@ public class PhotoMetadata : DisposableImpl
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Info($"{nameof(GetPreview)}: Cancelled retrieving preview {FilePath}");
+            Log.Info($"Cancelled retrieving preview for {FilePath}",
+                nameof(GetPreview), nameof(PhotoMetadata));
 
             thumbM?.Dispose();
             thumbM = null;

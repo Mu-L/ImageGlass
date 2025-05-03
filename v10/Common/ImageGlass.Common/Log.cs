@@ -38,7 +38,7 @@ public static class Log
         // class name
         if (!string.IsNullOrWhiteSpace(className))
         {
-            sb.Append($" > {className}");
+            sb.Append($" {className}");
         }
 
         // function name

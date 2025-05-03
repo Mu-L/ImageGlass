@@ -461,16 +461,14 @@ public static partial class PhotoWIC
         using var encoder = fac.CreateEncoder(format);
         encoder.Initialize(stream, BitmapEncoderCacheOption.NoCache);
 
+        size ??= new Size(srcBmp.Size.Width, srcBmp.Size.Height);
+
         // writing a frame
         using (var frameEncode = encoder.CreateNewFrame(out _))
         {
             frameEncode.Initialize();
 
-            if (size is not null)
-            {
-                frameEncode.SetSize((uint)size.Value.Width, (uint)size.Value.Height);
-            }
-
+            frameEncode.SetSize((uint)size.Value.Width, (uint)size.Value.Height);
             frameEncode.SetPixelFormat(Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA);
 
             frameEncode.WriteSource(srcBmp);

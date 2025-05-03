@@ -330,7 +330,8 @@ public class MagickDecoder
             }
             catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
             {
-                Log.Info($"{nameof(LoadMetadataAsync)}: Cancelled decoding {filePath}");
+                Log.Info($"Cancelled decoding {filePath}",
+                    nameof(LoadMetadataAsync), nameof(MagickDecoder));
             }
         }, token);
 
@@ -342,7 +343,8 @@ public class MagickDecoder
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Info($"{nameof(LoadMetadataAsync)}: Cancelled decoding {filePath}");
+            Log.Info($"Cancelled decoding {filePath}",
+                nameof(LoadMetadataAsync), nameof(MagickDecoder));
         }
 
         return meta;
