@@ -23,11 +23,13 @@ public delegate void TEventHandler<TSender, TResult>(TSender sender, TResult e);
 
 
 
-public class PhotoLoadingEventArgs(PhotoImpl photo) : EventArgs
+public class PhotoLoadingEventArgs(PhotoImpl photo, CancellationToken token) : EventArgs
 {
     public PhotoImpl Photo => photo;
 
     public PhotoMetadata Metadata => photo.Metadata;
+
+    public CancellationToken CancelToken => token;
 
     public bool IsDone => photo.IsDone;
 

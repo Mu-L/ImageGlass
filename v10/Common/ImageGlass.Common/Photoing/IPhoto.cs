@@ -97,7 +97,8 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
     /// Loads <c><see cref="Bitmap"/></c> from file.
     /// </summary>
     Task LoadAsync(bool useCache,
-        PhotoReadOptions? options = null, IProgress<PhotoLoadingEventArgs>? progress = null);
+        PhotoReadOptions? options = null,
+        IProgress<PhotoLoadingEventArgs>? progress = null);
 
 
     /// <summary>
@@ -109,7 +110,7 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
     /// <summary>
     /// Stops any ongoing photo loading process.
     /// </summary>
-    void CancelPhotoLoading();
+    void CancelLoading();
 
 
     /// <summary>

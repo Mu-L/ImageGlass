@@ -30,8 +30,7 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     protected uint _height = 0;
     protected PhotoMetadata? _metadata;
 
-    private readonly SemaphoreSlim _lockCancelPhotoLoading = new(1, 1);
-    protected CancellationTokenSource? _cancelPhotoLoading = new();
+    protected CancellationTokenSource? _cancelPhotoLoading;
 
 
     /// <summary>
@@ -121,7 +120,7 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     /// </param>
     protected virtual void OnDisposing(bool disposeEverything)
     {
-        CancelPhotoLoading();
+        CancelLoading();
 
         _bitmap?.Dispose();
         _bitmap = null;
@@ -134,8 +133,6 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
 
             _cancelPhotoLoading?.Dispose();
             _cancelPhotoLoading = null;
-
-            _lockCancelPhotoLoading?.Dispose();
         }
     }
 
@@ -143,17 +140,28 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    [MemberNotNull(nameof(_cancelPhotoLoading))]
+    public virtual void CancelLoading()
+    {
+        _cancelPhotoLoading?.Cancel();
+        _cancelPhotoLoading = new();
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public virtual async Task LoadAsync(bool useCache,
-        PhotoReadOptions? newOptions = null, IProgress<PhotoLoadingEventArgs>? progress = null)
+        PhotoReadOptions? newOptions = null,
+        IProgress<PhotoLoadingEventArgs>? progress = null)
     {
         // use cached data
         if (useCache && IsDone) return;
 
-        await _lockCancelPhotoLoading.WaitAsync();
-
         try
         {
-            CancelPhotoLoading();
+            CancelLoading();
+            var token = _cancelPhotoLoading.Token;
 
             // reset dispose status
             IsDisposed = false;
@@ -164,7 +172,7 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
 
             // 1. load metadata ===================
             // cancel if requested
-            _cancelPhotoLoading.Token.ThrowIfCancellationRequested();
+            token.ThrowIfCancellationRequested();
 
             // load metadata
             await LoadMetadataAsync();
@@ -172,27 +180,27 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
             // load image data
             ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
 
-            progress?.Report(new PhotoLoadingEventArgs(this));
+            progress?.Report(new PhotoLoadingEventArgs(this, token));
 
 
             // 2. load image data ===================
             // cancel if requested
-            _cancelPhotoLoading.Token.ThrowIfCancellationRequested();
+            token.ThrowIfCancellationRequested();
 
             // decode the photo
-            await OnDecodingAsync(Metadata, _cancelPhotoLoading.Token);
+            await OnDecodingAsync(Metadata, token);
 
             // cancel if requested
-            _cancelPhotoLoading.Token.ThrowIfCancellationRequested();
+            token.ThrowIfCancellationRequested();
 
             // done loading
             IsDone = true;
 
-            progress?.Report(new PhotoLoadingEventArgs(this));
+            progress?.Report(new PhotoLoadingEventArgs(this, token));
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Info($"{nameof(LoadAsync)}: Cancelled loading {FilePath}");
+            Log.Info($"Cancelled loading {FilePath}", nameof(LoadAsync), nameof(PhotoImpl));
             Unload();
         }
         catch (Exception ex)
@@ -201,10 +209,6 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
             IsDone = true;
 
             Log.Error(ex);
-        }
-        finally
-        {
-            _lockCancelPhotoLoading.Release();
         }
     }
 
@@ -264,18 +268,6 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
         {
             await Task.Delay(10);
         }
-    }
-
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    [MemberNotNull(nameof(_cancelPhotoLoading))]
-    public virtual void CancelPhotoLoading()
-    {
-        _cancelPhotoLoading?.Cancel();
-        _cancelPhotoLoading?.Dispose();
-        _cancelPhotoLoading = new();
     }
 
 

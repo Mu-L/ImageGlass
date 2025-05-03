@@ -24,6 +24,8 @@ public sealed partial class MainWindow : Window
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(WinMainTitleBar);
+
+        AppWindow.Resize(new Windows.Graphics.SizeInt32(1200, 800));
     }
 
     public GridLength TitleBarLeftInset => new(AppWindow.TitleBar.LeftInset);
@@ -36,7 +38,7 @@ public sealed partial class MainWindow : Window
 
     private void Window_Closed(object sender, WindowEventArgs args)
     {
-
+        Viewer.UnloadPhoto();
     }
 
 
@@ -89,19 +91,21 @@ public sealed partial class MainWindow : Window
 
     private void BtnViewNext_Clicked(object sender, RoutedEventArgs e)
     {
-        var photo = Local.Photos.GetByStep(1, true);
-
-        WinMainTitleBarText.Text = photo?.FilePath;
-        Viewer.SetPhoto(photo);
+        ViewNext(1);
     }
 
     private void BtnViewPrevious_Clicked(object sender, RoutedEventArgs e)
     {
-        var photo = Local.Photos.GetByStep(-1, true);
+        ViewNext(-1);
+    }
+
+
+    private void ViewNext(int step)
+    {
+        var photo = Local.Photos.GetByStep(step, true);
 
         WinMainTitleBarText.Text = photo?.FilePath;
         Viewer.SetPhoto(photo);
     }
-
 
 }

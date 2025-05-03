@@ -50,15 +50,16 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private Rect _srcRect = new();
     private Rect _destRect = new();
 
-    private Progress<PhotoLoadingEventArgs> _loadingProgress;
-    private bool _isPreviewing = false;
-    private CancellationTokenSource? _cancelPreview;
-    private readonly SemaphoreSlim _lockCancelPreview = new(1, 1);
     private readonly Lock _lockSource = new();
     private readonly Lock _lockPreview = new();
-
     private ImageInterpolation _interpolationScaleDown = ImageInterpolation.MultiSampleLinear;
     private ImageInterpolation _interpolationScaleUp = ImageInterpolation.NearestNeighbor;
+
+
+    // loading
+    private CancellationTokenSource? _cancelPreview;
+    private Progress<PhotoLoadingEventArgs> _loadingProgress;
+    private bool _isPreviewing = false;
 
 
     // control
@@ -217,31 +218,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         UnloadPhoto();
         DisposeCheckerboardBrushes();
-    }
-
-
-    [MemberNotNull(nameof(_cancelPreview))]
-    [MemberNotNullWhen(false, nameof(_photo))]
-    private void UnloadPhoto()
-    {
-        CancelPreview();
-
-        // reset selection
-        SetSourceSelection(Rect.Empty, false);
-        SetBitmapSize(0, 0, false);
-
-        // dispose animator
-        if (_animator is not null)
-        {
-            _animator.FrameChanged -= Animator_FrameChanged;
-            _animator.Unload();
-            _animator = null;
-        }
-
-        // dispose native resources of photo
-        DisposeNativePhotoResources();
-
-        _photo = null;
     }
 
 
@@ -528,7 +504,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
     /// <summary>
-    /// Cancels any ongoing preview operation.
+    /// Cancels any ongoing photo previewing operation.
     /// </summary>
     [MemberNotNull(nameof(_cancelPreview))]
     private void CancelPreview()
@@ -538,6 +514,33 @@ public partial class VirtualViewerControl : SwapChainCanvas
         _cancelPreview = new();
     }
 
+
+    /// <summary>
+    /// Unloads the photo and cancels any ongoing loading operation.
+    /// </summary>
+    [MemberNotNull(nameof(_cancelPreview))]
+    public void UnloadPhoto()
+    {
+        CancelPreview();
+        _photo?.CancelLoading();
+
+        // reset selection
+        SetSourceSelection(Rect.Empty, false);
+        SetBitmapSize(0, 0, false);
+
+        // dispose animator
+        if (_animator is not null)
+        {
+            _animator.FrameChanged -= Animator_FrameChanged;
+            _animator.Unload();
+            _animator = null;
+        }
+
+        // dispose native resources of photo
+        DisposeNativePhotoResources();
+
+        _photo?.Unload();
+    }
 
 
 
@@ -558,7 +561,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // photo is cached
         if (_photo.IsDone)
         {
-            _ = HandlePhotoLoadedAsync(new PhotoLoadingEventArgs(_photo));
+            //_ = HandlePhotoLoadedAsync(new(_photo, token), token);
         }
         // photo is not cached
         else
@@ -573,24 +576,22 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // previewing
         if (!e.IsDone)
         {
-            await HandlePhotoPreviewAsync(e, _cancelPreview?.Token ?? default);
+            await HandlePhotoPreviewAsync(e);
         }
         // load full resolution photo
         else
         {
-            //await Task.Run(async () =>
-            //{
-            //    await Task.Delay(5000);
-            //    await HandlePhotoLoadedAsync(e);
-            //});
-            await HandlePhotoLoadedAsync(e);
+            await HandlePhotoLoadedAsync(e, e.CancelToken);
         }
     }
 
 
 
-    private async Task HandlePhotoPreviewAsync(PhotoLoadingEventArgs e, CancellationToken token)
+    private async Task HandlePhotoPreviewAsync(PhotoLoadingEventArgs e)
     {
+        CancelPreview();
+        var token = _cancelPreview.Token;
+
         try
         {
             // cancel if requested
@@ -614,7 +615,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 // cancel if requested
                 token.ThrowIfCancellationRequested();
 
-                _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
+                lock (_lockPreview)
+                {
+                    _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
+                }
             }
             else
             {
@@ -623,10 +627,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
-            Log.Info($"{nameof(HandlePhotoPreviewAsync)}: Cancelled previewing {e.Metadata.FilePath}");
+            Log.Info($"Cancelled previewing {e.Metadata.FilePath}",
+                nameof(HandlePhotoPreviewAsync), nameof(VirtualViewerControl));
 
-            _bmpPreview?.Dispose();
-            _bmpPreview = null;
             _isPreviewing = false;
         }
         catch (Exception ex)
@@ -663,57 +666,117 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    private async Task HandlePhotoLoadedAsync(PhotoLoadingEventArgs e)
+    private async Task HandlePhotoLoadedAsync(PhotoLoadingEventArgs e, CancellationToken token)
     {
-        await _lockCancelPreview.WaitAsync();
-
         // back up size of preview image
         var prevSize = BitmapSize;
         var hasSource = false;
 
         try
         {
+            // cancel if requested
+            token.ThrowIfCancellationRequested();
+
+            Log.Info($"Loading full resolution photo...",
+                nameof(HandlePhotoLoadedAsync), nameof(VirtualViewerControl));
+
+
+            if (e.Photo.Bitmap is not null)
+            {
+                // update bitmap size
+                SetBitmapSize(e.Photo.Size.ToSize(), true);
+
+
+                // native bitmap is a single-frame bitmap
+                if (e.Photo.Bitmap is IWICBitmapSource bmpSrc)
+                {
+                    // create new native bitmap
+                    _bmpSource = await Task
+                      .Run(() => PhotoWIC.CreateD2dBitmap(bmpSrc, D2dContext))
+                      .ConfigureAwait(true);
+
+                    hasSource = _bmpSource != null;
+                }
+                // native bitmap is a animated bitmap
+                else if (e.Photo.Bitmap is WicAnimator animator)
+                {
+                    _animator = animator;
+                    _animator.FrameChanged += Animator_FrameChanged;
+                    _animator.Initialize(D2dContext);
+                    _animator.Play();
+
+                    hasSource = true;
+                }
+                // native bitmap is a multi-frame bitmap
+                else if (e.Photo.Bitmap is IWICBitmapDecoder decoder)
+                {
+                    using var frame = decoder.GetFrame(0);
+
+                    _bmpSource = await Task
+                      .Run(() => PhotoWIC.CreateD2dBitmap(frame, D2dContext))
+                      .ConfigureAwait(true);
+
+                    hasSource = _bmpSource != null;
+                }
+            }
+
+
             // cancel the preview process
             CancelPreview();
 
-            Log.Info($"{nameof(HandlePhotoLoadedAsync)}: Loading full resolution photo...");
-            if (e.Photo.Bitmap is null) return;
+            _bmpPreview?.Dispose();
+            _bmpPreview = null;
 
-            // update bitmap size
-            SetBitmapSize(e.Photo.Size.ToSize(), true);
+            // cancel if requested
+            token.ThrowIfCancellationRequested();
 
 
-            // native bitmap is a single-frame bitmap
-            if (e.Photo.Bitmap is IWICBitmapSource bmpSrc)
+            // calculate the source viewport to match with the preview
+            if (hasSource)
             {
-                // create new native bitmap
-                _bmpSource = await Task
-                  .Run(() => PhotoWIC.CreateD2dBitmap(bmpSrc, D2dContext))
-                  .ConfigureAwait(true);
+                // apply color effect
+                _bmpSource = ApplyColorManagementEffect(_bmpSource, e.Photo);
 
-                hasSource = _bmpSource != null;
+
+                if (_isPreviewing)
+                {
+                    var diffRatio = new Size(
+                        prevSize.Width / BitmapSize.Width,
+                        prevSize.Height / BitmapSize.Height);
+
+                    // calculate new source rect
+                    var newSrcRect = _srcRect;
+                    newSrcRect.X /= diffRatio.Width;
+                    newSrcRect.Y /= diffRatio.Height;
+                    newSrcRect.Width /= diffRatio.Width;
+                    newSrcRect.Height /= diffRatio.Height;
+
+                    // update zoom source
+                    _srcRect = newSrcRect.Safe();
+                    _zooming.Factor *= diffRatio.Width;
+
+                    // make sure all zoomed point and viewport are synced
+                    // by manually applying a very small zoom factor
+                    var isManualZoom = _zooming.IsManual;
+                    ZoomByDeltaToPoint(double.Epsilon, _zooming.ZoomedPoint, false);
+                    _zooming.IsManual = isManualZoom;
+
+                    _isPreviewing = false;
+                    Refresh(!isManualZoom);
+
+                    _bmpPreview?.Dispose();
+                    _bmpPreview = null;
+                }
+                else
+                {
+                    _isPreviewing = false;
+                    Refresh(true);
+                }
             }
-            // native bitmap is a animated bitmap
-            else if (e.Photo.Bitmap is WicAnimator animator)
-            {
-                _animator = animator;
-                _animator.FrameChanged += Animator_FrameChanged;
-                _animator.Initialize(D2dContext);
-                _animator.Play();
-
-                hasSource = true;
-            }
-            // native bitmap is a multi-frame bitmap
-            else if (e.Photo.Bitmap is IWICBitmapDecoder decoder)
-            {
-                using var frame = decoder.GetFrame(0);
-
-                _bmpSource = await Task
-                  .Run(() => PhotoWIC.CreateD2dBitmap(frame, D2dContext))
-                  .ConfigureAwait(true);
-
-                hasSource = _bmpSource != null;
-            }
+        }
+        catch (Exception ex) when (ex is OperationCanceledException)
+        {
+            UnloadPhoto();
         }
         catch (Exception ex)
         {
@@ -722,66 +785,21 @@ public partial class VirtualViewerControl : SwapChainCanvas
             _bmpSource?.Dispose();
             _bmpSource = null;
         }
-        finally
-        {
-            _lockCancelPreview.Release();
-        }
-
-
-        // calculate the source viewport to match with the preview
-        if (hasSource)
-        {
-            // apply color effect
-            _bmpSource = ApplyColorManagementEffect(_bmpSource, e.Photo);
-
-
-            if (_isPreviewing)
-            {
-                var diffRatio = new Size(
-                    prevSize.Width / BitmapSize.Width,
-                    prevSize.Height / BitmapSize.Height);
-
-                // calculate new source rect
-                var newSrcRect = _srcRect;
-                newSrcRect.X /= diffRatio.Width;
-                newSrcRect.Y /= diffRatio.Height;
-                newSrcRect.Width /= diffRatio.Width;
-                newSrcRect.Height /= diffRatio.Height;
-
-                // update zoom source
-                _srcRect = newSrcRect.Safe();
-                _zooming.Factor *= diffRatio.Width;
-
-                // make sure all zoomed point and viewport are synced
-                // by manually applying a very small zoom factor
-                var isManualZoom = _zooming.IsManual;
-                ZoomByDeltaToPoint(double.Epsilon, _zooming.ZoomedPoint, false);
-                _zooming.IsManual = isManualZoom;
-
-                _isPreviewing = false;
-                Refresh(!isManualZoom);
-
-                _bmpPreview?.Dispose();
-                _bmpPreview = null;
-            }
-            else
-            {
-                _isPreviewing = false;
-                Refresh(true);
-            }
-        }
 
 
         BHelper.GcCollect();
     }
 
+
     private void Animator_FrameChanged(AnimatorImpl sender, AnimatorFrameChangedEventArgs e)
     {
         DisposeNativePhotoResources();
 
+        // update the frame bitmap
         _bmpSource = (sender as WicAnimator)!.GetRenderedFrameBitmap1();
         Invalidate();
     }
+
 
     private ID2D1Bitmap1? ApplyColorManagementEffect(ID2D1Bitmap1? bmpD2, PhotoImpl? photo)
     {
@@ -791,7 +809,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (photo.Metadata.ColorSpace == ImageMagick.ColorSpace.CMYK
             || photo.Metadata.ColorProfileData is null) return bmpD2;
 
-        Log.Info($"Applying color management effect", nameof(ApplyColorManagementEffect));
+        Log.Info($"Applying color management effect",
+            nameof(ApplyColorManagementEffect), nameof(VirtualViewerControl));
 
         // create color management effect
         using var colorEffect = new ColorManagement(D2dContext);
