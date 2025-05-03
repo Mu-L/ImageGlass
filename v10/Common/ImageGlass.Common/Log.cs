@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System.Diagnostics;
+using System.Text;
 
 namespace ImageGlass.Common;
 
@@ -28,10 +29,28 @@ public static class Log
     /// <summary>
     /// Outputs a message to the debug console when in debug mode.
     /// </summary>
-    public static void Note(string message)
+    public static void Note(string message, string fnName = "", string className = "", string header = "")
     {
 #if DEBUG
-        Debug.WriteLine($"[LOG] {message}");
+        var sb = new StringBuilder();
+        sb.Append($"[LOG] {header}");
+
+        // class name
+        if (!string.IsNullOrWhiteSpace(className))
+        {
+            sb.Append($" > {className}");
+        }
+
+        // function name
+        if (!string.IsNullOrWhiteSpace(fnName))
+        {
+            sb.Append($" > {fnName}");
+        }
+
+        // message
+        sb.Append($": {message}");
+
+        Debug.WriteLine(sb);
 #endif
     }
 
@@ -39,27 +58,27 @@ public static class Log
     /// <summary>
     /// Logs an info message.
     /// </summary>
-    public static void Info(string message)
+    public static void Info(string message, string fnName = "", string className = "")
     {
-        Note($"ℹ️ℹ️ℹ️ {message}");
+        Note(message, fnName, className, "ℹ️ℹ️ℹ️");
     }
 
 
     /// <summary>
     /// Logs a warning message.
     /// </summary>
-    public static void Warn(string message)
+    public static void Warn(string message, string fnName = "", string className = "")
     {
-        Note($"⚠️⚠️⚠️ {message}");
+        Note(message, fnName, className, "⚠️⚠️⚠️");
     }
 
 
     /// <summary>
     /// Logs an error message.
     /// </summary>
-    public static void Error(string message)
+    public static void Error(string message, string fnName = "", string className = "")
     {
-        Note($"❌❌❌ {message}");
+        Note(message, fnName, className, "❌❌❌");
     }
 
 
@@ -68,7 +87,7 @@ public static class Log
     /// </summary>
     public static void Error(Exception ex)
     {
-        Note($"⛔⛔⛔ {ex.ToString()}");
+        Note(ex.ToString(), header: "⛔⛔⛔");
     }
 
 }
