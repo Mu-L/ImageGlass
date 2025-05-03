@@ -31,10 +31,7 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     protected PhotoMetadata? _metadata;
 
     private readonly SemaphoreSlim _lockCancelPhotoLoading = new(1, 1);
-    private readonly SemaphoreSlim _lockCancelMetadataLoading = new(1, 1);
-
     protected CancellationTokenSource? _cancelPhotoLoading = new();
-    protected CancellationTokenSource? _cancelMetadataLoading = new();
 
 
     /// <summary>
@@ -125,7 +122,6 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
     protected virtual void OnDisposing(bool disposeEverything)
     {
         CancelPhotoLoading();
-        CancelMetadataLoading();
 
         _bitmap?.Dispose();
         _bitmap = null;
@@ -138,11 +134,8 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
 
             _cancelPhotoLoading?.Dispose();
             _cancelPhotoLoading = null;
-            _cancelMetadataLoading?.Dispose();
-            _cancelMetadataLoading = null;
 
             _lockCancelPhotoLoading?.Dispose();
-            _lockCancelMetadataLoading?.Dispose();
         }
     }
 
@@ -227,28 +220,37 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
 
     /// <summary>
     /// <inheritdoc/>
+    /// Returns the cached metadata if it's not null and up-to-date.
     /// </summary>
     public async Task LoadMetadataAsync(PhotoReadOptions? newOptions = null)
     {
-        await _lockCancelMetadataLoading.WaitAsync();
-
         try
         {
-            CancelMetadataLoading();
-
             ReadOptions = newOptions ?? ReadOptions;
             ReadSettings ??= MagickDecoder.ParseSettings(ReadOptions, false, FilePath);
 
-            _metadata = await MagickDecoder.LoadMetadataAsync(FilePath,
-                ReadOptions, ReadSettings, _cancelMetadataLoading.Token);
+            // check if the current Metadata is outdated or not
+            var hasOutdatedCache = _metadata is null;
+            if (_metadata is not null)
+            {
+                try
+                {
+                    var fi = new FileInfo(FilePath);
+                    hasOutdatedCache = _metadata.FileLastWriteTimeUtc < fi.LastWriteTimeUtc;
+                }
+                catch { }
+            }
+
+
+            // load the metadata if it's outdated
+            if (hasOutdatedCache)
+            {
+                _metadata = await MagickDecoder.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings);
+            }
         }
         catch (Exception ex)
         {
             Log.Error(ex);
-        }
-        finally
-        {
-            _lockCancelMetadataLoading.Release();
         }
     }
 
@@ -274,18 +276,6 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
         _cancelPhotoLoading?.Cancel();
         _cancelPhotoLoading?.Dispose();
         _cancelPhotoLoading = new();
-    }
-
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    [MemberNotNull(nameof(_cancelMetadataLoading))]
-    public virtual void CancelMetadataLoading()
-    {
-        _cancelMetadataLoading?.Cancel();
-        _cancelMetadataLoading?.Dispose();
-        _cancelMetadataLoading = new();
     }
 
 

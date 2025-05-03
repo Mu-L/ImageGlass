@@ -37,12 +37,12 @@ public class PhotoMetadata : DisposableImpl
     /// </summary>
     public string FileSizeFormated => BHelper.FormatSize(FileSizeInBytes);
 
-    public DateTime FileCreationTime { get; private set; } // local time
-    public DateTime FileLastAccessTime { get; private set; } // local time
-    public DateTime FileLastWriteTime { get; private set; } // local time
-    public string FileCreationTimeFormated => BHelper.FormatDateTime(FileCreationTime);
-    public string FileLastAccessTimeFormated => BHelper.FormatDateTime(FileLastAccessTime);
-    public string FileLastWriteTimeFormated => BHelper.FormatDateTime(FileLastWriteTime);
+    public DateTime FileCreationTimeUtc { get; private set; }
+    public DateTime FileLastAccessTimeUtc { get; private set; }
+    public DateTime FileLastWriteTimeUtc { get; private set; }
+    public string FileCreationTimeFormated => BHelper.FormatDateTime(FileCreationTimeUtc.ToLocalTime());
+    public string FileLastAccessTimeFormated => BHelper.FormatDateTime(FileLastAccessTimeUtc.ToLocalTime());
+    public string FileLastWriteTimeFormated => BHelper.FormatDateTime(FileLastWriteTimeUtc.ToLocalTime());
 
 
     /// <summary>
@@ -139,9 +139,9 @@ public class PhotoMetadata : DisposableImpl
             FolderName = fi.Directory?.Name ?? string.Empty;
 
             FileSizeInBytes = fi.Length;
-            FileCreationTime = fi.CreationTime;
-            FileLastWriteTime = fi.LastWriteTime;
-            FileLastAccessTime = fi.LastAccessTime;
+            FileCreationTimeUtc = fi.CreationTimeUtc;
+            FileLastWriteTimeUtc = fi.LastWriteTimeUtc;
+            FileLastAccessTimeUtc = fi.LastAccessTimeUtc;
         }
         catch { }
     }

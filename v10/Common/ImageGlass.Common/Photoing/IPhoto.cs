@@ -113,12 +113,6 @@ public interface IPhoto<T> : IDisposable where T : IDisposable
 
 
     /// <summary>
-    /// Stops any ongoing metadata loading process.
-    /// </summary>
-    void CancelMetadataLoading();
-
-
-    /// <summary>
     /// Disposes the <c><see cref="Bitmap"/></c> and resets the relevant info.
     /// This method keeps the <c><see cref="Metadata"/></c> and neccessary resources.
     /// </summary>
