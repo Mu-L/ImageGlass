@@ -48,6 +48,11 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     protected readonly long _maxThumbnailCacheSizeInMb = 100; // 100MB
 
 
+    protected CancellationTokenSource? _cancelWorker;
+    protected List<int> _queueList = [];
+    protected HashSet<int> _freeList = [];
+
+
     // Public Properties
     #region Public Properties
 
@@ -97,11 +102,183 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// </summary>
     public PhotoManagerImpl(IEnumerable<string>? list = null)
     {
-        if (list != null)
+        if (list != null) Add(list);
+
+        // run background worker
+        _cancelWorker = new();
+        _ = Task.Run(async () => await RunBackgroundWorker(_cancelWorker.Token), _cancelWorker.Token);
+
+        //var fac = new TaskFactory();
+        //fac.StartNew(async () => await RunBackgroundWorker(_cancelWorker.Token), _cancelWorker.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+    }
+
+
+    /// <summary>
+    /// Preload photos in a background thread.
+    /// </summary>
+    private async Task RunBackgroundWorker(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
         {
-            Add(list);
+            if (_queueList.Count > 0)
+            {
+                // pop out the first item
+                var index = _queueList[0];
+                var photo = _photos[index];
+                _queueList.RemoveAt(0);
+
+                Log.Info(
+                    $"Caching photo index={index}, path={photo.FilePath}",
+                    nameof(RunBackgroundWorker), nameof(PhotoManagerImpl<T>));
+
+
+                // if photo is cached
+                if (photo.IsDone)
+                {
+                    Log.Info(
+                        $"\t-> Skipped caching photo index={index}",
+                        nameof(RunBackgroundWorker), nameof(PhotoManagerImpl<T>));
+                }
+                // if photo is not cached, load from file
+                else
+                {
+                    await photo.LoadAsync(true, ReadOptions);
+
+                    Log.Info(
+                        $"\t-> Done caching photo index={index}",
+                        nameof(RunBackgroundWorker), nameof(PhotoManagerImpl<T>));
+                }
+            }
+
+            await Task.Delay(10, token).ConfigureAwait(false);
         }
     }
+
+
+    /// <summary>
+    /// Gets photo indexes for queuing.
+    /// </summary>
+    /// <param name="index">Current index of photo list</param>
+    /// <param name="includeCurrentIndex">Include current index in the queue list</param>
+    private async Task<List<int>> GetQueueListAsync(int index, bool includeCurrentIndex)
+    {
+        // check valid index
+        if (index < 0 || index >= Count) return [];
+
+
+        // 1. get the indexes to cache
+        var newQueueList = BHelper.GenerateWrappedIndexes(index, PreloadRange, Count, includeCurrentIndex);
+
+
+        // 2. release the out-of-range resources
+        var oldFreeList = new List<int>(_freeList);
+        var unloadedList = new HashSet<int>();
+        foreach (var photoIndex in oldFreeList)
+        {
+            if (photoIndex == index) continue;
+            if (!newQueueList.Contains(photoIndex))
+            {
+                Get(photoIndex)?.Unload();
+                _freeList.Remove(photoIndex);
+
+                unloadedList.Add(photoIndex);
+            }
+        }
+
+        Log.Info(
+            $"New index={index}, " +
+            $"Unloaded photos=[{string.Join(",", unloadedList)}]",
+            nameof(GetQueueListAsync), nameof(PhotoManagerImpl<T>));
+
+        // save the indexes to free for next time
+        _freeList.UnionWith(newQueueList);
+
+
+        // 3. create final photo indexes to cache
+        var finalQueueList = new HashSet<int>();
+
+        foreach (var itemIndex in newQueueList)
+        {
+            try
+            {
+                var item = Get(itemIndex);
+                if (item is null) continue;
+
+                // load metadata
+                await item.LoadMetadataAsync(ReadOptions);
+
+
+                // check image dimension
+                var notExceedDimension = MaxImageDimensionToCache <= 0
+                    || (item.Metadata.Width <= MaxImageDimensionToCache
+                        && item.Metadata.Height <= MaxImageDimensionToCache);
+
+                // check file size
+                var notExceedFileSize = MaxFileSizeInMbToCache <= 0
+                    || (item.Metadata.FileSizeInBytes / 1024f / 1024f <= MaxFileSizeInMbToCache);
+
+                // check if this photo can be cached
+                var canCache = !item.IsDone && notExceedDimension && notExceedFileSize;
+
+                if (canCache) finalQueueList.Add(itemIndex);
+            }
+            catch { }
+        }
+
+
+        Log.Info(
+            $"\t-> " +
+            $"Old _freeList=[{string.Join(",", oldFreeList)}], " +
+            $"New _freeList=[{string.Join(",", _freeList)}]",
+            nameof(GetQueueListAsync), nameof(PhotoManagerImpl<T>));
+
+        return finalQueueList.ToList();
+    }
+
+
+    /// <summary>
+    /// Gets a photo at the specified index and initiates caching for surrounding photos.
+    /// </summary>
+    private T? GetAndCache(int index)
+    {
+        var photo = Get(index);
+
+        // start caching
+        if (photo is not null)
+        {
+            _ = Task.Run(async () =>
+            {
+                // get queue list according to index, don't include current index
+                var newQueueList = await GetQueueListAsync(index, false);
+
+                _queueList.Clear();
+                _queueList.AddRange(newQueueList);
+            });
+        }
+
+        return photo;
+    }
+
+
+    /// <summary>
+    /// Gets a photo by given step,
+    /// optionally loop back the index if its new value is out of range.
+    /// </summary>
+    public T? GetByStep(int step, bool loopBackNavigation)
+    {
+        // calculate new index
+        var newIndex = CurrentIndex + step;
+        var safeIndex = BHelper.ComputeIndexInRange(newIndex, Count, loopBackNavigation);
+
+        var photo = GetAndCache(safeIndex);
+
+        CurrentIndex = safeIndex;
+        return photo;
+    }
+
+
+
+
 
 
     // Abstract / Virtual functions
@@ -119,6 +296,11 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     protected override void OnDisposing()
     {
         base.OnDisposing();
+
+        // stop the worker
+        _cancelWorker?.Cancel();
+        _cancelWorker?.Dispose();
+        _cancelWorker = null;
 
         Clear();
         DisposeFileSearcher();
@@ -142,68 +324,23 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
 
 
 
-    /// <summary>
-    /// Loads the photo at the specified index if it has not already been loaded.
-    /// </summary>
-    public async Task LoadAsync(int index, bool useCache = true,
-        IProgress<PhotoLoadingEventArgs>? progress = null,
-        CancellationToken token = default)
-    {
-        var photo = Get(index);
-        if (photo is null) return;
-
-        // use cached data
-        if (useCache && photo.IsDone) return;
-
-        // limit the number of concurrent loads
-        await _lockPreloadPhotos.WaitAsync(token);
-
-        try
-        {
-            // start loading photo
-            if (!photo.IsDone)
-            {
-                await photo.LoadAsync(useCache, ReadOptions, progress);
-            }
-        }
-        finally
-        {
-            _lockPreloadPhotos.Release();
-        }
-    }
 
 
-    /// <summary>
-    /// Gets a photo by given step,
-    /// optionally loop back the index if its new value is out of range.
-    /// </summary>
-    public T? GetByStep(int step, bool loopBackNavigation)
-    {
-        // calculate new index
-        var newIndex = CurrentIndex + step;
-        var safeIndex = BHelper.ComputeIndexInRange(newIndex, Count, loopBackNavigation);
 
-        var photo = GetAndCache(safeIndex, false);
+    ///// <summary>
+    ///// Gets a photo at the specified index and initiates caching for surrounding photos.
+    ///// </summary>
+    //public T? GetAndCache(int index, bool cacheCurrentIndex)
+    //{
+    //    var photo = Get(index);
 
-        CurrentIndex = safeIndex;
-        return photo;
-    }
+    //    if (photo is not null)
+    //    {
+    //        _ = StartCachingAsync(index, CurrentIndex, cacheCurrentIndex);
+    //    }
 
-
-    /// <summary>
-    /// Gets a photo at the specified index and initiates caching for surrounding photos.
-    /// </summary>
-    public T? GetAndCache(int index, bool cacheCurrentIndex)
-    {
-        var photo = Get(index);
-
-        if (photo is not null)
-        {
-            _ = StartCachingAsync(index, CurrentIndex, cacheCurrentIndex);
-        }
-
-        return photo;
-    }
+    //    return photo;
+    //}
 
 
     /// <summary>
@@ -354,6 +491,36 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     }
 
 
+
+    /// <summary>
+    /// Loads the photo at the specified index if it has not already been loaded.
+    /// </summary>
+    private async Task LoadAsync(int index, bool useCache = true,
+        IProgress<PhotoLoadingEventArgs>? progress = null,
+        CancellationToken token = default)
+    {
+        var photo = Get(index);
+        if (photo is null) return;
+
+        // use cached data
+        if (useCache && photo.IsDone) return;
+
+        // limit the number of concurrent loads
+        await _lockPreloadPhotos.WaitAsync(token);
+
+        try
+        {
+            // start loading photo
+            if (!photo.IsDone)
+            {
+                await photo.LoadAsync(useCache, ReadOptions, progress);
+            }
+        }
+        finally
+        {
+            _lockPreloadPhotos.Release();
+        }
+    }
 
 
 
