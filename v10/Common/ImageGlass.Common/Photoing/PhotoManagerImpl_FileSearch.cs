@@ -105,7 +105,8 @@ public partial class PhotoManagerImpl<T>
                 // get the first item as the init photo
                 CurrentIndex = 0;
 
-                InitPhoto = GetAndCache(CurrentIndex);
+                //InitPhoto = await GetAndCacheAsync(CurrentIndex, default);
+                InitPhoto = Get(CurrentIndex);
                 InitInputPath = InitPhoto?.FilePath ?? InitInputPath;
             }
         }
@@ -130,8 +131,8 @@ public partial class PhotoManagerImpl<T>
                 _photos[CurrentIndex]?.Dispose();
                 _photos[CurrentIndex] = InitPhoto;
 
-                // start caching the surrounding items
-                _ = GetAndCache(CurrentIndex);
+                //// start caching the surrounding items
+                //_ = GetAndCacheAsync(CurrentIndex, default);
             }
         }
 

@@ -107,9 +107,6 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
         // run background worker
         _cancelWorker = new();
         _ = Task.Run(async () => await RunBackgroundWorker(_cancelWorker.Token), _cancelWorker.Token);
-
-        //var fac = new TaskFactory();
-        //fac.StartNew(async () => await RunBackgroundWorker(_cancelWorker.Token), _cancelWorker.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
     }
 
 
@@ -126,10 +123,6 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
                 var index = _queueList[0];
                 var photo = _photos[index];
                 _queueList.RemoveAt(0);
-
-                Log.Info(
-                    $"Caching photo index={index}, path={photo.FilePath}",
-                    nameof(RunBackgroundWorker), nameof(PhotoManagerImpl<T>));
 
 
                 // if photo is cached
@@ -178,7 +171,10 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
             if (photoIndex == index) continue;
             if (!newQueueList.Contains(photoIndex))
             {
-                Get(photoIndex)?.Unload();
+                var photo = Get(photoIndex);
+                photo?.CancelLoading();
+                photo?.Unload();
+
                 _freeList.Remove(photoIndex);
 
                 unloadedList.Add(photoIndex);
@@ -239,22 +235,23 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// <summary>
     /// Gets a photo at the specified index and initiates caching for surrounding photos.
     /// </summary>
-    private T? GetAndCache(int index)
+    private async Task<T?> GetAndCacheAsync(int index, CancellationToken token)
     {
         var photo = Get(index);
+        if (photo is null) return null;
 
-        // start caching
-        if (photo is not null)
-        {
-            _ = Task.Run(async () =>
-            {
-                // get queue list according to index, don't include current index
-                var newQueueList = await GetQueueListAsync(index, false);
 
-                _queueList.Clear();
-                _queueList.AddRange(newQueueList);
-            });
-        }
+        // get queue list according to index, don't include current index
+        var newQueueList = await GetQueueListAsync(index, false);
+
+        // cancel if requested
+        token.ThrowIfCancellationRequested();
+
+        Log.Error($"newQueueList=[{string.Join(",", newQueueList)}]");
+
+        _queueList.Clear();
+        _queueList.AddRange(newQueueList);
+
 
         return photo;
     }
@@ -264,20 +261,30 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// Gets a photo by given step,
     /// optionally loop back the index if its new value is out of range.
     /// </summary>
-    public T? GetByStep(int step, bool loopBackNavigation)
+    public async Task<T?> GetByStepAsync(int step, bool loopBackNavigation, CancellationToken token)
     {
         // calculate new index
         var newIndex = CurrentIndex + step;
         var safeIndex = BHelper.ComputeIndexInRange(newIndex, Count, loopBackNavigation);
 
-        var photo = GetAndCache(safeIndex);
+        var photo = await GetAndCacheAsync(safeIndex, token);
 
         CurrentIndex = safeIndex;
         return photo;
     }
 
 
+    public T? GetByStep(int step, bool loopBackNavigation)
+    {
+        // calculate new index
+        var newIndex = CurrentIndex + step;
+        var safeIndex = BHelper.ComputeIndexInRange(newIndex, Count, loopBackNavigation);
 
+        var photo = Get(safeIndex);
+
+        CurrentIndex = safeIndex;
+        return photo;
+    }
 
 
 
