@@ -38,114 +38,82 @@ public static partial class PhotoWIC
     /// <summary>
     /// Converts the given WIC bitmap to a 32bpp PBGRA format.
     /// </summary>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static IWICBitmapSource? ConvertToWic32bppPBGRA(IWICBitmapSource? wicBmp)
     {
-        if (wicBmp is null) return null;
+        if (wicBmp.IsDisposed()) return null;
 
-        try
-        {
-            var newBmp = WIC.WICConvertBitmapSource(
-                Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA,
-                wicBmp);
-
-            return newBmp;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
-        }
-
-        return null;
+        return WIC.WICConvertBitmapSource(
+            Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA,
+            wicBmp);
     }
 
 
     /// <summary>
     /// Creates a Direct2D bitmap from the given WIC bitmap.
     /// </summary>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static ID2D1Bitmap1? CreateD2dBitmap(IWICBitmapSource? wicBmp, ID2D1DeviceContext dc)
     {
         if (dc.IsDisposed()) return null;
 
-        try
+
+        using var newBmp = ConvertToWic32bppPBGRA(wicBmp);
+        if (newBmp == null) return null;
+
+        var bmpProps = new BitmapProperties1(new Vortice.DCommon.PixelFormat()
         {
-            using var newBmp = ConvertToWic32bppPBGRA(wicBmp);
-            if (newBmp == null) return null;
+            Format = Vortice.DXGI.Format.B8G8R8A8_UNorm,
+            AlphaMode = Vortice.DCommon.AlphaMode.Premultiplied,
+        });
 
-            var bmpProps = new BitmapProperties1(new Vortice.DCommon.PixelFormat()
-            {
-                Format = Vortice.DXGI.Format.B8G8R8A8_UNorm,
-                AlphaMode = Vortice.DCommon.AlphaMode.Premultiplied,
-            });
-
-            return dc.CreateBitmapFromWicBitmap(newBmp, bmpProps);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
-        }
-
-        return null;
+        return dc.CreateBitmapFromWicBitmap(newBmp, bmpProps);
     }
 
 
     /// <summary>
     /// Creates a new <see cref="ID2D1Bitmap1"/> instance from <see cref="ID2D1Bitmap"/>.
     /// </summary>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static ID2D1Bitmap1? CreateD2dBitmap1(ID2D1Bitmap srcBmp, ID2D1DeviceContext dc)
     {
         if (dc.IsDisposed()) return null;
 
-        try
-        {
-            // Get size and pixel format of the source bitmap
-            var size = srcBmp.Size.ToSizeI();
+        // Get size and pixel format of the source bitmap
+        var size = srcBmp.Size.ToSizeI();
 
-            // Create a compatible ID2D1Bitmap1 with same size and pixel format
-            var bmpProps = new BitmapProperties1(srcBmp.PixelFormat);
-            var bmp1 = dc.CreateBitmap(size, IntPtr.Zero, 0, bmpProps);
+        // Create a compatible ID2D1Bitmap1 with same size and pixel format
+        var bmpProps = new BitmapProperties1(srcBmp.PixelFormat);
+        var bmp1 = dc.CreateBitmap(size, IntPtr.Zero, 0, bmpProps);
 
-            // Copy from source bitmap
-            bmp1.CopyFromBitmap(srcBmp);
+        // Copy from source bitmap
+        bmp1.CopyFromBitmap(srcBmp);
 
-            return bmp1;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
-        }
-
-        return null;
+        return bmp1;
     }
 
 
     /// <summary>
     /// Creates a Direct2D render target from WIC Bitmap for drawing operation.
     /// </summary>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static ID2D1RenderTarget? CreateWicRenderTarget(IWICBitmapSource? wicBmp, RenderTargetProperties? rtProps = null)
     {
         if (wicBmp.IsDisposed()) return null;
 
-        try
-        {
-            using var fac = D2D1.D2D1CreateFactory<ID2D1Factory8>(FactoryType.MultiThreaded);
-            rtProps ??= new RenderTargetProperties(Vortice.DCommon.PixelFormat.Premultiplied);
+        using var fac = D2D1.D2D1CreateFactory<ID2D1Factory8>(FactoryType.MultiThreaded);
+        rtProps ??= new RenderTargetProperties(Vortice.DCommon.PixelFormat.Premultiplied);
 
-            var rt = fac.CreateWicBitmapRenderTarget(wicBmp.As<IWICBitmap>(), rtProps.Value);
+        var rt = fac.CreateWicBitmapRenderTarget(wicBmp.As<IWICBitmap>(), rtProps.Value);
 
-            return rt;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
-        }
-
-        return null;
+        return rt;
     }
 
 
     /// <summary>
     /// Creates a Direct2D device context from WIC Bitmap for drawing operation.
     /// </summary>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static ID2D1DeviceContext7? CreateWicDeviceContext(IWICBitmapSource? wicBmp, RenderTargetProperties? rtProps = null)
     {
         var rt = CreateWicDeviceContext(wicBmp);
@@ -158,6 +126,7 @@ public static partial class PhotoWIC
     /// <summary>
     /// Draws a WIC bitmap using the specified Direct2D device context action.
     /// </summary>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static void DrawWicBitmap(IWICBitmapSource? wicBmp, Action<ID2D1DeviceContext7> fn)
     {
         // create device context
@@ -295,24 +264,16 @@ public static partial class PhotoWIC
     /// <param name="width">Bitmap width</param>
     /// <param name="height">Bitmap height</param>
     /// <param name="pixelFormat">By default, use <c><see cref="Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA"/></c></param>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static IWICBitmapSource? CreateWicBitmapSource(double width, double height, Guid? pixelFormat = null)
     {
         pixelFormat ??= Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA;
 
-        try
-        {
-            using var wicFactory = new IWICImagingFactory2();
-            var wicBmp = wicFactory.CreateBitmap((uint)width, (uint)height,
-                pixelFormat.Value, BitmapCreateCacheOption.CacheOnLoad);
+        using var wicFactory = new IWICImagingFactory2();
+        var wicBmp = wicFactory.CreateBitmap((uint)width, (uint)height,
+            pixelFormat.Value, BitmapCreateCacheOption.CacheOnLoad);
 
-            return wicBmp;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
-        }
-
-        return null;
+        return wicBmp;
     }
 
 
@@ -435,6 +396,7 @@ public static partial class PhotoWIC
     /// <summary>
     /// Saves the input bitmap to a file in the given format.
     /// </summary>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static void SaveAs(IWICBitmapSource? srcBmp, string destFilePath, Size? size = null,
         ContainerFormat format = ContainerFormat.Webp)
     {
@@ -450,6 +412,7 @@ public static partial class PhotoWIC
     /// <summary>
     /// Saves the input bitmap to a file in the given format.
     /// </summary>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static void SaveAs(IWICBitmapSource? srcBmp, Stream destStream, Size? size = null,
         ContainerFormat format = ContainerFormat.Webp)
     {
