@@ -408,6 +408,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
             "Consolas", FontSize_Dpi, DrawingArea, Colors.Magenta);
 
 
+        //// draw SwapChainSize
+        //e.DrawRectangle(e.Sender.Bounds, 0, Colors.Yellow, Colors.Transparent, 3f);
+
+        //// draw DrawingArea
+        //e.DrawRectangle(DrawingArea, 0, Colors.GreenYellow, Colors.Transparent, 3f);
+
         //// draw zoomed point
         //var zoomPoint = DpiScale(_zooming.ZoomedPoint);
         //e.DrawEllipse(zoomPoint.X, zoomPoint.Y, 8f, Colors.White, Colors.Red, 3f);
@@ -415,11 +421,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         //// draw dest rect
         //e.DrawRectangle(_destRect, 0, Colors.Cyan);
 
-        //// draw SwapChainSize
-        //e.DrawRectangle(e.Sender.Bounds, 0, Colors.Yellow, Colors.Transparent, 3f);
-
-        //// draw DrawingArea
-        //e.DrawRectangle(DrawingArea, 0, Colors.GreenYellow, Colors.Transparent, 3f);
 
         base.OnRender(e);
     }
@@ -565,7 +566,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (_photo.IsDone)
         {
             var token = _photo.CancelToken ?? default;
-            _ = HandlePhotoLoadedAsync(new(_photo, token), token);
+            _ = HandlePhotoLoadedAsync(new(_photo, token));
         }
         // photo is not cached
         else
@@ -611,7 +612,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // load full resolution photo
         else
         {
-            await HandlePhotoLoadedAsync(e, e.CancelToken);
+            await HandlePhotoLoadedAsync(e);
         }
     }
 
@@ -709,7 +710,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    private async Task HandlePhotoLoadedAsync(PhotoLoadingEventArgs e, CancellationToken token)
+    private async Task HandlePhotoLoadedAsync(PhotoLoadingEventArgs e)
     {
         // back up size of preview image
         var prevSize = BitmapSize;
@@ -718,7 +719,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         try
         {
             // cancel if requested
-            token.ThrowIfCancellationRequested();
+            e.CancelToken.ThrowIfCancellationRequested();
             ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
 
             Log.Info($"Loading full resolution photo...",
@@ -742,7 +743,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 {
                     _animator = animator;
                     _animator.FrameChanged += Animator_FrameChanged;
-                    _animator.Initialize(D2dContext);
+                    _animator.Initialize(D2dContext, e.CancelToken);
                     _animator.Play();
 
                     hasSource = true;
@@ -771,7 +772,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
             // cancel if requested
-            token.ThrowIfCancellationRequested();
+            e.CancelToken.ThrowIfCancellationRequested();
             ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
 
 

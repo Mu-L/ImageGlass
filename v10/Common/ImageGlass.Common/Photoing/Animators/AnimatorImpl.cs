@@ -39,6 +39,13 @@ public abstract class AnimatorImpl : DisposableImpl
     protected TimeSpan _lastFrameTime = TimeSpan.Zero;
     protected TimeSpan _pauseStartTime = TimeSpan.Zero;
 
+    protected CancellationToken _cancelToken;
+
+
+    /// <summary>
+    /// Gets metadata of this photo.
+    /// </summary>
+    public PhotoMetadata Metadata => _meta;
 
     /// <summary>
     /// Occurs when the image frame is changed.
@@ -64,12 +71,6 @@ public abstract class AnimatorImpl : DisposableImpl
 
 
     /// <summary>
-    /// Begins decoding frames in the background.
-    /// </summary>
-    protected abstract void DecodeFrames();
-
-
-    /// <summary>
     /// Start the animator timer.
     /// </summary>
     protected abstract void StartTimer();
@@ -90,6 +91,15 @@ public abstract class AnimatorImpl : DisposableImpl
 
     // Public methods
     #region Public methods
+
+    /// <summary>
+    /// Initialize the animator instance.
+    /// </summary>
+    public virtual void Initialize(CancellationToken token)
+    {
+        _cancelToken = token;
+    }
+
 
     /// <summary>
     /// Restarts animation.
@@ -113,7 +123,6 @@ public abstract class AnimatorImpl : DisposableImpl
     {
         if (!_isDecoded)
         {
-            DecodeFrames();
             _isDecoded = true;
 
             _stopwatch.Restart();
@@ -166,7 +175,6 @@ public abstract class AnimatorImpl : DisposableImpl
             LoopCount = _loopCount,
         });
     }
-
 
     #endregion // Public methods
 

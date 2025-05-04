@@ -16,14 +16,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageMagick;
 using Microsoft.UI.Xaml.Media;
-using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using Vortice;
 using Vortice.Direct2D1;
 using Vortice.WIC;
@@ -45,7 +43,6 @@ public partial class WicAnimator : AnimatorImpl
     protected ID2D1Bitmap? _backupSurface; // stores composite before the current frame
 
     private Lock _lockDc = new Lock();
-    private CancellationTokenSource? _cancelDecoding = null;
 
 
     /// <summary>
@@ -62,26 +59,21 @@ public partial class WicAnimator : AnimatorImpl
     /// </summary>
     protected override void OnDisposing()
     {
-        base.OnDisposing();
-
         Unload();
-
-        _cancelDecoding?.Dispose();
-        _cancelDecoding = null;
 
         _decoder?.Dispose();
         _decoder = null;
+
+        base.OnDisposing();
     }
 
 
     /// <summary>
     /// Creates the Direct2D resources required for rendering, also disposes the old resources.
     /// </summary>
-    public void Initialize(ID2D1DeviceContext dc)
+    public void Initialize(ID2D1DeviceContext dc, CancellationToken token)
     {
-        // dispose old Direct2D resources
-        Unload();
-
+        Initialize(token);
         _dc = dc;
 
         var size = new Vortice.Mathematics.SizeI((int)_meta.Width, (int)_meta.Height);
@@ -107,10 +99,6 @@ public partial class WicAnimator : AnimatorImpl
     {
         StopTimer();
 
-        _cancelDecoding?.Cancel();
-        _cancelDecoding?.Dispose();
-        _cancelDecoding = null;
-
         _compositeSurface?.Dispose();
         _compositeSurface = null;
 
@@ -120,55 +108,14 @@ public partial class WicAnimator : AnimatorImpl
 
         // dispose frames
         _isDecoded = false;
-        foreach (var frame in _decodedFrames.Values)
+
+        for (int i = 0; i < _decodedFrames.Count; i++)
         {
+            var frame = _decodedFrames.GetValueOrDefault(i);
             frame?.Dispose();
+            frame = null;
         }
         _decodedFrames.Clear();
-    }
-
-
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    protected override void DecodeFrames()
-    {
-        // start decoding frames in background
-        Task.Run(() =>
-        {
-            for (int i = 0; i < _frameCount; i++)
-            {
-                try
-                {
-                    _cancelDecoding?.Token.ThrowIfCancellationRequested();
-
-                    if (!_dc.IsDisposed())
-                    {
-                        lock (_lockDc)
-                        {
-                            if (!_dc.IsDisposed())
-                            {
-                                var frameIndex = i;
-                                _ = DecodeFrame(frameIndex);
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
-                {
-                    Log.Info($"{nameof(DecodeFrames)}: Cancelled decoding frame {_meta.FileName}");
-                    Unload();
-
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex);
-                    break;
-                }
-            }
-        });
     }
 
 
@@ -323,8 +270,6 @@ public partial class WicAnimator : AnimatorImpl
     /// </summary>
     private ID2D1Bitmap1? DecodeFrame(int frameIndex)
     {
-        Log.Info($"{nameof(WicAnimator)}: Decoding frame {frameIndex}");
-
         using var frameBmp = _decoder?.GetFrame((uint)frameIndex);
         if (!_dc.IsDisposed())
         {
