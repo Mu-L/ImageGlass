@@ -71,9 +71,8 @@ public partial class WicAnimator : AnimatorImpl
     /// <summary>
     /// Creates the Direct2D resources required for rendering, also disposes the old resources.
     /// </summary>
-    public void Initialize(ID2D1DeviceContext dc, CancellationToken token)
+    public void Initialize(ID2D1DeviceContext dc)
     {
-        Initialize(token);
         _dc = dc;
 
         var size = new Vortice.Mathematics.SizeI((int)_meta.Width, (int)_meta.Height);

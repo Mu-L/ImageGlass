@@ -39,8 +39,6 @@ public abstract class AnimatorImpl : DisposableImpl
     protected TimeSpan _lastFrameTime = TimeSpan.Zero;
     protected TimeSpan _pauseStartTime = TimeSpan.Zero;
 
-    protected CancellationToken _cancelToken;
-
 
     /// <summary>
     /// Gets metadata of this photo.
@@ -91,14 +89,6 @@ public abstract class AnimatorImpl : DisposableImpl
 
     // Public methods
     #region Public methods
-
-    /// <summary>
-    /// Initialize the animator instance.
-    /// </summary>
-    public virtual void Initialize(CancellationToken token)
-    {
-        _cancelToken = token;
-    }
 
 
     /// <summary>

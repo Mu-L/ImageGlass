@@ -743,7 +743,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 {
                     _animator = animator;
                     _animator.FrameChanged += Animator_FrameChanged;
-                    _animator.Initialize(D2dContext, e.CancelToken);
+                    _animator.Initialize(D2dContext);
                     _animator.Play();
 
                     hasSource = true;
