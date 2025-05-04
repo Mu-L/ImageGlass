@@ -273,7 +273,7 @@ public abstract class AnimatorImpl : DisposableImpl
         var rawDelay = _meta.Frames[frameIndex].AnimationDelay;
 
         // set minimum delay time if frame delay time is too small
-        if (rawDelay <= 2) rawDelay = 10;
+        if (rawDelay < 2) rawDelay = 10;
 
         var delayMs = rawDelay * ticksPerMs;
 
