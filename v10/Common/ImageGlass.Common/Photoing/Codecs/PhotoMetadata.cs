@@ -27,6 +27,9 @@ public class PhotoMetadata : DisposableImpl
     // File metadata
     public string FilePath { get; set; } = string.Empty;
     public string FileName { get; private set; } = string.Empty;
+    /// <summary>
+    /// Getss file extension in uppercase. E.g. <c>.PNG</c>
+    /// </summary>
     public string FileExtension { get; private set; } = string.Empty;
     public string FolderPath { get; private set; } = string.Empty;
     public string FolderName { get; private set; } = string.Empty;

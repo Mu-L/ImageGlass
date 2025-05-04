@@ -16,10 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 using ImageGlass.Common.Photoing;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Vortice.WIC;
@@ -92,11 +90,10 @@ public partial class Photo : PhotoImpl
     /// </summary>
     protected override async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var extWIC = new string[] { ".GIF", ".GIFV", ".WEBP", ".FAX", ".JXR", ".APNG" };
-
+        var wicExts = new string[] { ".GIF", ".GIFV", ".WEBP", ".FAX", ".JXR", ".APNG" };
 
         // use WIC decoders
-        if (meta.ColorSpace != ImageMagick.ColorSpace.CMYK && extWIC.Contains(meta.FileExtension))
+        if (meta.ColorSpace != ImageMagick.ColorSpace.CMYK && meta.IsOneOfExtensions(wicExts))
         {
             await LoadWithWICAsync(meta, token);
         }

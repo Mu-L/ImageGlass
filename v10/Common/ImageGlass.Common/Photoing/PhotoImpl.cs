@@ -23,70 +23,87 @@ using System.Numerics;
 namespace ImageGlass.Common.Photoing;
 
 
-public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
+public abstract class PhotoImpl : DisposableImpl
 {
     protected IDisposable? _bitmap;
+    protected PhotoMetadata? _metadata;
     protected uint _width = 0;
     protected uint _height = 0;
-    protected PhotoMetadata? _metadata;
 
     protected CancellationTokenSource? _cancelPhotoLoading;
 
 
+
+    // Public Propterties
+    #region Public Propterties
+
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets the native bitmap.
     /// </summary>
     public virtual IDisposable? Bitmap => _bitmap;
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets the size of the <c><see cref="Bitmap"/></c>.
     /// </summary>
     public Vector2 Size => new Vector2(_width, _height);
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets the width of the <c><see cref="Bitmap"/></c>.
     /// </summary>
     public virtual uint Width => (uint)Size.X;
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets the height of the <c><see cref="Bitmap"/></c>.
     /// </summary>
     public virtual uint Height => (uint)Size.Y;
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Indicates whether the <see cref="Bitmap"/> is currently loaded.
     /// </summary>
     public virtual bool IsDone { get; set; } = false;
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets file path of the photo.
     /// </summary>
     public virtual string FilePath { get; set; } = string.Empty;
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets file extension in lowercase. E.g: <c>.PNG</c>.
+    /// </summary>
+    public string Extension => Path.GetExtension(FilePath).ToUpperInvariant();
+
+    /// <summary>
+    /// Gets the error details.
     /// </summary>
     public virtual Exception? Error { get; set; } = null;
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets, sets options for reading photo.
     /// </summary>
     public virtual PhotoReadOptions ReadOptions { get; set; } = new();
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets, sets the settings for reading Metadata and photo with <see cref="MagickDecoder"/>.
     /// </summary>
     public MagickReadSettings? ReadSettings { get; set; } = null;
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets image metadata.
     /// </summary>
     public virtual PhotoMetadata Metadata => _metadata!;
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets photo loading cancellation token source.
+    /// </summary>
+    public CancellationToken? CancelToken => _cancelPhotoLoading?.Token;
+
+    /// <summary>
+    /// Gets the hash key of the image.
     /// </summary>
     public string HashKey => BHelper.CreateUniqueFileKey(FilePath, new Vector2(Width, Height));
+
+    #endregion // Public Propterties
+
 
 
 
@@ -99,6 +116,11 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
         ReadOptions = options ?? new();
     }
 
+
+
+
+    // Abstract / Virtual functions
+    #region Abstract / Virtual functions
 
     /// <summary>
     /// <inheritdoc/>
@@ -138,7 +160,36 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
 
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Handles the decoding of image files based on their metadata.
+    /// </summary>
+    protected abstract Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token);
+
+
+    #endregion // Abstract / Virtual functions
+
+
+
+
+    // Public functions
+    #region Public functions
+
+    /// <summary>
+    /// Disposes the <c><see cref="Bitmap"/></c> and resets the relevant info.
+    /// This method keeps the <c><see cref="Metadata"/></c> and neccessary resources.
+    /// </summary>
+    public virtual void Unload()
+    {
+        // reset info
+        IsDone = false;
+        Error = null;
+
+        // unload image
+        OnDisposing(false);
+    }
+
+
+    /// <summary>
+    /// Stops any ongoing photo loading process.
     /// </summary>
     [MemberNotNull(nameof(_cancelPhotoLoading))]
     public virtual void CancelLoading()
@@ -149,7 +200,7 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
 
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Loads <c><see cref="Bitmap"/></c> from file.
     /// </summary>
     public virtual async Task LoadAsync(bool useCache,
         PhotoReadOptions? newOptions = null,
@@ -214,16 +265,7 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
 
 
     /// <summary>
-    /// Not implemented. Throws <see cref="NotImplementedException"/>.
-    /// </summary>
-    protected virtual Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
-    {
-        throw new NotImplementedException();
-    }
-
-
-    /// <summary>
-    /// <inheritdoc/>
+    /// Loads <c><see cref="Metadata"/></c> for the photo.
     /// Returns the cached metadata if it's not null and up-to-date.
     /// </summary>
     public async Task LoadMetadataAsync(PhotoReadOptions? newOptions = null)
@@ -270,19 +312,8 @@ public class PhotoImpl : DisposableImpl, IPhoto<IDisposable>
         }
     }
 
+    #endregion // Public functions
 
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public virtual void Unload()
-    {
-        // reset info
-        IsDone = false;
-        Error = null;
-
-        // unload image
-        OnDisposing(false);
-    }
 
 
 }
