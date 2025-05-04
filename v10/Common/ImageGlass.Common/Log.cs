@@ -85,9 +85,9 @@ public static class Log
     /// <summary>
     /// Logs an error message.
     /// </summary>
-    public static void Error(Exception ex)
+    public static void Error(Exception ex, string header = "", string fnName = "", string className = "")
     {
-        Note(ex.ToString(), header: "⛔⛔⛔");
+        Note($"{header}\n{ex.ToString()}", fnName, className, "⛔⛔⛔");
     }
 
 }

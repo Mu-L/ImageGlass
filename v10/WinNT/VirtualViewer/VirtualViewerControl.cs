@@ -403,6 +403,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             _zoomFactor = {_zooming.Factor}
             _zoomedPoint = {_zooming.ZoomedPoint}
             _isPreviewing = {_isPreviewing}
+            ERROR = {_photo?.Error?.ToString()}
             """,
             "Consolas", FontSize_Dpi, DrawingArea, Colors.Magenta);
 
@@ -543,7 +544,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-
+    /// <summary>
+    /// Sets a photo to render.
+    /// </summary>
     public void SetPhoto(Photo? inputPhoto)
     {
         // unload current photo resources
@@ -561,7 +564,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // photo is cached
         if (_photo.IsDone)
         {
-            //_ = HandlePhotoLoadedAsync(new(_photo, token), token);
+            var token = _photo.CancelToken ?? default;
+            _ = HandlePhotoLoadedAsync(new(_photo, token), token);
         }
         // photo is not cached
         else
@@ -571,8 +575,34 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
+    /// <summary>
+    /// Compares the path of <see cref="_photo"/> and the one being loaded,
+    /// return <c>true</c> or throws exception if they are not same.
+    /// </summary>
+    /// <exception cref="OperationCanceledException"></exception>
+    private static bool ShouldCancelIfPathNotSame(PhotoImpl loadingPhoto, string? loadingPath, bool throwException)
+    {
+        var isSame = loadingPhoto.FilePath.Equals(loadingPath, StringComparison.InvariantCultureIgnoreCase);
+        if (isSame) return false;
+
+        loadingPhoto.CancelLoading();
+        loadingPhoto.Unload();
+
+        if (throwException)
+        {
+            throw new OperationCanceledException("Photo paths are not same!");
+        }
+
+        return true;
+    }
+
+
     private async void Photo_Loading(PhotoLoadingEventArgs e)
     {
+        // if new _photo is started loading
+        if (ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, false)) return;
+
+
         // previewing
         if (!e.IsDone)
         {
@@ -591,21 +621,25 @@ public partial class VirtualViewerControl : SwapChainCanvas
     {
         CancelPreview();
         var token = _cancelPreview.Token;
+        IWICBitmapSource? wicThumb = null;
+
 
         try
         {
             // cancel if requested
             token.ThrowIfCancellationRequested();
+            ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
 
             var previewHeight = Math.Min(DrawingArea.Height, e.Metadata.Height) / DpiY;
 
             // try to get photo preview
-            using var wicThumb = await e.Metadata.GetPreviewAsync(previewHeight, token);
-            _isPreviewing = true;
+            wicThumb = await e.Metadata.GetPreviewAsync(previewHeight, token);
+            _isPreviewing = wicThumb is not null;
 
 
             // cancel if requested
             token.ThrowIfCancellationRequested();
+            ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
 
             if (wicThumb is not null)
             {
@@ -615,17 +649,19 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 SetBitmapSize(prevWidth, prevHeight, true);
 
 
+                // create new native bitmap for previewing
+                lock (_lockPreview)
+                {
+                    _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
+                }
+
                 // cancel if requested
                 token.ThrowIfCancellationRequested();
-
-                _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
-            }
-            else
-            {
-                _isPreviewing = false;
+                ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
             }
         }
-        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+        catch (Exception ex)
+            when (ex is ObjectDisposedException or TaskCanceledException or OperationCanceledException)
         {
             Log.Info($"Cancelled previewing {e.Metadata.FilePath}",
                 nameof(HandlePhotoPreviewAsync), nameof(VirtualViewerControl));
@@ -634,11 +670,18 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         catch (Exception ex)
         {
-            Log.Error(ex);
+            Log.Error(ex,
+                $"Error previewing: {e.Metadata.FilePath}",
+                nameof(HandlePhotoPreviewAsync), nameof(VirtualViewerControl));
 
             _bmpPreview?.Dispose();
             _bmpPreview = null;
             _isPreviewing = false;
+        }
+        finally
+        {
+            wicThumb?.Dispose();
+            wicThumb = null;
         }
 
 
@@ -676,6 +719,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         {
             // cancel if requested
             token.ThrowIfCancellationRequested();
+            ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
 
             Log.Info($"Loading full resolution photo...",
                 nameof(HandlePhotoLoadedAsync), nameof(VirtualViewerControl));
@@ -728,6 +772,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             // cancel if requested
             token.ThrowIfCancellationRequested();
+            ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
+
+
+            if (e.Photo.Error is not null)
+            {
+                throw e.Photo.Error;
+            }
 
 
             // calculate the source viewport to match with the preview
@@ -769,9 +820,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
                     Refresh(true);
                 }
             }
-            else if (e.Photo.Error is not null)
+            else
             {
-                throw e.Photo.Error;
+
             }
         }
         catch (Exception ex) when (ex is OperationCanceledException)

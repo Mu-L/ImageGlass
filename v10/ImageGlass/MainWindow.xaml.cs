@@ -25,7 +25,7 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(WinMainTitleBar);
 
-        AppWindow.Resize(new Windows.Graphics.SizeInt32(1200, 800));
+        AppWindow.Resize(new Windows.Graphics.SizeInt32(2000, 800));
     }
 
     public GridLength TitleBarLeftInset => new(AppWindow.TitleBar.LeftInset);
