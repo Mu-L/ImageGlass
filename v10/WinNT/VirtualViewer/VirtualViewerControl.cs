@@ -426,6 +426,18 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     protected virtual void DrawImageLayer(SwapChainCanvasRenderEventArgs e)
     {
+        // draw preview bitmap
+        if (_bmpPreview is not null)
+        {
+            lock (_lockPreview)
+            {
+                if (_bmpPreview is not null)
+                {
+                    e.DrawBitmap(_bmpPreview, _destRect, _srcRect, (InterpolationMode)CurrentInterpolation);
+                }
+            }
+        }
+
         // draw full resolution bitmap
         if (_bmpSource is not null)
         {
@@ -434,17 +446,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 if (_bmpSource is not null)
                 {
                     e.DrawBitmap(_bmpSource, _destRect, _srcRect, (InterpolationMode)CurrentInterpolation);
-                }
-            }
-        }
-        // draw preview bitmap
-        else if (_bmpPreview is not null)
-        {
-            lock (_lockPreview)
-            {
-                if (_bmpPreview is not null)
-                {
-                    e.DrawBitmap(_bmpPreview, _destRect, _srcRect, (InterpolationMode)CurrentInterpolation);
                 }
             }
         }
@@ -493,7 +494,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (_bitmapSize.Width != value.Width || _bitmapSize.Height != value.Height)
         {
             _bitmapSize = value;
-
 
             if (updateAcceleration)
             {
@@ -604,6 +604,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
             _isPreviewing = true;
 
 
+            // cancel if requested
+            token.ThrowIfCancellationRequested();
+
             if (wicThumb is not null)
             {
                 // get thumbnail size
@@ -615,10 +618,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 // cancel if requested
                 token.ThrowIfCancellationRequested();
 
-                lock (_lockPreview)
-                {
-                    _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
-                }
+                _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
             }
             else
             {
@@ -683,10 +683,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             if (e.Photo.Bitmap is not null)
             {
-                // update bitmap size
-                SetBitmapSize(e.Photo.Size.ToSize(), true);
-
-
                 // native bitmap is a single-frame bitmap
                 if (e.Photo.Bitmap is IWICBitmapSource bmpSrc)
                 {
@@ -723,9 +719,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             // cancel the preview process
             CancelPreview();
-
             _bmpPreview?.Dispose();
             _bmpPreview = null;
+
+            // update bitmap size, MUST BE AFTER cancelling preview
+            SetBitmapSize(e.Photo.Size.ToSize(), true);
+
 
             // cancel if requested
             token.ThrowIfCancellationRequested();
@@ -763,15 +762,16 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
                     _isPreviewing = false;
                     Refresh(!isManualZoom);
-
-                    _bmpPreview?.Dispose();
-                    _bmpPreview = null;
                 }
                 else
                 {
                     _isPreviewing = false;
                     Refresh(true);
                 }
+            }
+            else if (e.Photo.Error is not null)
+            {
+                throw e.Photo.Error;
             }
         }
         catch (Exception ex) when (ex is OperationCanceledException)
