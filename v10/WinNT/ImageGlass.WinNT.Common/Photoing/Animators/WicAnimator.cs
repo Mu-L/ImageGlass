@@ -83,9 +83,9 @@ public partial class WicAnimator : AnimatorImpl
         Unload();
 
         _dc = dc;
-        _compositeSurface = _dc.CreateCompatibleRenderTarget();
 
-        _cancelDecoding = new();
+        var size = new Vortice.Mathematics.SizeI((int)_meta.Width, (int)_meta.Height);
+        _compositeSurface = _dc.CreateCompatibleRenderTarget(size);
     }
 
 
