@@ -22,8 +22,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Vortice.WIC;
-using Windows.Storage;
-using Windows.Storage.FileProperties;
 
 namespace ImageGlass.WinNT.Common.Photoing;
 
@@ -47,11 +45,11 @@ public static class PhotoMetadata_Extensions
 
         // cancel if requested
         token.ThrowIfCancellationRequested();
-        minHeight ??= double.MinValue;
+        var previewHeight = minHeight ?? double.MinValue;
 
 
         // get thumbnail using Magick decoder
-        if (thumbM is not null && thumbM.Height >= minHeight)
+        if (thumbM is not null && thumbM.Height >= previewHeight)
         {
             wicThumb = PhotoWIC.ConvertFromMagick(thumbM);
         }
@@ -59,14 +57,9 @@ public static class PhotoMetadata_Extensions
         // if no embedded thumbnail found or the size is too small
         else
         {
-            var fi = await StorageFile.GetFileFromPathAsync(meta.FilePath).AsTask(token);
-            using var fiThumb = await fi.GetScaledImageAsThumbnailAsync(ThumbnailMode.SingleItem)
-                .AsTask(token);
-
-            var thumbBytes = await fiThumb.ReadBytesAsync().WaitAsync(token);
-            if (thumbBytes is null) return null;
-
-            wicThumb = PhotoWIC.ConvertFromBytes(thumbBytes);
+            wicThumb = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath,
+                (int)previewHeight, (int)previewHeight,
+                ShellThumbnailOptions.ThumbnailOnly | ShellThumbnailOptions.BiggerSizeOk), token);
         }
 
 

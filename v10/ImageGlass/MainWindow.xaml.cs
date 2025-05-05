@@ -50,19 +50,6 @@ public sealed partial class MainWindow : Window
     }
 
 
-    private async void OpenPhotoFromPath(string path)
-    {
-        WinMainTitleBarText.Text = path;
-
-        var photo = await Local.Photos.LoadFolderAsync(path, new FilesSearchOptions()
-        {
-            AllowedExtensions = Const.FileFormats,
-        });
-
-        Viewer.SetPhoto(photo);
-    }
-
-
     private async void BtnOpenFile_Clicked(object sender, RoutedEventArgs e)
     {
         var op = new Windows.Storage.Pickers.FileOpenPicker();
@@ -97,6 +84,19 @@ public sealed partial class MainWindow : Window
     private void BtnViewPrevious_Clicked(object sender, RoutedEventArgs e)
     {
         ViewNext(-1);
+    }
+
+
+    private async void OpenPhotoFromPath(string path)
+    {
+        WinMainTitleBarText.Text = path;
+
+        var photo = await Local.Photos.LoadFolderAsync(path, new FilesSearchOptions()
+        {
+            AllowedExtensions = Const.FileFormats,
+        });
+
+        Viewer.SetPhoto(photo);
     }
 
 
