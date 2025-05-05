@@ -26,23 +26,34 @@ public partial class PhotoManagerImpl<T>
     protected FilesSearcher _fileSearcher = new();
 
 
+    // Public properties
+    #region Public properties
+
     /// <summary>
     /// Gets, sets index of the viewing photo.
     /// </summary>
     public int CurrentIndex { get; set; } = -1;
 
-    /// <summary>
-    /// The current "initial" path (file or dir) we're viewing for rebuilding the photo list.
-    /// </summary>
-    public string InitInputPath { get; set; } = string.Empty;
 
     /// <summary>
-    /// The "initial" photo.
+    /// The initial photo,
+    /// can be the photo from the initial file path or the first photo of the directory.
     /// </summary>
     public T? InitPhoto { get; set; } = null;
 
+    #endregion // Public properties
 
 
+
+
+    /// <summary>
+    /// Frees resources of file searcher.
+    /// </summary>
+    protected void DisposeFileSearcher()
+    {
+        _fileSearcher.FileSearching -= FileSearchProvider_FileSearching;
+        _fileSearcher.Dispose();
+    }
 
 
     /// <summary>
@@ -77,23 +88,17 @@ public partial class PhotoManagerImpl<T>
         // path is a file
         else
         {
-            InitInputPath = path;
             dirPath = Path.GetDirectoryName(path);
+            InitPhoto = CreatePhotoItem(path);
         }
 
 
-        // 3. create initiate photo
-        if (!string.IsNullOrWhiteSpace(InitInputPath))
-        {
-            InitPhoto = CreatePhotoItem(InitInputPath);
-        }
-
-
-        // 4. start new file search
+        // 3. start new file search
         if (!string.IsNullOrWhiteSpace(dirPath))
         {
             _ = _fileSearcher.StartAsync([dirPath], searchOptions);
 
+            // if user selects a folder
             if (InitPhoto is null)
             {
                 // wait for some results
@@ -104,10 +109,7 @@ public partial class PhotoManagerImpl<T>
 
                 // get the first item as the init photo
                 CurrentIndex = 0;
-
-                //InitPhoto = await GetAndCacheAsync(CurrentIndex, default);
                 InitPhoto = Get(CurrentIndex);
-                InitInputPath = InitPhoto?.FilePath ?? InitInputPath;
             }
         }
 
@@ -116,37 +118,34 @@ public partial class PhotoManagerImpl<T>
     }
 
 
+    /// <summary>
+    /// Handles search results.
+    /// </summary>
     private void FileSearchProvider_FileSearching(object? sender, FileSearchingEventArgs e)
     {
         Add(e.Results);
 
-        // find the current index
-        if (CurrentIndex == -1)
+        // if we haven't found current index for the init photo yet
+        if (InitPhoto is not null && CurrentIndex == -1)
         {
-            CurrentIndex = IndexOf(InitInputPath);
+            CurrentIndex = IndexOf(InitPhoto.FilePath);
 
             // save the init photo to the list
             if (CurrentIndex >= 0 && InitPhoto is not null)
             {
                 _photos[CurrentIndex]?.Dispose();
                 _photos[CurrentIndex] = InitPhoto;
-
-                //// start caching the surrounding items
-                //_ = GetAndCacheAsync(CurrentIndex, default);
             }
         }
 
 
-        Log.Info($"{nameof(FileSearchProvider_FileSearching)}: " +
+        Log.Info(
             $"Added {e.Results.Count()} files to the list, " +
-            $"{nameof(CurrentIndex)}={CurrentIndex}/{Count}.");
+            $"{nameof(CurrentIndex)}={CurrentIndex}/{Count - 1}.",
+            nameof(FileSearchProvider_FileSearching), nameof(PhotoManagerImpl<T>));
     }
 
 
-    protected void DisposeFileSearcher()
-    {
-        _fileSearcher.FileSearching -= FileSearchProvider_FileSearching;
-        _fileSearcher.Dispose();
-    }
+
 
 }

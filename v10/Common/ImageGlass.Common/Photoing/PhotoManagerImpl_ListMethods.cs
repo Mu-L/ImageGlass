@@ -126,7 +126,7 @@ public partial class PhotoManagerImpl<T>
     /// <summary>
     /// Find index of the photo with the given file path.
     /// </summary>
-    public int IndexOf(string filePath)
+    public int IndexOf(string? filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath)) return -1;
 
@@ -188,7 +188,6 @@ public partial class PhotoManagerImpl<T>
         // clear init photo
         InitPhoto?.Dispose();
         InitPhoto = null;
-        InitInputPath = string.Empty;
         CurrentIndex = -1;
 
         // clear all list
