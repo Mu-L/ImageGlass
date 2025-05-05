@@ -525,23 +525,14 @@ public partial class VirtualViewerControl : SwapChainCanvas
     {
         CancelPreview();
         _photo?.CancelLoading();
+        _photo?.Unload();
 
         // reset selection
         SetSourceSelection(Rect.Empty, false);
         SetBitmapSize(0, 0, false);
 
-        // dispose animator
-        if (_animator is not null)
-        {
-            _animator.FrameChanged -= Animator_FrameChanged;
-            _animator.Unload();
-            _animator = null;
-        }
-
         // dispose native resources of photo
         DisposeNativePhotoResources();
-
-        _photo?.Unload();
     }
 
 
@@ -553,26 +544,26 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // unload current photo resources
         UnloadPhoto();
 
-        // start loading new photo
-        _photo = inputPhoto;
-
-        if (_photo is null)
+        if (inputPhoto is null)
         {
+            _photo = null;
             Refresh(true);
             return;
         }
 
         // photo is cached
-        if (_photo.IsDone)
+        if (inputPhoto.IsDone)
         {
-            var token = _photo.CancelToken ?? default;
-            _ = HandlePhotoLoadedAsync(new(_photo, token));
+            var token = inputPhoto.CancelToken ?? default;
+            _ = HandlePhotoLoadedAsync(new(inputPhoto, token));
         }
         // photo is not cached
         else
         {
-            _ = _photo.LoadAsync(true, null, _loadingProgress);
+            _ = inputPhoto.LoadAsync(true, null, _loadingProgress);
         }
+
+        _photo = inputPhoto;
     }
 
 
@@ -620,13 +611,18 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     private async Task HandlePhotoPreviewAsync(PhotoLoadingEventArgs e)
     {
-        CancelPreview();
-        var token = _cancelPreview.Token;
+        var token = _cancelPreview?.Token ?? default;
+
         IWICBitmapSource? wicThumb = null;
+        ID2D1Bitmap1? previewBitmap = null;
+        var hasPreview = false;
 
 
         try
         {
+            Log.Info($"Previewing: {e.Metadata.FilePath}",
+                nameof(HandlePhotoPreviewAsync), nameof(VirtualViewerControl));
+
             // cancel if requested
             token.ThrowIfCancellationRequested();
             ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
@@ -635,14 +631,14 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             // try to get photo preview
             wicThumb = await e.Metadata.GetPreviewAsync(previewHeight, token);
-            _isPreviewing = wicThumb is not null;
+            hasPreview = !wicThumb.IsDisposed();
 
 
             // cancel if requested
             token.ThrowIfCancellationRequested();
             ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
 
-            if (wicThumb is not null)
+            if (hasPreview)
             {
                 // get thumbnail size
                 var prevWidth = wicThumb?.Size.Width ?? (int)e.Metadata.Width;
@@ -651,33 +647,35 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
                 // create new native bitmap for previewing
-                lock (_lockPreview)
-                {
-                    _bmpPreview = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
-                }
+                previewBitmap = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
 
                 // cancel if requested
                 token.ThrowIfCancellationRequested();
                 ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
+
+                //set preview source
+                _bmpPreview = previewBitmap;
             }
         }
         catch (Exception ex)
             when (ex is ObjectDisposedException or TaskCanceledException or OperationCanceledException)
         {
-            Log.Info($"Cancelled previewing {e.Metadata.FilePath}",
+            Log.Info($"\t-> Cancelled previewing: {e.Metadata.FilePath}",
                 nameof(HandlePhotoPreviewAsync), nameof(VirtualViewerControl));
 
-            _isPreviewing = false;
+            hasPreview = false;
+            previewBitmap?.Dispose();
+            previewBitmap = null;
         }
         catch (Exception ex)
         {
             Log.Error(ex,
-                $"Error previewing: {e.Metadata.FilePath}",
+                $"\t-> Error previewing: {e.Metadata.FilePath}",
                 nameof(HandlePhotoPreviewAsync), nameof(VirtualViewerControl));
 
-            _bmpPreview?.Dispose();
-            _bmpPreview = null;
-            _isPreviewing = false;
+            hasPreview = false;
+            previewBitmap?.Dispose();
+            previewBitmap = null;
         }
         finally
         {
@@ -687,7 +685,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
         // calculate viewport of preview
-        if (_isPreviewing)
+        _isPreviewing = hasPreview;
+
+        if (hasPreview)
         {
             var desiredSrcZoomFactor = CalculateZoomFactor(ZoomMode, e.Metadata.Width, e.Metadata.Height);
 
@@ -714,51 +714,65 @@ public partial class VirtualViewerControl : SwapChainCanvas
     {
         // back up size of preview image
         var prevSize = BitmapSize;
+
+        // source
+        ID2D1Bitmap1? bitmap = null;
+        WicAnimator? animator = null;
         var hasSource = false;
 
         try
         {
+            Log.Info($"Loading full photo: {e.Metadata.FilePath}",
+                nameof(HandlePhotoLoadedAsync), nameof(VirtualViewerControl));
+
+
             // cancel if requested
             e.CancelToken.ThrowIfCancellationRequested();
             ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
 
-            Log.Info($"Loading full resolution photo...",
-                nameof(HandlePhotoLoadedAsync), nameof(VirtualViewerControl));
 
-
+            // create the native bitmap
             if (e.Photo.Bitmap is not null)
             {
                 // native bitmap is a single-frame bitmap
                 if (e.Photo.Bitmap is IWICBitmapSource bmpSrc)
                 {
                     // create new native bitmap
-                    _bmpSource = await Task
-                      .Run(() => PhotoWIC.CreateD2dBitmap(bmpSrc, D2dContext))
-                      .ConfigureAwait(true);
+                    bitmap = PhotoWIC.CreateD2dBitmap(bmpSrc, D2dContext);
 
-                    hasSource = _bmpSource != null;
-                }
-                // native bitmap is a animated bitmap
-                else if (e.Photo.Bitmap is WicAnimator animator)
-                {
-                    _animator = animator;
-                    _animator.FrameChanged += Animator_FrameChanged;
-                    _animator.Initialize(D2dContext);
-                    _animator.Play();
+                    //bitmap = await Task
+                    //  .Run(() => PhotoWIC.CreateD2dBitmap(bmpSrc, D2dContext), e.CancelToken)
+                    //  .ConfigureAwait(true);
 
-                    hasSource = true;
+                    hasSource = bitmap != null;
                 }
                 // native bitmap is a multi-frame bitmap
                 else if (e.Photo.Bitmap is IWICBitmapDecoder decoder)
                 {
                     using var frame = decoder.GetFrame(0);
 
-                    _bmpSource = await Task
-                      .Run(() => PhotoWIC.CreateD2dBitmap(frame, D2dContext))
+                    bitmap = await Task
+                      .Run(() => PhotoWIC.CreateD2dBitmap(frame, D2dContext), e.CancelToken)
                       .ConfigureAwait(true);
 
-                    hasSource = _bmpSource != null;
+                    hasSource = bitmap != null;
                 }
+                // native bitmap is a animated bitmap
+                else if (e.Photo.Bitmap is WicAnimator wicAnimator)
+                {
+                    animator = wicAnimator;
+                    hasSource = true;
+                }
+            }
+
+
+            // cancel if requested
+            e.CancelToken.ThrowIfCancellationRequested();
+            ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
+
+            if (e.Photo.Error is not null)
+            {
+                throw e.Photo.Error;
             }
 
 
@@ -771,22 +785,23 @@ public partial class VirtualViewerControl : SwapChainCanvas
             SetBitmapSize(e.Photo.Size.ToSize(), true);
 
 
-            // cancel if requested
-            e.CancelToken.ThrowIfCancellationRequested();
-            ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
-
-
-            if (e.Photo.Error is not null)
-            {
-                throw e.Photo.Error;
-            }
-
-
             // calculate the source viewport to match with the preview
             if (hasSource)
             {
-                // apply color effect
+                // set the source
+                _bmpSource = bitmap;
                 _bmpSource = ApplyColorManagementEffect(_bmpSource, e.Photo);
+
+
+                // set animator
+                if (animator is not null)
+                {
+                    _animator = animator;
+                    _animator.FrameChanged -= Animator_FrameChanged;
+                    _animator.FrameChanged += Animator_FrameChanged;
+                    _animator.Initialize(D2dContext);
+                    _animator.Play();
+                }
 
 
                 if (_isPreviewing)
@@ -821,21 +836,31 @@ public partial class VirtualViewerControl : SwapChainCanvas
                     Refresh(true);
                 }
             }
-            else
-            {
-
-            }
         }
-        catch (Exception ex) when (ex is OperationCanceledException)
+        catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException)
         {
-            UnloadPhoto();
+            Log.Info($"\t-> Cancelled loading full photo: {e.Metadata.FilePath}",
+                nameof(HandlePhotoLoadedAsync), nameof(VirtualViewerControl));
+
+            e.Photo.Unload();
+
+            bitmap?.Dispose();
+            bitmap = null;
+
+            animator?.Dispose();
+            animator = null;
         }
         catch (Exception ex)
         {
-            Log.Error(ex);
+            Log.Error(ex,
+                $"Error loading full photo: {e.Metadata.FilePath}",
+                nameof(HandlePhotoLoadedAsync), nameof(VirtualViewerControl));
 
-            _bmpSource?.Dispose();
-            _bmpSource = null;
+            bitmap?.Dispose();
+            bitmap = null;
+
+            animator?.Dispose();
+            animator = null;
         }
 
 

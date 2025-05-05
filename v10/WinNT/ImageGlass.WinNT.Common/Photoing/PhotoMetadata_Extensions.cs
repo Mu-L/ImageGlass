@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using System;
 using System.Threading;
@@ -35,47 +34,39 @@ public static class PhotoMetadata_Extensions
     /// Retrieves an embedded thumbnail from either a RAW format or an EXIF profile if exists.
     /// Tries to use WinRT to get the thumbnail if it not exist or size is too small.
     /// </summary>
-    public static async Task<IWICBitmapSource?> GetPreviewAsync(this PhotoMetadata meta, double? minHeight, CancellationToken token)
+    /// <exception cref="OperationCanceledException"></exception>
+    /// <exception cref="TaskCanceledException"></exception>
+    public static async Task<IWICBitmapSource?> GetPreviewAsync(
+        this PhotoMetadata meta, double? minHeight, CancellationToken token)
     {
-        // try to get photo preview
-        using var thumbM = meta.GetPreview(token);
         IWICBitmapSource? wicThumb = null;
 
-        try
+        // try to get embedded preview
+        using var thumbM = meta.GetEmbeddedPreview(token);
+
+
+        // cancel if requested
+        token.ThrowIfCancellationRequested();
+        minHeight ??= double.MinValue;
+
+
+        // get thumbnail using Magick decoder
+        if (thumbM is not null && thumbM.Height >= minHeight)
         {
-            // cancel if requested
-            token.ThrowIfCancellationRequested();
-            minHeight ??= double.MinValue;
-
-            // get the thumbnail using WinRT
-            // if no embedded thumbnail found or the size is too small
-            if (thumbM is null || thumbM.Height < minHeight)
-            {
-                var fi = await StorageFile.GetFileFromPathAsync(meta.FilePath);
-                using var fiThumb = await fi.GetScaledImageAsThumbnailAsync(ThumbnailMode.SingleItem);
-
-                // cancel if requested
-                token.ThrowIfCancellationRequested();
-
-                var thumbBytes = await fiThumb.ReadBytesAsync();
-                if (thumbBytes is null) return null;
-
-                wicThumb = PhotoWIC.ConvertFromBytes(thumbBytes);
-            }
-            // get thumbnail using Magick decoder
-            else
-            {
-                wicThumb = PhotoWIC.ConvertFromMagick(thumbM);
-            }
+            wicThumb = PhotoWIC.ConvertFromMagick(thumbM);
         }
-        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+        // get the thumbnail using WinRT
+        // if no embedded thumbnail found or the size is too small
+        else
         {
-            Log.Info($"Cancelled retrieving preview for {meta.FilePath}",
-                nameof(GetPreviewAsync), nameof(PhotoMetadata_Extensions));
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
+            var fi = await StorageFile.GetFileFromPathAsync(meta.FilePath).AsTask(token);
+            using var fiThumb = await fi.GetScaledImageAsThumbnailAsync(ThumbnailMode.SingleItem)
+                .AsTask(token);
+
+            var thumbBytes = await fiThumb.ReadBytesAsync().WaitAsync(token);
+            if (thumbBytes is null) return null;
+
+            wicThumb = PhotoWIC.ConvertFromBytes(thumbBytes);
         }
 
 

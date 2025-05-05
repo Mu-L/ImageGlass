@@ -163,62 +163,46 @@ public class PhotoMetadata : DisposableImpl
     /// <summary>
     /// Retrieves an embedded thumbnail from either a RAW format or an EXIF profile if exists.
     /// </summary>
-    public MagickImage? GetPreview(CancellationToken token)
+    /// <exception cref="OperationCanceledException"></exception>
+    /// <exception cref="TaskCanceledException"></exception>
+    public MagickImage? GetEmbeddedPreview(CancellationToken token)
     {
         if (RawThumbnail is null && ExifProfile is null) return null;
 
         MagickImage? thumbM = null;
 
-        try
+        // cancel if requested
+        token.ThrowIfCancellationRequested();
+        Log.Info($"Retrieving preview: {FilePath}",
+            nameof(GetEmbeddedPreview), nameof(PhotoMetadata));
+
+
+        // 1. try get from RAW format
+        if (RawThumbnail is not null)
         {
-            // cancel if requested
-            token.ThrowIfCancellationRequested();
-            Log.Info($"Retrieving embedded preview {FilePath}",
-                nameof(GetPreview), nameof(PhotoMetadata));
+            Log.Info($"\t-> from RAW format...",
+                nameof(GetEmbeddedPreview), nameof(PhotoMetadata));
 
-
-            if (RawThumbnail is not null)
-            {
-                Log.Info($"\t-> from RAW format...",
-                    nameof(GetPreview), nameof(PhotoMetadata));
-
-                thumbM = new MagickImage(RawThumbnail.ToReadOnlySpan());
-            }
-
-
-            // cancel if requested
-            token.ThrowIfCancellationRequested();
-
-            if (thumbM is null && ExifProfile is not null)
-            {
-                Log.Info($"\t-> from EXIF profile...",
-                    nameof(GetPreview), nameof(PhotoMetadata));
-
-                thumbM = (MagickImage?)ExifProfile.CreateThumbnail();
-            }
-
-
-            if (thumbM is not null)
-            {
-                thumbM.Orientation = Orientation;
-                thumbM?.AutoOrient();
-            }
-
-            return thumbM;
-        }
-        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
-        {
-            Log.Info($"Cancelled retrieving preview for {FilePath}",
-                nameof(GetPreview), nameof(PhotoMetadata));
-
-            thumbM?.Dispose();
-            thumbM = null;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
+            thumbM = new MagickImage(RawThumbnail.ToReadOnlySpan());
         }
 
+
+        // 2. try get from EXIF profile
+        if (thumbM is null && ExifProfile is not null)
+        {
+            Log.Info($"\t-> from EXIF profile...",
+                nameof(GetEmbeddedPreview), nameof(PhotoMetadata));
+
+            thumbM = (MagickImage?)ExifProfile.CreateThumbnail();
+        }
+
+
+        // 3. fix orientation
+        if (thumbM is not null)
+        {
+            thumbM.Orientation = Orientation;
+            thumbM?.AutoOrient();
+        }
 
         return thumbM;
     }

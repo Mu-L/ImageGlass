@@ -160,7 +160,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
 
 
         // get thumbnail from the photo
-        thumbnail = await Task.Run(() => photo.Metadata.GetPreview(token), token);
+        thumbnail = await Task.Run(() => photo.Metadata.GetEmbeddedPreview(token), token);
 
 
         if (token.IsCancellationRequested)
