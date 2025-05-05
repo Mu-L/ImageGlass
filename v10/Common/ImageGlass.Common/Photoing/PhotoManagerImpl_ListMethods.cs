@@ -192,8 +192,6 @@ public partial class PhotoManagerImpl<T>
         CurrentIndex = -1;
 
         // clear all list
-        _queueList.Clear();
-        _freeList.Clear();
         _pathDict.Clear();
         DistinctDirs.Clear();
 
@@ -204,7 +202,7 @@ public partial class PhotoManagerImpl<T>
         });
         _photos.Clear();
 
-        Log.Info($"{nameof(Clear)}: Cleared photo list!");
+        Log.Info($"Cleared photo list!", nameof(Clear), nameof(PhotoManagerImpl<T>));
     }
 
 }
