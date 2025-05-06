@@ -89,7 +89,7 @@ public partial class BHelper
     {
         long newIndex;
 
-        if (count < 0)
+        if (count <= 0)
         {
             newIndex = 0;
         }
