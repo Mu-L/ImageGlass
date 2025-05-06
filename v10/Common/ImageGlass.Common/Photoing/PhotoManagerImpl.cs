@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common.FileSystem;
 using ImageMagick;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -26,7 +27,9 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// Class for managing a collection of photos.
 /// </summary>
-public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : PhotoImpl
+public abstract partial class PhotoManagerImpl<T, Fs> : DisposableImpl
+    where T : PhotoImpl
+    where Fs : FileSearcherImpl
 {
     // photo list
     protected readonly List<T> _photos = new();
@@ -90,6 +93,8 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
     /// </summary>
     public PhotoManagerImpl(IEnumerable<string>? list = null)
     {
+        _fileSearcher = CreateFileSearcher();
+
         if (list is not null) Add(list);
     }
 
@@ -213,7 +218,7 @@ public abstract partial class PhotoManagerImpl<T> : DisposableImpl where T : Pho
             if (token.IsCancellationRequested)
             {
                 Log.Info($"Cancelled {nameof(totalCacheSizeInMb)}={totalCacheSizeInMb}",
-                    nameof(ManageThumbnailsDiskCache), nameof(PhotoManagerImpl<T>));
+                    nameof(ManageThumbnailsDiskCache), nameof(PhotoManagerImpl<T, Fs>));
                 break;
             }
 

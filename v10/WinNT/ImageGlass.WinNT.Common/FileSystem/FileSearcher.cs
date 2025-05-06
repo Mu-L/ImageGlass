@@ -16,43 +16,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common.Photoing;
-using ImageGlass.WinNT.Common.FileSystem;
-using System.Collections.Generic;
+using ImageGlass.Common.FileSystem;
 
-namespace ImageGlass.WinNT.Common.Photoing;
+namespace ImageGlass.WinNT.Common.FileSystem;
 
 
-/// <summary>
-/// <inheritdoc/>
-/// </summary>
-public partial class PhotoManager : PhotoManagerImpl<Photo, FileSearcher>
+public partial class FileSearcher : FileSearcherImpl
 {
-
-    public PhotoManager(IEnumerable<string>? list = null) : base(list)
-    {
-        //
-    }
-
-
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    protected override FileSearcher CreateFileSearcher()
-    {
-        return new FileSearcher();
-    }
-
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    protected override Photo CreatePhotoItem(string filePath)
-    {
-        return new Photo(filePath);
-    }
 
 
 }
-

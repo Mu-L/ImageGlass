@@ -20,10 +20,10 @@ using ImageGlass.Common.FileSystem;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class PhotoManagerImpl<T>
+public partial class PhotoManagerImpl<T, Fs>
 {
 
-    protected FileSearcherImpl _fileSearcher = new();
+    protected FileSearcherImpl _fileSearcher;
 
 
     // Public properties
@@ -43,6 +43,18 @@ public partial class PhotoManagerImpl<T>
 
     #endregion // Public properties
 
+
+
+    // Abstract / Virtual functions
+    #region Abstract / Virtual functions
+
+    /// <summary>
+    /// Creates file searcher service.
+    /// </summary>
+    protected abstract Fs CreateFileSearcher();
+
+
+    #endregion // Abstract / Virtual functions
 
 
 
@@ -142,7 +154,7 @@ public partial class PhotoManagerImpl<T>
         Log.Info(
             $"Added {e.Results.Count()} files to the list, " +
             $"{nameof(CurrentIndex)}={CurrentIndex}/{Count - 1}.",
-            nameof(FileSearchProvider_FileSearching), nameof(PhotoManagerImpl<T>));
+            nameof(FileSearchProvider_FileSearching), nameof(PhotoManagerImpl<T, Fs>));
     }
 
 
