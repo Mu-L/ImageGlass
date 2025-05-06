@@ -23,7 +23,7 @@ namespace ImageGlass.Common.Photoing;
 public partial class PhotoManagerImpl<T>
 {
 
-    protected FilesSearcher _fileSearcher = new();
+    protected FileSearcherImpl _fileSearcher = new();
 
 
     // Public properties

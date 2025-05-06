@@ -25,7 +25,7 @@ namespace ImageGlass.Common.FileSystem;
 /// <summary>
 /// Handles file searching, filtering, and sorting based on specified criteria.
 /// </summary>
-public partial class FilesSearcher() : DisposableImpl
+public partial class FileSearcherImpl() : DisposableImpl
 {
     private CancellationTokenSource? _cancelSearching;
     private SemaphoreSlim _lockSearching = new(1, 1);
