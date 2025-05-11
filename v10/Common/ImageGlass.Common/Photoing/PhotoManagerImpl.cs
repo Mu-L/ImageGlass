@@ -27,9 +27,10 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// Class for managing a collection of photos.
 /// </summary>
-public abstract partial class PhotoManagerImpl<T, Fs> : DisposableImpl
+public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImpl
     where T : PhotoImpl
-    where Fs : FileSearcherImpl
+    where Fs : FileSearcherImpl<FsOptions>
+    where FsOptions : FileSearchOptions
 {
     // photo list
     protected readonly List<T> _photos = new();
@@ -218,7 +219,7 @@ public abstract partial class PhotoManagerImpl<T, Fs> : DisposableImpl
             if (token.IsCancellationRequested)
             {
                 Log.Info($"Cancelled {nameof(totalCacheSizeInMb)}={totalCacheSizeInMb}",
-                    nameof(ManageThumbnailsDiskCache), nameof(PhotoManagerImpl<T, Fs>));
+                    nameof(ManageThumbnailsDiskCache), nameof(PhotoManagerImpl<T, Fs, FsOptions>));
                 break;
             }
 

@@ -1,11 +1,115 @@
-﻿using ImageGlass.WinNT.Common.Photoing;
+﻿/*
+ImageGlass Project - Image viewer for Windows
+Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+using D2Phap;
+using ImageGlass.Common;
+using ImageGlass.WinNT.Common.Photoing;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace ImageGlass;
 
 public static class Local
 {
+    private static ExplorerView? _foregroundShell;
+    private static string _foregroundShellPath = "";
+    private static string _inputImagePathFromArgs = "";
 
-    public static PhotoManager Photos { get; set; } = new PhotoManager();
+
+    /// <summary>
+    /// Gets the photo manager.
+    /// </summary>
+    public static PhotoManager Photos { get; set; } = new();
+
+    /// <summary>
+    /// Gets the path of the image file from the arguments.
+    /// </summary>
+    public static string InputImagePathFromArgs => _inputImagePathFromArgs;
+
+    /// <summary>
+    /// Gets the Shell object of foreground window
+    /// </summary>
+    public static ExplorerView? ForegroundShell
+    {
+        get => _foregroundShell;
+        set
+        {
+            _foregroundShell?.Dispose();
+            _foregroundShell = value;
+
+            try
+            {
+                _foregroundShellPath = _foregroundShell?.GetTabViewPath() ?? "";
+                UpdateInputImagePath();
+            }
+            catch
+            {
+                _foregroundShellPath = "";
+                _foregroundShell?.Dispose();
+                _foregroundShell = null;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Check if we can use the foreground shell folder for loading images
+    /// </summary>
+    public static bool CanUseForegroundShell()
+    {
+        // check if we should load images from foreground window
+        var inputImageDirPath = Path.GetDirectoryName(InputImagePathFromArgs) ?? "";
+        var isFromSearchWindow = _foregroundShellPath.StartsWith(EggShell.SEARCH_MS_PROTOCOL, StringComparison.OrdinalIgnoreCase);
+        var isFromSavedSearch = _foregroundShellPath.EndsWith(".search-ms", StringComparison.OrdinalIgnoreCase);
+        var isFromSameDir = inputImageDirPath.Equals(_foregroundShellPath, StringComparison.OrdinalIgnoreCase);
+
+        var useForegroundWindow = ForegroundShell != null
+            && !string.IsNullOrEmpty(InputImagePathFromArgs)
+            && (isFromSearchWindow || isFromSavedSearch || isFromSameDir);
+
+        return useForegroundWindow;
+    }
+
+
+    /// <summary>
+    /// Update input path from arguments
+    /// </summary>
+    public static void UpdateInputImagePath(string? path = null)
+    {
+        var pathToLoad = path ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(pathToLoad) && App.Args.Length >= 2)
+        {
+            // get path from params
+            var cmdPath = App.Args
+                .Skip(1)
+                .FirstOrDefault(i => !i.StartsWith(Const.CONFIG_CMD_PREFIX, StringComparison.Ordinal));
+
+            if (!string.IsNullOrEmpty(cmdPath))
+            {
+                pathToLoad = cmdPath;
+            }
+        }
+
+        _inputImagePathFromArgs = pathToLoad;
+    }
+
 
 
 }

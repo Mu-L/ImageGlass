@@ -20,10 +20,9 @@ using ImageGlass.Common.FileSystem;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class PhotoManagerImpl<T, Fs>
+public partial class PhotoManagerImpl<T, Fs, FsOptions>
 {
-
-    protected FileSearcherImpl _fileSearcher;
+    protected Fs _fileSearcher;
 
 
     // Public properties
@@ -45,16 +44,10 @@ public partial class PhotoManagerImpl<T, Fs>
 
 
 
-    // Abstract / Virtual functions
-    #region Abstract / Virtual functions
-
     /// <summary>
     /// Creates file searcher service.
     /// </summary>
     protected abstract Fs CreateFileSearcher();
-
-
-    #endregion // Abstract / Virtual functions
 
 
 
@@ -72,7 +65,7 @@ public partial class PhotoManagerImpl<T, Fs>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
     /// <param name="path">Full path of file or directory</param>
-    public async Task<T?> LoadFolderAsync(string path, FilesSearchOptions searchOptions)
+    public async Task<T?> LoadFolderAsync(string path, FsOptions searchOptions)
     {
         if (string.IsNullOrEmpty(path)) return null;
 
@@ -108,7 +101,8 @@ public partial class PhotoManagerImpl<T, Fs>
         // 3. start new file search
         if (!string.IsNullOrWhiteSpace(dirPath))
         {
-            _ = _fileSearcher.StartAsync([dirPath], searchOptions);
+            _fileSearcher.StartAsync([dirPath], searchOptions);
+
 
             // if user selects a folder
             if (InitPhoto is null)
@@ -152,9 +146,9 @@ public partial class PhotoManagerImpl<T, Fs>
 
 
         Log.Info(
-            $"Added {e.Results.Count()} files to the list, " +
+            $"Added files to the list, " +
             $"{nameof(CurrentIndex)}={CurrentIndex}/{Count - 1}.",
-            nameof(FileSearchProvider_FileSearching), nameof(PhotoManagerImpl<T, Fs>));
+            nameof(FileSearchProvider_FileSearching), nameof(PhotoManagerImpl<T, Fs, FsOptions>));
     }
 
 

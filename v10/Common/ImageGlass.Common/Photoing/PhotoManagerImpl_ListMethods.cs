@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 namespace ImageGlass.Common.Photoing;
 
-public partial class PhotoManagerImpl<T, Fs>
+public partial class PhotoManagerImpl<T, Fs, FsOptions>
 {
 
     /// <summary>
@@ -201,7 +201,7 @@ public partial class PhotoManagerImpl<T, Fs>
         });
         _photos.Clear();
 
-        Log.Info($"Cleared photo list!", nameof(Clear), nameof(PhotoManagerImpl<T, Fs>));
+        Log.Info($"Cleared photo list!", nameof(Clear), nameof(PhotoManagerImpl<T, Fs, FsOptions>));
     }
 
 }

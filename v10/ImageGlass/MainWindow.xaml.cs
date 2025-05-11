@@ -1,5 +1,5 @@
 ﻿using ImageGlass.Common;
-using ImageGlass.Common.FileSystem;
+using ImageGlass.WinNT.Common.FileSystem;
 using Microsoft.UI.Xaml;
 using System;
 using WinRT.Interop;
@@ -46,7 +46,7 @@ public sealed partial class MainWindow : Window
     {
 
 
-        OpenPhotoFromPath(path);
+        LoadImagesFromCmdArgs();
     }
 
 
@@ -60,7 +60,7 @@ public sealed partial class MainWindow : Window
         if (file == null) return;
 
 
-        OpenPhotoFromPath(file.Path);
+        PrepareLoadPhoto(file.Path, false);
     }
 
 
@@ -73,7 +73,7 @@ public sealed partial class MainWindow : Window
         if (dir == null) return;
 
 
-        OpenPhotoFromPath(dir.Path);
+        PrepareLoadPhoto(dir.Path, false);
     }
 
     private void BtnViewNext_Clicked(object sender, RoutedEventArgs e)
@@ -87,14 +87,61 @@ public sealed partial class MainWindow : Window
     }
 
 
-    private async void OpenPhotoFromPath(string path)
+
+    private void LoadImagesFromCmdArgs()
+    {
+        var pathToLoad = Local.InputImagePathFromArgs;
+
+        //if (string.IsNullOrEmpty(pathToLoad)
+        //    && Config.ShouldOpenLastSeenImage
+        //    && BHelper.CheckPath(Config.LastSeenImagePath) == PathType.File)
+        //{
+        //    pathToLoad = Config.LastSeenImagePath;
+        //}
+
+
+        //if (string.IsNullOrEmpty(pathToLoad))
+        //{
+        //    if (Config.ShowWelcomeImage)
+        //    {
+        //        pathToLoad = App.StartUpDir("default.webp");
+        //    }
+        //    else
+        //    {
+        //        return;
+        //    }
+        //}
+
+
+        // start loading path with the foreground shell
+        PrepareLoadPhoto(pathToLoad, false);
+    }
+
+
+    private async void PrepareLoadPhoto(string path, bool disposeForegroundShell)
     {
         WinMainTitleBarText.Text = path;
 
-        var photo = await Local.Photos.LoadFolderAsync(path, new FilesSearchOptions()
+
+        // dispose the foreground shell if requested
+        if (disposeForegroundShell) Local.ForegroundShell = null;
+
+
+        // check if we should load images from foreground window
+        var useForegroundWindow = Local.CanUseForegroundShell();
+        var foregroundShell = useForegroundWindow
+            ? Local.ForegroundShell
+            : null;
+
+
+        // start loading files
+        var photo = await Local.Photos.LoadFolderAsync(path, new FileShellSearchOptions()
         {
             AllowedExtensions = Const.FileFormats,
+            UseExplorerSortOrder = true, // TODO: from setting
+            ForegroundShell = foregroundShell,
         });
+
 
         Viewer.SetPhoto(photo);
     }

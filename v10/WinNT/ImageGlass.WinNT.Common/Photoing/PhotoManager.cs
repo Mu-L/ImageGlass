@@ -26,7 +26,7 @@ namespace ImageGlass.WinNT.Common.Photoing;
 /// <summary>
 /// <inheritdoc/>
 /// </summary>
-public partial class PhotoManager : PhotoManagerImpl<Photo, FileSearcher>
+public partial class PhotoManager : PhotoManagerImpl<Photo, FileSearcher, FileShellSearchOptions>
 {
 
     public PhotoManager(IEnumerable<string>? list = null) : base(list)
@@ -52,7 +52,6 @@ public partial class PhotoManager : PhotoManagerImpl<Photo, FileSearcher>
     {
         return new Photo(filePath);
     }
-
 
 }
 
