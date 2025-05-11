@@ -16,22 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-namespace ImageGlass.Common.FileSystem;
+using D2Phap;
+using ImageGlass.Common.FileSystem;
 
+namespace ImageGlass.WinNT.Common.FileSystem;
 
-/// <summary>
-/// Event arguments for the <see cref="FileSearcherImpl.FileSearching"/> event.
-/// </summary>
-public class FileSearchingEventArgs(IEnumerable<string> filePaths, bool isSearchEnded) : EventArgs
+public class FileShellSearchOptions : FileSearchOptions
 {
-    /// <summary>
-    /// Gets the file paths that have been enumerated.
-    /// </summary>
-    public IEnumerable<string> Results { get; } = filePaths;
 
-    /// <summary>
-    /// Gets a value indicating whether the search operation has completed.
-    /// </summary>
-    public bool IsSearchEnded => isSearchEnded;
+    public bool UseExplorerSortOrder { get; set; } = false;
+
+    public ExplorerView? ForegroundShell { get; set; } = null;
 
 }

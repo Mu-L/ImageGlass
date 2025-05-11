@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 namespace ImageGlass.Common.FileSystem;
 
-public class FilesSearchOptions
+public class FileSearchOptions
 {
     /// <summary>
     /// Gets or sets the collection of allowed file extensions.
@@ -58,4 +58,5 @@ public class FilesSearchOptions
     /// Indicates whether hidden items should be included. Defaults to <c>false</c>.
     /// </summary>
     public bool IncludeHidden { get; set; } = false;
+
 }
