@@ -19,11 +19,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using D2Phap;
 using ImageGlass.Common.FileSystem;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ImageGlass.WinNT.Common.FileSystem;
 
@@ -32,9 +34,27 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
 {
 
     /// <summary>
+    /// Searches files from the provided directories.
+    /// If <see cref="FileShellSearchOptions.UseExplorerSortOrder"/> is <c>true</c>,
+    /// it follows there steps:
+    /// 
+    /// <list type="number">
+    /// <item>
+    ///   Get files from provided shell view of <see cref="FileShellSearchOptions.ForegroundShell"/>,
+    ///   ignoring the param <c><paramref name="dirs"/></c>.
+    /// </item>
+    /// <item>
+    ///   If not (or error), try to get the shell view
+    ///   from each param <c><paramref name="dirs"/></c> provided, then do step 1.
+    /// </item>
+    /// <item>
+    ///   If not shell view from step 2, use the normal searching process:
+    /// </item>
+    /// </list>
+    /// 
     /// <inheritdoc/>
     /// </summary>
-    public override void StartAsync(IEnumerable<string> dirs, FileShellSearchOptions options)
+    public override async Task SearchAsync(IEnumerable<string> dirs, FileShellSearchOptions options)
     {
         // cancel ongoing search
         CancelSearching();
@@ -57,39 +77,50 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
 
 
         // 2. get files from the given directories
-        foreach (var dirPath in dirs)
+        var fvMap = new ConcurrentDictionary<string, ExplorerFolderView?>();
+
+        if (options.UseExplorerSortOrder)
         {
-            OnSearching(dirPath, options, _cancelSearching.Token);
+            // find and save all shell folder view
+            foreach (var dirPath in dirs)
+            {
+                var fv = GetShellFolderView(dirPath, null).View;
+                _ = fvMap.TryAdd(dirPath, fv);
+            }
         }
 
+
+        // 3. start searching in a separate thread
+        await Task.Run(() =>
+        {
+            foreach (var dirPath in dirs)
+            {
+                var folderShellView = fvMap.GetValueOrDefault(dirPath);
+
+                // with shell
+                if (folderShellView != null)
+                {
+                    FindFiles_WithShell(folderShellView, dirPath, options, _cancelSearching.Token);
+                }
+
+                // without shell
+                else
+                {
+                    FindFiles(dirPath, options, _cancelSearching.Token);
+                }
+            }
+        });
+
+
+        // 4. end searching
         IsSearchEnded = true;
-    }
 
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    protected override void OnSearching(string dirPath, FileShellSearchOptions options, CancellationToken token)
-    {
-        var folderShellView = options.UseExplorerSortOrder
-            ? GetShellFolderView(dirPath, null).View
-            : null;
-
-
-        // with shell
-        if (folderShellView != null)
+        // dipose shell objects
+        foreach (var fv in fvMap)
         {
-            FindFiles_WithShell(folderShellView, dirPath, options, token);
-
-            // dispose shell object
-            folderShellView.Dispose();
+            fv.Value?.Dispose();
         }
-
-        // without shell
-        else
-        {
-            base.OnSearching(dirPath, options, token);
-        }
+        fvMap.Clear();
     }
 
 
@@ -97,12 +128,12 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
     /// Finds files in the given <see cref="ExplorerFolderView"/>.
     /// Use the <see cref="FilesEnumerated"/> event to get results.
     /// </summary>
-    /// <remarks>🔴 NOTE: Must run on UI thread.</remarks>
     private void FindFiles_WithShell(ExplorerFolderView? fv, string? rootDir, FileShellSearchOptions options, CancellationToken token)
     {
         // if no folder view
         if (fv is null)
         {
+            // use .NET
             if (!string.IsNullOrWhiteSpace(rootDir))
             {
                 FindFiles(rootDir, options, token);
@@ -175,7 +206,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
             // find files in sub-folders
             foreach (var dirPath in subDirList)
             {
-                OnSearching(dirPath, options, token);
+                FindFiles(dirPath, options, token);
             }
         }
     }

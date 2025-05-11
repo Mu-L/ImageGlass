@@ -101,7 +101,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // 3. start new file search
         if (!string.IsNullOrWhiteSpace(dirPath))
         {
-            _fileSearcher.StartAsync([dirPath], searchOptions);
+            _ = _fileSearcher.SearchAsync([dirPath], searchOptions);
 
 
             // if user selects a folder

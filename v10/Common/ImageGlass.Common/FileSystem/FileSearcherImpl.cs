@@ -51,15 +51,11 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
 
 
     /// <summary>
-    /// Starts files finding process in 3 steps:
-    /// <list type="number">
-    ///   <item><c><see cref="OnSearching"/></c></item>
-    ///   <item><c><see cref="OnFiltering"/></c></item>
-    ///   <item><c><see cref="OnSorting"/></c></item>
-    /// </list>
+    /// Searches files from the provided directories
+    /// with <see cref="FindFiles(string, TOptions, CancellationToken)"/>.
     /// </summary>
     /// <param name="dirs">List of directories to search for files</param>
-    public virtual void StartAsync(IEnumerable<string> dirs, TOptions options)
+    public virtual async Task SearchAsync(IEnumerable<string> dirs, TOptions options)
     {
         // cancel ongoing search
         CancelSearching();
@@ -67,10 +63,13 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
 
 
         // get files from the given directories
-        foreach (var dirPath in dirs)
+        await Task.Run(() =>
         {
-            OnSearching(dirPath, options, _cancelSearching.Token);
-        }
+            foreach (var dirPath in dirs)
+            {
+                FindFiles(dirPath, options, _cancelSearching.Token);
+            }
+        });
 
         IsSearchEnded = true;
     }
@@ -106,16 +105,6 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
         {
             FileSearching -= (EventHandler<FileSearchingEventArgs>)eventDelegate;
         }
-    }
-
-
-    /// <summary>
-    /// Finds files in the given directory, emits <see cref="FileSearching"/> event.
-    /// </summary>
-    /// <param name="dirPath">The current path of directory to find</param>
-    protected virtual void OnSearching(string dirPath, TOptions options, CancellationToken token)
-    {
-        FindFiles(dirPath, options, token);
     }
 
 
