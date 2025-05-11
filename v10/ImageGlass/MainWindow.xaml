@@ -89,13 +89,12 @@
 
         <!--  Gallery  -->
         <Grid
-            x:Name="Gallery"
             Grid.Row="3"
             Grid.Column="1"
             VerticalAlignment="Bottom"
             Background="#10ff"
             Canvas.ZIndex="98">
-            <winNT:GalleryControl />
+            <winNT:GalleryControl x:Name="Gallery" />
         </Grid>
 
 

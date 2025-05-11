@@ -6,8 +6,21 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.WinNT"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:photoing="using:ImageGlass.WinNT.Common.Photoing"
     SizeChanged="UserControl_SizeChanged"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="GalleryItemTemplate" x:DataType="x:String">
+            <Button Click="GalleryItem_Selected" GotFocus="GalleryItem_Selected">
+                <StackPanel>
+                    <Image Source="null" />
+                    <TextBlock Foreground="{ThemeResource ButtonForeground}" Text="{x:Bind}" />
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+    </UserControl.Resources>
+
 
 
     <ScrollViewer
@@ -18,7 +31,10 @@
         VerticalScrollBarVisibility="Auto"
         VerticalScrollMode="Disabled"
         ViewChanging="GalleryScrollViewer_ViewChanging">
-        <ItemsRepeater x:Name="GalleryItemRepeater" HorizontalAlignment="Center">
+        <ItemsRepeater
+            x:Name="GalleryItemRepeater"
+            HorizontalAlignment="Center"
+            ItemTemplate="{StaticResource GalleryItemTemplate}">
             <ItemsRepeater.Layout>
                 <UniformGridLayout
                     MinColumnSpacing="5"
@@ -27,21 +43,7 @@
                     MinRowSpacing="5"
                     Orientation="Horizontal" />
             </ItemsRepeater.Layout>
-
-            <ItemsRepeater.ItemTemplate>
-                <DataTemplate x:DataType="x:String">
-                    <Button
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        Background="{x:Bind}"
-                        Click="GalleryItem_Selected"
-                        Content="{x:Bind}"
-                        Foreground="{ThemeResource ButtonForeground}"
-                        GotFocus="GalleryItem_Selected" />
-                </DataTemplate>
-            </ItemsRepeater.ItemTemplate>
         </ItemsRepeater>
     </ScrollViewer>
-
 
 </UserControl>

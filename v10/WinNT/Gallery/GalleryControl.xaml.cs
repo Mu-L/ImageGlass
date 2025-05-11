@@ -14,7 +14,6 @@ public sealed partial class GalleryControl : UserControl
     private Thickness ItemMargin = new();
 
 
-
     public GalleryControl()
     {
         InitializeComponent();
@@ -46,10 +45,10 @@ public sealed partial class GalleryControl : UserControl
         }
 
 
-        if (sender is Button btn)
+        if (sender is Button item)
         {
             // Update corresponding rectangle with selected color
-            GalleryScrollViewer.Background = btn.Background;
+            GalleryScrollViewer.Background = item.Background;
         }
     }
 
@@ -81,7 +80,16 @@ public sealed partial class GalleryControl : UserControl
             "DarkKhaki"
         };
 
-        GalleryItemRepeater.ItemsSource = colors;
+    }
+
+
+    public object ItemsSource
+    {
+        get => GalleryItemRepeater.ItemsSource;
+        set
+        {
+            GalleryItemRepeater.ItemsSource = value;
+        }
     }
 
 

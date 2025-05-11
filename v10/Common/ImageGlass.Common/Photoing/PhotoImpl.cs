@@ -68,6 +68,11 @@ public abstract class PhotoImpl : DisposableImpl
     public virtual string FilePath { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets file name of the photo.
+    /// </summary>
+    public string FileName => Path.GetFileName(FilePath);
+
+    /// <summary>
     /// Gets file extension in lowercase. E.g: <c>.PNG</c>.
     /// </summary>
     public string Extension => Path.GetExtension(FilePath).ToUpperInvariant();
