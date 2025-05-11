@@ -3,6 +3,7 @@
     x:Class="ImageGlass.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -88,11 +89,14 @@
 
         <!--  Gallery  -->
         <Grid
+            x:Name="Gallery"
             Grid.Row="3"
-            Height="0"
+            Grid.Column="1"
             VerticalAlignment="Bottom"
             Background="#10ff"
-            Canvas.ZIndex="98" />
+            Canvas.ZIndex="98">
+            <winNT:GalleryControl />
+        </Grid>
 
 
         <!--  Viewer  -->
@@ -105,6 +109,8 @@
                     Loaded="Viewer_Loaded" />
             </Border>
         </Grid>
+
+
 
     </Grid>
 

@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q8-OpenMP-x64" Version="14.6.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.4" />
   </ItemGroup>
 
 </Project>
