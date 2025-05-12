@@ -36,7 +36,7 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     protected readonly List<T> _photos = new();
 
     // store file paths and the index for quick access photo in the list
-    protected readonly ConcurrentDictionary<string, int> _pathDict = new();
+    protected readonly ConcurrentDictionary<string, int> _pathDict = new(StringComparer.OrdinalIgnoreCase);
 
 
     // thumbnail

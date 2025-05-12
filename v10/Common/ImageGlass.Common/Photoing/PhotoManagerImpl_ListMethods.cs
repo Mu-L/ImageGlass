@@ -42,7 +42,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // update path dictionary
         for (int i = addedIndex; i < Count; i++)
         {
-            var key = _photos[i].FilePath.ToLowerInvariant();
+            var key = _photos[i].FilePath;
             _pathDict.AddOrUpdate(key, i, (fIndex, oldValue) => i);
         }
     }
@@ -70,7 +70,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // update path dictionary
         for (int i = addedIndex; i < Count; i++)
         {
-            var key = _photos[i].FilePath.ToLowerInvariant();
+            var key = _photos[i].FilePath;
             _pathDict.AddOrUpdate(key, i, (fIndex, oldValue) => i);
         }
     }
@@ -117,9 +117,8 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         photo.FilePath = filePath;
         photo.Metadata.SetFilePath(filePath);
 
-        var key = filePath.ToLowerInvariant();
-        _pathDict.Remove(key, out _);
-        _pathDict.AddOrUpdate(key, index, (fIndex, oldValue) => index);
+        _pathDict.Remove(filePath, out _);
+        _pathDict.AddOrUpdate(filePath, index, (fIndex, oldValue) => index);
     }
 
 
@@ -130,8 +129,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     {
         if (string.IsNullOrWhiteSpace(filePath)) return -1;
 
-        var key = filePath.ToLowerInvariant();
-        if (_pathDict.TryGetValue(key, out var index))
+        if (_pathDict.TryGetValue(filePath, out var index))
         {
             return index;
         }
@@ -171,8 +169,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         if (photo is null) return;
 
         // remove from mapping
-        var key = photo.FilePath.ToLowerInvariant();
-        _pathDict.Remove(key, out _);
+        _pathDict.Remove(photo.FilePath, out _);
 
         // remove from the collection
         photo.Dispose();
