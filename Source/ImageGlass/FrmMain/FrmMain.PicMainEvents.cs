@@ -100,8 +100,13 @@ public partial class FrmMain
 
 
         // get foreground shell
-        using var shell = new EggShell();
-        Program.ForegroundShell = shell.GetForegroundWindowView();
+        if (Config.ShouldUseExplorerSortOrder)
+        {
+            using var shell = new EggShell();
+            Program.ForegroundShell = shell.GetForegroundWindowView();
+        }
+
+        // save init input path
         Program.UpdateInputImagePath(filePath);
 
 

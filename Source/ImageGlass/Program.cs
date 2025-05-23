@@ -54,7 +54,6 @@ internal static class Program
             try
             {
                 _foregroundShellPath = _foregroundShell?.GetTabViewPath() ?? "";
-                UpdateInputImagePath();
             }
             catch
             {
@@ -132,8 +131,15 @@ internal static class Program
 
 
         // get foreground shell
-        using var shell = new EggShell();
-        ForegroundShell = shell.GetForegroundWindowView();
+        if (Config.ShouldUseExplorerSortOrder)
+        {
+            using var shell = new EggShell();
+            ForegroundShell = shell.GetForegroundWindowView();
+        }
+
+        // save init input path
+        UpdateInputImagePath();
+
 
         // check and run Quick setup
         if (CheckAndRunQuickSetup()) return;
@@ -332,9 +338,14 @@ internal static class Program
 
 
         // get foreground shell
-        using var shell = new EggShell();
-        ForegroundShell = shell.GetForegroundWindowView();
+        if (Config.ShouldUseExplorerSortOrder)
+        {
+            using var shell = new EggShell();
+            ForegroundShell = shell.GetForegroundWindowView();
+        }
 
+        // save init input path
+        UpdateInputImagePath();
 
         // load image file from arg
         Local.FrmMain.LoadImagesFromCmdArgs(args);
