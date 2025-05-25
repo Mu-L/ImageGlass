@@ -35,7 +35,8 @@ public static class PhotoMetadata_Extensions
     /// <exception cref="OperationCanceledException"></exception>
     /// <exception cref="TaskCanceledException"></exception>
     public static async Task<IWICBitmapSource?> GetPreviewAsync(
-        this PhotoMetadata meta, double? minHeight, CancellationToken token)
+        this PhotoMetadata meta, double? minHeight, CancellationToken token,
+        ShellThumbnailOptions thumbnailOptions = ShellThumbnailOptions.ThumbnailOnly | ShellThumbnailOptions.BiggerSizeOk)
     {
         IWICBitmapSource? wicThumb = null;
 
@@ -58,8 +59,7 @@ public static class PhotoMetadata_Extensions
         else
         {
             wicThumb = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath,
-                (int)previewHeight, (int)previewHeight,
-                ShellThumbnailOptions.ThumbnailOnly | ShellThumbnailOptions.BiggerSizeOk), token);
+                (int)previewHeight, (int)previewHeight, thumbnailOptions), token);
         }
 
 
