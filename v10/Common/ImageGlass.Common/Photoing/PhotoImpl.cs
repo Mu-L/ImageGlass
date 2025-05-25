@@ -90,7 +90,7 @@ public abstract class PhotoImpl : DisposableImpl
     /// <summary>
     /// Gets file extension without dot. E.g. <c>"png"</c>.
     /// </summary>
-    public string GalleryFileExt => Extension.Substring(1);
+    public string GalleryFileExt => Extension.Length > 1 ? Extension.Substring(1) : string.Empty;
 
     /// <summary>
     /// Gets the error details.

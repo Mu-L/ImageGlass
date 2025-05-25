@@ -22,7 +22,7 @@
                 VerticalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
                 VerticalContentAlignment="Stretch"
-                Click="GalleryItem_Selected">
+                Click="GalleryItem_Clicked">
                 <Grid VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />

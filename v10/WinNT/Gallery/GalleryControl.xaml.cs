@@ -1,6 +1,7 @@
 ﻿// To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
+using ImageGlass.Common;
 using ImageGlass.WinNT.Common;
 using ImageGlass.WinNT.Common.Photoing;
 using Microsoft.UI.Xaml;
@@ -58,13 +59,16 @@ public sealed partial class GalleryControl : UserControl
 
         // 1. try get from cache if size is big enough
         var cachedThumb = _thumbMap.GetValueOrDefault(photo.FilePath);
-        if (cachedThumb?.PixelHeight >= ItemSize)
+        if (cachedThumb is not null)
         {
             return cachedThumb;
         }
 
 
         // 2. get a fresh thumbnail
+        Log.Info($"Loading thumbnail for index={PhotoManager.IndexOf(filePath)}: {filePath}",
+            nameof(GetThumbnailAsync), nameof(GalleryControl));
+
         await photo.LoadMetadataAsync();
         using var wicBmp = await photo.Metadata.GetPreviewAsync(
             ItemSize, default, ShellThumbnailOptions.BiggerSizeOk);
@@ -119,7 +123,7 @@ public sealed partial class GalleryControl : UserControl
     }
 
 
-    private void GalleryItem_Selected(object sender, RoutedEventArgs e)
+    private void GalleryItem_Clicked(object sender, RoutedEventArgs e)
     {
         if (sender is not FrameworkElement fe) return;
 
