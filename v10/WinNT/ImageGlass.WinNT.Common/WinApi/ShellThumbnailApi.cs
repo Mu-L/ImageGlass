@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -61,6 +62,10 @@ public static class ShellThumbnailApi
             // clone the bitmap and dispose the original handle
             thumbnail = fac.CreateBitmapFromSource(bitmap, BitmapCreateCacheOption.CacheOnDemand);
             bitmap?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Log.Warn(ex.Message, nameof(GetThumbnail), nameof(ShellThumbnailApi));
         }
         finally
         {

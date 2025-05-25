@@ -23,9 +23,11 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Vortice.Direct2D1;
 using Vortice.WIC;
 using Windows.Foundation;
+using Windows.Graphics.Imaging;
 using WinRT;
 
 
@@ -46,6 +48,36 @@ public static partial class PhotoWIC
         return WIC.WICConvertBitmapSource(
             Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA,
             wicBmp);
+    }
+
+
+    /// <summary>
+    /// Converts the given WIC bitmap to Software Bitmap.
+    /// </summary>
+    public static async Task<SoftwareBitmap?> ConvertToSoftwareBitmap(IWICBitmapSource? wicBmp, BitmapTransform? transform = null)
+    {
+        var newBmp = ConvertToWic32bppPBGRA(wicBmp);
+        if (newBmp is null) return null;
+
+        using var ms = new Windows.Storage.Streams.InMemoryRandomAccessStream();
+        using var stream = ms.AsStream();
+
+        // convert to stream
+        SaveAs(wicBmp, stream);
+
+        // create SoftwareBitmap from stream
+        var bmpDecoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(ms)
+            .AsTask().ConfigureAwait(false);
+
+        var softwareBmp = await bmpDecoder.GetSoftwareBitmapAsync(
+            BitmapPixelFormat.Bgra8,
+            BitmapAlphaMode.Premultiplied,
+            transform ?? new(),
+            ExifOrientationMode.RespectExifOrientation,
+            ColorManagementMode.ColorManageToSRgb)
+            .AsTask().ConfigureAwait(false);
+
+        return softwareBmp;
     }
 
 
@@ -398,7 +430,7 @@ public static partial class PhotoWIC
     /// </summary>
     /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static void SaveAs(IWICBitmapSource? srcBmp, string destFilePath, Size? size = null,
-        ContainerFormat format = ContainerFormat.Webp)
+        ContainerFormat format = ContainerFormat.Png)
     {
         if (srcBmp.IsDisposed()) return;
 
@@ -414,7 +446,7 @@ public static partial class PhotoWIC
     /// </summary>
     /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static void SaveAs(IWICBitmapSource? srcBmp, Stream destStream, Size? size = null,
-        ContainerFormat format = ContainerFormat.Webp)
+        ContainerFormat format = ContainerFormat.Png)
     {
         if (srcBmp.IsDisposed()) return;
 
@@ -439,6 +471,7 @@ public static partial class PhotoWIC
         }
 
         encoder.Commit();
+        destStream.Position = 0;
     }
 
 
