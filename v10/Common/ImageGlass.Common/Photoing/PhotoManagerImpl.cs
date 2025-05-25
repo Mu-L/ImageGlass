@@ -49,6 +49,11 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     #region Public Properties
 
     /// <summary>
+    /// Gets the list of photos.
+    /// </summary>
+    public List<T> List => _photos;
+
+    /// <summary>
     /// Gets the number of photos currently in the collection.
     /// </summary>
     public uint Count => (uint)_photos.Count;

@@ -63,19 +63,34 @@ public abstract class PhotoImpl : DisposableImpl
     public virtual bool IsDone { get; set; } = false;
 
     /// <summary>
-    /// Gets file path of the photo.
+    /// Gets file path of the photo. E.g. <c>"C:\Album\My photo.png"</c>.
     /// </summary>
     public virtual string FilePath { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets file name of the photo.
+    /// Gets original file name of the photo. E.g. <c>"My photo.png"</c>.
     /// </summary>
     public string FileName => Path.GetFileName(FilePath);
 
     /// <summary>
-    /// Gets file extension in lowercase. E.g: <c>.PNG</c>.
+    /// Gets original file extension. E.g: <c>".png"</c>.
     /// </summary>
-    public string Extension => Path.GetExtension(FilePath).ToUpperInvariant();
+    public string Extension => Path.GetExtension(FilePath);
+
+    /// <summary>
+    /// Gets original file name without extension. E.g. <c>"My photo"</c>.
+    /// </summary>
+    public string FileTitle => Path.GetFileNameWithoutExtension(FilePath);
+
+    /// <summary>
+    /// Gets the file name without extension and including a trailing dot. E.g. <c>"My photo."</c>.
+    /// </summary>
+    public string GalleryFileTitle => FileTitle + ".";
+
+    /// <summary>
+    /// Gets file extension without dot. E.g. <c>"png"</c>.
+    /// </summary>
+    public string GalleryFileExt => Extension.Substring(1);
 
     /// <summary>
     /// Gets the error details.
