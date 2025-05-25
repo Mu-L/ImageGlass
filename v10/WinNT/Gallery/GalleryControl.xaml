@@ -12,11 +12,24 @@
 
     <UserControl.Resources>
         <DataTemplate x:Key="GalleryItemTemplate" x:DataType="x:String">
-            <Button Click="GalleryItem_Selected" GotFocus="GalleryItem_Selected">
-                <StackPanel>
-                    <Image Source="null" />
-                    <TextBlock Foreground="{ThemeResource ButtonForeground}" Text="{x:Bind}" />
-                </StackPanel>
+            <Button
+                Padding="2,0,2,2.5"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                VerticalContentAlignment="Bottom"
+                Click="GalleryItem_Selected">
+                <Grid VerticalAlignment="Bottom">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Image Grid.Row="0" Source="null" />
+                    <TextBlock
+                        Grid.Row="1"
+                        VerticalAlignment="Bottom"
+                        Foreground="{ThemeResource ButtonForeground}"
+                        Text="{x:Bind}" />
+                </Grid>
             </Button>
         </DataTemplate>
     </UserControl.Resources>
@@ -25,21 +38,21 @@
 
     <ScrollViewer
         x:Name="GalleryScrollViewer"
-        Padding="0,5,0,5"
+        Padding="5"
         HorizontalScrollBarVisibility="Auto"
         HorizontalScrollMode="Enabled"
         VerticalScrollBarVisibility="Auto"
-        VerticalScrollMode="Disabled"
-        ViewChanging="GalleryScrollViewer_ViewChanging">
+        VerticalScrollMode="Disabled">
         <ItemsRepeater
             x:Name="GalleryItemRepeater"
             HorizontalAlignment="Center"
             ItemTemplate="{StaticResource GalleryItemTemplate}">
             <ItemsRepeater.Layout>
                 <UniformGridLayout
+                    ItemsStretch="Uniform"
                     MinColumnSpacing="5"
-                    MinItemHeight="70"
-                    MinItemWidth="70"
+                    MinItemHeight="{x:Bind ItemSize}"
+                    MinItemWidth="{x:Bind ItemSize}"
                     MinRowSpacing="5"
                     Orientation="Horizontal" />
             </ItemsRepeater.Layout>
