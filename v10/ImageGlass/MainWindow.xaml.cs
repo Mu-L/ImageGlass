@@ -147,7 +147,7 @@ public sealed partial class MainWindow : Window
         Viewer.SetPhoto(photo);
         await Task.Delay(200);
 
-        Gallery.ItemsSource = Local.Photos.FilePaths;
+        Gallery.ItemsSource = Local.Photos.List;
     }
 
 

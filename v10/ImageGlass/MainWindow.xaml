@@ -94,7 +94,7 @@
             VerticalAlignment="Bottom"
             Background="#10ff"
             Canvas.ZIndex="98">
-            <winNT:GalleryControl x:Name="Gallery" />
+            <winNT:GalleryControl x:Name="Gallery" PhotoManager="{x:Bind local:Local.Photos}" />
         </Grid>
 
 
