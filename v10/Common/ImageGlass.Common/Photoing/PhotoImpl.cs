@@ -83,6 +83,11 @@ public abstract class PhotoImpl : DisposableImpl
     public string FileTitle => Path.GetFileNameWithoutExtension(FilePath);
 
     /// <summary>
+    /// Gets, sets the index of this photo in the list.
+    /// </summary>
+    public int Index { get; set; } = -1;
+
+    /// <summary>
     /// Gets the file name without extension and including a trailing dot. E.g. <c>"My photo."</c>.
     /// </summary>
     public string GalleryFileTitle => FileTitle + ".";

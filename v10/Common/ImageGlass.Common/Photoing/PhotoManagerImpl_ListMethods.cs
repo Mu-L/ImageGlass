@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
+
 namespace ImageGlass.Common.Photoing;
 
 public partial class PhotoManagerImpl<T, Fs, FsOptions>
@@ -26,25 +28,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// </summary>
     public void Add(string filePath, int index = -1)
     {
-        var addedIndex = index;
-
-        if (index < 0)
-        {
-            addedIndex = (int)Count;
-            _photos.Add(CreatePhotoItem(filePath));
-        }
-        else
-        {
-            _photos.Insert(index, CreatePhotoItem(filePath));
-        }
-
-
-        // update path dictionary
-        for (int i = addedIndex; i < Count; i++)
-        {
-            var key = _photos[i].FilePath;
-            _pathDict.AddOrUpdate(key, i, (fIndex, oldValue) => i);
-        }
+        Add([filePath], index);
     }
 
 
@@ -54,24 +38,26 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     public void Add(IEnumerable<string> filePaths, int index = -1)
     {
         var addedIndex = index;
-        var items = filePaths.Select(i => CreatePhotoItem(i));
 
         if (index < 0)
         {
             addedIndex = (int)Count;
-            _photos.AddRange(items);
+            _paths.AddItems(filePaths);
         }
         else
         {
-            _photos.InsertRange(index, items);
+            _paths.InsertItems(filePaths, index);
         }
 
 
         // update path dictionary
         for (int i = addedIndex; i < Count; i++)
         {
-            var key = _photos[i].FilePath;
-            _pathDict.AddOrUpdate(key, i, (fIndex, oldValue) => i);
+            var path = _paths[i];
+            var photoItem = CreatePhotoItem(path);
+            photoItem.Index = i;
+
+            _photosDict.AddOrUpdate(path, photoItem, (fIndex, oldValue) => photoItem);
         }
     }
 
@@ -82,8 +68,9 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     public T? Get(int index)
     {
         if (index < 0 || index >= Count) return null;
+        var path = _paths[index];
 
-        return _photos[index];
+        return _photosDict.GetValueOrDefault(path);
     }
 
 
@@ -92,8 +79,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// </summary>
     public T? Get(string filePath)
     {
-        var index = IndexOf(filePath);
-        return Get(index);
+        return _photosDict.GetValueOrDefault(filePath);
     }
 
 
@@ -117,8 +103,8 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         photo.FilePath = filePath;
         photo.Metadata.SetFilePath(filePath);
 
-        _pathDict.Remove(filePath, out _);
-        _pathDict.AddOrUpdate(filePath, index, (fIndex, oldValue) => index);
+        _photosDict.Remove(filePath, out _);
+        _photosDict.AddOrUpdate(filePath, photo, (fIndex, oldValue) => photo);
     }
 
 
@@ -129,9 +115,9 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     {
         if (string.IsNullOrWhiteSpace(filePath)) return -1;
 
-        if (_pathDict.TryGetValue(filePath, out var index))
+        if (_photosDict.TryGetValue(filePath, out var photo))
         {
-            return index;
+            return photo.Index;
         }
 
         return -1;
@@ -148,7 +134,6 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
 
         return photo.IsDone;
     }
-
 
 
     /// <summary>
@@ -168,12 +153,35 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         var photo = Get(index);
         if (photo is null) return;
 
-        // remove from mapping
-        _pathDict.Remove(photo.FilePath, out _);
+        Remove(photo.FilePath);
+    }
 
-        // remove from the collection
-        photo.Dispose();
-        _photos.RemoveAt(index);
+
+    /// <summary>
+    /// Removes the photo by the given file path from the collection.
+    /// </summary>
+    public void Remove(string filePath)
+    {
+        // remove from the lists
+        _photosDict.Remove(filePath, out var removedItem);
+        if (removedItem is null) return;
+
+        _paths.RemoveAt(removedItem.Index);
+
+
+        // update index of affected items
+        for (int i = removedItem.Index; i < _paths.Count; i++)
+        {
+            var photoItem = Get(_paths[i]);
+
+            if (photoItem is not null)
+            {
+                _photosDict[photoItem.FilePath].Index = i;
+            }
+        }
+
+        // dispose removed item
+        removedItem.Dispose();
     }
 
 
@@ -187,16 +195,14 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         InitPhoto = null;
         CurrentIndex = -1;
 
-        // clear all list
-        _pathDict.Clear();
-        DistinctDirs.Clear();
-
         // dispose photos in the list
-        Parallel.ForEach(_photos, item =>
+        Parallel.ForEach(_photosDict, item =>
         {
-            item?.Dispose();
+            item.Value?.Dispose();
         });
-        _photos.Clear();
+        _photosDict.Clear();
+        _paths.Clear();
+        DistinctDirs.Clear();
 
         Log.Info($"Cleared photo list!", nameof(Clear), nameof(PhotoManagerImpl<T, Fs, FsOptions>));
     }

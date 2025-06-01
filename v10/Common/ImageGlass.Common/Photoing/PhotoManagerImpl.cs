@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Catel.Collections;
 using ImageGlass.Common.FileSystem;
 using ImageMagick;
 using System.Collections.Concurrent;
@@ -33,10 +34,8 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     where FsOptions : FileSearchOptions
 {
     // photo list
-    protected readonly List<T> _photos = new();
-
-    // store file paths and the index for quick access photo in the list
-    protected readonly ConcurrentDictionary<string, int> _pathDict = new(StringComparer.OrdinalIgnoreCase);
+    protected FastObservableCollection<string> _paths = new();
+    protected readonly ConcurrentDictionary<string, T> _photosDict = new(StringComparer.OrdinalIgnoreCase);
 
 
     // thumbnail
@@ -49,19 +48,14 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     #region Public Properties
 
     /// <summary>
-    /// Gets the list of photos.
-    /// </summary>
-    public List<T> List => _photos;
-
-    /// <summary>
     /// Gets the number of photos currently in the collection.
     /// </summary>
-    public uint Count => (uint)_photos.Count;
+    public uint Count => (uint)_paths.Count;
 
     /// <summary>
     /// Gets a list of file paths associated with the photos.
     /// </summary>
-    public IEnumerable<string> FilePaths => _photos.Select(i => i.FilePath);
+    public FastObservableCollection<string> FilePaths => _paths;
 
     /// <summary>
     /// Gets, sets the distinct directories list.
