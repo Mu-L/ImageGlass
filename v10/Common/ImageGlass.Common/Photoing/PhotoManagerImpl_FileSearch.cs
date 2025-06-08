@@ -23,15 +23,16 @@ namespace ImageGlass.Common.Photoing;
 public partial class PhotoManagerImpl<T, Fs, FsOptions>
 {
     protected Fs _fileSearcher;
+    protected int _currentIndex = -1;
 
 
     // Public properties
     #region Public properties
 
     /// <summary>
-    /// Gets, sets index of the viewing photo.
+    /// Gets index of the viewing photo.
     /// </summary>
-    public int CurrentIndex { get; set; } = -1;
+    public int CurrentIndex => _currentIndex;
 
 
     /// <summary>
@@ -114,7 +115,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
                 }
 
                 // get the first item as the init photo
-                CurrentIndex = 0;
+                Select(0);
                 InitPhoto = Get(CurrentIndex);
             }
         }
@@ -134,7 +135,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // if we haven't found current index for the init photo yet
         if (InitPhoto is not null && CurrentIndex == -1)
         {
-            CurrentIndex = IndexOf(InitPhoto.FilePath);
+            Select(InitPhoto.FilePath);
 
             // save the init photo to the list
             if (CurrentIndex >= 0 && InitPhoto is not null)

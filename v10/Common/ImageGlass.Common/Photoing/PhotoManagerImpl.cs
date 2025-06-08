@@ -34,7 +34,7 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     where FsOptions : FileSearchOptions
 {
     // photo list
-    protected FastObservableCollection<string> _paths = new();
+    protected FastObservableCollection<PhotoPath> _paths = new();
     protected readonly ConcurrentDictionary<string, T> _photosDict = new(StringComparer.OrdinalIgnoreCase);
 
 
@@ -55,7 +55,7 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     /// <summary>
     /// Gets a list of file paths associated with the photos.
     /// </summary>
-    public FastObservableCollection<string> FilePaths => _paths;
+    public FastObservableCollection<PhotoPath> FilePaths => _paths;
 
     /// <summary>
     /// Gets, sets the distinct directories list.
@@ -140,7 +140,7 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
 
         var photo = Get(safeIndex);
 
-        CurrentIndex = safeIndex;
+        Select(safeIndex);
         return photo;
     }
 
