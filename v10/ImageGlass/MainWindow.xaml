@@ -94,7 +94,7 @@
             VerticalAlignment="Bottom"
             Background="#10ff"
             Canvas.ZIndex="98">
-            <winNT:GalleryControl x:Name="Gallery" PhotoManager="{x:Bind local:Local.Photos}" />
+            <winNT:GalleryControl x:Name="Gallery" PhotoManager="{x:Bind local:Local.Photos, Mode=OneWay}" />
         </Grid>
 
 
@@ -103,13 +103,11 @@
             <Border BorderBrush="Red" BorderThickness="0">
                 <winNT:VirtualViewerControl
                     x:Name="Viewer"
-                    EnableDebug="True"
+                    EnableDebug="False"
                     EnableSelection="True"
                     Loaded="Viewer_Loaded" />
             </Border>
         </Grid>
-
-
 
     </Grid>
 

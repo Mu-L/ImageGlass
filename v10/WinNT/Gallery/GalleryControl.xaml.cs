@@ -1,7 +1,9 @@
 ﻿// To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
+using Catel.Collections;
 using ImageGlass.Common;
+using ImageGlass.Common.Photoing;
 using ImageGlass.WinNT.Common;
 using ImageGlass.WinNT.Common.Photoing;
 using Microsoft.UI.Xaml;
@@ -20,34 +22,42 @@ public sealed partial class GalleryControl : UserControl
 {
     private ConcurrentDictionary<string, SoftwareBitmap?> _thumbMap = new(StringComparer.OrdinalIgnoreCase);
 
-    public double ItemSize { get; set; } = 70;
 
-
-    public PhotoManager PhotoManager { get; set; } = new();
-
-
-    public List<Photo> ItemsSource
+    public PhotoManager PhotoManager
     {
-        get => GalleryItemRepeater.ItemsSource as List<Photo> ?? [];
+        get => (PhotoManager)GetValue(PhotoManagerProperty);
         set
         {
-            GalleryItemRepeater.ItemsSource = null;
-            ClearThumbnails();
-
-            GalleryItemRepeater.ItemsSource = value;
+            SetValue(PhotoManagerProperty, (PhotoManager)value);
         }
     }
+    public static readonly DependencyProperty PhotoManagerProperty =
+        DependencyProperty.Register(
+            nameof(PhotoManager),
+            typeof(PhotoManager),
+            typeof(GalleryControl),
+            new PropertyMetadata(new PhotoManager()));
+
+
+    public FastObservableCollection<PhotoPath> FileList
+    {
+        get => (FastObservableCollection<PhotoPath>)GetValue(FileListProperty);
+        set
+        {
+            SetValue(FileListProperty, (FastObservableCollection<PhotoPath>)value);
+        }
+    }
+    public static readonly DependencyProperty FileListProperty =
+        DependencyProperty.Register(
+            nameof(FileList),
+            typeof(FastObservableCollection<PhotoPath>),
+            typeof(GalleryControl),
+            new PropertyMetadata(new FastObservableCollection<PhotoPath>()));
 
 
     public GalleryControl()
     {
         InitializeComponent();
-    }
-
-
-    public void SelectItem()
-    {
-
     }
 
 
@@ -69,9 +79,11 @@ public sealed partial class GalleryControl : UserControl
         Log.Info($"Loading thumbnail for index={PhotoManager.IndexOf(filePath)}: {filePath}",
             nameof(GetThumbnailAsync), nameof(GalleryControl));
 
+        var itemSize = (double)Application.Current.Resources["GalleryThumbnailSize"];
+
         await photo.LoadMetadataAsync();
         using var wicBmp = await photo.Metadata.GetPreviewAsync(
-            ItemSize, default, ShellThumbnailOptions.BiggerSizeOk);
+            itemSize, default, ShellThumbnailOptions.BiggerSizeOk);
 
         // set thumbnail
         var softwareBmp = await SetThumbnailAsync(filePath, wicBmp);
@@ -84,12 +96,12 @@ public sealed partial class GalleryControl : UserControl
     {
         // remove the old thumbnail
         RemoveThumbnail(filePath);
+
         if (wicBmp is null) return null;
 
 
         // load new thumbnail
         var softwareBmp = await PhotoWIC.ConvertToSoftwareBitmap(wicBmp);
-
 
         // save to cache
         _thumbMap.TryAdd(filePath, softwareBmp);
@@ -127,7 +139,7 @@ public sealed partial class GalleryControl : UserControl
     {
         if (sender is not FrameworkElement fe) return;
 
-        // When the clicked item has been received, bring it to the middle of the viewport.
+        // scroll the clicked item into the view
         fe.StartBringIntoView(new BringIntoViewOptions()
         {
             VerticalAlignmentRatio = 0.5,
@@ -162,20 +174,40 @@ public sealed partial class GalleryControl : UserControl
 
     private async void GalleryItemRepeater_ElementPrepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs e)
     {
-        if (e.Element is not Button item) return;
+        if (e.Element is not GalleryButtonItem btnItem) return;
         if (PhotoManager.Get(e.Index) is not Photo photo) return;
 
-        // get the image element
-        if (item.FindName("GalleryItem_Thumbnail") is not Image img) return;
 
-        // get the thumbnail
-        var softwareBmp = await GetThumbnailAsync(photo.FilePath);
-        var softwareBmpSrc = new SoftwareBitmapSource();
-        await softwareBmpSrc.SetBitmapAsync(softwareBmp);
+        // 1. get the image element
+        if (btnItem.FindName("GalleryItem_Thumbnail") is Image imgThumbnail)
+        {
+            // get the thumbnail
+            var softwareBmp = await GetThumbnailAsync(photo.FilePath);
+            var softwareBmpSrc = new SoftwareBitmapSource();
+            await softwareBmpSrc.SetBitmapAsync(softwareBmp);
 
-        // render the thumbnail
-        img.Source = softwareBmpSrc;
+            // render the thumbnail
+            imgThumbnail.Source = softwareBmpSrc;
+        }
+
+
+        // 2. get the File name text block
+        if (btnItem.FindName("GalleryItem_FileName") is TextBlock txtFileName)
+        {
+            txtFileName.Text = photo.GalleryFileTitle;
+        }
+
+
+        // 3. get the File extension text block
+        if (btnItem.FindName("GalleryItem_FileExtension") is TextBlock txtFileExt)
+        {
+            txtFileExt.Text = photo.GalleryFileExt;
+        }
+
     }
 
-
 }
+
+
+
+

@@ -1,8 +1,8 @@
-﻿using ImageGlass.Common;
+﻿
+using ImageGlass.Common;
 using ImageGlass.WinNT.Common.FileSystem;
 using Microsoft.UI.Xaml;
 using System;
-using System.Threading.Tasks;
 using WinRT.Interop;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -144,10 +144,11 @@ public sealed partial class MainWindow : Window
         });
 
 
-        Viewer.SetPhoto(photo);
-        await Task.Delay(200);
 
-        Gallery.ItemsSource = Local.Photos.List;
+        Viewer.SetPhoto(photo);
+
+        Gallery.ClearThumbnails();
+        Gallery.FileList = Local.Photos.FilePaths;
     }
 
 

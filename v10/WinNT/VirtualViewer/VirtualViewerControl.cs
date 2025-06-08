@@ -392,7 +392,11 @@ public partial class VirtualViewerControl : SwapChainCanvas
         OnSelectionDrawing(e);
 
 
+        base.OnRender(e);
+
+
         // debug
+        if (!EnableDebug) return;
         e.DrawText(
             $"""
             Control Size = {ActualWidth} x {ActualHeight}
@@ -420,9 +424,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         //// draw dest rect
         //e.DrawRectangle(_destRect, 0, Colors.Cyan);
-
-
-        base.OnRender(e);
     }
 
 
