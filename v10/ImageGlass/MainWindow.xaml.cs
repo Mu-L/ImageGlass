@@ -45,8 +45,6 @@ public sealed partial class MainWindow : Window
 
     private void Viewer_Loaded(object sender, RoutedEventArgs e)
     {
-
-
         LoadImagesFromCmdArgs();
     }
 
@@ -85,6 +83,15 @@ public sealed partial class MainWindow : Window
     private void BtnViewPrevious_Clicked(object sender, RoutedEventArgs e)
     {
         ViewNext(-1);
+    }
+
+    private void Gallery_ItemClicked(WinNT.GalleryButtonItem sender, EventArgs args)
+    {
+        var photo = Local.Photos.Get(sender.FilePath);
+        if (photo is null) return;
+
+        var step = photo.Index - Local.Photos.CurrentIndex;
+        ViewNext(step);
     }
 
 
@@ -159,5 +166,6 @@ public sealed partial class MainWindow : Window
         WinMainTitleBarText.Text = photo?.FilePath;
         Viewer.SetPhoto(photo);
     }
+
 
 }

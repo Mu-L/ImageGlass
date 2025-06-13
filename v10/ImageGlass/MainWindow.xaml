@@ -94,7 +94,10 @@
             VerticalAlignment="Bottom"
             Background="#10ff"
             Canvas.ZIndex="98">
-            <winNT:GalleryControl x:Name="Gallery" PhotoManager="{x:Bind local:Local.Photos, Mode=OneWay}" />
+            <winNT:GalleryControl
+                x:Name="Gallery"
+                ItemClicked="Gallery_ItemClicked"
+                PhotoManager="{x:Bind local:Local.Photos, Mode=OneWay}" />
         </Grid>
 
 

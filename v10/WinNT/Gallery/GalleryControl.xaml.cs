@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vortice.WIC;
+using Windows.Foundation;
 using Windows.Graphics.Imaging;
 
 namespace ImageGlass.WinNT;
@@ -21,6 +22,8 @@ namespace ImageGlass.WinNT;
 public sealed partial class GalleryControl : UserControl
 {
     private ConcurrentDictionary<string, SoftwareBitmap?> _thumbMap = new(StringComparer.OrdinalIgnoreCase);
+
+    public event TypedEventHandler<GalleryButtonItem, EventArgs>? ItemClicked;
 
 
     public PhotoManager PhotoManager
@@ -137,15 +140,18 @@ public sealed partial class GalleryControl : UserControl
 
     private void GalleryItem_Clicked(object sender, RoutedEventArgs e)
     {
-        if (sender is not FrameworkElement fe) return;
+        if (sender is not GalleryButtonItem btnItem) return;
 
         // scroll the clicked item into the view
-        fe.StartBringIntoView(new BringIntoViewOptions()
+        btnItem.StartBringIntoView(new BringIntoViewOptions()
         {
             VerticalAlignmentRatio = 0.5,
             HorizontalAlignmentRatio = 0.5,
             AnimationDesired = true,
         });
+
+
+        ItemClicked?.Invoke(btnItem, EventArgs.Empty);
     }
 
 
