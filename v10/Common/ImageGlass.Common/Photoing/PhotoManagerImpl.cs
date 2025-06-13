@@ -138,9 +138,8 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
         var newIndex = CurrentIndex + step;
         var safeIndex = BHelper.ComputeIndexInRange(newIndex, Count, loopBackNavigation);
 
-        var photo = Get(safeIndex);
+        var photo = Select(safeIndex);
 
-        Select(safeIndex);
         return photo;
     }
 

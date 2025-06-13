@@ -87,31 +87,33 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// <summary>
     /// Selects the specified file by its path, updating the current selection.
     /// </summary>
-    public void Select(string filePath)
+    public T? Select(string filePath)
     {
         var newSelectionIndex = IndexOf(filePath);
 
-        Select(newSelectionIndex);
+        return Select(newSelectionIndex);
     }
 
 
     /// <summary>
     /// Selects an item at the specified index, updating the current selection.
     /// </summary>
-    public void Select(int index)
+    public T? Select(int index)
     {
         // deselect old index
-        if (0 < CurrentIndex && CurrentIndex < _paths.Count)
+        if (0 <= CurrentIndex && CurrentIndex < _paths.Count)
         {
             _paths[CurrentIndex].IsSelected = false;
         }
 
         // validate new index
-        if (index < 0 || index >= _paths.Count) return;
+        if (index < 0 || index >= _paths.Count) return null;
 
         // select new index
         _paths[index].IsSelected = true;
         _currentIndex = index;
+
+        return Get(index);
     }
 
 

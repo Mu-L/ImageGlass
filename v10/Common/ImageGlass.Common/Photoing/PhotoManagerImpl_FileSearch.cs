@@ -115,8 +115,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
                 }
 
                 // get the first item as the init photo
-                Select(0);
-                InitPhoto = Get(CurrentIndex);
+                InitPhoto = Select(0);
             }
         }
 
@@ -135,7 +134,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // if we haven't found current index for the init photo yet
         if (InitPhoto is not null && CurrentIndex == -1)
         {
-            Select(InitPhoto.FilePath);
+            _ = Select(InitPhoto.FilePath);
 
             // save the init photo to the list
             if (CurrentIndex >= 0)
