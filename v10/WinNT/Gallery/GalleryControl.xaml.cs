@@ -26,6 +26,11 @@ public sealed partial class GalleryControl : UserControl
     public event TypedEventHandler<GalleryButtonItem, EventArgs>? ItemClicked;
 
 
+    public static double GalleryThumbnailSize => (double)Application.Current.Resources["GalleryThumbnailSize"];
+
+    public static double ItemSpacing => 1;
+
+
     public PhotoManager PhotoManager
     {
         get => (PhotoManager)GetValue(PhotoManagerProperty);
@@ -82,11 +87,10 @@ public sealed partial class GalleryControl : UserControl
         Log.Info($"Loading thumbnail for index={PhotoManager.IndexOf(filePath)}: {filePath}",
             nameof(GetThumbnailAsync), nameof(GalleryControl));
 
-        var itemSize = (double)Application.Current.Resources["GalleryThumbnailSize"];
 
         await photo.LoadMetadataAsync();
         using var wicBmp = await photo.Metadata.GetPreviewAsync(
-            itemSize, default, ShellThumbnailOptions.BiggerSizeOk);
+            GalleryThumbnailSize, default, ShellThumbnailOptions.BiggerSizeOk);
 
         // set thumbnail
         var softwareBmp = await SetThumbnailAsync(filePath, wicBmp);
@@ -129,6 +133,21 @@ public sealed partial class GalleryControl : UserControl
         }
 
         _thumbMap.Clear();
+    }
+
+
+    public void SelectItem(string filePath, bool disableAnimation = true)
+    {
+        var photo = PhotoManager.Select(filePath);
+        if (photo is null) return;
+
+        var itemsCount = photo.Index + 1;
+        var itemCenterX = (GalleryThumbnailSize * itemsCount)
+            + (ItemSpacing * itemsCount)
+            - (GalleryScrollViewer.ViewportWidth / 2)
+            - (GalleryThumbnailSize / 2);
+
+        GalleryScrollViewer.ChangeView(itemCenterX, null, null, disableAnimation);
     }
 
 

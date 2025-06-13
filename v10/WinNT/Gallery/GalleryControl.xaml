@@ -144,10 +144,10 @@
             <ItemsRepeater.Layout>
                 <UniformGridLayout
                     ItemsStretch="Uniform"
-                    MinColumnSpacing="1"
+                    MinColumnSpacing="{x:Bind local:GalleryControl.ItemSpacing}"
                     MinItemHeight="{StaticResource GalleryThumbnailSize}"
                     MinItemWidth="{StaticResource GalleryThumbnailSize}"
-                    MinRowSpacing="1"
+                    MinRowSpacing="{x:Bind local:GalleryControl.ItemSpacing}"
                     Orientation="Horizontal" />
             </ItemsRepeater.Layout>
         </ItemsRepeater>

@@ -165,6 +165,11 @@ public sealed partial class MainWindow : Window
 
         WinMainTitleBarText.Text = photo?.FilePath;
         Viewer.SetPhoto(photo);
+
+        if (photo != null)
+        {
+            Gallery.SelectItem(photo.FilePath);
+        }
     }
 
 
