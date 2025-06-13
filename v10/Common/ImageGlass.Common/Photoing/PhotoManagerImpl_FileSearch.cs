@@ -138,8 +138,10 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
             Select(InitPhoto.FilePath);
 
             // save the init photo to the list
-            if (CurrentIndex >= 0 && InitPhoto is not null)
+            if (CurrentIndex >= 0)
             {
+                InitPhoto.Index = CurrentIndex;
+
                 _photosDict[InitPhoto.FilePath]?.Dispose();
                 _photosDict[InitPhoto.FilePath] = InitPhoto;
             }
