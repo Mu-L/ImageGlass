@@ -215,20 +215,6 @@ public sealed partial class GalleryControl : UserControl
             imgThumbnail.Source = softwareBmpSrc;
         }
 
-
-        // 2. get the File name text block
-        if (btnItem.FindName("GalleryItem_FileName") is TextBlock txtFileName)
-        {
-            txtFileName.Text = photo.GalleryFileTitle;
-        }
-
-
-        // 3. get the File extension text block
-        if (btnItem.FindName("GalleryItem_FileExtension") is TextBlock txtFileExt)
-        {
-            txtFileExt.Text = photo.GalleryFileExt;
-        }
-
     }
 
 }

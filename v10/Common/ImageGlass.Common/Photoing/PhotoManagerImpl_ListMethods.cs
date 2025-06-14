@@ -55,10 +55,10 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         for (int i = addedIndex; i < Count; i++)
         {
             var item = _paths[i];
-            var photoItem = CreatePhotoItem(item.Path);
+            var photoItem = CreatePhotoItem(item.FilePath);
             photoItem.Index = i;
 
-            _photosDict.AddOrUpdate(item.Path, photoItem, (fIndex, oldValue) => photoItem);
+            _photosDict.AddOrUpdate(item.FilePath, photoItem, (fIndex, oldValue) => photoItem);
         }
     }
 
@@ -71,7 +71,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         if (index < 0 || index >= Count) return null;
         var item = _paths[index];
 
-        return _photosDict.GetValueOrDefault(item.Path);
+        return _photosDict.GetValueOrDefault(item.FilePath);
     }
 
 
@@ -229,7 +229,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // update index of affected items
         for (int i = removedItem.Index; i < _paths.Count; i++)
         {
-            var photoItem = Get(_paths[i].Path);
+            var photoItem = Get(_paths[i].FilePath);
 
             if (photoItem is not null)
             {

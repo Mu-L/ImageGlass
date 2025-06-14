@@ -30,19 +30,6 @@ public class PhotoPath(string path) : INotifyPropertyChanged
     private bool _isSelected = false;
 
 
-    /// <summary>
-    /// Gets, set the path of photo
-    /// </summary>
-    public string Path
-    {
-        get => _path;
-        set
-        {
-            _path = value;
-            OnPropertyChanged(nameof(Path));
-        }
-    }
-
 
     /// <summary>
     /// Gets, sets value indicating if the photo is selected.
@@ -59,6 +46,51 @@ public class PhotoPath(string path) : INotifyPropertyChanged
             }
         }
     }
+
+
+    /// <summary>
+    /// Gets, set the path of photo
+    /// </summary>
+    public string FilePath
+    {
+        get => _path;
+        set
+        {
+            _path = value;
+            OnPropertyChanged(nameof(FilePath));
+
+            OnPropertyChanged(nameof(Extension));
+            OnPropertyChanged(nameof(FileTitle));
+            OnPropertyChanged(nameof(GalleryFileTitle));
+            OnPropertyChanged(nameof(GalleryFileExtension));
+        }
+    }
+
+
+    /// <summary>
+    /// Gets original file extension. E.g: <c>".png"</c>.
+    /// </summary>
+    public string Extension => Path.GetExtension(FilePath);
+
+
+    /// <summary>
+    /// Gets original file name without extension. E.g. <c>"My photo"</c>.
+    /// </summary>
+    public string FileTitle => Path.GetFileNameWithoutExtension(FilePath);
+
+
+    /// <summary>
+    /// Gets the file name without extension and including a trailing dot. E.g. <c>"My photo."</c>.
+    /// </summary>
+    public string GalleryFileTitle => FileTitle + ".";
+
+
+    /// <summary>
+    /// Gets file extension without dot. E.g. <c>"png"</c>.
+    /// </summary>
+    public string GalleryFileExtension => Extension.Length > 1 ? Extension.Substring(1) : string.Empty;
+
+
 
 
 

@@ -83,7 +83,7 @@
                 BorderBrush="{x:Bind IsSelected, Converter={StaticResource SelectionToBorderConverter}}"
                 BorderThickness="1.25"
                 Click="GalleryItem_Clicked"
-                FilePath="{x:Bind Path}"
+                FilePath="{x:Bind FilePath}"
                 IsSelected="{x:Bind IsSelected}"
                 Style="{StaticResource GalleryButtonItemStyle}">
 
@@ -113,12 +113,14 @@
                         <TextBlock
                             Name="GalleryItem_FileName"
                             Grid.Column="0"
+                            Text="{x:Bind GalleryFileTitle}"
                             TextTrimming="CharacterEllipsis" />
 
                         <TextBlock
                             Name="GalleryItem_FileExtension"
                             Grid.Column="1"
                             HorizontalAlignment="Right"
+                            Text="{x:Bind GalleryFileExtension}"
                             Visibility="Visible" />
                     </Grid>
                 </Grid>
