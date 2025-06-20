@@ -161,14 +161,18 @@ public sealed partial class GalleryControl : UserControl
     {
         if (sender is not GalleryButtonItem btnItem) return;
 
-        // scroll the clicked item into the view
-        btnItem.StartBringIntoView(new BringIntoViewOptions()
-        {
-            VerticalAlignmentRatio = 0.5,
-            HorizontalAlignmentRatio = 0.5,
-            AnimationDesired = true,
-        });
 
+        // scroll the clicked item into the view
+        if (GalleryScrollViewer.ComputedHorizontalScrollBarVisibility == Visibility.Visible
+            || GalleryScrollViewer.ComputedVerticalScrollBarVisibility == Visibility.Visible)
+        {
+            btnItem.StartBringIntoView(new BringIntoViewOptions()
+            {
+                VerticalAlignmentRatio = 0.5,
+                HorizontalAlignmentRatio = 0.5,
+                AnimationDesired = true,
+            });
+        }
 
         ItemClicked?.Invoke(btnItem, EventArgs.Empty);
     }

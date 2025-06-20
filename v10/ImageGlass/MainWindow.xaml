@@ -13,7 +13,7 @@
     mc:Ignorable="d">
 
     <Window.SystemBackdrop>
-        <DesktopAcrylicBackdrop />
+        <MicaBackdrop Kind="Base" />
     </Window.SystemBackdrop>
 
 
@@ -31,7 +31,6 @@
             Grid.Row="0"
             Height="{x:Bind TitleBarHeight.Value}"
             Padding="{x:Bind TitleBarMargin}"
-            Background="#10ff"
             Canvas.ZIndex="100">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -60,7 +59,6 @@
         <Grid
             Grid.Row="1"
             VerticalAlignment="Top"
-            Background="#1ff0"
             Canvas.ZIndex="99">
 
             <StackPanel
@@ -92,7 +90,6 @@
             Grid.Row="3"
             Grid.Column="1"
             VerticalAlignment="Bottom"
-            Background="#10ff"
             Canvas.ZIndex="98">
             <winNT:GalleryControl
                 x:Name="Gallery"
@@ -106,8 +103,9 @@
             <Border BorderBrush="Red" BorderThickness="0">
                 <winNT:VirtualViewerControl
                     x:Name="Viewer"
+                    BackgroundColor="#22000000"
                     EnableDebug="False"
-                    EnableSelection="True"
+                    EnableSelection="False"
                     Loaded="Viewer_Loaded" />
             </Border>
         </Grid>
