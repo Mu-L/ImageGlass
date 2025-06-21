@@ -38,27 +38,24 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     public void Add(IEnumerable<string> filePaths, int index = -1)
     {
         var addedIndex = index;
-        var fileItems = filePaths.Select(path => new PhotoPath(path));
+        var newItems = filePaths.Select(path => CreatePhotoItem(path));
 
         if (index < 0)
         {
             addedIndex = (int)Count;
-            _paths.AddItems(fileItems);
+            _items.AddItems(newItems);
         }
         else
         {
-            _paths.InsertItems(fileItems, index);
+            _items.InsertItems(newItems, index);
         }
 
 
         // update path dictionary
         for (int i = addedIndex; i < Count; i++)
         {
-            var item = _paths[i];
-            var photoItem = CreatePhotoItem(item.FilePath);
-            photoItem.Index = i;
-
-            _photosDict.AddOrUpdate(item.FilePath, photoItem, (fIndex, oldValue) => photoItem);
+            var item = _items[i];
+            _dict.AddOrUpdate(item.FilePath, i, (fIndex, oldValue) => i);
         }
     }
 
@@ -69,9 +66,9 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     public T? Get(int index)
     {
         if (index < 0 || index >= Count) return null;
-        var item = _paths[index];
+        var item = _items[index];
 
-        return _photosDict.GetValueOrDefault(item.FilePath);
+        return item;
     }
 
 
@@ -80,7 +77,8 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// </summary>
     public T? Get(string filePath)
     {
-        return _photosDict.GetValueOrDefault(filePath);
+        var index = _dict.GetValueOrDefault(filePath, -1);
+        return Get(index);
     }
 
 
@@ -101,16 +99,16 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     public T? Select(int index)
     {
         // deselect old index
-        if (0 <= CurrentIndex && CurrentIndex < _paths.Count)
+        if (0 <= CurrentIndex && CurrentIndex < Count)
         {
-            _paths[CurrentIndex].IsSelected = false;
+            _items[CurrentIndex].IsSelected = false;
         }
 
         // validate new index
-        if (index < 0 || index >= _paths.Count) return null;
+        if (index < 0 || index >= Count) return null;
 
         // select new index
-        _paths[index].IsSelected = true;
+        _items[index].IsSelected = true;
         _currentIndex = index;
 
         return Get(index);
@@ -133,10 +131,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// </summary>
     public bool IsSelected(int index)
     {
-        // validate new index
-        if (index < 0 || index >= _paths.Count) return false;
-
-        return _currentIndex == index;
+        return Get(index)?.IsSelected ?? false;
     }
 
 
@@ -160,8 +155,8 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         photo.FilePath = filePath;
         photo.Metadata.SetFilePath(filePath);
 
-        _photosDict.Remove(filePath, out _);
-        _photosDict.AddOrUpdate(filePath, photo, (fIndex, oldValue) => photo);
+        _dict.Remove(filePath, out _);
+        _dict.AddOrUpdate(filePath, index, (fIndex, oldValue) => index);
     }
 
 
@@ -172,9 +167,9 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     {
         if (string.IsNullOrWhiteSpace(filePath)) return -1;
 
-        if (_photosDict.TryGetValue(filePath, out var photo))
+        if (_dict.TryGetValue(filePath, out var photoIndex))
         {
-            return photo.Index;
+            return photoIndex;
         }
 
         return -1;
@@ -187,9 +182,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     public bool IsCached(int index)
     {
         var photo = Get(index);
-        if (photo == null) return false;
-
-        return photo.IsDone;
+        return photo?.IsDone ?? false;
     }
 
 
@@ -219,26 +212,23 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// </summary>
     public void Remove(string filePath)
     {
-        // remove from the lists
-        _photosDict.Remove(filePath, out var removedItem);
-        if (removedItem is null) return;
-
-        _paths.RemoveAt(removedItem.Index);
+        var index = IndexOf(filePath);
+        if (index < 0) return;
 
 
         // update index of affected items
-        for (int i = removedItem.Index; i < _paths.Count; i++)
+        for (int i = index; i < Count; i++)
         {
-            var photoItem = Get(_paths[i].FilePath);
-
-            if (photoItem is not null)
-            {
-                _photosDict[photoItem.FilePath].Index = i;
-            }
+            var itemPath = GetFilePath(i);
+            _dict[itemPath] = i;
         }
 
         // dispose removed item
-        removedItem.Dispose();
+        _items[index].Dispose();
+
+        // remove from the lists
+        _dict.Remove(filePath, out var _);
+        _items.RemoveAt(index);
     }
 
 
@@ -253,12 +243,12 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         _currentIndex = -1;
 
         // dispose photos in the list
-        Parallel.ForEach(_photosDict, item =>
+        foreach (var item in _items)
         {
-            item.Value?.Dispose();
-        });
-        _photosDict.Clear();
-        _paths.Clear();
+            item?.Dispose();
+        }
+        _items.Clear();
+        _dict.Clear();
         DistinctDirs.Clear();
 
         Log.Info($"Cleared photo list!", nameof(Clear), nameof(PhotoManagerImpl<T, Fs, FsOptions>));

@@ -87,10 +87,10 @@ public sealed partial class MainWindow : Window
 
     private void Gallery_ItemClicked(WinNT.GalleryButtonItem sender, EventArgs args)
     {
-        var photo = Local.Photos.Get(sender.FilePath);
-        if (photo is null) return;
+        var photoIndex = Local.Photos.IndexOf(sender.FilePath);
+        if (photoIndex < 0) return;
 
-        var step = photo.Index - Local.Photos.CurrentIndex;
+        var step = photoIndex - Local.Photos.CurrentIndex;
         ViewNext(step);
     }
 
@@ -155,7 +155,7 @@ public sealed partial class MainWindow : Window
         Viewer.SetPhoto(photo);
 
         Gallery.ClearThumbnails();
-        Gallery.FileList = Local.Photos.FilePaths;
+        Gallery.Items = Local.Photos.Items;
     }
 
 

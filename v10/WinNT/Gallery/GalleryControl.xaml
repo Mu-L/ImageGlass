@@ -71,10 +71,10 @@
         <!--  Gallery Item: Template  -->
         <DataTemplate
             x:Key="GalleryItemTemplate"
-            x:DataType="photoing1:PhotoPath"
+            x:DataType="photoing:Photo"
             x:DefaultBindMode="OneWay">
             <local:GalleryButtonItem
-                Padding="4"
+                Padding="3"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
@@ -142,7 +142,7 @@
             HorizontalAlignment="Center"
             ElementPrepared="GalleryItemRepeater_ElementPrepared"
             ItemTemplate="{StaticResource GalleryItemTemplate}"
-            ItemsSource="{x:Bind FileList, Mode=OneWay}">
+            ItemsSource="{x:Bind Items, Mode=OneWay}">
             <ItemsRepeater.Layout>
                 <UniformGridLayout
                     ItemsStretch="Uniform"

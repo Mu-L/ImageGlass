@@ -29,6 +29,8 @@ public abstract class PhotoImpl : DisposableImpl
     protected PhotoMetadata? _metadata;
     protected uint _width = 0;
     protected uint _height = 0;
+    private string _filePath = "";
+    private bool _isSelected = false;
 
     protected CancellationTokenSource? _cancelPhotoLoading;
 
@@ -62,15 +64,44 @@ public abstract class PhotoImpl : DisposableImpl
     /// </summary>
     public virtual bool IsDone { get; set; } = false;
 
+
+
+    /// <summary>
+    /// Gets, sets value indicating if the photo is selected.
+    /// </summary>
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected != value)
+            {
+                _isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
+            }
+        }
+    }
+
     /// <summary>
     /// Gets file path of the photo. E.g. <c>"C:\Album\My photo.png"</c>.
     /// </summary>
-    public virtual string FilePath { get; set; } = string.Empty;
+    public string FilePath
+    {
+        get => _filePath;
+        set
+        {
+            if (!_filePath.Equals(value, StringComparison.Ordinal))
+            {
+                _filePath = value;
+                OnPropertyChanged(nameof(FilePath));
 
-    /// <summary>
-    /// Gets original file name of the photo. E.g. <c>"My photo.png"</c>.
-    /// </summary>
-    public string FileName => Path.GetFileName(FilePath);
+                OnPropertyChanged(nameof(Extension));
+                OnPropertyChanged(nameof(FileTitle));
+                OnPropertyChanged(nameof(GalleryFileTitle));
+                OnPropertyChanged(nameof(GalleryFileExtension));
+            }
+        }
+    }
 
     /// <summary>
     /// Gets original file extension. E.g: <c>".png"</c>.
@@ -83,9 +114,16 @@ public abstract class PhotoImpl : DisposableImpl
     public string FileTitle => Path.GetFileNameWithoutExtension(FilePath);
 
     /// <summary>
-    /// Gets, sets the index of this photo in the list.
+    /// Gets the file name without extension and including a trailing dot. E.g. <c>"My photo."</c>.
     /// </summary>
-    public int Index { get; set; } = -1;
+    public string GalleryFileTitle => FileTitle + ".";
+
+    /// <summary>
+    /// Gets file extension without dot. E.g. <c>"png"</c>.
+    /// </summary>
+    public string GalleryFileExtension => Extension.Length > 1 ? Extension.Substring(1) : string.Empty;
+
+
 
     /// <summary>
     /// Gets the error details.

@@ -136,14 +136,12 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         {
             _ = Select(InitPhoto.FilePath);
 
-            // save the init photo to the list
-            if (CurrentIndex >= 0)
-            {
-                InitPhoto.Index = CurrentIndex;
-
-                _photosDict[InitPhoto.FilePath]?.Dispose();
-                _photosDict[InitPhoto.FilePath] = InitPhoto;
-            }
+            //// save the init photo to the list
+            //if (CurrentIndex >= 0)
+            //{
+            //    _list[CurrentIndex]?.Dispose();
+            //    _list[CurrentIndex] = InitPhoto;
+            //}
         }
 
 

@@ -3,7 +3,6 @@
 
 using Catel.Collections;
 using ImageGlass.Common;
-using ImageGlass.Common.Photoing;
 using ImageGlass.WinNT.Common;
 using ImageGlass.WinNT.Common.Photoing;
 using Microsoft.UI.Xaml;
@@ -47,20 +46,20 @@ public sealed partial class GalleryControl : UserControl
             new PropertyMetadata(new PhotoManager()));
 
 
-    public FastObservableCollection<PhotoPath> FileList
+    public FastObservableCollection<Photo> Items
     {
-        get => (FastObservableCollection<PhotoPath>)GetValue(FileListProperty);
+        get => (FastObservableCollection<Photo>)GetValue(ItemsProperty);
         set
         {
-            SetValue(FileListProperty, (FastObservableCollection<PhotoPath>)value);
+            SetValue(ItemsProperty, (FastObservableCollection<Photo>)value);
         }
     }
-    public static readonly DependencyProperty FileListProperty =
+    public static readonly DependencyProperty ItemsProperty =
         DependencyProperty.Register(
-            nameof(FileList),
-            typeof(FastObservableCollection<PhotoPath>),
+            nameof(Items),
+            typeof(FastObservableCollection<Photo>),
             typeof(GalleryControl),
-            new PropertyMetadata(new FastObservableCollection<PhotoPath>()));
+            new PropertyMetadata(new FastObservableCollection<Photo>()));
 
 
     public GalleryControl()
@@ -141,7 +140,7 @@ public sealed partial class GalleryControl : UserControl
         var photo = PhotoManager.Select(filePath);
         if (photo is null) return;
 
-        var itemsCount = photo.Index + 1;
+        var itemsCount = PhotoManager.IndexOf(filePath) + 1;
         var itemCenterX = (GalleryThumbnailSize * itemsCount)
             + (ItemSpacing * itemsCount)
             - (GalleryScrollViewer.ViewportWidth / 2)
