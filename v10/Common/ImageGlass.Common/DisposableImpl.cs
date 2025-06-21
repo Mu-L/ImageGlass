@@ -16,15 +16,45 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using System.ComponentModel;
+
 namespace ImageGlass.Common;
 
 
 /// <summary>
-/// Provides a base implementation of the <see cref="IDisposable"/> interface,
+/// Provides a base implementation of <see cref="IDisposable"/>
+/// and <see cref="INotifyPropertyChanged"/> interface,
 /// including support for managed and unmanaged resource cleanup.
 /// </summary>
-public class DisposableImpl : IDisposable
+public class DisposableImpl : IDisposable, INotifyPropertyChanged
 {
+    // to manage PropertyChanged events
+    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
+    private event PropertyChangedEventHandler? _propertyChangedHandler;
+
+
+    public event PropertyChangedEventHandler? PropertyChanged
+    {
+        add
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler += value;
+                _propertyChangedEvent.Add(value);
+            }
+        }
+
+        remove
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler -= value;
+                _propertyChangedEvent.Remove(value);
+            }
+        }
+    }
+
+
 
     #region IDisposable Disposing
 
@@ -41,6 +71,13 @@ public class DisposableImpl : IDisposable
         {
             // Free any other managed objects here.
             OnDisposing();
+
+            // remove PropertyChanged events
+            foreach (var eventHandler in _propertyChangedEvent)
+            {
+                _propertyChangedHandler -= eventHandler;
+            }
+            _propertyChangedEvent.Clear();
         }
 
         // Free any unmanaged objects here.
@@ -67,6 +104,15 @@ public class DisposableImpl : IDisposable
     protected virtual void OnDisposing()
     {
         //
+    }
+
+
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    protected void OnPropertyChanged(string propertyName)
+    {
+        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
 }
