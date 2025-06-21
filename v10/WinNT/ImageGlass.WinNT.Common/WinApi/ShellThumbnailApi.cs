@@ -65,7 +65,10 @@ public static class ShellThumbnailApi
         }
         catch (Exception ex)
         {
-            Log.Warn(ex.Message, nameof(GetThumbnail), nameof(ShellThumbnailApi));
+            if (ex is not COMException)
+            {
+                Log.Warn(ex.Message, nameof(GetThumbnail), nameof(ShellThumbnailApi));
+            }
         }
         finally
         {
