@@ -132,7 +132,7 @@ public sealed partial class MainWindow : Window
     }
 
 
-    private async void PrepareLoadPhoto(string path, bool disposeForegroundShell)
+    private void PrepareLoadPhoto(string path, bool disposeForegroundShell)
     {
         WinMainTitleBarText.Text = path;
 
@@ -148,7 +148,7 @@ public sealed partial class MainWindow : Window
 
 
         // start loading files
-        var photo = await Local.Photos.LoadFolderAsync(path, new FileShellSearchOptions()
+        var initPhoto = Local.Photos.StartLoadingFiles(path, new FileShellSearchOptions()
         {
             AllowedExtensions = Const.FileFormats,
             UseExplorerSortOrder = true, // TODO: from setting
@@ -156,10 +156,14 @@ public sealed partial class MainWindow : Window
         }, _searchProgress);
 
 
+        if (initPhoto != null)
+        {
+            Viewer.SetPhoto(initPhoto);
+        }
 
-        Viewer.SetPhoto(photo);
         Gallery.ClearThumbnails();
     }
+
 
     private void Files_Searched(FileSearchingEventArgs e)
     {
@@ -168,14 +172,22 @@ public sealed partial class MainWindow : Window
         // if we haven't found current index for the init photo yet
         if (Local.Photos.InitPhoto is not null && Local.Photos.CurrentIndex == -1)
         {
+            // find index of the init photo and select it
             _ = Local.Photos.Select(Local.Photos.InitPhoto.FilePath);
 
-            //// save the init photo to the list
-            //if (CurrentIndex >= 0)
-            //{
-            //    _list[CurrentIndex]?.Dispose();
-            //    _list[CurrentIndex] = InitPhoto;
-            //}
+            // save the init photo to the list
+            if (Local.Photos.CurrentIndex >= 0)
+            {
+                Local.Photos.Items[Local.Photos.CurrentIndex]?.Dispose();
+                Local.Photos.Items[Local.Photos.CurrentIndex] = Local.Photos.InitPhoto;
+                Local.Photos.Items[Local.Photos.CurrentIndex].IsSelected = true;
+            }
+        }
+        // display the first file in a folder
+        else
+        {
+            Local.Photos.InitPhoto = Local.Photos.Select(0);
+            Viewer.SetPhoto(Local.Photos.InitPhoto);
         }
     }
 

@@ -65,7 +65,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
     /// <param name="path">Full path of file or directory</param>
-    public async Task<T?> LoadFolderAsync(string path, FsOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
+    public T? StartLoadingFiles(string path, FsOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
     {
         if (string.IsNullOrEmpty(path)) return null;
 
@@ -96,24 +96,10 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         }
 
 
-        // 3. start new file search
+        // 3. start searching files in a new thread
         if (!string.IsNullOrWhiteSpace(dirPath))
         {
             _ = _fileSearcher.SearchAsync([dirPath], searchOptions, progress);
-
-
-            // if user selects a folder
-            if (InitPhoto is null)
-            {
-                // wait for some results
-                while (Count == 0 && !_fileSearcher.IsSearchEnded)
-                {
-                    await Task.Delay(10);
-                }
-
-                // get the first item as the init photo
-                InitPhoto = Select(0);
-            }
         }
 
 
