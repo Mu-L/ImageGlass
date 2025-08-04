@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using Catel.Collections;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -43,18 +44,18 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         if (index < 0)
         {
             addedIndex = (int)Count;
-            _items.AddItems(newItems);
+            Items.AddRange(newItems);
         }
         else
         {
-            _items.InsertItems(newItems, index);
+            Items.InsertItems(newItems, index);
         }
 
 
         // update path dictionary
         for (int i = addedIndex; i < Count; i++)
         {
-            var item = _items[i];
+            var item = Items[i];
             _dict.AddOrUpdate(item.FilePath, i, (fIndex, oldValue) => i);
         }
     }
@@ -66,7 +67,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     public T? Get(int index)
     {
         if (index < 0 || index >= Count) return null;
-        var item = _items[index];
+        var item = Items[index];
 
         return item;
     }
@@ -101,14 +102,14 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // deselect old index
         if (0 <= CurrentIndex && CurrentIndex < Count)
         {
-            _items[CurrentIndex].IsSelected = false;
+            Items[CurrentIndex].IsSelected = false;
         }
 
         // validate new index
         if (index < 0 || index >= Count) return null;
 
         // select new index
-        _items[index].IsSelected = true;
+        Items[index].IsSelected = true;
         _currentIndex = index;
 
         return Get(index);
@@ -224,11 +225,11 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         }
 
         // dispose removed item
-        _items[index].Dispose();
+        Items[index].Dispose();
 
         // remove from the lists
         _dict.Remove(filePath, out var _);
-        _items.RemoveAt(index);
+        Items.RemoveAt(index);
     }
 
 
@@ -243,11 +244,11 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         _currentIndex = -1;
 
         // dispose photos in the list
-        foreach (var item in _items)
+        foreach (var item in Items)
         {
             item?.Dispose();
         }
-        _items.Clear();
+        Items.Clear();
         _dict.Clear();
         DistinctDirs.Clear();
 

@@ -34,7 +34,6 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     where FsOptions : FileSearchOptions
 {
     // photo list
-    protected FastObservableCollection<T> _items = new();
     protected readonly ConcurrentDictionary<string, int> _dict = new(StringComparer.OrdinalIgnoreCase);
 
     // thumbnail
@@ -49,12 +48,12 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     /// <summary>
     /// Gets the number of photos currently in the collection.
     /// </summary>
-    public uint Count => (uint)_items.Count;
+    public uint Count => (uint)Items.Count;
 
     /// <summary>
     /// Gets a list of photos.
     /// </summary>
-    public FastObservableCollection<T> Items => _items;
+    public FastObservableCollection<T> Items { get; set; } = [];
 
     /// <summary>
     /// Gets, sets the distinct directories list.

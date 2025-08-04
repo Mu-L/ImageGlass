@@ -1,7 +1,6 @@
 ﻿// To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-using Catel.Collections;
 using ImageGlass.Common;
 using ImageGlass.WinNT.Common;
 using ImageGlass.WinNT.Common.Photoing;
@@ -25,7 +24,7 @@ public sealed partial class GalleryControl : UserControl
     public event TypedEventHandler<GalleryButtonItem, EventArgs>? ItemClicked;
 
 
-    public static double GalleryThumbnailSize => (double)Application.Current.Resources["GalleryThumbnailSize"];
+    public static double GalleryThumbnailSize => (double)Application.Current.Resources[nameof(GalleryThumbnailSize)];
 
     public static double ItemSpacing => 1;
 
@@ -33,10 +32,7 @@ public sealed partial class GalleryControl : UserControl
     public PhotoManager PhotoManager
     {
         get => (PhotoManager)GetValue(PhotoManagerProperty);
-        set
-        {
-            SetValue(PhotoManagerProperty, (PhotoManager)value);
-        }
+        set => SetValue(PhotoManagerProperty, value);
     }
     public static readonly DependencyProperty PhotoManagerProperty =
         DependencyProperty.Register(
@@ -45,21 +41,6 @@ public sealed partial class GalleryControl : UserControl
             typeof(GalleryControl),
             new PropertyMetadata(new PhotoManager()));
 
-
-    public FastObservableCollection<Photo> Items
-    {
-        get => (FastObservableCollection<Photo>)GetValue(ItemsProperty);
-        set
-        {
-            SetValue(ItemsProperty, (FastObservableCollection<Photo>)value);
-        }
-    }
-    public static readonly DependencyProperty ItemsProperty =
-        DependencyProperty.Register(
-            nameof(Items),
-            typeof(FastObservableCollection<Photo>),
-            typeof(GalleryControl),
-            new PropertyMetadata(new FastObservableCollection<Photo>()));
 
 
     public GalleryControl()

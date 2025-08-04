@@ -158,9 +158,7 @@ public sealed partial class MainWindow : Window
 
 
         Viewer.SetPhoto(photo);
-
         Gallery.ClearThumbnails();
-        Gallery.Items = Local.Photos.Items;
     }
 
     private void Files_Searched(FileSearchingEventArgs e)
