@@ -57,7 +57,6 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// </summary>
     protected void DisposeFileSearcher()
     {
-        _fileSearcher.FileSearching -= FileSearchProvider_FileSearching;
         _fileSearcher.Dispose();
     }
 
@@ -66,7 +65,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
     /// <param name="path">Full path of file or directory</param>
-    public async Task<T?> LoadFolderAsync(string path, FsOptions searchOptions)
+    public async Task<T?> LoadFolderAsync(string path, FsOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
     {
         if (string.IsNullOrEmpty(path)) return null;
 
@@ -76,8 +75,6 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
 
         // 1. stop any ongoing search
         _fileSearcher.CancelSearching();
-        _fileSearcher.FileSearching -= FileSearchProvider_FileSearching;
-        _fileSearcher.FileSearching += FileSearchProvider_FileSearching;
 
         // reset the photo list
         Clear();
@@ -102,7 +99,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // 3. start new file search
         if (!string.IsNullOrWhiteSpace(dirPath))
         {
-            _ = _fileSearcher.SearchAsync([dirPath], searchOptions);
+            _ = _fileSearcher.SearchAsync([dirPath], searchOptions, progress);
 
 
             // if user selects a folder
@@ -122,36 +119,5 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
 
         return InitPhoto;
     }
-
-
-    /// <summary>
-    /// Handles search results.
-    /// </summary>
-    private void FileSearchProvider_FileSearching(object? sender, FileSearchingEventArgs e)
-    {
-        Add(e.Results);
-
-        // if we haven't found current index for the init photo yet
-        if (InitPhoto is not null && CurrentIndex == -1)
-        {
-            _ = Select(InitPhoto.FilePath);
-
-            //// save the init photo to the list
-            //if (CurrentIndex >= 0)
-            //{
-            //    _list[CurrentIndex]?.Dispose();
-            //    _list[CurrentIndex] = InitPhoto;
-            //}
-        }
-
-
-        Log.Info(
-            $"Added files to the list, " +
-            $"{nameof(CurrentIndex)}={CurrentIndex}/{Count - 1}.",
-            nameof(FileSearchProvider_FileSearching), nameof(PhotoManagerImpl<T, Fs, FsOptions>));
-    }
-
-
-
 
 }

@@ -31,13 +31,6 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
     protected CancellationTokenSource? _cancelSearching;
 
 
-    /// <summary>
-    /// Occurs when files are enumerated.
-    /// </summary>
-    public event EventHandler<FileSearchingEventArgs>? FileSearching;
-
-
-
     // Public Properties
     #region Public Properties
 
@@ -51,11 +44,11 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
 
 
     /// <summary>
-    /// Searches files from the provided directories
-    /// with <see cref="FindFiles(string, TOptions, CancellationToken)"/>.
+    /// Searches files from the provided directories with
+    /// <see cref="FindFiles(string, TOptions, IProgress{FileSearchingEventArgs}, CancellationToken)"/>.
     /// </summary>
     /// <param name="dirs">List of directories to search for files</param>
-    public virtual async Task SearchAsync(IEnumerable<string> dirs, TOptions options)
+    public virtual async Task SearchAsync(IEnumerable<string> dirs, TOptions options, IProgress<FileSearchingEventArgs> progress)
     {
         // cancel ongoing search
         CancelSearching();
@@ -67,7 +60,7 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
         {
             foreach (var dirPath in dirs)
             {
-                FindFiles(dirPath, options, _cancelSearching.Token);
+                FindFiles(dirPath, options, progress, _cancelSearching.Token);
             }
         });
 
@@ -99,12 +92,6 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
         base.OnDisposing();
 
         CancelSearching();
-
-
-        foreach (var eventDelegate in FileSearching?.GetInvocationList() ?? [])
-        {
-            FileSearching -= (EventHandler<FileSearchingEventArgs>)eventDelegate;
-        }
     }
 
 
@@ -138,7 +125,8 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
     /// <summary>
     /// Finds files in the given directory, emits <see cref="FileSearching"/> event.
     /// </summary>
-    protected void FindFiles(string dirPath, TOptions options, CancellationToken token)
+    protected void FindFiles(string dirPath, TOptions options,
+        IProgress<FileSearchingEventArgs> progress, CancellationToken token)
     {
         // cancel if requested
         if (token.IsCancellationRequested) return;
@@ -174,13 +162,7 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
         if (token.IsCancellationRequested) return;
 
         // emits results
-        OnFileSearching(new FileSearchingEventArgs(filePaths, IsSearchEnded));
-    }
-
-
-    protected virtual void OnFileSearching(FileSearchingEventArgs e)
-    {
-        FileSearching?.Invoke(this, e);
+        progress.Report(new FileSearchingEventArgs(filePaths, IsSearchEnded));
     }
 
 

@@ -1,5 +1,6 @@
 ﻿
 using ImageGlass.Common;
+using ImageGlass.Common.FileSystem;
 using ImageGlass.WinNT.Common.FileSystem;
 using Microsoft.UI.Xaml;
 using System;
@@ -15,9 +16,14 @@ namespace ImageGlass;
 /// </summary>
 public sealed partial class MainWindow : Window
 {
+    private Progress<FileSearchingEventArgs> _searchProgress;
+
+
     public MainWindow()
     {
         InitializeComponent();
+
+        _searchProgress = new(Files_Searched);
 
         AppWindow.TitleBar.PreferredTheme = Microsoft.UI.Windowing.TitleBarTheme.UseDefaultAppMode;
 
@@ -130,7 +136,6 @@ public sealed partial class MainWindow : Window
     {
         WinMainTitleBarText.Text = path;
 
-
         // dispose the foreground shell if requested
         if (disposeForegroundShell) Local.ForegroundShell = null;
 
@@ -148,7 +153,7 @@ public sealed partial class MainWindow : Window
             AllowedExtensions = Const.FileFormats,
             UseExplorerSortOrder = true, // TODO: from setting
             ForegroundShell = foregroundShell,
-        });
+        }, _searchProgress);
 
 
 
@@ -156,6 +161,24 @@ public sealed partial class MainWindow : Window
 
         Gallery.ClearThumbnails();
         Gallery.Items = Local.Photos.Items;
+    }
+
+    private void Files_Searched(FileSearchingEventArgs e)
+    {
+        Local.Photos.Add(e.Results);
+
+        // if we haven't found current index for the init photo yet
+        if (Local.Photos.InitPhoto is not null && Local.Photos.CurrentIndex == -1)
+        {
+            _ = Local.Photos.Select(Local.Photos.InitPhoto.FilePath);
+
+            //// save the init photo to the list
+            //if (CurrentIndex >= 0)
+            //{
+            //    _list[CurrentIndex]?.Dispose();
+            //    _list[CurrentIndex] = InitPhoto;
+            //}
+        }
     }
 
 

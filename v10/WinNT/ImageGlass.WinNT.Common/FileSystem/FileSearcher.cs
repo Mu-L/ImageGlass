@@ -54,7 +54,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
     /// 
     /// <inheritdoc/>
     /// </summary>
-    public override async Task SearchAsync(IEnumerable<string> dirs, FileShellSearchOptions options)
+    public override async Task SearchAsync(IEnumerable<string> dirs, FileShellSearchOptions options, IProgress<FileSearchingEventArgs> progress)
     {
         // cancel ongoing search
         CancelSearching();
@@ -69,7 +69,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
                 // get shell folder
                 var folderShell = GetShellFolderView(null, options.ForegroundShell);
 
-                FindFiles_WithShell(folderShell.View, folderShell.DirPath, options, _cancelSearching.Token);
+                FindFiles_WithShell(folderShell.View, folderShell.DirPath, options, progress, _cancelSearching.Token);
                 return;
             }
             catch (COMException) { }
@@ -100,13 +100,13 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
                 // with shell
                 if (folderShellView != null)
                 {
-                    FindFiles_WithShell(folderShellView, dirPath, options, _cancelSearching.Token);
+                    FindFiles_WithShell(folderShellView, dirPath, options, progress, _cancelSearching.Token);
                 }
 
                 // without shell
                 else
                 {
-                    FindFiles(dirPath, options, _cancelSearching.Token);
+                    FindFiles(dirPath, options, progress, _cancelSearching.Token);
                 }
             }
         });
@@ -128,7 +128,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
     /// Finds files in the given <see cref="ExplorerFolderView"/>.
     /// Use the <see cref="FilesEnumerated"/> event to get results.
     /// </summary>
-    private void FindFiles_WithShell(ExplorerFolderView? fv, string? rootDir, FileShellSearchOptions options, CancellationToken token)
+    private void FindFiles_WithShell(ExplorerFolderView? fv, string? rootDir, FileShellSearchOptions options, IProgress<FileSearchingEventArgs> progress, CancellationToken token)
     {
         // if no folder view
         if (fv is null)
@@ -136,7 +136,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
             // use .NET
             if (!string.IsNullOrWhiteSpace(rootDir))
             {
-                FindFiles(rootDir, options, token);
+                FindFiles(rootDir, options, progress, token);
             }
             return;
         }
@@ -182,7 +182,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
 
 
         // 3. emits results
-        OnFileSearching(new FileSearchingEventArgs(filePaths, IsSearchEnded));
+        progress.Report(new FileSearchingEventArgs(filePaths, IsSearchEnded));
 
 
         // cancel if requested
@@ -206,7 +206,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
             // find files in sub-folders
             foreach (var dirPath in subDirList)
             {
-                FindFiles(dirPath, options, token);
+                FindFiles(dirPath, options, progress, token);
             }
         }
     }
