@@ -103,7 +103,10 @@
             <Border BorderBrush="Red" BorderThickness="0">
                 <winNT:VirtualViewerControl
                     x:Name="Viewer"
+                    AllowDrop="True"
                     BackgroundColor="#22000000"
+                    DragOver="Viewer_DragOver"
+                    Drop="Viewer_Drop"
                     EnableDebug="False"
                     EnableSelection="False"
                     Loaded="Viewer_Loaded" />

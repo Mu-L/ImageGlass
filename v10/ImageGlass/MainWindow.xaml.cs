@@ -1,9 +1,14 @@
 ﻿
+using D2Phap;
 using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
+using ImageGlass.WinNT.Common;
 using ImageGlass.WinNT.Common.FileSystem;
+using ImageGlass.WinNT.Common.Photoing;
 using Microsoft.UI.Xaml;
 using System;
+using System.Linq;
+using Windows.ApplicationModel.DataTransfer;
 using WinRT.Interop;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -25,10 +30,8 @@ public sealed partial class MainWindow : Window
 
         _searchProgress = new(Files_Searched);
 
+        // set title bar
         AppWindow.TitleBar.PreferredTheme = Microsoft.UI.Windowing.TitleBarTheme.UseDefaultAppMode;
-
-        WinMainTitleBarText.Text = $".NET {Environment.Version} - {Environment.OSVersion}";
-
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(WinMainTitleBar);
 
@@ -83,21 +86,18 @@ public sealed partial class MainWindow : Window
 
     private void BtnViewNext_Clicked(object sender, RoutedEventArgs e)
     {
-        ViewNext(1);
+        ViewByStep(1);
     }
 
     private void BtnViewPrevious_Clicked(object sender, RoutedEventArgs e)
     {
-        ViewNext(-1);
+        ViewByStep(-1);
     }
 
     private void Gallery_ItemClicked(WinNT.GalleryButtonItem sender, EventArgs args)
     {
         var photoIndex = Local.Photos.IndexOf(sender.FilePath);
-        if (photoIndex < 0) return;
-
-        var step = photoIndex - Local.Photos.CurrentIndex;
-        ViewNext(step);
+        ViewByIndex(photoIndex);
     }
 
 
@@ -132,9 +132,14 @@ public sealed partial class MainWindow : Window
     }
 
 
-    private void PrepareLoadPhoto(string path, bool disposeForegroundShell)
+    private void PrepareLoadPhoto(string inputPath, bool disposeForegroundShell)
     {
-        WinMainTitleBarText.Text = path;
+        var path = WHelper.ResolvePath(inputPath);
+        if (string.IsNullOrEmpty(path)) return;
+
+        var pathType = BHelper.CheckPath(path);
+        if (pathType == PathType.Unknown) return;
+
 
         // dispose the foreground shell if requested
         if (disposeForegroundShell) Local.ForegroundShell = null;
@@ -155,11 +160,7 @@ public sealed partial class MainWindow : Window
             ForegroundShell = foregroundShell,
         }, _searchProgress);
 
-
-        if (initPhoto != null)
-        {
-            Viewer.SetPhoto(initPhoto);
-        }
+        ViewPhoto(initPhoto);
 
         Gallery.ClearThumbnails();
     }
@@ -187,21 +188,90 @@ public sealed partial class MainWindow : Window
         else
         {
             Local.Photos.InitPhoto = Local.Photos.Select(0);
-            Viewer.SetPhoto(Local.Photos.InitPhoto);
+            ViewPhoto(Local.Photos.InitPhoto);
         }
     }
 
 
-    private void ViewNext(int step)
+    private void ViewByIndex(int photoIndex)
+    {
+        if (photoIndex < 0) return;
+
+        var step = photoIndex - Local.Photos.CurrentIndex;
+        ViewByStep(step);
+    }
+
+    private void ViewByStep(int step)
     {
         var photo = Local.Photos.GetByStep(step, true);
+        ViewPhoto(photo);
+    }
 
+    private void ViewPhoto(Photo? photo)
+    {
         WinMainTitleBarText.Text = photo?.FilePath;
         Viewer.SetPhoto(photo);
 
         if (photo != null)
         {
             Gallery.SelectItem(photo.FilePath);
+        }
+    }
+
+    private void Viewer_DragOver(object sender, DragEventArgs e)
+    {
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        {
+            e.AcceptedOperation = DataPackageOperation.None;
+            return;
+        }
+
+        e.AcceptedOperation = DataPackageOperation.Link;
+        e.DragUIOverride.Caption = "Open with ImageGlass";
+    }
+
+    private async void Viewer_Drop(object sender, DragEventArgs e)
+    {
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
+
+        var items = await e.DataView.GetStorageItemsAsync();
+        var paths = items.Select(i => i.Path).ToArray();
+
+        if (paths.Length > 1)
+        {
+            // TODO:
+            return;
+        }
+
+        var filePath = WHelper.ResolvePath(paths[0]);
+        var imageIndex = Local.Photos.IndexOf(filePath);
+
+
+        // get foreground shell
+        if (true) // TODO: Config.ShouldUseExplorerSortOrder)
+        {
+            using var shell = new EggShell();
+            Local.ForegroundShell = shell.GetForegroundWindowView();
+        }
+
+        // save init input path
+        Local.UpdateInputImagePath(filePath);
+
+
+        // The file is located another folder, load the entire folder
+        if (imageIndex == -1 || Local.CanUseForegroundShell())
+        {
+            PrepareLoadPhoto(filePath, false);
+        }
+        // The file is in current folder AND it is the viewing image
+        else if (Local.Photos.CurrentIndex == imageIndex)
+        {
+            //do nothing
+        }
+        // The file is in current folder AND it is NOT the viewing image
+        else
+        {
+            ViewByIndex(imageIndex);
         }
     }
 
