@@ -65,45 +65,9 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
     /// <param name="path">Full path of file or directory</param>
-    public T? StartLoadingFiles(string path, FsOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
+    public virtual T? StartLoadingFiles(string[] paths, FsOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
     {
-        if (string.IsNullOrEmpty(path)) return null;
-
-        var pathType = BHelper.CheckPath(path);
-        if (pathType == PathType.Unknown) return null;
-
-
-        // 1. stop any ongoing search
-        _fileSearcher.CancelSearching();
-
-        // reset the photo list
-        Clear();
-
-
-        string? dirPath = null;
-
-        // 2. check the input path
-        // path is a directory
-        if (pathType == PathType.Dir)
-        {
-            dirPath = path;
-        }
-        // path is a file
-        else
-        {
-            dirPath = Path.GetDirectoryName(path);
-            InitPhoto = CreatePhotoItem(path);
-        }
-
-
-        // 3. start searching files in a new thread
-        if (!string.IsNullOrWhiteSpace(dirPath))
-        {
-            _ = _fileSearcher.SearchAsync([dirPath], searchOptions, progress);
-        }
-
-
-        return InitPhoto;
+        throw new NotImplementedException();
     }
 
 }

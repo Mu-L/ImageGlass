@@ -58,6 +58,71 @@ public sealed partial class MainWindow : Window
     }
 
 
+    private void Viewer_DragOver(object sender, DragEventArgs e)
+    {
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        {
+            e.AcceptedOperation = DataPackageOperation.None;
+            return;
+        }
+
+        e.AcceptedOperation = DataPackageOperation.Link;
+        e.DragUIOverride.Caption = "Open with ImageGlass";
+    }
+
+
+    private async void Viewer_Drop(object sender, DragEventArgs e)
+    {
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
+
+        // 1. get dropped paths
+        var droppedItems = await e.DataView.GetStorageItemsAsync();
+        var paths = droppedItems.Select(i => i.Path).ToArray();
+
+
+        // 2. load multiple paths
+        if (paths.Length > 1)
+        {
+            PrepareLoadPhoto(paths, true);
+            return;
+        }
+
+
+        // 3. load single path
+        var filePath = WHelper.ResolvePath(paths[0]);
+        var imageIndex = Local.Photos.IndexOf(filePath);
+
+
+        // 3.1 get foreground shell
+        if (true) // TODO: Config.ShouldUseExplorerSortOrder)
+        {
+            using var shell = new EggShell();
+            Local.ForegroundShell = shell.GetForegroundWindowView();
+        }
+
+        // 3.2 save init input path
+        Local.UpdateInputImagePath(filePath);
+
+
+        // 3.3 The file is located another folder, load the entire folder
+        if (imageIndex == -1 || Local.CanUseForegroundShell())
+        {
+            PrepareLoadPhoto([filePath], false);
+        }
+        // 3.4 The file is in current folder AND it is the viewing image
+        else if (Local.Photos.CurrentIndex == imageIndex)
+        {
+            //do nothing
+        }
+        // 3.5 The file is in current folder AND it is NOT the viewing image
+        else
+        {
+            ViewByIndex(imageIndex);
+        }
+    }
+
+
+
     private async void BtnOpenFile_Clicked(object sender, RoutedEventArgs e)
     {
         var op = new Windows.Storage.Pickers.FileOpenPicker();
@@ -68,7 +133,7 @@ public sealed partial class MainWindow : Window
         if (file == null) return;
 
 
-        PrepareLoadPhoto(file.Path, false);
+        PrepareLoadPhoto([file.Path], false);
     }
 
 
@@ -81,7 +146,7 @@ public sealed partial class MainWindow : Window
         if (dir == null) return;
 
 
-        PrepareLoadPhoto(dir.Path, false);
+        PrepareLoadPhoto([dir.Path], false);
     }
 
     private void BtnViewNext_Clicked(object sender, RoutedEventArgs e)
@@ -128,19 +193,12 @@ public sealed partial class MainWindow : Window
 
 
         // start loading path with the foreground shell
-        PrepareLoadPhoto(pathToLoad, false);
+        PrepareLoadPhoto([pathToLoad], false);
     }
 
 
-    private void PrepareLoadPhoto(string inputPath, bool disposeForegroundShell)
+    private void PrepareLoadPhoto(string[] inputPaths, bool disposeForegroundShell)
     {
-        var path = WHelper.ResolvePath(inputPath);
-        if (string.IsNullOrEmpty(path)) return;
-
-        var pathType = BHelper.CheckPath(path);
-        if (pathType == PathType.Unknown) return;
-
-
         // dispose the foreground shell if requested
         if (disposeForegroundShell) Local.ForegroundShell = null;
 
@@ -153,7 +211,7 @@ public sealed partial class MainWindow : Window
 
 
         // start loading files
-        var initPhoto = Local.Photos.StartLoadingFiles(path, new FileShellSearchOptions()
+        var initPhoto = Local.Photos.StartLoadingFiles(inputPaths, new FileShellSearchOptions()
         {
             AllowedExtensions = Const.FileFormats,
             UseExplorerSortOrder = true, // TODO: from setting
@@ -215,63 +273,6 @@ public sealed partial class MainWindow : Window
         if (photo != null)
         {
             Gallery.SelectItem(photo.FilePath);
-        }
-    }
-
-    private void Viewer_DragOver(object sender, DragEventArgs e)
-    {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
-        {
-            e.AcceptedOperation = DataPackageOperation.None;
-            return;
-        }
-
-        e.AcceptedOperation = DataPackageOperation.Link;
-        e.DragUIOverride.Caption = "Open with ImageGlass";
-    }
-
-    private async void Viewer_Drop(object sender, DragEventArgs e)
-    {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
-
-        var items = await e.DataView.GetStorageItemsAsync();
-        var paths = items.Select(i => i.Path).ToArray();
-
-        if (paths.Length > 1)
-        {
-            // TODO:
-            return;
-        }
-
-        var filePath = WHelper.ResolvePath(paths[0]);
-        var imageIndex = Local.Photos.IndexOf(filePath);
-
-
-        // get foreground shell
-        if (true) // TODO: Config.ShouldUseExplorerSortOrder)
-        {
-            using var shell = new EggShell();
-            Local.ForegroundShell = shell.GetForegroundWindowView();
-        }
-
-        // save init input path
-        Local.UpdateInputImagePath(filePath);
-
-
-        // The file is located another folder, load the entire folder
-        if (imageIndex == -1 || Local.CanUseForegroundShell())
-        {
-            PrepareLoadPhoto(filePath, false);
-        }
-        // The file is in current folder AND it is the viewing image
-        else if (Local.Photos.CurrentIndex == imageIndex)
-        {
-            //do nothing
-        }
-        // The file is in current folder AND it is NOT the viewing image
-        else
-        {
-            ViewByIndex(imageIndex);
         }
     }
 

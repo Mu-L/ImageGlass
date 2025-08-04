@@ -1,7 +1,9 @@
 ﻿using ImageGlass.Common;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Windows.System;
@@ -10,6 +12,61 @@ namespace ImageGlass.WinNT.Common;
 
 public static partial class WHelper
 {
+    /// <summary>
+    /// Get distinct directories list from paths list.
+    /// </summary>
+    public static (List<string> DirPaths, List<string> FilePaths) GetDistinctDirsFromPaths(IEnumerable<string> pathList)
+    {
+        if (!pathList.Any()) return ([], []);
+
+        var hashedDirsList = new HashSet<string>();
+        var hashedFilesList = new HashSet<string>();
+
+        foreach (var path in pathList)
+        {
+            var pathType = BHelper.CheckPath(path);
+            if (pathType == PathType.Unknown) continue;
+
+            if (pathType == PathType.Dir)
+            {
+                hashedDirsList.Add(path);
+            }
+            else
+            {
+                string dir;
+                if (string.Equals(Path.GetExtension(path), ".lnk", StringComparison.OrdinalIgnoreCase))
+                {
+                    var shortcutPath = FileShortcutApi.GetTargetPathFromShortcut(path);
+                    var shortcutPathType = BHelper.CheckPath(shortcutPath);
+                    if (shortcutPathType == PathType.Unknown) continue;
+
+                    // get the DIR path of shortcut target
+                    if (shortcutPathType == PathType.Dir)
+                    {
+                        dir = shortcutPath;
+                    }
+                    else
+                    {
+                        hashedFilesList.Add(shortcutPath);
+                        dir = Path.GetDirectoryName(shortcutPath) ?? "";
+                    }
+                }
+                else
+                {
+                    hashedFilesList.Add(path);
+                    dir = Path.GetDirectoryName(path) ?? "";
+                }
+
+
+                if (string.IsNullOrEmpty(dir)) continue;
+                hashedDirsList.Add(dir);
+            }
+        }
+
+        return ([.. hashedDirsList], [.. hashedFilesList]);
+    }
+
+
     /// <summary>
     /// Resolves a relative/protocol/link path to absolute path
     /// </summary>
