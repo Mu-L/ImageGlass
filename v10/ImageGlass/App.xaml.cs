@@ -21,6 +21,7 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.WinNT.Common;
 using Microsoft.UI.Xaml;
 using System;
+using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -48,6 +49,21 @@ public partial class App : Application
     public App()
     {
         this.InitializeComponent();
+
+        Application.Current.UnhandledException += Current_UnhandledException;
+        TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+    }
+
+    private void Current_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    {
+        // TODO:
+        throw new NotImplementedException();
+    }
+
+    private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        // TODO:
+        throw new NotImplementedException();
     }
 
 
@@ -58,6 +74,9 @@ public partial class App : Application
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         Args = Environment.GetCommandLineArgs();
+
+        // load app configs
+        Config.Load();
 
         // get foreground shell
         using var shell = new EggShell();
@@ -76,13 +95,16 @@ public partial class App : Application
     }
 
 
-    private void Window_Closed(object sender, WindowEventArgs args)
+    private async void Window_Closed(object sender, WindowEventArgs args)
     {
         // dispose foreground shell
         Local.ForegroundShell = null;
 
         Local.Photos.Dispose();
         WindowColorProfileProvider.Instance.Dispose();
+
+        // save configs
+        await Config.SaveAsync();
     }
 
 

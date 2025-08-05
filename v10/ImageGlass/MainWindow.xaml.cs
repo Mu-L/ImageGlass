@@ -94,7 +94,7 @@ public sealed partial class MainWindow : Window
 
 
         // 3.1 get foreground shell
-        if (true) // TODO: Config.ShouldUseExplorerSortOrder)
+        if (Config.ShouldUseExplorerSortOrder)
         {
             using var shell = new EggShell();
             Local.ForegroundShell = shell.GetForegroundWindowView();
@@ -214,7 +214,7 @@ public sealed partial class MainWindow : Window
         var initPhoto = Local.Photos.StartLoadingFiles(inputPaths, new FileShellSearchOptions()
         {
             AllowedExtensions = Const.FileFormats,
-            UseExplorerSortOrder = true, // TODO: from setting
+            UseExplorerSortOrder = Config.ShouldUseExplorerSortOrder,
             ForegroundShell = foregroundShell,
         }, _searchProgress);
 
