@@ -17,7 +17,30 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-namespace ImageGlass.WinNT;
+namespace ImageGlass.Common;
+
+
+/// <summary>
+/// Specifies the display styles for the background texture grid
+/// </summary>
+public enum CheckerboardMode
+{
+    /// <summary>
+    /// No background.
+    /// </summary>
+    None = 0,
+
+    /// <summary>
+    /// Background is displayed in the control's client area.
+    /// </summary>
+    Client = 1,
+
+    /// <summary>
+    /// Background is displayed only in the image region.
+    /// </summary>
+    Image = 2,
+}
+
 
 
 public enum ZoomMode
@@ -75,4 +98,6 @@ public enum ImageInterpolation : int
     /// </summary>
     HighQualityBicubic = 5,
 }
+
+
 
