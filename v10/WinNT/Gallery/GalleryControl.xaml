@@ -85,6 +85,7 @@
                 Click="GalleryItem_Clicked"
                 FilePath="{x:Bind FilePath}"
                 IsSelected="{x:Bind IsSelected}"
+                IsTabStop="False"
                 Style="{StaticResource GalleryButtonItemStyle}">
 
                 <Grid VerticalAlignment="Stretch">

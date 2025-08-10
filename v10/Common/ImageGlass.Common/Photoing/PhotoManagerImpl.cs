@@ -128,7 +128,7 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
 
 
     /// <summary>
-    /// Gets a photo by step.
+    /// Selects and gets a photo by step.
     /// </summary>
     public T? GetByStep(int step, bool loopBackNavigation)
     {

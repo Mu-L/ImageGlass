@@ -219,14 +219,16 @@ public sealed partial class MainWindow : Window
             ForegroundShell = foregroundShell,
         }, _searchProgress);
 
-        ViewPhoto(initPhoto);
 
         Gallery.ClearThumbnails();
+
+        ViewPhoto(initPhoto);
     }
 
 
     private void Files_Searched(FileSearchingEventArgs e)
     {
+        var isEmptyList = Local.Photos.Count == 0;
         Local.Photos.Add(e.Results);
 
         // if we haven't found current index for the init photo yet
@@ -249,6 +251,15 @@ public sealed partial class MainWindow : Window
             Local.Photos.InitPhoto = Local.Photos.Select(0);
             ViewPhoto(Local.Photos.InitPhoto);
         }
+
+
+        // Gallery: scroll to the selected item
+        if (isEmptyList)
+        {
+            // make sure gallery is rendered
+            Gallery.UpdateLayout();
+            Gallery.ScrollToItem(Local.Photos.CurrentIndex);
+        }
     }
 
 
@@ -260,21 +271,20 @@ public sealed partial class MainWindow : Window
         ViewByStep(step);
     }
 
+
     private void ViewByStep(int step)
     {
         var photo = Local.Photos.GetByStep(step, true);
         ViewPhoto(photo);
     }
 
+
     private void ViewPhoto(Photo? photo)
     {
         WinMainTitleBarText.Text = photo?.FilePath;
         Viewer.SetPhoto(photo);
 
-        if (photo != null)
-        {
-            Gallery.SelectItem(photo.FilePath);
-        }
+        Gallery.ScrollToItem(Local.Photos.CurrentIndex);
     }
 
 

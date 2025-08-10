@@ -42,7 +42,6 @@ public sealed partial class GalleryControl : UserControl
             new PropertyMetadata(new PhotoManager()));
 
 
-
     public GalleryControl()
     {
         InitializeComponent();
@@ -116,14 +115,13 @@ public sealed partial class GalleryControl : UserControl
     }
 
 
-    public void SelectItem(string filePath, bool disableAnimation = true)
+    public void ScrollToItem(int index, bool disableAnimation = true)
     {
-        var photo = PhotoManager.Select(filePath);
-        if (photo is null) return;
+        if (index < 0 || index >= PhotoManager.Count) return;
 
-        var itemsCount = PhotoManager.IndexOf(filePath) + 1;
-        var itemCenterX = (GalleryThumbnailSize * itemsCount)
-            + (ItemSpacing * itemsCount)
+        var centerItemIndex = index + 1;
+        var itemCenterX = (GalleryThumbnailSize * centerItemIndex)
+            + (ItemSpacing * centerItemIndex)
             - (GalleryScrollViewer.ViewportWidth / 2)
             - (GalleryThumbnailSize / 2);
 
