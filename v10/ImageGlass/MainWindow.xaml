@@ -11,11 +11,8 @@
     xmlns:winNTCommon="using:ImageGlass.WinNT.Common"
     Title="ImageGlass"
     Closed="Window_Closed"
+    SystemBackdrop="{x:Bind WindowBackdrop}"
     mc:Ignorable="d">
-
-    <Window.SystemBackdrop>
-        <MicaBackdrop Kind="Base" />
-    </Window.SystemBackdrop>
 
 
     <Grid x:Name="ContentArea">
@@ -108,12 +105,16 @@
                     x:Name="Viewer"
                     AllowDrop="True"
                     BackgroundColor="#22000000"
-                    CheckerboardMode="{x:Bind ViewerCheckerboardMode}"
+                    CheckerboardMode="{x:Bind winNTCommon:Config.Current.CheckerboardMode}"
                     DragOver="Viewer_DragOver"
                     Drop="Viewer_Drop"
                     EnableDebug="{x:Bind winNTCommon:Config.Current.EnableDebug}"
                     EnableSelection="False"
-                    Loaded="Viewer_Loaded" />
+                    Loaded="Viewer_Loaded"
+                    PanSpeed="{x:Bind winNTCommon:Config.Current.PanSpeed}"
+                    ZoomLevels="{x:Bind winNTCommon:Config.Current.ZoomLevels}"
+                    ZoomMode="{x:Bind winNTCommon:Config.Current.ZoomMode}"
+                    ZoomSpeed="{x:Bind winNTCommon:Config.Current.ZoomSpeed}" />
             </Border>
         </Grid>
 

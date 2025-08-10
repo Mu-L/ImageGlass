@@ -221,8 +221,12 @@ public static partial class Config
         if (Version <= configVersion) return;
 
 
-
-        //
+        // Migration v9 to v10
+        if (configVersion < 10)
+        {
+            // ShowCheckerboard + ShowCheckerboardOnlyImageRegion: merged into CheckerboardMode
+            // ZoomLevels: change type: number[] to string
+        }
     }
 
     #endregion // Config file migration

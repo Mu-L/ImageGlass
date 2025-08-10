@@ -136,16 +136,6 @@ public partial class AppSettings
     ///// </summary>
     //public bool EnableLoopBackNavigation { get; set; } = true;
 
-    /// <summary>
-    /// Gets, sets value indicating that checker board is shown or not
-    /// </summary>
-    public bool ShowCheckerboard { get; set; } = false;
-
-    /// <summary>
-    /// Gets, sets the value indicates whether to show checkerboard in the image region only
-    /// </summary>
-    public bool ShowCheckerboardOnlyImageRegion { get; set; } = false;
-
     ///// <summary>
     ///// Gets, sets value indicating that multi instances is allowed or not
     ///// </summary>
@@ -331,17 +321,17 @@ public partial class AppSettings
     ///// </summary>
     //public int FrmSettingsHeight { get; set; } = 800;
 
-    ///// <summary>
-    ///// Gets, sets the panning speed.
-    ///// Value range is from 0 to 100.
-    ///// </summary>
-    //public float PanSpeed { get; set; } = 20f;
+    /// <summary>
+    /// Gets, sets the panning speed.
+    /// Value range is from 0 to 100.
+    /// </summary>
+    public float PanSpeed { get; set; } = 20f;
 
-    ///// <summary>
-    ///// Gets, sets the zooming speed.
-    ///// Value range is from -500 to 500.
-    ///// </summary>
-    //public float ZoomSpeed { get; set; } = 0;
+    /// <summary>
+    /// Gets, sets the zooming speed.
+    /// Value range is from -500 to 500.
+    /// </summary>
+    public float ZoomSpeed { get; set; } = 0;
 
     ///// <summary>
     ///// Gets, sets slide show interval (minimum value if it's random)
@@ -462,10 +452,11 @@ public partial class AppSettings
 
     #region Array items
 
-    ///// <summary>
-    ///// Gets, sets zoom levels of the viewer
-    ///// </summary>
-    //public float[] ZoomLevels { get; set; } = [];
+    /// <summary>
+    /// Gets, sets zoom levels of the viewer
+    /// </summary>
+    [JsonConverter(typeof(JsonArrayToZoomFactorConverter))]
+    public double[] ZoomLevels { get; set; } = [];
 
     ///// <summary>
     ///// Gets, sets the list of apps for edit action.
@@ -550,6 +541,12 @@ public partial class AppSettings
     ///// </summary>
     //public FormWindowState FrmSettingsState { get; set; } = FormWindowState.Normal;
 
+
+    /// <summary>
+    /// Gets, sets checkerboard mode of the viewer.
+    /// </summary>
+    public CheckerboardMode CheckerboardMode { get; set; } = CheckerboardMode.None;
+
     /// <summary>
     /// Gets, sets image loading order
     /// </summary>
@@ -560,30 +557,30 @@ public partial class AppSettings
     /// </summary>
     public ImageOrderType ImageLoadingOrderType { get; set; } = ImageOrderType.Asc;
 
-    ///// <summary>
-    ///// Gets, sets zoom mode value
-    ///// </summary>
-    //public ZoomMode ZoomMode { get; set; } = ZoomMode.AutoZoom;
+    /// <summary>
+    /// Gets, sets zoom mode value
+    /// </summary>
+    public ZoomMode ZoomMode { get; set; } = ZoomMode.AutoZoom;
 
-    ///// <summary>
-    ///// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>less than or equals 100%</c>.
-    ///// </summary>
-    //public ImageInterpolation ImageInterpolationScaleDown { get; set; } = ImageInterpolation.MultiSampleLinear;
+    /// <summary>
+    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>less than or equals 100%</c>.
+    /// </summary>
+    public ImageInterpolation ImageInterpolationScaleDown { get; set; } = ImageInterpolation.MultiSampleLinear;
 
-    ///// <summary>
-    ///// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
-    ///// </summary>
-    //public ImageInterpolation ImageInterpolationScaleUp { get; set; } = ImageInterpolation.NearestNeighbor;
+    /// <summary>
+    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
+    /// </summary>
+    public ImageInterpolation ImageInterpolationScaleUp { get; set; } = ImageInterpolation.NearestNeighbor;
 
     ///// <summary>
     ///// Gets, sets value indicates what happens after clicking Edit menu
     ///// </summary>
     //public AfterEditAppAction AfterEditingAction { get; set; } = AfterEditAppAction.Nothing;
 
-    ///// <summary>
-    ///// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
-    ///// </summary>
-    //public BackdropStyle WindowBackdrop { get; set; } = BackdropStyle.Mica;
+    /// <summary>
+    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
+    /// </summary>
+    public BackdropStyle WindowBackdrop { get; set; } = BackdropStyle.Mica;
 
     #endregion // Enum items
 

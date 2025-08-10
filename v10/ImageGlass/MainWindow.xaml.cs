@@ -2,11 +2,12 @@
 using D2Phap;
 using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
-using ImageGlass.WinNT;
 using ImageGlass.WinNT.Common;
 using ImageGlass.WinNT.Common.FileSystem;
 using ImageGlass.WinNT.Common.Photoing;
+using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
@@ -39,6 +40,7 @@ public sealed partial class MainWindow : Window
         AppWindow.Resize(new Windows.Graphics.SizeInt32(2000, 1500));
     }
 
+
     public GridLength TitleBarLeftInset => new(AppWindow.TitleBar.LeftInset);
     public GridLength TitleBarRightInset => new(AppWindow.TitleBar.RightInset);
     public GridLength TitleBarHeight => new(AppWindow.TitleBar.Height / 2.5f);
@@ -46,13 +48,24 @@ public sealed partial class MainWindow : Window
 
     public nint Handle => WindowNative.GetWindowHandle(this);
 
-    public CheckerboardMode ViewerCheckerboardMode
+    public SystemBackdrop? WindowBackdrop
     {
         get
         {
-            if (!Config.Current.ShowCheckerboard) return CheckerboardMode.None;
-            if (Config.Current.ShowCheckerboardOnlyImageRegion) return CheckerboardMode.Image;
-            return CheckerboardMode.Client;
+            if (Config.Current.WindowBackdrop == BackdropStyle.None) return null;
+            if (Config.Current.WindowBackdrop == BackdropStyle.Acrylic)
+            {
+                return new DesktopAcrylicBackdrop();
+            }
+            else
+            {
+                return new MicaBackdrop()
+                {
+                    Kind = Config.Current.WindowBackdrop == BackdropStyle.MicaAlt
+                        ? MicaKind.BaseAlt
+                        : MicaKind.Base
+                };
+            }
         }
     }
 
