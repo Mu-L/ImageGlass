@@ -25,10 +25,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
     <PackageReference Include="D2Phap.EggShell-x64" Version="1.0.517" />
     <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
       <PrivateAssets>all</PrivateAssets>
@@ -38,6 +34,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
     <PackageReference Include="Vortice.Direct2D1" Version="3.7.4-beta" />
     <PackageReference Include="Vortice.Win32.Graphics.Imaging" Version="2.2.7" />
+    <PackageReference Include="ZString" Version="2.6.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\ImageGlass.Common\ImageGlass.Common.csproj" />

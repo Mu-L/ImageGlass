@@ -1,6 +1,22 @@
-﻿
+﻿/*
+ImageGlass Project - Image viewer for Windows
+Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 using ImageGlass.Common;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Linq;
@@ -11,10 +27,20 @@ namespace ImageGlass.WinNT.Common;
 
 public static partial class Config
 {
-    private static IConfigurationRoot? _root;
-
 
     #region Public properties
+
+    /// <summary>
+    /// Gets, sets the instance of app settings.
+    /// </summary>
+    public static AppSettings Current { get; set; } = new();
+
+
+    /// <summary>
+    /// Current version of the app.
+    /// </summary>
+    public static float Version => 10f;
+
 
     /// <summary>
     /// Gets the user config file name.
@@ -41,12 +67,6 @@ public static partial class Config
 
 
     /// <summary>
-    /// Config file version
-    /// </summary>
-    public static float Version => 10f;
-
-
-    /// <summary>
     /// Gets user settings from command line arguments
     /// </summary>
     public static string[] SettingsFromCmdLine => Environment.GetCommandLineArgs()
@@ -56,124 +76,113 @@ public static partial class Config
         .Select(cmd => cmd[1..]) // trim '/' from the command
         .ToArray();
 
+
+    /// <summary>
+    /// Gets the app's startup path.
+    /// </summary>
+    public static string StartUpDir => AppDomain.CurrentDomain.BaseDirectory;
+
+
+    /// <summary>
+    /// Gets the app's configuration path.
+    /// </summary>
+    public static string ConfigDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ImageGlass_10");
+
     #endregion
 
-
-    public static string StartUpDir => AppDomain.CurrentDomain.BaseDirectory;
-    public static string ConfigDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ImageGlass_10");
 
 
     #region Public methods
 
     /// <summary>
-    /// Loads all config files: default, user, command-lines, admin;
-    /// then unify configs.
+    /// Loads and parses configs from file.
     /// </summary>
-    public static IConfigurationRoot ReadUserConfigFile()
+    public static void Load()
     {
-        var startUpDir = StartUpDir;
-        var configDir = ConfigDir;
+        // 1. get user config file path
+        var userFilePath = Path.Combine(ConfigDir, UserFilename);
+
+        // 2. create json options
+        var jsonOptions = BHelper.CreateJsonOptions();
+        var jsonContext = new AppSettingsJsonContext(jsonOptions);
+
+
+        // 3. load user settings
+        var userSettings = ParseSettingFile(userFilePath);
+        if (userSettings != null)
+        {
+            Config.Current = userSettings;
+        }
+        else
+        {
+            Config.Current.LoadDefaults();
+        }
+
+
+        // 4. migrate user config file if config version is changed
+        MigrateUserConfigFile();
+    }
+
+
+    private static AppSettings? ParseSettingFile(string filePath)
+    {
+        var jsonOptions = BHelper.CreateJsonOptions();
+        var jsonContext = new AppSettingsJsonContext(jsonOptions);
 
         try
         {
-            // igconfig.default.json
-            var defaultConfig = new ConfigurationBuilder()
-                .SetBasePath(startUpDir)
-                .AddJsonFile(DefaultFilename, optional: true)
-                .Build();
+            var userSettings = BHelper.ReadJsonFromFile(filePath, jsonContext.AppSettings);
 
-            // admin.igconfig.json
-            var adminConfig = new ConfigurationBuilder()
-                .SetBasePath(startUpDir)
-                .AddJsonFile(AdminFilename, optional: true)
-                .Build();
+            if (userSettings == null)
+                throw new FileLoadException($"Cannot parse settings from file: {filePath}");
 
-            // final config
-            var userConfig = new ConfigurationBuilder()
-                .AddConfiguration(defaultConfig)
-
-                // igconfig.json
-                .SetBasePath(configDir)
-                .AddJsonFile(UserFilename, optional: true)
-
-                // command line
-                .AddCommandLine(SettingsFromCmdLine)
-
-                .AddConfiguration(adminConfig)
-                .Build();
-
-            return userConfig;
+            return userSettings;
         }
         catch { }
 
-
-        // fall back to default config if user config is invalid
-        var fallBackConfig = new ConfigurationBuilder()
-            .SetBasePath(startUpDir)
-            .AddJsonFile(DefaultFilename, optional: true) // igconfig.default.json
-            .AddCommandLine(SettingsFromCmdLine) // command line
-            .AddJsonFile(AdminFilename, optional: true) // igconfig.admin.json
-            .Build();
-
-        return fallBackConfig;
+        return null;
     }
 
 
     /// <summary>
-    /// Loads pre-defined settings from
-    /// <see cref="DefaultFilename"/> and <see cref="AdminFilename"/>.
-    /// </summary>
-    public static IConfigurationRoot ReadNonUserConfigs()
-    {
-        var startUpDir = StartUpDir;
-
-        // igconfig.default.json
-        var defaultConfig = new ConfigurationBuilder()
-            .SetBasePath(startUpDir)
-            .AddJsonFile(DefaultFilename, optional: true)
-            .Build();
-
-        // admin.igconfig.json
-        var adminConfig = new ConfigurationBuilder()
-            .SetBasePath(startUpDir)
-            .AddJsonFile(AdminFilename, optional: true)
-            .Build();
-
-        // final config
-        var userConfig = new ConfigurationBuilder()
-            .AddConfiguration(defaultConfig)
-            .AddCommandLine(SettingsFromCmdLine)
-            .AddConfiguration(adminConfig)
-            .Build();
-
-        return userConfig;
-    }
-
-
-    /// <summary>
-    /// Loads and parsse configs from file
-    /// </summary>
-    public static void Load(IConfigurationRoot? root = null)
-    {
-        _root ??= ReadUserConfigFile();
-
-        // TODO:
-    }
-
-
-    /// <summary>
-    /// Parses and writes configs to file
+    /// Writes configs to file.
     /// </summary>
     public static async Task SaveAsync()
     {
-        // TODO:
+        var jsonFilePath = Path.Combine(ConfigDir, UserFilename);
+        var jsonOptions = BHelper.CreateJsonOptions();
+        var jsonContext = new AppSettingsJsonContext(jsonOptions);
 
-        //var jsonFile = App.ConfigDir(PathType.File, Source.UserFilename);
-        //var jsonObj = PrepareJsonSettingsObject();
-
-        //await BHelper.WriteJsonAsync(jsonFile, jsonObj);
+        await BHelper.WriteJsonToFileAsync(jsonFilePath, Config.Current, jsonContext.AppSettings);
     }
 
+
     #endregion
+
+
+
+    // Config file migration
+    #region Config file migration
+
+    /// <summary>
+    /// Migrate user config file.
+    /// </summary>
+    private static void MigrateUserConfigFile()
+    {
+        var configVersion = Current._Metadata.Version;
+
+        // update config version
+        Current._Metadata.Version = Version;
+
+        // no change
+        if (Version <= configVersion) return;
+
+
+
+        //
+    }
+
+    #endregion // Config file migration
+
 
 }

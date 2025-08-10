@@ -1,6 +1,5 @@
 ﻿
 using D2Phap;
-using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
 using ImageGlass.WinNT.Common;
 using ImageGlass.WinNT.Common.FileSystem;
@@ -94,7 +93,7 @@ public sealed partial class MainWindow : Window
 
 
         // 3.1 get foreground shell
-        if (Config.ShouldUseExplorerSortOrder)
+        if (Config.Current.ShouldUseExplorerSortOrder)
         {
             using var shell = new EggShell();
             Local.ForegroundShell = shell.GetForegroundWindowView();
@@ -172,16 +171,16 @@ public sealed partial class MainWindow : Window
         var pathToLoad = Local.InputImagePathFromArgs;
 
         //if (string.IsNullOrEmpty(pathToLoad)
-        //    && Config.ShouldOpenLastSeenImage
-        //    && BHelper.CheckPath(Config.LastSeenImagePath) == PathType.File)
+        //    && Config.Current.ShouldOpenLastSeenImage
+        //    && BHelper.CheckPath(Config.Current.LastSeenImagePath) == PathType.File)
         //{
-        //    pathToLoad = Config.LastSeenImagePath;
+        //    pathToLoad = Config.Current.LastSeenImagePath;
         //}
 
 
         //if (string.IsNullOrEmpty(pathToLoad))
         //{
-        //    if (Config.ShowWelcomeImage)
+        //    if (Config.Current.ShowWelcomeImage)
         //    {
         //        pathToLoad = App.StartUpDir("default.webp");
         //    }
@@ -213,8 +212,8 @@ public sealed partial class MainWindow : Window
         // start loading files
         var initPhoto = Local.Photos.StartLoadingFiles(inputPaths, new FileShellSearchOptions()
         {
-            AllowedExtensions = Const.FileFormats,
-            UseExplorerSortOrder = Config.ShouldUseExplorerSortOrder,
+            AllowedExtensions = Config.Current.FileFormats,
+            UseExplorerSortOrder = Config.Current.ShouldUseExplorerSortOrder,
             ForegroundShell = foregroundShell,
         }, _searchProgress);
 
