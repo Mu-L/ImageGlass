@@ -8,6 +8,7 @@
     xmlns:local="using:ImageGlass"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:winNT="using:ImageGlass.WinNT"
+    xmlns:winNTCommon="using:ImageGlass.WinNT.Common"
     Title="ImageGlass"
     Closed="Window_Closed"
     mc:Ignorable="d">
@@ -41,12 +42,14 @@
             <ImageIcon
                 Grid.Column="0"
                 Width="20"
-                Margin="5,0,5,0"
-                Source="/Assets/Square44x44Logo.png" />
+                Margin="5,0,0,0"
+                Source="/Assets/Square44x44Logo.png"
+                Visibility="{x:Bind winNTCommon:Config.Current.ShowAppIcon}" />
 
             <TextBlock
                 x:Name="WinMainTitleBarText"
                 Grid.Column="1"
+                Margin="5,0,0,0"
                 VerticalAlignment="Center"
                 Style="{StaticResource CaptionTextBlockStyle}"
                 Text="{x:Bind Title}"
@@ -105,9 +108,10 @@
                     x:Name="Viewer"
                     AllowDrop="True"
                     BackgroundColor="#22000000"
+                    CheckerboardMode="{x:Bind ViewerCheckerboardMode}"
                     DragOver="Viewer_DragOver"
                     Drop="Viewer_Drop"
-                    EnableDebug="False"
+                    EnableDebug="{x:Bind winNTCommon:Config.Current.EnableDebug}"
                     EnableSelection="False"
                     Loaded="Viewer_Loaded" />
             </Border>

@@ -2,6 +2,7 @@
 using D2Phap;
 using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
+using ImageGlass.WinNT;
 using ImageGlass.WinNT.Common;
 using ImageGlass.WinNT.Common.FileSystem;
 using ImageGlass.WinNT.Common.Photoing;
@@ -44,6 +45,16 @@ public sealed partial class MainWindow : Window
     public Thickness TitleBarMargin => new Thickness(0, 0, AppWindow.TitleBar.RightInset / 2.5f, 0);
 
     public nint Handle => WindowNative.GetWindowHandle(this);
+
+    public CheckerboardMode ViewerCheckerboardMode
+    {
+        get
+        {
+            if (!Config.Current.ShowCheckerboard) return CheckerboardMode.None;
+            if (Config.Current.ShowCheckerboardOnlyImageRegion) return CheckerboardMode.Image;
+            return CheckerboardMode.Client;
+        }
+    }
 
 
     private void Window_Closed(object sender, WindowEventArgs args)
@@ -217,6 +228,11 @@ public sealed partial class MainWindow : Window
             AllowedExtensions = Config.Current.FileFormats,
             UseExplorerSortOrder = Config.Current.ShouldUseExplorerSortOrder,
             ForegroundShell = foregroundShell,
+            SearchSubDirectories = Config.Current.EnableRecursiveLoading,
+            GroupByDir = Config.Current.ShouldGroupImagesByDirectory,
+            IncludeHidden = Config.Current.ShouldLoadHiddenImages,
+            OrderBy = Config.Current.ImageLoadingOrder,
+            OrderType = Config.Current.ImageLoadingOrderType,
         }, _searchProgress);
 
 

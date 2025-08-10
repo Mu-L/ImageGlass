@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Common.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +33,7 @@ public partial class AppSettingsJsonContext : JsonSerializerContext { }
 public partial class AppSettings
 {
     public ConfigMetadata _Metadata { get; set; } = new();
+
 
 
     #region Setting items
@@ -124,25 +126,25 @@ public partial class AppSettings
     ///// </summary>
     //public bool ShowFrameNavTool { get; set; } = false;
 
-    ///// <summary>
-    ///// Gets, sets value of visibility of app icon
-    ///// </summary>
-    //public bool ShowAppIcon { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value of visibility of app icon
+    /// </summary>
+    public bool ShowAppIcon { get; set; } = true;
 
     ///// <summary>
     ///// Gets, sets value indicating that ImageGlass will loop back viewer to the first image when reaching the end of the list.
     ///// </summary>
     //public bool EnableLoopBackNavigation { get; set; } = true;
 
-    ///// <summary>
-    ///// Gets, sets value indicating that checker board is shown or not
-    ///// </summary>
-    //public bool ShowCheckerboard { get; set; } = false;
+    /// <summary>
+    /// Gets, sets value indicating that checker board is shown or not
+    /// </summary>
+    public bool ShowCheckerboard { get; set; } = false;
 
-    ///// <summary>
-    ///// Gets, sets the value indicates whether to show checkerboard in the image region only
-    ///// </summary>
-    //public bool ShowCheckerboardOnlyImageRegion { get; set; } = false;
+    /// <summary>
+    /// Gets, sets the value indicates whether to show checkerboard in the image region only
+    /// </summary>
+    public bool ShowCheckerboardOnlyImageRegion { get; set; } = false;
 
     ///// <summary>
     ///// Gets, sets value indicating that multi instances is allowed or not
@@ -199,25 +201,25 @@ public partial class AppSettings
     ///// </summary>
     //public bool EnableNavigationButtons { get; set; } = true;
 
-    ///// <summary>
-    ///// Gets, sets recursive value
-    ///// </summary>
-    //public bool EnableRecursiveLoading { get; set; } = false;
+    /// <summary>
+    /// Gets, sets recursive value
+    /// </summary>
+    public bool EnableRecursiveLoading { get; set; } = false;
 
     /// <summary>
     /// Gets, sets the value indicates that Windows File Explorer sort order is used if possible
     /// </summary>
     public bool ShouldUseExplorerSortOrder { get; set; } = true;
 
-    ///// <summary>
-    ///// Gets, sets the value indicates that images order should be grouped by directory
-    ///// </summary>
-    //public bool ShouldGroupImagesByDirectory { get; set; } = false;
+    /// <summary>
+    /// Gets, sets the value indicates that images order should be grouped by directory
+    /// </summary>
+    public bool ShouldGroupImagesByDirectory { get; set; } = false;
 
-    ///// <summary>
-    ///// Gets, sets showing/loading hidden images
-    ///// </summary>
-    //public bool ShouldLoadHiddenImages { get; set; } = false;
+    /// <summary>
+    /// Gets, sets showing/loading hidden images
+    /// </summary>
+    public bool ShouldLoadHiddenImages { get; set; } = false;
 
     ///// <summary>
     ///// Gets, sets value specifying that Window Fit mode is on
@@ -548,15 +550,15 @@ public partial class AppSettings
     ///// </summary>
     //public FormWindowState FrmSettingsState { get; set; } = FormWindowState.Normal;
 
-    ///// <summary>
-    ///// Gets, sets image loading order
-    ///// </summary>
-    //public ImageOrderBy ImageLoadingOrder { get; set; } = ImageOrderBy.Name;
+    /// <summary>
+    /// Gets, sets image loading order
+    /// </summary>
+    public ImageOrderBy ImageLoadingOrder { get; set; } = ImageOrderBy.Name;
 
-    ///// <summary>
-    ///// Gets, sets image loading order type
-    ///// </summary>
-    //public ImageOrderType ImageLoadingOrderType { get; set; } = ImageOrderType.Asc;
+    /// <summary>
+    /// Gets, sets image loading order type
+    /// </summary>
+    public ImageOrderType ImageLoadingOrderType { get; set; } = ImageOrderType.Asc;
 
     ///// <summary>
     ///// Gets, sets zoom mode value
