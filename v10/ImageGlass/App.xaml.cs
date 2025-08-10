@@ -97,15 +97,39 @@ public partial class App : Application
 
     private async void Window_Closed(object sender, WindowEventArgs args)
     {
+        // save configs
+        await SaveConfigsOnClosing();
+
         // dispose foreground shell
         Local.ForegroundShell = null;
 
         Local.Photos.Dispose();
         WindowColorProfileProvider.Instance.Dispose();
-
-        // save configs
-        await Config.SaveAsync();
     }
 
+    public static async Task SaveConfigsOnClosing()
+    {
+        //// save FrmMain placement
+        //if (!Config.EnableFullScreen)
+        //{
+        //    WindowSettings.SaveFrmMainPlacementToConfig(this);
+        //}
 
+
+        Config.Current.LastSeenImagePath = Local.Photos.GetFilePath(Local.Photos.CurrentIndex);
+        //Config.ZoomLockValue = PicMain.ZoomFactor * 100f;
+
+
+        // save config to file
+        await Config.SaveAsync();
+
+
+        //// cleaning
+        //try
+        //{
+        //    // delete trash
+        //    Directory.Delete(Config.ConfigDir(PathType.Dir, Dir.Temporary), true);
+        //}
+        //catch { }
+    }
 }

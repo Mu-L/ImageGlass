@@ -184,10 +184,10 @@ public partial class AppSettings
     ///// </summary>
     //public bool EnableCenterToolbar { get; set; } = true;
 
-    ///// <summary>
-    ///// Gets, sets the value indicates that to show last seen image on startup
-    ///// </summary>
-    //public bool ShouldOpenLastSeenImage { get; set; } = true;
+    /// <summary>
+    /// Gets, sets the value indicates that to show last seen image on startup
+    /// </summary>
+    public bool ShouldOpenLastSeenImage { get; set; } = true;
 
     ///// <summary>
     ///// Gets, sets the value indicates that the ColorProfile will be applied for all or only the images with embedded profile
@@ -435,10 +435,10 @@ public partial class AppSettings
     ///// </summary>
     //public string AutoUpdate { get; set; } = DateTime.UtcNow.Subtract(TimeSpan.FromDays(30)).ToISO8601String();
 
-    ///// <summary>
-    ///// Gets, sets the absolute file path of the last seen image
-    ///// </summary>
-    //public string LastSeenImagePath { get; set; } = "";
+    /// <summary>
+    /// Gets, sets the absolute file path of the last seen image
+    /// </summary>
+    public string LastSeenImagePath { get; set; } = "";
 
     ///// <summary>
     ///// Gets, sets the last view of settings window.

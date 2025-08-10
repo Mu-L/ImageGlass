@@ -77,16 +77,19 @@ public static partial class Config
         .ToArray();
 
 
+    public static string AppName => "ImageGlass_10";
+
+
     /// <summary>
     /// Gets the app's startup path.
     /// </summary>
-    public static string StartUpDir => AppDomain.CurrentDomain.BaseDirectory;
+    public static string StartupPath => AppDomain.CurrentDomain.BaseDirectory;
 
 
     /// <summary>
     /// Gets the app's configuration path.
     /// </summary>
-    public static string ConfigDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ImageGlass_10");
+    public static string ConfigPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
 
     #endregion
 
@@ -100,7 +103,7 @@ public static partial class Config
     public static void Load()
     {
         // 1. get user config file path
-        var userFilePath = Path.Combine(ConfigDir, UserFilename);
+        var userFilePath = Path.Combine(ConfigPath, UserFilename);
 
         // 2. create json options
         var jsonOptions = BHelper.CreateJsonOptions();
@@ -149,13 +152,53 @@ public static partial class Config
     /// </summary>
     public static async Task SaveAsync()
     {
-        var jsonFilePath = Path.Combine(ConfigDir, UserFilename);
+        var jsonFilePath = Path.Combine(ConfigPath, UserFilename);
         var jsonOptions = BHelper.CreateJsonOptions();
         var jsonContext = new AppSettingsJsonContext(jsonOptions);
 
         await BHelper.WriteJsonToFileAsync(jsonFilePath, Config.Current, jsonContext.AppSettings);
     }
 
+
+    /// <summary>
+    /// Gets the path based on the startup folder of ImageGlass.
+    /// </summary>
+    public static string StartUpDir(params string[] paths)
+    {
+        var newPaths = paths.ToList();
+        newPaths.Insert(0, StartupPath);
+
+        return Path.Combine([.. newPaths]);
+    }
+
+
+    /// <summary>
+    /// Returns the path based on the configuration folder of ImageGlass.
+    /// For portable mode, ConfigDir = InstalledDir, else <c>%LocalAppData%\ImageGlass</c>
+    /// </summary>
+    /// <param name="type">Indicates if the given path is either file or directory</param>
+    public static string ConfigDir(PathType type, params string[] paths)
+    {
+        // use StartUp dir if it's writable
+        var startUpPath = StartUpDir(paths);
+
+        if (BHelper.CheckPathWritable(type, startUpPath))
+        {
+            return startUpPath;
+        }
+
+        // else, use AppData dir
+        var appDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
+
+        // create the directory if not exists
+        Directory.CreateDirectory(appDataDir);
+
+        var newPaths = paths.ToList();
+        newPaths.Insert(0, appDataDir);
+        appDataDir = Path.Combine([.. newPaths]);
+
+        return appDataDir;
+    }
 
     #endregion
 

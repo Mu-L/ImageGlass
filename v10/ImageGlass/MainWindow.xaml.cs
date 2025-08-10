@@ -1,5 +1,6 @@
 ﻿
 using D2Phap;
+using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
 using ImageGlass.WinNT.Common;
 using ImageGlass.WinNT.Common.FileSystem;
@@ -170,25 +171,26 @@ public sealed partial class MainWindow : Window
     {
         var pathToLoad = Local.InputImagePathFromArgs;
 
-        //if (string.IsNullOrEmpty(pathToLoad)
-        //    && Config.Current.ShouldOpenLastSeenImage
-        //    && BHelper.CheckPath(Config.Current.LastSeenImagePath) == PathType.File)
-        //{
-        //    pathToLoad = Config.Current.LastSeenImagePath;
-        //}
+        // check for last seen image
+        if (string.IsNullOrEmpty(pathToLoad)
+            && Config.Current.ShouldOpenLastSeenImage
+            && BHelper.CheckPath(Config.Current.LastSeenImagePath) == PathType.File)
+        {
+            pathToLoad = Config.Current.LastSeenImagePath;
+        }
 
-
-        //if (string.IsNullOrEmpty(pathToLoad))
-        //{
-        //    if (Config.Current.ShowWelcomeImage)
-        //    {
-        //        pathToLoad = App.StartUpDir("default.webp");
-        //    }
-        //    else
-        //    {
-        //        return;
-        //    }
-        //}
+        // check for Welcome image
+        if (string.IsNullOrEmpty(pathToLoad))
+        {
+            if (Config.Current.ShowWelcomeImage)
+            {
+                pathToLoad = Config.StartUpDir("default.webp");
+            }
+            else
+            {
+                return;
+            }
+        }
 
 
         // start loading path with the foreground shell
