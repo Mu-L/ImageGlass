@@ -13,27 +13,29 @@
             <!--  Other app resources here  -->
 
 
-            <SolidColorBrush
-                x:Key="ItemBorderSelected"
-                Opacity="0.5"
-                Color="{ThemeResource SystemAccentColor}" />
-            <SolidColorBrush
-                x:Key="ItemBackgroundHovered"
-                Opacity="0.2"
-                Color="{ThemeResource SystemAccentColor}" />
-            <SolidColorBrush
-                x:Key="ItemBackgroundPressed"
-                Opacity="0.35"
-                Color="{ThemeResource SystemAccentColor}" />
-            <SolidColorBrush
-                x:Key="ItemBackgroundSelected"
-                Opacity="0.3"
-                Color="{ThemeResource SystemAccentColor}" />
-
-
             <!--  Gallery  -->
             <x:Double x:Key="GalleryThumbnailSize">70</x:Double>
 
+
+            <!--  IgButton Styles  -->
+            <SolidColorBrush
+                x:Key="IgButtonBorderSelected"
+                Opacity="0.5"
+                Color="{ThemeResource SystemAccentColor}" />
+
+            <SolidColorBrush x:Key="IgButtonBackground" Color="Transparent" />
+            <SolidColorBrush
+                x:Key="IgButtonBackgroundHovered"
+                Opacity="0.2"
+                Color="{ThemeResource SystemAccentColor}" />
+            <SolidColorBrush
+                x:Key="IgButtonBackgroundPressed"
+                Opacity="0.35"
+                Color="{ThemeResource SystemAccentColor}" />
+            <SolidColorBrush
+                x:Key="IgButtonBackgroundSelected"
+                Opacity="0.3"
+                Color="{ThemeResource SystemAccentColor}" />
 
 
         </ResourceDictionary>

@@ -29,7 +29,7 @@ public partial class SelectionToBackgroundConverter : IValueConverter
 {
     public Brush DefaultBackground { get; set; } = new SolidColorBrush();
 
-    public Brush SelectedBackground { get; set; } = (Brush)(Application.Current.Resources["ItemBackgroundSelected"]);
+    public Brush SelectedBackground { get; set; } = (Brush)(Application.Current.Resources["IgButtonBackgroundSelected"]);
 
 
     public object Convert(object value, Type targetType, object parameter, string language)

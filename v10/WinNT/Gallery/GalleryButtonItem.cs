@@ -161,21 +161,21 @@ public partial class GalleryButtonItem : Button
         // selected style
         if (IsSelected)
         {
-            bgBrush = (Brush)(Application.Current.Resources["ItemBackgroundSelected"]);
-            borderBrush = (Brush)(Application.Current.Resources["ItemBorderSelected"]);
+            bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundSelected"]);
+            borderBrush = (Brush)(Application.Current.Resources["IgButtonBorderSelected"]);
         }
 
 
         // hover style
         if (State.HasFlag(GalleryButtonItemStates.Hovered))
         {
-            bgBrush = (Brush)(Application.Current.Resources["ItemBackgroundHovered"]);
+            bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundHovered"]);
         }
 
         // pressed style
         else if (State.HasFlag(GalleryButtonItemStates.Pressed))
         {
-            bgBrush = (Brush)(Application.Current.Resources["ItemBackgroundPressed"]);
+            bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundPressed"]);
         }
 
 

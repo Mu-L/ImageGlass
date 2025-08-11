@@ -28,7 +28,7 @@ public partial class SelectionToBorderConverter : IValueConverter
 {
     public Brush DefaultBorder { get; set; } = new SolidColorBrush();
 
-    public Brush SelectedBorder { get; set; } = (Brush)(Application.Current.Resources["ItemBorderSelected"]);
+    public Brush SelectedBorder { get; set; } = (Brush)(Application.Current.Resources["IgButtonBorderSelected"]);
 
 
     public object Convert(object value, Type targetType, object parameter, string language)
