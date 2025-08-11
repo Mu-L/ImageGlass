@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WinNT\Gallery\ImageGlass.Gallery.csproj" />
+    <ProjectReference Include="..\WinNT\Toolbar\ImageGlass.Toolbar.csproj" />
     <ProjectReference Include="..\WinNT\VirtualViewer\ImageGlass.VirtualViewer.csproj" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

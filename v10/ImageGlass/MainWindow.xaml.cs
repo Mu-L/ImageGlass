@@ -37,6 +37,9 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(WinMainTitleBar);
 
+        // load toolbar buttons
+        LoadToolbarButtons();
+
         AppWindow.Resize(new Windows.Graphics.SizeInt32(2000, 1500));
     }
 
@@ -67,6 +70,12 @@ public sealed partial class MainWindow : Window
                 };
             }
         }
+    }
+
+
+    private void LoadToolbarButtons()
+    {
+        ToolbarMain.AddButtons(Config.Current.ToolbarButtons);
     }
 
 

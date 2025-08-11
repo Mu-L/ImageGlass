@@ -475,10 +475,40 @@ public partial class AppSettings
     [JsonConverter(typeof(JsonArrayToStringConverter))]
     public HashSet<string> SingleFrameFormats { get; set; } = [".avif", ".heic", ".heif", ".psd", ".jxl"];
 
-    ///// <summary>
-    ///// Gets, sets the list of toolbar buttons
-    ///// </summary>
-    //public List<ToolbarItemModel> ToolbarButtons { get; set; } = [];
+    /// <summary>
+    /// Gets, sets the list of toolbar buttons
+    /// </summary>
+    public List<ToolbarItemModel> ToolbarButtons { get; set; } =
+    [
+        new()
+        {
+            Id = "Btn_OpenFile",
+            Text = "Open File",
+            Type = ToolbarItemType.Button,
+        },
+        new()
+        {
+            Id = "Btn_OpenFolder",
+            Text = "Open Folder",
+            Type = ToolbarItemType.Button,
+        },
+        new()
+        {
+            Type = ToolbarItemType.Separator,
+        },
+        new()
+        {
+            Id = "Btn_ViewPrevious",
+            Text = "View Previous",
+            Type = ToolbarItemType.Button,
+        },
+        new()
+        {
+            Id = "Btn_ViewNext",
+            Text = "View Next",
+            Type = ToolbarItemType.Button,
+        },
+    ];
 
     ///// <summary>
     ///// Gets, sets the tags for displaying image info
