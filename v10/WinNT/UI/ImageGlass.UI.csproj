@@ -17,8 +17,8 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Common\ImageGlass.Common\ImageGlass.Common.csproj" />
-    <ProjectReference Include="..\..\ImageGlass.WinNT.Common\ImageGlass.WinNT.Common.csproj" />
+    <ProjectReference Include="..\..\Common\ImageGlass.Common\ImageGlass.Common.csproj" />
+    <ProjectReference Include="..\ImageGlass.WinNT.Common\ImageGlass.WinNT.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Gallery\GalleryControl.xaml">
