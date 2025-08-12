@@ -48,8 +48,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WinNT\Gallery\ImageGlass.Gallery.csproj" />
-    <ProjectReference Include="..\WinNT\Toolbar\ImageGlass.Toolbar.csproj" />
+    <ProjectReference Include="..\WinNT\UI\UI\ImageGlass.UI.csproj" />
     <ProjectReference Include="..\WinNT\VirtualViewer\ImageGlass.VirtualViewer.csproj" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

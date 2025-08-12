@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:ImageGlass.WinNT.UI"
     xmlns:winNT="using:ImageGlass.WinNT"
     xmlns:winNTCommon="using:ImageGlass.WinNT.Common"
     Title="ImageGlass"
@@ -60,7 +61,7 @@
             Grid.Row="1"
             VerticalAlignment="Top"
             Canvas.ZIndex="99">
-            <winNT:ToolbarControl x:Name="ToolbarMain" />
+            <ui:ToolbarControl x:Name="ToolbarMain" />
         </Grid>
 
 
@@ -70,7 +71,7 @@
             Grid.Column="1"
             VerticalAlignment="Bottom"
             Canvas.ZIndex="98">
-            <winNT:GalleryControl
+            <ui:GalleryControl
                 x:Name="Gallery"
                 ItemClicked="Gallery_ItemClicked"
                 PhotoManager="{x:Bind local:Local.Photos, Mode=OneWay}" />

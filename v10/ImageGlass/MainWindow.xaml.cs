@@ -5,6 +5,7 @@ using ImageGlass.Common.FileSystem;
 using ImageGlass.WinNT.Common;
 using ImageGlass.WinNT.Common.FileSystem;
 using ImageGlass.WinNT.Common.Photoing;
+using ImageGlass.WinNT.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -192,7 +193,7 @@ public sealed partial class MainWindow : Window
         ViewByStep(-1);
     }
 
-    private void Gallery_ItemClicked(WinNT.GalleryButtonItem sender, EventArgs args)
+    private void Gallery_ItemClicked(GalleryButtonItem sender, EventArgs args)
     {
         var photoIndex = Local.Photos.IndexOf(sender.FilePath);
         ViewByIndex(photoIndex);
