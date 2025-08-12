@@ -2,10 +2,10 @@
 using D2Phap;
 using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
-using ImageGlass.WinNT.Common;
-using ImageGlass.WinNT.Common.FileSystem;
-using ImageGlass.WinNT.Common.Photoing;
-using ImageGlass.WinNT.UI;
+using ImageGlass.Win64.Common;
+using ImageGlass.Win64.Common.FileSystem;
+using ImageGlass.Win64.Common.Photoing;
+using ImageGlass.Win64.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;

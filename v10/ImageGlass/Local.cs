@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using D2Phap;
 using ImageGlass.Common;
-using ImageGlass.WinNT.Common.Photoing;
+using ImageGlass.Win64.Common.Photoing;
 using System;
 using System.IO;
 using System.Linq;

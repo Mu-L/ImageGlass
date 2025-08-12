@@ -49,9 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\ImageGlass.Common\ImageGlass.Common.csproj" />
-    <ProjectReference Include="..\WinNT\ImageGlass.WinNT.Common\ImageGlass.WinNT.Common.csproj" />
-    <ProjectReference Include="..\WinNT\UI\ImageGlass.UI.csproj" />
-    <ProjectReference Include="..\WinNT\VirtualViewer\ImageGlass.VirtualViewer.csproj" />
+    <ProjectReference Include="..\Win64\ImageGlass.Win64.Common\ImageGlass.Win64.Common.csproj" />
+    <ProjectReference Include="..\Win64\UI\ImageGlass.UI.csproj" />
+    <ProjectReference Include="..\Win64\VirtualViewer\ImageGlass.VirtualViewer.csproj" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <WebView2EnableCsWinRTProjection>True</WebView2EnableCsWinRTProjection>
