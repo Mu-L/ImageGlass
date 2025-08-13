@@ -122,33 +122,40 @@ public sealed partial class MainWindow : Window
         }
 
 
-        // 3. load single path
-        var filePath = WHelper.ResolvePath(paths[0]);
-        var imageIndex = Local.Photos.IndexOf(filePath);
+        // 3. load single directory path
+        var path = WHelper.ResolvePath(paths[0]);
+        if (BHelper.CheckPath(path) == PathType.Dir)
+        {
+            PrepareLoadPhoto([path], true);
+            return;
+        }
 
 
-        // 3.1 get foreground shell
+        // 4. load single file path
+        var imageIndex = Local.Photos.IndexOf(path);
+
+        // 4.1 get foreground shell
         if (Config.Current.ShouldUseExplorerSortOrder)
         {
             using var shell = new EggShell();
             Local.ForegroundShell = shell.GetForegroundWindowView();
         }
 
-        // 3.2 save init input path
-        Local.UpdateInputImagePath(filePath);
+        // 4.2 save init input path
+        Local.UpdateInputImagePath(path);
 
 
-        // 3.3 The file is located another folder, load the entire folder
+        // 4.3 The file is located another folder, load the entire folder
         if (imageIndex == -1 || Local.CanUseForegroundShell())
         {
-            PrepareLoadPhoto([filePath], false);
+            PrepareLoadPhoto([path], false);
         }
-        // 3.4 The file is in current folder AND it is the viewing image
+        // 4.4 The file is in current folder AND it is the viewing image
         else if (Local.Photos.CurrentIndex == imageIndex)
         {
             //do nothing
         }
-        // 3.5 The file is in current folder AND it is NOT the viewing image
+        // 4.5 The file is in current folder AND it is NOT the viewing image
         else
         {
             ViewByIndex(imageIndex);
