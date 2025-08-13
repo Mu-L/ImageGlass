@@ -288,7 +288,7 @@ public sealed partial class MainWindow : Window
             {
                 Local.Photos.Items[Local.Photos.CurrentIndex]?.Dispose();
                 Local.Photos.Items[Local.Photos.CurrentIndex] = Local.Photos.InitPhoto;
-                Local.Photos.Items[Local.Photos.CurrentIndex].IsSelected = true;
+                Local.Photos.Items[Local.Photos.CurrentIndex].IsCurrent = true;
             }
         }
         // display the first file in a folder

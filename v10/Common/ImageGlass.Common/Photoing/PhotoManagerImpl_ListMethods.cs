@@ -102,14 +102,14 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // deselect old index
         if (0 <= CurrentIndex && CurrentIndex < Count)
         {
-            Items[CurrentIndex].IsSelected = false;
+            Items[CurrentIndex].IsCurrent = false;
         }
 
         // validate new index
         if (index < 0 || index >= Count) return null;
 
         // select new index
-        Items[index].IsSelected = true;
+        Items[index].IsCurrent = true;
         _currentIndex = index;
 
         return Get(index);
@@ -132,7 +132,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// </summary>
     public bool IsSelected(int index)
     {
-        return Get(index)?.IsSelected ?? false;
+        return Get(index)?.IsCurrent ?? false;
     }
 
 

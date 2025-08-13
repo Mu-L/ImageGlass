@@ -30,7 +30,7 @@ public abstract class PhotoImpl : DisposableImpl
     protected uint _width = 0;
     protected uint _height = 0;
     private string _filePath = "";
-    private bool _isSelected = false;
+    private bool _isCurrent = false;
 
     protected CancellationTokenSource? _cancelPhotoLoading;
 
@@ -67,17 +67,17 @@ public abstract class PhotoImpl : DisposableImpl
 
 
     /// <summary>
-    /// Gets, sets value indicating if the photo is selected.
+    /// Gets, sets value indicating if the photo is current index.
     /// </summary>
-    public bool IsSelected
+    public bool IsCurrent
     {
-        get => _isSelected;
+        get => _isCurrent;
         set
         {
-            if (_isSelected != value)
+            if (_isCurrent != value)
             {
-                _isSelected = value;
-                OnPropertyChanged(nameof(IsSelected));
+                _isCurrent = value;
+                OnPropertyChanged(nameof(IsCurrent));
             }
         }
     }

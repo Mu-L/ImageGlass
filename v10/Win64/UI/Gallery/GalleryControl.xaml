@@ -79,12 +79,12 @@
                 VerticalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
                 VerticalContentAlignment="Stretch"
-                Background="{x:Bind IsSelected, Converter={StaticResource SelectionToBackgroundConverter}}"
-                BorderBrush="{x:Bind IsSelected, Converter={StaticResource SelectionToBorderConverter}}"
+                Background="{x:Bind IsCurrent, Converter={StaticResource SelectionToBackgroundConverter}}"
+                BorderBrush="{x:Bind IsCurrent, Converter={StaticResource SelectionToBorderConverter}}"
                 BorderThickness="1.25"
                 Click="GalleryItem_Clicked"
                 FilePath="{x:Bind FilePath}"
-                IsChecked="{x:Bind IsSelected}"
+                IsChecked="{x:Bind IsCurrent}"
                 IsTabStop="False"
                 Style="{StaticResource GalleryButtonItemStyle}">
 
