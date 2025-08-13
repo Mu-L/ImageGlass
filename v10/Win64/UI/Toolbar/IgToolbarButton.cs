@@ -67,7 +67,7 @@ public partial class IgToolbarButton : AppBarButton
 
     public IgToolbarButton()
     {
-        DefaultStyleKey = typeof(IgToolbarButton);
+        DefaultStyleKey = nameof(IgToolbarButton);
     }
 
 
@@ -75,12 +75,22 @@ public partial class IgToolbarButton : AppBarButton
     {
         base.OnApplyTemplate();
 
+        // reset button width
+        Width = double.NaN;
+
 
         // Border lement: remove background transition
         if (GetTemplateChild("AppBarButtonInnerBorder") is Border borderEl)
         {
             borderEl.BackgroundTransition = null;
             borderEl.BorderThickness = new Thickness(1);
+
+            // Set min size of button to the size of icon
+            if (GetTemplateChild("ContentViewbox") is Viewbox iconViewBox)
+            {
+                var iconHeight = iconViewBox.Height;
+                MinWidth = MinHeight = iconHeight * 2.5;
+            }
         }
 
 
