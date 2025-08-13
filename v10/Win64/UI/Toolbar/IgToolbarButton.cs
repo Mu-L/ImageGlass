@@ -62,7 +62,7 @@ public partial class IgToolbarButton : AppBarButton
         Width = double.NaN;
 
 
-        // Border lement: remove background transition
+        // Border element: remove background transition
         if (GetTemplateChild("AppBarButtonInnerBorder") is Border borderEl)
         {
             borderEl.BackgroundTransition = null;
@@ -72,22 +72,36 @@ public partial class IgToolbarButton : AppBarButton
             if (GetTemplateChild("ContentViewbox") is Viewbox iconViewBox)
             {
                 var iconHeight = iconViewBox.Height;
-                MinWidth = MinHeight = iconHeight * 2.5;
+                MinWidth = iconHeight * 2.5;
             }
         }
 
-        // remove default hover style
+        // remove default style: PointerOver
         if (GetTemplateChild("PointerOver") is VisualState vsHover)
         {
             vsHover.Setters.RemoveAt(1);
             vsHover.Setters.RemoveAt(0);
         }
 
-        // remove default pressed style
+        // remove default style: Pressed
         if (GetTemplateChild("Pressed") is VisualState vsPressed)
         {
             vsPressed.Setters.RemoveAt(1);
             vsPressed.Setters.RemoveAt(0);
+        }
+
+        // remove default style: OverflowPointerOver
+        if (GetTemplateChild("OverflowPointerOver") is VisualState vsOverflowHover)
+        {
+            vsOverflowHover.Setters.RemoveAt(1);
+            vsOverflowHover.Setters.RemoveAt(0);
+        }
+
+        // remove default style: OverflowPressed
+        if (GetTemplateChild("OverflowPressed") is VisualState vsOverflowPressed)
+        {
+            vsOverflowPressed.Setters.RemoveAt(1);
+            vsOverflowPressed.Setters.RemoveAt(0);
         }
 
         _clickable.UpdateStyle();

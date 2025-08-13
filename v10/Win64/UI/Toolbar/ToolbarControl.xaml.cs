@@ -27,7 +27,6 @@ namespace ImageGlass.Win64.UI;
 
 public sealed partial class ToolbarControl : UserControl
 {
-
     public ToolbarControl()
     {
         InitializeComponent();
