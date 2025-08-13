@@ -84,7 +84,7 @@
                 BorderThickness="1.25"
                 Click="GalleryItem_Clicked"
                 FilePath="{x:Bind FilePath}"
-                IsSelected="{x:Bind IsSelected}"
+                IsChecked="{x:Bind IsSelected}"
                 IsTabStop="False"
                 Style="{StaticResource GalleryButtonItemStyle}">
 

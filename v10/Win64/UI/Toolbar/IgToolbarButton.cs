@@ -19,31 +19,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 
 namespace ImageGlass.Win64.UI;
 
 public partial class IgToolbarButton : AppBarButton
 {
-
-    /// <summary>
-    /// Gets or sets the interaction state of the gallery button item.
-    /// </summary>
-    public IgButtonStates State
-    {
-        get => (IgButtonStates)GetValue(StateProperty);
-        set
-        {
-            SetValue(StateProperty, value);
-            UpdateStyle();
-        }
-    }
-    public static readonly DependencyProperty StateProperty =
-        DependencyProperty.Register(
-            nameof(State),
-            typeof(IgButtonStates),
-            typeof(GalleryButtonItem),
-            new PropertyMetadata(IgButtonStates.Normal));
+    private readonly IgClickable _clickable;
 
 
     /// <summary>
@@ -51,15 +32,9 @@ public partial class IgToolbarButton : AppBarButton
     /// </summary>
     public bool IsCheckable
     {
-        get => (bool)GetValue(IsCheckableProperty);
-        set => SetValue(IsCheckableProperty, value);
+        get => _clickable.IsCheckable;
+        set => _clickable.IsCheckable = value;
     }
-    public static readonly DependencyProperty IsCheckableProperty =
-        DependencyProperty.Register(
-            nameof(IsCheckable),
-            typeof(bool),
-            typeof(IgToolbarButton),
-            new PropertyMetadata(default));
 
 
     /// <summary>
@@ -67,25 +42,14 @@ public partial class IgToolbarButton : AppBarButton
     /// </summary>
     public bool IsChecked
     {
-        get => (bool)GetValue(IsCheckedProperty);
-        set
-        {
-            SetValue(IsCheckedProperty, value);
-
-            // set selected styles
-            UpdateStyle();
-        }
+        get => _clickable.IsChecked;
+        set => _clickable.IsChecked = value;
     }
-    public static readonly DependencyProperty IsCheckedProperty =
-        DependencyProperty.Register(
-            nameof(IsChecked),
-            typeof(bool),
-            typeof(IgToolbarButton),
-            new PropertyMetadata(default));
 
 
     public IgToolbarButton()
     {
+        _clickable = new IgClickable(this);
         DefaultStyleKey = nameof(IgToolbarButton);
     }
 
@@ -126,117 +90,57 @@ public partial class IgToolbarButton : AppBarButton
             vsPressed.Setters.RemoveAt(0);
         }
 
-        UpdateStyle();
+        _clickable.UpdateStyle();
     }
 
 
     protected override void OnPreviewKeyDown(KeyRoutedEventArgs e)
     {
         base.OnPreviewKeyDown(e);
-
-        if (e.Key == Windows.System.VirtualKey.Space
-            || e.Key == Windows.System.VirtualKey.Enter)
-        {
-            State ^= IgButtonStates.Hovered;
-            State |= IgButtonStates.Pressed;
-            ClickMode = ClickMode.Press;
-
-            if (IsCheckable) IsChecked = !IsChecked;
-        }
+        _clickable.SetStateForPreviewKeyDown(e);
     }
+
 
     protected override void OnPreviewKeyUp(KeyRoutedEventArgs e)
     {
         base.OnPreviewKeyUp(e);
-
-        if (e.Key == Windows.System.VirtualKey.Space
-            || e.Key == Windows.System.VirtualKey.Enter)
-        {
-            State ^= IgButtonStates.Pressed;
-            State ^= IgButtonStates.Hovered;
-            ClickMode = ClickMode.Release;
-        }
+        _clickable.SetStateForPreviewKeyUp(e);
     }
 
 
     protected override void OnPointerEntered(PointerRoutedEventArgs e)
     {
-        State ^= IgButtonStates.Normal;
-        State |= IgButtonStates.Hovered;
-        ClickMode = ClickMode.Hover;
-
+        _clickable.SetStateForPointerEntered();
         base.OnPointerEntered(e);
-        UpdateStyle();
+
+        _clickable.UpdateStyle();
     }
+
 
     protected override void OnPointerExited(PointerRoutedEventArgs e)
     {
-        State ^= IgButtonStates.Hovered;
-        State |= IgButtonStates.Normal;
-        ClickMode = ClickMode.Release;
-
+        _clickable.SetStateForPointerExited();
         base.OnPointerExited(e);
-        UpdateStyle();
+
+        _clickable.UpdateStyle();
     }
+
 
     protected override void OnPointerPressed(PointerRoutedEventArgs e)
     {
-        State ^= IgButtonStates.Hovered;
-        State |= IgButtonStates.Pressed;
-        ClickMode = ClickMode.Press;
-        if (IsCheckable) IsChecked = !IsChecked;
-
+        _clickable.SetStateForPointerPressed();
         base.OnPointerPressed(e);
-        UpdateStyle();
+
+        _clickable.UpdateStyle();
     }
+
 
     protected override void OnPointerReleased(PointerRoutedEventArgs e)
     {
-        State ^= IgButtonStates.Pressed;
-        if (e.Pointer.IsInContact) State |= IgButtonStates.Hovered;
-        else State ^= IgButtonStates.Hovered;
-        ClickMode = ClickMode.Release;
-
+        _clickable.SetStateForPointerReleased(e);
         base.OnPointerReleased(e);
-        UpdateStyle();
-    }
 
-
-    private void UpdateStyle()
-    {
-        // normal style
-        Brush? bgBrush = null;
-        Brush? borderBrush = null;
-
-
-        // selected style
-        if (IsChecked)
-        {
-            bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundSelected"]);
-        }
-
-
-        // hover style
-        if (State.HasFlag(IgButtonStates.Hovered))
-        {
-            bgBrush = borderBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundHovered"]);
-        }
-
-        // pressed style
-        else if (State.HasFlag(IgButtonStates.Pressed))
-        {
-            bgBrush = borderBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundPressed"]);
-        }
-
-
-        if (IsChecked)
-        {
-            borderBrush = (Brush)(Application.Current.Resources["IgButtonBorderSelected"]);
-        }
-
-
-        Background = bgBrush;
-        BorderBrush = borderBrush;
+        _clickable.UpdateStyle();
     }
 
 }

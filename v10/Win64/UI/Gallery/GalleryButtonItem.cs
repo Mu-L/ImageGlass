@@ -19,34 +19,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using System;
 
 namespace ImageGlass.Win64.UI;
 
 
 public partial class GalleryButtonItem : Button
 {
-
-    /// <summary>
-    /// Gets or sets the interaction state of the gallery button item.
-    /// </summary>
-    public IgButtonStates State
-    {
-        get => (IgButtonStates)GetValue(StateProperty);
-        set
-        {
-            SetValue(StateProperty, value);
-            UpdateStyle();
-        }
-    }
-    public static readonly DependencyProperty StateProperty =
-        DependencyProperty.Register(
-            nameof(State),
-            typeof(IgButtonStates),
-            typeof(GalleryButtonItem),
-            new PropertyMetadata(IgButtonStates.Normal));
-
+    private readonly IgClickable _clickable;
 
     /// <summary>
     /// Gets or sets the associated file path of the gallery button item.
@@ -57,7 +36,7 @@ public partial class GalleryButtonItem : Button
         set
         {
             SetValue(FilePathProperty, value);
-            UpdateStyle();
+            _clickable.UpdateStyle();
         }
     }
     public static readonly DependencyProperty FilePathProperty =
@@ -69,28 +48,18 @@ public partial class GalleryButtonItem : Button
 
 
     /// <summary>
-    /// Gets or sets the selection state of the gallery button item.
+    /// Gets or sets the check state of the gallery button item.
     /// </summary>
-    public bool IsSelected
+    public bool IsChecked
     {
-        get => (bool)GetValue(IsSelectedProperty);
-        set
-        {
-            SetValue(IsSelectedProperty, value);
-            UpdateStyle();
-        }
+        get => _clickable.IsChecked;
+        set => _clickable.IsChecked = value;
     }
-    public static readonly DependencyProperty IsSelectedProperty =
-        DependencyProperty.Register(
-            nameof(IsSelected),
-            typeof(bool),
-            typeof(GalleryButtonItem),
-            new PropertyMetadata(default));
-
 
 
     public GalleryButtonItem()
     {
+        _clickable = new IgClickable(this);
         DefaultStyleKey = typeof(GalleryButtonItem);
     }
 
@@ -98,91 +67,41 @@ public partial class GalleryButtonItem : Button
     protected override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
-        UpdateStyle();
+        _clickable.UpdateStyle();
     }
 
 
     protected override void OnPointerEntered(PointerRoutedEventArgs e)
     {
-        State ^= IgButtonStates.Normal;
-        State |= IgButtonStates.Hovered;
-
+        _clickable.SetStateForPointerEntered();
         base.OnPointerEntered(e);
-        UpdateStyle();
+
+        _clickable.UpdateStyle();
     }
 
     protected override void OnPointerExited(PointerRoutedEventArgs e)
     {
-        State ^= IgButtonStates.Hovered;
-        State |= IgButtonStates.Normal;
-
+        _clickable.SetStateForPointerExited();
         base.OnPointerExited(e);
-        UpdateStyle();
+
+        _clickable.UpdateStyle();
     }
 
     protected override void OnPointerPressed(PointerRoutedEventArgs e)
     {
-        State ^= IgButtonStates.Hovered;
-        State |= IgButtonStates.Pressed;
-
+        _clickable.SetStateForPointerPressed();
         base.OnPointerPressed(e);
-        UpdateStyle();
+
+        _clickable.UpdateStyle();
     }
 
     protected override void OnPointerReleased(PointerRoutedEventArgs e)
     {
-        State ^= IgButtonStates.Pressed;
-
-        if (e.Pointer.IsInContact) State |= IgButtonStates.Hovered;
-        else State ^= IgButtonStates.Hovered;
-
+        _clickable.SetStateForPointerReleased(e);
         base.OnPointerReleased(e);
-        UpdateStyle();
-    }
 
-
-    /// <summary>
-    /// Updates the visual style of the item based on its current state.
-    /// </summary>
-    public void UpdateStyle()
-    {
-        // normal style
-        Brush? bgBrush = null;
-        Brush? borderBrush = null;
-
-
-        // selected style
-        if (IsSelected)
-        {
-            bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundSelected"]);
-            borderBrush = (Brush)(Application.Current.Resources["IgButtonBorderSelected"]);
-        }
-
-
-        // hover style
-        if (State.HasFlag(IgButtonStates.Hovered))
-        {
-            bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundHovered"]);
-        }
-
-        // pressed style
-        else if (State.HasFlag(IgButtonStates.Pressed))
-        {
-            bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundPressed"]);
-        }
-
-        Background = bgBrush;
-        BorderBrush = borderBrush;
+        _clickable.UpdateStyle();
     }
 
 }
 
-
-
-[Flags]
-public enum IgButtonStates
-{
-    Normal = 1 << 1,
-    Hovered = 1 << 2,
-    Pressed = 1 << 3,
-}
