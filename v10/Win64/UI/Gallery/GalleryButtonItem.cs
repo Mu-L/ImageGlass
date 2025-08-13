@@ -31,9 +31,9 @@ public partial class GalleryButtonItem : Button
     /// <summary>
     /// Gets or sets the interaction state of the gallery button item.
     /// </summary>
-    public GalleryButtonItemStates State
+    public IgButtonStates State
     {
-        get => (GalleryButtonItemStates)GetValue(StateProperty);
+        get => (IgButtonStates)GetValue(StateProperty);
         set
         {
             SetValue(StateProperty, value);
@@ -43,9 +43,9 @@ public partial class GalleryButtonItem : Button
     public static readonly DependencyProperty StateProperty =
         DependencyProperty.Register(
             nameof(State),
-            typeof(GalleryButtonItemStates),
+            typeof(IgButtonStates),
             typeof(GalleryButtonItem),
-            new PropertyMetadata(GalleryButtonItemStates.Normal));
+            new PropertyMetadata(IgButtonStates.Normal));
 
 
     /// <summary>
@@ -104,46 +104,39 @@ public partial class GalleryButtonItem : Button
 
     protected override void OnPointerEntered(PointerRoutedEventArgs e)
     {
-        State ^= GalleryButtonItemStates.Normal;
-        State |= GalleryButtonItemStates.Hovered;
-        base.OnPointerEntered(e);
+        State ^= IgButtonStates.Normal;
+        State |= IgButtonStates.Hovered;
 
+        base.OnPointerEntered(e);
         UpdateStyle();
     }
 
     protected override void OnPointerExited(PointerRoutedEventArgs e)
     {
-        State ^= GalleryButtonItemStates.Hovered;
-        State |= GalleryButtonItemStates.Normal;
-        base.OnPointerExited(e);
+        State ^= IgButtonStates.Hovered;
+        State |= IgButtonStates.Normal;
 
+        base.OnPointerExited(e);
         UpdateStyle();
     }
 
     protected override void OnPointerPressed(PointerRoutedEventArgs e)
     {
-        State ^= GalleryButtonItemStates.Hovered;
-        State |= GalleryButtonItemStates.Pressed;
-        base.OnPointerPressed(e);
+        State ^= IgButtonStates.Hovered;
+        State |= IgButtonStates.Pressed;
 
+        base.OnPointerPressed(e);
         UpdateStyle();
     }
 
     protected override void OnPointerReleased(PointerRoutedEventArgs e)
     {
-        State ^= GalleryButtonItemStates.Pressed;
+        State ^= IgButtonStates.Pressed;
 
-        if (e.Pointer.IsInContact)
-        {
-            State |= GalleryButtonItemStates.Hovered;
-        }
-        else
-        {
-            State ^= GalleryButtonItemStates.Hovered;
-        }
+        if (e.Pointer.IsInContact) State |= IgButtonStates.Hovered;
+        else State ^= IgButtonStates.Hovered;
 
         base.OnPointerReleased(e);
-
         UpdateStyle();
     }
 
@@ -154,8 +147,8 @@ public partial class GalleryButtonItem : Button
     public void UpdateStyle()
     {
         // normal style
-        Brush bgBrush = new SolidColorBrush();
-        Brush borderBrush = new SolidColorBrush();
+        Brush? bgBrush = null;
+        Brush? borderBrush = null;
 
 
         // selected style
@@ -167,17 +160,16 @@ public partial class GalleryButtonItem : Button
 
 
         // hover style
-        if (State.HasFlag(GalleryButtonItemStates.Hovered))
+        if (State.HasFlag(IgButtonStates.Hovered))
         {
             bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundHovered"]);
         }
 
         // pressed style
-        else if (State.HasFlag(GalleryButtonItemStates.Pressed))
+        else if (State.HasFlag(IgButtonStates.Pressed))
         {
             bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundPressed"]);
         }
-
 
         Background = bgBrush;
         BorderBrush = borderBrush;
@@ -188,7 +180,7 @@ public partial class GalleryButtonItem : Button
 
 
 [Flags]
-public enum GalleryButtonItemStates
+public enum IgButtonStates
 {
     Normal = 1 << 1,
     Hovered = 1 << 2,

@@ -79,7 +79,7 @@ public sealed partial class ToolbarControl : UserControl
                 LabelPosition = item.DisplayStyle == ToolbarItemDisplayStyle.ImageAndText
                     ? CommandBarLabelPosition.Default
                     : CommandBarLabelPosition.Collapsed,
-                IsSelected = !string.IsNullOrWhiteSpace(item.CheckableConfigBinding),
+                IsCheckable = !string.IsNullOrWhiteSpace(item.CheckableConfigBinding),
             };
         }
 

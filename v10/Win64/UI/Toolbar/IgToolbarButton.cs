@@ -18,48 +18,67 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 
 namespace ImageGlass.Win64.UI;
 
 public partial class IgToolbarButton : AppBarButton
 {
+
     /// <summary>
-    /// Gets or sets the selection state of the button.
+    /// Gets or sets the interaction state of the gallery button item.
     /// </summary>
-    public bool IsSelected
+    public IgButtonStates State
     {
-        get => (bool)GetValue(IsSelectedProperty);
+        get => (IgButtonStates)GetValue(StateProperty);
         set
         {
-            SetValue(IsSelectedProperty, value);
-
-            // set selected styles
-            if (value)
-            {
-                // background
-                Resources["AppBarButtonBackground"] = Application.Current.Resources["IgButtonBackgroundSelected"];
-
-                // border
-                Resources["AppBarButtonBorderBrush"] = Application.Current.Resources["IgButtonBorderSelected"];
-                Resources["AppBarButtonBorderBrushPointerOver"] = Application.Current.Resources["IgButtonBorderSelected"];
-                Resources["AppBarButtonBorderBrushPressed"] = Application.Current.Resources["IgButtonBorderSelected"];
-            }
-            // default style
-            else
-            {
-                // background
-                Resources["AppBarButtonBackground"] = Application.Current.Resources["IgButtonBackground"];
-
-                // border
-                Resources["AppBarButtonBorderBrush"] = Application.Current.Resources["IgButtonBackground"];
-                Resources["AppBarButtonBorderBrushPointerOver"] = Application.Current.Resources["IgButtonBackgroundHovered"];
-                Resources["AppBarButtonBorderBrushPressed"] = Application.Current.Resources["IgButtonBackgroundPressed"];
-            }
+            SetValue(StateProperty, value);
+            UpdateStyle();
         }
     }
-    public static readonly DependencyProperty IsSelectedProperty =
+    public static readonly DependencyProperty StateProperty =
         DependencyProperty.Register(
-            nameof(IsSelected),
+            nameof(State),
+            typeof(IgButtonStates),
+            typeof(GalleryButtonItem),
+            new PropertyMetadata(IgButtonStates.Normal));
+
+
+    /// <summary>
+    /// Gets, sets the value indicating that the button is checkable.
+    /// </summary>
+    public bool IsCheckable
+    {
+        get => (bool)GetValue(IsCheckableProperty);
+        set => SetValue(IsCheckableProperty, value);
+    }
+    public static readonly DependencyProperty IsCheckableProperty =
+        DependencyProperty.Register(
+            nameof(IsCheckable),
+            typeof(bool),
+            typeof(IgToolbarButton),
+            new PropertyMetadata(default));
+
+
+    /// <summary>
+    /// Gets or sets the check state of the button.
+    /// </summary>
+    public bool IsChecked
+    {
+        get => (bool)GetValue(IsCheckedProperty);
+        set
+        {
+            SetValue(IsCheckedProperty, value);
+
+            // set selected styles
+            UpdateStyle();
+        }
+    }
+    public static readonly DependencyProperty IsCheckedProperty =
+        DependencyProperty.Register(
+            nameof(IsChecked),
             typeof(bool),
             typeof(IgToolbarButton),
             new PropertyMetadata(default));
@@ -93,9 +112,132 @@ public partial class IgToolbarButton : AppBarButton
             }
         }
 
+        // remove default hover style
+        if (GetTemplateChild("PointerOver") is VisualState vsHover)
+        {
+            vsHover.Setters.RemoveAt(1);
+            vsHover.Setters.RemoveAt(0);
+        }
 
-        // Overrides Background styles
-        Resources["AppBarButtonBackgroundPointerOver"] = Application.Current.Resources["IgButtonBackgroundHovered"];
-        Resources["AppBarButtonBackgroundPressed"] = Application.Current.Resources["IgButtonBackgroundPressed"];
+        // remove default pressed style
+        if (GetTemplateChild("Pressed") is VisualState vsPressed)
+        {
+            vsPressed.Setters.RemoveAt(1);
+            vsPressed.Setters.RemoveAt(0);
+        }
+
+        UpdateStyle();
     }
+
+
+    protected override void OnPreviewKeyDown(KeyRoutedEventArgs e)
+    {
+        base.OnPreviewKeyDown(e);
+
+        if (e.Key == Windows.System.VirtualKey.Space
+            || e.Key == Windows.System.VirtualKey.Enter)
+        {
+            State ^= IgButtonStates.Hovered;
+            State |= IgButtonStates.Pressed;
+            ClickMode = ClickMode.Press;
+
+            if (IsCheckable) IsChecked = !IsChecked;
+        }
+    }
+
+    protected override void OnPreviewKeyUp(KeyRoutedEventArgs e)
+    {
+        base.OnPreviewKeyUp(e);
+
+        if (e.Key == Windows.System.VirtualKey.Space
+            || e.Key == Windows.System.VirtualKey.Enter)
+        {
+            State ^= IgButtonStates.Pressed;
+            State ^= IgButtonStates.Hovered;
+            ClickMode = ClickMode.Release;
+        }
+    }
+
+
+    protected override void OnPointerEntered(PointerRoutedEventArgs e)
+    {
+        State ^= IgButtonStates.Normal;
+        State |= IgButtonStates.Hovered;
+        ClickMode = ClickMode.Hover;
+
+        base.OnPointerEntered(e);
+        UpdateStyle();
+    }
+
+    protected override void OnPointerExited(PointerRoutedEventArgs e)
+    {
+        State ^= IgButtonStates.Hovered;
+        State |= IgButtonStates.Normal;
+        ClickMode = ClickMode.Release;
+
+        base.OnPointerExited(e);
+        UpdateStyle();
+    }
+
+    protected override void OnPointerPressed(PointerRoutedEventArgs e)
+    {
+        State ^= IgButtonStates.Hovered;
+        State |= IgButtonStates.Pressed;
+        ClickMode = ClickMode.Press;
+        if (IsCheckable) IsChecked = !IsChecked;
+
+        base.OnPointerPressed(e);
+        UpdateStyle();
+    }
+
+    protected override void OnPointerReleased(PointerRoutedEventArgs e)
+    {
+        State ^= IgButtonStates.Pressed;
+        if (e.Pointer.IsInContact) State |= IgButtonStates.Hovered;
+        else State ^= IgButtonStates.Hovered;
+        ClickMode = ClickMode.Release;
+
+        base.OnPointerReleased(e);
+        UpdateStyle();
+    }
+
+
+    private void UpdateStyle()
+    {
+        // normal style
+        Brush? bgBrush = null;
+        Brush? borderBrush = null;
+
+
+        // selected style
+        if (IsChecked)
+        {
+            bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundSelected"]);
+        }
+
+
+        // hover style
+        if (State.HasFlag(IgButtonStates.Hovered))
+        {
+            bgBrush = borderBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundHovered"]);
+        }
+
+        // pressed style
+        else if (State.HasFlag(IgButtonStates.Pressed))
+        {
+            bgBrush = borderBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundPressed"]);
+        }
+
+
+        if (IsChecked)
+        {
+            borderBrush = (Brush)(Application.Current.Resources["IgButtonBorderSelected"]);
+        }
+
+
+        Background = bgBrush;
+        BorderBrush = borderBrush;
+    }
+
 }
+
