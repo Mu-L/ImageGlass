@@ -19,6 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media.Imaging;
+using System;
 
 namespace ImageGlass.Win64.UI;
 
@@ -51,6 +53,11 @@ public partial class IgToolbarButton : AppBarButton
     {
         _clickable = new IgClickable(this);
         DefaultStyleKey = nameof(IgToolbarButton);
+    }
+
+    public IgToolbarButton(string? svgIconPath) : this()
+    {
+        SetSvgIcon(svgIconPath);
     }
 
 
@@ -155,6 +162,27 @@ public partial class IgToolbarButton : AppBarButton
         base.OnPointerReleased(e);
 
         _clickable.UpdateStyle();
+    }
+
+
+    /// <summary>
+    /// Sets button icon from a SVG file.
+    /// </summary>
+    public void SetSvgIcon(string? svgPath)
+    {
+        // set default icon
+        if (string.IsNullOrWhiteSpace(svgPath))
+        {
+            Icon = new SymbolIcon(Symbol.Placeholder);
+            return;
+        }
+
+        // set new icon
+        var svgSource = new SvgImageSource(new Uri(svgPath));
+        Icon = new ImageIcon()
+        {
+            Source = svgSource,
+        };
     }
 
 }
