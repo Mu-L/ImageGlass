@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="ImageGlass.Win64.UI.ToolbarCustomControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:common="using:ImageGlass.Common"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:ImageGlass.Win64.UI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    AutomationProperties.AutomationControlType="ToolBar"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <!--  Internal item template  -->
+        <DataTemplate x:Key="ToolbarItemTemplate" x:DataType="common:ToolbarItemModel">
+            <Button
+                Name="{x:Bind Id}"
+                Content="{x:Bind Text}"
+                Loaded="ToolbarItem_Loaded" />
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <Grid
+        x:Name="GridToolbar"
+        Padding="{x:Bind ToolbarPadding}"
+        HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+
+        <!--  Primary Items  -->
+        <StackPanel
+            x:Name="PanelMain"
+            Grid.Column="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Stretch"
+            Orientation="Horizontal"
+            Spacing="{x:Bind ItemSpacing}">
+
+            <!--  Primary Visible Items  -->
+            <ItemsRepeater
+                x:Name="RepeaterPrimaryItems"
+                HorizontalAlignment="Center"
+                ItemTemplate="{StaticResource ToolbarItemTemplate}"
+                ItemsSource="{x:Bind PrimaryVisibleItems, Mode=OneWay}">
+                <ItemsRepeater.Layout>
+                    <StackLayout Orientation="Horizontal" Spacing="{x:Bind ItemSpacing}" />
+                </ItemsRepeater.Layout>
+            </ItemsRepeater>
+        </StackPanel>
+
+
+        <!--  Right Column  -->
+        <StackPanel
+            x:Name="PanelRight"
+            Grid.Column="1"
+            Padding="{x:Bind ToolbarPadding}"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Stretch"
+            Orientation="Horizontal"
+            Spacing="{x:Bind ItemSpacing}">
+
+            <!--  Overflow button  -->
+            <Button x:Name="BtnOverflow" Visibility="Collapsed">
+                <FontIcon AutomationProperties.AccessibilityView="Raw" Glyph="&#xE712;" />
+                <Button.Flyout>
+                    <MenuFlyout
+                        x:Name="MnuOverflow"
+                        Opening="MnuOverflow_Opening"
+                        Placement="BottomEdgeAlignedRight" />
+                </Button.Flyout>
+            </Button>
+
+
+            <!--  Menu button  -->
+            <Button x:Name="BtnMenu">
+                <FontIcon AutomationProperties.AccessibilityView="Raw" Glyph="&#xE700;" />
+
+                <Button.Flyout>
+                    <MenuFlyout x:Name="MnuMain" Placement="BottomEdgeAlignedRight">
+
+                        <!--  File  -->
+                        <MenuFlyoutSubItem x:Name="MnuFile" Text="File">
+                            <MenuFlyoutItem Text="Open file..." />
+                            <MenuFlyoutItem Text="Open new window" />
+                            <MenuFlyoutItem Text="Save" />
+                            <MenuFlyoutItem Text="Save as..." />
+                            <MenuFlyoutSeparator />
+
+                            <MenuFlyoutItem Text="Open with..." />
+                            <MenuFlyoutItem Text="Edit image" />
+                            <MenuFlyoutItem Text="Print..." />
+                            <MenuFlyoutItem Text="Share..." />
+                            <MenuFlyoutSeparator />
+
+                            <MenuFlyoutItem Text="Refresh" />
+                            <MenuFlyoutItem Text="Reload image" />
+                            <MenuFlyoutItem Text="Reload list" />
+                            <MenuFlyoutItem Text="Unload" />
+                        </MenuFlyoutSubItem>
+
+
+                        <!--  Navigation  -->
+                        <MenuFlyoutSubItem Text="Navigation">
+                            <MenuFlyoutItem Text="Save" />
+                            <MenuFlyoutSeparator />
+                        </MenuFlyoutSubItem>
+
+
+                        <!--  Zoom  -->
+                        <MenuFlyoutSubItem Text="Zoom">
+                            <MenuFlyoutItem Text="Save" />
+                            <MenuFlyoutSeparator />
+                        </MenuFlyoutSubItem>
+
+                        <!--  Panning  -->
+                        <MenuFlyoutSubItem Text="Panning">
+                            <MenuFlyoutItem Text="Save" />
+                            <MenuFlyoutSeparator />
+                        </MenuFlyoutSubItem>
+
+
+                        <!--  Image  -->
+                        <MenuFlyoutSubItem Text="Image">
+                            <MenuFlyoutItem Text="Save" />
+                            <MenuFlyoutSeparator />
+                        </MenuFlyoutSubItem>
+
+
+                        <!--  Clipboard  -->
+                        <MenuFlyoutSubItem Text="Clipboard">
+                            <MenuFlyoutItem Text="Save" />
+                            <MenuFlyoutSeparator />
+                        </MenuFlyoutSubItem>
+
+
+                        <!--  Window modes  -->
+                        <MenuFlyoutSeparator />
+                        <ToggleMenuFlyoutItem Text="Window Fit" />
+                        <ToggleMenuFlyoutItem IsChecked="True" Text="Frameless" />
+                        <ToggleMenuFlyoutItem Text="Fullscreen" />
+                        <ToggleMenuFlyoutItem Text="Slideshow" />
+                        <MenuFlyoutSeparator />
+
+
+                        <!--  Layout  -->
+                        <MenuFlyoutSubItem Text="Layout">
+                            <MenuFlyoutItem Text="Save" />
+                            <MenuFlyoutSeparator />
+                        </MenuFlyoutSubItem>
+
+
+                        <!--  Tools  -->
+                        <MenuFlyoutSubItem Text="Tools">
+                            <MenuFlyoutItem Text="Save" />
+                            <MenuFlyoutSeparator />
+                        </MenuFlyoutSubItem>
+
+
+                        <!--  Settings  -->
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem Text="Settings" />
+
+
+                        <!--  Help  -->
+                        <MenuFlyoutSubItem Text="Help">
+                            <MenuFlyoutItem Text="Save" />
+                            <MenuFlyoutSeparator />
+                        </MenuFlyoutSubItem>
+
+
+                        <!--  Exit  -->
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem Text="Exit">
+                            <MenuFlyoutItem.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="Escape" />
+                            </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem>
+
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+
+        </StackPanel>
+
+    </Grid>
+</UserControl>

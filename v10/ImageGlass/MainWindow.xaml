@@ -25,6 +25,7 @@
         </Grid.RowDefinitions>
 
 
+        <!--  Title bar  -->
         <Grid
             x:Name="WinMainTitleBar"
             Grid.Row="0"
@@ -59,9 +60,11 @@
         <!--  Toolbar  -->
         <Grid
             Grid.Row="1"
+            HorizontalAlignment="Stretch"
             VerticalAlignment="Top"
             Canvas.ZIndex="99">
-            <ui:ToolbarControl x:Name="ToolbarMain" />
+            <ui:ToolbarControl x:Name="ToolbarMain" Visibility="Collapsed" />
+            <ui:ToolbarCustomControl ItemsSource="{x:Bind MyButtons}" />
         </Grid>
 
 

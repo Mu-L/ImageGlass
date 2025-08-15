@@ -10,6 +10,7 @@ using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using WinRT.Interop;
@@ -25,6 +26,33 @@ namespace ImageGlass;
 public sealed partial class MainWindow : Window
 {
     private Progress<FileSearchingEventArgs> _searchProgress;
+
+    public ObservableCollection<ToolbarItemModel> MyButtons { get; } = [
+        new ToolbarItemModel {
+            Id = "Btn_Open",
+            Text = "Open",
+        },
+        new ToolbarItemModel {
+            Id = "Btn_Save",
+            Text = "Save",
+        },
+        new ToolbarItemModel {
+            Id = "Btn_Delete",
+            Text = "Delete",
+        },
+        new ToolbarItemModel {
+            Id = "Btn_Edit",
+            Text = "Edit",
+        },
+        new ToolbarItemModel {
+            Id = "Btn_Export",
+            Text = "Export",
+        },
+        new ToolbarItemModel {
+            Id = "Btn_Download",
+            Text = "Download",
+        },
+    ];
 
 
     public MainWindow()
