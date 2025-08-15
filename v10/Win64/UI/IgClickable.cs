@@ -95,7 +95,7 @@ public class IgClickable(ButtonBase control) : DependencyObject
     public void UpdateStyle()
     {
         // normal style
-        Brush? bgBrush = null;
+        Brush bgBrush = new SolidColorBrush(); // must not be null for interaction
         Brush? borderBrush = null;
 
 
