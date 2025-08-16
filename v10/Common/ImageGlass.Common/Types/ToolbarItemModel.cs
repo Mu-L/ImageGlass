@@ -24,21 +24,96 @@ namespace ImageGlass.Common;
 /// </summary>
 public class ToolbarItemModel : DisposableImpl
 {
+    protected string _id = "";
+    protected ToolbarItemType _type = ToolbarItemType.Button;
+    protected string _text = "";
+    protected string _image = "";
+    protected ToolbarItemAlignment _alignment = ToolbarItemAlignment.Left;
+    protected ToolbarItemDisplayStyle _displayStyle = ToolbarItemDisplayStyle.Image;
+
     protected bool _isOverflow = false;
 
 
-    public ToolbarItemType Type { get; set; } = ToolbarItemType.Button;
-
-    public string Id { get; set; } = string.Empty;
-    public string Text { get; set; } = string.Empty;
-
-    public ToolbarItemDisplayStyle DisplayStyle { get; set; } = ToolbarItemDisplayStyle.Image;
     public string CheckableConfigBinding { get; set; } = string.Empty;
-    public ToolbarItemAlignment Alignment { get; set; } = ToolbarItemAlignment.Left;
 
-    public string Image { get; set; } = string.Empty;
-    public SingleAction OnClick { get; set; } = new();
 
+    public string Id
+    {
+        get => _id;
+        set
+        {
+            if (_id != value)
+            {
+                _id = value;
+                OnPropertyChanged(nameof(Id));
+            }
+        }
+    }
+
+    public ToolbarItemType Type
+    {
+        get => _type;
+        set
+        {
+            if (_type != value)
+            {
+                _type = value;
+                OnPropertyChanged(nameof(Type));
+            }
+        }
+    }
+
+    public string Text
+    {
+        get => _text;
+        set
+        {
+            if (_text != value)
+            {
+                _text = value;
+                OnPropertyChanged(nameof(Text));
+            }
+        }
+    }
+
+    public string Image
+    {
+        get => _image;
+        set
+        {
+            if (_image != value)
+            {
+                _image = value;
+                OnPropertyChanged(nameof(Image));
+            }
+        }
+    }
+
+    public ToolbarItemAlignment Alignment
+    {
+        get => _alignment;
+        set
+        {
+            if (_alignment != value)
+            {
+                _alignment = value;
+                OnPropertyChanged(nameof(Alignment));
+            }
+        }
+    }
+
+    public ToolbarItemDisplayStyle DisplayStyle
+    {
+        get => _displayStyle;
+        set
+        {
+            if (_displayStyle != value)
+            {
+                _displayStyle = value;
+                OnPropertyChanged(nameof(DisplayStyle));
+            }
+        }
+    }
 
     public bool IsOverflow
     {

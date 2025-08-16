@@ -8,6 +8,7 @@
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     AutomationProperties.AutomationControlType="ToolBar"
+    Unloaded="UserControl_Unloaded"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -49,14 +50,17 @@
 
 
 
-    <Grid x:Name="GridToolbar" Padding="5">
+    <Grid
+        x:Name="GridToolbar"
+        Padding="5"
+        Background="{x:Bind Background}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
 
-        <!--  Primary Items  -->
+        <!--  Toolbar: Primary Items  -->
         <ItemsRepeater
             x:Name="RepeaterPrimaryItems"
             Grid.Column="0"
@@ -79,7 +83,7 @@
             Orientation="Horizontal"
             Spacing="{x:Bind local:ToolbarCustomControl.ItemSpacing}">
 
-            <!--  Overflow button  -->
+            <!--  Toolbar: Overflow button  -->
             <local:IgButton
                 x:Name="BtnOverflow"
                 Padding="5"
@@ -98,6 +102,19 @@
                         Placement="BottomEdgeAlignedRight" />
                 </local:IgButton.Flyout>
             </local:IgButton>
+
+
+            <!--  Toolbar: Secondary Items  -->
+            <ItemsRepeater
+                x:Name="RepeaterSecondaryItems"
+                Grid.Column="0"
+                HorizontalAlignment="Center"
+                ItemTemplate="{StaticResource ToolbarItemTemplate}"
+                ItemsSource="{x:Bind SecondaryItems, Mode=OneWay}">
+                <ItemsRepeater.Layout>
+                    <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarCustomControl.ItemSpacing}" />
+                </ItemsRepeater.Layout>
+            </ItemsRepeater>
 
 
             <!--  Menu button  -->

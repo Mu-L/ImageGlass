@@ -63,8 +63,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Top"
             Canvas.ZIndex="99">
-            <ui:ToolbarControl x:Name="ToolbarMain" Visibility="Collapsed" />
-            <ui:ToolbarCustomControl ItemsSource="{x:Bind MyButtons}" />
+            <ui:ToolbarCustomControl Background="#22E7F8F9" ItemsSource="{x:Bind winNTCommon:Config.Current.ToolbarButtons}" />
         </Grid>
 
 

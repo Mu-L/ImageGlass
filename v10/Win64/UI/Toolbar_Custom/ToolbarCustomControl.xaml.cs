@@ -17,10 +17,15 @@ public sealed partial class ToolbarCustomControl : UserControl
 
     public ObservableCollection<ToolbarItemModel> PrimaryItems { get; } = [];
     public ObservableCollection<ToolbarItemModel> PrimaryItemsOverflow { get; } = [];
+    public ObservableCollection<ToolbarItemModel> SecondaryItems { get; } = [];
 
 
+    // Dependency Properties
     #region Dependency Properties
 
+    /// <summary>
+    /// Gets, sets the items source of toolbar.
+    /// </summary>
     public IEnumerable ItemsSource
     {
         get => (IEnumerable)GetValue(ItemsSourceProperty);
@@ -36,17 +41,22 @@ public sealed partial class ToolbarCustomControl : UserControl
         toolbar.UpdateLayoutItems();
     }
 
-    #endregion
+    #endregion // Dependency Properties
 
 
     public ToolbarCustomControl()
     {
         this.InitializeComponent();
-        this.SizeChanged += Toolbar_SizeChanged;
+        this.SizeChanged += UserControl_SizeChanged;
     }
 
 
-    private void Toolbar_SizeChanged(object sender, SizeChangedEventArgs e)
+    private void UserControl_Unloaded(object sender, RoutedEventArgs e)
+    {
+        this.SizeChanged -= UserControl_SizeChanged;
+    }
+
+    private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         HandleOverflow();
     }
@@ -88,7 +98,7 @@ public sealed partial class ToolbarCustomControl : UserControl
 
             // get toolbar item metadata
             if (!_itemsMetadata.TryGetValue(item.Id, out var meta)) continue;
-            if (RepeaterPrimaryItems.TryGetElement(meta.Index) is not IgButton btnEl) continue;
+            if (RepeaterPrimaryItems.TryGetElement(meta.PrimaryItemIndex) is not IgButton btnEl) continue;
 
 
             // get image source from toolbar item
@@ -136,26 +146,43 @@ public sealed partial class ToolbarCustomControl : UserControl
     }
 
 
-    private void UpdateLayoutItems()
+    public void UpdateLayoutItems()
     {
         _itemsMetadata.Clear();
         PrimaryItems.Clear();
         PrimaryItemsOverflow.Clear();
+        SecondaryItems.Clear();
 
         if (ItemsSource is not IEnumerable<ToolbarItemModel> btnItems) return;
 
-        int index = -1;
+
+        int srcIndex = -1;
+        int primaryIndex = -1;
+        int secondaryIndex = -1;
+
         foreach (var item in btnItems)
         {
-            index++;
+            // group: secondary
+            if (item.Alignment == ToolbarItemAlignment.Right)
+            {
+                secondaryIndex++;
+                SecondaryItems.Add(item);
+            }
+            // group: primary
+            else
+            {
+                primaryIndex++;
+                PrimaryItems.Add(item);
+            }
 
+            // save item metadata
             _itemsMetadata.TryAdd(item.Id, new ToolbarItemMetadata()
             {
-                Index = index,
+                SourceIndex = srcIndex,
+                PrimaryItemIndex = primaryIndex,
+                SecondaryItemIndex = secondaryIndex,
                 RenderedWidth = 0,
             });
-
-            PrimaryItems.Add(item);
         }
     }
 
@@ -204,6 +231,8 @@ public sealed partial class ToolbarCustomControl : UserControl
 
 public record ToolbarItemMetadata
 {
-    public int Index { get; set; } = -1;
+    public int SourceIndex { get; set; } = -1;
+    public int PrimaryItemIndex { get; set; } = -1;
+    public int SecondaryItemIndex { get; set; } = -1;
     public double RenderedWidth { get; set; } = 0;
 }

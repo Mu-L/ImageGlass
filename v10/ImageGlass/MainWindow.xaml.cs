@@ -1,4 +1,5 @@
 ﻿
+using Catel.Collections;
 using D2Phap;
 using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
@@ -10,7 +11,6 @@ using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using WinRT.Interop;
@@ -27,37 +27,6 @@ public sealed partial class MainWindow : Window
 {
     private Progress<FileSearchingEventArgs> _searchProgress;
 
-    public ObservableCollection<ToolbarItemModel> MyButtons { get; } = [
-        new ToolbarItemModel {
-            Id = "Btn_Open",
-            Text = "Open",
-            Image = @"D:\OpenFile.svg",
-        },
-        new ToolbarItemModel {
-            Id = "Btn_Save",
-            Text = "Save",
-            Image = @"D:\Save.svg",
-            CheckableConfigBinding = "aaa",
-        },
-        new ToolbarItemModel {
-            Id = "Btn_Print",
-            Text = "Print",
-            Image = @"D:\Print.svg",
-        },
-        //new ToolbarItemModel {
-        //    Id = "Btn_Edit",
-        //    Text = "Edit",
-        //},
-        //new ToolbarItemModel {
-        //    Id = "Btn_Export",
-        //    Text = "Export",
-        //},
-        //new ToolbarItemModel {
-        //    Id = "Btn_Download",
-        //    Text = "Download",
-        //},
-    ];
-
 
     public MainWindow()
     {
@@ -69,9 +38,6 @@ public sealed partial class MainWindow : Window
         AppWindow.TitleBar.PreferredTheme = Microsoft.UI.Windowing.TitleBarTheme.UseDefaultAppMode;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(WinMainTitleBar);
-
-        // load toolbar buttons
-        LoadToolbarButtons();
 
         AppWindow.Resize(new Windows.Graphics.SizeInt32(2000, 1500));
     }
@@ -104,13 +70,6 @@ public sealed partial class MainWindow : Window
             }
         }
     }
-
-
-    private void LoadToolbarButtons()
-    {
-        ToolbarMain.AddButtons(Config.Current.ToolbarButtons);
-    }
-
 
     private void Window_Closed(object sender, WindowEventArgs args)
     {

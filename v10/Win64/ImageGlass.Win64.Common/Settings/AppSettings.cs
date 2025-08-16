@@ -20,6 +20,7 @@ using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json.Serialization;
 
@@ -478,35 +479,44 @@ public partial class AppSettings
     /// <summary>
     /// Gets, sets the list of toolbar buttons
     /// </summary>
-    public List<ToolbarItemModel> ToolbarButtons { get; set; } =
+    public ObservableCollection<ToolbarItemModel> ToolbarButtons { get; set; } =
     [
-        new()
-        {
-            Id = "Btn_OpenFile",
-            Text = "Open File",
-            Type = ToolbarItemType.Button,
+        new ToolbarItemModel {
+            Id = "Btn_Open",
+            Text = "Open",
+            Image = @"D:\OpenFile.svg",
         },
-        new()
-        {
-            Id = "Btn_OpenFolder",
-            Text = "Open Folder",
-            Type = ToolbarItemType.Button,
+        new ToolbarItemModel {
+            Id = "Btn_Save",
+            Text = "Save",
+            Image = @"D:\Save.svg",
+            CheckableConfigBinding = "aaa",
+            DisplayStyle = ToolbarItemDisplayStyle.ImageAndText,
         },
-        new()
-        {
-            Type = ToolbarItemType.Separator,
+        new ToolbarItemModel {
+            Id = "Btn_Print",
+            Text = "Print",
+            Image = @"D:\Print.svg",
+            DisplayStyle = ToolbarItemDisplayStyle.ImageAndText,
         },
-        new()
-        {
-            Id = "Btn_ViewPrevious",
-            Text = "View Previous",
-            Type = ToolbarItemType.Button,
+        new ToolbarItemModel {
+            Id = "Btn_Crop",
+            Text = "Crop",
+            Image = @"D:\Crop.svg",
         },
-        new()
-        {
-            Id = "Btn_ViewNext",
-            Text = "View Next",
-            Type = ToolbarItemType.Button,
+
+
+        new ToolbarItemModel {
+            Id = "Btn_Checkerboard",
+            Text = "Checkerboard",
+            Image = @"D:\Checkerboard.svg",
+            Alignment = ToolbarItemAlignment.Right,
+        },
+        new ToolbarItemModel {
+            Id = "Btn_ColorPicker",
+            Text = "ColorPicker",
+            Image = @"D:\ColorPicker.svg",
+            Alignment = ToolbarItemAlignment.Right,
         },
     ];
 
