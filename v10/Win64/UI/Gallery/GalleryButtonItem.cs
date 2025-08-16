@@ -17,16 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
 
 namespace ImageGlass.Win64.UI;
 
 
-public partial class GalleryButtonItem : Button
+public partial class GalleryButtonItem : IgButton
 {
-    private readonly IgClickable _clickable;
-
     /// <summary>
     /// Gets or sets the associated file path of the gallery button item.
     /// </summary>
@@ -47,61 +43,12 @@ public partial class GalleryButtonItem : Button
             new PropertyMetadata(default));
 
 
-    /// <summary>
-    /// Gets or sets the check state of the gallery button item.
-    /// </summary>
-    public bool IsChecked
-    {
-        get => _clickable.IsChecked;
-        set => _clickable.IsChecked = value;
-    }
 
-
-    public GalleryButtonItem()
+    public GalleryButtonItem() : base()
     {
-        _clickable = new IgClickable(this);
         DefaultStyleKey = typeof(GalleryButtonItem);
     }
 
-
-    protected override void OnApplyTemplate()
-    {
-        base.OnApplyTemplate();
-        _clickable.UpdateStyle();
-    }
-
-
-    protected override void OnPointerEntered(PointerRoutedEventArgs e)
-    {
-        _clickable.SetStateForPointerEntered();
-        base.OnPointerEntered(e);
-
-        _clickable.UpdateStyle();
-    }
-
-    protected override void OnPointerExited(PointerRoutedEventArgs e)
-    {
-        _clickable.SetStateForPointerExited();
-        base.OnPointerExited(e);
-
-        _clickable.UpdateStyle();
-    }
-
-    protected override void OnPointerPressed(PointerRoutedEventArgs e)
-    {
-        _clickable.SetStateForPointerPressed();
-        base.OnPointerPressed(e);
-
-        _clickable.UpdateStyle();
-    }
-
-    protected override void OnPointerReleased(PointerRoutedEventArgs e)
-    {
-        _clickable.SetStateForPointerReleased(e);
-        base.OnPointerReleased(e);
-
-        _clickable.UpdateStyle();
-    }
 
 }
 

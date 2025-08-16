@@ -47,23 +47,23 @@ public class IgClickable(ButtonBase control) : DependencyObject
         DependencyProperty.Register(
             nameof(State),
             typeof(IgButtonStates),
-            typeof(GalleryButtonItem),
+            typeof(IgClickable),
             new PropertyMetadata(IgButtonStates.Normal));
 
 
     /// <summary>
-    /// Gets, sets the value indicating that the control is checkable.
+    /// Gets, sets the value indicating that the control is checked on click.
     /// </summary>
-    public bool IsCheckable
+    public bool IsCheckOnClick
     {
-        get => (bool)GetValue(IsCheckableProperty);
-        set => SetValue(IsCheckableProperty, value);
+        get => (bool)GetValue(IsCheckOnClickProperty);
+        set => SetValue(IsCheckOnClickProperty, value);
     }
-    public static readonly DependencyProperty IsCheckableProperty =
+    public static readonly DependencyProperty IsCheckOnClickProperty =
         DependencyProperty.Register(
-            nameof(IsCheckable),
+            nameof(IsCheckOnClick),
             typeof(bool),
-            typeof(IgToolbarButton),
+            typeof(IgClickable),
             new PropertyMetadata(default));
 
 
@@ -142,7 +142,7 @@ public class IgClickable(ButtonBase control) : DependencyObject
             State |= IgButtonStates.Pressed;
             _control.ClickMode = ClickMode.Press;
 
-            if (IsCheckable) IsChecked = !IsChecked;
+            if (IsCheckOnClick) IsChecked = !IsChecked;
         }
     }
 
@@ -175,7 +175,7 @@ public class IgClickable(ButtonBase control) : DependencyObject
         State ^= IgButtonStates.Hovered;
         State |= IgButtonStates.Pressed;
 
-        if (IsCheckable) IsChecked = !IsChecked;
+        if (IsCheckOnClick) IsChecked = !IsChecked;
     }
 
     public void SetStateForPointerReleased(PointerRoutedEventArgs e)

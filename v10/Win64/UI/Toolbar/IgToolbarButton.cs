@@ -34,8 +34,8 @@ public partial class IgToolbarButton : AppBarButton
     /// </summary>
     public bool IsCheckable
     {
-        get => _clickable.IsCheckable;
-        set => _clickable.IsCheckable = value;
+        get => _clickable.IsCheckOnClick;
+        set => _clickable.IsCheckOnClick = value;
     }
 
 
