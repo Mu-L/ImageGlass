@@ -11,20 +11,45 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <!--  Internal item template  -->
-        <DataTemplate x:Key="ToolbarItemTemplate" x:DataType="common:ToolbarItemModel">
-            <Button
-                Name="{x:Bind Id}"
-                Content="{x:Bind Text}"
-                Loaded="ToolbarItem_Loaded" />
-        </DataTemplate>
+        <local:StringToImageIconSourceConverter x:Key="StringToImageIconSourceConverter" />
+        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+        <local:StringToBoolConverter x:Key="StringToBoolConverter" />
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
+        <!--  ToolbarItemTemplate  -->
+        <DataTemplate
+            x:Key="ToolbarItemTemplate"
+            x:DataType="common:ToolbarItemModel"
+            x:DefaultBindMode="OneWay">
+            <local:IgButton
+                Name="{x:Bind Id}"
+                Padding="5"
+                IsCheckOnClick="{x:Bind CheckableConfigBinding, Converter={StaticResource StringToBoolConverter}}"
+                IsChecked="{x:Bind CheckableConfigBinding, Converter={StaticResource StringToBoolConverter}}"
+                Loaded="ToolbarItem_Loaded"
+                Style="{StaticResource IgButtonStyle}"
+                Text="{x:Bind Text}"
+                ToolTipService.ToolTip="{x:Bind Text}"
+                Visibility="{x:Bind IsOverflow, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <Viewbox
+                        Width="{StaticResource ToolbarIconSize}"
+                        Height="{StaticResource ToolbarIconSize}"
+                        VerticalAlignment="Center">
+                        <ImageIcon x:Name="ToolbarButtonIcon" Source="{x:Bind Image}" />
+                    </Viewbox>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="{x:Bind Text}"
+                        Visibility="{x:Bind Text, Converter={StaticResource StringToVisibilityConverter}}" />
+                </StackPanel>
+            </local:IgButton>
+        </DataTemplate>
     </UserControl.Resources>
 
-    <Grid
-        x:Name="GridToolbar"
-        Padding="{x:Bind ToolbarPadding}"
-        HorizontalAlignment="Stretch">
+
+
+    <Grid x:Name="GridToolbar" Padding="5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
@@ -32,54 +57,61 @@
 
 
         <!--  Primary Items  -->
-        <StackPanel
-            x:Name="PanelMain"
+        <ItemsRepeater
+            x:Name="RepeaterPrimaryItems"
             Grid.Column="0"
             HorizontalAlignment="Center"
-            VerticalAlignment="Stretch"
-            Orientation="Horizontal"
-            Spacing="{x:Bind ItemSpacing}">
+            ItemTemplate="{StaticResource ToolbarItemTemplate}"
+            ItemsSource="{x:Bind PrimaryItems, Mode=OneWay}">
+            <ItemsRepeater.Layout>
+                <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarCustomControl.ItemSpacing}" />
+            </ItemsRepeater.Layout>
+        </ItemsRepeater>
 
-            <!--  Primary Visible Items  -->
-            <ItemsRepeater
-                x:Name="RepeaterPrimaryItems"
-                HorizontalAlignment="Center"
-                ItemTemplate="{StaticResource ToolbarItemTemplate}"
-                ItemsSource="{x:Bind PrimaryVisibleItems, Mode=OneWay}">
-                <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Horizontal" Spacing="{x:Bind ItemSpacing}" />
-                </ItemsRepeater.Layout>
-            </ItemsRepeater>
-        </StackPanel>
 
 
         <!--  Right Column  -->
         <StackPanel
             x:Name="PanelRight"
             Grid.Column="1"
-            Padding="{x:Bind ToolbarPadding}"
             HorizontalAlignment="Right"
             VerticalAlignment="Stretch"
             Orientation="Horizontal"
-            Spacing="{x:Bind ItemSpacing}">
+            Spacing="{x:Bind local:ToolbarCustomControl.ItemSpacing}">
 
             <!--  Overflow button  -->
-            <Button x:Name="BtnOverflow" Visibility="Collapsed">
-                <FontIcon AutomationProperties.AccessibilityView="Raw" Glyph="&#xE712;" />
-                <Button.Flyout>
+            <local:IgButton
+                x:Name="BtnOverflow"
+                Padding="5"
+                Style="{StaticResource IgButtonStyle}"
+                Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <Viewbox Height="{StaticResource ToolbarIconSize}">
+                        <FontIcon AutomationProperties.AccessibilityView="Raw" Glyph="&#xE712;" />
+                    </Viewbox>
+                </StackPanel>
+
+                <local:IgButton.Flyout>
                     <MenuFlyout
                         x:Name="MnuOverflow"
                         Opening="MnuOverflow_Opening"
                         Placement="BottomEdgeAlignedRight" />
-                </Button.Flyout>
-            </Button>
+                </local:IgButton.Flyout>
+            </local:IgButton>
 
 
             <!--  Menu button  -->
-            <Button x:Name="BtnMenu">
-                <FontIcon AutomationProperties.AccessibilityView="Raw" Glyph="&#xE700;" />
+            <local:IgButton
+                x:Name="BtnMenu"
+                Padding="5"
+                Style="{StaticResource IgButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <Viewbox Height="{StaticResource ToolbarIconSize}">
+                        <FontIcon AutomationProperties.AccessibilityView="Raw" Glyph="&#xE700;" />
+                    </Viewbox>
+                </StackPanel>
 
-                <Button.Flyout>
+                <local:IgButton.Flyout>
                     <MenuFlyout x:Name="MnuMain" Placement="BottomEdgeAlignedRight">
 
                         <!--  File  -->
@@ -181,8 +213,8 @@
                         </MenuFlyoutItem>
 
                     </MenuFlyout>
-                </Button.Flyout>
-            </Button>
+                </local:IgButton.Flyout>
+            </local:IgButton>
 
         </StackPanel>
 

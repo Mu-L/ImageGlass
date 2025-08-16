@@ -1,10 +1,10 @@
 ﻿using ImageGlass.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -12,12 +12,11 @@ using System.Linq;
 namespace ImageGlass.Win64.UI;
 public sealed partial class ToolbarCustomControl : UserControl
 {
-    private Dictionary<string, double> _itemsDict = [];
-    private double ItemSpacing => 5;
-    private Thickness ToolbarPadding => new Thickness(5);
+    private Dictionary<string, ToolbarItemMetadata> _itemsMetadata = [];
+    public static double ItemSpacing => 4;
 
-    public ObservableCollection<ToolbarItemModel> PrimaryVisibleItems { get; } = [];
-    public ObservableCollection<ToolbarItemModel> PrimaryOverflowItems { get; } = [];
+    public ObservableCollection<ToolbarItemModel> PrimaryItems { get; } = [];
+    public ObservableCollection<ToolbarItemModel> PrimaryItemsOverflow { get; } = [];
 
 
     #region Dependency Properties
@@ -33,8 +32,8 @@ public sealed partial class ToolbarCustomControl : UserControl
 
     private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is ToolbarCustomControl toolbar)
-            toolbar.UpdateLayoutItems();
+        if (d is not ToolbarCustomControl toolbar) return;
+        toolbar.UpdateLayoutItems();
     }
 
     #endregion
@@ -55,12 +54,24 @@ public sealed partial class ToolbarCustomControl : UserControl
 
     private void ToolbarItem_Loaded(object sender, RoutedEventArgs e)
     {
-        if (sender is not FrameworkElement fe) return;
+        if (sender is not IgButton btn) return;
 
-        if (_itemsDict.ContainsKey(fe.Name))
+        // save button size
+        if (_itemsMetadata.TryGetValue(btn.Name, out ToolbarItemMetadata? value))
         {
-            _itemsDict[fe.Name] = fe.ActualWidth;
+            value.RenderedWidth = btn.ActualWidth;
         }
+
+
+        //if (btn.FindName("ToolbarButtonIcon") is ImageIcon iconEl)
+        //{
+        //    // set new icon
+        //    if (iconEl.Source == null)
+        //    {
+        //        var model = (ItemsSource as IEnumerable<ToolbarItemModel>).FirstOrDefault(i => i.Id == btn.Name);
+        //        iconEl.Source = new SvgImageSource(new Uri(model.Image));
+        //    }
+        //}
     }
 
     private void MnuOverflow_Opening(object sender, object e)
@@ -69,16 +80,45 @@ public sealed partial class ToolbarCustomControl : UserControl
         mnu.Items.Clear();
 
 
-        foreach (var item in PrimaryOverflowItems)
+        foreach (var item in PrimaryItemsOverflow)
         {
             MenuFlyoutItemBase mnuItem;
+            IconElement iconFe;
+            ImageSource? imgSrc = null;
+
+            // get toolbar item metadata
+            if (!_itemsMetadata.TryGetValue(item.Id, out var meta)) continue;
+            if (RepeaterPrimaryItems.TryGetElement(meta.Index) is not IgButton btnEl) continue;
+
+
+            // get image source from toolbar item
+            if (btnEl.FindName("ToolbarButtonIcon") is ImageIcon iconEl)
+            {
+                imgSrc = iconEl.Source;
+            }
+
+            if (imgSrc == null)
+            {
+                iconFe = new SymbolIcon(Symbol.Placeholder);
+            }
+            else
+            {
+                iconFe = new ImageIcon()
+                {
+                    Source = imgSrc,
+                };
+            }
+
 
             if (!string.IsNullOrWhiteSpace(item.CheckableConfigBinding))
             {
                 mnuItem = new ToggleMenuFlyoutItem()
                 {
                     Text = item.Text,
-                    Icon = new SymbolIcon(Symbol.Placeholder),
+                    Icon = iconFe,
+                    IsChecked = btnEl.IsChecked,
+                    Command = btnEl.Command,
+                    CommandParameter = btnEl.CommandParameter,
                 };
             }
             else
@@ -86,72 +126,84 @@ public sealed partial class ToolbarCustomControl : UserControl
                 mnuItem = new MenuFlyoutItem()
                 {
                     Text = item.Text,
-                    Icon = new SymbolIcon(Symbol.Placeholder),
+                    Icon = iconFe,
                 };
             }
 
             mnu.Items.Add(mnuItem);
         }
+
     }
 
 
     private void UpdateLayoutItems()
     {
-        _itemsDict.Clear();
-        PrimaryVisibleItems.Clear();
-        PrimaryOverflowItems.Clear();
+        _itemsMetadata.Clear();
+        PrimaryItems.Clear();
+        PrimaryItemsOverflow.Clear();
 
-        if (ItemsSource == null) return;
+        if (ItemsSource is not IEnumerable<ToolbarItemModel> btnItems) return;
 
-        foreach (var item in ItemsSource)
+        int index = -1;
+        foreach (var item in btnItems)
         {
-            if (item is not ToolbarItemModel itemModel) continue;
+            index++;
 
-            _itemsDict.TryAdd(itemModel.Id, 0);
-            PrimaryVisibleItems.Add(itemModel);
+            _itemsMetadata.TryAdd(item.Id, new ToolbarItemMetadata()
+            {
+                Index = index,
+                RenderedWidth = 0,
+            });
+
+            PrimaryItems.Add(item);
         }
-
-        HandleOverflow();
     }
 
 
     private void HandleOverflow()
     {
-        PrimaryOverflowItems.Clear();
+        PrimaryItemsOverflow.Clear();
 
-        var availableWidth = ActualWidth - BtnOverflow.ActualWidth - BtnMenu.ActualWidth;
+        // calculate available width for visible items
         var usedWidth = 0d;
+        var availableWidth = GridToolbar.ActualWidth
+            - PanelRight.ActualWidth
+            - (PrimaryItems.Count * ItemSpacing);
 
 
-        if (ItemsSource is IEnumerable<ToolbarItemModel> allItems)
+        foreach (var item in PrimaryItems)
         {
-            availableWidth -= allItems.Count() * ItemSpacing;
-            PrimaryVisibleItems.Clear();
+            if (!_itemsMetadata.TryGetValue(item.Id, out var meta)) continue;
 
-            foreach (var item in allItems)
+            // check if item is overflow
+            if (meta.RenderedWidth > 0)
             {
-                if (!_itemsDict.TryGetValue(item.Id, out var itemWidth)) continue;
-
-
-                if (usedWidth + itemWidth <= availableWidth)
-                {
-                    PrimaryVisibleItems.Add(item);
-                }
-                else
-                {
-                    PrimaryOverflowItems.Add(item);
-                }
-
-                usedWidth += itemWidth;
+                var hasEnoughSpace = availableWidth >= usedWidth + meta.RenderedWidth;
+                item.IsOverflow = !hasEnoughSpace;
             }
+
+            // add overflow item
+            if (item.IsOverflow)
+            {
+                PrimaryItemsOverflow.Add(item);
+            }
+
+            usedWidth += meta.RenderedWidth;
         }
 
-
-        BtnOverflow.Visibility = PrimaryOverflowItems.Any()
+        // set visibility of overflow button
+        BtnOverflow.Visibility = usedWidth > availableWidth
             ? Visibility.Visible
             : Visibility.Collapsed;
-
     }
 
 
+}
+
+
+
+public record ToolbarItemMetadata
+{
+    public int Index { get; set; } = -1;
+    public double RenderedWidth { get; set; } = 0;
 }

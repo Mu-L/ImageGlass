@@ -31,27 +31,31 @@ public sealed partial class MainWindow : Window
         new ToolbarItemModel {
             Id = "Btn_Open",
             Text = "Open",
+            Image = @"D:\OpenFile.svg",
         },
         new ToolbarItemModel {
             Id = "Btn_Save",
             Text = "Save",
+            Image = @"D:\Save.svg",
+            CheckableConfigBinding = "aaa",
         },
         new ToolbarItemModel {
-            Id = "Btn_Delete",
-            Text = "Delete",
+            Id = "Btn_Print",
+            Text = "Print",
+            Image = @"D:\Print.svg",
         },
-        new ToolbarItemModel {
-            Id = "Btn_Edit",
-            Text = "Edit",
-        },
-        new ToolbarItemModel {
-            Id = "Btn_Export",
-            Text = "Export",
-        },
-        new ToolbarItemModel {
-            Id = "Btn_Download",
-            Text = "Download",
-        },
+        //new ToolbarItemModel {
+        //    Id = "Btn_Edit",
+        //    Text = "Edit",
+        //},
+        //new ToolbarItemModel {
+        //    Id = "Btn_Export",
+        //    Text = "Export",
+        //},
+        //new ToolbarItemModel {
+        //    Id = "Btn_Download",
+        //    Text = "Download",
+        //},
     ];
 
 

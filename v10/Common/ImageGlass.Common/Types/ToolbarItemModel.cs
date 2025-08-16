@@ -22,8 +22,11 @@ namespace ImageGlass.Common;
 /// <summary>
 /// Toolbar item model
 /// </summary>
-public record ToolbarItemModel
+public class ToolbarItemModel : DisposableImpl
 {
+    protected bool _isOverflow = false;
+
+
     public ToolbarItemType Type { get; set; } = ToolbarItemType.Button;
 
     public string Id { get; set; } = string.Empty;
@@ -36,12 +39,28 @@ public record ToolbarItemModel
     public string Image { get; set; } = string.Empty;
     public SingleAction OnClick { get; set; } = new();
 
+
+    public bool IsOverflow
+    {
+        get => _isOverflow;
+        set
+        {
+            if (_isOverflow != value)
+            {
+                _isOverflow = value;
+                OnPropertyChanged(nameof(IsOverflow));
+            }
+        }
+    }
+
+
     ///// <summary>
     ///// Gets, sets hotkeys.
     ///// </summary>
     //[JsonConverter(typeof(HotkeyListJsonConverter))]
     //public List<Hotkey> Hotkeys { get; set; } = [];
 }
+
 
 public enum ToolbarItemType
 {
