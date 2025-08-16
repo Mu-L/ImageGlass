@@ -27,9 +27,6 @@
     <Page Update="Gallery\GalleryControl.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Toolbar\ToolbarControl.xaml">
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Toolbar_Custom\ToolbarCustomControl.xaml">

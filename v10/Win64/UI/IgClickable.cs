@@ -32,9 +32,9 @@ public class IgClickable(ButtonBase control) : DependencyObject
 
 
     /// <summary>
-    /// Gets or sets the interaction state of the gallery button item.
+    /// Gets or sets the interaction states of the gallery button item.
     /// </summary>
-    public IgButtonStates State
+    public IgButtonStates ButtonStates
     {
         get => (IgButtonStates)GetValue(StateProperty);
         set
@@ -45,7 +45,7 @@ public class IgClickable(ButtonBase control) : DependencyObject
     }
     public static readonly DependencyProperty StateProperty =
         DependencyProperty.Register(
-            nameof(State),
+            nameof(ButtonStates),
             typeof(IgButtonStates),
             typeof(IgClickable),
             new PropertyMetadata(IgButtonStates.Normal));
@@ -85,7 +85,7 @@ public class IgClickable(ButtonBase control) : DependencyObject
         DependencyProperty.Register(
             nameof(IsChecked),
             typeof(bool),
-            typeof(IgToolbarButton),
+            typeof(IgClickable),
             new PropertyMetadata(default));
 
 
@@ -107,7 +107,7 @@ public class IgClickable(ButtonBase control) : DependencyObject
 
 
         // hover style
-        if (State.HasFlag(IgButtonStates.Hovered))
+        if (ButtonStates.HasFlag(IgButtonStates.Hovered))
         {
             bgBrush
                 = borderBrush
@@ -115,7 +115,7 @@ public class IgClickable(ButtonBase control) : DependencyObject
         }
 
         // pressed style
-        else if (State.HasFlag(IgButtonStates.Pressed))
+        else if (ButtonStates.HasFlag(IgButtonStates.Pressed))
         {
             bgBrush
                 = borderBrush
@@ -138,8 +138,8 @@ public class IgClickable(ButtonBase control) : DependencyObject
         if (e.Key == Windows.System.VirtualKey.Space
             || e.Key == Windows.System.VirtualKey.Enter)
         {
-            State ^= IgButtonStates.Hovered;
-            State |= IgButtonStates.Pressed;
+            ButtonStates ^= IgButtonStates.Hovered;
+            ButtonStates |= IgButtonStates.Pressed;
             _control.ClickMode = ClickMode.Press;
 
             if (IsCheckOnClick) IsChecked = !IsChecked;
@@ -151,8 +151,8 @@ public class IgClickable(ButtonBase control) : DependencyObject
         if (e.Key == Windows.System.VirtualKey.Space
             || e.Key == Windows.System.VirtualKey.Enter)
         {
-            State ^= IgButtonStates.Pressed;
-            State ^= IgButtonStates.Hovered;
+            ButtonStates ^= IgButtonStates.Pressed;
+            ButtonStates ^= IgButtonStates.Hovered;
             _control.ClickMode = ClickMode.Release;
         }
     }
@@ -160,29 +160,29 @@ public class IgClickable(ButtonBase control) : DependencyObject
 
     public void SetStateForPointerEntered()
     {
-        State ^= IgButtonStates.Normal;
-        State |= IgButtonStates.Hovered;
+        ButtonStates ^= IgButtonStates.Normal;
+        ButtonStates |= IgButtonStates.Hovered;
     }
 
     public void SetStateForPointerExited()
     {
-        State ^= IgButtonStates.Hovered;
-        State |= IgButtonStates.Normal;
+        ButtonStates ^= IgButtonStates.Hovered;
+        ButtonStates |= IgButtonStates.Normal;
     }
 
     public void SetStateForPointerPressed()
     {
-        State ^= IgButtonStates.Hovered;
-        State |= IgButtonStates.Pressed;
+        ButtonStates ^= IgButtonStates.Hovered;
+        ButtonStates |= IgButtonStates.Pressed;
 
         if (IsCheckOnClick) IsChecked = !IsChecked;
     }
 
     public void SetStateForPointerReleased(PointerRoutedEventArgs e)
     {
-        State ^= IgButtonStates.Pressed;
-        if (e.Pointer.IsInContact) State |= IgButtonStates.Hovered;
-        else State ^= IgButtonStates.Hovered;
+        ButtonStates ^= IgButtonStates.Pressed;
+        if (e.Pointer.IsInContact) ButtonStates |= IgButtonStates.Hovered;
+        else ButtonStates ^= IgButtonStates.Hovered;
     }
 }
 
