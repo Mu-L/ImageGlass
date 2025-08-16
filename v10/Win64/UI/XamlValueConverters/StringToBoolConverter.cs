@@ -24,9 +24,9 @@ namespace ImageGlass.Win64.UI;
 
 public partial class StringToBoolConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, string language)
+    public object Convert(object? value, Type targetType, object parameter, string language)
     {
-        return !string.IsNullOrEmpty(value.ToString());
+        return !string.IsNullOrEmpty(value?.ToString());
     }
 
 

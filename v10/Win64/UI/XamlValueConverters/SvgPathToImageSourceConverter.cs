@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
@@ -24,20 +23,20 @@ using System;
 namespace ImageGlass.Win64.UI;
 
 
-
-public partial class StringToImageIconSourceConverter : IValueConverter
+public partial class SvgPathToImageSourceConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, string language)
+    public object? Convert(object value, Type targetType, object parameter, string language)
     {
-        // set default icon
-        if (value is not string svgPath || string.IsNullOrWhiteSpace(svgPath))
+        var svgPath = (string)value;
+
+        try
         {
-            return new SymbolIcon(Symbol.Placeholder);
+            // set new icon
+            return new SvgImageSource(new Uri(svgPath));
         }
+        catch { }
 
-
-        // set new icon
-        return new SvgImageSource(new Uri(svgPath));
+        return null;
     }
 
 

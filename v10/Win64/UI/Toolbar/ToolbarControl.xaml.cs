@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using CommunityToolkit.WinUI.Controls;
 using ImageGlass.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -26,9 +27,10 @@ using System.Collections.ObjectModel;
 
 
 namespace ImageGlass.Win64.UI;
+
 public sealed partial class ToolbarControl : UserControl
 {
-    private Dictionary<string, ToolbarItemMetadata> _itemsMetadata = [];
+    private Dictionary<int, ToolbarItemMetadata> _itemsMetadata = [];
     public static double ItemSpacing => 4;
 
     public ObservableCollection<ToolbarItemModel> PrimaryItems { get; } = [];
@@ -78,14 +80,16 @@ public sealed partial class ToolbarControl : UserControl
     }
 
 
+
     private void ToolbarItem_Loaded(object sender, RoutedEventArgs e)
     {
-        if (sender is not IgButton btn) return;
+        if (sender is not IIgToolbarItem item) return;
+        if (sender is not FrameworkElement fe) return;
 
-        // save button size
-        if (_itemsMetadata.TryGetValue(btn.Name, out ToolbarItemMetadata? value))
+        // save toolbar item width
+        if (_itemsMetadata.TryGetValue(item.ViewModel.SourceIndex, out ToolbarItemMetadata? value))
         {
-            value.RenderedWidth = btn.ActualWidth;
+            value.RenderedWidth = fe.ActualWidth;
         }
 
 
@@ -112,13 +116,22 @@ public sealed partial class ToolbarControl : UserControl
             IconElement iconFe;
             ImageSource? imgSrc = null;
 
+            // 1. Separator
+            if (item.Type == ToolbarItemType.Separator)
+            {
+                mnu.Items.Add(new MenuFlyoutSeparator());
+                continue;
+            }
+
+            // 2. Button item
             // get toolbar item metadata
-            if (!_itemsMetadata.TryGetValue(item.Id, out var meta)) continue;
-            if (RepeaterPrimaryItems.TryGetElement(meta.PrimaryItemIndex) is not IgButton btnEl) continue;
+            if (!_itemsMetadata.TryGetValue(item.SourceIndex, out var meta)) continue;
+            if (RepeaterPrimaryItems.TryGetElement(meta.PrimaryItemIndex) is not SwitchPresenter sp) continue;
+            if (sp.FindName("ToolbarItem_Button") is not IgToolbarItemButton btnEl) continue;
 
 
             // get image source from toolbar item
-            if (btnEl.FindName("ToolbarButtonIcon") is ImageIcon iconEl)
+            if (btnEl.FindName("ToolbarItem_Button_Icon") is ImageIcon iconEl)
             {
                 imgSrc = iconEl.Source;
             }
@@ -136,15 +149,15 @@ public sealed partial class ToolbarControl : UserControl
             }
 
 
-            if (!string.IsNullOrWhiteSpace(item.CheckableConfigBinding))
+            if (btnEl.ViewModel.IsToggle)
             {
                 mnuItem = new ToggleMenuFlyoutItem()
                 {
                     Text = item.Text,
                     Icon = iconFe,
-                    IsChecked = btnEl.IsChecked,
-                    Command = btnEl.Command,
-                    CommandParameter = btnEl.CommandParameter,
+                    //IsChecked = btnEl.IsChecked,
+                    //Command = btnEl.Command,
+                    //CommandParameter = btnEl.CommandParameter,
                 };
             }
             else
@@ -169,15 +182,18 @@ public sealed partial class ToolbarControl : UserControl
         PrimaryItemsOverflow.Clear();
         SecondaryItems.Clear();
 
-        if (ItemsSource is not IEnumerable<ToolbarItemModel> btnItems) return;
+        if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
 
 
         int srcIndex = -1;
         int primaryIndex = -1;
         int secondaryIndex = -1;
 
-        foreach (var item in btnItems)
+        foreach (var item in allItems)
         {
+            srcIndex++;
+            item.SourceIndex = srcIndex;
+
             // group: secondary
             if (item.Alignment == ToolbarItemAlignment.Right)
             {
@@ -192,7 +208,7 @@ public sealed partial class ToolbarControl : UserControl
             }
 
             // save item metadata
-            _itemsMetadata.TryAdd(item.Id, new ToolbarItemMetadata()
+            _itemsMetadata.TryAdd(srcIndex, new ToolbarItemMetadata()
             {
                 SourceIndex = srcIndex,
                 PrimaryItemIndex = primaryIndex,
@@ -205,25 +221,29 @@ public sealed partial class ToolbarControl : UserControl
 
     private void HandleOverflow()
     {
+        if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
+
         PrimaryItemsOverflow.Clear();
 
         // calculate available width for visible items
         var usedWidth = 0d;
         var availableWidth = GridToolbar.ActualWidth
+            - GridToolbar.Padding.Left
+            - GridToolbar.Padding.Right
             - PanelRight.ActualWidth
             - (PrimaryItems.Count * ItemSpacing);
 
 
         foreach (var item in PrimaryItems)
         {
-            if (!_itemsMetadata.TryGetValue(item.Id, out var meta)) continue;
+            if (!_itemsMetadata.TryGetValue(item.SourceIndex, out var meta)) continue;
+
+            usedWidth += meta.RenderedWidth;
 
             // check if item is overflow
-            if (meta.RenderedWidth > 0)
-            {
-                var hasEnoughSpace = availableWidth >= usedWidth + meta.RenderedWidth;
-                item.IsOverflow = !hasEnoughSpace;
-            }
+            var hasEnoughSpace = availableWidth >= usedWidth;
+            item.IsOverflow = !hasEnoughSpace;
+
 
             // add overflow item
             if (item.IsOverflow)
@@ -231,7 +251,6 @@ public sealed partial class ToolbarControl : UserControl
                 PrimaryItemsOverflow.Add(item);
             }
 
-            usedWidth += meta.RenderedWidth;
         }
 
         // set visibility of overflow button
@@ -252,3 +271,4 @@ public record ToolbarItemMetadata
     public int SecondaryItemIndex { get; set; } = -1;
     public double RenderedWidth { get; set; } = 0;
 }
+

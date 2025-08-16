@@ -490,14 +490,14 @@ public partial class AppSettings
             Id = "Btn_Save",
             Text = "Save",
             Image = @"D:\Save.svg",
-            CheckableConfigBinding = "aaa",
-            DisplayStyle = ToolbarItemDisplayStyle.ImageAndText,
+            IsToggle = true,
+            ShowText =true,
         },
         new ToolbarItemModel {
             Id = "Btn_Print",
             Text = "Print",
             Image = @"D:\Print.svg",
-            DisplayStyle = ToolbarItemDisplayStyle.ImageAndText,
+            ShowText = true,
         },
         new ToolbarItemModel {
             Id = "Btn_Crop",
