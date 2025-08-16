@@ -57,13 +57,13 @@ public partial class App : Application
     private void Current_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
         // TODO:
-        throw new NotImplementedException();
+        throw e.Exception;
     }
 
     private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
         // TODO:
-        throw new NotImplementedException();
+        throw e.Exception;
     }
 
 
