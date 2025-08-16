@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using System.Text.Json.Serialization;
+
 namespace ImageGlass.Common;
 
 
@@ -34,8 +36,6 @@ public class ToolbarItemModel : DisposableImpl
     protected bool _isOverflow = false;
 
 
-    public string CheckableConfigBinding { get; set; } = string.Empty;
-
 
     public string Id
     {
@@ -50,6 +50,7 @@ public class ToolbarItemModel : DisposableImpl
         }
     }
 
+
     public ToolbarItemType Type
     {
         get => _type;
@@ -62,6 +63,7 @@ public class ToolbarItemModel : DisposableImpl
             }
         }
     }
+
 
     public string Text
     {
@@ -76,6 +78,7 @@ public class ToolbarItemModel : DisposableImpl
         }
     }
 
+
     public string Image
     {
         get => _image;
@@ -88,6 +91,7 @@ public class ToolbarItemModel : DisposableImpl
             }
         }
     }
+
 
     public ToolbarItemAlignment Alignment
     {
@@ -102,6 +106,8 @@ public class ToolbarItemModel : DisposableImpl
         }
     }
 
+
+
     public ToolbarItemDisplayStyle DisplayStyle
     {
         get => _displayStyle;
@@ -115,6 +121,8 @@ public class ToolbarItemModel : DisposableImpl
         }
     }
 
+
+    [JsonIgnore]
     public bool IsOverflow
     {
         get => _isOverflow;
@@ -127,6 +135,9 @@ public class ToolbarItemModel : DisposableImpl
             }
         }
     }
+
+
+    public string CheckableConfigBinding { get; set; } = "";
 
 
     ///// <summary>
