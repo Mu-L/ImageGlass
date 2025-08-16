@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <UserControl
-    x:Class="ImageGlass.Win64.UI.ToolbarCustomControl"
+    x:Class="ImageGlass.Win64.UI.ToolbarControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:common="using:ImageGlass.Common"
@@ -68,7 +68,7 @@
             ItemTemplate="{StaticResource ToolbarItemTemplate}"
             ItemsSource="{x:Bind PrimaryItems, Mode=OneWay}">
             <ItemsRepeater.Layout>
-                <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarCustomControl.ItemSpacing}" />
+                <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarControl.ItemSpacing}" />
             </ItemsRepeater.Layout>
         </ItemsRepeater>
 
@@ -81,7 +81,7 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Stretch"
             Orientation="Horizontal"
-            Spacing="{x:Bind local:ToolbarCustomControl.ItemSpacing}">
+            Spacing="{x:Bind local:ToolbarControl.ItemSpacing}">
 
             <!--  Toolbar: Overflow button  -->
             <local:IgButton
@@ -112,7 +112,7 @@
                 ItemTemplate="{StaticResource ToolbarItemTemplate}"
                 ItemsSource="{x:Bind SecondaryItems, Mode=OneWay}">
                 <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarCustomControl.ItemSpacing}" />
+                    <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarControl.ItemSpacing}" />
                 </ItemsRepeater.Layout>
             </ItemsRepeater>
 

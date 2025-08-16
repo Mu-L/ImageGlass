@@ -1,4 +1,22 @@
-﻿using ImageGlass.Common;
+﻿/*
+ImageGlass Project - Image viewer for Windows
+Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+using ImageGlass.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -6,11 +24,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace ImageGlass.Win64.UI;
-public sealed partial class ToolbarCustomControl : UserControl
+public sealed partial class ToolbarControl : UserControl
 {
     private Dictionary<string, ToolbarItemMetadata> _itemsMetadata = [];
     public static double ItemSpacing => 4;
@@ -32,19 +48,19 @@ public sealed partial class ToolbarCustomControl : UserControl
         set => SetValue(ItemsSourceProperty, value);
     }
     public static readonly DependencyProperty ItemsSourceProperty =
-        DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(ToolbarCustomControl),
+        DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(ToolbarControl),
             new PropertyMetadata(null, OnItemsSourceChanged));
 
     private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not ToolbarCustomControl toolbar) return;
+        if (d is not ToolbarControl toolbar) return;
         toolbar.UpdateLayoutItems();
     }
 
     #endregion // Dependency Properties
 
 
-    public ToolbarCustomControl()
+    public ToolbarControl()
     {
         this.InitializeComponent();
         this.SizeChanged += UserControl_SizeChanged;
