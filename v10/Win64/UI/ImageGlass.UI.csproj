@@ -13,12 +13,28 @@
       <Platforms>AnyCPU;x64;ARM64</Platforms>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Toolbar\IgToolbarItemButton.xaml" />
+    <None Remove="Toolbar\IgToolbarItemSeparator.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250402" />
+    <PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.2.250402" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4654" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\ImageGlass.Common\ImageGlass.Common.csproj" />
     <ProjectReference Include="..\..\Win64\ImageGlass.Win64.Common\ImageGlass.Win64.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Toolbar\IgToolbarItemButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Toolbar\IgToolbarItemSeparator.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Gallery\GalleryControl.xaml">

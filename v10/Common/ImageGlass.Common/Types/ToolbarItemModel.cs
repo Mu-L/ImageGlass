@@ -28,13 +28,49 @@ public class ToolbarItemModel : DisposableImpl
 {
     protected string _id = "";
     protected ToolbarItemType _type = ToolbarItemType.Button;
+    protected bool _isToggle = false;
     protected string _text = "";
     protected string _image = "";
     protected ToolbarItemAlignment _alignment = ToolbarItemAlignment.Left;
-    protected ToolbarItemDisplayStyle _displayStyle = ToolbarItemDisplayStyle.Image;
+    protected bool _showText = false;
 
     protected bool _isOverflow = false;
+    protected int _sourceIndex = -1;
 
+
+
+    [JsonIgnore]
+    public int SourceIndex
+    {
+        get => _sourceIndex;
+        set
+        {
+            if (_sourceIndex != value)
+            {
+                _sourceIndex = value;
+                OnPropertyChanged(nameof(SourceIndex));
+            }
+        }
+    }
+
+
+    [JsonIgnore]
+    public bool IsOverflow
+    {
+        get => _isOverflow;
+        set
+        {
+            if (_isOverflow != value)
+            {
+                _isOverflow = value;
+                OnPropertyChanged(nameof(IsOverflow));
+            }
+        }
+    }
+
+
+    [JsonIgnore]
+    public bool IsTextVisible => ShowText && !string.IsNullOrWhiteSpace(Text);
 
 
     public string Id
@@ -64,6 +100,19 @@ public class ToolbarItemModel : DisposableImpl
         }
     }
 
+    public bool IsToggle
+    {
+        get => _isToggle;
+        set
+        {
+            if (_isToggle != value)
+            {
+                _isToggle = value;
+                OnPropertyChanged(nameof(IsToggle));
+            }
+        }
+    }
+
 
     public string Text
     {
@@ -74,6 +123,7 @@ public class ToolbarItemModel : DisposableImpl
             {
                 _text = value;
                 OnPropertyChanged(nameof(Text));
+                OnPropertyChanged(nameof(IsTextVisible));
             }
         }
     }
@@ -108,36 +158,24 @@ public class ToolbarItemModel : DisposableImpl
 
 
 
-    public ToolbarItemDisplayStyle DisplayStyle
+    public bool ShowText
     {
-        get => _displayStyle;
+        get => _showText;
         set
         {
-            if (_displayStyle != value)
+            if (_showText != value)
             {
-                _displayStyle = value;
-                OnPropertyChanged(nameof(DisplayStyle));
+                _showText = value;
+                OnPropertyChanged(nameof(ShowText));
+                OnPropertyChanged(nameof(IsTextVisible));
             }
         }
     }
 
 
-    [JsonIgnore]
-    public bool IsOverflow
-    {
-        get => _isOverflow;
-        set
-        {
-            if (_isOverflow != value)
-            {
-                _isOverflow = value;
-                OnPropertyChanged(nameof(IsOverflow));
-            }
-        }
-    }
 
 
-    public string CheckableConfigBinding { get; set; } = "";
+
 
 
     ///// <summary>
@@ -152,12 +190,6 @@ public enum ToolbarItemType
 {
     Button,
     Separator,
-}
-
-public enum ToolbarItemDisplayStyle
-{
-    Image,
-    ImageAndText,
 }
 
 public enum ToolbarItemAlignment
