@@ -52,7 +52,7 @@ public partial class IgToolbarButton : AppBarButton
     public IgToolbarButton()
     {
         _clickable = new IgClickable(this);
-        DefaultStyleKey = nameof(IgToolbarButton);
+        DefaultStyleKey = typeof(IgToolbarButton);
     }
 
     public IgToolbarButton(string? svgIconPath) : this()
