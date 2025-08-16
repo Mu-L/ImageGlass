@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -26,9 +27,13 @@ using System;
 namespace ImageGlass.Win64.UI;
 
 
-public class IgClickable(ButtonBase control) : DependencyObject
+public partial class IgClickable(ButtonBase control) : DisposableImpl
 {
     private ButtonBase _control => control;
+
+    private IgButtonStates _buttonStates = IgButtonStates.Normal;
+    private bool _isCheckOnClick = false;
+    private bool _isChecked = false;
 
 
     /// <summary>
@@ -36,19 +41,16 @@ public class IgClickable(ButtonBase control) : DependencyObject
     /// </summary>
     public IgButtonStates ButtonStates
     {
-        get => (IgButtonStates)GetValue(StateProperty);
+        get => _buttonStates;
         set
         {
-            SetValue(StateProperty, value);
-            UpdateStyle();
+            if (_buttonStates != value)
+            {
+                _buttonStates = value;
+                OnPropertyChanged(nameof(ButtonStates));
+            }
         }
     }
-    public static readonly DependencyProperty StateProperty =
-        DependencyProperty.Register(
-            nameof(ButtonStates),
-            typeof(IgButtonStates),
-            typeof(IgClickable),
-            new PropertyMetadata(IgButtonStates.Normal));
 
 
     /// <summary>
@@ -56,15 +58,16 @@ public class IgClickable(ButtonBase control) : DependencyObject
     /// </summary>
     public bool IsCheckOnClick
     {
-        get => (bool)GetValue(IsCheckOnClickProperty);
-        set => SetValue(IsCheckOnClickProperty, value);
+        get => _isCheckOnClick;
+        set
+        {
+            if (_isCheckOnClick != value)
+            {
+                _isCheckOnClick = value;
+                OnPropertyChanged(nameof(IsCheckOnClick));
+            }
+        }
     }
-    public static readonly DependencyProperty IsCheckOnClickProperty =
-        DependencyProperty.Register(
-            nameof(IsCheckOnClick),
-            typeof(bool),
-            typeof(IgClickable),
-            new PropertyMetadata(default));
 
 
     /// <summary>
@@ -72,21 +75,16 @@ public class IgClickable(ButtonBase control) : DependencyObject
     /// </summary>
     public bool IsChecked
     {
-        get => (bool)GetValue(IsCheckedProperty);
+        get => _isChecked;
         set
         {
-            SetValue(IsCheckedProperty, value);
-
-            // set selected styles
-            UpdateStyle();
+            if (_isChecked != value)
+            {
+                _isChecked = value;
+                OnPropertyChanged(nameof(IsChecked));
+            }
         }
     }
-    public static readonly DependencyProperty IsCheckedProperty =
-        DependencyProperty.Register(
-            nameof(IsChecked),
-            typeof(bool),
-            typeof(IgClickable),
-            new PropertyMetadata(default));
 
 
     /// <summary>

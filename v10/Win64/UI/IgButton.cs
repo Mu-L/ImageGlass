@@ -32,9 +32,19 @@ public partial class IgButton : Button
     /// </summary>
     public bool IsCheckOnClick
     {
-        get => _clickable.IsCheckOnClick;
-        set => _clickable.IsCheckOnClick = value;
+        get => (bool)GetValue(IsCheckOnClickProperty);
+        set
+        {
+            _clickable.IsCheckOnClick = value;
+            SetValue(IsCheckOnClickProperty, value);
+        }
     }
+    public static readonly DependencyProperty IsCheckOnClickProperty =
+        DependencyProperty.Register(
+            nameof(IsCheckOnClick),
+            typeof(bool),
+            typeof(IgButton),
+            new PropertyMetadata(false));
 
 
     /// <summary>
@@ -42,9 +52,35 @@ public partial class IgButton : Button
     /// </summary>
     public bool IsChecked
     {
-        get => _clickable.IsChecked;
-        set => _clickable.IsChecked = value;
+        get => (bool)GetValue(IsCheckedProperty);
+        set
+        {
+            _clickable.IsChecked = value;
+            SetValue(IsCheckedProperty, value);
+        }
     }
+    public static readonly DependencyProperty IsCheckedProperty =
+        DependencyProperty.Register(
+            nameof(IsChecked),
+            typeof(bool),
+            typeof(IgButton),
+            new PropertyMetadata(false));
+
+
+    /// <summary>
+    /// Gets or sets the check state of the control.
+    /// </summary>
+    public string Id
+    {
+        get => (string)GetValue(IdProperty);
+        set => SetValue(IdProperty, value);
+    }
+    public static readonly DependencyProperty IdProperty =
+        DependencyProperty.Register(
+            nameof(Id),
+            typeof(string),
+            typeof(IgButton),
+            new PropertyMetadata(""));
 
 
     /// <summary>
