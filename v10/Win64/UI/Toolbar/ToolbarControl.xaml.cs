@@ -178,22 +178,22 @@ public sealed partial class ToolbarControl : UserControl
 
     private void MnuOverflow_Opened(object sender, object e)
     {
-        BtnOverflow.IsChecked = true;
+        BtnOverflowMenu.IsChecked = true;
     }
 
     private void MnuOverflow_Closed(object sender, object e)
     {
-        BtnOverflow.IsChecked = false;
+        BtnOverflowMenu.IsChecked = false;
     }
 
     private void MnuMain_Opened(object sender, object e)
     {
-        BtnMenu.IsChecked = true;
+        BtnMainMenu.IsChecked = true;
     }
 
     private void MnuMain_Closed(object sender, object e)
     {
-        BtnMenu.IsChecked = false;
+        BtnMainMenu.IsChecked = false;
     }
 
 
@@ -276,7 +276,7 @@ public sealed partial class ToolbarControl : UserControl
         }
 
         // set visibility of overflow button
-        BtnOverflow.Visibility = usedWidth > availableWidth
+        BtnOverflowMenu.Visibility = usedWidth > availableWidth
             ? Visibility.Visible
             : Visibility.Collapsed;
     }

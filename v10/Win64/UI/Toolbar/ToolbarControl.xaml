@@ -87,7 +87,7 @@
 
             <!--  Toolbar: Overflow button  -->
             <local:IgButton
-                x:Name="BtnOverflow"
+                x:Name="BtnOverflowMenu"
                 Padding="5"
                 Style="{StaticResource IgButtonStyle}"
                 ToolTipService.ToolTip="View more buttons"
@@ -122,19 +122,14 @@
             </ItemsRepeater>
 
 
-            <!--  Menu button  -->
-            <local:IgButton
-                x:Name="BtnMenu"
-                Padding="5"
-                Style="{StaticResource IgButtonStyle}"
-                ToolTipService.ToolTip="Main Menu">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <Viewbox Height="{StaticResource ToolbarIconSize}" VerticalAlignment="Center">
-                        <FontIcon AutomationProperties.AccessibilityView="Raw" Glyph="&#xE700;" />
-                    </Viewbox>
-                </StackPanel>
 
-                <local:IgButton.Flyout>
+            <!--  Menu button  -->
+            <local:IgToolbarItemButton x:Name="BtnMainMenu">
+                <local:IgToolbarItemButton.ViewModel>
+                    <common:ToolbarItemModel Image="MainMenu.svg" Text="Main Menu" />
+                </local:IgToolbarItemButton.ViewModel>
+
+                <local:IgToolbarItemButton.Flyout>
                     <MenuFlyout
                         x:Name="MnuMain"
                         Closed="MnuMain_Closed"
@@ -240,8 +235,10 @@
                         </MenuFlyoutItem>
 
                     </MenuFlyout>
-                </local:IgButton.Flyout>
-            </local:IgButton>
+                </local:IgToolbarItemButton.Flyout>
+
+            </local:IgToolbarItemButton>
+
 
         </StackPanel>
 

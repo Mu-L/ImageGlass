@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 
 
 namespace ImageGlass.Win64.UI;
@@ -39,6 +40,25 @@ public sealed partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     }
     public static readonly DependencyProperty ViewModelProperty =
         DependencyProperty.Register(nameof(ViewModel), typeof(ToolbarItemModel), typeof(IgToolbarItemButton), new PropertyMetadata(new ToolbarItemModel()));
+
+
+    public FlyoutBase? Flyout
+    {
+        get => BtnActivator.Flyout;
+        set => BtnActivator.Flyout = value;
+    }
+
+    public bool IsChecked
+    {
+        get => BtnActivator.IsChecked;
+        set => BtnActivator.IsChecked = value;
+    }
+
+    public bool IsCheckOnClick
+    {
+        get => BtnActivator.IsCheckOnClick;
+        set => BtnActivator.IsCheckOnClick = value;
+    }
 
     #endregion // Dependency Properties
 

@@ -18,6 +18,7 @@
 
 
     <local:IgButton
+        x:Name="BtnActivator"
         Padding="5"
         Id="{x:Bind ViewModel.Id}"
         IsCheckOnClick="{x:Bind ViewModel.IsToggle}"
