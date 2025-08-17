@@ -47,6 +47,7 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
             if (_buttonStates != value)
             {
                 _buttonStates = value;
+                UpdateStyle();
                 OnPropertyChanged(nameof(ButtonStates));
             }
         }
@@ -64,6 +65,7 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
             if (_isCheckOnClick != value)
             {
                 _isCheckOnClick = value;
+                UpdateStyle();
                 OnPropertyChanged(nameof(IsCheckOnClick));
             }
         }
@@ -81,6 +83,7 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
             if (_isChecked != value)
             {
                 _isChecked = value;
+                UpdateStyle();
                 OnPropertyChanged(nameof(IsChecked));
             }
         }

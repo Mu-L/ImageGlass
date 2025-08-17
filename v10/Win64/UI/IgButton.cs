@@ -99,17 +99,6 @@ public partial class IgButton : Button
             new PropertyMetadata(""));
 
 
-    public string SvgIcon
-    {
-        get => (string)GetValue(SvgIconProperty);
-        set => SetValue(SvgIconProperty, value);
-    }
-    public static readonly DependencyProperty SvgIconProperty =
-        DependencyProperty.Register(
-            nameof(SvgIcon),
-            typeof(string),
-            typeof(IgButton),
-            new PropertyMetadata(""));
 
     public IgButton()
     {
@@ -155,5 +144,10 @@ public partial class IgButton : Button
         base.OnPointerReleased(e);
 
         _clickable.UpdateStyle();
+    }
+
+    public void SetButtonsState(IgButtonStates states)
+    {
+        _clickable.ButtonStates = states;
     }
 }

@@ -101,6 +101,8 @@
                 <local:IgButton.Flyout>
                     <MenuFlyout
                         x:Name="MnuOverflow"
+                        Closed="MnuOverflow_Closed"
+                        Opened="MnuOverflow_Opened"
                         Opening="MnuOverflow_Opening"
                         Placement="BottomEdgeAlignedRight" />
                 </local:IgButton.Flyout>
@@ -133,7 +135,11 @@
                 </StackPanel>
 
                 <local:IgButton.Flyout>
-                    <MenuFlyout x:Name="MnuMain" Placement="BottomEdgeAlignedRight">
+                    <MenuFlyout
+                        x:Name="MnuMain"
+                        Closed="MnuMain_Closed"
+                        Opened="MnuMain_Opened"
+                        Placement="BottomEdgeAlignedRight">
 
                         <!--  File  -->
                         <MenuFlyoutSubItem x:Name="MnuFile" Text="File">

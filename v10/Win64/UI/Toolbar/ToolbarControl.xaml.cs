@@ -30,6 +30,7 @@ namespace ImageGlass.Win64.UI;
 
 public sealed partial class ToolbarControl : UserControl
 {
+
     private Dictionary<int, ToolbarItemMetadata> _itemsMetadata = [];
     public static double ItemSpacing => 4;
 
@@ -58,6 +59,7 @@ public sealed partial class ToolbarControl : UserControl
         if (d is not ToolbarControl toolbar) return;
         toolbar.UpdateLayoutItems();
     }
+
 
     #endregion // Dependency Properties
 
@@ -172,6 +174,26 @@ public sealed partial class ToolbarControl : UserControl
             mnu.Items.Add(mnuItem);
         }
 
+    }
+
+    private void MnuOverflow_Opened(object sender, object e)
+    {
+        BtnOverflow.IsChecked = true;
+    }
+
+    private void MnuOverflow_Closed(object sender, object e)
+    {
+        BtnOverflow.IsChecked = false;
+    }
+
+    private void MnuMain_Opened(object sender, object e)
+    {
+        BtnMenu.IsChecked = true;
+    }
+
+    private void MnuMain_Closed(object sender, object e)
+    {
+        BtnMenu.IsChecked = false;
     }
 
 
