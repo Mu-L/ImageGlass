@@ -86,6 +86,7 @@ public partial class MainWindowViewModel(MainWindow win) : DisposableImpl
             {
                 _titleBarRightInset = value;
                 OnPropertyChanged(nameof(TitleBarRightInset));
+                OnPropertyChanged(nameof(TitleBarPadding));
             }
         }
     }
@@ -93,7 +94,7 @@ public partial class MainWindowViewModel(MainWindow win) : DisposableImpl
     /// <summary>
     /// Gets the title bar padding of <see cref="MainWindow"/>.
     /// </summary>
-    public Thickness TitleBarPadding => new Thickness(0, TitleBarRightInset, 0, 0);
+    public Thickness TitleBarPadding => new Thickness(0, 0, TitleBarRightInset, 0);
 
 
     public static SystemBackdrop? WindowBackdrop
