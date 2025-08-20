@@ -246,8 +246,35 @@ public sealed partial class ToolbarControl : UserControl
         if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
 
         PrimaryItemsOverflow.Clear();
+        var toolbarIconSize = (double)Application.Current.Resources["ToolbarIconSize"];
 
-        // calculate available width for visible items
+
+        // 1. calculate how much space can I safely use for center toolbar items
+        // before they hit the right-side panel
+        var availableSpaceOfCenterToolbar =
+            (GridToolbar.ActualWidth / 2) // center line
+            - PanelPrimary.ActualWidth / 2 // shifts calculation for primary panel
+            - PanelRight.ActualWidth // reserves space
+            - toolbarIconSize; // safety gap
+
+
+        // 2. if has no space,
+        // align items to the left to have more space
+        if (availableSpaceOfCenterToolbar <= 0)
+        {
+            PanelPrimary.HorizontalAlignment = HorizontalAlignment.Left;
+        }
+        else
+        {
+            PanelPrimary.HorizontalAlignment = HorizontalAlignment.Center;
+        }
+
+
+        // 3. event if after the items aligned to the left
+        // it does not have enough space to fit the toolbar,
+        // we need to hide the items until preserve enough space
+
+        // 3.1 calculate available width for visible items
         var usedWidth = 0d;
         var availableWidth = GridToolbar.ActualWidth
             - GridToolbar.Padding.Left
@@ -255,14 +282,13 @@ public sealed partial class ToolbarControl : UserControl
             - PanelRight.ActualWidth
             - (PrimaryItems.Count * ItemSpacing);
 
-
+        // 3.2 check if we should hide the item
         foreach (var item in PrimaryItems)
         {
             if (!_itemsMetadata.TryGetValue(item.SourceIndex, out var meta)) continue;
-
             usedWidth += meta.RenderedWidth;
 
-            // check if item is overflow
+            // check if the item has enough space to show
             var hasEnoughSpace = availableWidth >= usedWidth;
             item.IsOverflow = !hasEnoughSpace;
 
@@ -275,7 +301,7 @@ public sealed partial class ToolbarControl : UserControl
 
         }
 
-        // set visibility of overflow button
+        // 4. show the overflow button if there are hidden icons
         BtnOverflowMenu.Visibility = usedWidth > availableWidth
             ? Visibility.Visible
             : Visibility.Collapsed;

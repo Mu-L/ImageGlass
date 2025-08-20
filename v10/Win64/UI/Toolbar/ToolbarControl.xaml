@@ -64,7 +64,10 @@
 
 
         <!--  Toolbar: Primary Items  -->
-        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+        <StackPanel
+            x:Name="PanelPrimary"
+            Grid.Column="0"
+            HorizontalAlignment="Center">
             <ItemsRepeater
                 x:Name="RepeaterPrimaryItems"
                 ItemTemplate="{StaticResource ToolbarItemTemplate}"
@@ -80,9 +83,9 @@
         <!--  Right Column  -->
         <StackPanel
             x:Name="PanelRight"
-            Grid.Column="1"
             HorizontalAlignment="Right"
             VerticalAlignment="Stretch"
+            Canvas.ZIndex="90"
             Orientation="Horizontal"
             Spacing="{x:Bind local:ToolbarControl.ItemSpacing}">
 
