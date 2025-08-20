@@ -54,6 +54,8 @@
     <Grid
         x:Name="GridToolbar"
         Padding="5"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
         Background="{x:Bind Background}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />

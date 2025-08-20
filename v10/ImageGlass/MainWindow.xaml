@@ -10,13 +10,14 @@
     xmlns:ui="using:ImageGlass.Win64.UI"
     xmlns:winNT="using:ImageGlass.WinNT"
     xmlns:winNTCommon="using:ImageGlass.Win64.Common"
-    Title="ImageGlass"
+    Title="{x:Bind VM.Title}"
+    x:DefaultBindMode="OneWay"
     Closed="Window_Closed"
-    SystemBackdrop="{x:Bind WindowBackdrop}"
+    SystemBackdrop="{x:Bind local:MainWindowViewModel.WindowBackdrop}"
     mc:Ignorable="d">
 
 
-    <Grid x:Name="ContentArea">
+    <Grid x:Name="WindowContent" Loaded="WindowContent_Loaded">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -27,10 +28,10 @@
 
         <!--  Title bar  -->
         <Grid
-            x:Name="WinMainTitleBar"
+            x:Name="WinTitleBar"
             Grid.Row="0"
-            Height="{x:Bind TitleBarHeight.Value}"
-            Padding="{x:Bind TitleBarMargin}"
+            Height="{x:Bind VM.TitleBarHeight}"
+            Padding="{x:Bind VM.TitleBarPadding}"
             Canvas.ZIndex="100">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -46,59 +47,50 @@
                 Visibility="{x:Bind winNTCommon:Config.Current.ShowAppIcon}" />
 
             <TextBlock
-                x:Name="WinMainTitleBarText"
                 Grid.Column="1"
                 Margin="5,0,0,0"
                 VerticalAlignment="Center"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{x:Bind Title}"
+                Text="{x:Bind VM.Title}"
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="NoWrap" />
         </Grid>
 
 
         <!--  Toolbar  -->
-        <Grid
+        <ui:ToolbarControl
+            x:Name="ToolbarMain"
             Grid.Row="1"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Top"
-            Canvas.ZIndex="99">
-            <ui:ToolbarControl ItemsSource="{x:Bind winNTCommon:Config.Current.ToolbarButtons}" />
-        </Grid>
+            Background="#07ffffff"
+            Canvas.ZIndex="90"
+            ItemsSource="{x:Bind winNTCommon:Config.Current.ToolbarButtons}" />
 
 
         <!--  Gallery  -->
-        <Grid
+        <ui:GalleryControl
+            x:Name="Gallery"
             Grid.Row="3"
             Grid.Column="1"
-            VerticalAlignment="Bottom"
-            Canvas.ZIndex="98">
-            <ui:GalleryControl
-                x:Name="Gallery"
-                ItemClicked="Gallery_ItemClicked"
-                PhotoManager="{x:Bind local:Local.Photos, Mode=OneWay}" />
-        </Grid>
+            Background="#07ffffff"
+            Canvas.ZIndex="80"
+            ItemClicked="Gallery_ItemClicked"
+            PhotoManager="{x:Bind local:Local.Photos, Mode=OneWay}" />
 
 
         <!--  Viewer  -->
-        <Grid Grid.Row="2">
-            <Border BorderBrush="Red" BorderThickness="0">
-                <winNT:VirtualViewerControl
-                    x:Name="Viewer"
-                    AllowDrop="True"
-                    BackgroundColor="#22000000"
-                    CheckerboardMode="{x:Bind winNTCommon:Config.Current.CheckerboardMode}"
-                    DragOver="Viewer_DragOver"
-                    Drop="Viewer_Drop"
-                    EnableDebug="{x:Bind winNTCommon:Config.Current.EnableDebug}"
-                    EnableSelection="False"
-                    Loaded="Viewer_Loaded"
-                    PanSpeed="{x:Bind winNTCommon:Config.Current.PanSpeed}"
-                    ZoomLevels="{x:Bind winNTCommon:Config.Current.ZoomLevels}"
-                    ZoomMode="{x:Bind winNTCommon:Config.Current.ZoomMode}"
-                    ZoomSpeed="{x:Bind winNTCommon:Config.Current.ZoomSpeed}" />
-            </Border>
-        </Grid>
+        <winNT:VirtualViewerControl
+            x:Name="Viewer"
+            Grid.Row="2"
+            AllowDrop="True"
+            CheckerboardMode="{x:Bind winNTCommon:Config.Current.CheckerboardMode}"
+            DragOver="Viewer_DragOver"
+            Drop="Viewer_Drop"
+            EnableDebug="{x:Bind winNTCommon:Config.Current.EnableDebug}"
+            EnableSelection="False"
+            PanSpeed="{x:Bind winNTCommon:Config.Current.PanSpeed}"
+            ZoomLevels="{x:Bind winNTCommon:Config.Current.ZoomLevels}"
+            ZoomMode="{x:Bind winNTCommon:Config.Current.ZoomMode}"
+            ZoomSpeed="{x:Bind winNTCommon:Config.Current.ZoomSpeed}" />
 
     </Grid>
 

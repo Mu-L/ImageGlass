@@ -86,6 +86,7 @@
     <ScrollViewer
         x:Name="GalleryScrollViewer"
         Padding="5"
+        Background="{x:Bind Background}"
         HorizontalScrollBarVisibility="Auto"
         HorizontalScrollMode="Enabled"
         VerticalScrollBarVisibility="Auto"

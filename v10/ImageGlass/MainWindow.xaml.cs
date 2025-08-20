@@ -1,4 +1,22 @@
 ﻿
+/*
+ImageGlass Project - Image viewer for Windows
+Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 using Catel.Collections;
 using D2Phap;
 using ImageGlass.Common;
@@ -7,16 +25,13 @@ using ImageGlass.Win64.Common;
 using ImageGlass.Win64.Common.FileSystem;
 using ImageGlass.Win64.Common.Photoing;
 using ImageGlass.Win64.UI;
-using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
 using System;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Graphics;
 using WinRT.Interop;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace ImageGlass;
 
@@ -27,59 +42,38 @@ public sealed partial class MainWindow : Window
 {
     private Progress<FileSearchingEventArgs> _searchProgress;
 
+    public MainWindowViewModel VM;
+    public nint Handle => WindowNative.GetWindowHandle(this);
+
 
     public MainWindow()
     {
-        InitializeComponent();
-
         _searchProgress = new(Files_Searched);
+        VM = new MainWindowViewModel(this);
+
+        InitializeComponent();
 
         // set title bar
         AppWindow.TitleBar.PreferredTheme = Microsoft.UI.Windowing.TitleBarTheme.UseDefaultAppMode;
         ExtendsContentIntoTitleBar = true;
-        SetTitleBar(WinMainTitleBar);
+        SetTitleBar(WinTitleBar);
 
-        AppWindow.Resize(new Windows.Graphics.SizeInt32(2000, 1500));
+        AppWindow.Resize(new SizeInt32(2000, 1500));
     }
 
-
-    public GridLength TitleBarLeftInset => new(AppWindow.TitleBar.LeftInset);
-    public GridLength TitleBarRightInset => new(AppWindow.TitleBar.RightInset);
-    public GridLength TitleBarHeight => new(AppWindow.TitleBar.Height / 2.5f);
-    public Thickness TitleBarMargin => new Thickness(0, 0, AppWindow.TitleBar.RightInset / 2.5f, 0);
-
-    public nint Handle => WindowNative.GetWindowHandle(this);
-
-    public SystemBackdrop? WindowBackdrop
+    private void WindowContent_Loaded(object sender, RoutedEventArgs e)
     {
-        get
-        {
-            if (Config.Current.WindowBackdrop == BackdropStyle.None) return null;
-            if (Config.Current.WindowBackdrop == BackdropStyle.Acrylic)
-            {
-                return new DesktopAcrylicBackdrop();
-            }
-            else
-            {
-                return new MicaBackdrop()
-                {
-                    Kind = Config.Current.WindowBackdrop == BackdropStyle.MicaAlt
-                        ? MicaKind.BaseAlt
-                        : MicaKind.Base
-                };
-            }
-        }
+        // set title bar
+        SetTitleBar();
+
+        // load image from command line arguments
+        LoadImagesFromCmdArgs();
     }
 
-    private void Window_Closed(object sender, WindowEventArgs args)
+    private void Window_Closed(object sender, WindowEventArgs e)
     {
         Viewer.UnloadPhoto();
-    }
-
-
-    private void Viewer_Loaded(object sender, RoutedEventArgs e)
-    {
-        LoadImagesFromCmdArgs();
+        VM.Dispose();
     }
 
 
@@ -154,7 +148,6 @@ public sealed partial class MainWindow : Window
     }
 
 
-
     private async void BtnOpenFile_Clicked(object sender, RoutedEventArgs e)
     {
         var op = new Windows.Storage.Pickers.FileOpenPicker();
@@ -197,6 +190,21 @@ public sealed partial class MainWindow : Window
         ViewByIndex(photoIndex);
     }
 
+
+    private void SetTitleBar()
+    {
+        // update title bar size according to API
+        VM.TitleBarHeight = AppWindow.TitleBar.Height;
+        VM.TitleBarRightInset = AppWindow.TitleBar.RightInset;
+
+        // set drag area
+        var dragRect = new RectInt32(
+                0, 0,
+                (int)(ToolbarMain.ActualWidth * VM.DpiScale),
+                (int)((ToolbarMain.ActualHeight + VM.TitleBarHeight) * VM.DpiScale));
+
+        AppWindow.TitleBar.SetDragRectangles([dragRect]);
+    }
 
 
     private void LoadImagesFromCmdArgs()
@@ -318,7 +326,7 @@ public sealed partial class MainWindow : Window
 
     private void ViewPhoto(Photo? photo)
     {
-        WinMainTitleBarText.Text = photo?.FilePath;
+        VM.Title = photo?.FilePath;
         Viewer.SetPhoto(photo);
 
         Gallery.ScrollToItem(Local.Photos.CurrentIndex);
