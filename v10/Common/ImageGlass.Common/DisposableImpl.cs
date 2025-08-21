@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ImageGlass.Common;
 
@@ -110,7 +111,7 @@ public class DisposableImpl : IDisposable, INotifyPropertyChanged
     /// <summary>
     /// Emits event <see cref="PropertyChanged"/>.
     /// </summary>
-    protected void OnPropertyChanged(string propertyName)
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
