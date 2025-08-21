@@ -29,10 +29,11 @@ namespace ImageGlass.Win64.Common.Photoing;
 public partial class Photo : PhotoImpl
 {
     // private properties
+    private CancellationTokenSource? _cancelLoadingThumbnail = null;
     private PhotoColorProfile? _colorContext;
     private IWICPixelFormatInfo2? _pixelFormatInfo;
     private ImageSource? _galleryThumbnail;
-    private CancellationTokenSource? _cancelLoadingThumbnail = null;
+
 
 
     /// <summary>
@@ -47,14 +48,15 @@ public partial class Photo : PhotoImpl
             {
                 _galleryThumbnail = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(IsGalleryThumbnailLoading));
                 OnPropertyChanged(nameof(IsGalleryThumbnailLoaded));
+                OnPropertyChanged(nameof(IsGalleryThumbnailLoading));
             }
         }
     }
 
-    public bool IsGalleryThumbnailLoading => GalleryThumbnail == null;
     public bool IsGalleryThumbnailLoaded => GalleryThumbnail != null;
+
+    public bool IsGalleryThumbnailLoading => !IsGalleryThumbnailLoaded;
 
 
     /// <summary>

@@ -111,6 +111,12 @@ public sealed partial class GalleryControl : UserControl
 
     private async void Thumbnail_Loaded(ThumbnailLoadedEventArgs e)
     {
+        if (e.Bitmap == null)
+        {
+            e.Sender.GalleryThumbnail = null;
+            return;
+        }
+
         try
         {
             // load bitmap source to the UI
