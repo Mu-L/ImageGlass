@@ -10,6 +10,7 @@
     xmlns:photoing1="using:ImageGlass.Common.Photoing"
     d:DataContext="{d:DesignInstance local:GalleryControl,
                                      IsDesignTimeCreatable=True}"
+    x:DefaultBindMode="OneWay"
     SizeChanged="UserControl_SizeChanged"
     Unloaded="UserControl_Unloaded"
     mc:Ignorable="d">
@@ -37,10 +38,10 @@
                 BorderBrush="{x:Bind IsCurrent, Converter={StaticResource SelectionToBorderConverter}}"
                 BorderThickness="1.25"
                 Click="GalleryItem_Clicked"
-                FilePath="{x:Bind FilePath}"
                 IsChecked="{x:Bind IsCurrent}"
                 IsTabStop="False"
-                Style="{StaticResource IgButtonStyle}">
+                Style="{StaticResource IgButtonStyle}"
+                ViewModel="{x:Bind}">
 
                 <Grid VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
@@ -49,10 +50,13 @@
                     </Grid.RowDefinitions>
 
                     <!--  Gallery Item: Thumbnail  -->
+                    <SymbolIcon Symbol="Page2" Visibility="{x:Bind IsGalleryThumbnailLoading}" />
                     <Image
                         Name="GalleryItem_Thumbnail"
                         Grid.Row="0"
-                        Stretch="Uniform" />
+                        Source="{x:Bind GalleryThumbnail}"
+                        Stretch="Uniform"
+                        Visibility="{x:Bind IsGalleryThumbnailLoaded}" />
 
 
                     <!--  Gallery Item: Title  -->
@@ -96,6 +100,7 @@
         <ItemsRepeater
             x:Name="GalleryItemRepeater"
             HorizontalAlignment="Center"
+            ElementClearing="GalleryItemRepeater_ElementClearing"
             ElementPrepared="GalleryItemRepeater_ElementPrepared"
             ItemTemplate="{StaticResource GalleryItemTemplate}"
             ItemsSource="{x:Bind PhotoManager.Items}">

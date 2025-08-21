@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Win64.Common.Photoing;
 using Microsoft.UI.Xaml;
 
 namespace ImageGlass.Win64.UI;
@@ -23,32 +24,23 @@ namespace ImageGlass.Win64.UI;
 
 public partial class GalleryButtonItem : IgButton
 {
-    /// <summary>
-    /// Gets or sets the associated file path of the gallery button item.
-    /// </summary>
-    public string FilePath
-    {
-        get => (string)GetValue(FilePathProperty);
-        set
-        {
-            SetValue(FilePathProperty, value);
-            _clickable.UpdateStyle();
-        }
-    }
-    public static readonly DependencyProperty FilePathProperty =
-        DependencyProperty.Register(
-            nameof(FilePath),
-            typeof(string),
-            typeof(GalleryButtonItem),
-            new PropertyMetadata(default));
 
+    /// <summary>
+    /// Gets, sets view model for the control.
+    /// </summary>
+    public Photo ViewModel
+    {
+        get => (Photo)GetValue(ViewModelProperty);
+        set => SetValue(ViewModelProperty, value);
+    }
+    public static readonly DependencyProperty ViewModelProperty =
+        DependencyProperty.Register(nameof(ViewModel), typeof(Photo), typeof(GalleryButtonItem), new PropertyMetadata(new Photo()));
 
 
     public GalleryButtonItem() : base()
     {
         DefaultStyleKey = typeof(GalleryButtonItem);
     }
-
 
 }
 

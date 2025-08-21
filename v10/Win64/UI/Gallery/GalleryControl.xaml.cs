@@ -1,25 +1,33 @@
-﻿// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+﻿/*
+ImageGlass Project - Image viewer for Windows
+Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
 
-using ImageGlass.Common;
-using ImageGlass.Win64.Common;
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 using ImageGlass.Win64.Common.Photoing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Vortice.WIC;
 using Windows.Foundation;
-using Windows.Graphics.Imaging;
 
 namespace ImageGlass.Win64.UI;
 
 public sealed partial class GalleryControl : UserControl
 {
-    private ConcurrentDictionary<string, SoftwareBitmap?> _thumbMap = new(StringComparer.OrdinalIgnoreCase);
+    private Progress<ThumbnailLoadedEventArgs> _progressThumbnailLoader;
 
     public event TypedEventHandler<GalleryButtonItem, EventArgs>? ItemClicked;
 
@@ -42,96 +50,18 @@ public sealed partial class GalleryControl : UserControl
             new PropertyMetadata(new PhotoManager()));
 
 
+
     public GalleryControl()
     {
         InitializeComponent();
-    }
 
-
-    public async Task<SoftwareBitmap?> GetThumbnailAsync(string filePath)
-    {
-        var photo = PhotoManager.Get(filePath);
-        if (photo is null) return null;
-
-
-        // 1. try get from cache if size is big enough
-        var cachedThumb = _thumbMap.GetValueOrDefault(photo.FilePath);
-        if (cachedThumb is not null)
-        {
-            return cachedThumb;
-        }
-
-
-        // 2. get a fresh thumbnail
-        Log.Info($"Loading thumbnail for index={PhotoManager.IndexOf(filePath)}: {filePath}",
-            nameof(GetThumbnailAsync), nameof(GalleryControl));
-
-
-        await photo.LoadMetadataAsync();
-        using var wicBmp = await photo.Metadata.GetPreviewAsync(
-            GalleryThumbnailSize, default, ShellThumbnailOptions.BiggerSizeOk);
-
-        // set thumbnail
-        var softwareBmp = await SetThumbnailAsync(filePath, wicBmp);
-
-        return softwareBmp;
-    }
-
-
-    public async Task<SoftwareBitmap?> SetThumbnailAsync(string filePath, IWICBitmapSource? wicBmp)
-    {
-        // remove the old thumbnail
-        RemoveThumbnail(filePath);
-
-        if (wicBmp is null) return null;
-
-
-        // load new thumbnail
-        var softwareBmp = await PhotoWIC.ConvertToSoftwareBitmap(wicBmp);
-
-        // save to cache
-        _thumbMap.TryAdd(filePath, softwareBmp);
-
-        return softwareBmp;
-    }
-
-
-    public void RemoveThumbnail(string filePath)
-    {
-        _thumbMap.TryRemove(filePath, out var removedThumb);
-        removedThumb?.Dispose();
-    }
-
-
-    public void ClearThumbnails()
-    {
-        // delete thumbnails cache
-        foreach (var item in _thumbMap)
-        {
-            item.Value?.Dispose();
-        }
-
-        _thumbMap.Clear();
-    }
-
-
-    public void ScrollToItem(int index, bool disableAnimation = true)
-    {
-        if (index < 0 || index >= PhotoManager.Count) return;
-
-        var centerItemIndex = index + 1;
-        var itemCenterX = (GalleryThumbnailSize * centerItemIndex)
-            + (ItemSpacing * centerItemIndex)
-            - (GalleryScrollViewer.ViewportWidth / 2)
-            - (GalleryThumbnailSize / 2);
-
-        GalleryScrollViewer.ChangeView(itemCenterX, null, null, disableAnimation);
+        _progressThumbnailLoader = new Progress<ThumbnailLoadedEventArgs>(Thumbnail_Loaded);
     }
 
 
     private void UserControl_Unloaded(object sender, RoutedEventArgs e)
     {
-        ClearThumbnails();
+
     }
 
 
@@ -179,25 +109,60 @@ public sealed partial class GalleryControl : UserControl
     }
 
 
-    private async void GalleryItemRepeater_ElementPrepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs e)
+    private async void Thumbnail_Loaded(ThumbnailLoadedEventArgs e)
+    {
+        try
+        {
+            // load bitmap source to the UI
+            var bmpSource = new SoftwareBitmapSource();
+            await bmpSource.SetBitmapAsync(e.Bitmap);
+
+            e.Sender.GalleryThumbnail = bmpSource;
+        }
+        catch
+        {
+            e.Sender.GalleryThumbnail = null;
+        }
+    }
+
+
+    private void GalleryItemRepeater_ElementPrepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs e)
     {
         if (e.Element is not GalleryButtonItem btnItem) return;
-        if (PhotoManager.Get(e.Index) is not Photo photo) return;
 
-
-        // 1. get the image element
-        if (btnItem.FindName("GalleryItem_Thumbnail") is Image imgThumbnail)
-        {
-            // get the thumbnail
-            var softwareBmp = await GetThumbnailAsync(photo.FilePath);
-            var softwareBmpSrc = new SoftwareBitmapSource();
-            await softwareBmpSrc.SetBitmapAsync(softwareBmp);
-
-            // render the thumbnail
-            imgThumbnail.Source = softwareBmpSrc;
-        }
-
+        // start loading thumbnail
+        btnItem.ViewModel.LoadGalleryThumbnail(GalleryThumbnailSize, _progressThumbnailLoader);
     }
+
+
+    private void GalleryItemRepeater_ElementClearing(ItemsRepeater sender, ItemsRepeaterElementClearingEventArgs e)
+    {
+        if (e.Element is not GalleryButtonItem btnItem) return;
+
+        // cancel loading thumbnail
+        btnItem.ViewModel.CancelLoadingGalleryThumbnail();
+    }
+
+
+
+
+
+    /// <summary>
+    /// Scrolls the gallery to bring the specified item into view.
+    /// </summary>
+    public void ScrollToItem(int index, bool disableAnimation = true)
+    {
+        if (index < 0 || index >= PhotoManager.Count) return;
+
+        var centerItemIndex = index + 1;
+        var itemCenterX = (GalleryThumbnailSize * centerItemIndex)
+            + (ItemSpacing * centerItemIndex)
+            - (GalleryScrollViewer.ViewportWidth / 2)
+            - (GalleryThumbnailSize / 2);
+
+        GalleryScrollViewer.ChangeView(itemCenterX, null, null, disableAnimation);
+    }
+
 
 }
 

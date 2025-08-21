@@ -186,7 +186,7 @@ public sealed partial class MainWindow : Window
 
     private void Gallery_ItemClicked(GalleryButtonItem sender, EventArgs args)
     {
-        var photoIndex = Local.Photos.IndexOf(sender.FilePath);
+        var photoIndex = Local.Photos.IndexOf(sender.ViewModel.FilePath);
         ViewByIndex(photoIndex);
     }
 
@@ -264,8 +264,6 @@ public sealed partial class MainWindow : Window
             OrderType = Config.Current.ImageLoadingOrderType,
         }, _searchProgress);
 
-
-        Gallery.ClearThumbnails();
 
         ViewPhoto(initPhoto);
     }
