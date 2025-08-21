@@ -26,6 +26,8 @@
             x:DataType="photoing:Photo"
             x:DefaultBindMode="OneWay">
             <local:GalleryButtonItem
+                Width="{StaticResource GalleryThumbnailSize}"
+                Height="{StaticResource GalleryThumbnailSize}"
                 Padding="3"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
@@ -98,13 +100,7 @@
             ItemTemplate="{StaticResource GalleryItemTemplate}"
             ItemsSource="{x:Bind PhotoManager.Items}">
             <ItemsRepeater.Layout>
-                <UniformGridLayout
-                    ItemsStretch="Uniform"
-                    MinColumnSpacing="{x:Bind local:GalleryControl.ItemSpacing}"
-                    MinItemHeight="{StaticResource GalleryThumbnailSize}"
-                    MinItemWidth="{StaticResource GalleryThumbnailSize}"
-                    MinRowSpacing="{x:Bind local:GalleryControl.ItemSpacing}"
-                    Orientation="Horizontal" />
+                <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:GalleryControl.ItemSpacing, Mode=OneTime}" />
             </ItemsRepeater.Layout>
         </ItemsRepeater>
     </ScrollViewer>
