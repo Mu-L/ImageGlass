@@ -29,7 +29,7 @@ public sealed partial class GalleryControl : UserControl
 {
     private Progress<ThumbnailLoadedEventArgs> _progressThumbnailLoader;
 
-    public event TypedEventHandler<GalleryButtonItem, EventArgs>? ItemClicked;
+    public event TypedEventHandler<IgGalleryItem, EventArgs>? ItemClicked;
 
 
     public static double GalleryThumbnailSize => (double)Application.Current.Resources[nameof(GalleryThumbnailSize)];
@@ -67,7 +67,7 @@ public sealed partial class GalleryControl : UserControl
 
     private void GalleryItem_Clicked(object sender, RoutedEventArgs e)
     {
-        if (sender is not GalleryButtonItem btnItem) return;
+        if (sender is not IgGalleryItem btnItem) return;
 
 
         // scroll the clicked item into the view
@@ -128,7 +128,7 @@ public sealed partial class GalleryControl : UserControl
 
     private void GalleryItemRepeater_ElementPrepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs e)
     {
-        if (e.Element is not GalleryButtonItem btnItem) return;
+        if (e.Element is not IgGalleryItem btnItem) return;
 
         // start loading thumbnail
         btnItem.ViewModel.LoadGalleryThumbnail(GalleryThumbnailSize, _progressThumbnailLoader);
@@ -137,7 +137,7 @@ public sealed partial class GalleryControl : UserControl
 
     private void GalleryItemRepeater_ElementClearing(ItemsRepeater sender, ItemsRepeaterElementClearingEventArgs e)
     {
-        if (e.Element is not GalleryButtonItem btnItem) return;
+        if (e.Element is not IgGalleryItem btnItem) return;
 
         // cancel loading thumbnail
         btnItem.ViewModel.CancelLoadingGalleryThumbnail();

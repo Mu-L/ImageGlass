@@ -211,128 +211,121 @@ public class MagickDecoder
 
         var readingTask = Task.Run(() =>
         {
+            // 2. read metadata of all frames
             try
             {
-                // 2. read metadata of all frames
-                try
+                meta.FrameIndex = 0;
+                meta.FrameCount = (uint)imgC.Count;
+                meta.AnimationLoop = imgC[0].AnimationIterations;
+                meta.Frames = imgC.Select(item => new FrameMetadata()
                 {
-                    meta.FrameIndex = 0;
-                    meta.FrameCount = (uint)imgC.Count;
-                    meta.AnimationLoop = imgC[0].AnimationIterations;
-                    meta.Frames = imgC.Select(item => new FrameMetadata()
-                    {
-                        BackgroundColor = (MagickColor?)item.BackgroundColor ?? MagickColors.Transparent,
-                        Width = item.Width,
-                        Height = item.Height,
-                        X = item.Page.X,
-                        Y = item.Page.Y,
+                    BackgroundColor = (MagickColor?)item.BackgroundColor ?? MagickColors.Transparent,
+                    Width = item.Width,
+                    Height = item.Height,
+                    X = item.Page.X,
+                    Y = item.Page.Y,
 
-                        AnimationDelay = item.AnimationDelay,
-                        AnimationTicksPerSecond = (uint)item.AnimationTicksPerSecond,
-                        GifDisposeMethod = item.GifDisposeMethod,
-                    }).ToImmutableList();
-                }
-                catch { }
-
-
-                // 3. read metadata of a specific frame
-                try
-                {
-                    // image size
-                    meta.OriginalWidth = meta.Width = imgC[frameIndex].Page.Width;
-                    meta.OriginalHeight = meta.Height = imgC[frameIndex].Page.Height;
-                    meta.Orientation = imgC[frameIndex].Orientation;
-
-                    // correct the image size according to orientation
-                    if (meta.Orientation != OrientationType.Undefined)
-                    {
-                        // swap width and height
-                        meta.Width = meta.OriginalHeight;
-                        meta.Height = meta.OriginalWidth;
-                    }
-
-
-                    // image color
-                    meta.HasAlpha = imgC.Any(i => i.HasAlpha);
-                    meta.ColorSpace = imgC[frameIndex].ColorSpace;
-                    meta.CanAnimate = CheckAnimatedFormat(imgC, meta.FileExtension);
-
-                    // get RAW thumbnail
-                    meta.RawThumbnail = imgC[frameIndex].GetProfile("dng:thumbnail");
-                }
-                catch { }
-
-
-                // cancel if requested
-                token.ThrowIfCancellationRequested();
-
-
-                // 4. read frame exif profile
-                try
-                {
-                    if (imgC[frameIndex].GetExifProfile() is IExifProfile exifProfile)
-                    {
-                        meta.ExifProfile = exifProfile;
-
-                        // ExifRatingPercent
-                        meta.ExifRatingPercent = GetExifValue(exifProfile, ExifTag.RatingPercent);
-
-                        // ExifDateTimeOriginal
-                        var dt = GetExifValue(exifProfile, ExifTag.DateTimeOriginal);
-                        meta.ExifDateTimeOriginal = BHelper.ConvertDateTime(dt);
-
-                        // ExifDateTime
-                        dt = GetExifValue(exifProfile, ExifTag.DateTime);
-                        meta.ExifDateTime = BHelper.ConvertDateTime(dt);
-
-                        meta.ExifArtist = GetExifValue(exifProfile, ExifTag.Artist);
-                        meta.ExifCopyright = GetExifValue(exifProfile, ExifTag.Copyright);
-                        meta.ExifSoftware = GetExifValue(exifProfile, ExifTag.Software);
-                        meta.ExifImageDescription = GetExifValue(exifProfile, ExifTag.ImageDescription);
-                        meta.ExifModel = GetExifValue(exifProfile, ExifTag.Model);
-                        meta.ExifISOSpeed = (int?)GetExifValue(exifProfile, ExifTag.ISOSpeed);
-
-                        var rational = GetExifValue(exifProfile, ExifTag.ExposureTime);
-                        meta.ExifExposureTime = rational.Denominator == 0
-                            ? null
-                            : rational.Numerator / rational.Denominator;
-
-                        rational = GetExifValue(exifProfile, ExifTag.FNumber);
-                        meta.ExifFNumber = rational.Denominator == 0
-                            ? null
-                            : rational.Numerator / rational.Denominator;
-
-                        rational = GetExifValue(exifProfile, ExifTag.FocalLength);
-                        meta.ExifFocalLength = rational.Denominator == 0
-                            ? null
-                            : rational.Numerator / rational.Denominator;
-                    }
-                }
-                catch { }
-
-
-                // cancel if requested
-                token.ThrowIfCancellationRequested();
-
-
-                // 5 read color profile
-                try
-                {
-                    // Color profile
-                    if (imgC[frameIndex].GetColorProfile() is IColorProfile colorProfile)
-                    {
-                        meta.ColorSpace = colorProfile.ColorSpace;
-                        meta.ColorProfileName = colorProfile.Description ?? "";
-                        meta.ColorProfileData = colorProfile.ToByteArray();
-                    }
-                }
-                catch { }
+                    AnimationDelay = item.AnimationDelay,
+                    AnimationTicksPerSecond = (uint)item.AnimationTicksPerSecond,
+                    GifDisposeMethod = item.GifDisposeMethod,
+                }).ToImmutableList();
             }
-            catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+            catch { }
+
+
+            // 3. read metadata of a specific frame
+            try
             {
-                Log.Info($"Cancelled decoding {filePath}",
-                    nameof(LoadMetadataAsync), nameof(MagickDecoder));
+                // image size
+                meta.OriginalWidth = meta.Width = imgC[frameIndex].Page.Width;
+                meta.OriginalHeight = meta.Height = imgC[frameIndex].Page.Height;
+                meta.Orientation = imgC[frameIndex].Orientation;
+
+                // correct the image size according to orientation
+                if (meta.Orientation != OrientationType.Undefined)
+                {
+                    // swap width and height
+                    meta.Width = meta.OriginalHeight;
+                    meta.Height = meta.OriginalWidth;
+                }
+
+
+                // image color
+                meta.HasAlpha = imgC.Any(i => i.HasAlpha);
+                meta.ColorSpace = imgC[frameIndex].ColorSpace;
+                meta.CanAnimate = CheckAnimatedFormat(imgC, meta.FileExtension);
+
+                // get RAW thumbnail
+                meta.RawThumbnail = imgC[frameIndex].GetProfile("dng:thumbnail");
             }
+            catch { }
+
+
+            // cancel if requested
+            if (token.IsCancellationRequested) return;
+
+
+            // 4. read frame exif profile
+            try
+            {
+                if (imgC[frameIndex].GetExifProfile() is IExifProfile exifProfile)
+                {
+                    meta.ExifProfile = exifProfile;
+
+                    // ExifRatingPercent
+                    meta.ExifRatingPercent = GetExifValue(exifProfile, ExifTag.RatingPercent);
+
+                    // ExifDateTimeOriginal
+                    var dt = GetExifValue(exifProfile, ExifTag.DateTimeOriginal);
+                    meta.ExifDateTimeOriginal = BHelper.ConvertDateTime(dt);
+
+                    // ExifDateTime
+                    dt = GetExifValue(exifProfile, ExifTag.DateTime);
+                    meta.ExifDateTime = BHelper.ConvertDateTime(dt);
+
+                    meta.ExifArtist = GetExifValue(exifProfile, ExifTag.Artist);
+                    meta.ExifCopyright = GetExifValue(exifProfile, ExifTag.Copyright);
+                    meta.ExifSoftware = GetExifValue(exifProfile, ExifTag.Software);
+                    meta.ExifImageDescription = GetExifValue(exifProfile, ExifTag.ImageDescription);
+                    meta.ExifModel = GetExifValue(exifProfile, ExifTag.Model);
+                    meta.ExifISOSpeed = (int?)GetExifValue(exifProfile, ExifTag.ISOSpeed);
+
+                    var rational = GetExifValue(exifProfile, ExifTag.ExposureTime);
+                    meta.ExifExposureTime = rational.Denominator == 0
+                        ? null
+                        : rational.Numerator / rational.Denominator;
+
+                    rational = GetExifValue(exifProfile, ExifTag.FNumber);
+                    meta.ExifFNumber = rational.Denominator == 0
+                        ? null
+                        : rational.Numerator / rational.Denominator;
+
+                    rational = GetExifValue(exifProfile, ExifTag.FocalLength);
+                    meta.ExifFocalLength = rational.Denominator == 0
+                        ? null
+                        : rational.Numerator / rational.Denominator;
+                }
+            }
+            catch { }
+
+
+            // cancel if requested
+            if (token.IsCancellationRequested) return;
+
+
+            // 5 read color profile
+            try
+            {
+                // Color profile
+                if (imgC[frameIndex].GetColorProfile() is IColorProfile colorProfile)
+                {
+                    meta.ColorSpace = colorProfile.ColorSpace;
+                    meta.ColorProfileName = colorProfile.Description ?? "";
+                    meta.ColorProfileData = colorProfile.ToByteArray();
+                }
+            }
+            catch { }
+
         }, token);
 
 

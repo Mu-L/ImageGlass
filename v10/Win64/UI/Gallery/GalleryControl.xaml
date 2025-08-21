@@ -16,7 +16,6 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
         <local:SelectionToBackgroundConverter x:Key="SelectionToBackgroundConverter" />
         <local:SelectionToBorderConverter x:Key="SelectionToBorderConverter" />
 
@@ -26,7 +25,7 @@
             x:Key="GalleryItemTemplate"
             x:DataType="photoing:Photo"
             x:DefaultBindMode="OneWay">
-            <local:GalleryButtonItem
+            <local:IgGalleryItem
                 Width="{StaticResource GalleryThumbnailSize}"
                 Height="{StaticResource GalleryThumbnailSize}"
                 Padding="3"
@@ -83,8 +82,9 @@
                             Visibility="Visible" />
                     </Grid>
                 </Grid>
-            </local:GalleryButtonItem>
+            </local:IgGalleryItem>
         </DataTemplate>
+
     </UserControl.Resources>
 
 

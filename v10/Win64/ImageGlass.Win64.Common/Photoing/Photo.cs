@@ -289,11 +289,15 @@ public partial class Photo : PhotoImpl
 
                 if (token.IsCancellationRequested) return;
             }
-            catch { }
+            catch
+            {
+                softwareBmp?.Dispose();
+                softwareBmp = null;
+            }
             finally
             {
-                _cancelLoadingThumbnail = null;
                 progress.Report(new ThumbnailLoadedEventArgs(this, softwareBmp));
+                _cancelLoadingThumbnail = null;
             }
         });
     }

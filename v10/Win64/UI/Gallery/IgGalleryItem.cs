@@ -22,7 +22,7 @@ using Microsoft.UI.Xaml;
 namespace ImageGlass.Win64.UI;
 
 
-public partial class GalleryButtonItem : IgButton
+public partial class IgGalleryItem : IgButton
 {
 
     /// <summary>
@@ -34,12 +34,12 @@ public partial class GalleryButtonItem : IgButton
         set => SetValue(ViewModelProperty, value);
     }
     public static readonly DependencyProperty ViewModelProperty =
-        DependencyProperty.Register(nameof(ViewModel), typeof(Photo), typeof(GalleryButtonItem), new PropertyMetadata(new Photo()));
+        DependencyProperty.Register(nameof(ViewModel), typeof(Photo), typeof(IgGalleryItem), new PropertyMetadata(new Photo()));
 
 
-    public GalleryButtonItem() : base()
+    public IgGalleryItem() : base()
     {
-        DefaultStyleKey = typeof(GalleryButtonItem);
+        DefaultStyleKey = typeof(IgGalleryItem);
     }
 
 }

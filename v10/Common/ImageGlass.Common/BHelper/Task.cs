@@ -39,25 +39,20 @@ public partial class BHelper
 
     private static async Task GCCollectAsync(int delayMs, CancellationToken token)
     {
-        try
-        {
-            // check if task is cancelled
-            token.ThrowIfCancellationRequested();
+        // check if task is cancelled
+        if (token.IsCancellationRequested) return;
 
-            await Task.Delay(delayMs, token);
+        await Task.Delay(delayMs, token);
 
-            // check if task is cancelled
-            token.ThrowIfCancellationRequested();
+        // check if task is cancelled
+        if (token.IsCancellationRequested) return;
 
-            // Collect system garbage
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+        // Collect system garbage
+        GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-        }
-        catch (TaskCanceledException) { }
-        catch (OperationCanceledException) { }
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
     }
 
 }
