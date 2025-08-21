@@ -17,20 +17,44 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Photoing;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Vortice.WIC;
-
+using Windows.Graphics.Imaging;
 
 namespace ImageGlass.Win64.Common.Photoing;
-
 
 public partial class Photo : PhotoImpl
 {
     // private properties
     private PhotoColorProfile? _colorContext;
     private IWICPixelFormatInfo2? _pixelFormatInfo;
+    private ImageSource? _galleryThumbnail;
+    private CancellationTokenSource? _cancelLoadingThumbnail = null;
+
+
+    /// <summary>
+    /// Gets, sets the image source for gallery thumbnail.
+    /// </summary>
+    public ImageSource? GalleryThumbnail
+    {
+        get => _galleryThumbnail;
+        set
+        {
+            if (_galleryThumbnail != value)
+            {
+                _galleryThumbnail = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsGalleryThumbnailLoading));
+                OnPropertyChanged(nameof(IsGalleryThumbnailLoaded));
+            }
+        }
+    }
+
+    public bool IsGalleryThumbnailLoading => GalleryThumbnail == null;
+    public bool IsGalleryThumbnailLoaded => GalleryThumbnail != null;
 
 
     /// <summary>
@@ -237,6 +261,58 @@ public partial class Photo : PhotoImpl
     #endregion // Private Functions
 
 
+
+    /// <summary>
+    /// Starts loading thumbnail in a thread.
+    /// </summary>
+    public void LoadGalleryThumbnail(double size, IProgress<ThumbnailLoadedEventArgs> progress)
+    {
+        if (GalleryThumbnail != null) return;
+
+        _cancelLoadingThumbnail ??= new();
+        var token = _cancelLoadingThumbnail.Token;
+
+        _ = Task.Run(async () =>
+        {
+            SoftwareBitmap? softwareBmp = null;
+
+            try
+            {
+                if (token.IsCancellationRequested) return;
+                await LoadMetadataAsync();
+
+                using var wicBmp = await Metadata.GetPreviewAsync(
+                    size, token, ShellThumbnailOptions.BiggerSizeOk);
+
+                if (token.IsCancellationRequested) return;
+                softwareBmp = await PhotoWIC.ConvertToSoftwareBitmap(wicBmp);
+
+                if (token.IsCancellationRequested) return;
+            }
+            catch { }
+            finally
+            {
+                _cancelLoadingThumbnail = null;
+                progress.Report(new ThumbnailLoadedEventArgs(this, softwareBmp));
+            }
+        });
+    }
+
+
+    /// <summary>
+    /// Cancels the gallery thumbnail loading.
+    /// </summary>
+    public void CancelLoadingGalleryThumbnail()
+    {
+        _cancelLoadingThumbnail?.Cancel();
+        _cancelLoadingThumbnail = null;
+    }
 }
 
 
+public class ThumbnailLoadedEventArgs(Photo sender, SoftwareBitmap? bmp) : EventArgs
+{
+    public Photo Sender { get; set; } = sender;
+
+    public SoftwareBitmap? Bitmap { get; set; } = bmp;
+}
