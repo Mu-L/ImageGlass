@@ -196,14 +196,6 @@ public sealed partial class MainWindow : Window
         // update title bar size according to API
         VM.TitleBarHeight = AppWindow.TitleBar.Height;
         VM.TitleBarRightInset = AppWindow.TitleBar.RightInset;
-
-        // set drag area
-        var dragRect = new RectInt32(
-                0, 0,
-                (int)(ToolbarMain.ActualWidth * VM.DpiScale),
-                (int)((ToolbarMain.ActualHeight + VM.TitleBarHeight) * VM.DpiScale));
-
-        AppWindow.TitleBar.SetDragRectangles([dragRect]);
     }
 
 
