@@ -85,7 +85,12 @@ public partial class App : Application
 
         _window = new MainWindow();
         _window.Closed += Window_Closed;
+
+        var root = (FrameworkElement)_window.Content;
+        root.ActualThemeChanged += Root_ActualThemeChanged;
+
         _window.Activate();
+
 
         // get current monitor profile
         _ = WindowColorProfileProvider.Instance.InitializeAsync(_window.AppWindow.Id);
@@ -94,6 +99,13 @@ public partial class App : Application
         MagickDecoder.Initialize();
     }
 
+    private void Root_ActualThemeChanged(FrameworkElement sender, object args)
+    {
+        var isDarkMode = sender.ActualTheme == ElementTheme.Dark;
+
+        // switch theme
+        Config.LoadCurrentTheme(isDarkMode, true, true, false);
+    }
 
     private async void Window_Closed(object sender, WindowEventArgs args)
     {

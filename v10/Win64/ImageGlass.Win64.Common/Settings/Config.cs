@@ -25,9 +25,8 @@ using System.Threading.Tasks;
 namespace ImageGlass.Win64.Common;
 
 
-public static partial class Config
+public partial class Config : Notify
 {
-
     #region Public properties
 
     /// <summary>
@@ -35,11 +34,16 @@ public static partial class Config
     /// </summary>
     public static AppSettings Current { get; set; } = new();
 
+    /// <summary>
+    /// Gets, sets the instance of app theme.
+    /// </summary>
+    public static IgTheme Theme { get; set; } = new();
+
 
     /// <summary>
-    /// Current version of the app.
+    /// App setting specs version, to check for compatibility.
     /// </summary>
-    public static float Version => 10f;
+    public static float SPEC_VERSION => 10f;
 
 
     /// <summary>
@@ -105,25 +109,14 @@ public static partial class Config
         // 1. get user config file path
         var userFilePath = Path.Combine(ConfigPath, UserFilename);
 
-        // 2. create json options
-        var jsonOptions = BHelper.CreateJsonOptions();
-        var jsonContext = new AppSettingsJsonContext(jsonOptions);
-
-
-        // 3. load user settings
+        // 2. load user settings
         var userSettings = ParseSettingFile(userFilePath);
-        if (userSettings != null)
-        {
-            Config.Current = userSettings;
-        }
-        else
-        {
-            Config.Current.LoadDefaults();
-        }
+        if (userSettings != null) Config.Current = userSettings;
+        else Config.Current.LoadDefaults();
 
-
-        // 4. migrate user config file if config version is changed
+        // 3. migrate user config file if config version is changed
         MigrateUserConfigFile();
+
     }
 
 
@@ -200,6 +193,93 @@ public static partial class Config
         return appDataDir;
     }
 
+
+    /// <summary>
+    /// Loads theme pack <see cref="Config.Theme"/>.
+    /// </summary>
+    /// <param name="darkMode">
+    /// Determine which theme should be loaded: <see cref="DarkTheme"/> or <see cref="LightTheme"/>.
+    /// </param>
+    /// <param name="useFallBackTheme">
+    /// If theme pack is invalid, should load the default theme pack <see cref="Const.DEFAULT_THEME"/>?
+    /// </param>
+    /// <param name="throwIfThemeInvalid">
+    /// If theme pack is invalid, should throw exception?
+    /// </param>
+    /// <param name="forceUpdateBackground">Force updating background according to theme value</param>
+    /// <exception cref="ArgumentException"></exception>
+    public static void LoadCurrentTheme(bool darkMode, bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
+    {
+        // 1. get the theme folder name
+        var themeFolderName = darkMode ? Current.DarkTheme : Current.LightTheme;
+        if (string.IsNullOrEmpty(themeFolderName))
+        {
+            themeFolderName = Const.DEFAULT_THEME;
+        }
+
+        // 2. check if theme pack is already loaded
+        if (themeFolderName.Equals(Theme.FolderName, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        // 3. load theme pack
+        var th = FindAndLoadThemePack(themeFolderName, useFallBackTheme, throwIfThemeInvalid);
+
+        // 4. update the name of dark/light theme
+        if (darkMode) Current.DarkTheme = th.FolderName;
+        else Current.LightTheme = th.FolderName;
+
+
+        // 5. load background color
+        if (Config.Current.BackgroundColor == Theme.Colors.BgColor || forceUpdateBackground)
+        {
+            Config.Current.BackgroundColor = th.Colors.BgColor;
+        }
+
+        // 6. set to the current theme
+        Theme = th;
+    }
+
+
+    /// <summary>
+    /// Finds the correct location of theme name and loads it.
+    /// </summary>
+    /// <exception cref="ArgumentException"></exception>
+    private static IgTheme FindAndLoadThemePack(string themeFolderName, bool useFallBackTheme, bool throwIfThemeInvalid)
+    {
+        // 1. look for theme pack in the Config dir
+        var themeConfigPath = ConfigDir(PathType.File, Dir.Themes, themeFolderName);
+        var th = new IgTheme(themeConfigPath).Load();
+
+        if (!th.IsValid)
+        {
+            // 2. look for theme pack in the Startup dir
+            var startupThemeConfigPath = StartUpDir(Dir.Themes, themeFolderName);
+            th = new IgTheme(startupThemeConfigPath).Load();
+
+            // 3. cannot find theme, use fall back theme
+            if (!th.IsValid && useFallBackTheme)
+            {
+                // 4. load default theme
+                startupThemeConfigPath = StartUpDir(Dir.Themes, Const.DEFAULT_THEME);
+                th = new IgTheme(startupThemeConfigPath).Load();
+            }
+        }
+
+        // 5. throw error if theme is invalid
+        if (!th.IsValid && throwIfThemeInvalid)
+        {
+            throw new ArgumentException($"Unable to load '{themeFolderName}' theme pack. " +
+                $"Please make sure '{themeConfigPath}' file is valid.", nameof(themeFolderName));
+        }
+
+        return th;
+    }
+
+
+
+
     #endregion
 
 
@@ -215,10 +295,10 @@ public static partial class Config
         var configVersion = Current._Metadata.Version;
 
         // update config version
-        Current._Metadata.Version = Version;
+        Current._Metadata.Version = SPEC_VERSION;
 
         // no change
-        if (Version <= configVersion) return;
+        if (SPEC_VERSION <= configVersion) return;
 
 
         // Migration v9 to v10

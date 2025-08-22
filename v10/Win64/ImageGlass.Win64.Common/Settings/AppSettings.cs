@@ -438,15 +438,25 @@ public partial class AppSettings
     ///// </summary>
     //public string LastOpenedSetting { get; set; } = string.Empty;
 
-    ///// <summary>
-    ///// Gets, sets the theme name for dark mode.
-    ///// </summary>
-    //public string DarkTheme { get; set; } = Const.DEFAULT_THEME;
+    /// <summary>
+    /// Gets, sets background color of of the main window
+    /// </summary>
+    public string BackgroundColor { get; set; } = "#00000000";
 
     ///// <summary>
-    ///// Gets, sets the theme name for light mode.
+    ///// Gets, sets background color of slideshow
     ///// </summary>
-    //public string LightTheme { get; set; } = "Kobe-Light";
+    //public Color SlideshowBackgroundColor { get; set; } = Color.Black;
+
+    /// <summary>
+    /// Gets, sets the theme name for dark mode.
+    /// </summary>
+    public string DarkTheme { get; set; } = Const.DEFAULT_THEME;
+
+    /// <summary>
+    /// Gets, sets the theme name for light mode.
+    /// </summary>
+    public string LightTheme { get; set; } = "Kobe-Light";
 
     #endregion
 
@@ -491,7 +501,7 @@ public partial class AppSettings
             Text = "Save",
             Image = @"D:\Save.svg",
             IsToggle = true,
-            ShowText =true,
+            ShowText = true,
         },
         new ToolbarItemModel {
             Id = "Btn_Print",
@@ -627,15 +637,6 @@ public partial class AppSettings
 
     #region Other types items
 
-    ///// <summary>
-    ///// Gets, sets background color of of the main window
-    ///// </summary>
-    //public Color BackgroundColor { get; set; } = Color.Empty;
-
-    ///// <summary>
-    ///// Gets, sets background color of slideshow
-    ///// </summary>
-    //public Color SlideshowBackgroundColor { get; set; } = Color.Black;
 
     ///// <summary>
     ///// Gets, sets language pack
