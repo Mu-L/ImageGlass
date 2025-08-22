@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace ImageGlass.Common;
 
@@ -27,36 +26,8 @@ namespace ImageGlass.Common;
 /// and <see cref="INotifyPropertyChanged"/> interface,
 /// including support for managed and unmanaged resource cleanup.
 /// </summary>
-public class DisposableImpl : IDisposable, INotifyPropertyChanged
+public class DisposableImpl : Notify, IDisposable
 {
-    // to manage PropertyChanged events
-    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
-    private event PropertyChangedEventHandler? _propertyChangedHandler;
-
-
-    public event PropertyChangedEventHandler? PropertyChanged
-    {
-        add
-        {
-            if (value != null)
-            {
-                _propertyChangedHandler += value;
-                _propertyChangedEvent.Add(value);
-            }
-        }
-
-        remove
-        {
-            if (value != null)
-            {
-                _propertyChangedHandler -= value;
-                _propertyChangedEvent.Remove(value);
-            }
-        }
-    }
-
-
-
     #region IDisposable Disposing
 
     /// <summary>
@@ -105,15 +76,6 @@ public class DisposableImpl : IDisposable, INotifyPropertyChanged
     protected virtual void OnDisposing()
     {
         //
-    }
-
-
-    /// <summary>
-    /// Emits event <see cref="PropertyChanged"/>.
-    /// </summary>
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
 }
