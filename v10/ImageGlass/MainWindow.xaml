@@ -8,8 +8,7 @@
     xmlns:local="using:ImageGlass"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:ImageGlass.Win64.UI"
-    xmlns:winNT="using:ImageGlass.WinNT"
-    xmlns:winNTCommon="using:ImageGlass.Win64.Common"
+    xmlns:win64="using:ImageGlass.WinNT"
     Title="{x:Bind VM.Title}"
     x:DefaultBindMode="OneWay"
     Closed="Window_Closed"
@@ -71,14 +70,13 @@
             x:Name="Gallery"
             Grid.Row="3"
             Grid.Column="1"
-            Background="#07ffffff"
             Canvas.ZIndex="80"
             ItemClicked="Gallery_ItemClicked"
             PhotoManager="{x:Bind local:Local.Photos, Mode=OneWay}" />
 
 
         <!--  Viewer  -->
-        <winNT:VirtualViewerControl
+        <win64:VirtualViewerControl
             x:Name="Viewer"
             Grid.Row="2"
             AllowDrop="True"

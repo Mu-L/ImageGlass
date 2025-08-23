@@ -21,6 +21,8 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -31,18 +33,42 @@ namespace ImageGlass;
 /// <summary>
 /// Provides application-specific behavior to supplement the default Application class.
 /// </summary>
-public partial class App : Application
+public partial class App : Application, INotifyPropertyChanged
 {
     private MainWindow? _winMain;
+    private bool _isDarkMode = true;
 
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public MainWindow WinMain => _winMain!;
+
 
 
     /// <summary>
     /// Gets the arguments passed to the application.
     /// </summary>
     public static string[] Args { get; set; } = [];
+
+
+    /// <summary>
+    /// Gets, sets the app color mode.
+    /// </summary>
+    public bool IsDarkMode
+    {
+        get => _isDarkMode;
+        set
+        {
+            if (_isDarkMode != value)
+            {
+                _isDarkMode = value;
+                OnPropertyChanged();
+
+                // load theme
+                Config.LoadCurrentTheme(_isDarkMode, true, true, false);
+            }
+        }
+    }
 
 
     /// <summary>
@@ -63,6 +89,12 @@ public partial class App : Application
         Application.Current.UnhandledException += Current_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
     }
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
 
     private void Current_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
@@ -100,8 +132,10 @@ public partial class App : Application
         var root = (FrameworkElement)_winMain.Content;
         root.ActualThemeChanged += Root_ActualThemeChanged;
 
+
         // load theme
-        Config.LoadCurrentTheme(root.ActualTheme != ElementTheme.Light, true, true, false);
+        IsDarkMode = root.ActualTheme != ElementTheme.Light;
+
 
         // show the main window
         _winMain.Activate();
@@ -116,10 +150,7 @@ public partial class App : Application
 
     private void Root_ActualThemeChanged(FrameworkElement sender, object args)
     {
-        var isDarkMode = sender.ActualTheme != ElementTheme.Light;
-
-        // switch theme
-        Config.LoadCurrentTheme(isDarkMode, true, true, false);
+        IsDarkMode = sender.ActualTheme != ElementTheme.Light;
     }
 
     private async void Window_Closed(object sender, WindowEventArgs args)
