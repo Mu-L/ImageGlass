@@ -12,7 +12,7 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
     <LangVersion>Latest</LangVersion>
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 

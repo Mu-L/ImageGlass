@@ -8,11 +8,12 @@
     <RootNamespace>VirtualViewer</RootNamespace>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
+    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 
     <Nullable>enable</Nullable>
     <LangVersion>Latest</LangVersion>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <Platforms>AnyCPU;x64;ARM64</Platforms>
+    <Platforms>x64;ARM64</Platforms>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>

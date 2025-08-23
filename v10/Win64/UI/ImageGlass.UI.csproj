@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-      <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
-      <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-      <RootNamespace>ImageGlass.Win64.UI</RootNamespace>
-      <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-      <UseWinUI>true</UseWinUI>
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>ImageGlass.Win64.UI</RootNamespace>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 
-      <Nullable>enable</Nullable>
-      <LangVersion>Latest</LangVersion>
-      <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-      <Platforms>AnyCPU;x64;ARM64</Platforms>
+    <Nullable>enable</Nullable>
+    <LangVersion>Latest</LangVersion>
+    <Platforms>x64;ARM64</Platforms>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Toolbar\IgToolbarItemButton.xaml" />

@@ -5,8 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>Latest</LangVersion>
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <Platforms>AnyCPU;x64;ARM64</Platforms>
+    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+    <Platforms>x64;ARM64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
