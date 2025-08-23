@@ -66,6 +66,31 @@
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
 
+
+
+  <!-- Clean files -->
+  <Target Name="DeleteFiles" AfterTargets="AfterClean">
+    <ItemGroup>
+      <IG_FilesToClean Include="$(OutDir)\**\*.*" Exclude="$(OutDir)\**\igconfig.json" />
+    </ItemGroup>
+
+    <Delete Files="@(IG_FilesToClean)" />
+  </Target>
+
+
+  <!-- Copy resources -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <IG_Themes Include="..\..\Setup\Assets\Themes\**\*.*" />
+      <IG_Langs Include="..\..\Setup\Assets\Language\**\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(IG_Themes)" DestinationFolder="$(OutputPath)\Themes\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(IG_Langs)" DestinationFolder="$(OutputPath)\Language\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+  
+    
+
   <!-- Publish Properties -->
   <PropertyGroup>
     <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
