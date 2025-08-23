@@ -91,10 +91,13 @@ public partial class App : Application, INotifyPropertyChanged
     {
         var accent = sender.GetColorValue(UIColorType.Accent);
 
-        _uiReporter.Report(new AppUpdatedEventArgs()
+        WHelper.Debounce(200, (accentColor) =>
         {
-            AccentColor = accent,
-        });
+            _uiReporter.Report(new AppUpdatedEventArgs()
+            {
+                AccentColor = accentColor,
+            });
+        }, accent);
     }
 
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
