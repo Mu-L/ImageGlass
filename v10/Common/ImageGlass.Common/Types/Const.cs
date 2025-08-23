@@ -43,7 +43,7 @@ public static class Const
     /// </summary>
     public const string FILE_MACRO = "<file>";
 
-    public const string THEME_SYSTEM_ACCENT_COLOR = "accent";
+    public const string THEME_SYSTEM_ACCENT = "accent";
 
     // predefined built-in tool names
     public const string IGTOOL_EXIFTOOL = "Tool_ExifGlass";

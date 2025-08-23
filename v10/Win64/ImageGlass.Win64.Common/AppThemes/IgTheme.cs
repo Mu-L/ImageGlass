@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Common;
 using System.IO;
 using System.Text.Json.Serialization;
+using Windows.UI;
 
 namespace ImageGlass.Win64.Common;
 
@@ -30,8 +31,11 @@ public partial class IgThemeJsonContext : JsonSerializerContext { }
 /// <summary>
 /// Represents a theme pack for the app.
 /// </summary>
-public partial class IgTheme()
+public partial class IgTheme : Notify
 {
+    private IgThemeColorBrushes _colorBrushes = new();
+
+
     public IgThemeMetadata _Metadata { get; set; } = new();
     public IgThemeInfo Info { get; set; } = new();
     public IgThemeSettings Settings { get; set; } = new();
@@ -76,12 +80,18 @@ public partial class IgTheme()
     [JsonIgnore]
     public bool IsValid { get; set; } = false;
 
+    /// <summary>
+    /// Gets the theme color brushes.
+    /// </summary>
+    [JsonIgnore]
+    public IgThemeColorBrushes ColorBrushes => _colorBrushes;
+
 
     /// <summary>
     /// Reads theme config file and loads the theme properties.
     /// </summary>
     /// <returns>The current instance of this theme pack.</returns>
-    public IgTheme Load(string themeFolderPath)
+    public IgTheme Load(string themeFolderPath, Color? accent = null)
     {
         FolderPath = themeFolderPath;
 
@@ -107,7 +117,19 @@ public partial class IgTheme()
         }
         catch { }
 
+        // load colors
+        LoadColors(accent);
+
         return this;
+    }
+
+
+    /// <summary>
+    /// Loads the theme colors.
+    /// </summary>
+    public void LoadColors(Color? accent = null)
+    {
+        ColorBrushes.Load(Colors, accent);
     }
 
 }

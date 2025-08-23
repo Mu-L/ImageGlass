@@ -17,17 +17,41 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System.Text.Json.Serialization;
+using Windows.UI;
 
 namespace ImageGlass.Win64.Common;
 
 public partial class AppSettings
 {
     private IgTheme _theme = new();
+    private Color _accentColor = new();
 
 
 
     // Public Reactive properties
     #region Public Reactive properties
+
+    /// <summary>
+    /// Gets, sets the current color accent.
+    /// </summary>
+    [JsonIgnore]
+    public Color AccentColor
+    {
+        get => _accentColor;
+        set
+        {
+            if (_accentColor != value)
+            {
+                _accentColor = value;
+
+                // reload theme colors
+                Theme.LoadColors(_accentColor);
+
+                OnPropertyChanged();
+            }
+        }
+    }
+
 
     /// <summary>
     /// Gets, sets the current app theme pack.
@@ -48,5 +72,6 @@ public partial class AppSettings
 
 
     #endregion // Public Reactive properties
+
 
 }

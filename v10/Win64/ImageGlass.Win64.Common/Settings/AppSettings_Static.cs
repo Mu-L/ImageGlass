@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Windows.UI;
 
 namespace ImageGlass.Win64.Common;
 
@@ -179,36 +180,39 @@ public partial class AppSettings
     /// </param>
     /// <param name="forceUpdateBackground">Force updating background according to theme value</param>
     /// <exception cref="ArgumentException"></exception>
-    public void LoadCurrentTheme(bool darkMode, bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
+    public void LoadCurrentTheme(bool darkMode, Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
     {
-        // 1. get the theme folder name
+        // 1. save accent color
+        if (accent != null) _accentColor = accent.Value;
+
+        // 2. get the theme folder name
         var themeFolderName = darkMode ? DarkTheme : LightTheme;
         if (string.IsNullOrEmpty(themeFolderName))
         {
             themeFolderName = Const.DEFAULT_THEME;
         }
 
-        // 2. check if theme pack is already loaded
+        // 3. check if theme pack is already loaded
         if (themeFolderName.Equals(Theme.FolderName, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        // 3. load theme pack
-        var th = FindAndLoadThemePack(themeFolderName, useFallBackTheme, throwIfThemeInvalid);
+        // 4. load theme pack
+        var th = FindAndLoadThemePack(themeFolderName, accent, useFallBackTheme, throwIfThemeInvalid);
 
-        // 4. update the name of dark/light theme
+        // 5. update the name of dark/light theme
         if (darkMode) DarkTheme = th.FolderName;
         else LightTheme = th.FolderName;
 
 
-        // 5. load background color
+        // 6. load background color
         if (BackgroundColor == Theme.Colors.BgColor || forceUpdateBackground)
         {
             BackgroundColor = th.Colors.BgColor;
         }
 
-        // 6. set to the current theme
+        // 7. set to the current theme
         Theme = th;
     }
 
@@ -217,24 +221,24 @@ public partial class AppSettings
     /// Finds the correct location of theme name and loads it.
     /// </summary>
     /// <exception cref="ArgumentException"></exception>
-    private static IgTheme FindAndLoadThemePack(string themeFolderName, bool useFallBackTheme, bool throwIfThemeInvalid)
+    private static IgTheme FindAndLoadThemePack(string themeFolderName, Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid)
     {
         // 1. look for theme pack in the Config dir
         var themeConfigPath = BHelper.ConfigDir(Dir.Themes, themeFolderName);
-        var th = new IgTheme().Load(themeConfigPath);
+        var th = new IgTheme().Load(themeConfigPath, accent);
 
         if (!th.IsValid)
         {
             // 2. look for theme pack in the base dir
             var baseThemeConfigPath = BHelper.BaseDir(Dir.Themes, themeFolderName);
-            th = new IgTheme().Load(baseThemeConfigPath);
+            th = new IgTheme().Load(baseThemeConfigPath, accent);
 
             // 3. cannot find theme, use fall back theme
             if (!th.IsValid && useFallBackTheme)
             {
                 // 4. load default theme
                 baseThemeConfigPath = BHelper.BaseDir(Dir.Themes, Const.DEFAULT_THEME);
-                th = new IgTheme().Load(baseThemeConfigPath);
+                th = new IgTheme().Load(baseThemeConfigPath, accent);
             }
         }
 

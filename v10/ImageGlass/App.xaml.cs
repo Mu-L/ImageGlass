@@ -24,6 +24,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Windows.UI.ViewManagement;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -37,6 +38,7 @@ public partial class App : Application, INotifyPropertyChanged
 {
     private MainWindow? _winMain;
     private bool _isDarkMode = true;
+    private static UISettings _uiSystem = new UISettings();
 
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -65,7 +67,7 @@ public partial class App : Application, INotifyPropertyChanged
                 OnPropertyChanged();
 
                 // load theme
-                Config.LoadCurrentTheme(_isDarkMode, true, true, false);
+                Config.LoadCurrentTheme(_isDarkMode, App.Config.AccentColor, true, true, false);
             }
         }
     }
@@ -88,6 +90,14 @@ public partial class App : Application, INotifyPropertyChanged
 
         Application.Current.UnhandledException += Current_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+
+
+        _uiSystem.ColorValuesChanged += UiSettings_ColorValuesChanged;
+    }
+
+    private void UiSettings_ColorValuesChanged(UISettings sender, object args)
+    {
+        App.Config.AccentColor = sender.GetColorValue(UIColorType.Accent);
     }
 
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -117,14 +127,6 @@ public partial class App : Application, INotifyPropertyChanged
     {
         Args = Environment.GetCommandLineArgs();
 
-        // load app configs
-        App.Config = AppSettings.Load(AppSettings.CONFIG_USER);
-
-        // get foreground shell
-        using var shell = new EggShell();
-        Local.ForegroundShell = shell.GetForegroundWindowView();
-
-
         _winMain = new MainWindow();
         _winMain.Closed += Window_Closed;
 
@@ -133,11 +135,23 @@ public partial class App : Application, INotifyPropertyChanged
         root.ActualThemeChanged += Root_ActualThemeChanged;
 
 
+        // load app configs
+        App.Config = AppSettings.Load(AppSettings.CONFIG_USER);
+        var accentColor = _uiSystem.GetColorValue(UIColorType.Accent);
+
         // load theme
         IsDarkMode = root.ActualTheme != ElementTheme.Light;
 
         // load theme for the first time
-        Config.LoadCurrentTheme(IsDarkMode, true, true, false);
+        Config.LoadCurrentTheme(IsDarkMode, accentColor, true, true, false);
+
+
+        // get foreground shell
+        if (App.Config.ShouldUseExplorerSortOrder)
+        {
+            using var shell = new EggShell();
+            Local.ForegroundShell = shell.GetForegroundWindowView();
+        }
 
 
         // show the main window

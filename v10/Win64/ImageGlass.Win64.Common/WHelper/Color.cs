@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using System;
 using System.Globalization;
 using Windows.UI;
@@ -26,10 +27,54 @@ public partial class WHelper
 {
 
     /// <summary>
-    /// Creates a new <see cref="Color"/> from the given hex color string (with alpha).
-    /// Returns <c>Color(0,0,0,0)</c> if the <paramref name="hex"/> is invalid.
+    /// Creates a new <see cref="Color"/> from the given hex color string (with alpha),
+    /// supports parsing <c>accent:opacity</c> sytax.
     /// </summary>
-    public static Color ColorFromHex(string hex, bool skipAlpha = false)
+    /// <returns>
+    /// <c>Color(0,0,0,0)</c> if the <paramref name="colorStr"/> is invalid.
+    /// </returns>
+    public static Color ColorFromHex(string colorStr, Color? accent = null, bool skipAlpha = false)
+    {
+        // not using accent color
+        if (!colorStr.StartsWith(Const.THEME_SYSTEM_ACCENT, StringComparison.OrdinalIgnoreCase))
+        {
+            return WHelper.ColorFromHex(colorStr, skipAlpha);
+        }
+
+
+        // example: accent:180
+        var valueArr = colorStr.Split(':', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+        var accentColor = new Color();
+        byte accentAlpha = 255;
+        if (accent != null)
+        {
+            accentColor.R = accent.Value.R;
+            accentColor.G = accent.Value.G;
+            accentColor.B = accent.Value.B;
+            accentColor.A = accent.Value.A;
+        }
+
+        // adjust accent color alpha
+        if (!skipAlpha && valueArr.Length > 1)
+        {
+            _ = byte.TryParse(valueArr[1], out accentAlpha);
+        }
+
+        accentColor.A = accentAlpha;
+
+        return accentColor;
+
+    }
+
+
+    /// <summary>
+    /// Creates a new <see cref="Color"/> from the given hex color string (with alpha).
+    /// </summary>
+    /// <returns>
+    /// <c>Color(0,0,0,0)</c> if the <paramref name="hex"/> is invalid.
+    /// </returns>
+    public static Color ColorFromHex(string hex, bool skipAlpha)
     {
         var color = new Color();
         if (string.IsNullOrWhiteSpace(hex)) return color;
@@ -82,5 +127,6 @@ public partial class WHelper
 
         return color;
     }
+
 
 }

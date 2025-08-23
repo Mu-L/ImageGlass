@@ -22,10 +22,12 @@ namespace ImageGlass.Win64.Common;
 /// <summary>
 /// Theme colors
 /// </summary>
-public record IgThemeColors
+public class IgThemeColors
 {
+    // Viewer
     public string TextColor { get; set; } = "#d3d3d3";
     public string BgColor { get; set; } = "#151b1f00";
+    public string NavigationButtonColor { get; set; } = "ff000015";
 
 
     // Toolbar
@@ -50,8 +52,5 @@ public record IgThemeColors
     public string MenuTextColor { get; set; } = "#dedede";
     public string MenuTextHoverColor { get; set; } = "#dedede";
 
-
-    // Viewer
-    public string NavigationButtonColor { get; set; } = "ff000015";
 }
 
