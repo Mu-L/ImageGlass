@@ -33,7 +33,10 @@ namespace ImageGlass;
 /// </summary>
 public partial class App : Application
 {
-    private Window? _window;
+    private MainWindow? _winMain;
+
+
+    public MainWindow WinMain => _winMain!;
 
 
     /// <summary>
@@ -90,17 +93,22 @@ public partial class App : Application
         Local.ForegroundShell = shell.GetForegroundWindowView();
 
 
-        _window = new MainWindow();
-        _window.Closed += Window_Closed;
+        _winMain = new MainWindow();
+        _winMain.Closed += Window_Closed;
 
-        var root = (FrameworkElement)_window.Content;
+        // monitor color mode change event
+        var root = (FrameworkElement)_winMain.Content;
         root.ActualThemeChanged += Root_ActualThemeChanged;
 
-        _window.Activate();
+        // load theme
+        Config.LoadCurrentTheme(root.ActualTheme != ElementTheme.Light, true, true, false);
+
+        // show the main window
+        _winMain.Activate();
 
 
         // get current monitor profile
-        _ = WindowColorProfileProvider.Instance.InitializeAsync(_window.AppWindow.Id);
+        _ = WindowColorProfileProvider.Instance.InitializeAsync(_winMain.AppWindow.Id);
 
         // initialize Magick decoder
         MagickDecoder.Initialize();
@@ -108,7 +116,7 @@ public partial class App : Application
 
     private void Root_ActualThemeChanged(FrameworkElement sender, object args)
     {
-        var isDarkMode = sender.ActualTheme == ElementTheme.Dark;
+        var isDarkMode = sender.ActualTheme != ElementTheme.Light;
 
         // switch theme
         Config.LoadCurrentTheme(isDarkMode, true, true, false);

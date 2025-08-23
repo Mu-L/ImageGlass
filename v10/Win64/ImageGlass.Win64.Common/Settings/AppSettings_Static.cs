@@ -74,21 +74,6 @@ public partial class AppSettings
 
 
 
-    // Public Reactive properties
-    #region Public Reactive properties
-
-    /// <summary>
-    /// Gets, sets the instance of app theme.
-    /// </summary>
-    [JsonIgnore]
-    public IgTheme Theme { get; set; } = new();
-
-
-    #endregion // Public Reactive properties
-
-
-
-
 
     // Public static methods
     #region Public static methods
@@ -236,20 +221,20 @@ public partial class AppSettings
     {
         // 1. look for theme pack in the Config dir
         var themeConfigPath = BHelper.ConfigDir(Dir.Themes, themeFolderName);
-        var th = new IgTheme(themeConfigPath).Load();
+        var th = new IgTheme().Load(themeConfigPath);
 
         if (!th.IsValid)
         {
             // 2. look for theme pack in the base dir
             var baseThemeConfigPath = BHelper.BaseDir(Dir.Themes, themeFolderName);
-            th = new IgTheme(baseThemeConfigPath).Load();
+            th = new IgTheme().Load(baseThemeConfigPath);
 
             // 3. cannot find theme, use fall back theme
             if (!th.IsValid && useFallBackTheme)
             {
                 // 4. load default theme
                 baseThemeConfigPath = BHelper.BaseDir(Dir.Themes, Const.DEFAULT_THEME);
-                th = new IgTheme(baseThemeConfigPath).Load();
+                th = new IgTheme().Load(baseThemeConfigPath);
             }
         }
 
@@ -265,8 +250,6 @@ public partial class AppSettings
 
 
     #endregion // Public methods
-
-
 
 
 

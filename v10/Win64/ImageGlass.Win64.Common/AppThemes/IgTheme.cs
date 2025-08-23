@@ -30,14 +30,13 @@ public partial class IgThemeJsonContext : JsonSerializerContext { }
 /// <summary>
 /// Represents a theme pack for the app.
 /// </summary>
-public partial class IgTheme(string themeFolderPath = "")
+public partial class IgTheme()
 {
     public IgThemeMetadata _Metadata { get; set; } = new();
     public IgThemeInfo Info { get; set; } = new();
     public IgThemeSettings Settings { get; set; } = new();
     public IgThemeColors Colors { get; set; } = new();
     public IgThemeToolbarIcons ToolbarIcons { get; set; } = new();
-
 
 
     /// <summary>
@@ -57,7 +56,7 @@ public partial class IgTheme(string themeFolderPath = "")
     /// Gets the full path of theme folder.
     /// </summary>
     [JsonIgnore]
-    public string FolderPath => themeFolderPath;
+    public string FolderPath { get; set; } = "";
 
     /// <summary>
     /// Gets the name of theme folder.
@@ -82,8 +81,10 @@ public partial class IgTheme(string themeFolderPath = "")
     /// Reads theme config file and loads the theme properties.
     /// </summary>
     /// <returns>The current instance of this theme pack.</returns>
-    public IgTheme Load()
+    public IgTheme Load(string themeFolderPath)
     {
+        FolderPath = themeFolderPath;
+
         // 1. parse theme config file to theme pack
         var jsonOptions = BHelper.CreateJsonOptions();
         var jsonContext = new IgThemeJsonContext(jsonOptions);
