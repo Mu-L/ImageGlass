@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using CommunityToolkit.WinUI.Controls;
 using ImageGlass.Common;
+using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -25,8 +26,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-
 namespace ImageGlass.Win64.UI;
+
 
 public sealed partial class ToolbarControl : UserControl
 {
@@ -41,6 +42,19 @@ public sealed partial class ToolbarControl : UserControl
 
     // Dependency Properties
     #region Dependency Properties
+
+    /// <summary>
+    /// Gets, sets the theme instance.
+    /// </summary>
+    public IgTheme Theme
+    {
+        get => (IgTheme)GetValue(ThemeProperty);
+        set => SetValue(ThemeProperty, value);
+    }
+    public static readonly DependencyProperty ThemeProperty =
+        DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(ToolbarControl),
+            new PropertyMetadata(new IgTheme()));
+
 
     /// <summary>
     /// Gets, sets the items source of toolbar.

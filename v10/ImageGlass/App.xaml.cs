@@ -136,6 +136,9 @@ public partial class App : Application, INotifyPropertyChanged
         // load theme
         IsDarkMode = root.ActualTheme != ElementTheme.Light;
 
+        // load theme for the first time
+        Config.LoadCurrentTheme(IsDarkMode, true, true, false);
+
 
         // show the main window
         _winMain.Activate();

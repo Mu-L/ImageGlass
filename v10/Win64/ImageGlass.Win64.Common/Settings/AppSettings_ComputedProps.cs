@@ -22,7 +22,7 @@ namespace ImageGlass.Win64.Common;
 
 public partial class AppSettings
 {
-    public IgTheme _theme = new();
+    private IgTheme _theme = new();
 
 
 

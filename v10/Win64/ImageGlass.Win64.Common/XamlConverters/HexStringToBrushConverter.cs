@@ -17,22 +17,24 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media;
 using System;
-using Windows.UI;
 
 namespace ImageGlass.Win64.Common;
 
 
-public partial class HexStringToColorConverter : IValueConverter
+public partial class HexStringToBrushConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
+
         if (value is not string hexColor)
         {
-            return Color.FromArgb(0, 0, 0, 0);
+            return new SolidColorBrush();
         }
 
-        return WHelper.ColorFromHex(hexColor);
+        var color = WHelper.ColorFromHex(hexColor);
+        return new SolidColorBrush(color);
     }
 
 

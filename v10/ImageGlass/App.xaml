@@ -16,8 +16,9 @@
             </ResourceDictionary.MergedDictionaries>
             <!--  Other app resources here  -->
 
+
             <!--  Xaml Converters  -->
-            <win64Common:HexStringToColorConverter x:Key="HexStringToColorConverter" />
+            <win64Common:HexStringToBrushConverter x:Key="HexStringToBrushConverter" />
 
 
             <!--  Gallery  -->

@@ -60,9 +60,9 @@
         <ui:ToolbarControl
             x:Name="ToolbarMain"
             Grid.Row="1"
-            Background="#07ffffff"
             Canvas.ZIndex="90"
-            ItemsSource="{x:Bind local:App.Config.ToolbarButtons}" />
+            ItemsSource="{x:Bind local:App.Config.ToolbarButtons}"
+            Theme="{x:Bind local:App.Config.Theme}" />
 
 
         <!--  Gallery  -->
