@@ -21,6 +21,51 @@ namespace ImageGlass.Common;
 
 public partial class BHelper
 {
+    public static string AppName => "ImageGlass_10";
+
+
+    /// <summary>
+    /// Gets the base dir path.
+    /// </summary>
+    public static string BasePath => AppDomain.CurrentDomain.BaseDirectory;
+
+
+    /// <summary>
+    /// Gets the config dir path.
+    /// </summary>
+    public static string ConfigPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
+
+
+    /// <summary>
+    /// Computes the full path based on the installed folder.
+    /// </summary>
+    public static string BaseDir(params string[] paths)
+    {
+        var newPaths = paths.ToList();
+        newPaths.Insert(0, BasePath);
+        var path = Path.Combine([.. newPaths]);
+
+        return path;
+    }
+
+
+    /// <summary>
+    /// Computes the full path based on the config folder.
+    /// </summary>
+    public static string ConfigDir(params string[] paths)
+    {
+        // create the directory if not exists
+        Directory.CreateDirectory(ConfigPath);
+
+        var newPaths = paths.ToList();
+        newPaths.Insert(0, ConfigPath);
+        var path = Path.Combine([.. newPaths]);
+
+        return path;
+    }
+
+
+
     /// <summary>
     /// Check if the given path (file or directory) is writable. 
     /// </summary>

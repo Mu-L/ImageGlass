@@ -44,7 +44,7 @@
                 Width="20"
                 Margin="5,0,0,0"
                 Source="/Assets/Square44x44Logo.png"
-                Visibility="{x:Bind winNTCommon:Config.Current.ShowAppIcon}" />
+                Visibility="{x:Bind local:App.Config.ShowAppIcon}" />
 
             <TextBlock
                 Grid.Column="1"
@@ -63,7 +63,7 @@
             Grid.Row="1"
             Background="#07ffffff"
             Canvas.ZIndex="90"
-            ItemsSource="{x:Bind winNTCommon:Config.Current.ToolbarButtons}" />
+            ItemsSource="{x:Bind local:App.Config.ToolbarButtons}" />
 
 
         <!--  Gallery  -->
@@ -82,15 +82,15 @@
             x:Name="Viewer"
             Grid.Row="2"
             AllowDrop="True"
-            CheckerboardMode="{x:Bind winNTCommon:Config.Current.CheckerboardMode}"
+            CheckerboardMode="{x:Bind local:App.Config.CheckerboardMode}"
             DragOver="Viewer_DragOver"
             Drop="Viewer_Drop"
-            EnableDebug="{x:Bind winNTCommon:Config.Current.EnableDebug}"
+            EnableDebug="{x:Bind local:App.Config.EnableDebug}"
             EnableSelection="False"
-            PanSpeed="{x:Bind winNTCommon:Config.Current.PanSpeed}"
-            ZoomLevels="{x:Bind winNTCommon:Config.Current.ZoomLevels}"
-            ZoomMode="{x:Bind winNTCommon:Config.Current.ZoomMode}"
-            ZoomSpeed="{x:Bind winNTCommon:Config.Current.ZoomSpeed}" />
+            PanSpeed="{x:Bind local:App.Config.PanSpeed}"
+            ZoomLevels="{x:Bind local:App.Config.ZoomLevels}"
+            ZoomMode="{x:Bind local:App.Config.ZoomMode}"
+            ZoomSpeed="{x:Bind local:App.Config.ZoomSpeed}" />
 
     </Grid>
 

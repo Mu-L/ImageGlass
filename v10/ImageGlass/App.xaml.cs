@@ -43,6 +43,13 @@ public partial class App : Application
 
 
     /// <summary>
+    /// Gets the app settings.
+    /// </summary>
+    public static AppSettings Config { get; set; } = new();
+
+
+
+    /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>
@@ -70,13 +77,13 @@ public partial class App : Application
     /// <summary>
     /// Invoked when the application is launched.
     /// </summary>
-    /// <param name="args">Details about the launch request and process.</param>
-    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+    /// <param name="e">Details about the launch request and process.</param>
+    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs e)
     {
         Args = Environment.GetCommandLineArgs();
 
         // load app configs
-        Config.Load();
+        App.Config = AppSettings.Load(AppSettings.CONFIG_USER);
 
         // get foreground shell
         using var shell = new EggShell();
@@ -128,12 +135,12 @@ public partial class App : Application
         //}
 
 
-        Config.Current.LastSeenImagePath = Local.Photos.GetFilePath(Local.Photos.CurrentIndex);
+        App.Config.LastSeenImagePath = Local.Photos.GetFilePath(Local.Photos.CurrentIndex);
         //Config.ZoomLockValue = PicMain.ZoomFactor * 100f;
 
 
         // save config to file
-        await Config.SaveAsync();
+        await App.Config.SaveAsync();
 
 
         //// cleaning

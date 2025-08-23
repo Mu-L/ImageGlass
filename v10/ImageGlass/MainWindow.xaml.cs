@@ -120,7 +120,7 @@ public sealed partial class MainWindow : Window
         var imageIndex = Local.Photos.IndexOf(path);
 
         // 4.1 get foreground shell
-        if (Config.Current.ShouldUseExplorerSortOrder)
+        if (App.Config.ShouldUseExplorerSortOrder)
         {
             using var shell = new EggShell();
             Local.ForegroundShell = shell.GetForegroundWindowView();
@@ -205,18 +205,18 @@ public sealed partial class MainWindow : Window
 
         // check for last seen image
         if (string.IsNullOrEmpty(pathToLoad)
-            && Config.Current.ShouldOpenLastSeenImage
-            && BHelper.CheckPath(Config.Current.LastSeenImagePath) == PathType.File)
+            && App.Config.ShouldOpenLastSeenImage
+            && BHelper.CheckPath(App.Config.LastSeenImagePath) == PathType.File)
         {
-            pathToLoad = Config.Current.LastSeenImagePath;
+            pathToLoad = App.Config.LastSeenImagePath;
         }
 
         // check for Welcome image
         if (string.IsNullOrEmpty(pathToLoad))
         {
-            if (Config.Current.ShowWelcomeImage)
+            if (App.Config.ShowWelcomeImage)
             {
-                pathToLoad = Config.StartUpDir("default.webp");
+                pathToLoad = BHelper.BaseDir("default.webp");
             }
             else
             {
@@ -246,14 +246,14 @@ public sealed partial class MainWindow : Window
         // start loading files
         var initPhoto = Local.Photos.StartLoadingFiles(inputPaths, new FileShellSearchOptions()
         {
-            AllowedExtensions = Config.Current.FileFormats,
-            UseExplorerSortOrder = Config.Current.ShouldUseExplorerSortOrder,
+            AllowedExtensions = App.Config.FileFormats,
+            UseExplorerSortOrder = App.Config.ShouldUseExplorerSortOrder,
             ForegroundShell = foregroundShell,
-            SearchSubDirectories = Config.Current.EnableRecursiveLoading,
-            GroupByDir = Config.Current.ShouldGroupImagesByDirectory,
-            IncludeHidden = Config.Current.ShouldLoadHiddenImages,
-            OrderBy = Config.Current.ImageLoadingOrder,
-            OrderType = Config.Current.ImageLoadingOrderType,
+            SearchSubDirectories = App.Config.EnableRecursiveLoading,
+            GroupByDir = App.Config.ShouldGroupImagesByDirectory,
+            IncludeHidden = App.Config.ShouldLoadHiddenImages,
+            OrderBy = App.Config.ImageLoadingOrder,
+            OrderType = App.Config.ImageLoadingOrderType,
         }, _searchProgress);
 
 

@@ -18,10 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace ImageGlass.Win64.Common;
@@ -31,7 +29,7 @@ namespace ImageGlass.Win64.Common;
 public partial class AppSettingsJsonContext : JsonSerializerContext { }
 
 
-public partial class AppSettings
+public partial class AppSettings : Notify
 {
     public ConfigMetadata _Metadata { get; set; } = new();
 
@@ -647,21 +645,6 @@ public partial class AppSettings
 
     #endregion // Setting items
 
-
-
-    /// <summary>
-    /// Sets default value of app settings
-    /// </summary>
-    public void LoadDefaults()
-    {
-        // set default value for file formats
-        if (FileFormats.Count == 0)
-        {
-            FileFormats = Const.IMAGE_FORMATS
-                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .ToHashSet();
-        }
-    }
 
 }
 
