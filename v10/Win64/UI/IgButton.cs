@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -25,6 +26,23 @@ namespace ImageGlass.Win64.UI;
 public partial class IgButton : Button
 {
     protected readonly IgClickable _clickable;
+
+
+    /// <summary>
+    /// Gets, sets the theme instance.
+    /// </summary>
+    public IgTheme Theme
+    {
+        get => (IgTheme)GetValue(ThemeProperty);
+        set
+        {
+            _clickable.Theme = value;
+            SetValue(ThemeProperty, value);
+        }
+    }
+    public static readonly DependencyProperty ThemeProperty =
+        DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(IgButton),
+            new PropertyMetadata(new IgTheme()));
 
 
     /// <summary>

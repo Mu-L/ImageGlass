@@ -25,11 +25,32 @@ public partial class AppSettings
 {
     private IgTheme _theme = new();
     private Color _accentColor = new();
+    private bool _isDarkMode = true;
 
 
 
     // Public Reactive properties
     #region Public Reactive properties
+
+    /// <summary>
+    /// Gets, sets the current color mode.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsDarkMode
+    {
+        get => _isDarkMode;
+        set
+        {
+            if (_isDarkMode != value)
+            {
+                _isDarkMode = value;
+                OnPropertyChanged();
+
+                // load theme
+                LoadCurrentTheme(_isDarkMode, AccentColor, true, true, false);
+            }
+        }
+    }
 
     /// <summary>
     /// Gets, sets the current color accent.
@@ -46,7 +67,6 @@ public partial class AppSettings
 
                 // reload theme colors
                 Theme.LoadColors(_accentColor);
-
                 OnPropertyChanged();
             }
         }

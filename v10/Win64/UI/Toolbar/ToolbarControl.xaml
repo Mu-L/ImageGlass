@@ -74,7 +74,7 @@
                 ItemTemplate="{StaticResource ToolbarItemTemplate}"
                 ItemsSource="{x:Bind PrimaryItems, Mode=OneWay}">
                 <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarControl.ItemSpacing}" />
+                    <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarControl.ItemSpacing, Mode=OneTime}" />
                 </ItemsRepeater.Layout>
             </ItemsRepeater>
         </StackPanel>
@@ -88,7 +88,7 @@
             VerticalAlignment="Stretch"
             Canvas.ZIndex="90"
             Orientation="Horizontal"
-            Spacing="{x:Bind local:ToolbarControl.ItemSpacing}">
+            Spacing="{x:Bind local:ToolbarControl.ItemSpacing, Mode=OneTime}">
 
 
             <!--  Toolbar: Overflow button  -->
@@ -96,6 +96,7 @@
                 x:Name="BtnOverflowMenu"
                 Padding="5"
                 Style="{StaticResource IgButtonStyle}"
+                Theme="{x:Bind Theme}"
                 ToolTipService.ToolTip="View more buttons"
                 Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal" Spacing="4">
@@ -123,14 +124,14 @@
                 ItemTemplate="{StaticResource ToolbarItemTemplate}"
                 ItemsSource="{x:Bind SecondaryItems, Mode=OneWay}">
                 <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarControl.ItemSpacing}" />
+                    <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarControl.ItemSpacing, Mode=OneTime}" />
                 </ItemsRepeater.Layout>
             </ItemsRepeater>
 
 
 
             <!--  Menu button  -->
-            <local:IgToolbarItemButton x:Name="BtnMainMenu">
+            <local:IgToolbarItemButton x:Name="BtnMainMenu" Theme="{x:Bind Theme}">
                 <local:IgToolbarItemButton.ViewModel>
                     <common:ToolbarItemModel Image="MainMenu.svg" Text="Main Menu" />
                 </local:IgToolbarItemButton.ViewModel>

@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
-using Microsoft.UI.Xaml;
+using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
@@ -31,9 +31,39 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
 {
     private ButtonBase _control => control;
 
+    private IgTheme _theme = new();
     private IgButtonStates _buttonStates = IgButtonStates.Normal;
     private bool _isCheckOnClick = false;
     private bool _isChecked = false;
+
+
+    /// <summary>
+    /// Gets, sets the theme instance.
+    /// </summary>
+    public IgTheme Theme
+    {
+        get => _theme;
+        set
+        {
+            if (_theme != value)
+            {
+                _theme.PropertyChanged -= Theme_PropertyChanged;
+                _theme = value;
+                _theme.PropertyChanged += Theme_PropertyChanged;
+
+                OnPropertyChanged();
+                UpdateStyle();
+            }
+        }
+    }
+
+    private void Theme_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Theme.ColorBrushes))
+        {
+            UpdateStyle();
+        }
+    }
 
 
     /// <summary>
@@ -96,37 +126,37 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
     public void UpdateStyle()
     {
         // normal style
-        Brush bgBrush = new SolidColorBrush(); // must not be null for interaction
-        Brush? borderBrush = null;
+        SolidColorBrush bgBrush = new(); // must not be null for interaction
+        SolidColorBrush borderBrush = new();
 
 
         // checked style for background
         if (IsChecked)
         {
-            bgBrush = (Brush)(Application.Current.Resources["IgButtonBackgroundSelected"]);
+            bgBrush.Color = Theme.ColorBrushes.ToolbarItemSelectedColor;
         }
 
 
         // hover style
         if (ButtonStates.HasFlag(IgButtonStates.Hovered))
         {
-            bgBrush
-                = borderBrush
-                = (Brush)(Application.Current.Resources["IgButtonBackgroundHovered"]);
+            bgBrush.Color
+                = borderBrush.Color
+                = Theme.ColorBrushes.ToolbarItemHoverColor;
         }
 
         // pressed style
         else if (ButtonStates.HasFlag(IgButtonStates.Pressed))
         {
-            bgBrush
-                = borderBrush
-                = (Brush)(Application.Current.Resources["IgButtonBackgroundPressed"]);
+            bgBrush.Color
+                = borderBrush.Color
+                = Theme.ColorBrushes.ToolbarItemActiveColor;
         }
 
         // checked style for border
         if (IsChecked)
         {
-            borderBrush = (Brush)(Application.Current.Resources["IgButtonBorderSelected"]);
+            borderBrush.Color = Theme.ColorBrushes.ToolbarItemSelectedColor;
         }
 
         _control.Background = bgBrush;

@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -40,6 +41,19 @@ public sealed partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     }
     public static readonly DependencyProperty ViewModelProperty =
         DependencyProperty.Register(nameof(ViewModel), typeof(ToolbarItemModel), typeof(IgToolbarItemButton), new PropertyMetadata(new ToolbarItemModel()));
+
+
+    /// <summary>
+    /// Gets, sets the theme instance.
+    /// </summary>
+    public IgTheme Theme
+    {
+        get => (IgTheme)GetValue(ThemeProperty);
+        set => SetValue(ThemeProperty, value);
+    }
+    public static readonly DependencyProperty ThemeProperty =
+        DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(IgToolbarItemButton),
+            new PropertyMetadata(new IgTheme()));
 
 
     public FlyoutBase? Flyout

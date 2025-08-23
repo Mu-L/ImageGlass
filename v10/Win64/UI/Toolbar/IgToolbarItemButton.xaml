@@ -25,6 +25,7 @@
         IsChecked="{x:Bind ViewModel.IsToggle}"
         Style="{StaticResource IgButtonStyle}"
         Text="{x:Bind ViewModel.Text}"
+        Theme="{x:Bind Theme}"
         ToolTipService.ToolTip="{x:Bind ViewModel.Text}">
         <StackPanel Orientation="Horizontal" Spacing="5">
             <Viewbox

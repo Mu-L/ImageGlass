@@ -24,6 +24,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Windows.UI;
 using Windows.UI.ViewManagement;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -37,7 +38,8 @@ namespace ImageGlass;
 public partial class App : Application, INotifyPropertyChanged
 {
     private MainWindow? _winMain;
-    private bool _isDarkMode = true;
+
+    private IProgress<AppUpdatedEventArgs> _uiReporter;
     private static UISettings _uiSystem = new UISettings();
 
 
@@ -53,24 +55,6 @@ public partial class App : Application, INotifyPropertyChanged
     public static string[] Args { get; set; } = [];
 
 
-    /// <summary>
-    /// Gets, sets the app color mode.
-    /// </summary>
-    public bool IsDarkMode
-    {
-        get => _isDarkMode;
-        set
-        {
-            if (_isDarkMode != value)
-            {
-                _isDarkMode = value;
-                OnPropertyChanged();
-
-                // load theme
-                Config.LoadCurrentTheme(_isDarkMode, App.Config.AccentColor, true, true, false);
-            }
-        }
-    }
 
 
     /// <summary>
@@ -88,6 +72,8 @@ public partial class App : Application, INotifyPropertyChanged
     {
         this.InitializeComponent();
 
+        _uiReporter = new Progress<AppUpdatedEventArgs>(UIReporter_Reported);
+
         Application.Current.UnhandledException += Current_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
@@ -95,9 +81,20 @@ public partial class App : Application, INotifyPropertyChanged
         _uiSystem.ColorValuesChanged += UiSettings_ColorValuesChanged;
     }
 
+    private void UIReporter_Reported(AppUpdatedEventArgs e)
+    {
+        if (e.AccentColor != null) App.Config.AccentColor = e.AccentColor.Value;
+        if (e.IsDarkMode != null) App.Config.IsDarkMode = e.IsDarkMode.Value;
+    }
+
     private void UiSettings_ColorValuesChanged(UISettings sender, object args)
     {
-        App.Config.AccentColor = sender.GetColorValue(UIColorType.Accent);
+        var accent = sender.GetColorValue(UIColorType.Accent);
+
+        _uiReporter.Report(new AppUpdatedEventArgs()
+        {
+            AccentColor = accent,
+        });
     }
 
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -137,13 +134,13 @@ public partial class App : Application, INotifyPropertyChanged
 
         // load app configs
         App.Config = AppSettings.Load(AppSettings.CONFIG_USER);
-        var accentColor = _uiSystem.GetColorValue(UIColorType.Accent);
 
-        // load theme
-        IsDarkMode = root.ActualTheme != ElementTheme.Light;
+        // get accent color & color mode
+        var accentColor = _uiSystem.GetColorValue(UIColorType.Accent);
+        var isDarkMode = root.ActualTheme != ElementTheme.Light;
 
         // load theme for the first time
-        Config.LoadCurrentTheme(IsDarkMode, accentColor, true, true, false);
+        Config.LoadCurrentTheme(isDarkMode, accentColor, true, true, false);
 
 
         // get foreground shell
@@ -157,7 +154,6 @@ public partial class App : Application, INotifyPropertyChanged
         // show the main window
         _winMain.Activate();
 
-
         // get current monitor profile
         _ = WindowColorProfileProvider.Instance.InitializeAsync(_winMain.AppWindow.Id);
 
@@ -167,7 +163,10 @@ public partial class App : Application, INotifyPropertyChanged
 
     private void Root_ActualThemeChanged(FrameworkElement sender, object args)
     {
-        IsDarkMode = sender.ActualTheme != ElementTheme.Light;
+        _uiReporter.Report(new AppUpdatedEventArgs()
+        {
+            IsDarkMode = sender.ActualTheme != ElementTheme.Light,
+        });
     }
 
     private async void Window_Closed(object sender, WindowEventArgs args)
@@ -207,4 +206,11 @@ public partial class App : Application, INotifyPropertyChanged
         //}
         //catch { }
     }
+}
+
+
+public class AppUpdatedEventArgs : EventArgs
+{
+    public Color? AccentColor { get; set; }
+    public bool? IsDarkMode { get; set; }
 }
