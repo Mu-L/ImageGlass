@@ -169,7 +169,7 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
         if (e.Key == Windows.System.VirtualKey.Space
             || e.Key == Windows.System.VirtualKey.Enter)
         {
-            ButtonStates ^= IgButtonStates.Hovered;
+            ButtonStates &= ~IgButtonStates.Hovered;
             ButtonStates |= IgButtonStates.Pressed;
             _control.ClickMode = ClickMode.Press;
 
@@ -182,8 +182,7 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
         if (e.Key == Windows.System.VirtualKey.Space
             || e.Key == Windows.System.VirtualKey.Enter)
         {
-            ButtonStates ^= IgButtonStates.Pressed;
-            ButtonStates ^= IgButtonStates.Hovered;
+            ButtonStates &= ~(IgButtonStates.Pressed | IgButtonStates.Hovered);
             _control.ClickMode = ClickMode.Release;
         }
     }
@@ -191,29 +190,29 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
 
     public void SetStateForPointerEntered()
     {
-        ButtonStates ^= IgButtonStates.Normal;
+        ButtonStates &= ~IgButtonStates.Normal;
         ButtonStates |= IgButtonStates.Hovered;
     }
 
     public void SetStateForPointerExited()
     {
-        ButtonStates ^= IgButtonStates.Hovered;
+        ButtonStates &= ~IgButtonStates.Hovered;
         ButtonStates |= IgButtonStates.Normal;
     }
 
     public void SetStateForPointerPressed()
     {
-        ButtonStates ^= IgButtonStates.Hovered;
+        ButtonStates &= ~IgButtonStates.Hovered;
         ButtonStates |= IgButtonStates.Pressed;
 
         if (IsCheckOnClick) IsChecked = !IsChecked;
     }
 
-    public void SetStateForPointerReleased(PointerRoutedEventArgs e)
+    public void SetStateForPointerReleased(PointerRoutedEventArgs? e = null)
     {
-        ButtonStates ^= IgButtonStates.Pressed;
-        if (e.Pointer.IsInContact) ButtonStates |= IgButtonStates.Hovered;
-        else ButtonStates ^= IgButtonStates.Hovered;
+        ButtonStates &= ~(IgButtonStates.Pressed | IgButtonStates.Hovered);
+
+        if (e != null && e.Pointer.IsInContact) ButtonStates |= IgButtonStates.Hovered;
     }
 }
 

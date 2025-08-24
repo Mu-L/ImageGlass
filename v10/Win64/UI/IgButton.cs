@@ -122,8 +122,9 @@ public partial class IgButton : Button
     {
         _clickable = new IgClickable(this);
         DefaultStyleKey = typeof(IgButton);
-    }
 
+        Loaded += IgButton_Loaded;
+    }
 
     protected override void OnApplyTemplate()
     {
@@ -168,4 +169,24 @@ public partial class IgButton : Button
     {
         _clickable.ButtonStates = states;
     }
+
+
+    private void IgButton_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (Flyout is null) return;
+
+        Flyout.Opened += Flyout_Opened;
+        Flyout.Closed += Flyout_Closed;
+    }
+
+    private void Flyout_Closed(object? sender, object e)
+    {
+        IsChecked = false;
+    }
+
+    private void Flyout_Opened(object? sender, object e)
+    {
+        IsChecked = true;
+    }
+
 }
