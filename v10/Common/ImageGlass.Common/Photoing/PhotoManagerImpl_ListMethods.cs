@@ -44,13 +44,19 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         if (index < 0)
         {
             addedIndex = (int)Count;
-            Items.AddRange(newItems);
+
+            using (Items.SuspendChangeNotifications(SuspensionMode.Adding))
+            {
+                Items.AddRange(newItems);
+            }
         }
         else
         {
-            Items.InsertItems(newItems, index);
+            using (Items.SuspendChangeNotifications(SuspensionMode.Adding))
+            {
+                Items.InsertItems(newItems, index);
+            }
         }
-
 
         // update path dictionary
         for (int i = addedIndex; i < Count; i++)
@@ -111,6 +117,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // select new index
         Items[index].IsCurrent = true;
         _currentIndex = index;
+        OnPropertyChanged(nameof(CurrentIndex));
 
         return Get(index);
     }
