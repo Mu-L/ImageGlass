@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Microsoft.UI.Xaml;
 using System.Text.Json.Serialization;
 using Windows.UI;
 
@@ -85,6 +86,7 @@ public partial class AppSettings
             if (_theme != value)
             {
                 _theme = value;
+                Application.Current.Resources["IG_AppTheme"] = value;
                 OnPropertyChanged();
             }
         }

@@ -37,8 +37,8 @@
                 Click="GalleryItem_Clicked"
                 IsChecked="{x:Bind IsCurrent}"
                 IsTabStop="False"
-                Loaded="GalleryItem_Loaded"
                 Style="{StaticResource IgButtonStyle}"
+                Theme="{x:Bind local:GalleryControl.IG_AppTheme}"
                 VM="{x:Bind}">
 
                 <Grid VerticalAlignment="Stretch">
@@ -91,7 +91,7 @@
     <ScrollViewer
         x:Name="GalleryScrollViewer"
         Padding="5"
-        Background="{x:Bind Background}"
+        Background="{x:Bind Theme.ColorBrushes.GalleryBgColor, Converter={StaticResource HexStringToBrushConverter}}"
         HorizontalScrollBarVisibility="Auto"
         HorizontalScrollMode="Enabled"
         VerticalScrollBarVisibility="Auto"
@@ -100,10 +100,9 @@
             x:Name="GalleryItemRepeater"
             HorizontalAlignment="Center"
             ElementClearing="GalleryItemRepeater_ElementClearing"
-            ElementIndexChanged="GalleryItemRepeater_ElementIndexChanged"
             ElementPrepared="GalleryItemRepeater_ElementPrepared"
             ItemTemplate="{StaticResource GalleryItemTemplate}"
-            ItemsSource="{x:Bind PhotoManager.Items}">
+            ItemsSource="{x:Bind VM.Items}">
             <ItemsRepeater.Layout>
                 <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:GalleryControl.ItemSpacing, Mode=OneTime}" />
             </ItemsRepeater.Layout>

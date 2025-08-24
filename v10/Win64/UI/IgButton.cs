@@ -48,27 +48,25 @@ public partial class IgButton : Button, INotifyPropertyChanged
     /// </summary>
     public IgTheme Theme
     {
-        get => _theme;
+        get => (IgTheme)GetValue(ThemeProperty);
         set
         {
-            if (_theme != value)
-            {
-                _theme.PropertyChanged -= Theme_PropertyChanged;
-                _theme = value;
-                _theme.PropertyChanged += Theme_PropertyChanged;
+            value.PropertyChanged -= Theme_PropertyChanged;
+            SetValue(ThemeProperty, value);
+            value.PropertyChanged += Theme_PropertyChanged;
 
-                OnPropertyChanged();
-                UpdateStyle();
-            }
+            UpdateStyle();
         }
     }
-    private void Theme_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    public static readonly DependencyProperty ThemeProperty = DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(IgButton), new PropertyMetadata(new IgTheme()));
+    private void Theme_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Theme.ColorBrushes))
         {
             UpdateStyle();
         }
     }
+
 
 
     /// <summary>

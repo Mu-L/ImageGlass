@@ -14,7 +14,11 @@
                 <!--  Other merged dictionaries here  -->
 
             </ResourceDictionary.MergedDictionaries>
-            <!--  Other app resources here  -->
+
+
+
+            <!--  Global resource  -->
+            <win64Common:IgTheme x:Key="IG_AppTheme" />
 
 
             <!--  Xaml Converters  -->
