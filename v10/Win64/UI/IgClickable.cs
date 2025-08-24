@@ -18,23 +18,28 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
 using ImageGlass.Win64.Common;
-using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using System;
 
 namespace ImageGlass.Win64.UI;
 
 
-public partial class IgClickable(ButtonBase control) : DisposableImpl
+public partial class IgClickable : DisposableImpl
 {
-    private ButtonBase _control => control;
+    protected ButtonBase _control;
+    protected IgTheme _theme = new();
 
-    private IgTheme _theme = new();
-    private IgButtonStates _buttonStates = IgButtonStates.Normal;
-    private bool _isCheckOnClick = false;
-    private bool _isChecked = false;
+
+    protected long _tokenIsPointerOverChanged = 0;
+    protected long _tokenIsPressedChanged = 0;
+
+    protected bool _isPointerOver = false;
+    protected bool _isPressed = false;
+
+    protected bool _isToggle = false;
+    protected bool _isChecked = false;
+
 
 
     /// <summary>
@@ -56,7 +61,6 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
             }
         }
     }
-
     private void Theme_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Theme.ColorBrushes))
@@ -67,43 +71,37 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
 
 
     /// <summary>
-    /// Gets or sets the interaction states of the gallery button item.
+    /// Gets a value that indicates whether a pointer is located over this control.
     /// </summary>
-    public IgButtonStates ButtonStates
-    {
-        get => _buttonStates;
-        set
-        {
-            if (_buttonStates != value)
-            {
-                _buttonStates = value;
-                UpdateStyle();
-                OnPropertyChanged(nameof(ButtonStates));
-            }
-        }
-    }
+    public bool IsPointerOver => _isPointerOver;
+
+
+    /// <summary>
+    /// Gets a value that indicates whether this control is currently in a pressed state.
+    /// </summary>
+    public bool IsPressed => _isPressed;
 
 
     /// <summary>
     /// Gets, sets the value indicating that the control is checked on click.
     /// </summary>
-    public bool IsCheckOnClick
+    public bool IsToggle
     {
-        get => _isCheckOnClick;
+        get => _isToggle;
         set
         {
-            if (_isCheckOnClick != value)
+            if (_isToggle != value)
             {
-                _isCheckOnClick = value;
+                _isToggle = value;
                 UpdateStyle();
-                OnPropertyChanged(nameof(IsCheckOnClick));
+                OnPropertyChanged(nameof(IsToggle));
             }
         }
     }
 
 
     /// <summary>
-    /// Gets or sets the check state of the control.
+    /// Gets, sets check state for this control.
     /// </summary>
     public bool IsChecked
     {
@@ -117,6 +115,54 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
                 OnPropertyChanged(nameof(IsChecked));
             }
         }
+    }
+
+
+    public IgClickable(ButtonBase control)
+    {
+        _control = control;
+
+        _tokenIsPointerOverChanged = _control.RegisterPropertyChangedCallback(ButtonBase.IsPointerOverProperty, IsPointerOver_Changed);
+        _tokenIsPressedChanged = _control.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, IsPressed_Changed);
+
+        _control.Unloaded += Control_Unloaded;
+        _control.Click += Control_Click;
+    }
+
+
+    private void Control_Unloaded(object sender, RoutedEventArgs e)
+    {
+        _control.Unloaded -= Control_Unloaded;
+        _control.Click -= Control_Click;
+
+        _control.UnregisterPropertyChangedCallback(ButtonBase.IsPointerOverProperty, _tokenIsPointerOverChanged);
+        _control.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _tokenIsPressedChanged);
+    }
+
+
+    private void IsPointerOver_Changed(DependencyObject sender, DependencyProperty dp)
+    {
+        if (sender is not ButtonBase btn) return;
+
+        _isPointerOver = btn.IsPointerOver;
+        OnPropertyChanged(nameof(IsPointerOver));
+        UpdateStyle();
+    }
+
+
+    private void IsPressed_Changed(DependencyObject sender, DependencyProperty dp)
+    {
+        if (sender is not ButtonBase btn) return;
+
+        _isPressed = btn.IsPressed;
+        OnPropertyChanged(nameof(IsPressed));
+        UpdateStyle();
+    }
+
+
+    private void Control_Click(object sender, RoutedEventArgs e)
+    {
+        if (IsToggle) IsChecked = !IsChecked;
     }
 
 
@@ -138,7 +184,7 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
 
 
         // hover style
-        if (ButtonStates.HasFlag(IgButtonStates.Hovered))
+        if (IsPointerOver)
         {
             bgBrush.Color
                 = borderBrush.Color
@@ -146,7 +192,7 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
         }
 
         // pressed style
-        else if (ButtonStates.HasFlag(IgButtonStates.Pressed))
+        else if (IsPressed)
         {
             bgBrush.Color
                 = borderBrush.Color
@@ -163,68 +209,5 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
         _control.BorderBrush = borderBrush;
     }
 
-
-    public void SetStateForPreviewKeyDown(KeyRoutedEventArgs e)
-    {
-        if (e.Key == Windows.System.VirtualKey.Space
-            || e.Key == Windows.System.VirtualKey.Enter)
-        {
-            ButtonStates &= ~IgButtonStates.Hovered;
-            ButtonStates |= IgButtonStates.Pressed;
-            _control.ClickMode = ClickMode.Press;
-
-            if (IsCheckOnClick) IsChecked = !IsChecked;
-        }
-    }
-
-    public void SetStateForPreviewKeyUp(KeyRoutedEventArgs e)
-    {
-        if (e.Key == Windows.System.VirtualKey.Space
-            || e.Key == Windows.System.VirtualKey.Enter)
-        {
-            ButtonStates &= ~(IgButtonStates.Pressed | IgButtonStates.Hovered);
-            _control.ClickMode = ClickMode.Release;
-        }
-    }
-
-
-    public void SetStateForPointerEntered()
-    {
-        ButtonStates &= ~IgButtonStates.Normal;
-        ButtonStates |= IgButtonStates.Hovered;
-    }
-
-    public void SetStateForPointerExited()
-    {
-        ButtonStates &= ~IgButtonStates.Hovered;
-        ButtonStates |= IgButtonStates.Normal;
-    }
-
-    public void SetStateForPointerPressed()
-    {
-        ButtonStates &= ~IgButtonStates.Hovered;
-        ButtonStates |= IgButtonStates.Pressed;
-
-        if (IsCheckOnClick) IsChecked = !IsChecked;
-    }
-
-    public void SetStateForPointerReleased(PointerRoutedEventArgs? e = null)
-    {
-        ButtonStates &= ~(IgButtonStates.Pressed | IgButtonStates.Hovered);
-
-        if (_control.IsPointerOver)
-        {
-            ButtonStates |= IgButtonStates.Hovered;
-        }
-    }
-}
-
-
-[Flags]
-public enum IgButtonStates
-{
-    Normal = 1 << 1,
-    Hovered = 1 << 2,
-    Pressed = 1 << 3,
 }
 

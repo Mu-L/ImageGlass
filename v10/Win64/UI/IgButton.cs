@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
 
 namespace ImageGlass.Win64.UI;
 
@@ -53,7 +52,7 @@ public partial class IgButton : Button
         get => (bool)GetValue(IsCheckOnClickProperty);
         set
         {
-            _clickable.IsCheckOnClick = value;
+            _clickable.IsToggle = value;
             SetValue(IsCheckOnClickProperty, value);
         }
     }
@@ -130,44 +129,6 @@ public partial class IgButton : Button
     {
         base.OnApplyTemplate();
         _clickable.UpdateStyle();
-    }
-
-
-    protected override void OnPointerEntered(PointerRoutedEventArgs e)
-    {
-        _clickable.SetStateForPointerEntered();
-        base.OnPointerEntered(e);
-
-        _clickable.UpdateStyle();
-    }
-
-    protected override void OnPointerExited(PointerRoutedEventArgs e)
-    {
-        _clickable.SetStateForPointerExited();
-        base.OnPointerExited(e);
-
-        _clickable.UpdateStyle();
-    }
-
-    protected override void OnPointerPressed(PointerRoutedEventArgs e)
-    {
-        _clickable.SetStateForPointerPressed();
-        base.OnPointerPressed(e);
-
-        _clickable.UpdateStyle();
-    }
-
-    protected override void OnPointerReleased(PointerRoutedEventArgs e)
-    {
-        _clickable.SetStateForPointerReleased(e);
-        base.OnPointerReleased(e);
-
-        _clickable.UpdateStyle();
-    }
-
-    public void SetButtonsState(IgButtonStates states)
-    {
-        _clickable.ButtonStates = states;
     }
 
 
