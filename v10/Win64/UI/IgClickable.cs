@@ -212,7 +212,10 @@ public partial class IgClickable(ButtonBase control) : DisposableImpl
     {
         ButtonStates &= ~(IgButtonStates.Pressed | IgButtonStates.Hovered);
 
-        if (e != null && e.Pointer.IsInContact) ButtonStates |= IgButtonStates.Hovered;
+        if (_control.IsPointerOver)
+        {
+            ButtonStates |= IgButtonStates.Hovered;
+        }
     }
 }
 
