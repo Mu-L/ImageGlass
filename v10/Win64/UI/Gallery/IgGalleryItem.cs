@@ -17,24 +17,31 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Win64.Common.Photoing;
-using Microsoft.UI.Xaml;
 
 namespace ImageGlass.Win64.UI;
 
 
 public partial class IgGalleryItem : IgButton
 {
+    protected Photo _vm = new();
+
 
     /// <summary>
     /// Gets, sets view model for the control.
     /// </summary>
-    public Photo ViewModel
+    public Photo VM
     {
-        get => (Photo)GetValue(ViewModelProperty);
-        set => SetValue(ViewModelProperty, value);
+        get => _vm;
+        set
+        {
+            if (_vm != value)
+            {
+                _vm = value;
+                OnPropertyChanged();
+            }
+        }
     }
-    public static readonly DependencyProperty ViewModelProperty =
-        DependencyProperty.Register(nameof(ViewModel), typeof(Photo), typeof(IgGalleryItem), new PropertyMetadata(new Photo()));
+
 
 
     public IgGalleryItem() : base()

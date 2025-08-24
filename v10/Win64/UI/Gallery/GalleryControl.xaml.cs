@@ -137,7 +137,7 @@ public sealed partial class GalleryControl : UserControl
         if (e.Element is not IgGalleryItem btnItem) return;
 
         // start loading thumbnail
-        btnItem.ViewModel.LoadGalleryThumbnail(GalleryThumbnailSize, _progressThumbnailLoader);
+        btnItem.VM.LoadGalleryThumbnail(GalleryThumbnailSize, _progressThumbnailLoader);
     }
 
 
@@ -146,7 +146,7 @@ public sealed partial class GalleryControl : UserControl
         if (e.Element is not IgGalleryItem btnItem) return;
 
         // cancel loading thumbnail
-        btnItem.ViewModel.CancelLoadingGalleryThumbnail();
+        btnItem.VM.CancelLoadingGalleryThumbnail();
     }
 
 

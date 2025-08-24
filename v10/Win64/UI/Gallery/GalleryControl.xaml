@@ -40,7 +40,7 @@
                 IsChecked="{x:Bind IsCurrent}"
                 IsTabStop="False"
                 Style="{StaticResource IgButtonStyle}"
-                ViewModel="{x:Bind}">
+                VM="{x:Bind}">
 
                 <Grid VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>

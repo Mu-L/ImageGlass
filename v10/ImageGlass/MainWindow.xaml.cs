@@ -186,7 +186,7 @@ public sealed partial class MainWindow : Window
 
     private void Gallery_ItemClicked(IgGalleryItem sender, EventArgs args)
     {
-        var photoIndex = Local.Photos.IndexOf(sender.ViewModel.FilePath);
+        var photoIndex = Local.Photos.IndexOf(sender.VM.FilePath);
         ViewByIndex(photoIndex);
     }
 
