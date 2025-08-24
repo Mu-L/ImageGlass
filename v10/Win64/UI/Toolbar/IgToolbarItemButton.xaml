@@ -28,12 +28,11 @@
         Theme="{x:Bind Theme}"
         ToolTipService.ToolTip="{x:Bind ViewModel.Text}">
         <StackPanel Orientation="Horizontal" Spacing="5">
-            <Viewbox
+            <ImageIcon
+                Name="ToolbarItem_Button_Icon"
                 Width="{StaticResource ToolbarIconSize}"
                 Height="{StaticResource ToolbarIconSize}"
-                VerticalAlignment="Center">
-                <ImageIcon Name="ToolbarItem_Button_Icon" Source="{x:Bind ViewModel.Image, Converter={StaticResource SvgPathToImageSourceConverter}}" />
-            </Viewbox>
+                Source="{x:Bind ViewModel.Image, Converter={StaticResource SvgPathToImageSourceConverter}}" />
 
             <TextBlock
                 Name="ToolbarItem_Button_Text"
