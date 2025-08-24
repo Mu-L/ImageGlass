@@ -166,7 +166,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
     /// <summary>
     /// Emits event <see cref="PropertyChanged"/>.
     /// </summary>
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

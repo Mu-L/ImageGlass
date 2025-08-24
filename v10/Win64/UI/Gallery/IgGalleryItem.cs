@@ -44,7 +44,7 @@ public partial class IgGalleryItem : IgButton
 
 
 
-    public IgGalleryItem() : base()
+    public IgGalleryItem()
     {
         DefaultStyleKey = typeof(IgGalleryItem);
     }

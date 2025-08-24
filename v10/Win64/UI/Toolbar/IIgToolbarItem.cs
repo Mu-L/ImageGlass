@@ -18,12 +18,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
 using ImageGlass.Win64.Common;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ImageGlass.Win64.UI;
 
-interface IIgToolbarItem
+interface IIgToolbarItem : INotifyPropertyChanged
 {
     ToolbarItemModel VM { get; set; }
     IgTheme Theme { get; set; }
+
+    void OnPropertyChanged([CallerMemberName] string? propertyName = null);
 }
 

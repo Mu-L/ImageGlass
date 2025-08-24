@@ -18,60 +18,86 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
 using ImageGlass.Win64.Common;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 
 namespace ImageGlass.Win64.UI;
 
-public sealed partial class IgToolbarItemButton : UserControl, IIgToolbarItem
+public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
 {
     public static string _PART_ButtonIcon => "PART_ButtonIcon";
     public static string _PART_ButtonText => "PART_ButtonText";
 
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-    // Dependency Properties
-    #region Dependency Properties
+    protected IgTheme _theme = new();
+    protected ToolbarItemModel _vm = new();
 
-    /// <summary>
-    /// Gets, sets view model for the control.
-    /// </summary>
-    public ToolbarItemModel VM
-    {
-        get => (ToolbarItemModel)GetValue(ViewModelProperty);
-        set => SetValue(ViewModelProperty, value);
-    }
-    public static readonly DependencyProperty ViewModelProperty =
-        DependencyProperty.Register(nameof(VM), typeof(ToolbarItemModel), typeof(IgToolbarItemButton), new PropertyMetadata(new ToolbarItemModel()));
 
+    // Public Properties
+    #region Public Properties
 
     /// <summary>
     /// Gets, sets the theme instance.
     /// </summary>
     public IgTheme Theme
     {
-        get => (IgTheme)GetValue(ThemeProperty);
-        set => SetValue(ThemeProperty, value);
+        get => _theme;
+        set
+        {
+            if (_theme != value)
+            {
+                _theme = value;
+                OnPropertyChanged();
+            }
+        }
     }
-    public static readonly DependencyProperty ThemeProperty =
-        DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(IgToolbarItemButton),
-            new PropertyMetadata(new IgTheme()));
 
 
+    /// <summary>
+    /// Gets, sets view model for the control.
+    /// </summary>
+    public ToolbarItemModel VM
+    {
+        get => _vm;
+        set
+        {
+            if (_vm != value)
+            {
+                _vm = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Gets or sets the flyout associated with this button.
+    /// </summary>
     public FlyoutBase? Flyout
     {
         get => BtnActivator.Flyout;
         set => BtnActivator.Flyout = value;
     }
 
-
-    #endregion // Dependency Properties
+    #endregion // Public Properties
 
 
     public IgToolbarItemButton()
     {
         InitializeComponent();
+    }
+
+
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
 }
