@@ -34,13 +34,13 @@ public sealed partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     /// <summary>
     /// Gets, sets view model for the control.
     /// </summary>
-    public ToolbarItemModel ViewModel
+    public ToolbarItemModel VM
     {
         get => (ToolbarItemModel)GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);
     }
     public static readonly DependencyProperty ViewModelProperty =
-        DependencyProperty.Register(nameof(ViewModel), typeof(ToolbarItemModel), typeof(IgToolbarItemButton), new PropertyMetadata(new ToolbarItemModel()));
+        DependencyProperty.Register(nameof(VM), typeof(ToolbarItemModel), typeof(IgToolbarItemButton), new PropertyMetadata(new ToolbarItemModel()));
 
 
     /// <summary>
@@ -62,17 +62,6 @@ public sealed partial class IgToolbarItemButton : UserControl, IIgToolbarItem
         set => BtnActivator.Flyout = value;
     }
 
-    public bool IsChecked
-    {
-        get => BtnActivator.IsChecked;
-        set => BtnActivator.IsChecked = value;
-    }
-
-    public bool IsCheckOnClick
-    {
-        get => BtnActivator.IsCheckOnClick;
-        set => BtnActivator.IsCheckOnClick = value;
-    }
 
     #endregion // Dependency Properties
 

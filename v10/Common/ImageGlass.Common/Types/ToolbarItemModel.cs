@@ -24,11 +24,12 @@ namespace ImageGlass.Common;
 /// <summary>
 /// Toolbar item model
 /// </summary>
-public class ToolbarItemModel : DisposableImpl
+public class ToolbarItemModel : Notify
 {
     protected string _id = "";
     protected ToolbarItemType _type = ToolbarItemType.Button;
     protected bool _isToggle = false;
+    protected bool _isChecked = false;
     protected string _text = "";
     protected string _image = "";
     protected ToolbarItemAlignment _alignment = ToolbarItemAlignment.Left;
@@ -173,7 +174,19 @@ public class ToolbarItemModel : DisposableImpl
     }
 
 
-
+    [JsonIgnore]
+    public bool IsChecked
+    {
+        get => _isChecked;
+        set
+        {
+            if (_isChecked != value)
+            {
+                _isChecked = value;
+                OnPropertyChanged(nameof(IsChecked));
+            }
+        }
+    }
 
 
 

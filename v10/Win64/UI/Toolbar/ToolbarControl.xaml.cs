@@ -103,7 +103,7 @@ public sealed partial class ToolbarControl : UserControl
         if (sender is not FrameworkElement fe) return;
 
         // save toolbar item width
-        if (_itemsMetadata.TryGetValue(item.ViewModel.SourceIndex, out ToolbarItemMetadata? value))
+        if (_itemsMetadata.TryGetValue(item.VM.SourceIndex, out ToolbarItemMetadata? value))
         {
             value.RenderedWidth = fe.ActualWidth;
         }
@@ -165,7 +165,7 @@ public sealed partial class ToolbarControl : UserControl
             }
 
 
-            if (btnEl.ViewModel.IsToggle)
+            if (btnEl.VM.IsToggle)
             {
                 mnuItem = new ToggleMenuFlyoutItem()
                 {
@@ -188,26 +188,6 @@ public sealed partial class ToolbarControl : UserControl
             mnu.Items.Add(mnuItem);
         }
 
-    }
-
-    private void MnuOverflow_Opened(object sender, object e)
-    {
-        BtnOverflowMenu.IsChecked = true;
-    }
-
-    private void MnuOverflow_Closed(object sender, object e)
-    {
-        BtnOverflowMenu.IsChecked = false;
-    }
-
-    private void MnuMain_Opened(object sender, object e)
-    {
-        BtnMainMenu.IsChecked = true;
-    }
-
-    private void MnuMain_Closed(object sender, object e)
-    {
-        BtnMainMenu.IsChecked = false;
     }
 
 
@@ -320,7 +300,6 @@ public sealed partial class ToolbarControl : UserControl
             ? Visibility.Visible
             : Visibility.Collapsed;
     }
-
 
 }
 

@@ -33,13 +33,13 @@ public sealed partial class IgToolbarItemSeparator : UserControl, IIgToolbarItem
     /// <summary>
     /// Gets, sets view model for the control.
     /// </summary>
-    public ToolbarItemModel ViewModel
+    public ToolbarItemModel VM
     {
         get => (ToolbarItemModel)GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);
     }
     public static readonly DependencyProperty ViewModelProperty =
-        DependencyProperty.Register(nameof(ViewModel), typeof(ToolbarItemModel), typeof(IgToolbarItemButton), new PropertyMetadata(new ToolbarItemModel()));
+        DependencyProperty.Register(nameof(VM), typeof(ToolbarItemModel), typeof(IgToolbarItemButton), new PropertyMetadata(new ToolbarItemModel()));
 
 
     /// <summary>

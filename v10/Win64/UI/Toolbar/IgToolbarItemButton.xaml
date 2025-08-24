@@ -8,7 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    DataContext="{x:Bind ViewModel, Mode=OneWay}"
+    DataContext="{x:Bind VM, Mode=OneWay}"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -20,25 +20,26 @@
     <local:IgButton
         x:Name="BtnActivator"
         Padding="5"
-        Id="{x:Bind ViewModel.Id}"
-        IsCheckOnClick="{x:Bind ViewModel.IsToggle}"
-        IsChecked="{x:Bind ViewModel.IsToggle}"
+        x:DefaultBindMode="OneWay"
+        Id="{x:Bind VM.Id}"
+        IsCheckOnClick="{x:Bind VM.IsToggle}"
+        IsChecked="{x:Bind VM.IsChecked}"
         Style="{StaticResource IgButtonStyle}"
-        Text="{x:Bind ViewModel.Text}"
+        Text="{x:Bind VM.Text}"
         Theme="{x:Bind Theme}"
-        ToolTipService.ToolTip="{x:Bind ViewModel.Text}">
+        ToolTipService.ToolTip="{x:Bind VM.Text}">
         <StackPanel Orientation="Horizontal" Spacing="5">
             <ImageIcon
                 Name="ToolbarItem_Button_Icon"
                 Width="{StaticResource ToolbarIconSize}"
                 Height="{StaticResource ToolbarIconSize}"
-                Source="{x:Bind ViewModel.Image, Converter={StaticResource SvgPathToImageSourceConverter}}" />
+                Source="{x:Bind VM.Image, Converter={StaticResource SvgPathToImageSourceConverter}}" />
 
             <TextBlock
                 Name="ToolbarItem_Button_Text"
                 VerticalAlignment="Center"
-                Text="{x:Bind ViewModel.Text}"
-                Visibility="{x:Bind ViewModel.IsTextVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                Text="{x:Bind VM.Text}"
+                Visibility="{x:Bind VM.IsTextVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
         </StackPanel>
     </local:IgButton>
 

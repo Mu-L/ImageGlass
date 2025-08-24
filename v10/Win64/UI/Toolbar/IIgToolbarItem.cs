@@ -23,7 +23,7 @@ namespace ImageGlass.Win64.UI;
 
 interface IIgToolbarItem
 {
-    ToolbarItemModel ViewModel { get; set; }
+    ToolbarItemModel VM { get; set; }
     IgTheme Theme { get; set; }
 }
 
