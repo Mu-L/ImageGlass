@@ -19,116 +19,156 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Media;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ImageGlass.Win64.UI;
 
-public partial class IgButton : Button
+public partial class IgButton : Button, INotifyPropertyChanged
 {
-    protected readonly IgClickable _clickable;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
+    protected IgTheme _theme = new();
+    protected string _id = "";
+    protected string _text = "";
+    protected bool _isToggle = false;
+    protected bool _isChecked = false;
+
+    protected long _tokenIsPointerOverChanged = 0;
+    protected long _tokenIsPressedChanged = 0;
+
+
+    // Public Properties
+    #region Public Properties
 
     /// <summary>
     /// Gets, sets the theme instance.
     /// </summary>
     public IgTheme Theme
     {
-        get => (IgTheme)GetValue(ThemeProperty);
+        get => _theme;
         set
         {
-            _clickable.Theme = value;
-            SetValue(ThemeProperty, value);
+            if (_theme != value)
+            {
+                _theme.PropertyChanged -= Theme_PropertyChanged;
+                _theme = value;
+                _theme.PropertyChanged += Theme_PropertyChanged;
+
+                OnPropertyChanged();
+                UpdateStyle();
+            }
         }
     }
-    public static readonly DependencyProperty ThemeProperty =
-        DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(IgButton),
-            new PropertyMetadata(new IgTheme()));
-
-
-    /// <summary>
-    /// Gets, sets the value indicating that the button is checked on click.
-    /// </summary>
-    public bool IsCheckOnClick
+    private void Theme_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        get => (bool)GetValue(IsCheckOnClickProperty);
-        set
+        if (e.PropertyName == nameof(Theme.ColorBrushes))
         {
-            _clickable.IsToggle = value;
-            SetValue(IsCheckOnClickProperty, value);
+            UpdateStyle();
         }
     }
-    public static readonly DependencyProperty IsCheckOnClickProperty =
-        DependencyProperty.Register(
-            nameof(IsCheckOnClick),
-            typeof(bool),
-            typeof(IgButton),
-            new PropertyMetadata(false));
 
 
     /// <summary>
-    /// Gets or sets the check state of the gallery button item.
+    /// Gets, sets the value indicating that the control is checked on click.
+    /// </summary>
+    public bool IsToggle
+    {
+        get => _isToggle;
+        set
+        {
+            if (value != _isToggle)
+            {
+                _isToggle = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Gets, sets check state for this control.
     /// </summary>
     public bool IsChecked
     {
-        get => (bool)GetValue(IsCheckedProperty);
+        get => _isChecked;
         set
         {
-            _clickable.IsChecked = value;
-            SetValue(IsCheckedProperty, value);
+            if (_isChecked != value)
+            {
+                _isChecked = value;
+                OnPropertyChanged();
+            }
         }
     }
-    public static readonly DependencyProperty IsCheckedProperty =
-        DependencyProperty.Register(
-            nameof(IsChecked),
-            typeof(bool),
-            typeof(IgButton),
-            new PropertyMetadata(false));
 
 
     /// <summary>
-    /// Gets or sets the check state of the control.
+    /// Gets or sets the ID of this control.
     /// </summary>
     public string Id
     {
-        get => (string)GetValue(IdProperty);
-        set => SetValue(IdProperty, value);
+        get => _id;
+        set
+        {
+            if (_id != value)
+            {
+                _id = value;
+                OnPropertyChanged();
+            }
+        }
     }
-    public static readonly DependencyProperty IdProperty =
-        DependencyProperty.Register(
-            nameof(Id),
-            typeof(string),
-            typeof(IgButton),
-            new PropertyMetadata(""));
 
 
     /// <summary>
-    /// Gets or sets the check state of the control.
+    /// Gets or sets the text of this control.
     /// </summary>
     public string Text
     {
-        get => (string)GetValue(TextProperty);
-        set => SetValue(TextProperty, value);
+        get => _text;
+        set
+        {
+            if (_text != value)
+            {
+                _text = value;
+                OnPropertyChanged();
+            }
+        }
     }
-    public static readonly DependencyProperty TextProperty =
-        DependencyProperty.Register(
-            nameof(Text),
-            typeof(string),
-            typeof(IgButton),
-            new PropertyMetadata(""));
 
+    #endregion // Public Properties
 
 
     public IgButton()
     {
-        _clickable = new IgClickable(this);
         DefaultStyleKey = typeof(IgButton);
 
+        _tokenIsPointerOverChanged = RegisterPropertyChangedCallback(ButtonBase.IsPointerOverProperty, IgButton_StateChanged);
+        _tokenIsPressedChanged = RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, IgButton_StateChanged);
+
         Loaded += IgButton_Loaded;
+        Unloaded += IgButton_Unloaded;
+        Click += IgButton_Click;
     }
+
+
+    // Control Events
+    #region Control Events
 
     protected override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
-        _clickable.UpdateStyle();
+        UpdateStyle();
+    }
+
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
 
@@ -140,14 +180,81 @@ public partial class IgButton : Button
         Flyout.Closed += Flyout_Closed;
     }
 
-    private void Flyout_Closed(object? sender, object e)
+    private void IgButton_Unloaded(object sender, RoutedEventArgs e)
     {
-        IsChecked = false;
+        Loaded -= IgButton_Loaded;
+        Unloaded -= IgButton_Unloaded;
+        Click -= IgButton_Click;
+
+        UnregisterPropertyChangedCallback(ButtonBase.IsPointerOverProperty, _tokenIsPointerOverChanged);
+        UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _tokenIsPressedChanged);
+    }
+
+    private void IgButton_StateChanged(DependencyObject sender, DependencyProperty dp)
+    {
+        UpdateStyle();
+    }
+
+    private void IgButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (IsToggle) IsChecked = !IsChecked;
     }
 
     private void Flyout_Opened(object? sender, object e)
     {
         IsChecked = true;
     }
+
+    private void Flyout_Closed(object? sender, object e)
+    {
+        IsChecked = false;
+    }
+
+    #endregion // Control Events
+
+
+    /// <summary>
+    /// Update the style of control.
+    /// </summary>
+    public void UpdateStyle()
+    {
+        // normal style
+        SolidColorBrush bgBrush = new(); // must not be null for interaction
+        SolidColorBrush borderBrush = new();
+
+
+        // checked style for background
+        if (IsChecked)
+        {
+            bgBrush.Color = Theme.ColorBrushes.ToolbarItemSelectedColor;
+        }
+
+
+        // hover style
+        if (IsPointerOver)
+        {
+            bgBrush.Color
+                = borderBrush.Color
+                = Theme.ColorBrushes.ToolbarItemHoverColor;
+        }
+
+        // pressed style
+        else if (IsPressed)
+        {
+            bgBrush.Color
+                = borderBrush.Color
+                = Theme.ColorBrushes.ToolbarItemActiveColor;
+        }
+
+        // checked style for border
+        if (IsChecked)
+        {
+            borderBrush.Color = Theme.ColorBrushes.ToolbarItemSelectedColor;
+        }
+
+        Background = bgBrush;
+        BorderBrush = borderBrush;
+    }
+
 
 }

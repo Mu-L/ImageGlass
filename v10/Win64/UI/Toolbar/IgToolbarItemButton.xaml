@@ -23,7 +23,7 @@
         Padding="5"
         x:DefaultBindMode="OneWay"
         Id="{x:Bind VM.Id}"
-        IsCheckOnClick="{x:Bind VM.IsToggle}"
+        IsToggle="{x:Bind VM.IsToggle}"
         IsChecked="{x:Bind VM.IsChecked}"
         Style="{StaticResource IgButtonStyle}"
         Text="{x:Bind VM.Text}"
