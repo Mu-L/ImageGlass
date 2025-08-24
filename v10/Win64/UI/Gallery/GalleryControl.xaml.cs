@@ -16,38 +16,98 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Win64.Common;
 using ImageGlass.Win64.Common.Photoing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Windows.Foundation;
 
 namespace ImageGlass.Win64.UI;
 
-public sealed partial class GalleryControl : UserControl
+public sealed partial class GalleryControl : UserControl, INotifyPropertyChanged
 {
-    private Progress<ThumbnailLoadedEventArgs> _progressThumbnailLoader;
-
-    public event TypedEventHandler<IgGalleryItem, EventArgs>? ItemClicked;
-
-
     public static double GalleryThumbnailSize => (double)Application.Current.Resources[nameof(GalleryThumbnailSize)];
-
     public static double ItemSpacing => 1;
 
 
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event TypedEventHandler<IgGalleryItem, EventArgs>? ItemClicked;
+
+    private IgTheme _theme = new();
+    private PhotoManager _vm = new();
+
+    private Progress<ThumbnailLoadedEventArgs> _progressThumbnailLoader;
+    private HashSet<int> _loadedItemIndice = [];
+
+
+
+
+
+
+    // Public Properties
+    #region Public Properties
+
+    /// <summary>
+    /// Gets, sets the theme of this control.
+    /// </summary>
+    public IgTheme Theme
+    {
+        get => _theme;
+        set
+        {
+            if (_theme != value)
+            {
+                _theme.PropertyChanged -= Theme_PropertyChanged;
+                _theme = value;
+                _theme.PropertyChanged += Theme_PropertyChanged;
+
+                OnPropertyChanged();
+            }
+        }
+    }
+    private void Theme_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        UpdateItemsTheme();
+    }
+
+
+    /// <summary>
+    /// Gets, sets view model for this control.
+    /// </summary>
     public PhotoManager PhotoManager
     {
-        get => (PhotoManager)GetValue(PhotoManagerProperty);
-        set => SetValue(PhotoManagerProperty, value);
+        get => _vm;
+        set
+        {
+            if (_vm != value)
+            {
+                _vm.Items.CollectionChanged -= Items_CollectionChanged;
+                _vm = value;
+                _vm.Items.CollectionChanged += Items_CollectionChanged;
+
+                OnPropertyChanged();
+            }
+        }
     }
-    public static readonly DependencyProperty PhotoManagerProperty =
-        DependencyProperty.Register(
-            nameof(PhotoManager),
-            typeof(PhotoManager),
-            typeof(GalleryControl),
-            new PropertyMetadata(new PhotoManager()));
+
+    private void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action == NotifyCollectionChangedAction.Reset)
+        {
+            _loadedItemIndice.Clear();
+        }
+    }
+
+
+    #endregion // Public Properties
+
+
 
 
 
@@ -55,34 +115,16 @@ public sealed partial class GalleryControl : UserControl
     {
         InitializeComponent();
 
-        _progressThumbnailLoader = new Progress<ThumbnailLoadedEventArgs>(Thumbnail_Loaded);
+        _progressThumbnailLoader = new Progress<ThumbnailLoadedEventArgs>(GalleryItemThumbnail_Loaded);
     }
 
 
-    private void UserControl_Unloaded(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-
-    }
-
-
-    private void GalleryItem_Clicked(object sender, RoutedEventArgs e)
-    {
-        if (sender is not IgGalleryItem btnItem) return;
-
-
-        // scroll the clicked item into the view
-        if (GalleryScrollViewer.ComputedHorizontalScrollBarVisibility == Visibility.Visible
-            || GalleryScrollViewer.ComputedVerticalScrollBarVisibility == Visibility.Visible)
-        {
-            btnItem.StartBringIntoView(new BringIntoViewOptions()
-            {
-                VerticalAlignmentRatio = 0.5,
-                HorizontalAlignmentRatio = 0.5,
-                AnimationDesired = true,
-            });
-        }
-
-        ItemClicked?.Invoke(btnItem, EventArgs.Empty);
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
 
@@ -109,7 +151,68 @@ public sealed partial class GalleryControl : UserControl
     }
 
 
-    private async void Thumbnail_Loaded(ThumbnailLoadedEventArgs e)
+    private void GalleryItemRepeater_ElementPrepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs e)
+    {
+        if (e.Element is not IgGalleryItem btnItem) return;
+
+        // start loading thumbnail
+        btnItem.VM.LoadGalleryThumbnail(GalleryThumbnailSize, _progressThumbnailLoader);
+
+        // save index of the loaded item
+        _loadedItemIndice.Add(e.Index);
+    }
+
+
+    private void GalleryItemRepeater_ElementClearing(ItemsRepeater sender, ItemsRepeaterElementClearingEventArgs e)
+    {
+        if (e.Element is not IgGalleryItem item) return;
+
+        // cancel loading thumbnail
+        item.VM.CancelLoadingGalleryThumbnail();
+
+        // remove index of unloaded item
+        var itemIndex = PhotoManager.IndexOf(item.VM.FilePath);
+        _loadedItemIndice.Remove(itemIndex);
+    }
+
+
+    private void GalleryItemRepeater_ElementIndexChanged(ItemsRepeater sender, ItemsRepeaterElementIndexChangedEventArgs e)
+    {
+
+    }
+
+
+    private void GalleryItem_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is not IgGalleryItem item) return;
+
+        // set item theme
+        item.Theme = Theme;
+    }
+
+
+    private void GalleryItem_Clicked(object sender, RoutedEventArgs e)
+    {
+        if (sender is not IgGalleryItem btnItem) return;
+
+
+        // scroll the clicked item into the view
+        if (GalleryScrollViewer.ComputedHorizontalScrollBarVisibility == Visibility.Visible
+            || GalleryScrollViewer.ComputedVerticalScrollBarVisibility == Visibility.Visible)
+        {
+            btnItem.StartBringIntoView(new BringIntoViewOptions()
+            {
+                VerticalAlignmentRatio = 0.5,
+                HorizontalAlignmentRatio = 0.5,
+                AnimationDesired = true,
+            });
+        }
+
+        ItemClicked?.Invoke(btnItem, EventArgs.Empty);
+    }
+
+
+    private async void GalleryItemThumbnail_Loaded(ThumbnailLoadedEventArgs e)
     {
         if (e.Bitmap == null)
         {
@@ -132,26 +235,6 @@ public sealed partial class GalleryControl : UserControl
     }
 
 
-    private void GalleryItemRepeater_ElementPrepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs e)
-    {
-        if (e.Element is not IgGalleryItem btnItem) return;
-
-        // start loading thumbnail
-        btnItem.VM.LoadGalleryThumbnail(GalleryThumbnailSize, _progressThumbnailLoader);
-    }
-
-
-    private void GalleryItemRepeater_ElementClearing(ItemsRepeater sender, ItemsRepeaterElementClearingEventArgs e)
-    {
-        if (e.Element is not IgGalleryItem btnItem) return;
-
-        // cancel loading thumbnail
-        btnItem.VM.CancelLoadingGalleryThumbnail();
-    }
-
-
-
-
 
     /// <summary>
     /// Scrolls the gallery to bring the specified item into view.
@@ -167,6 +250,18 @@ public sealed partial class GalleryControl : UserControl
             - (GalleryThumbnailSize / 2);
 
         GalleryScrollViewer.ChangeView(itemCenterX, null, null, disableAnimation);
+    }
+
+
+    private void UpdateItemsTheme()
+    {
+        foreach (var index in _loadedItemIndice)
+        {
+            if (GalleryItemRepeater.TryGetElement(index) is not IgGalleryItem item) continue;
+
+            // update theme
+            item.Theme = Theme;
+        }
     }
 
 

@@ -72,7 +72,8 @@
             Grid.Column="1"
             Canvas.ZIndex="80"
             ItemClicked="Gallery_ItemClicked"
-            PhotoManager="{x:Bind local:Local.Photos, Mode=OneWay}" />
+            PhotoManager="{x:Bind local:Local.Photos, Mode=OneWay}"
+            Theme="{x:Bind local:App.Config.Theme}" />
 
 
         <!--  Viewer  -->

@@ -8,11 +8,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:photoing="using:ImageGlass.Win64.Common.Photoing"
     xmlns:photoing1="using:ImageGlass.Common.Photoing"
+    x:Name="Root"
     d:DataContext="{d:DesignInstance local:GalleryControl,
                                      IsDesignTimeCreatable=True}"
     x:DefaultBindMode="OneWay"
     SizeChanged="UserControl_SizeChanged"
-    Unloaded="UserControl_Unloaded"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -33,12 +33,11 @@
                 VerticalAlignment="Stretch"
                 HorizontalContentAlignment="Stretch"
                 VerticalContentAlignment="Stretch"
-                Background="{x:Bind IsCurrent, Converter={StaticResource SelectionToBackgroundConverter}}"
-                BorderBrush="{x:Bind IsCurrent, Converter={StaticResource SelectionToBorderConverter}}"
                 BorderThickness="1.25"
                 Click="GalleryItem_Clicked"
                 IsChecked="{x:Bind IsCurrent}"
                 IsTabStop="False"
+                Loaded="GalleryItem_Loaded"
                 Style="{StaticResource IgButtonStyle}"
                 VM="{x:Bind}">
 
@@ -101,6 +100,7 @@
             x:Name="GalleryItemRepeater"
             HorizontalAlignment="Center"
             ElementClearing="GalleryItemRepeater_ElementClearing"
+            ElementIndexChanged="GalleryItemRepeater_ElementIndexChanged"
             ElementPrepared="GalleryItemRepeater_ElementPrepared"
             ItemTemplate="{StaticResource GalleryItemTemplate}"
             ItemsSource="{x:Bind PhotoManager.Items}">

@@ -36,12 +36,22 @@ public partial class IgGalleryItem : IgButton
         {
             if (_vm != value)
             {
+                _vm.PropertyChanged -= VM_PropertyChanged;
                 _vm = value;
+                _vm.PropertyChanged += VM_PropertyChanged;
+
                 OnPropertyChanged();
             }
         }
     }
 
+    private void VM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Photo.IsCurrent))
+        {
+            UpdateStyle();
+        }
+    }
 
 
     public IgGalleryItem()
