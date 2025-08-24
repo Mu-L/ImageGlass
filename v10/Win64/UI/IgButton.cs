@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Win64.Common;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -57,7 +58,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
             SetValue(ThemeProperty, value);
             value.PropertyChanged += Theme_PropertyChanged;
 
-            UpdateStyle();
+            UpdateStyle(true);
         }
     }
     public static readonly DependencyProperty ThemeProperty = DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(IgButton), new PropertyMetadata(new IgTheme()));
@@ -65,7 +66,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
     {
         if (e.PropertyName == nameof(Theme.ColorBrushes))
         {
-            UpdateStyle();
+            UpdateStyle(true);
         }
     }
 
@@ -216,7 +217,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
     /// <summary>
     /// Update the style of control.
     /// </summary>
-    public void UpdateStyle()
+    public void UpdateStyle(bool includeTextColor = false)
     {
         // normal style: must not be null for interaction
         SolidColorBrush bgBrush = new(GetColorForDefault());
@@ -254,8 +255,17 @@ public partial class IgButton : Button, INotifyPropertyChanged
 
         Background = bgBrush;
         BorderBrush = borderBrush;
+
+        if (includeTextColor)
+        {
+            Foreground = new SolidColorBrush(GetColorForText());
+        }
     }
 
+    protected virtual Color GetColorForText()
+    {
+        return Colors.Black;
+    }
 
     protected virtual Color GetColorForDefault()
     {

@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json.Serialization;
 using Windows.UI;
@@ -41,7 +42,8 @@ public partial class IgTheme : Notify
     public IgThemeInfo Info { get; set; } = new();
     public IgThemeSettings Settings { get; set; } = new();
     public IgThemeColors Colors { get; set; } = new();
-    public IgThemeToolbarIcons ToolbarIcons { get; set; } = new();
+    //public IgThemeToolbarIcons ToolbarIcons { get; set; } = new();
+    public Dictionary<string, string> ToolbarIcons { get; set; } = [];
 
 
     // Static Properties
@@ -145,6 +147,28 @@ public partial class IgTheme : Notify
     {
         ColorBrushes.Load(Colors, accent);
         OnPropertyChanged(nameof(ColorBrushes));
+    }
+
+
+    /// <summary>
+    /// Gets the full path of toolbar icon.
+    /// </summary>
+    public string GetToolbarIconPath(IgThemeIcon iconName)
+    {
+        var svgPath = "";
+
+        try
+        {
+            // get icon file name
+            if (!ToolbarIcons.TryGetValue(iconName.ToString(), out var themeIconName)) return svgPath;
+
+            // get full path
+            svgPath = Path.Combine(FolderPath, themeIconName);
+            if (!File.Exists(svgPath)) return "";
+        }
+        catch { }
+
+        return svgPath;
     }
 
     #endregion // Public methods

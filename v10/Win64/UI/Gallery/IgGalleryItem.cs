@@ -61,6 +61,11 @@ public partial class IgGalleryItem : IgButton
     }
 
 
+    protected override Color GetColorForText()
+    {
+        return Theme.ColorBrushes.GalleryTextColor;
+    }
+
     protected override Color GetColorForHovered()
     {
         return Theme.ColorBrushes.GalleryItemHoverColor;

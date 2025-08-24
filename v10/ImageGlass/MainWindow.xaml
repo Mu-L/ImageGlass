@@ -62,7 +62,7 @@
             Grid.Row="1"
             Canvas.ZIndex="90"
             ItemsSource="{x:Bind local:App.Config.ToolbarButtons}"
-            Theme="{x:Bind local:App.Config.Theme}" />
+            Theme="{x:Bind local:App.Config.Theme, Mode=OneWay}" />
 
 
         <!--  Gallery  -->
@@ -72,8 +72,8 @@
             Grid.Column="1"
             Canvas.ZIndex="80"
             ItemClicked="Gallery_ItemClicked"
-            VM="{x:Bind local:Local.Photos, Mode=OneWay}"
-            Theme="{x:Bind local:App.Config.Theme}" />
+            Theme="{x:Bind local:App.Config.Theme}"
+            VM="{x:Bind local:Local.Photos, Mode=OneWay}" />
 
 
         <!--  Viewer  -->

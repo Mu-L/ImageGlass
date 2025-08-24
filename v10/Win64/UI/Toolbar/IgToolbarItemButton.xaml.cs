@@ -16,11 +16,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Media.Imaging;
+using System;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 
 
@@ -52,6 +54,7 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
             {
                 _theme = value;
                 OnPropertyChanged();
+                UpdateIcon();
             }
         }
     }
@@ -99,5 +102,43 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
+
+
+    private void BtnActivator_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        UpdateIcon();
+    }
+
+
+    /// <summary>
+    /// Updates icon.
+    /// </summary>
+    private void UpdateIcon()
+    {
+        if (string.IsNullOrWhiteSpace(VM.Image)) return;
+        var svgPath = "";
+
+        try
+        {
+            // absolute path
+            if (File.Exists(VM.Image)) return;
+
+            // get toolbar icon enum from theme
+            if (!Enum.TryParse<IgThemeIcon>(VM.Image, out var themeIconNameEnum)) return;
+
+            // get icon file name from theme
+            var themeIconName = Theme.GetToolbarIconPath(themeIconNameEnum);
+            if (string.IsNullOrWhiteSpace(themeIconName)) return;
+
+            // theme icon path
+            svgPath = Path.Combine(Theme.FolderPath, themeIconName);
+            if (!File.Exists(svgPath)) return;
+
+            // set icon
+            PART_ButtonIcon.Source = new SvgImageSource(new Uri(svgPath));
+        }
+        catch { }
+    }
+
 
 }

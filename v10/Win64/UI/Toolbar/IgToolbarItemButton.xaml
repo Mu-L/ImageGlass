@@ -25,6 +25,7 @@
         Id="{x:Bind VM.Id}"
         IsChecked="{x:Bind VM.IsChecked}"
         IsToggle="{x:Bind VM.IsToggle}"
+        Loaded="BtnActivator_Loaded"
         Style="{StaticResource IgButtonStyle}"
         Text="{x:Bind VM.Text}"
         Theme="{x:Bind Theme}"
@@ -33,12 +34,12 @@
             <ImageIcon
                 Name="PART_ButtonIcon"
                 Width="{StaticResource ToolbarIconSize}"
-                Height="{StaticResource ToolbarIconSize}"
-                Source="{x:Bind VM.Image, Converter={StaticResource SvgPathToImageSourceConverter}}" />
+                Height="{StaticResource ToolbarIconSize}" />
 
             <TextBlock
                 Name="PART_ButtonText"
                 VerticalAlignment="Center"
+                Foreground="{x:Bind Theme.ColorBrushes.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
                 Text="{x:Bind VM.Text}"
                 Visibility="{x:Bind VM.IsTextVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
         </StackPanel>

@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using CommunityToolkit.WinUI.Controls;
-using ImageGlass.Common;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -26,17 +25,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ImageGlass.Win64.UI;
 
 
-public sealed partial class ToolbarControl : UserControl
+public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private Dictionary<int, ToolbarItemMetadata> _itemsMetadata = [];
     public static double ItemSpacing => 4;
     public static string _PART_ItemButton => "PART_ItemButton";
     public static string _PART_ItemSeparator => "PART_ItemSeparator";
+    public static string MainMenuIconName => nameof(IgThemeIcon.MainMenu);
 
     public ObservableCollection<ToolbarItemModel> PrimaryItems { get; } = [];
     public ObservableCollection<ToolbarItemModel> PrimaryItemsOverflow { get; } = [];
@@ -92,6 +94,14 @@ public sealed partial class ToolbarControl : UserControl
         this.SizeChanged += UserControl_SizeChanged;
     }
 
+
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 
     private void UserControl_Unloaded(object sender, RoutedEventArgs e)
     {

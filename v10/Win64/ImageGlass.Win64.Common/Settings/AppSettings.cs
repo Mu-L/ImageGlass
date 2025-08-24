@@ -492,38 +492,38 @@ public partial class AppSettings : Notify
         new ToolbarItemModel {
             Id = "Btn_Open",
             Text = "Open",
-            Image = @"D:\OpenFile.svg",
+            Image = "OpenFile",
         },
         new ToolbarItemModel {
             Id = "Btn_Save",
             Text = "Save",
-            Image = @"D:\Save.svg",
+            Image = "Save",
             IsToggle = true,
             ShowText = true,
         },
         new ToolbarItemModel {
             Id = "Btn_Print",
             Text = "Print",
-            Image = @"D:\Print.svg",
+            Image = "Print",
             ShowText = true,
         },
         new ToolbarItemModel {
             Id = "Btn_Crop",
             Text = "Crop",
-            Image = @"D:\Crop.svg",
+            Image = "Crop",
         },
 
 
         new ToolbarItemModel {
             Id = "Btn_Checkerboard",
             Text = "Checkerboard",
-            Image = @"D:\Checkerboard.svg",
+            Image = "Checkerboard",
             Alignment = ToolbarItemAlignment.Right,
         },
         new ToolbarItemModel {
             Id = "Btn_ColorPicker",
             Text = "ColorPicker",
-            Image = @"D:\ColorPicker.svg",
+            Image = "ColorPicker",
             Alignment = ToolbarItemAlignment.Right,
         },
     ];

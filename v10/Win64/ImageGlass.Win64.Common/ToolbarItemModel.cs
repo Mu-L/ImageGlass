@@ -16,15 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using System.Text.Json.Serialization;
 
-namespace ImageGlass.Common;
+namespace ImageGlass.Win64.Common;
 
 
 /// <summary>
 /// Toolbar item model
 /// </summary>
-public class ToolbarItemModel : Notify
+public partial class ToolbarItemModel : Notify
 {
     protected string _id = "";
     protected ToolbarItemType _type = ToolbarItemType.Button;
@@ -37,41 +38,6 @@ public class ToolbarItemModel : Notify
 
     protected bool _isOverflow = false;
     protected int _sourceIndex = -1;
-
-
-
-    [JsonIgnore]
-    public int SourceIndex
-    {
-        get => _sourceIndex;
-        set
-        {
-            if (_sourceIndex != value)
-            {
-                _sourceIndex = value;
-                OnPropertyChanged(nameof(SourceIndex));
-            }
-        }
-    }
-
-
-    [JsonIgnore]
-    public bool IsOverflow
-    {
-        get => _isOverflow;
-        set
-        {
-            if (_isOverflow != value)
-            {
-                _isOverflow = value;
-                OnPropertyChanged(nameof(IsOverflow));
-            }
-        }
-    }
-
-
-    [JsonIgnore]
-    public bool IsTextVisible => ShowText && !string.IsNullOrWhiteSpace(Text);
 
 
     public string Id
@@ -100,6 +66,7 @@ public class ToolbarItemModel : Notify
             }
         }
     }
+
 
     public bool IsToggle
     {
@@ -158,7 +125,6 @@ public class ToolbarItemModel : Notify
     }
 
 
-
     public bool ShowText
     {
         get => _showText;
@@ -172,6 +138,42 @@ public class ToolbarItemModel : Notify
             }
         }
     }
+
+
+
+
+    [JsonIgnore]
+    public int SourceIndex
+    {
+        get => _sourceIndex;
+        set
+        {
+            if (_sourceIndex != value)
+            {
+                _sourceIndex = value;
+                OnPropertyChanged(nameof(SourceIndex));
+            }
+        }
+    }
+
+
+    [JsonIgnore]
+    public bool IsOverflow
+    {
+        get => _isOverflow;
+        set
+        {
+            if (_isOverflow != value)
+            {
+                _isOverflow = value;
+                OnPropertyChanged(nameof(IsOverflow));
+            }
+        }
+    }
+
+
+    [JsonIgnore]
+    public bool IsTextVisible => ShowText && !string.IsNullOrWhiteSpace(Text);
 
 
     [JsonIgnore]
@@ -188,14 +190,6 @@ public class ToolbarItemModel : Notify
         }
     }
 
-
-
-
-    ///// <summary>
-    ///// Gets, sets hotkeys.
-    ///// </summary>
-    //[JsonConverter(typeof(HotkeyListJsonConverter))]
-    //public List<Hotkey> Hotkeys { get; set; } = [];
 }
 
 
@@ -211,18 +205,3 @@ public enum ToolbarItemAlignment
     Right,
 }
 
-public record ToolbarItemTagModel
-{
-    public SingleAction OnClick { get; set; } = new();
-    public string Image { get; set; } = string.Empty;
-    public string CheckableConfigBinding { get; set; } = string.Empty;
-}
-
-
-public enum ToolbarAddItemResult
-{
-    Success,
-    ItemExists,
-    InvalidModel,
-    ThemeIsNull,
-}
