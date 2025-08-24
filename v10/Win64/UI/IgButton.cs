@@ -21,8 +21,10 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Windows.UI;
 
 namespace ImageGlass.Win64.UI;
 
@@ -216,42 +218,63 @@ public partial class IgButton : Button, INotifyPropertyChanged
     /// </summary>
     public void UpdateStyle()
     {
-        // normal style
-        SolidColorBrush bgBrush = new(); // must not be null for interaction
-        SolidColorBrush borderBrush = new();
+        // normal style: must not be null for interaction
+        SolidColorBrush bgBrush = new(GetColorForDefault());
+        SolidColorBrush borderBrush = new(GetColorForDefault());
 
 
         // checked style for background
         if (IsChecked)
         {
-            bgBrush.Color = Theme.ColorBrushes.ToolbarItemSelectedColor;
+            bgBrush.Color = GetColorForChecked();
         }
 
-
-        // hover style
-        if (IsPointerOver)
-        {
-            bgBrush.Color
-                = borderBrush.Color
-                = Theme.ColorBrushes.ToolbarItemHoverColor;
-        }
 
         // pressed style
-        else if (IsPressed)
+        if (IsPressed)
         {
-            bgBrush.Color
-                = borderBrush.Color
-                = Theme.ColorBrushes.ToolbarItemActiveColor;
+            bgBrush.Color = GetColorForPressed();
+        }
+        // hover style
+        else if (IsPointerOver)
+        {
+            bgBrush.Color = GetColorForHovered();
         }
 
+
         // checked style for border
-        if (IsChecked)
+        if (IsChecked || IsPointerOver || IsPressed)
         {
-            borderBrush.Color = Theme.ColorBrushes.ToolbarItemSelectedColor;
+            var alpha = bgBrush.Color.A + (int)(bgBrush.Color.A / 1.5f);
+            alpha = Math.Clamp(alpha, 0, 255);
+            alpha = Math.Max(50, alpha);
+
+            borderBrush.Color = bgBrush.Color.WithAlpha(alpha);
         }
 
         Background = bgBrush;
         BorderBrush = borderBrush;
+    }
+
+
+    protected virtual Color GetColorForDefault()
+    {
+        return new Color();
+    }
+
+    protected virtual Color GetColorForHovered()
+    {
+        return Theme.ColorBrushes.ToolbarItemHoverColor;
+    }
+
+    protected virtual Color GetColorForPressed()
+    {
+        return Theme.ColorBrushes.ToolbarItemActiveColor;
+    }
+
+    protected virtual Color GetColorForChecked()
+    {
+        return Theme.ColorBrushes.ToolbarItemSelectedColor;
     }
 
 

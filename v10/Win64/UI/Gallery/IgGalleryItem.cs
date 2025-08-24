@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Win64.Common.Photoing;
+using Windows.UI;
 
 namespace ImageGlass.Win64.UI;
 
@@ -57,6 +58,22 @@ public partial class IgGalleryItem : IgButton
     public IgGalleryItem()
     {
         DefaultStyleKey = typeof(IgGalleryItem);
+    }
+
+
+    protected override Color GetColorForHovered()
+    {
+        return Theme.ColorBrushes.GalleryItemHoverColor;
+    }
+
+    protected override Color GetColorForPressed()
+    {
+        return Theme.ColorBrushes.GalleryItemActiveColor;
+    }
+
+    protected override Color GetColorForChecked()
+    {
+        return Theme.ColorBrushes.GalleryItemSelectedColor;
     }
 
 }
