@@ -22,6 +22,7 @@
 
 
             <!--  Xaml Converters  -->
+            <win64Common:ColorToBrushConverter x:Key="ColorToBrushConverter" />
             <win64Common:HexStringToBrushConverter x:Key="HexStringToBrushConverter" />
 
 
