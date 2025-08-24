@@ -8,6 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:DefaultBindMode="OneWay"
     DataContext="{x:Bind VM, Mode=OneWay}"
     mc:Ignorable="d">
 
@@ -30,13 +31,13 @@
         ToolTipService.ToolTip="{x:Bind VM.Text}">
         <StackPanel Orientation="Horizontal" Spacing="5">
             <ImageIcon
-                Name="ToolbarItem_Button_Icon"
+                Name="PART_ButtonIcon"
                 Width="{StaticResource ToolbarIconSize}"
                 Height="{StaticResource ToolbarIconSize}"
                 Source="{x:Bind VM.Image, Converter={StaticResource SvgPathToImageSourceConverter}}" />
 
             <TextBlock
-                Name="ToolbarItem_Button_Text"
+                Name="PART_ButtonText"
                 VerticalAlignment="Center"
                 Text="{x:Bind VM.Text}"
                 Visibility="{x:Bind VM.IsTextVisible, Converter={StaticResource BoolToVisibilityConverter}}" />

@@ -27,6 +27,9 @@ namespace ImageGlass.Win64.UI;
 
 public sealed partial class IgToolbarItemButton : UserControl, IIgToolbarItem
 {
+    public static string _PART_ButtonIcon => "PART_ButtonIcon";
+    public static string _PART_ButtonText => "PART_ButtonText";
+
 
     // Dependency Properties
     #region Dependency Properties

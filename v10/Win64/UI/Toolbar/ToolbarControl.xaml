@@ -9,6 +9,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="Root"
     x:DefaultBindMode="OneWay"
     AutomationProperties.AutomationControlType="ToolBar"
     Unloaded="UserControl_Unloaded"
@@ -27,12 +28,12 @@
             x:DefaultBindMode="OneWay">
             <ctk:SwitchPresenter
                 TargetType="common:ToolbarItemType"
-                Visibility="{x:Bind IsOverflow, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"
+                Visibility="{x:Bind IsOverflow, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"
                 Value="{x:Bind Type}">
                 <!--  Button  -->
                 <ctk:Case Value="Button">
                     <local:IgToolbarItemButton
-                        Name="ToolbarItem_Button"
+                        Name="PART_ItemButton"
                         Loaded="ToolbarItem_Loaded"
                         VM="{x:Bind}" />
                 </ctk:Case>
@@ -41,7 +42,7 @@
                 <!--  Separator  -->
                 <ctk:Case Value="Separator">
                     <local:IgToolbarItemSeparator
-                        Name="ToolbarItem_Separator"
+                        Name="PART_ItemSeparator"
                         Loaded="ToolbarItem_Loaded"
                         VM="{x:Bind}" />
                 </ctk:Case>
@@ -72,7 +73,7 @@
             <ItemsRepeater
                 x:Name="RepeaterPrimaryItems"
                 ItemTemplate="{StaticResource ToolbarItemTemplate}"
-                ItemsSource="{x:Bind PrimaryItems, Mode=OneWay}">
+                ItemsSource="{x:Bind PrimaryItems}">
                 <ItemsRepeater.Layout>
                     <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarControl.ItemSpacing, Mode=OneTime}" />
                 </ItemsRepeater.Layout>
@@ -120,7 +121,7 @@
                 Grid.Column="0"
                 HorizontalAlignment="Center"
                 ItemTemplate="{StaticResource ToolbarItemTemplate}"
-                ItemsSource="{x:Bind SecondaryItems, Mode=OneWay}">
+                ItemsSource="{x:Bind SecondaryItems}">
                 <ItemsRepeater.Layout>
                     <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarControl.ItemSpacing, Mode=OneTime}" />
                 </ItemsRepeater.Layout>

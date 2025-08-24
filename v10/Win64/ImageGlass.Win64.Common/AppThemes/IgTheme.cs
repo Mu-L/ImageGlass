@@ -36,12 +36,16 @@ public partial class IgTheme : Notify
     private IgThemeColorBrushes _colorBrushes = new();
 
 
+    // Serializable properties
     public IgThemeMetadata _Metadata { get; set; } = new();
     public IgThemeInfo Info { get; set; } = new();
     public IgThemeSettings Settings { get; set; } = new();
     public IgThemeColors Colors { get; set; } = new();
     public IgThemeToolbarIcons ToolbarIcons { get; set; } = new();
 
+
+    // Static Properties
+    #region Static Properties
 
     /// <summary>
     /// Theme specs version, to check for compatibility.
@@ -55,6 +59,11 @@ public partial class IgTheme : Notify
     [JsonIgnore]
     public static string CONFIG_FILE => "igtheme.json";
 
+    #endregion // Static Properties
+
+
+    // Instance Properties
+    #region Instance Properties
 
     /// <summary>
     /// Gets the full path of theme folder.
@@ -86,6 +95,11 @@ public partial class IgTheme : Notify
     [JsonIgnore]
     public IgThemeColorBrushes ColorBrushes => _colorBrushes;
 
+    #endregion // Instance Properties
+
+
+    // Public methods
+    #region Public methods
 
     /// <summary>
     /// Reads theme config file and loads the theme properties.
@@ -130,9 +144,10 @@ public partial class IgTheme : Notify
     public void LoadColors(Color? accent = null)
     {
         ColorBrushes.Load(Colors, accent);
-
         OnPropertyChanged(nameof(ColorBrushes));
     }
+
+    #endregion // Public methods
 
 }
 

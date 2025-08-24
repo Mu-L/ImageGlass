@@ -25,6 +25,7 @@ using Microsoft.UI.Xaml.Media;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace ImageGlass.Win64.UI;
 
@@ -34,6 +35,8 @@ public sealed partial class ToolbarControl : UserControl
 
     private Dictionary<int, ToolbarItemMetadata> _itemsMetadata = [];
     public static double ItemSpacing => 4;
+    public static string _PART_ItemButton => "PART_ItemButton";
+    public static string _PART_ItemSeparator => "PART_ItemSeparator";
 
     public ObservableCollection<ToolbarItemModel> PrimaryItems { get; } = [];
     public ObservableCollection<ToolbarItemModel> PrimaryItemsOverflow { get; } = [];
@@ -49,11 +52,19 @@ public sealed partial class ToolbarControl : UserControl
     public IgTheme Theme
     {
         get => (IgTheme)GetValue(ThemeProperty);
-        set => SetValue(ThemeProperty, value);
+        set
+        {
+            value.PropertyChanged -= Theme_PropertyChanged;
+            SetValue(ThemeProperty, value);
+            value.PropertyChanged += Theme_PropertyChanged;
+        }
     }
-    public static readonly DependencyProperty ThemeProperty =
-        DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(ToolbarControl),
-            new PropertyMetadata(new IgTheme()));
+    public static readonly DependencyProperty ThemeProperty = DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(ToolbarControl), new PropertyMetadata(new IgTheme(), OnThemeChanged));
+    private static void OnThemeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not ToolbarControl toolbar) return;
+        toolbar.UpdateItemsTheme();
+    }
 
 
     /// <summary>
@@ -64,10 +75,7 @@ public sealed partial class ToolbarControl : UserControl
         get => (IEnumerable)GetValue(ItemsSourceProperty);
         set => SetValue(ItemsSourceProperty, value);
     }
-    public static readonly DependencyProperty ItemsSourceProperty =
-        DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(ToolbarControl),
-            new PropertyMetadata(null, OnItemsSourceChanged));
-
+    public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(ToolbarControl), new PropertyMetadata(null, OnItemsSourceChanged));
     private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not ToolbarControl toolbar) return;
@@ -95,7 +103,10 @@ public sealed partial class ToolbarControl : UserControl
         HandleOverflow();
     }
 
-
+    private void Theme_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        UpdateItemsTheme();
+    }
 
     private void ToolbarItem_Loaded(object sender, RoutedEventArgs e)
     {
@@ -108,16 +119,8 @@ public sealed partial class ToolbarControl : UserControl
             value.RenderedWidth = fe.ActualWidth;
         }
 
-
-        //if (btn.FindName("ToolbarButtonIcon") is ImageIcon iconEl)
-        //{
-        //    // set new icon
-        //    if (iconEl.Source == null)
-        //    {
-        //        var model = (ItemsSource as IEnumerable<ToolbarItemModel>).FirstOrDefault(i => i.Id == btn.Name);
-        //        iconEl.Source = new SvgImageSource(new Uri(model.Image));
-        //    }
-        //}
+        // set item theme
+        item.Theme = Theme;
     }
 
     private void MnuOverflow_Opening(object sender, object e)
@@ -143,11 +146,11 @@ public sealed partial class ToolbarControl : UserControl
             // get toolbar item metadata
             if (!_itemsMetadata.TryGetValue(item.SourceIndex, out var meta)) continue;
             if (RepeaterPrimaryItems.TryGetElement(meta.PrimaryItemIndex) is not SwitchPresenter sp) continue;
-            if (sp.FindName("ToolbarItem_Button") is not IgToolbarItemButton btnEl) continue;
+            if (sp.FindName(_PART_ItemButton) is not IgToolbarItemButton btnEl) continue;
 
 
             // get image source from toolbar item
-            if (btnEl.FindName("ToolbarItem_Button_Icon") is ImageIcon iconEl)
+            if (btnEl.FindName(IgToolbarItemButton._PART_ButtonIcon) is ImageIcon iconEl)
             {
                 imgSrc = iconEl.Source;
             }
@@ -171,7 +174,7 @@ public sealed partial class ToolbarControl : UserControl
                 {
                     Text = item.Text,
                     Icon = iconFe,
-                    //IsChecked = btnEl.IsChecked,
+                    IsChecked = item.IsChecked,
                     //Command = btnEl.Command,
                     //CommandParameter = btnEl.CommandParameter,
                 };
@@ -299,6 +302,31 @@ public sealed partial class ToolbarControl : UserControl
         BtnOverflowMenu.Visibility = usedWidth > availableWidth
             ? Visibility.Visible
             : Visibility.Collapsed;
+    }
+
+
+    private void UpdateItemsTheme()
+    {
+        foreach (var meta in _itemsMetadata)
+        {
+            IIgToolbarItem? item = null;
+
+            // primary items
+            if (RepeaterPrimaryItems.TryGetElement(meta.Value.PrimaryItemIndex) is FrameworkElement priFe)
+            {
+                item = (IIgToolbarItem)priFe.FindName(_PART_ItemButton)
+                    ?? (IIgToolbarItem)priFe.FindName(_PART_ItemSeparator);
+            }
+            // secondary items
+            else if (RepeaterSecondaryItems.TryGetElement(meta.Value.SecondaryItemIndex) is FrameworkElement secFe)
+            {
+                item = (IIgToolbarItem)secFe.FindName(_PART_ItemButton)
+                    ?? (IIgToolbarItem)secFe.FindName(_PART_ItemSeparator);
+            }
+
+            // update theme
+            if (item != null) item.Theme = Theme;
+        }
     }
 
 }

@@ -23,9 +23,9 @@ namespace ImageGlass.Win64.Common;
 
 public partial class AppSettings
 {
-    private IgTheme _theme = new();
-    private Color _accentColor = new();
     private bool _isDarkMode = true;
+    private Color _accentColor = new();
+    private IgTheme _theme = new();
 
 
 
@@ -52,8 +52,9 @@ public partial class AppSettings
         }
     }
 
+
     /// <summary>
-    /// Gets, sets the current color accent.
+    /// Gets the system accent color.
     /// </summary>
     [JsonIgnore]
     public Color AccentColor
@@ -64,10 +65,9 @@ public partial class AppSettings
             if (_accentColor != value)
             {
                 _accentColor = value;
-
-                // reload theme colors
-                Theme.LoadColors(_accentColor);
                 OnPropertyChanged();
+
+                Theme.LoadColors(AccentColor);
             }
         }
     }
