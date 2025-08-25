@@ -90,6 +90,15 @@ public static class Window_UI_Color_Exts
 
 
     /// <summary>
+    /// Checks if this color is considered light.
+    /// </summary>
+    public static bool IsLight(this Color c)
+    {
+        return (((5 * c.G) + (2 * c.R) + c.B) > (8 * 128));
+    }
+
+
+    /// <summary>
     /// Creates a new color structure with the input alpha.
     /// </summary>
     public static Color WithAlpha(this Color c, int alpha = 255)

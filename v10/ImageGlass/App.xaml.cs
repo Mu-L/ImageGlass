@@ -27,25 +27,19 @@ using System.Threading.Tasks;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace ImageGlass;
+
 
 /// <summary>
 /// Provides application-specific behavior to supplement the default Application class.
 /// </summary>
 public partial class App : Application, INotifyPropertyChanged
 {
-    private MainWindow? _winMain;
-
-    private IProgress<AppUpdatedEventArgs> _uiReporter;
-    private static UISettings _uiSystem = new UISettings();
-
-
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public MainWindow WinMain => _winMain!;
+    private MainWindow? _winMain;
+    private IProgress<SystemColorInfoChangedEventArgs> _uiReporter;
+    private static UISettings _systemUI = new UISettings();
 
 
 
@@ -57,50 +51,16 @@ public partial class App : Application, INotifyPropertyChanged
     {
         this.InitializeComponent();
 
-        _uiReporter = new Progress<AppUpdatedEventArgs>(UIReporter_Reported);
+        _uiReporter = new Progress<SystemColorInfoChangedEventArgs>(UIReporter_Reported);
 
         Application.Current.UnhandledException += Current_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
-
-        _uiSystem.ColorValuesChanged += UiSettings_ColorValuesChanged;
-    }
-
-    private void UIReporter_Reported(AppUpdatedEventArgs e)
-    {
-        if (e.AccentColor != null) AP.Config.AccentColor = e.AccentColor.Value;
-        if (e.IsDarkMode != null) AP.Config.IsDarkMode = e.IsDarkMode.Value;
-    }
-
-    private void UiSettings_ColorValuesChanged(UISettings sender, object args)
-    {
-        var accent = sender.GetColorValue(UIColorType.Accent);
-
-        WHelper.Debounce(200, (accentColor) =>
-        {
-            _uiReporter.Report(new AppUpdatedEventArgs()
-            {
-                AccentColor = accentColor,
-            });
-        }, accent);
-    }
-
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
+        _systemUI.ColorValuesChanged += UiSettings_ColorValuesChanged;
 
 
-    private void Current_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
-    {
-        // TODO:
-        throw e.Exception;
-    }
-
-    private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
-    {
-        // TODO:
-        throw e.Exception;
+        // load initial settings
+        LoadInitAppSettings();
     }
 
 
@@ -108,28 +68,11 @@ public partial class App : Application, INotifyPropertyChanged
     /// Invoked when the application is launched.
     /// </summary>
     /// <param name="e">Details about the launch request and process.</param>
-    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs e)
+    protected override void OnLaunched(LaunchActivatedEventArgs e)
     {
-        AP.Args = Environment.GetCommandLineArgs();
-
         _winMain = new MainWindow();
         _winMain.Closed += Window_Closed;
-
-        // monitor color mode change event
-        var root = (FrameworkElement)_winMain.Content;
-        root.ActualThemeChanged += Root_ActualThemeChanged;
-
-
-        // load app configs
-        AP.Config = AppSettings.Load(AppSettings.CONFIG_USER);
-
-        // get accent color & color mode
-        var accentColor = _uiSystem.GetColorValue(UIColorType.Accent);
-        var isDarkMode = root.ActualTheme != ElementTheme.Light;
-
-        // load theme for the first time
-        AP.Config.LoadCurrentTheme(isDarkMode, accentColor, true, true, false);
-
+        var info = GetSystemColorInfo(_systemUI);
 
         // get foreground shell
         if (AP.Config.ShouldUseExplorerSortOrder)
@@ -149,13 +92,19 @@ public partial class App : Application, INotifyPropertyChanged
         MagickDecoder.Initialize();
     }
 
-    private void Root_ActualThemeChanged(FrameworkElement sender, object args)
+
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-        _uiReporter.Report(new AppUpdatedEventArgs()
-        {
-            IsDarkMode = sender.ActualTheme != ElementTheme.Light,
-        });
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
+
+
+
+    // App Events
+    #region App Events
 
     private async void Window_Closed(object sender, WindowEventArgs args)
     {
@@ -168,6 +117,79 @@ public partial class App : Application, INotifyPropertyChanged
         AP.Photos.Dispose();
         WindowColorProfileProvider.Instance.Dispose();
     }
+
+    private void UiSettings_ColorValuesChanged(UISettings sender, object args)
+    {
+        var info = GetSystemColorInfo(sender);
+
+        WHelper.Debounce(200, (args) =>
+        {
+            _uiReporter.Report(args!);
+        }, info);
+    }
+
+    private void UIReporter_Reported(SystemColorInfoChangedEventArgs e)
+    {
+        AP.Config.AccentColor = e.AccentColor;
+        AP.Config.IsSystemDarkMode = e.IsDarkMode;
+    }
+
+    private void Current_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    {
+        // TODO:
+        throw e.Exception;
+    }
+
+    private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        // TODO:
+        throw e.Exception;
+    }
+
+    #endregion // App Events
+
+
+
+    /// <summary>
+    /// Loads user settings and applies theme pack.
+    /// </summary>
+    private void LoadInitAppSettings()
+    {
+        AP.Args = Environment.GetCommandLineArgs();
+
+        // load app configs
+        AP.Config = AppSettings.Load(AppSettings.CONFIG_USER);
+
+        // get accent color & color mode
+        var info = GetSystemColorInfo(_systemUI);
+
+        // load theme for the first time
+        AP.Config.LoadCurrentTheme(info.IsDarkMode, info.AccentColor, true, true, false);
+
+        // set the initial app color mode
+        if (AP.Config.Theme.Settings.IsDarkMode) RequestedTheme = ApplicationTheme.Dark;
+        else RequestedTheme = ApplicationTheme.Light;
+    }
+
+
+    /// <summary>
+    /// Gets system color information.
+    /// </summary>
+    private static SystemColorInfoChangedEventArgs GetSystemColorInfo(UISettings settings)
+    {
+        var foreground = settings.GetColorValue(UIColorType.Foreground);
+        var isDarkMode = foreground.IsLight(); // if text color is light => dark mode
+        var accent = settings.GetColorValue(UIColorType.Accent);
+
+        var info = new SystemColorInfoChangedEventArgs()
+        {
+            AccentColor = accent,
+            IsDarkMode = isDarkMode,
+        };
+
+        return info;
+    }
+
 
     public static async Task SaveConfigsOnClosing()
     {
@@ -194,11 +216,13 @@ public partial class App : Application, INotifyPropertyChanged
         //}
         //catch { }
     }
+
+
 }
 
 
-public class AppUpdatedEventArgs : EventArgs
+public class SystemColorInfoChangedEventArgs : EventArgs
 {
-    public Color? AccentColor { get; set; }
-    public bool? IsDarkMode { get; set; }
+    public Color AccentColor { get; set; }
+    public bool IsDarkMode { get; set; }
 }

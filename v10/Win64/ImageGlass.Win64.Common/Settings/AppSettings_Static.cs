@@ -183,7 +183,7 @@ public partial class AppSettings
     public void LoadCurrentTheme(bool darkMode, Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
     {
         // 1. save instance settings
-        _isDarkMode = darkMode;
+        _isSystemDarkMode = darkMode;
         if (accent != null) _accentColor = accent.Value;
 
         // 2. get the theme folder name

@@ -23,7 +23,7 @@ namespace ImageGlass.Win64.Common;
 
 public partial class AppSettings
 {
-    private bool _isDarkMode = true;
+    private bool _isSystemDarkMode = true;
     private Color _accentColor = new();
     private IgTheme _theme = new();
 
@@ -33,21 +33,21 @@ public partial class AppSettings
     #region Public Reactive properties
 
     /// <summary>
-    /// Gets, sets the current color mode.
+    /// Gets, sets the current color mode of OS.
     /// </summary>
     [JsonIgnore]
-    public bool IsDarkMode
+    public bool IsSystemDarkMode
     {
-        get => _isDarkMode;
+        get => _isSystemDarkMode;
         set
         {
-            if (_isDarkMode != value)
+            if (_isSystemDarkMode != value)
             {
-                _isDarkMode = value;
+                _isSystemDarkMode = value;
                 OnPropertyChanged();
 
                 // load theme
-                LoadCurrentTheme(_isDarkMode, AccentColor, true, true, false);
+                LoadCurrentTheme(_isSystemDarkMode, AccentColor, true, true, false);
             }
         }
     }

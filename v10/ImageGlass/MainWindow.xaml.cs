@@ -1,5 +1,4 @@
-﻿
-/*
+﻿/*
 ImageGlass Project - Image viewer for Windows
 Copyright (C) 2010 - 2025 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
@@ -42,30 +41,21 @@ public sealed partial class MainWindow : Window
 {
     private Progress<FileSearchingEventArgs> _searchProgress;
 
-    public MainWindowViewModel VM;
-    public nint Handle => WindowNative.GetWindowHandle(this);
+    private IgWindowHook WinHook;
 
 
     public MainWindow()
     {
-        _searchProgress = new(Files_Searched);
-        VM = new MainWindowViewModel(this);
-
         InitializeComponent();
 
-        // set title bar
-        AppWindow.TitleBar.PreferredTheme = Microsoft.UI.Windowing.TitleBarTheme.UseDefaultAppMode;
-        ExtendsContentIntoTitleBar = true;
-        SetTitleBar(WinTitleBar);
+        WinHook = new(this, WinTitleBar);
+        _searchProgress = new(Files_Searched);
 
         AppWindow.Resize(new SizeInt32(2000, 1500));
     }
 
     private void WindowContent_Loaded(object sender, RoutedEventArgs e)
     {
-        // set title bar
-        SetTitleBar();
-
         // load image from command line arguments
         LoadImagesFromCmdArgs();
     }
@@ -73,7 +63,7 @@ public sealed partial class MainWindow : Window
     private void Window_Closed(object sender, WindowEventArgs e)
     {
         Viewer.UnloadPhoto();
-        VM.Dispose();
+        WinHook.Dispose();
     }
 
 
@@ -152,7 +142,7 @@ public sealed partial class MainWindow : Window
     {
         var op = new Windows.Storage.Pickers.FileOpenPicker();
         op.FileTypeFilter.Add("*");
-        InitializeWithWindow.Initialize(op, Handle);
+        InitializeWithWindow.Initialize(op, WinHook.WindowHandle);
 
         var file = await op.PickSingleFileAsync();
         if (file == null) return;
@@ -165,7 +155,7 @@ public sealed partial class MainWindow : Window
     private async void BtnOpenFolder_Clicked(object sender, RoutedEventArgs e)
     {
         var fp = new Windows.Storage.Pickers.FolderPicker();
-        InitializeWithWindow.Initialize(fp, Handle);
+        InitializeWithWindow.Initialize(fp, WinHook.WindowHandle);
 
         var dir = await fp.PickSingleFolderAsync();
         if (dir == null) return;
@@ -189,15 +179,6 @@ public sealed partial class MainWindow : Window
         var photoIndex = AP.Photos.IndexOf(sender.VM.FilePath);
         ViewByIndex(photoIndex);
     }
-
-
-    private void SetTitleBar()
-    {
-        // update title bar size according to API
-        VM.TitleBarHeight = AppWindow.TitleBar.Height;
-        VM.TitleBarRightInset = AppWindow.TitleBar.RightInset;
-    }
-
 
     private void LoadImagesFromCmdArgs()
     {
@@ -316,7 +297,7 @@ public sealed partial class MainWindow : Window
 
     private void ViewPhoto(Photo? photo)
     {
-        VM.Title = photo?.FilePath;
+        WinHook.Title = photo?.FilePath;
         Viewer.SetPhoto(photo);
 
         Gallery.ScrollToItem(AP.Photos.CurrentIndex);

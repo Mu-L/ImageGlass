@@ -8,7 +8,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:w64c="using:ImageGlass.Win64.Common"
     xmlns:w64photo="using:ImageGlass.Win64.Common.Photoing"
-    x:Name="Root"
     d:DataContext="{d:DesignInstance local:GalleryControl,
                                      IsDesignTimeCreatable=True}"
     x:DefaultBindMode="OneWay"

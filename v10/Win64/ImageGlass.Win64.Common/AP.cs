@@ -142,7 +142,7 @@ public class ThemePackChangedEventArgs(string propName = "") : EventArgs
 {
     /// <summary>
     /// Gets the property that triggered the event.
-    /// If it's empty, the entire theme pack is changed.
+    /// If it's empty, the new theme pack is loaded.
     /// </summary>
     public string PropertyName => propName;
 }
