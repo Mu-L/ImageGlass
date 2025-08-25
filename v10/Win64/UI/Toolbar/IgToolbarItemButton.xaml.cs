@@ -31,12 +31,14 @@ namespace ImageGlass.Win64.UI;
 
 public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
 {
+    public static string _PART_Button => "PART_Button";
     public static string _PART_ButtonIcon => "PART_ButtonIcon";
     public static string _PART_ButtonText => "PART_ButtonText";
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
     protected IgTheme _theme = new();
+    protected FlyoutBase? _flyout = null;
     protected ToolbarItemModel _vm = new();
 
 
@@ -65,8 +67,15 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     /// </summary>
     public FlyoutBase? Flyout
     {
-        get => BtnActivator.Flyout;
-        set => BtnActivator.Flyout = value;
+        get => _flyout;
+        set
+        {
+            if (_flyout != value)
+            {
+                _flyout = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     #endregion // Public Properties
@@ -92,7 +101,7 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
         AP.ThemeChanged -= AP_ThemeChanged;
     }
 
-    private void BtnActivator_Loaded(object sender, RoutedEventArgs e)
+    private void PART_Button_Loaded(object sender, RoutedEventArgs e)
     {
         UpdateIcon();
     }
