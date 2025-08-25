@@ -127,7 +127,6 @@ public partial class IgButton : Button, INotifyPropertyChanged
         Loaded += IgButton_Loaded;
         Unloaded += IgButton_Unloaded;
         Click += IgButton_Click;
-
         AP.ThemeChanged += AP_ThemeChanged;
     }
 
@@ -165,6 +164,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
 
     private void IgButton_Unloaded(object sender, RoutedEventArgs e)
     {
+        AP.ThemeChanged -= AP_ThemeChanged;
         Loaded -= IgButton_Loaded;
         Unloaded -= IgButton_Unloaded;
         Click -= IgButton_Click;

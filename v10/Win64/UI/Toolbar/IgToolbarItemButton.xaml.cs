@@ -87,6 +87,10 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
+    private void UserControl_Unloaded(object sender, RoutedEventArgs e)
+    {
+        AP.ThemeChanged -= AP_ThemeChanged;
+    }
 
     private void BtnActivator_Loaded(object sender, RoutedEventArgs e)
     {

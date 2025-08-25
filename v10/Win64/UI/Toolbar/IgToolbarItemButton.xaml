@@ -11,6 +11,7 @@
     xmlns:w64c="using:ImageGlass.Win64.Common"
     x:DefaultBindMode="OneWay"
     DataContext="{x:Bind VM, Mode=OneWay}"
+    Unloaded="UserControl_Unloaded"
     mc:Ignorable="d">
 
     <UserControl.Resources>
