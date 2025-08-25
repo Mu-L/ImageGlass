@@ -256,17 +256,17 @@ public partial class IgButton : Button, INotifyPropertyChanged
 
     protected virtual Color GetColorForHovered()
     {
-        return AP.Config.Theme.ColorBrushes.ToolbarItemHoverColor;
+        return AP.Config.Theme.ComputedColors.ToolbarItemHoverColor;
     }
 
     protected virtual Color GetColorForPressed()
     {
-        return AP.Config.Theme.ColorBrushes.ToolbarItemActiveColor;
+        return AP.Config.Theme.ComputedColors.ToolbarItemActiveColor;
     }
 
     protected virtual Color GetColorForChecked()
     {
-        return AP.Config.Theme.ColorBrushes.ToolbarItemSelectedColor;
+        return AP.Config.Theme.ComputedColors.ToolbarItemSelectedColor;
     }
 
 

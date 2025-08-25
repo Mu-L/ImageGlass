@@ -64,22 +64,22 @@ public partial class IgGalleryItem : IgButton
 
     protected override Color GetColorForText()
     {
-        return AP.Config.Theme.ColorBrushes.GalleryTextColor;
+        return AP.Config.Theme.ComputedColors.GalleryTextColor;
     }
 
     protected override Color GetColorForHovered()
     {
-        return AP.Config.Theme.ColorBrushes.GalleryItemHoverColor;
+        return AP.Config.Theme.ComputedColors.GalleryItemHoverColor;
     }
 
     protected override Color GetColorForPressed()
     {
-        return AP.Config.Theme.ColorBrushes.GalleryItemActiveColor;
+        return AP.Config.Theme.ComputedColors.GalleryItemActiveColor;
     }
 
     protected override Color GetColorForChecked()
     {
-        return AP.Config.Theme.ColorBrushes.GalleryItemSelectedColor;
+        return AP.Config.Theme.ComputedColors.GalleryItemSelectedColor;
     }
 
 }

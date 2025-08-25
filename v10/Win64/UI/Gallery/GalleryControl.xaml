@@ -86,7 +86,7 @@
     <ScrollViewer
         x:Name="GalleryScrollViewer"
         Padding="5"
-        Background="{x:Bind w64c:AP.Config.Theme.ColorBrushes.GalleryBgColor, Converter={StaticResource ColorToBrushConverter}}"
+        Background="{x:Bind w64c:AP.Config.Theme.ComputedColors.GalleryBgColor, Converter={StaticResource ColorToBrushConverter}}"
         HorizontalScrollBarVisibility="Auto"
         HorizontalScrollMode="Enabled"
         VerticalScrollBarVisibility="Auto"

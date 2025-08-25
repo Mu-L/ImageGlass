@@ -105,7 +105,7 @@
                     <Viewbox Height="{StaticResource ToolbarIconSize}" VerticalAlignment="Center">
                         <FontIcon
                             AutomationProperties.AccessibilityView="Raw"
-                            Foreground="{x:Bind w64c:AP.Config.Theme.ColorBrushes.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
+                            Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
                             Glyph="&#xE712;" />
                     </Viewbox>
                 </StackPanel>

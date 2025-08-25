@@ -17,41 +17,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
-using Microsoft.UI.Xaml.Media;
 using Windows.UI;
 
 namespace ImageGlass.Win64.Common;
 
 
-public partial class IgThemeColorBrushes : Notify
+public partial class IgThemeComputedColors : Notify
 {
-    // Viewer
-    private readonly SolidColorBrush _textColor = new();
-    private readonly SolidColorBrush _bgColor = new();
-    private readonly SolidColorBrush _navigationButtonColor = new();
-
-    // Toolbar
-    private readonly SolidColorBrush _toolbarBgColor = new();
-    private readonly SolidColorBrush _toolbarTextColor = new();
-    private readonly SolidColorBrush _toolbarItemHoverColor = new();
-    private readonly SolidColorBrush _toolbarItemActiveColor = new();
-    private readonly SolidColorBrush _toolbarItemSelectedColor = new();
-
-    // Gallery
-    private readonly SolidColorBrush _galleryBgColor = new();
-    private readonly SolidColorBrush _galleryTextColor = new();
-    private readonly SolidColorBrush _galleryItemHoverColor = new();
-    private readonly SolidColorBrush _galleryItemActiveColor = new();
-    private readonly SolidColorBrush _galleryItemSelectedColor = new();
-
-    // Menu
-    private readonly SolidColorBrush _menuBgColor = new();
-    private readonly SolidColorBrush _menuBgHoverColor = new();
-    private readonly SolidColorBrush _menuTextColor = new();
-    private readonly SolidColorBrush _menuTextHoverColor = new();
-
-
-
     // Viewer
     public Color TextColor { get; set; } = new();
     public Color BgColor { get; set; } = new();
@@ -81,16 +53,16 @@ public partial class IgThemeColorBrushes : Notify
 
 
     /// <summary>
-    /// Initializes new instance of <see cref="IgThemeColorBrushes"/>.
+    /// Initializes new instance of <see cref="IgThemeComputedColors"/>.
     /// </summary>
-    public IgThemeColorBrushes(IgThemeColors? themeColors = null)
+    public IgThemeComputedColors(IgThemeColors? themeColors = null)
     {
         Load(themeColors);
     }
 
 
     /// <summary>
-    /// Parses string into <see cref="SolidColorBrush"/>.
+    /// Computes colors from the color strings.
     /// </summary>
     public void Load(IgThemeColors? colors = null, Color? accentColor = null)
     {

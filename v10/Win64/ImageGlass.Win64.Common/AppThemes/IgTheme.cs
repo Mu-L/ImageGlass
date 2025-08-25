@@ -34,7 +34,7 @@ public partial class IgThemeJsonContext : JsonSerializerContext { }
 /// </summary>
 public partial class IgTheme : Notify
 {
-    private IgThemeColorBrushes _colorBrushes = new();
+    private IgThemeComputedColors _computedColors = new();
 
 
     // Serializable properties
@@ -42,7 +42,6 @@ public partial class IgTheme : Notify
     public IgThemeInfo Info { get; set; } = new();
     public IgThemeSettings Settings { get; set; } = new();
     public IgThemeColors Colors { get; set; } = new();
-    //public IgThemeToolbarIcons ToolbarIcons { get; set; } = new();
     public Dictionary<string, string> ToolbarIcons { get; set; } = [];
 
 
@@ -92,10 +91,10 @@ public partial class IgTheme : Notify
     public bool IsValid { get; set; } = false;
 
     /// <summary>
-    /// Gets the theme color brushes.
+    /// Gets the theme computed colors.
     /// </summary>
     [JsonIgnore]
-    public IgThemeColorBrushes ColorBrushes => _colorBrushes;
+    public IgThemeComputedColors ComputedColors => _computedColors;
 
     #endregion // Instance Properties
 
@@ -145,10 +144,10 @@ public partial class IgTheme : Notify
     /// </summary>
     public void LoadColors(Color? accent = null)
     {
-        ColorBrushes.Load(Colors, accent);
+        ComputedColors.Load(Colors, accent);
 
-        OnPropertyChanged(nameof(ColorBrushes));
-        AP.TriggerThemeChangedEvent(nameof(ColorBrushes));
+        OnPropertyChanged(nameof(ComputedColors));
+        AP.TriggerThemeChangedEvent(nameof(ComputedColors));
     }
 
 
