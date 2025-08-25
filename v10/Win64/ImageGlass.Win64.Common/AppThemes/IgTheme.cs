@@ -146,7 +146,9 @@ public partial class IgTheme : Notify
     public void LoadColors(Color? accent = null)
     {
         ColorBrushes.Load(Colors, accent);
+
         OnPropertyChanged(nameof(ColorBrushes));
+        AP.TriggerThemeChangedEvent(nameof(ColorBrushes));
     }
 
 

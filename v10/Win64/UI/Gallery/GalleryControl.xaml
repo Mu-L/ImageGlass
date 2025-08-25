@@ -8,6 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:photoing="using:ImageGlass.Win64.Common.Photoing"
     xmlns:photoing1="using:ImageGlass.Common.Photoing"
+    xmlns:win64Common="using:ImageGlass.Win64.Common"
     x:Name="Root"
     d:DataContext="{d:DesignInstance local:GalleryControl,
                                      IsDesignTimeCreatable=True}"
@@ -38,7 +39,7 @@
                 IsChecked="{x:Bind IsCurrent}"
                 IsTabStop="False"
                 Style="{StaticResource IgButtonStyle}"
-                Theme="{x:Bind local:GalleryControl.IG_AppTheme}"
+                Theme="{x:Bind win64Common:AP.Config.Theme}"
                 VM="{x:Bind}">
 
                 <Grid VerticalAlignment="Stretch">

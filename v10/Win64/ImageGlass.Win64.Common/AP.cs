@@ -27,6 +27,8 @@ namespace ImageGlass.Win64.Common;
 
 public static class AP
 {
+    public static event EventHandler<ThemePackChangedEventArgs>? ThemeChanged;
+
     private static ExplorerView? _foregroundShell;
     private static string _foregroundShellPath = "";
     private static string _inputImagePathFromArgs = "";
@@ -36,6 +38,7 @@ public static class AP
     /// Gets the app settings.
     /// </summary>
     public static AppSettings Config { get; set; } = new();
+
 
     /// <summary>
     /// Gets the arguments passed to the application.
@@ -124,5 +127,22 @@ public static class AP
     }
 
 
+    /// <summary>
+    /// Triggers event <see cref="ThemeChanged"/>.
+    /// </summary>
+    public static void TriggerThemeChangedEvent(string propName = "")
+    {
+        ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
+    }
+
 }
 
+
+public class ThemePackChangedEventArgs(string propName = "") : EventArgs
+{
+    /// <summary>
+    /// Gets the property that triggered the event.
+    /// If it's empty, the entire theme pack is changed.
+    /// </summary>
+    public string PropertyName => propName;
+}

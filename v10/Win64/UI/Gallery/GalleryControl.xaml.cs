@@ -31,7 +31,6 @@ namespace ImageGlass.Win64.UI;
 public sealed partial class GalleryControl : UserControl, INotifyPropertyChanged
 {
     public static double GalleryThumbnailSize => (double)Application.Current.Resources[nameof(GalleryThumbnailSize)];
-    public static IgTheme IG_AppTheme => (IgTheme)Application.Current.Resources[nameof(IG_AppTheme)];
     public static double ItemSpacing => 1;
 
 
