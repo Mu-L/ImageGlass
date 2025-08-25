@@ -23,9 +23,9 @@ using System;
 using System.IO;
 using System.Linq;
 
-namespace ImageGlass;
+namespace ImageGlass.Win64.Common;
 
-public static class Local
+public static class AP
 {
     private static ExplorerView? _foregroundShell;
     private static string _foregroundShellPath = "";
@@ -33,14 +33,27 @@ public static class Local
 
 
     /// <summary>
+    /// Gets the app settings.
+    /// </summary>
+    public static AppSettings Config { get; set; } = new();
+
+    /// <summary>
+    /// Gets the arguments passed to the application.
+    /// </summary>
+    public static string[] Args { get; set; } = [];
+
+
+    /// <summary>
     /// Gets the photo manager.
     /// </summary>
     public static PhotoManager Photos { get; set; } = new();
+
 
     /// <summary>
     /// Gets the path of the image file from the arguments.
     /// </summary>
     public static string InputImagePathFromArgs => _inputImagePathFromArgs;
+
 
     /// <summary>
     /// Gets the Shell object of foreground window
@@ -94,10 +107,10 @@ public static class Local
     {
         var pathToLoad = path ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(pathToLoad) && App.Args.Length >= 2)
+        if (string.IsNullOrWhiteSpace(pathToLoad) && AP.Args.Length >= 2)
         {
             // get path from params
-            var cmdPath = App.Args
+            var cmdPath = AP.Args
                 .Skip(1)
                 .FirstOrDefault(i => !i.StartsWith(Const.CONFIG_CMD_PREFIX, StringComparison.Ordinal));
 
@@ -111,5 +124,5 @@ public static class Local
     }
 
 
-
 }
+

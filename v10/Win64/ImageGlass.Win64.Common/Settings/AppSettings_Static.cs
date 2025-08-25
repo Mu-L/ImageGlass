@@ -167,7 +167,7 @@ public partial class AppSettings
 
 
     /// <summary>
-    /// Loads theme pack <see cref="Config.Theme"/>.
+    /// Loads theme pack <see cref="AP.Theme"/>.
     /// </summary>
     /// <param name="darkMode">
     /// Determine which theme should be loaded: <see cref="DarkTheme"/> or <see cref="LightTheme"/>.

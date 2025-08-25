@@ -50,21 +50,6 @@ public partial class App : Application, INotifyPropertyChanged
 
 
     /// <summary>
-    /// Gets the arguments passed to the application.
-    /// </summary>
-    public static string[] Args { get; set; } = [];
-
-
-
-
-    /// <summary>
-    /// Gets the app settings.
-    /// </summary>
-    public static AppSettings Config { get; set; } = new();
-
-
-
-    /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>
@@ -83,8 +68,8 @@ public partial class App : Application, INotifyPropertyChanged
 
     private void UIReporter_Reported(AppUpdatedEventArgs e)
     {
-        if (e.AccentColor != null) App.Config.AccentColor = e.AccentColor.Value;
-        if (e.IsDarkMode != null) App.Config.IsDarkMode = e.IsDarkMode.Value;
+        if (e.AccentColor != null) AP.Config.AccentColor = e.AccentColor.Value;
+        if (e.IsDarkMode != null) AP.Config.IsDarkMode = e.IsDarkMode.Value;
     }
 
     private void UiSettings_ColorValuesChanged(UISettings sender, object args)
@@ -125,7 +110,7 @@ public partial class App : Application, INotifyPropertyChanged
     /// <param name="e">Details about the launch request and process.</param>
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs e)
     {
-        Args = Environment.GetCommandLineArgs();
+        AP.Args = Environment.GetCommandLineArgs();
 
         _winMain = new MainWindow();
         _winMain.Closed += Window_Closed;
@@ -136,21 +121,21 @@ public partial class App : Application, INotifyPropertyChanged
 
 
         // load app configs
-        App.Config = AppSettings.Load(AppSettings.CONFIG_USER);
+        AP.Config = AppSettings.Load(AppSettings.CONFIG_USER);
 
         // get accent color & color mode
         var accentColor = _uiSystem.GetColorValue(UIColorType.Accent);
         var isDarkMode = root.ActualTheme != ElementTheme.Light;
 
         // load theme for the first time
-        Config.LoadCurrentTheme(isDarkMode, accentColor, true, true, false);
+        AP.Config.LoadCurrentTheme(isDarkMode, accentColor, true, true, false);
 
 
         // get foreground shell
-        if (App.Config.ShouldUseExplorerSortOrder)
+        if (AP.Config.ShouldUseExplorerSortOrder)
         {
             using var shell = new EggShell();
-            Local.ForegroundShell = shell.GetForegroundWindowView();
+            AP.ForegroundShell = shell.GetForegroundWindowView();
         }
 
 
@@ -178,9 +163,9 @@ public partial class App : Application, INotifyPropertyChanged
         await SaveConfigsOnClosing();
 
         // dispose foreground shell
-        Local.ForegroundShell = null;
+        AP.ForegroundShell = null;
 
-        Local.Photos.Dispose();
+        AP.Photos.Dispose();
         WindowColorProfileProvider.Instance.Dispose();
     }
 
@@ -193,12 +178,12 @@ public partial class App : Application, INotifyPropertyChanged
         //}
 
 
-        App.Config.LastSeenImagePath = Local.Photos.GetFilePath(Local.Photos.CurrentIndex);
+        AP.Config.LastSeenImagePath = AP.Photos.GetFilePath(AP.Photos.CurrentIndex);
         //Config.ZoomLockValue = PicMain.ZoomFactor * 100f;
 
 
         // save config to file
-        await App.Config.SaveAsync();
+        await AP.Config.SaveAsync();
 
 
         //// cleaning

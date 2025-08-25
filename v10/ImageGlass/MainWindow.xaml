@@ -9,6 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:ImageGlass.Win64.UI"
     xmlns:win64="using:ImageGlass.WinNT"
+    xmlns:win64Common="using:ImageGlass.Win64.Common"
     Title="{x:Bind VM.Title}"
     x:DefaultBindMode="OneWay"
     Closed="Window_Closed"
@@ -43,7 +44,7 @@
                 Width="20"
                 Margin="5,0,0,0"
                 Source="/Assets/Square44x44Logo.png"
-                Visibility="{x:Bind local:App.Config.ShowAppIcon}" />
+                Visibility="{x:Bind win64Common:AP.Config.ShowAppIcon}" />
 
             <TextBlock
                 Grid.Column="1"
@@ -61,8 +62,8 @@
             x:Name="ToolbarMain"
             Grid.Row="1"
             Canvas.ZIndex="90"
-            ItemsSource="{x:Bind local:App.Config.ToolbarButtons}"
-            Theme="{x:Bind local:App.Config.Theme, Mode=OneWay}" />
+            ItemsSource="{x:Bind win64Common:AP.Config.ToolbarButtons}"
+            Theme="{x:Bind win64Common:AP.Config.Theme, Mode=OneWay}" />
 
 
         <!--  Gallery  -->
@@ -72,8 +73,8 @@
             Grid.Column="1"
             Canvas.ZIndex="80"
             ItemClicked="Gallery_ItemClicked"
-            Theme="{x:Bind local:App.Config.Theme}"
-            VM="{x:Bind local:Local.Photos, Mode=OneWay}" />
+            Theme="{x:Bind win64Common:AP.Config.Theme}"
+            VM="{x:Bind win64Common:AP.Photos, Mode=OneWay}" />
 
 
         <!--  Viewer  -->
@@ -81,15 +82,15 @@
             x:Name="Viewer"
             Grid.Row="2"
             AllowDrop="True"
-            CheckerboardMode="{x:Bind local:App.Config.CheckerboardMode}"
+            CheckerboardMode="{x:Bind win64Common:AP.Config.CheckerboardMode}"
             DragOver="Viewer_DragOver"
             Drop="Viewer_Drop"
-            EnableDebug="{x:Bind local:App.Config.EnableDebug}"
+            EnableDebug="{x:Bind win64Common:AP.Config.EnableDebug}"
             EnableSelection="False"
-            PanSpeed="{x:Bind local:App.Config.PanSpeed}"
-            ZoomLevels="{x:Bind local:App.Config.ZoomLevels}"
-            ZoomMode="{x:Bind local:App.Config.ZoomMode}"
-            ZoomSpeed="{x:Bind local:App.Config.ZoomSpeed}" />
+            PanSpeed="{x:Bind win64Common:AP.Config.PanSpeed}"
+            ZoomLevels="{x:Bind win64Common:AP.Config.ZoomLevels}"
+            ZoomMode="{x:Bind win64Common:AP.Config.ZoomMode}"
+            ZoomSpeed="{x:Bind win64Common:AP.Config.ZoomSpeed}" />
 
     </Grid>
 

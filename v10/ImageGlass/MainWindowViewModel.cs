@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using ImageGlass.Common;
+using ImageGlass.Win64.Common;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -100,8 +101,8 @@ public partial class MainWindowViewModel(MainWindow win) : DisposableImpl
     {
         get
         {
-            if (App.Config.WindowBackdrop == BackdropStyle.None) return null;
-            if (App.Config.WindowBackdrop == BackdropStyle.Acrylic)
+            if (AP.Config.WindowBackdrop == BackdropStyle.None) return null;
+            if (AP.Config.WindowBackdrop == BackdropStyle.Acrylic)
             {
                 return new DesktopAcrylicBackdrop();
             }
@@ -109,7 +110,7 @@ public partial class MainWindowViewModel(MainWindow win) : DisposableImpl
             {
                 return new MicaBackdrop()
                 {
-                    Kind = App.Config.WindowBackdrop == BackdropStyle.MicaAlt
+                    Kind = AP.Config.WindowBackdrop == BackdropStyle.MicaAlt
                         ? MicaKind.BaseAlt
                         : MicaKind.Base
                 };

@@ -117,26 +117,26 @@ public sealed partial class MainWindow : Window
 
 
         // 4. load single file path
-        var imageIndex = Local.Photos.IndexOf(path);
+        var imageIndex = AP.Photos.IndexOf(path);
 
         // 4.1 get foreground shell
-        if (App.Config.ShouldUseExplorerSortOrder)
+        if (AP.Config.ShouldUseExplorerSortOrder)
         {
             using var shell = new EggShell();
-            Local.ForegroundShell = shell.GetForegroundWindowView();
+            AP.ForegroundShell = shell.GetForegroundWindowView();
         }
 
         // 4.2 save init input path
-        Local.UpdateInputImagePath(path);
+        AP.UpdateInputImagePath(path);
 
 
         // 4.3 The file is located another folder, load the entire folder
-        if (imageIndex == -1 || Local.CanUseForegroundShell())
+        if (imageIndex == -1 || AP.CanUseForegroundShell())
         {
             PrepareLoadPhoto([path], false);
         }
         // 4.4 The file is in current folder AND it is the viewing image
-        else if (Local.Photos.CurrentIndex == imageIndex)
+        else if (AP.Photos.CurrentIndex == imageIndex)
         {
             //do nothing
         }
@@ -186,7 +186,7 @@ public sealed partial class MainWindow : Window
 
     private void Gallery_ItemClicked(IgGalleryItem sender, EventArgs args)
     {
-        var photoIndex = Local.Photos.IndexOf(sender.VM.FilePath);
+        var photoIndex = AP.Photos.IndexOf(sender.VM.FilePath);
         ViewByIndex(photoIndex);
     }
 
@@ -201,20 +201,20 @@ public sealed partial class MainWindow : Window
 
     private void LoadImagesFromCmdArgs()
     {
-        var pathToLoad = Local.InputImagePathFromArgs;
+        var pathToLoad = AP.InputImagePathFromArgs;
 
         // check for last seen image
         if (string.IsNullOrEmpty(pathToLoad)
-            && App.Config.ShouldOpenLastSeenImage
-            && BHelper.CheckPath(App.Config.LastSeenImagePath) == PathType.File)
+            && AP.Config.ShouldOpenLastSeenImage
+            && BHelper.CheckPath(AP.Config.LastSeenImagePath) == PathType.File)
         {
-            pathToLoad = App.Config.LastSeenImagePath;
+            pathToLoad = AP.Config.LastSeenImagePath;
         }
 
         // check for Welcome image
         if (string.IsNullOrEmpty(pathToLoad))
         {
-            if (App.Config.ShowWelcomeImage)
+            if (AP.Config.ShowWelcomeImage)
             {
                 pathToLoad = BHelper.BaseDir("default.webp");
             }
@@ -233,27 +233,27 @@ public sealed partial class MainWindow : Window
     private void PrepareLoadPhoto(string[] inputPaths, bool disposeForegroundShell)
     {
         // dispose the foreground shell if requested
-        if (disposeForegroundShell) Local.ForegroundShell = null;
+        if (disposeForegroundShell) AP.ForegroundShell = null;
 
 
         // check if we should load images from foreground window
-        var useForegroundWindow = Local.CanUseForegroundShell();
+        var useForegroundWindow = AP.CanUseForegroundShell();
         var foregroundShell = useForegroundWindow
-            ? Local.ForegroundShell
+            ? AP.ForegroundShell
             : null;
 
 
         // start loading files
-        var initPhoto = Local.Photos.StartLoadingFiles(inputPaths, new FileShellSearchOptions()
+        var initPhoto = AP.Photos.StartLoadingFiles(inputPaths, new FileShellSearchOptions()
         {
-            AllowedExtensions = App.Config.FileFormats,
-            UseExplorerSortOrder = App.Config.ShouldUseExplorerSortOrder,
+            AllowedExtensions = AP.Config.FileFormats,
+            UseExplorerSortOrder = AP.Config.ShouldUseExplorerSortOrder,
             ForegroundShell = foregroundShell,
-            SearchSubDirectories = App.Config.EnableRecursiveLoading,
-            GroupByDir = App.Config.ShouldGroupImagesByDirectory,
-            IncludeHidden = App.Config.ShouldLoadHiddenImages,
-            OrderBy = App.Config.ImageLoadingOrder,
-            OrderType = App.Config.ImageLoadingOrderType,
+            SearchSubDirectories = AP.Config.EnableRecursiveLoading,
+            GroupByDir = AP.Config.ShouldGroupImagesByDirectory,
+            IncludeHidden = AP.Config.ShouldLoadHiddenImages,
+            OrderBy = AP.Config.ImageLoadingOrder,
+            OrderType = AP.Config.ImageLoadingOrderType,
         }, _searchProgress);
 
 
@@ -263,28 +263,28 @@ public sealed partial class MainWindow : Window
 
     private void Files_Searched(FileSearchingEventArgs e)
     {
-        var isEmptyList = Local.Photos.Count == 0;
-        Local.Photos.Add(e.Results);
+        var isEmptyList = AP.Photos.Count == 0;
+        AP.Photos.Add(e.Results);
 
         // if we haven't found current index for the init photo yet
-        if (Local.Photos.InitPhoto is not null && Local.Photos.CurrentIndex == -1)
+        if (AP.Photos.InitPhoto is not null && AP.Photos.CurrentIndex == -1)
         {
             // find index of the init photo and select it
-            _ = Local.Photos.Select(Local.Photos.InitPhoto.FilePath);
+            _ = AP.Photos.Select(AP.Photos.InitPhoto.FilePath);
 
             // save the init photo to the list
-            if (Local.Photos.CurrentIndex >= 0)
+            if (AP.Photos.CurrentIndex >= 0)
             {
-                Local.Photos.Items[Local.Photos.CurrentIndex]?.Dispose();
-                Local.Photos.Items[Local.Photos.CurrentIndex] = Local.Photos.InitPhoto;
-                Local.Photos.Items[Local.Photos.CurrentIndex].IsCurrent = true;
+                AP.Photos.Items[AP.Photos.CurrentIndex]?.Dispose();
+                AP.Photos.Items[AP.Photos.CurrentIndex] = AP.Photos.InitPhoto;
+                AP.Photos.Items[AP.Photos.CurrentIndex].IsCurrent = true;
             }
         }
         // display the first file in a folder
         else
         {
-            Local.Photos.InitPhoto = Local.Photos.Select(0);
-            ViewPhoto(Local.Photos.InitPhoto);
+            AP.Photos.InitPhoto = AP.Photos.Select(0);
+            ViewPhoto(AP.Photos.InitPhoto);
         }
 
 
@@ -293,7 +293,7 @@ public sealed partial class MainWindow : Window
         {
             // make sure gallery is rendered
             Gallery.UpdateLayout();
-            Gallery.ScrollToItem(Local.Photos.CurrentIndex);
+            Gallery.ScrollToItem(AP.Photos.CurrentIndex);
         }
     }
 
@@ -302,14 +302,14 @@ public sealed partial class MainWindow : Window
     {
         if (photoIndex < 0) return;
 
-        var step = photoIndex - Local.Photos.CurrentIndex;
+        var step = photoIndex - AP.Photos.CurrentIndex;
         ViewByStep(step);
     }
 
 
     private void ViewByStep(int step)
     {
-        var photo = Local.Photos.GetByStep(step, true);
+        var photo = AP.Photos.GetByStep(step, true);
         ViewPhoto(photo);
     }
 
@@ -319,7 +319,7 @@ public sealed partial class MainWindow : Window
         VM.Title = photo?.FilePath;
         Viewer.SetPhoto(photo);
 
-        Gallery.ScrollToItem(Local.Photos.CurrentIndex);
+        Gallery.ScrollToItem(AP.Photos.CurrentIndex);
     }
 
 
