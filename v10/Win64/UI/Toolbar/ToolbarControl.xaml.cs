@@ -49,27 +49,6 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
     #region Dependency Properties
 
     /// <summary>
-    /// Gets, sets the theme instance.
-    /// </summary>
-    public IgTheme Theme
-    {
-        get => (IgTheme)GetValue(ThemeProperty);
-        set
-        {
-            value.PropertyChanged -= Theme_PropertyChanged;
-            SetValue(ThemeProperty, value);
-            value.PropertyChanged += Theme_PropertyChanged;
-        }
-    }
-    public static readonly DependencyProperty ThemeProperty = DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(ToolbarControl), new PropertyMetadata(new IgTheme(), OnThemeChanged));
-    private static void OnThemeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        if (d is not ToolbarControl toolbar) return;
-        toolbar.UpdateItemsTheme();
-    }
-
-
-    /// <summary>
     /// Gets, sets the items source of toolbar.
     /// </summary>
     public IEnumerable ItemsSource
@@ -113,10 +92,6 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
         HandleOverflow();
     }
 
-    private void Theme_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        UpdateItemsTheme();
-    }
 
     private void ToolbarItem_Loaded(object sender, RoutedEventArgs e)
     {
@@ -128,9 +103,6 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
         {
             value.RenderedWidth = fe.ActualWidth;
         }
-
-        // set item theme
-        item.Theme = Theme;
     }
 
     private void MnuOverflow_Opening(object sender, object e)
@@ -314,30 +286,6 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
             : Visibility.Collapsed;
     }
 
-
-    private void UpdateItemsTheme()
-    {
-        foreach (var meta in _itemsMetadata)
-        {
-            IIgToolbarItem? item = null;
-
-            // primary items
-            if (RepeaterPrimaryItems.TryGetElement(meta.Value.PrimaryItemIndex) is FrameworkElement priFe)
-            {
-                item = (IIgToolbarItem)priFe.FindName(_PART_ItemButton)
-                    ?? (IIgToolbarItem)priFe.FindName(_PART_ItemSeparator);
-            }
-            // secondary items
-            else if (RepeaterSecondaryItems.TryGetElement(meta.Value.SecondaryItemIndex) is FrameworkElement secFe)
-            {
-                item = (IIgToolbarItem)secFe.FindName(_PART_ItemButton)
-                    ?? (IIgToolbarItem)secFe.FindName(_PART_ItemSeparator);
-            }
-
-            // update theme
-            if (item != null) item.Theme = Theme;
-        }
-    }
 
 }
 

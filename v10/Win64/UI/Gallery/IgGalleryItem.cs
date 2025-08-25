@@ -16,7 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Win64.Common;
 using ImageGlass.Win64.Common.Photoing;
+using System.ComponentModel;
 using Windows.UI;
 
 namespace ImageGlass.Win64.UI;
@@ -45,8 +47,7 @@ public partial class IgGalleryItem : IgButton
             }
         }
     }
-
-    private void VM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void VM_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Photo.IsCurrent))
         {
@@ -63,22 +64,22 @@ public partial class IgGalleryItem : IgButton
 
     protected override Color GetColorForText()
     {
-        return Theme.ColorBrushes.GalleryTextColor;
+        return AP.Config.Theme.ColorBrushes.GalleryTextColor;
     }
 
     protected override Color GetColorForHovered()
     {
-        return Theme.ColorBrushes.GalleryItemHoverColor;
+        return AP.Config.Theme.ColorBrushes.GalleryItemHoverColor;
     }
 
     protected override Color GetColorForPressed()
     {
-        return Theme.ColorBrushes.GalleryItemActiveColor;
+        return AP.Config.Theme.ColorBrushes.GalleryItemActiveColor;
     }
 
     protected override Color GetColorForChecked()
     {
-        return Theme.ColorBrushes.GalleryItemSelectedColor;
+        return AP.Config.Theme.ColorBrushes.GalleryItemSelectedColor;
     }
 
 }

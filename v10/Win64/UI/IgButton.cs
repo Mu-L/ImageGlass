@@ -47,32 +47,6 @@ public partial class IgButton : Button, INotifyPropertyChanged
     #region Public Properties
 
     /// <summary>
-    /// Gets, sets the theme instance.
-    /// </summary>
-    public IgTheme Theme
-    {
-        get => (IgTheme)GetValue(ThemeProperty);
-        set
-        {
-            value.PropertyChanged -= Theme_PropertyChanged;
-            SetValue(ThemeProperty, value);
-            value.PropertyChanged += Theme_PropertyChanged;
-
-            UpdateStyle(true);
-        }
-    }
-    public static readonly DependencyProperty ThemeProperty = DependencyProperty.Register(nameof(Theme), typeof(IgTheme), typeof(IgButton), new PropertyMetadata(new IgTheme()));
-    private void Theme_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(Theme.ColorBrushes))
-        {
-            UpdateStyle(true);
-        }
-    }
-
-
-
-    /// <summary>
     /// Gets, sets the value indicating that the control is checked on click.
     /// </summary>
     public bool IsToggle
@@ -101,6 +75,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
             {
                 _isChecked = value;
                 OnPropertyChanged();
+                UpdateStyle();
             }
         }
     }
@@ -152,6 +127,13 @@ public partial class IgButton : Button, INotifyPropertyChanged
         Loaded += IgButton_Loaded;
         Unloaded += IgButton_Unloaded;
         Click += IgButton_Click;
+
+        AP.ThemeChanged += AP_ThemeChanged;
+    }
+
+    private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
+    {
+        UpdateStyle(true);
     }
 
 
@@ -274,17 +256,17 @@ public partial class IgButton : Button, INotifyPropertyChanged
 
     protected virtual Color GetColorForHovered()
     {
-        return Theme.ColorBrushes.ToolbarItemHoverColor;
+        return AP.Config.Theme.ColorBrushes.ToolbarItemHoverColor;
     }
 
     protected virtual Color GetColorForPressed()
     {
-        return Theme.ColorBrushes.ToolbarItemActiveColor;
+        return AP.Config.Theme.ColorBrushes.ToolbarItemActiveColor;
     }
 
     protected virtual Color GetColorForChecked()
     {
-        return Theme.ColorBrushes.ToolbarItemSelectedColor;
+        return AP.Config.Theme.ColorBrushes.ToolbarItemSelectedColor;
     }
 
 

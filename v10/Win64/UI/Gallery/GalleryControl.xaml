@@ -6,9 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:photoing="using:ImageGlass.Win64.Common.Photoing"
-    xmlns:photoing1="using:ImageGlass.Common.Photoing"
-    xmlns:win64Common="using:ImageGlass.Win64.Common"
+    xmlns:w64c="using:ImageGlass.Win64.Common"
+    xmlns:w64photo="using:ImageGlass.Win64.Common.Photoing"
     x:Name="Root"
     d:DataContext="{d:DesignInstance local:GalleryControl,
                                      IsDesignTimeCreatable=True}"
@@ -17,14 +16,11 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <local:SelectionToBackgroundConverter x:Key="SelectionToBackgroundConverter" />
-        <local:SelectionToBorderConverter x:Key="SelectionToBorderConverter" />
-
 
         <!--  Gallery Item: Template  -->
         <DataTemplate
             x:Key="GalleryItemTemplate"
-            x:DataType="photoing:Photo"
+            x:DataType="w64photo:Photo"
             x:DefaultBindMode="OneWay">
             <local:IgGalleryItem
                 Width="{StaticResource GalleryThumbnailSize}"
@@ -39,7 +35,6 @@
                 IsChecked="{x:Bind IsCurrent}"
                 IsTabStop="False"
                 Style="{StaticResource IgButtonStyle}"
-                Theme="{x:Bind win64Common:AP.Config.Theme}"
                 VM="{x:Bind}">
 
                 <Grid VerticalAlignment="Stretch">
@@ -92,7 +87,7 @@
     <ScrollViewer
         x:Name="GalleryScrollViewer"
         Padding="5"
-        Background="{x:Bind Theme.ColorBrushes.GalleryBgColor, Converter={StaticResource ColorToBrushConverter}}"
+        Background="{x:Bind w64c:AP.Config.Theme.ColorBrushes.GalleryBgColor, Converter={StaticResource ColorToBrushConverter}}"
         HorizontalScrollBarVisibility="Auto"
         HorizontalScrollMode="Enabled"
         VerticalScrollBarVisibility="Auto"

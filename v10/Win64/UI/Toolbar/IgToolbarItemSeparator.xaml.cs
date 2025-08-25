@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml.Controls;
 using System.ComponentModel;
@@ -28,30 +27,11 @@ namespace ImageGlass.Win64.UI;
 public partial class IgToolbarItemSeparator : UserControl, IIgToolbarItem
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected IgTheme _theme = new();
     protected ToolbarItemModel _vm = new();
 
 
     // Public Properties
     #region Public Properties
-
-    /// <summary>
-    /// Gets, sets the theme instance.
-    /// </summary>
-    public IgTheme Theme
-    {
-        get => _theme;
-        set
-        {
-            if (_theme != value)
-            {
-                _theme = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
 
     /// <summary>
     /// Gets, sets view model for the control.

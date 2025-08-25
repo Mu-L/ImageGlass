@@ -8,6 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:w64c="using:ImageGlass.Win64.Common"
     x:DefaultBindMode="OneWay"
     DataContext="{x:Bind VM, Mode=OneWay}"
     mc:Ignorable="d">
@@ -28,7 +29,6 @@
         Loaded="BtnActivator_Loaded"
         Style="{StaticResource IgButtonStyle}"
         Text="{x:Bind VM.Text}"
-        Theme="{x:Bind Theme}"
         ToolTipService.ToolTip="{x:Bind VM.Text}">
         <StackPanel Orientation="Horizontal" Spacing="5">
             <ImageIcon
@@ -39,7 +39,7 @@
             <TextBlock
                 Name="PART_ButtonText"
                 VerticalAlignment="Center"
-                Foreground="{x:Bind Theme.ColorBrushes.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
+                Foreground="{x:Bind w64c:AP.Config.Theme.ColorBrushes.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
                 Text="{x:Bind VM.Text}"
                 Visibility="{x:Bind VM.IsTextVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
         </StackPanel>

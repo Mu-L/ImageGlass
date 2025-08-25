@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
 using ImageGlass.Win64.Common;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -26,7 +25,6 @@ namespace ImageGlass.Win64.UI;
 interface IIgToolbarItem : INotifyPropertyChanged
 {
     ToolbarItemModel VM { get; set; }
-    IgTheme Theme { get; set; }
 
     void OnPropertyChanged([CallerMemberName] string? propertyName = null);
 }

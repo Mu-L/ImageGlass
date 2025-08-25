@@ -5,8 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ImageGlass"
     xmlns:revealBrushPresent="using:Microsoft.UI.Xaml"
-    xmlns:ui="using:ImageGlass.Win64.UI"
-    xmlns:win64Common="using:ImageGlass.Win64.Common">
+    xmlns:w64c="using:ImageGlass.Win64.Common">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -17,39 +16,14 @@
 
 
 
-            <!--  Global resource  -->
-            <win64Common:IgTheme x:Key="IG_AppTheme" />
-
-
             <!--  Xaml Converters  -->
-            <win64Common:ColorToBrushConverter x:Key="ColorToBrushConverter" />
-            <win64Common:HexStringToBrushConverter x:Key="HexStringToBrushConverter" />
+            <w64c:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+            <w64c:HexStringToBrushConverter x:Key="HexStringToBrushConverter" />
 
 
             <!--  Gallery  -->
             <x:Double x:Key="GalleryThumbnailSize">70</x:Double>
             <x:Double x:Key="ToolbarIconSize">24</x:Double>
-
-
-            <!--  IgButton Styles  -->
-            <SolidColorBrush
-                x:Key="IgButtonBorderSelected"
-                Opacity="0.5"
-                Color="{ThemeResource SystemAccentColor}" />
-
-            <SolidColorBrush x:Key="IgButtonBackground" Color="Transparent" />
-            <SolidColorBrush
-                x:Key="IgButtonBackgroundHovered"
-                Opacity="0.2"
-                Color="{ThemeResource SystemAccentColor}" />
-            <SolidColorBrush
-                x:Key="IgButtonBackgroundPressed"
-                Opacity="0.35"
-                Color="{ThemeResource SystemAccentColor}" />
-            <SolidColorBrush
-                x:Key="IgButtonBackgroundSelected"
-                Opacity="0.3"
-                Color="{ThemeResource SystemAccentColor}" />
 
 
             <!--  Style: IgButtonStyle  -->

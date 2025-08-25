@@ -8,9 +8,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="using:ImageGlass.Win64.UI"
-    xmlns:win64Common="using:ImageGlass.Win64.Common"
+    xmlns:w64c="using:ImageGlass.Win64.Common"
     x:Name="Root"
+    d:DataContext="{d:DesignInstance local:ToolbarControl,
+                                     IsDesignTimeCreatable=True}"
     x:DefaultBindMode="OneWay"
     AutomationProperties.AutomationControlType="ToolBar"
     Unloaded="UserControl_Unloaded"
@@ -25,10 +26,10 @@
         <!--  ToolbarItemTemplate  -->
         <DataTemplate
             x:Key="ToolbarItemTemplate"
-            x:DataType="win64Common:ToolbarItemModel"
+            x:DataType="w64c:ToolbarItemModel"
             x:DefaultBindMode="OneWay">
             <ctk:SwitchPresenter
-                TargetType="win64Common:ToolbarItemType"
+                TargetType="w64c:ToolbarItemType"
                 Visibility="{x:Bind IsOverflow, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"
                 Value="{x:Bind Type}">
                 <!--  Button  -->
@@ -59,7 +60,7 @@
         Padding="5"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
-        Background="{x:Bind Theme.Colors.ToolbarBgColor, Converter={StaticResource HexStringToBrushConverter}}">
+        Background="{x:Bind w64c:AP.Config.Theme.Colors.ToolbarBgColor, Converter={StaticResource HexStringToBrushConverter}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
@@ -98,14 +99,13 @@
                 x:Name="BtnOverflowMenu"
                 Padding="5"
                 Style="{StaticResource IgButtonStyle}"
-                Theme="{x:Bind Theme}"
                 ToolTipService.ToolTip="View more buttons"
                 Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal" Spacing="4">
                     <Viewbox Height="{StaticResource ToolbarIconSize}" VerticalAlignment="Center">
                         <FontIcon
                             AutomationProperties.AccessibilityView="Raw"
-                            Foreground="{x:Bind Theme.ColorBrushes.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
+                            Foreground="{x:Bind w64c:AP.Config.Theme.ColorBrushes.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
                             Glyph="&#xE712;" />
                     </Viewbox>
                 </StackPanel>
@@ -134,9 +134,9 @@
 
 
             <!--  Menu button  -->
-            <local:IgToolbarItemButton x:Name="BtnMainMenu" Theme="{x:Bind Theme, Mode=OneWay}">
+            <local:IgToolbarItemButton x:Name="BtnMainMenu">
                 <local:IgToolbarItemButton.VM>
-                    <win64Common:ToolbarItemModel Image="{x:Bind local:ToolbarControl.MainMenuIconName}" Text="Main Menu" />
+                    <w64c:ToolbarItemModel Image="{x:Bind local:ToolbarControl.MainMenuIconName}" Text="Main Menu" />
                 </local:IgToolbarItemButton.VM>
 
 

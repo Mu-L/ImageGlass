@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Win64.Common;
 using ImageGlass.Win64.Common.Photoing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -37,32 +36,13 @@ public sealed partial class GalleryControl : UserControl, INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public event TypedEventHandler<IgGalleryItem, EventArgs>? ItemClicked;
 
-    private IgTheme _theme = new();
     private PhotoManager _vm = new();
-
     private Progress<ThumbnailLoadedEventArgs> _progressThumbnailLoader;
 
 
 
     // Public Properties
     #region Public Properties
-
-    /// <summary>
-    /// Gets, sets the theme of this control.
-    /// </summary>
-    public IgTheme Theme
-    {
-        get => _theme;
-        set
-        {
-            if (_theme != value)
-            {
-                _theme = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
 
     /// <summary>
     /// Gets, sets view model for this control.

@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Win64.Common;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -41,24 +42,6 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
 
     // Public Properties
     #region Public Properties
-
-    /// <summary>
-    /// Gets, sets the theme instance.
-    /// </summary>
-    public IgTheme Theme
-    {
-        get => _theme;
-        set
-        {
-            if (_theme != value)
-            {
-                _theme = value;
-                OnPropertyChanged();
-                UpdateIcon();
-            }
-        }
-    }
-
 
     /// <summary>
     /// Gets, sets view model for the control.
@@ -92,8 +75,9 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     public IgToolbarItemButton()
     {
         InitializeComponent();
-    }
 
+        AP.ThemeChanged += AP_ThemeChanged;
+    }
 
     /// <summary>
     /// Emits event <see cref="PropertyChanged"/>.
@@ -104,7 +88,12 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     }
 
 
-    private void BtnActivator_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void BtnActivator_Loaded(object sender, RoutedEventArgs e)
+    {
+        UpdateIcon();
+    }
+
+    private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {
         UpdateIcon();
     }
@@ -127,11 +116,11 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
             if (!Enum.TryParse<IgThemeIcon>(VM.Image, out var themeIconNameEnum)) return;
 
             // get icon file name from theme
-            var themeIconName = Theme.GetToolbarIconPath(themeIconNameEnum);
+            var themeIconName = AP.Config.Theme.GetToolbarIconPath(themeIconNameEnum);
             if (string.IsNullOrWhiteSpace(themeIconName)) return;
 
             // theme icon path
-            svgPath = Path.Combine(Theme.FolderPath, themeIconName);
+            svgPath = Path.Combine(AP.Config.Theme.FolderPath, themeIconName);
             if (!File.Exists(svgPath)) return;
 
             // set icon
