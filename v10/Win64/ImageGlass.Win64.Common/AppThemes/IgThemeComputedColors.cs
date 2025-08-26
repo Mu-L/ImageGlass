@@ -22,7 +22,7 @@ using Windows.UI;
 namespace ImageGlass.Win64.Common;
 
 
-public partial class IgThemeComputedColors : Notify
+public partial class IgThemeComputedColors : IgReactive
 {
     // Viewer
     public Color TextColor { get; set; } = new();

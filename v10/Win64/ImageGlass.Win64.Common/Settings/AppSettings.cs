@@ -29,7 +29,7 @@ namespace ImageGlass.Win64.Common;
 public partial class AppSettingsJsonContext : JsonSerializerContext { }
 
 
-public partial class AppSettings : Notify
+public partial class AppSettings : IgReactive
 {
     public ConfigMetadata _Metadata { get; set; } = new();
 

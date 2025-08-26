@@ -25,7 +25,7 @@ namespace ImageGlass.Win64.Common;
 /// <summary>
 /// Toolbar item model
 /// </summary>
-public partial class ToolbarItemModel : Notify
+public partial class ToolbarItemModel : IgReactive
 {
     protected string _id = "";
     protected ToolbarItemType _type = ToolbarItemType.Button;

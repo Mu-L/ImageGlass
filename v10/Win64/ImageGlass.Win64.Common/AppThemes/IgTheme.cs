@@ -32,7 +32,7 @@ public partial class IgThemeJsonContext : JsonSerializerContext { }
 /// <summary>
 /// Represents a theme pack for the app.
 /// </summary>
-public partial class IgTheme : Notify
+public partial class IgTheme : IgReactive
 {
     private IgThemeComputedColors _computedColors = new();
 

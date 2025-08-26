@@ -37,7 +37,6 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected IgTheme _theme = new();
     protected FlyoutBase? _flyout = null;
     protected ToolbarItemModel _vm = new();
 

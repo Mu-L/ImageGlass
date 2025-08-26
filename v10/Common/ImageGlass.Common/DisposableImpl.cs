@@ -26,7 +26,7 @@ namespace ImageGlass.Common;
 /// and <see cref="INotifyPropertyChanged"/> interface,
 /// including support for managed and unmanaged resource cleanup.
 /// </summary>
-public class DisposableImpl : Notify, IDisposable
+public class DisposableImpl : IgReactive, IDisposable
 {
     #region IDisposable Disposing
 

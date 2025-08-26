@@ -33,7 +33,6 @@ public partial class IgButton : Button, INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected IgTheme _theme = new();
     protected string _id = "";
     protected string _text = "";
     protected bool _isToggle = false;

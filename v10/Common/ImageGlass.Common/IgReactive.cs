@@ -25,7 +25,7 @@ namespace ImageGlass.Common;
 /// <summary>
 /// Provides a base implementation of <see cref="INotifyPropertyChanged"/> interface.
 /// </summary>
-public class Notify : INotifyPropertyChanged
+public class IgReactive : INotifyPropertyChanged
 {
     // to manage PropertyChanged events
     protected List<PropertyChangedEventHandler> _propertyChangedEvent = new();
