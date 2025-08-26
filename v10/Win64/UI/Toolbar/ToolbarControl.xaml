@@ -27,28 +27,28 @@
             x:Key="ToolbarItemTemplate"
             x:DataType="w64c:ToolbarItemModel"
             x:DefaultBindMode="OneWay">
+
             <ctk:SwitchPresenter
-                TargetType="w64c:ToolbarItemType"
+                TargetType="x:Boolean"
                 Visibility="{x:Bind IsOverflow, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"
-                Value="{x:Bind Type}">
-                <!--  Button  -->
-                <ctk:Case Value="Button">
-                    <local:IgToolbarItemButton
-                        Name="PART_ItemButton"
-                        Loaded="ToolbarItem_Loaded"
-                        VM="{x:Bind}" />
-                </ctk:Case>
-
-
+                Value="{x:Bind IsSeparator}">
                 <!--  Separator  -->
-                <ctk:Case Value="Separator">
+                <ctk:Case Value="True">
                     <local:IgToolbarItemSeparator
                         Name="PART_ItemSeparator"
                         Loaded="ToolbarItem_Loaded"
                         VM="{x:Bind}" />
                 </ctk:Case>
 
+                <!--  Button  -->
+                <ctk:Case IsDefault="True">
+                    <local:IgToolbarItemButton
+                        Name="PART_ItemButton"
+                        Loaded="ToolbarItem_Loaded"
+                        VM="{x:Bind}" />
+                </ctk:Case>
             </ctk:SwitchPresenter>
+
         </DataTemplate>
     </UserControl.Resources>
 

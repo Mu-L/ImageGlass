@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using CommunityToolkit.WinUI.Controls;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -89,15 +88,16 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
     #endregion // INotifyPropertyChanged Implementation
 
 
-    private Dictionary<int, ToolbarItemMetadata> _itemsMetadata = [];
-    public static double ItemSpacing => 4;
     public static string _PART_ItemButton => "PART_ItemButton";
     public static string _PART_ItemSeparator => "PART_ItemSeparator";
+    public static double ItemSpacing => 4;
     public static string MainMenuIconName => nameof(IgThemeIcon.MainMenu);
 
-    public ObservableCollection<ToolbarItemModel> PrimaryItems { get; } = [];
-    public ObservableCollection<ToolbarItemModel> PrimaryItemsOverflow { get; } = [];
-    public ObservableCollection<ToolbarItemModel> SecondaryItems { get; } = [];
+
+    private readonly Dictionary<int, ToolbarItemMetadata> _itemsMetadata = [];
+    public readonly ObservableCollection<ToolbarItemModel> PrimaryItems = [];
+    public readonly ObservableCollection<ToolbarItemModel> PrimaryItemsOverflow = [];
+    public readonly ObservableCollection<ToolbarItemModel> SecondaryItems = [];
 
 
     // Dependency Properties
@@ -152,9 +152,9 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
         if (sender is not FrameworkElement fe) return;
 
         // save toolbar item width
-        if (_itemsMetadata.TryGetValue(item.VM.SourceIndex, out ToolbarItemMetadata? value))
+        if (_itemsMetadata.TryGetValue(item.VM.SourceIndex, out var meta))
         {
-            value.RenderedWidth = fe.ActualWidth;
+            meta.RenderedWidth = fe.ActualWidth;
         }
     }
 
@@ -172,7 +172,7 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
             ImageSource? imgSrc = null;
 
             // 1. Separator
-            if (item.Type == ToolbarItemType.Separator)
+            if (item.IsSeparator)
             {
                 mnu.Items.Add(new MenuFlyoutSeparator());
                 continue;
@@ -181,8 +181,8 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
             // 2. Button item
             // get toolbar item metadata
             if (!_itemsMetadata.TryGetValue(item.SourceIndex, out var meta)) continue;
-            if (RepeaterPrimaryItems.TryGetElement(meta.PrimaryItemIndex) is not SwitchPresenter sp) continue;
-            if (sp.FindName(_PART_ItemButton) is not IgToolbarItemButton btnEl) continue;
+            if (RepeaterPrimaryItems.TryGetElement(meta.PrimaryItemIndex) is not FrameworkElement fe) continue;
+            if (fe.FindName(_PART_ItemButton) is not IgToolbarItemButton btnEl) continue;
 
 
             // get image source from toolbar item
