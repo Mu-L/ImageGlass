@@ -23,6 +23,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Windows.UI;
@@ -31,7 +32,62 @@ namespace ImageGlass.Win64.UI;
 
 public partial class IgButton : Button, INotifyPropertyChanged
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
+    #region INotifyPropertyChanged Implementation
+
+    // to manage PropertyChanged events
+    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
+    private event PropertyChangedEventHandler? _propertyChangedHandler;
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event PropertyChangedEventHandler? PropertyChanged
+    {
+        add
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler += value;
+                _propertyChangedEvent.Add(value);
+            }
+        }
+
+        remove
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler -= value;
+                _propertyChangedEvent.Remove(value);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+
+    /// <summary>
+    /// Clears event handlers list of <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void ClearPropertyChangedEvents()
+    {
+        // remove PropertyChanged events
+        foreach (var eventHandler in _propertyChangedEvent)
+        {
+            _propertyChangedHandler -= eventHandler;
+        }
+        _propertyChangedEvent.Clear();
+    }
+
+    #endregion // INotifyPropertyChanged Implementation
+
 
     protected string _id = "";
     protected string _text = "";
@@ -144,14 +200,6 @@ public partial class IgButton : Button, INotifyPropertyChanged
         UpdateStyle();
     }
 
-    /// <summary>
-    /// Emits event <see cref="PropertyChanged"/>.
-    /// </summary>
-    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
 
     private void IgButton_Loaded(object sender, RoutedEventArgs e)
     {
@@ -168,6 +216,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
         Unloaded -= IgButton_Unloaded;
         Click -= IgButton_Click;
 
+        ClearPropertyChangedEvents();
         UnregisterPropertyChangedCallback(ButtonBase.IsPointerOverProperty, _tokenIsPointerOverChanged);
         UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _tokenIsPressedChanged);
     }

@@ -14,7 +14,6 @@
                                      IsDesignTimeCreatable=True}"
     x:DefaultBindMode="OneWay"
     AutomationProperties.AutomationControlType="ToolBar"
-    Unloaded="UserControl_Unloaded"
     mc:Ignorable="d">
 
     <UserControl.Resources>

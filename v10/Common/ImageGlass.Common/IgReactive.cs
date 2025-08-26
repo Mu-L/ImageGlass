@@ -27,9 +27,11 @@ namespace ImageGlass.Common;
 /// </summary>
 public class IgReactive : INotifyPropertyChanged
 {
+    #region INotifyPropertyChanged Implementation
+
     // to manage PropertyChanged events
-    protected List<PropertyChangedEventHandler> _propertyChangedEvent = new();
-    protected event PropertyChangedEventHandler? _propertyChangedHandler;
+    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
+    private event PropertyChangedEventHandler? _propertyChangedHandler;
 
 
     /// <summary>
@@ -60,9 +62,25 @@ public class IgReactive : INotifyPropertyChanged
     /// <summary>
     /// Emits event <see cref="PropertyChanged"/>.
     /// </summary>
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
+
+
+    /// <summary>
+    /// Clears event handlers list of <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void CleanUpPropertyChangedEvents()
+    {
+        // remove PropertyChanged events
+        foreach (var eventHandler in _propertyChangedEvent)
+        {
+            _propertyChangedHandler -= eventHandler;
+        }
+        _propertyChangedEvent.Clear();
+    }
+
+    #endregion // INotifyPropertyChanged Implementation
 
 }

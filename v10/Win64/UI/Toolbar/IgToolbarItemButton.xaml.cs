@@ -22,6 +22,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -31,11 +32,67 @@ namespace ImageGlass.Win64.UI;
 
 public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
 {
+    #region INotifyPropertyChanged Implementation
+
+    // to manage PropertyChanged events
+    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
+    private event PropertyChangedEventHandler? _propertyChangedHandler;
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event PropertyChangedEventHandler? PropertyChanged
+    {
+        add
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler += value;
+                _propertyChangedEvent.Add(value);
+            }
+        }
+
+        remove
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler -= value;
+                _propertyChangedEvent.Remove(value);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+
+    /// <summary>
+    /// Clears event handlers list of <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void ClearPropertyChangedEvents()
+    {
+        // remove PropertyChanged events
+        foreach (var eventHandler in _propertyChangedEvent)
+        {
+            _propertyChangedHandler -= eventHandler;
+        }
+        _propertyChangedEvent.Clear();
+    }
+
+    #endregion // INotifyPropertyChanged Implementation
+
+
     public static string _PART_Button => "PART_Button";
     public static string _PART_ButtonIcon => "PART_ButtonIcon";
     public static string _PART_ButtonText => "PART_ButtonText";
 
-    public event PropertyChangedEventHandler? PropertyChanged;
 
     protected FlyoutBase? _flyout = null;
     protected ToolbarItemModel _vm = new();
@@ -85,25 +142,25 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
         InitializeComponent();
 
         AP.ThemeChanged += AP_ThemeChanged;
+        Loaded += IgToolbarItemButton_Loaded;
+        Unloaded += IgToolbarItemButton_Unloaded;
     }
 
-    /// <summary>
-    /// Emits event <see cref="PropertyChanged"/>.
-    /// </summary>
-    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
 
-    private void UserControl_Unloaded(object sender, RoutedEventArgs e)
-    {
-        AP.ThemeChanged -= AP_ThemeChanged;
-    }
-
-    private void PART_Button_Loaded(object sender, RoutedEventArgs e)
+    private void IgToolbarItemButton_Loaded(object sender, RoutedEventArgs e)
     {
         UpdateIcon();
     }
+
+
+    private void IgToolbarItemButton_Unloaded(object sender, RoutedEventArgs e)
+    {
+        AP.ThemeChanged -= AP_ThemeChanged;
+        Unloaded -= IgToolbarItemButton_Unloaded;
+
+        ClearPropertyChangedEvents();
+    }
+
 
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {

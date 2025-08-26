@@ -45,11 +45,7 @@ public class DisposableImpl : IgReactive, IDisposable
             OnDisposing();
 
             // remove PropertyChanged events
-            foreach (var eventHandler in _propertyChangedEvent)
-            {
-                _propertyChangedHandler -= eventHandler;
-            }
-            _propertyChangedEvent.Clear();
+            CleanUpPropertyChangedEvents();
         }
 
         // Free any unmanaged objects here.

@@ -32,7 +32,62 @@ namespace ImageGlass.Win64.UI;
 
 public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
+    #region INotifyPropertyChanged Implementation
+
+    // to manage PropertyChanged events
+    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
+    private event PropertyChangedEventHandler? _propertyChangedHandler;
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event PropertyChangedEventHandler? PropertyChanged
+    {
+        add
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler += value;
+                _propertyChangedEvent.Add(value);
+            }
+        }
+
+        remove
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler -= value;
+                _propertyChangedEvent.Remove(value);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+
+    /// <summary>
+    /// Clears event handlers list of <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void ClearPropertyChangedEvents()
+    {
+        // remove PropertyChanged events
+        foreach (var eventHandler in _propertyChangedEvent)
+        {
+            _propertyChangedHandler -= eventHandler;
+        }
+        _propertyChangedEvent.Clear();
+    }
+
+    #endregion // INotifyPropertyChanged Implementation
+
 
     private Dictionary<int, ToolbarItemMetadata> _itemsMetadata = [];
     public static double ItemSpacing => 4;
@@ -69,25 +124,23 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
 
     public ToolbarControl()
     {
-        this.InitializeComponent();
-        this.SizeChanged += UserControl_SizeChanged;
+        InitializeComponent();
+
+        SizeChanged += ToolbarControl_SizeChanged;
+        Unloaded += ToolbarControl_Unloaded;
     }
 
 
-    /// <summary>
-    /// Emits event <see cref="PropertyChanged"/>.
-    /// </summary>
-    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void ToolbarControl_Unloaded(object sender, RoutedEventArgs e)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        SizeChanged -= ToolbarControl_SizeChanged;
+        Unloaded -= ToolbarControl_Unloaded;
+
+        ClearPropertyChangedEvents();
     }
 
-    private void UserControl_Unloaded(object sender, RoutedEventArgs e)
-    {
-        this.SizeChanged -= UserControl_SizeChanged;
-    }
 
-    private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
+    private void ToolbarControl_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         HandleOverflow();
     }
@@ -104,6 +157,7 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
             value.RenderedWidth = fe.ActualWidth;
         }
     }
+
 
     private void MnuOverflow_Opening(object sender, object e)
     {

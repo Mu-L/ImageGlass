@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml.Controls;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -26,7 +27,63 @@ namespace ImageGlass.Win64.UI;
 
 public partial class IgToolbarItemSeparator : UserControl, IIgToolbarItem
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
+    #region INotifyPropertyChanged Implementation
+
+    // to manage PropertyChanged events
+    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
+    private event PropertyChangedEventHandler? _propertyChangedHandler;
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event PropertyChangedEventHandler? PropertyChanged
+    {
+        add
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler += value;
+                _propertyChangedEvent.Add(value);
+            }
+        }
+
+        remove
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler -= value;
+                _propertyChangedEvent.Remove(value);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+
+    /// <summary>
+    /// Clears event handlers list of <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void ClearPropertyChangedEvents()
+    {
+        // remove PropertyChanged events
+        foreach (var eventHandler in _propertyChangedEvent)
+        {
+            _propertyChangedHandler -= eventHandler;
+        }
+        _propertyChangedEvent.Clear();
+    }
+
+    #endregion // INotifyPropertyChanged Implementation
+
+
     protected ToolbarItemModel _vm = new();
 
 
@@ -55,15 +112,15 @@ public partial class IgToolbarItemSeparator : UserControl, IIgToolbarItem
     public IgToolbarItemSeparator()
     {
         InitializeComponent();
+
+        Unloaded += IgToolbarItemSeparator_Unloaded;
     }
 
 
-    /// <summary>
-    /// Emits event <see cref="PropertyChanged"/>.
-    /// </summary>
-    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void IgToolbarItemSeparator_Unloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        Unloaded -= IgToolbarItemSeparator_Unloaded;
+        ClearPropertyChangedEvents();
     }
 
 }
