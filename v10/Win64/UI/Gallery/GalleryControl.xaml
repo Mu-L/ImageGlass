@@ -21,8 +21,8 @@
             x:DataType="w64photo:Photo"
             x:DefaultBindMode="OneWay">
             <local:IgGalleryItem
-                Width="{StaticResource GalleryThumbnailSize}"
-                Height="{StaticResource GalleryThumbnailSize}"
+                Width="{x:Bind w64c:AP.Config.ThumbnailSize}"
+                Height="{x:Bind w64c:AP.Config.ThumbnailSize}"
                 Padding="3"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"

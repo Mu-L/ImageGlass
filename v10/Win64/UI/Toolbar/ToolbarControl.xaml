@@ -101,7 +101,7 @@
                 ToolTipService.ToolTip="View more buttons"
                 Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal" Spacing="4">
-                    <Viewbox Height="{StaticResource ToolbarIconSize}" VerticalAlignment="Center">
+                    <Viewbox Height="{x:Bind w64c:AP.Config.ToolbarIconHeight}" VerticalAlignment="Center">
                         <FontIcon
                             AutomationProperties.AccessibilityView="Raw"
                             Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"

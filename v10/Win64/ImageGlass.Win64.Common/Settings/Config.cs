@@ -34,7 +34,6 @@ public partial class Config : IgReactive
     public ConfigMetadata _Metadata { get; set; } = new();
 
 
-
     #region Setting items
 
     ///// <summary>
@@ -347,10 +346,10 @@ public partial class Config : IgReactive
     ///// </summary>
     //public int SlideshowImagesToNotifySound { get; set; } = 0;
 
-    ///// <summary>
-    ///// Gets, sets value of thumbnail dimension in pixel
-    ///// </summary>
-    //public int ThumbnailSize { get; set; } = 50;
+    /// <summary>
+    /// Gets, sets value of thumbnail dimension in pixel
+    /// </summary>
+    public int ThumbnailSize { get; set; } = 70;
 
     ///// <summary>
     ///// Gets, sets the maximum size in MB of thumbnail persistent cache.
@@ -384,10 +383,10 @@ public partial class Config : IgReactive
     ///// </summary>
     //public float ZoomLockValue { get; set; } = 100f;
 
-    ///// <summary>
-    ///// Gets, sets toolbar icon height
-    ///// </summary>
-    //public uint ToolbarIconHeight { get; set; } = Const.TOOLBAR_ICON_HEIGHT;
+    /// <summary>
+    /// Gets, sets toolbar icon height
+    /// </summary>
+    public uint ToolbarIconHeight { get; set; } = Const.TOOLBAR_ICON_HEIGHT;
 
     ///// <summary>
     ///// Gets, sets value of image quality for editting

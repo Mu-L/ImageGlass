@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Win64.Common;
 using ImageGlass.Win64.Common.Photoing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -87,7 +88,6 @@ public sealed partial class GalleryControl : UserControl, INotifyPropertyChanged
     #endregion // INotifyPropertyChanged Implementation
 
 
-    public static double GalleryThumbnailSize => (double)Application.Current.Resources[nameof(GalleryThumbnailSize)];
     public static double ItemSpacing => 1;
     public event TypedEventHandler<IgGalleryItem, EventArgs>? ItemClicked;
 
@@ -164,7 +164,7 @@ public sealed partial class GalleryControl : UserControl, INotifyPropertyChanged
         if (e.Element is not IgGalleryItem item) return;
 
         // start loading thumbnail
-        item.VM.LoadGalleryThumbnail(GalleryThumbnailSize, _progressThumbnailLoader);
+        item.VM.LoadGalleryThumbnail(AP.Config.ThumbnailSize, _progressThumbnailLoader);
     }
 
 
@@ -229,10 +229,10 @@ public sealed partial class GalleryControl : UserControl, INotifyPropertyChanged
         if (index < 0 || index >= VM.Count) return;
 
         var centerItemIndex = index + 1;
-        var itemCenterX = (GalleryThumbnailSize * centerItemIndex)
+        var itemCenterX = (AP.Config.ThumbnailSize * centerItemIndex)
             + (ItemSpacing * centerItemIndex)
             - (GalleryScrollViewer.ViewportWidth / 2)
-            - (GalleryThumbnailSize / 2);
+            - (AP.Config.ThumbnailSize / 2);
 
         GalleryScrollViewer.ChangeView(itemCenterX, null, null, disableAnimation);
     }

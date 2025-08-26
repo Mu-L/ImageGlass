@@ -6,6 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:w64c="using:ImageGlass.Win64.Common"
+    x:DefaultBindMode="OneWay"
     DataContext="{x:Bind VM, Mode=OneWay}"
     mc:Ignorable="d">
 
@@ -21,7 +23,7 @@
             X1="0"
             X2="0"
             Y1="0"
-            Y2="{StaticResource ToolbarIconSize}" />
+            Y2="{x:Bind w64c:AP.Config.ToolbarIconHeight}" />
         <Line
             Stroke="#3eee"
             StrokeEndLineCap="Round"
@@ -30,6 +32,6 @@
             X1="0"
             X2="0"
             Y1="0"
-            Y2="{StaticResource ToolbarIconSize}" />
+            Y2="{x:Bind w64c:AP.Config.ToolbarIconHeight}" />
     </StackPanel>
 </UserControl>

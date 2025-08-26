@@ -279,7 +279,6 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
         if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
 
         PrimaryItemsOverflow.Clear();
-        var toolbarIconSize = (double)Application.Current.Resources["ToolbarIconSize"];
 
 
         // 1. calculate how much space can I safely use for center toolbar items
@@ -288,7 +287,7 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
             (GridToolbar.ActualWidth / 2) // center line
             - PanelPrimary.ActualWidth / 2 // shifts calculation for primary panel
             - PanelRight.ActualWidth // reserves space
-            - toolbarIconSize; // safety gap
+            - AP.Config.ToolbarIconHeight; // safety gap
 
 
         // 2. if has no space,
