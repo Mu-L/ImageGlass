@@ -87,7 +87,7 @@ public partial class AppSettings
                 _theme = value;
 
                 OnPropertyChanged();
-                AP.TriggerThemeChangedEvent();
+                AP.RaiseThemeChangedEvent();
             }
         }
     }

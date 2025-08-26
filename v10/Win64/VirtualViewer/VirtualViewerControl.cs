@@ -897,9 +897,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         // create destination color context
         ID2D1ColorContext? destColorContext = null;
-        if (WindowColorProfileProvider.Instance.Data != null)
+        if (AP.ColorProfileService.Data != null)
         {
-            destColorContext = D2dContext.CreateColorContext(ColorSpace.Custom, WindowColorProfileProvider.Instance.Data);
+            destColorContext = D2dContext.CreateColorContext(ColorSpace.Custom, AP.ColorProfileService.Data);
         }
         //else if (photo.PixelFormatInfo?.NumericRepresentation == PixelFormatNumericRepresentation.PixelFormatNumericRepresentationFloat)
         //{

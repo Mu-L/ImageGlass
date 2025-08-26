@@ -21,7 +21,6 @@ using ImageGlass.Common;
 using Microsoft.Graphics.Display;
 using Microsoft.UI;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace ImageGlass.Win64.Common;
@@ -63,16 +62,8 @@ public interface IWindowColorProfileProvider
 /// </summary>
 public partial class WindowColorProfileProvider : DisposableImpl, IWindowColorProfileProvider
 {
-    private static readonly Lazy<WindowColorProfileProvider> _instance = new(() => new WindowColorProfileProvider(), LazyThreadSafetyMode.ExecutionAndPublication);
-
-
-    /// <summary>
-    /// Provides a singleton instance of the <see cref="WindowColorProfileProvider"/> class.
-    /// </summary>
-    public static WindowColorProfileProvider Instance => _instance.Value;
-
-
     private DisplayInformation? _display;
+
 
     public event EventHandler? Changed;
     public byte[]? Data { get; private set; }

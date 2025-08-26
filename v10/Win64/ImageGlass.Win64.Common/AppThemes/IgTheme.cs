@@ -147,7 +147,7 @@ public partial class IgTheme : IgReactive
         ComputedColors.Load(Colors, accent);
 
         OnPropertyChanged(nameof(ComputedColors));
-        AP.TriggerThemeChangedEvent(nameof(ComputedColors));
+        AP.RaiseThemeChangedEvent(nameof(ComputedColors));
     }
 
 

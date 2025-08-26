@@ -28,7 +28,6 @@ namespace ImageGlass.Win64.Common;
 
 public partial class AppSettings
 {
-
     #region Public static properties
 
     /// <summary>
@@ -72,7 +71,6 @@ public partial class AppSettings
 
 
     #endregion // Public static properties
-
 
 
 

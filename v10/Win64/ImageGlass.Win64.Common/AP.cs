@@ -22,6 +22,7 @@ using ImageGlass.Win64.Common.Photoing;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace ImageGlass.Win64.Common;
 
@@ -32,7 +33,10 @@ public static class AP
     private static ExplorerView? _foregroundShell;
     private static string _foregroundShellPath = "";
     private static string _inputImagePathFromArgs = "";
+    private static readonly Lazy<WindowColorProfileProvider> _colorProfileService = new(() => new WindowColorProfileProvider(), LazyThreadSafetyMode.ExecutionAndPublication);
 
+
+    #region Public Properties
 
     /// <summary>
     /// Gets the app settings.
@@ -85,7 +89,31 @@ public static class AP
 
 
     /// <summary>
-    /// Check if we can use the foreground shell folder for loading images
+    /// Provides a singleton instance of the <see cref="WindowColorProfileProvider"/> class.
+    /// </summary>
+    public static WindowColorProfileProvider ColorProfileService => _colorProfileService.Value;
+
+    #endregion // Public Properties
+
+
+
+    #region Public Methods
+
+    /// <summary>
+    /// Disposes all singletons.
+    /// </summary>
+    public static void Dispose()
+    {
+        Config.CleanUpPropertyChangedEvents();
+
+        ForegroundShell = null;
+        Photos.Dispose();
+        ColorProfileService.Dispose();
+    }
+
+
+    /// <summary>
+    /// Check if we can use the foreground shell folder for loading images.
     /// </summary>
     public static bool CanUseForegroundShell()
     {
@@ -104,7 +132,7 @@ public static class AP
 
 
     /// <summary>
-    /// Update input path from arguments
+    /// Update input path from arguments.
     /// </summary>
     public static void UpdateInputImagePath(string? path = null)
     {
@@ -130,10 +158,13 @@ public static class AP
     /// <summary>
     /// Triggers event <see cref="ThemeChanged"/>.
     /// </summary>
-    public static void TriggerThemeChangedEvent(string propName = "")
+    public static void RaiseThemeChangedEvent(string propName = "")
     {
         ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
     }
+
+    #endregion // Public Methods
+
 
 }
 

@@ -21,8 +21,6 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -33,10 +31,8 @@ namespace ImageGlass;
 /// <summary>
 /// Provides application-specific behavior to supplement the default Application class.
 /// </summary>
-public partial class App : Application, INotifyPropertyChanged
+public partial class App : Application
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     private MainWindow? _winMain;
     private IProgress<SystemColorInfoChangedEventArgs> _uiReporter;
     private static UISettings _systemUI = new UISettings();
@@ -50,12 +46,10 @@ public partial class App : Application, INotifyPropertyChanged
     public App()
     {
         this.InitializeComponent();
-
         _uiReporter = new Progress<SystemColorInfoChangedEventArgs>(UIReporter_Reported);
 
         Application.Current.UnhandledException += Current_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-
         _systemUI.ColorValuesChanged += UiSettings_ColorValuesChanged;
 
 
@@ -71,8 +65,8 @@ public partial class App : Application, INotifyPropertyChanged
     protected override void OnLaunched(LaunchActivatedEventArgs e)
     {
         _winMain = new MainWindow();
-        _winMain.Closed += Window_Closed;
-        var info = GetSystemColorInfo(_systemUI);
+        _winMain.Closed += MainWindow_Closed;
+
 
         // get foreground shell
         if (AP.Config.ShouldUseExplorerSortOrder)
@@ -86,36 +80,25 @@ public partial class App : Application, INotifyPropertyChanged
         _winMain.Activate();
 
         // get current monitor profile
-        _ = WindowColorProfileProvider.Instance.InitializeAsync(_winMain.AppWindow.Id);
+        _ = AP.ColorProfileService.InitializeAsync(_winMain.AppWindow.Id);
 
         // initialize Magick decoder
         MagickDecoder.Initialize();
     }
 
 
-    /// <summary>
-    /// Emits event <see cref="PropertyChanged"/>.
-    /// </summary>
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-
-
     // App Events
     #region App Events
 
-    private async void Window_Closed(object sender, WindowEventArgs args)
+    private async void MainWindow_Closed(object sender, WindowEventArgs args)
     {
         // save configs
         await SaveConfigsOnClosing();
 
-        // dispose foreground shell
-        AP.ForegroundShell = null;
+        // dispose the global singleton
+        AP.Dispose();
 
-        AP.Photos.Dispose();
-        WindowColorProfileProvider.Instance.Dispose();
+        _systemUI.ColorValuesChanged -= UiSettings_ColorValuesChanged;
     }
 
     private void UiSettings_ColorValuesChanged(UISettings sender, object args)
@@ -160,10 +143,8 @@ public partial class App : Application, INotifyPropertyChanged
         // load app configs
         AP.Config = AppSettings.Load(AppSettings.CONFIG_USER);
 
-        // get accent color & color mode
+        // get accent, color mode & load theme for the first time
         var info = GetSystemColorInfo(_systemUI);
-
-        // load theme for the first time
         AP.Config.LoadCurrentTheme(info.IsDarkMode, info.AccentColor, true, true, false);
 
         // set the initial app color mode
