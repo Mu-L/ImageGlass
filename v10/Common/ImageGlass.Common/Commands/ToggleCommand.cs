@@ -21,14 +21,15 @@ using System.Text.Json.Serialization;
 namespace ImageGlass.Common;
 
 
-/// <summary>
-/// Defines user toggling action
-/// </summary>
-public class ToggleAction(SingleAction? toggleOn = null)
+[JsonSerializable(typeof(ToggleCommand))]
+public partial class ToggleCommandJsonContext : JsonSerializerContext { }
+
+
+public partial class ToggleCommand : IgReactive
 {
     /// <summary>
-    /// Gets the ToggleAction manager to check whether the <see cref="ToggleAction"/>
-    /// toggling value is on (<c>true</c>) or off (<c>false</c>).
+    /// Gets the manager to check whether the <see cref="ToggleCommand"/>
+    /// value is on (<c>true</c>) or off (<c>false</c>).
     /// </summary>
     private static readonly Dictionary<Guid, bool> _manager = [];
 
@@ -43,21 +44,39 @@ public class ToggleAction(SingleAction? toggleOn = null)
     /// <summary>
     /// Action to run when toggling on.
     /// </summary>
-    public SingleAction? ToggleOn { get; set; } = toggleOn;
+    public SingleCommand? ToggleOn { get; set; } = null;
 
 
     /// <summary>
     /// Action to run when toggling off.
     /// </summary>
-    public SingleAction? ToggleOff { get; set; } = null;
+    public SingleCommand? ToggleOff { get; set; } = null;
+
+
+    public ToggleCommand(SingleCommand? toggleOn = null, SingleCommand? toggleOff = null)
+    {
+        ToggleOn = toggleOn;
+        ToggleOff = toggleOff;
+    }
 
 
     /// <summary>
-    /// Checks if the given action is toggle off action
+    /// <inheritdoc/>
     /// </summary>
-    public static bool IsToggleOff(Guid actionId)
+    public override string ToString()
     {
-        if (_manager.TryGetValue(actionId, out var isToggled))
+        return $"{ToggleOn?.ToString() ?? "<empty>"} | {ToggleOff?.ToString() ?? "<empty>"}";
+    }
+
+
+    #region Static Methods
+
+    /// <summary>
+    /// Checks if the given command is off.
+    /// </summary>
+    public static bool IsToggleOff(Guid cmdId)
+    {
+        if (_manager.TryGetValue(cmdId, out var isToggled))
         {
             return isToggled;
         }
@@ -67,20 +86,19 @@ public class ToggleAction(SingleAction? toggleOn = null)
 
 
     /// <summary>
-    /// Sets the toggling value of the given action
+    /// Sets the toggling value of the given command.
     /// </summary>
-    public static void SetToggleValue(Guid actionId, bool isToggled)
+    public static void SetToggleValue(Guid cmdId, bool isToggled)
     {
-        if (!_manager.TryAdd(actionId, isToggled))
+        if (!_manager.TryAdd(cmdId, isToggled))
         {
-            _manager[actionId] = isToggled;
+            _manager[cmdId] = isToggled;
         }
     }
 
+    #endregion // Static Methods
 
-    public override string ToString()
-    {
-        return $"{ToggleOn?.ToString() ?? "<empty>"} | {ToggleOff?.ToString() ?? "<empty>"}";
-    }
 }
+
+
 

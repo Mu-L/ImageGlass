@@ -16,50 +16,60 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using System.Text.Json.Serialization;
 
 namespace ImageGlass.Common;
 
 
-/// <summary>
-/// Defines user single action
-/// </summary>
-public class SingleAction(string executable = "", object?[]? arguments = null, SingleAction? nextAction = null)
+[JsonSerializable(typeof(SingleCommand))]
+public partial class SingleCommandJsonContext : JsonSerializerContext { }
+
+
+public partial class SingleCommand : IgReactive
 {
     /// <summary>
     /// Executable action, its value can be:
     /// <list type="bullet">
     ///   <item>
-    ///   Name of a menu item of <c>MnuMain</c> in <c>FrmMain.cs</c>.
-    ///   For example: <c>MnuPrint</c>
+    ///   Name of a menu item in Main Menu. For example: <c>MnuPrint</c>
     ///   </item>
     ///   <item>
-    ///   Name of <c>IG_</c> methods defined in <c>FrmMain.IGMethods.cs</c>.
-    ///   For example: <c>IG_Print</c>
+    ///   Name of an <c>IG_</c> method. For example: <c>IG_Print</c>
     ///   </item>
     ///   <item>
-    ///   Path of executable file / command.
-    ///   For example: <c>cmd.exe</c>
+    ///   Path of executable file/command. For example: <c>cmd.exe</c>
     ///   </item>
     /// </list>
     /// </summary>
-    public string Executable { get; set; } = executable.Trim();
+    public string Executable { get; set; } = "";
 
 
     /// <summary>
-    /// Arguments to pass to the <see cref="Executable"/>.
+    /// Arguments to pass to the <see cref="Executable"/> in JSON format.
     /// </summary>
-    public object?[] Arguments { get; set; } = arguments ?? [];
+    public string Argument { get; set; } = "";
 
 
     /// <summary>
-    /// Next action to execute after running <see cref="Executable"/>.
+    /// The next command to execute after running <see cref="Executable"/>.
     /// </summary>
-    public SingleAction? NextAction { get; set; } = nextAction;
+    public SingleCommand? NextCommand { get; set; } = null;
 
+
+    public SingleCommand(string executable, string argument, SingleCommand? nextCommand)
+    {
+        Executable = executable;
+        Argument = argument;
+        NextCommand = nextCommand;
+    }
 
 
     public override string ToString()
     {
         return Executable;
     }
+
 }
+
+
+
