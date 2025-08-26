@@ -92,6 +92,8 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     public static string _PART_Button => "PART_Button";
     public static string _PART_ButtonIcon => "PART_ButtonIcon";
     public static string _PART_ButtonText => "PART_ButtonText";
+    public static double InnerSpacing => AP.Config.ToolbarIconHeight / 6f; // 4
+    public static Thickness ItemPadding => new(AP.Config.ToolbarIconHeight / 4.8f); // 5
 
 
     protected FlyoutBase? _flyout = null;

@@ -56,7 +56,7 @@
 
     <Grid
         x:Name="GridToolbar"
-        Padding="5"
+        Padding="{x:Bind local:IgToolbarItemButton.ItemPadding}"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         Background="{x:Bind w64c:AP.Config.Theme.Colors.ToolbarBgColor, Converter={StaticResource HexStringToBrushConverter}}">
@@ -96,12 +96,17 @@
             <!--  Toolbar: Overflow button  -->
             <local:IgButton
                 x:Name="BtnOverflowMenu"
-                Padding="5"
+                Padding="{x:Bind local:IgToolbarItemButton.ItemPadding}"
+                VerticalAlignment="Stretch"
+                VerticalContentAlignment="Bottom"
                 Style="{StaticResource IgButtonStyle}"
                 ToolTipService.ToolTip="View more buttons"
                 Visibility="Collapsed">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <Viewbox Height="{x:Bind w64c:AP.Config.ToolbarIconHeight}" VerticalAlignment="Center">
+                <StackPanel VerticalAlignment="Stretch" Orientation="Horizontal">
+                    <Viewbox
+                        Width="{x:Bind w64c:AP.Config.ToolbarIconHeight}"
+                        Height="{x:Bind local:ToolbarControl.OverflowIconHeight}"
+                        VerticalAlignment="Bottom">
                         <FontIcon
                             AutomationProperties.AccessibilityView="Raw"
                             Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"

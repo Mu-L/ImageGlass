@@ -21,7 +21,7 @@
 
     <local:IgButton
         Name="PART_Button"
-        Padding="5"
+        Padding="{x:Bind local:IgToolbarItemButton.ItemPadding}"
         x:DefaultBindMode="OneWay"
         Flyout="{x:Bind Flyout}"
         Id="{x:Bind VM.Id}"
@@ -30,7 +30,7 @@
         Style="{StaticResource IgButtonStyle}"
         Text="{x:Bind VM.Text}"
         ToolTipService.ToolTip="{x:Bind VM.Text}">
-        <StackPanel Orientation="Horizontal" Spacing="5">
+        <StackPanel Orientation="Horizontal" Spacing="{x:Bind local:IgToolbarItemButton.InnerSpacing}">
             <ImageIcon
                 Name="PART_ButtonIcon"
                 Width="{x:Bind w64c:AP.Config.ToolbarIconHeight}"

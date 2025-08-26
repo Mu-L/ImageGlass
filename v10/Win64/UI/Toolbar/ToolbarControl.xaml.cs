@@ -90,7 +90,8 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
 
     public static string _PART_ItemButton => "PART_ItemButton";
     public static string _PART_ItemSeparator => "PART_ItemSeparator";
-    public static double ItemSpacing => 4;
+    public static double OverflowIconHeight => AP.Config.ToolbarIconHeight / 1.5f; // 16
+    public static double ItemSpacing => AP.Config.ToolbarIconHeight / 6f; // 4
     public static string MainMenuIconName => nameof(IgThemeIcon.MainMenu);
 
 
