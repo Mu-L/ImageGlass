@@ -41,7 +41,7 @@ public static class AP
     /// <summary>
     /// Gets the app settings.
     /// </summary>
-    public static AppSettings Config { get; set; } = new();
+    public static Config Config { get; set; } = new();
 
 
     /// <summary>

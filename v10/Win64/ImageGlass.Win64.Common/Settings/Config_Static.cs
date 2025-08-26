@@ -26,7 +26,7 @@ using Windows.UI;
 
 namespace ImageGlass.Win64.Common;
 
-public partial class AppSettings
+public partial class Config
 {
     #region Public static properties
 
@@ -81,18 +81,18 @@ public partial class AppSettings
     /// Loads and parses configs from file.
     /// </summary>
     /// <exception cref="FileLoadException"></exception>
-    public static AppSettings Load(string configFileName)
+    public static Config Load(string configFileName)
     {
         // 1. get user config file path
         var configPath = BHelper.ConfigDir(configFileName);
-        if (!File.Exists(configPath)) return new AppSettings();
+        if (!File.Exists(configPath)) return new Config();
 
 
         // 2. load user settings
         var jsonOptions = BHelper.CreateJsonOptions();
-        var jsonContext = new AppSettingsJsonContext(jsonOptions);
+        var jsonContext = new ConfigJsonContext(jsonOptions);
 
-        var config = BHelper.ReadJsonFromFile(configPath, jsonContext.AppSettings);
+        var config = BHelper.ReadJsonFromFile(configPath, jsonContext.Config);
         if (config == null)
             throw new FileLoadException($"Cannot parse settings from file: {configPath}");
 
@@ -107,7 +107,7 @@ public partial class AppSettings
     /// <summary>
     /// Migrates user config file.
     /// </summary>
-    private static AppSettings MigrateUserConfigFile(AppSettings config)
+    private static Config MigrateUserConfigFile(Config config)
     {
         var configVersion = config._Metadata.Version;
 
@@ -143,9 +143,9 @@ public partial class AppSettings
     {
         var jsonFilePath = BHelper.ConfigDir(CONFIG_USER);
         var jsonOptions = BHelper.CreateJsonOptions();
-        var jsonContext = new AppSettingsJsonContext(jsonOptions);
+        var jsonContext = new ConfigJsonContext(jsonOptions);
 
-        await BHelper.WriteJsonToFileAsync(jsonFilePath, this, jsonContext.AppSettings);
+        await BHelper.WriteJsonToFileAsync(jsonFilePath, this, jsonContext.Config);
     }
 
 

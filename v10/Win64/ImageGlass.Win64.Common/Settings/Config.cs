@@ -25,11 +25,11 @@ using System.Text.Json.Serialization;
 namespace ImageGlass.Win64.Common;
 
 
-[JsonSerializable(typeof(AppSettings))]
-public partial class AppSettingsJsonContext : JsonSerializerContext { }
+[JsonSerializable(typeof(Config))]
+public partial class ConfigJsonContext : JsonSerializerContext { }
 
 
-public partial class AppSettings : IgReactive
+public partial class Config : IgReactive
 {
     public ConfigMetadata _Metadata { get; set; } = new();
 

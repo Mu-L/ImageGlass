@@ -141,7 +141,7 @@ public partial class App : Application
         AP.Args = Environment.GetCommandLineArgs();
 
         // load app configs
-        AP.Config = AppSettings.Load(AppSettings.CONFIG_USER);
+        AP.Config = Config.Load(Config.CONFIG_USER);
 
         // get accent, color mode & load theme for the first time
         var info = GetSystemColorInfo(_systemUI);

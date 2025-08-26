@@ -21,7 +21,7 @@ using Windows.UI;
 
 namespace ImageGlass.Win64.Common;
 
-public partial class AppSettings
+public partial class Config
 {
     private bool _isSystemDarkMode = true;
     private Color _accentColor = new();
