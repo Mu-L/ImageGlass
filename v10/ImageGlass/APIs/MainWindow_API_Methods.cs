@@ -16,29 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using System;
-using System.Windows.Input;
+using Microsoft.UI.Xaml;
 
-namespace ImageGlass.Win64.Common.Commands;
+namespace ImageGlass;
 
-public partial class RelayCommand : ICommand
+public partial class MainWindow
 {
-    private readonly Action _executeFn;
-    private readonly Func<bool>? _canExecuteFn;
 
-    public event EventHandler? CanExecuteChanged;
-
-
-    public RelayCommand(Action execute, Func<bool>? canExecute = null)
+    public static void IG_Exit()
     {
-        _executeFn = execute ?? throw new ArgumentNullException(nameof(execute));
-        _canExecuteFn = canExecute;
+        Application.Current.Exit();
     }
-
-
-    public bool CanExecute(object? parameter = null) => _canExecuteFn?.Invoke() ?? true;
-    public void Execute(object? parameter = null) => _executeFn();
-
-    public void RaiseCanExecuteChangedEvent() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 
 }

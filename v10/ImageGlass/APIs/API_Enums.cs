@@ -16,29 +16,43 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using System;
-using System.Windows.Input;
+namespace ImageGlass;
 
-namespace ImageGlass.Win64.Common.Commands;
 
-public partial class RelayCommand : ICommand
+public enum API
 {
-    private readonly Action _executeFn;
-    private readonly Func<bool>? _canExecuteFn;
+    IG_MainMenu,
 
-    public event EventHandler? CanExecuteChanged;
+    // Menu > File
+    IG_OpenFile,
+    IG_NewWindow,
+    IG_Save,
+    IG_SaveAs,
 
+    // Menu > Navigation
 
-    public RelayCommand(Action execute, Func<bool>? canExecute = null)
-    {
-        _executeFn = execute ?? throw new ArgumentNullException(nameof(execute));
-        _canExecuteFn = canExecute;
-    }
+    // Menu > Zoom
 
+    // Menu > Panning
 
-    public bool CanExecute(object? parameter = null) => _canExecuteFn?.Invoke() ?? true;
-    public void Execute(object? parameter = null) => _executeFn();
+    // Menu > Image
 
-    public void RaiseCanExecuteChangedEvent() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    // Menu > Clipboard
 
+    // Menu > Window Fit
+    // Menu > Frameless
+    // Menu > Fullscreen
+    // Menu > Slideshow
+
+    // Menu > Layout
+
+    // Menu > Tools
+
+    // Menu > Settings
+
+    // Menu > Help
+
+    // Menu > Exit
+    IG_Exit,
 }
+
