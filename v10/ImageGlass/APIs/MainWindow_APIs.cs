@@ -59,7 +59,7 @@ public partial class MainWindow
     public void CreateAppAPIs()
     {
         // Main Menu
-        _apis.Add(nameof(API.IG_OpenFile), new RelayCommand(() => BtnOpenFile_Clicked(this, null)));
+        _apis.Add(nameof(API.IG_OpenFile), new RelayCommand(() => IG_OpenFile()));
 
 
     }

@@ -29,7 +29,6 @@ using System;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Graphics;
-using WinRT.Interop;
 
 
 namespace ImageGlass;
@@ -48,6 +47,9 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
 
+        // create APIs
+        CreateAppAPIs();
+
         WinHook = new(this, WinTitleBar);
         _searchProgress = new(Files_Searched);
 
@@ -58,6 +60,8 @@ public sealed partial class MainWindow : Window
     {
         // load image from command line arguments
         LoadImagesFromCmdArgs();
+
+
     }
 
     private void Window_Closed(object sender, WindowEventArgs e)
@@ -138,31 +142,8 @@ public sealed partial class MainWindow : Window
     }
 
 
-    private async void BtnOpenFile_Clicked(object sender, RoutedEventArgs e)
-    {
-        var op = new Windows.Storage.Pickers.FileOpenPicker();
-        op.FileTypeFilter.Add("*");
-        InitializeWithWindow.Initialize(op, WinHook.WindowHandle);
-
-        var file = await op.PickSingleFileAsync();
-        if (file == null) return;
 
 
-        PrepareLoadPhoto([file.Path], false);
-    }
-
-
-    private async void BtnOpenFolder_Clicked(object sender, RoutedEventArgs e)
-    {
-        var fp = new Windows.Storage.Pickers.FolderPicker();
-        InitializeWithWindow.Initialize(fp, WinHook.WindowHandle);
-
-        var dir = await fp.PickSingleFolderAsync();
-        if (dir == null) return;
-
-
-        PrepareLoadPhoto([dir.Path], false);
-    }
 
     private void BtnViewNext_Clicked(object sender, RoutedEventArgs e)
     {

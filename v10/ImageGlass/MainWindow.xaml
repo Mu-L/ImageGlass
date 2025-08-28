@@ -38,12 +38,16 @@
             </Grid.ColumnDefinitions>
 
 
-            <ImageIcon
-                Grid.Column="0"
-                Width="20"
-                Margin="5,0,0,0"
-                Source="/Assets/Square44x44Logo.png"
-                Visibility="{x:Bind w64c:AP.Config.ShowAppIcon}" />
+            <StackPanel Orientation="Horizontal">
+                <ImageIcon
+                    Grid.Column="0"
+                    Width="20"
+                    Margin="5,0,0,0"
+                    Source="/Assets/Square44x44Logo.png"
+                    Visibility="{x:Bind w64c:AP.Config.ShowAppIcon}" />
+                <Button Command="{x:Bind GetApiCommand(local:API.IG_OpenFile)}" Content="Exit" />
+            </StackPanel>
+
 
             <TextBlock
                 Grid.Column="1"
