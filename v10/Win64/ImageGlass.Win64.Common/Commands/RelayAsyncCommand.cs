@@ -18,20 +18,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Microsoft.UI.Dispatching;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ImageGlass.Win64.Common;
 
-public sealed partial class RelayCommand : ICommand
+public sealed partial class RelayAsyncCommand : ICommand
 {
-    private readonly Action<object?> _execute;
+    private readonly Func<object?, Task> _execute;
     private readonly Func<object?, bool> _canExecute;
     private readonly DispatcherQueue _dispatcher;
+    private bool _isExecuting;
 
     public event EventHandler? CanExecuteChanged;
 
-
-    public RelayCommand(Action<object?> execute, Func<object?, bool> canExecute)
+    public RelayAsyncCommand(Func<object?, Task> execute, Func<object?, bool> canExecute)
     {
         _execute = execute;
         _canExecute = canExecute;
@@ -40,23 +41,40 @@ public sealed partial class RelayCommand : ICommand
 
     public bool CanExecute(object? parameter)
     {
-        return _canExecute.Invoke(parameter);
+        return !_isExecuting && _canExecute.Invoke(parameter);
     }
 
-    public void Execute(object? parameter)
+    public async void Execute(object? parameter)
     {
-        _execute.Invoke(parameter);
+        if (_isExecuting) return;
+
+        try
+        {
+            _isExecuting = true;
+            RaiseCanExecuteChanged();
+            await _execute.Invoke(parameter);
+        }
+        finally
+        {
+            _isExecuting = false;
+            RaiseCanExecuteChanged();
+        }
     }
 
     public void RaiseCanExecuteChanged()
     {
-        if (_dispatcher is not null)
+        var canExecuteChanged = CanExecuteChanged;
+        if (canExecuteChanged is not null)
         {
-            _dispatcher.TryEnqueue(() => CanExecuteChanged?.Invoke(this, EventArgs.Empty));
-        }
-        else
-        {
-            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            if (_dispatcher is not null)
+            {
+                _dispatcher.TryEnqueue(() => canExecuteChanged.Invoke(this, EventArgs.Empty));
+            }
+            else
+            {
+                canExecuteChanged.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }
+
