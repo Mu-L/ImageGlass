@@ -23,6 +23,7 @@
         Name="PART_Button"
         Padding="{x:Bind local:IgToolbarItemButton.ItemPadding}"
         x:DefaultBindMode="OneWay"
+        Click="PART_Button_Click"
         Flyout="{x:Bind Flyout}"
         Id="{x:Bind VM.Id}"
         IsChecked="{x:Bind VM.IsChecked}"

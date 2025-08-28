@@ -25,11 +25,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Windows.Foundation;
 
 namespace ImageGlass.Win64.UI;
 
 
-public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
+public partial class ToolbarControl : UserControl, INotifyPropertyChanged
 {
     #region INotifyPropertyChanged Implementation
 
@@ -87,6 +88,8 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
 
     #endregion // INotifyPropertyChanged Implementation
 
+
+    public event TypedEventHandler<IgToolbarItemButton, ToolbarItemClickedEventArgs>? ItemClicked;
 
     public static string _PART_ItemButton => "PART_ItemButton";
     public static string _PART_ItemSeparator => "PART_ItemSeparator";
@@ -157,6 +160,21 @@ public sealed partial class ToolbarControl : UserControl, INotifyPropertyChanged
         {
             meta.RenderedWidth = fe.ActualWidth;
         }
+    }
+
+
+    private void PART_ItemButton_Clicked(IgToolbarItemButton sender, ToolbarItemClickedEventArgs e)
+    {
+        OnItemClicked(sender, e);
+    }
+
+
+    /// <summary>
+    /// Raises event <see cref="ItemClicked"/>.
+    /// </summary>
+    protected virtual void OnItemClicked(IgToolbarItemButton sender, ToolbarItemClickedEventArgs e)
+    {
+        ItemClicked?.Invoke(sender, e);
     }
 
 

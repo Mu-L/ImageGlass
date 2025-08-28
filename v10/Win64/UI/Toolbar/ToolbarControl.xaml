@@ -44,6 +44,7 @@
                 <ctk:Case IsDefault="True">
                     <local:IgToolbarItemButton
                         Name="PART_ItemButton"
+                        Clicked="PART_ItemButton_Clicked"
                         Loaded="ToolbarItem_Loaded"
                         VM="{x:Bind}" />
                 </ctk:Case>

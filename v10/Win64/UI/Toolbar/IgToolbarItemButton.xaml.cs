@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using Windows.Foundation;
 
 
 namespace ImageGlass.Win64.UI;
@@ -88,6 +89,8 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
 
     #endregion // INotifyPropertyChanged Implementation
 
+
+    public event TypedEventHandler<IgToolbarItemButton, ToolbarItemClickedEventArgs>? Clicked;
 
     public static string _PART_Button => "PART_Button";
     public static string _PART_ButtonIcon => "PART_ButtonIcon";
@@ -170,6 +173,23 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     }
 
 
+    private void PART_Button_Click(object sender, RoutedEventArgs e)
+    {
+        OnClicked(this, e);
+    }
+
+
+    /// <summary>
+    /// Raises event <see cref="Clicked"/>.
+    /// </summary>
+    protected virtual void OnClicked(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is not IgButton btn) return;
+
+        Clicked?.Invoke(this, new ToolbarItemClickedEventArgs(VM, btn));
+    }
+
+
     /// <summary>
     /// Updates icon.
     /// </summary>
@@ -199,6 +219,5 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
         }
         catch { }
     }
-
 
 }
