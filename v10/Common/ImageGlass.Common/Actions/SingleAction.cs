@@ -21,11 +21,11 @@ using System.Text.Json.Serialization;
 namespace ImageGlass.Common;
 
 
-[JsonSerializable(typeof(SingleCommand))]
-public partial class SingleCommandJsonContext : JsonSerializerContext { }
+[JsonSerializable(typeof(SingleAction))]
+public partial class SingleActionJsonContext : JsonSerializerContext { }
 
 
-public partial class SingleCommand : IgReactive
+public partial class SingleAction : IgReactive
 {
     /// <summary>
     /// Executable action, its value can be:
@@ -51,16 +51,16 @@ public partial class SingleCommand : IgReactive
 
 
     /// <summary>
-    /// The next command to execute after running <see cref="Executable"/>.
+    /// The next command to execute after running the <see cref="Executable"/>.
     /// </summary>
-    public SingleCommand? NextCommand { get; set; } = null;
+    public SingleAction? NextAction { get; set; } = null;
 
 
-    public SingleCommand(string executable, string argument, SingleCommand? nextCommand)
+    public SingleAction(string executable = "", string argument = "", SingleAction? nextAction = null)
     {
         Executable = executable;
         Argument = argument;
-        NextCommand = nextCommand;
+        NextAction = nextAction;
     }
 
 

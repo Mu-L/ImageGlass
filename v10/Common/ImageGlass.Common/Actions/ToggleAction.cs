@@ -21,14 +21,14 @@ using System.Text.Json.Serialization;
 namespace ImageGlass.Common;
 
 
-[JsonSerializable(typeof(ToggleCommand))]
-public partial class ToggleCommandJsonContext : JsonSerializerContext { }
+[JsonSerializable(typeof(ToggleAction))]
+public partial class ToggleActionJsonContext : JsonSerializerContext { }
 
 
-public partial class ToggleCommand : IgReactive
+public partial class ToggleAction : IgReactive
 {
     /// <summary>
-    /// Gets the manager to check whether the <see cref="ToggleCommand"/>
+    /// Gets the manager to check whether the <see cref="ToggleAction"/>
     /// value is on (<c>true</c>) or off (<c>false</c>).
     /// </summary>
     private static readonly Dictionary<Guid, bool> _manager = [];
@@ -44,16 +44,16 @@ public partial class ToggleCommand : IgReactive
     /// <summary>
     /// Action to run when toggling on.
     /// </summary>
-    public SingleCommand? ToggleOn { get; set; } = null;
+    public SingleAction? ToggleOn { get; set; } = null;
 
 
     /// <summary>
     /// Action to run when toggling off.
     /// </summary>
-    public SingleCommand? ToggleOff { get; set; } = null;
+    public SingleAction? ToggleOff { get; set; } = null;
 
 
-    public ToggleCommand(SingleCommand? toggleOn = null, SingleCommand? toggleOff = null)
+    public ToggleAction(SingleAction? toggleOn = null, SingleAction? toggleOff = null)
     {
         ToggleOn = toggleOn;
         ToggleOff = toggleOff;
