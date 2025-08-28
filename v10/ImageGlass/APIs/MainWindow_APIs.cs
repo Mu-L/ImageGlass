@@ -16,47 +16,144 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using ImageGlass.Win64.Common;
 using System;
 using System.Collections.Generic;
-using System.Windows.Input;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace ImageGlass;
 
 public partial class MainWindow
 {
-    private Dictionary<string, ICommand> _apis = new(StringComparer.OrdinalIgnoreCase);
+    private Dictionary<string, IIgCommand> _apis = new(StringComparer.OrdinalIgnoreCase);
 
 
-    public ICommand? GetApiCommand(API api)
+    /// <summary>
+    /// Gets the API command.
+    /// </summary>
+    public IIgCommand? GetApiCommand(API api)
     {
         return GetApiCommand(api.ToString());
     }
 
 
-    public ICommand? GetApiCommand(string apiName)
+    /// <summary>
+    /// Gets the API command.
+    /// </summary>
+    public IIgCommand? GetApiCommand(string? apiName)
     {
         // get the command from API name
-        _apis.TryGetValue(apiName, out var cmd);
+        _apis.TryGetValue(apiName ?? "", out var cmd);
 
         return cmd;
     }
 
 
-    public void RunApi(API api, string? args = null)
+    /// <summary>
+    /// Executes the given built-in API command.
+    /// </summary>
+    public async Task<ActionResult> RunApiAsync(API api, string? args = null)
     {
-        // get the command from API name
-        if (GetApiCommand(api) is not ICommand cmd) return;
-
-        // check if the command can be executed
-        if (!cmd.CanExecute(args)) return;
-
-        // execute the command
-        cmd.Execute(args);
+        return await RunApiAsync(api.ToString(), args);
     }
 
 
-    public void CreateAppAPIs()
+    /// <summary>
+    /// Executes the given built-in API command.
+    /// </summary>
+    public async Task<ActionResult> RunApiAsync(string? apiName, string? args = null)
+    {
+        // get the command from API name
+        if (GetApiCommand(apiName) is not IIgCommand cmd)
+            return new ActionResult(ActionExitCode.ApiNotFound);
+
+        // check if the command can be executed
+        if (!cmd.CanExecute(args))
+            return new ActionResult(ActionExitCode.Cancelled);
+
+        try
+        {
+            // execute the command
+            if (cmd.IsAsync)
+            {
+                await cmd.ExecuteAsync(args);
+            }
+            else
+            {
+                cmd.Execute(args);
+            }
+        }
+        catch (Exception ex)
+        {
+            return new ActionResult(ActionExitCode.Error, ex);
+        }
+
+        return new ActionResult(ActionExitCode.Success);
+    }
+
+
+    /// <summary>
+    /// Executes a single action.
+    /// </summary>
+    public async Task RunActionAsync(SingleAction? ac, bool showError = true)
+    {
+        if (string.IsNullOrWhiteSpace(ac?.Executable)) return;
+
+        // 1. run the current action
+        var acResults = await RunApiAsync(ac.Executable, ac.Argument);
+
+
+        // 2. exit if the action was cancelled.
+        if (acResults.ExitCode == ActionExitCode.Cancelled) return;
+
+
+        // 3. run next action on success
+        if (acResults.ExitCode == ActionExitCode.Success)
+        {
+            await RunActionAsync(ac.NextAction);
+            return;
+        }
+
+
+        // 4. if there was an error from API
+        Exception? error = null;
+        if (acResults.ExitCode == ActionExitCode.Error && acResults.Error != null)
+        {
+            // TODO: show error message
+            error = acResults.Error;
+        }
+
+
+        // 5. if action name is not an built-in API
+        // try to run with Shell
+        else if (acResults.ExitCode == ActionExitCode.ApiNotFound)
+        {
+            var args = string.Join("", ac.Argument) ?? string.Empty;
+            var exeInfo = BHelper.BuildExeArgs(ac.Executable, args, AP.Photos.CurrentFilePath);
+
+            var exeCode = await BHelper.RunExeCmd(exeInfo.Executable, exeInfo.Args, false, false);
+            if (exeCode != IgExitCode.Done)
+            {
+                // TODO: lang
+                error = new Win32Exception($"Cannot execute command '{ac.Executable}'. Make sure the name is correct.");
+            }
+        }
+
+
+        if (showError)
+        {
+            // TODO: show error message
+        }
+    }
+
+
+
+    /// <summary>
+    /// Register ImageGlass API commands.
+    /// </summary>
+    public void RegisterImageGlassAPIs()
     {
         // Main Menu
         _apis.Add(nameof(API.IG_OpenFile), IgCommands.Create(IG_OpenFileAsync));

@@ -48,7 +48,7 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
 
         // create APIs
-        CreateAppAPIs();
+        RegisterImageGlassAPIs();
 
         WinHook = new(this, WinTitleBar);
         _searchProgress = new(Files_Searched);
@@ -139,11 +139,20 @@ public sealed partial class MainWindow : Window
         ViewByStep(-1);
     }
 
-    private void Gallery_ItemClicked(IgGalleryItem sender, EventArgs args)
+
+    private void ToolbarMain_ItemClicked(IgToolbarItemButton sender, ToolbarItemClickedEventArgs e)
+    {
+        _ = RunActionAsync(e.VM.OnClick);
+    }
+
+
+    private void Gallery_ItemClicked(IgGalleryItem sender, EventArgs e)
     {
         var photoIndex = AP.Photos.IndexOf(sender.VM.FilePath);
         ViewByIndex(photoIndex);
     }
+
+
 
     private void LoadImagesFromCmdArgs()
     {

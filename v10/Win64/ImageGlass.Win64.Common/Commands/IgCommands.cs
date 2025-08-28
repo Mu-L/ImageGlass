@@ -18,50 +18,49 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace ImageGlass.Win64.Common;
 
 public static class IgCommands
 {
-    public static ICommand Create(Action? execute)
+    public static IIgCommand Create(Action? execute)
     {
-        return new RelayCommand(WrapAction(execute), CanExecuteTrue);
+        return new SyncCommand(WrapAction(execute), CanExecuteTrue);
     }
 
-    public static ICommand Create(Action<object?>? execute)
+    public static IIgCommand Create(Action<object?>? execute)
     {
-        return new RelayCommand(execute ?? DefaultExecute, CanExecuteTrue);
+        return new SyncCommand(execute ?? DefaultExecute, CanExecuteTrue);
     }
 
-    public static ICommand Create(Action? execute, Func<bool>? canExecute)
+    public static IIgCommand Create(Action? execute, Func<bool>? canExecute)
     {
-        return new RelayCommand(WrapAction(execute), WrapAction(canExecute));
+        return new SyncCommand(WrapAction(execute), WrapAction(canExecute));
     }
 
-    public static ICommand Create(Action<object?>? execute, Func<object?, bool>? canExecute)
+    public static IIgCommand Create(Action<object?>? execute, Func<object?, bool>? canExecute)
     {
-        return new RelayCommand(execute ?? DefaultExecute, canExecute ?? CanExecuteTrue);
+        return new SyncCommand(execute ?? DefaultExecute, canExecute ?? CanExecuteTrue);
     }
 
-    public static ICommand Create(Func<Task>? execute)
+    public static IIgCommand Create(Func<Task>? execute)
     {
-        return new RelayAsyncCommand(WrapAction(execute), CanExecuteTrue);
+        return new AsyncCommand(WrapAction(execute), CanExecuteTrue);
     }
 
-    public static ICommand Create(Func<object?, Task>? execute)
+    public static IIgCommand Create(Func<object?, Task>? execute)
     {
-        return new RelayAsyncCommand(execute ?? DefaultExecuteAsync, CanExecuteTrue);
+        return new AsyncCommand(execute ?? DefaultExecuteAsync, CanExecuteTrue);
     }
 
-    public static ICommand Create(Func<Task>? execute, Func<bool>? canExecute)
+    public static IIgCommand Create(Func<Task>? execute, Func<bool>? canExecute)
     {
-        return new RelayAsyncCommand(WrapAction(execute), WrapAction(canExecute));
+        return new AsyncCommand(WrapAction(execute), WrapAction(canExecute));
     }
 
-    public static ICommand Create(Func<object?, Task>? execute, Func<object?, bool>? canExecute)
+    public static IIgCommand Create(Func<object?, Task>? execute, Func<object?, bool>? canExecute)
     {
-        return new RelayAsyncCommand(execute ?? DefaultExecuteAsync, canExecute ?? CanExecuteTrue);
+        return new AsyncCommand(execute ?? DefaultExecuteAsync, canExecute ?? CanExecuteTrue);
     }
 
 
