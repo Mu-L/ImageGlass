@@ -21,6 +21,8 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using System;
+using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.UI;
 using Windows.UI.ViewManagement;
@@ -46,6 +48,14 @@ public partial class App : Application
     public App()
     {
         this.InitializeComponent();
+
+        // use independent culture for formatting or parsing a string
+        CultureInfo.DefaultThreadCurrentCulture =
+            CultureInfo.DefaultThreadCurrentUICulture =
+            Thread.CurrentThread.CurrentCulture =
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+
         _uiReporter = new Progress<SystemColorInfoChangedEventArgs>(UIReporter_Reported);
 
         Application.Current.UnhandledException += Current_UnhandledException;

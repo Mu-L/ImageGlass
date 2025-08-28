@@ -65,6 +65,7 @@
             x:Name="ToolbarMain"
             Grid.Row="1"
             Canvas.ZIndex="90"
+            ItemClicked="ToolbarMain_ItemClicked"
             ItemsSource="{x:Bind w64c:AP.Config.ToolbarButtons}" />
 
 

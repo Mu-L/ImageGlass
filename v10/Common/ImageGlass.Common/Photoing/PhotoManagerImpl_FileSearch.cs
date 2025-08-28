@@ -30,9 +30,15 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     #region Public properties
 
     /// <summary>
-    /// Gets index of the viewing photo.
+    /// Gets index of the viewed photo.
     /// </summary>
     public int CurrentIndex => _currentIndex;
+
+
+    /// <summary>
+    /// Gets the current file path of the viewed photo.
+    /// </summary>
+    public string CurrentFilePath => GetFilePath(CurrentIndex);
 
 
     /// <summary>
