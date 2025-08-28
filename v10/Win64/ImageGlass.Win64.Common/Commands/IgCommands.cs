@@ -28,7 +28,7 @@ public static class IgCommands
         return new SyncCommand(WrapAction(execute), CanExecuteTrue);
     }
 
-    public static IIgCommand Create(Action<object?>? execute)
+    public static IIgCommand Create(Action<string?>? execute)
     {
         return new SyncCommand(execute ?? DefaultExecute, CanExecuteTrue);
     }
@@ -38,7 +38,7 @@ public static class IgCommands
         return new SyncCommand(WrapAction(execute), WrapAction(canExecute));
     }
 
-    public static IIgCommand Create(Action<object?>? execute, Func<object?, bool>? canExecute)
+    public static IIgCommand Create(Action<string?>? execute, Func<object?, bool>? canExecute)
     {
         return new SyncCommand(execute ?? DefaultExecute, canExecute ?? CanExecuteTrue);
     }
@@ -48,7 +48,7 @@ public static class IgCommands
         return new AsyncCommand(WrapAction(execute), CanExecuteTrue);
     }
 
-    public static IIgCommand Create(Func<object?, Task>? execute)
+    public static IIgCommand Create(Func<string?, Task>? execute)
     {
         return new AsyncCommand(execute ?? DefaultExecuteAsync, CanExecuteTrue);
     }
@@ -58,7 +58,7 @@ public static class IgCommands
         return new AsyncCommand(WrapAction(execute), WrapAction(canExecute));
     }
 
-    public static IIgCommand Create(Func<object?, Task>? execute, Func<object?, bool>? canExecute)
+    public static IIgCommand Create(Func<string?, Task>? execute, Func<object?, bool>? canExecute)
     {
         return new AsyncCommand(execute ?? DefaultExecuteAsync, canExecute ?? CanExecuteTrue);
     }

@@ -24,8 +24,8 @@ namespace ImageGlass.Win64.Common;
 
 public sealed partial class AsyncCommand : IIgCommand
 {
-    private readonly Func<object?, Task> _execute;
-    private readonly Func<object?, bool> _canExecute;
+    private readonly Func<string?, Task> _executeFn;
+    private readonly Func<object?, bool> _canExecuteFn;
     private readonly DispatcherQueue _dispatcher;
     private bool _isExecuting;
 
@@ -33,24 +33,29 @@ public sealed partial class AsyncCommand : IIgCommand
     public bool IsAsync => true;
 
 
-    public AsyncCommand(Func<object?, Task> execute, Func<object?, bool> canExecute)
+    public AsyncCommand(Func<string?, Task> execute, Func<object?, bool> canExecute)
     {
-        _execute = execute;
-        _canExecute = canExecute;
+        _executeFn = execute;
+        _canExecuteFn = canExecute;
         _dispatcher = DispatcherQueue.GetForCurrentThread();
     }
 
     public bool CanExecute(object? parameter)
     {
-        return !_isExecuting && _canExecute.Invoke(parameter);
+        return !_isExecuting && _canExecuteFn.Invoke(parameter);
     }
 
     public void Execute(object? parameter)
     {
+        _ = ExecuteAsync(parameter?.ToString());
+    }
+
+    public void Execute(string? parameter)
+    {
         _ = ExecuteAsync(parameter);
     }
 
-    public async Task ExecuteAsync(object? parameter)
+    public async Task ExecuteAsync(string? parameter)
     {
         if (_isExecuting) return;
 
@@ -58,7 +63,7 @@ public sealed partial class AsyncCommand : IIgCommand
         {
             _isExecuting = true;
             RaiseCanExecuteChanged();
-            await _execute.Invoke(parameter);
+            await _executeFn.Invoke(parameter);
         }
         finally
         {
