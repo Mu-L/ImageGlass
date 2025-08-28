@@ -158,8 +158,15 @@ public partial class MainWindow
         // Main Menu
         _apis.Add(nameof(API.IG_OpenFile), IgCommands.Create(IG_OpenFileAsync));
         _apis.Add(nameof(API.IG_OpenFolder), IgCommands.Create(IG_OpenFolderAsync));
-        _apis.Add(nameof(API.IG_OpenPath), IgCommands.Create(args => IG_OpenPath(args?.ToString())));
+        _apis.Add(nameof(API.IG_OpenPath), IgCommands.Create(IG_OpenPath));
 
+
+        // Naviagtion
+        _apis.Add(nameof(API.IG_ViewByStep), IgCommands.Create(IG_ViewByStep));
+        _apis.Add(nameof(API.IG_ViewByIndex), IgCommands.Create(IG_ViewByIndex));
+
+
+        // Exit
         _apis.Add(nameof(API.IG_Exit), IgCommands.Create(IG_Exit));
 
 

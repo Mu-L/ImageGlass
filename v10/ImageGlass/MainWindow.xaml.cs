@@ -127,19 +127,6 @@ public sealed partial class MainWindow : Window
 
 
 
-
-
-    private void BtnViewNext_Clicked(object sender, RoutedEventArgs e)
-    {
-        ViewByStep(1);
-    }
-
-    private void BtnViewPrevious_Clicked(object sender, RoutedEventArgs e)
-    {
-        ViewByStep(-1);
-    }
-
-
     private void ToolbarMain_ItemClicked(IgToolbarItemButton sender, ToolbarItemClickedEventArgs e)
     {
         _ = RunActionAsync(e.VM.OnClick);
@@ -149,7 +136,7 @@ public sealed partial class MainWindow : Window
     private void Gallery_ItemClicked(IgGalleryItem sender, EventArgs e)
     {
         var photoIndex = AP.Photos.IndexOf(sender.VM.FilePath);
-        ViewByIndex(photoIndex);
+        IG_ViewByIndex(photoIndex);
     }
 
 
@@ -252,21 +239,6 @@ public sealed partial class MainWindow : Window
         }
     }
 
-
-    private void ViewByIndex(int photoIndex)
-    {
-        if (photoIndex < 0) return;
-
-        var step = photoIndex - AP.Photos.CurrentIndex;
-        ViewByStep(step);
-    }
-
-
-    private void ViewByStep(int step)
-    {
-        var photo = AP.Photos.GetByStep(step, true);
-        ViewPhoto(photo);
-    }
 
 
     private void ViewPhoto(Photo? photo)

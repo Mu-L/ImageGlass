@@ -99,8 +99,56 @@ public partial class MainWindow
         // 2.3 The file is in current folder AND it is NOT the viewing image
         else
         {
-            ViewByIndex(imageIndex);
+            IG_ViewByIndex(imageIndex);
         }
     }
+
+
+    /// <summary>
+    /// View a photo in the list by the given index.
+    /// </summary>
+    public void IG_ViewByIndex(string? photoIndexStr)
+    {
+        if (!int.TryParse(photoIndexStr, out var photoIndex)) return;
+
+        IG_ViewByIndex(photoIndex);
+    }
+
+
+    /// <summary>
+    /// View a photo in the list by the given index.
+    /// </summary>
+    public void IG_ViewByIndex(int photoIndex)
+    {
+        if (photoIndex < 0) return;
+
+        var step = photoIndex - AP.Photos.CurrentIndex;
+        IG_ViewByStep(step);
+    }
+
+
+    /// <summary>
+    /// View a photo in the list by the given step.
+    /// </summary>
+    public void IG_ViewByStep(string? stepStr)
+    {
+        if (!int.TryParse(stepStr, out var step)) return;
+
+        IG_ViewByStep(step);
+    }
+
+
+    /// <summary>
+    /// View a photo in the list by the given step.
+    /// </summary>
+    public void IG_ViewByStep(int step)
+    {
+        var photo = AP.Photos.GetByStep(step, true);
+        ViewPhoto(photo);
+    }
+
+
+
+
 
 }
