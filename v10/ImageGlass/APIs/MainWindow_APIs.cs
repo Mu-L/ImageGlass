@@ -16,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Win64.Common.Commands;
+using ImageGlass.Win64.Common;
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
@@ -59,7 +59,11 @@ public partial class MainWindow
     public void CreateAppAPIs()
     {
         // Main Menu
-        _apis.Add(nameof(API.IG_OpenFile), new RelayCommand(() => IG_OpenFile()));
+        _apis.Add(nameof(API.IG_OpenFile), IgCommands.Create(IG_OpenFileAsync));
+        _apis.Add(nameof(API.IG_OpenFolder), IgCommands.Create(IG_OpenFolderAsync));
+        _apis.Add(nameof(API.IG_OpenPath), IgCommands.Create(args => IG_OpenPath(args?.ToString())));
+
+        _apis.Add(nameof(API.IG_Exit), IgCommands.Create(IG_Exit));
 
 
     }

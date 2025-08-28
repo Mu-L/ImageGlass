@@ -25,6 +25,8 @@ public enum API
 
     // Menu > File
     IG_OpenFile,
+    IG_OpenFolder,
+    IG_OpenPath,
     IG_NewWindow,
     IG_Save,
     IG_SaveAs,

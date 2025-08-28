@@ -20,19 +20,25 @@ using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.Storage.Pickers;
 using System;
+using System.Threading.Tasks;
 
 namespace ImageGlass;
 
 public partial class MainWindow
 {
-
+    /// <summary>
+    /// API name: <see cref="API.IG_Exit"/>.
+    /// </summary>
     public static void IG_Exit()
     {
         Application.Current.Exit();
     }
 
 
-    public async void IG_OpenFile()
+    /// <summary>
+    /// API name: <see cref="API.IG_OpenFile"/>.
+    /// </summary>
+    public async Task IG_OpenFileAsync()
     {
         var picker = new FileOpenPicker(AppWindow.Id)
         {
@@ -58,7 +64,10 @@ public partial class MainWindow
     }
 
 
-    public async void IG_OpenFolder()
+    /// <summary>
+    /// API name: <see cref="API.IG_OpenFolder"/>.
+    /// </summary>
+    public async Task IG_OpenFolderAsync()
     {
         var picker = new FolderPicker(AppWindow.Id);
 
@@ -67,11 +76,31 @@ public partial class MainWindow
     }
 
 
+    /// <summary>
+    /// API name: <see cref="API.IG_OpenPath"/>.
+    /// </summary>
     public void IG_OpenPath(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return;
 
-        PrepareLoadPhoto([path], false);
+        // 1. check if the path is being opened
+        var imageIndex = AP.Photos.IndexOf(path);
+
+        // 2.1 The file is located another folder, load the entire folder
+        if (imageIndex == -1 || AP.CanUseForegroundShell())
+        {
+            PrepareLoadPhoto([path], false);
+        }
+        // 2.2 The file is in current folder AND it is the viewing image
+        else if (AP.Photos.CurrentIndex == imageIndex)
+        {
+            //do nothing
+        }
+        // 2.3 The file is in current folder AND it is NOT the viewing image
+        else
+        {
+            ViewByIndex(imageIndex);
+        }
     }
 
 }

@@ -111,8 +111,6 @@ public sealed partial class MainWindow : Window
 
 
         // 4. load single file path
-        var imageIndex = AP.Photos.IndexOf(path);
-
         // 4.1 get foreground shell
         if (AP.Config.ShouldUseExplorerSortOrder)
         {
@@ -123,22 +121,8 @@ public sealed partial class MainWindow : Window
         // 4.2 save init input path
         AP.UpdateInputImagePath(path);
 
-
-        // 4.3 The file is located another folder, load the entire folder
-        if (imageIndex == -1 || AP.CanUseForegroundShell())
-        {
-            PrepareLoadPhoto([path], false);
-        }
-        // 4.4 The file is in current folder AND it is the viewing image
-        else if (AP.Photos.CurrentIndex == imageIndex)
-        {
-            //do nothing
-        }
-        // 4.5 The file is in current folder AND it is NOT the viewing image
-        else
-        {
-            ViewByIndex(imageIndex);
-        }
+        // 4.3 open the path
+        IG_OpenPath(path);
     }
 
 
