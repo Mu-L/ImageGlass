@@ -38,9 +38,8 @@ namespace ImageGlass;
 /// </summary>
 public sealed partial class MainWindow : Window
 {
+    private readonly IgWindowHook _winHook;
     private readonly Progress<FileSearchingEventArgs> _searchProgress;
-
-    private readonly IgWindowHook WinHook;
 
 
     public MainWindow()
@@ -50,25 +49,24 @@ public sealed partial class MainWindow : Window
         // create APIs
         RegisterImageGlassAPIs();
 
-        WinHook = new(this, WinTitleBar);
+        _winHook = new(this, WinTitleBar);
         _searchProgress = new(Files_Searched);
 
         AppWindow.Resize(new SizeInt32(2000, 1500));
     }
 
 
-    private void WindowContent_Loaded(object sender, RoutedEventArgs e)
+    private void Root_Loaded(object sender, RoutedEventArgs e)
     {
         // load image from command line arguments
         LoadImagesFromCmdArgs();
-
 
     }
 
     private void Window_Closed(object sender, WindowEventArgs e)
     {
         Viewer.UnloadPhoto();
-        WinHook.Dispose();
+        _winHook.Dispose();
     }
 
 
@@ -243,7 +241,7 @@ public sealed partial class MainWindow : Window
 
     private void ViewPhoto(Photo? photo)
     {
-        WinHook.Title = photo?.FilePath;
+        _winHook.Title = photo?.FilePath;
         Viewer.SetPhoto(photo);
 
         Gallery.ScrollToItem(AP.Photos.CurrentIndex);

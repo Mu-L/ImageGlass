@@ -10,13 +10,13 @@
     xmlns:w64="using:ImageGlass.WinNT"
     xmlns:w64c="using:ImageGlass.Win64.Common"
     xmlns:w64ui="using:ImageGlass.Win64.UI"
-    Title="{x:Bind WinHook.Title}"
+    Title="{x:Bind _winHook.Title}"
     x:DefaultBindMode="OneWay"
     Closed="Window_Closed"
     SystemBackdrop="{x:Bind w64ui:IgWindowHook.WindowBackdrop}"
     mc:Ignorable="d">
 
-    <Grid x:Name="WindowContent" Loaded="WindowContent_Loaded">
+    <Grid x:Name="Root" Loaded="Root_Loaded">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -26,38 +26,13 @@
 
 
         <!--  Title bar  -->
-        <Grid
+        <w64ui:TitlebarControl
             x:Name="WinTitleBar"
             Grid.Row="0"
-            Height="{x:Bind WinHook.TitleBarHeight}"
-            Padding="{x:Bind WinHook.TitleBarPadding}"
-            Canvas.ZIndex="100">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-
-            <ImageIcon
-                Name="PART_TitleBar_Icon"
-                Grid.Column="0"
-                Width="20"
-                Height="20"
-                Margin="5,0,0,0"
-                Source="/Assets/ImageGlassLogo.svg"
-                Visibility="{x:Bind w64c:AP.Config.ShowAppIcon}" />
-
-
-            <TextBlock
-                Name="PART_TitleBar_Text"
-                Grid.Column="1"
-                Margin="5,0,0,0"
-                VerticalAlignment="Center"
-                Style="{StaticResource CaptionTextBlockStyle}"
-                Text="{x:Bind WinHook.Title}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap" />
-        </Grid>
+            Height="{x:Bind _winHook.TitleBarHeight}"
+            Padding="{x:Bind _winHook.TitleBarPadding}"
+            Canvas.ZIndex="100"
+            Text="{x:Bind _winHook.Title}" />
 
 
         <!--  Toolbar  -->
@@ -67,16 +42,6 @@
             Canvas.ZIndex="90"
             ItemClicked="ToolbarMain_ItemClicked"
             ItemsSource="{x:Bind w64c:AP.Config.ToolbarButtons}" />
-
-
-        <!--  Gallery  -->
-        <w64ui:GalleryControl
-            x:Name="Gallery"
-            Grid.Row="3"
-            Grid.Column="1"
-            Canvas.ZIndex="80"
-            ItemClicked="Gallery_ItemClicked"
-            VM="{x:Bind w64c:AP.Photos, Mode=OneWay}" />
 
 
         <!--  Viewer  -->
@@ -93,6 +58,16 @@
             ZoomLevels="{x:Bind w64c:AP.Config.ZoomLevels}"
             ZoomMode="{x:Bind w64c:AP.Config.ZoomMode}"
             ZoomSpeed="{x:Bind w64c:AP.Config.ZoomSpeed}" />
+
+
+        <!--  Gallery  -->
+        <w64ui:GalleryControl
+            x:Name="Gallery"
+            Grid.Row="3"
+            Grid.Column="1"
+            Canvas.ZIndex="80"
+            ItemClicked="Gallery_ItemClicked"
+            VM="{x:Bind w64c:AP.Photos, Mode=OneWay}" />
 
     </Grid>
 

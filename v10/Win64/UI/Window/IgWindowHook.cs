@@ -37,7 +37,7 @@ namespace ImageGlass.Win64.UI;
 public partial class IgWindowHook : DisposableImpl
 {
     private Window _window;
-    private FrameworkElement? _titleBar = null;
+    private TitlebarControl? _titleBar = null;
 
     private readonly IProgress<AppIconChangedEventArgs> _uiReporter;
     private double _titleBarHeight = 0;
@@ -142,7 +142,7 @@ public partial class IgWindowHook : DisposableImpl
     #endregion // Public Properties
 
 
-    public IgWindowHook(Window window, FrameworkElement? customTitleBar = null)
+    public IgWindowHook(Window window, TitlebarControl? customTitleBar = null)
     {
         _window = window;
         _titleBar = customTitleBar;
@@ -184,6 +184,9 @@ public partial class IgWindowHook : DisposableImpl
         {
             // update app color mode according to the theme's color mode
             UpdateWindowColorMode();
+
+            // update app icon
+            UpdateWindowIconAsync(true);
         }
     }
 
@@ -239,7 +242,7 @@ public partial class IgWindowHook : DisposableImpl
     /// </summary>
     public void UpdateWindowIconAsync(bool updateTaskbarIcon = false)
     {
-        if (_titleBar?.FindName("PART_TitleBar_Icon") is not ImageIcon iconEl) return;
+        if (_titleBar?.FindName(TitlebarControl._PART_TitleBar_Icon) is not ImageIcon iconEl) return;
 
         // get full path of icon
         var iconPath = AP.Config.Theme.GetIconPath(IgThemeIcon.AppLogo);
