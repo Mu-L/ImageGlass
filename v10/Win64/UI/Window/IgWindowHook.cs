@@ -21,7 +21,10 @@ using ImageGlass.Win64.Common;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
+using System;
 using WinRT.Interop;
 
 
@@ -30,6 +33,7 @@ namespace ImageGlass.Win64.UI;
 public partial class IgWindowHook : DisposableImpl
 {
     private Window _window;
+    private FrameworkElement? _titleBar = null;
     private double _titleBarHeight = 0;
     private double _titleBarRightInset = 0;
 
@@ -131,15 +135,16 @@ public partial class IgWindowHook : DisposableImpl
     #endregion // Public Properties
 
 
-    public IgWindowHook(Window window, UIElement? customTitleBar = null)
+    public IgWindowHook(Window window, FrameworkElement? customTitleBar = null)
     {
         _window = window;
+        _titleBar = customTitleBar;
 
         // set title bar
-        if (customTitleBar != null)
+        if (_titleBar != null)
         {
             _window.ExtendsContentIntoTitleBar = true;
-            _window.SetTitleBar(customTitleBar);
+            _window.SetTitleBar(_titleBar);
         }
 
         AP.ThemeChanged += AP_ThemeChanged;
@@ -159,6 +164,7 @@ public partial class IgWindowHook : DisposableImpl
     {
         UpdateWindowColorMode();
         UpdateTitleBarSize();
+        UpdateWindowIcon();
     }
 
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
@@ -188,7 +194,6 @@ public partial class IgWindowHook : DisposableImpl
     /// </summary>
     public void UpdateWindowColorMode()
     {
-        // update app color mode according to the theme's color mode
         var root = (FrameworkElement)_window.Content;
 
         if (AP.Config.Theme.Settings.IsDarkMode)
@@ -201,6 +206,27 @@ public partial class IgWindowHook : DisposableImpl
             root.RequestedTheme = ElementTheme.Light;
             _window.AppWindow.TitleBar.PreferredTheme = TitleBarTheme.Light;
         }
+    }
+
+
+    /// <summary>
+    /// Updates icon for window, optional for taskbar
+    /// </summary>
+    public void UpdateWindowIcon(bool updateTaskbarIcon = false)
+    {
+        if (_titleBar?.FindName("PART_TitleBar_Icon") is not ImageIcon iconEl) return;
+
+        var iconPath = AP.Config.Theme.GetIconPath(IgThemeIcon.AppLogo);
+        var iconUri = new Uri(iconPath);
+
+        iconEl.Source = new SvgImageSource(iconUri);
+
+
+        if (updateTaskbarIcon)
+        {
+            _window.AppWindow.SetTaskbarIcon(iconPath);
+        }
+
     }
 
 }

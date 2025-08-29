@@ -20,10 +20,16 @@ namespace ImageGlass.Win64.Common;
 
 
 /// <summary>
-/// Theme toolbar icons
+/// Theme icons
 /// </summary>
 public enum IgThemeIcon
 {
+    // settings icons
+    NavButtonLeft,
+    NavButtonRight,
+    AppLogo,
+
+    // toolbar icons
     ActualSize,
     AutoZoom,
     Checkerboard,

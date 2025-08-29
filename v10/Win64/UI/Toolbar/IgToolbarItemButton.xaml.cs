@@ -207,7 +207,7 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
             if (!Enum.TryParse<IgThemeIcon>(VM.Image, out var themeIconNameEnum)) return;
 
             // get icon file name from theme
-            var themeIconName = AP.Config.Theme.GetToolbarIconPath(themeIconNameEnum);
+            var themeIconName = AP.Config.Theme.GetIconPath(themeIconNameEnum);
             if (string.IsNullOrWhiteSpace(themeIconName)) return;
 
             // theme icon path

@@ -39,14 +39,17 @@
 
 
             <ImageIcon
+                Name="PART_TitleBar_Icon"
                 Grid.Column="0"
                 Width="20"
+                Height="20"
                 Margin="5,0,0,0"
                 Source="/Assets/Square44x44Logo.png"
                 Visibility="{x:Bind w64c:AP.Config.ShowAppIcon}" />
 
 
             <TextBlock
+                Name="PART_TitleBar_Text"
                 Grid.Column="1"
                 Margin="5,0,0,0"
                 VerticalAlignment="Center"

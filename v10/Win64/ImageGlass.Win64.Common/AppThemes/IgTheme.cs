@@ -152,16 +152,35 @@ public partial class IgTheme : IgReactive
 
 
     /// <summary>
-    /// Gets the full path of toolbar icon.
+    /// Gets the full path of theme icon.
     /// </summary>
-    public string GetToolbarIconPath(IgThemeIcon iconName)
+    public string GetIconPath(IgThemeIcon iconName)
     {
         var svgPath = "";
 
         try
         {
-            // get icon file name
-            if (!ToolbarIcons.TryGetValue(iconName.ToString(), out var themeIconName)) return svgPath;
+            var themeIconName = "";
+
+            // icon from Settings
+            if (iconName == IgThemeIcon.NavButtonLeft)
+            {
+                themeIconName = Settings.NavButtonLeft;
+            }
+            else if (iconName == IgThemeIcon.NavButtonRight)
+            {
+                themeIconName = Settings.NavButtonLeft;
+            }
+            else if (iconName == IgThemeIcon.AppLogo)
+            {
+                themeIconName = Settings.AppLogo;
+            }
+            // icon from ToolbarIcons
+            else if (!ToolbarIcons.TryGetValue(iconName.ToString(), out themeIconName))
+            {
+                return svgPath;
+            }
+
 
             // get full path
             svgPath = Path.Combine(FolderPath, themeIconName);
