@@ -17,7 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Win64.Common;
+using ImageMagick;
+using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -25,6 +28,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
+using System.Threading.Tasks;
 using WinRT.Interop;
 
 
@@ -34,8 +38,11 @@ public partial class IgWindowHook : DisposableImpl
 {
     private Window _window;
     private FrameworkElement? _titleBar = null;
+
+    private readonly IProgress<AppIconChangedEventArgs> _uiReporter;
     private double _titleBarHeight = 0;
     private double _titleBarRightInset = 0;
+    private nint _appIconHandle = IntPtr.Zero;
 
 
     // Public Properties 
@@ -139,6 +146,7 @@ public partial class IgWindowHook : DisposableImpl
     {
         _window = window;
         _titleBar = customTitleBar;
+        _uiReporter = new Progress<AppIconChangedEventArgs>(UIReporter_Report);
 
         // set title bar
         if (_titleBar != null)
@@ -158,13 +166,15 @@ public partial class IgWindowHook : DisposableImpl
         base.OnDisposing();
 
         AP.ThemeChanged -= AP_ThemeChanged;
+
+        IconApi.DestroyHIcon(_appIconHandle);
     }
 
     private void Root_Loaded(object sender, RoutedEventArgs e)
     {
         UpdateWindowColorMode();
         UpdateTitleBarSize();
-        UpdateWindowIcon();
+        UpdateWindowIconAsync(true);
     }
 
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
@@ -175,6 +185,21 @@ public partial class IgWindowHook : DisposableImpl
             // update app color mode according to the theme's color mode
             UpdateWindowColorMode();
         }
+    }
+
+    private void UIReporter_Report(AppIconChangedEventArgs e)
+    {
+        if (e.Bytes == null) return;
+
+        // destroy the old icon handle
+        IconApi.DestroyHIcon(_appIconHandle);
+
+        // create new icon handle
+        _appIconHandle = IconApi.CreateHIcon(e.Bytes, e.Size, e.Size);
+
+        // update app icon
+        var iconId = Win32Interop.GetIconIdFromIcon(_appIconHandle);
+        _window.AppWindow.SetIcon(iconId);
     }
 
 
@@ -212,21 +237,47 @@ public partial class IgWindowHook : DisposableImpl
     /// <summary>
     /// Updates icon for window, optional for taskbar
     /// </summary>
-    public void UpdateWindowIcon(bool updateTaskbarIcon = false)
+    public void UpdateWindowIconAsync(bool updateTaskbarIcon = false)
     {
         if (_titleBar?.FindName("PART_TitleBar_Icon") is not ImageIcon iconEl) return;
 
+        // get full path of icon
         var iconPath = AP.Config.Theme.GetIconPath(IgThemeIcon.AppLogo);
-        var iconUri = new Uri(iconPath);
+        Uri? iconUri = null;
 
-        iconEl.Source = new SvgImageSource(iconUri);
+        try
+        {
+            // try to get icon URI from the given path
+            iconUri = new Uri(iconPath);
+            iconEl.Source = new SvgImageSource(iconUri);
+        }
+        catch { }
 
 
+        // set icon for taskbar
         if (updateTaskbarIcon)
         {
-            _window.AppWindow.SetTaskbarIcon(iconPath);
+            // get default logo icon
+            if (iconUri == null) iconPath = BHelper.BaseDir("Assets", "ImageGlassLogo.svg");
+            var size = (int)DpiScale * 32;
+
+            _ = Task.Run(async () =>
+            {
+                var bytes = await MagickDecoder.QuickDecodeAsync(iconPath, size, size, MagickFormat.Bgra);
+
+                _uiReporter.Report(new AppIconChangedEventArgs(bytes, size));
+            });
         }
 
     }
 
+
 }
+
+
+public class AppIconChangedEventArgs(byte[]? bytes, int size) : EventArgs
+{
+    public byte[]? Bytes { get; set; } = bytes;
+    public int Size { get; set; } = size;
+}
+

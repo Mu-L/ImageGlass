@@ -44,7 +44,7 @@
                 Width="20"
                 Height="20"
                 Margin="5,0,0,0"
-                Source="/Assets/Square44x44Logo.png"
+                Source="/Assets/ImageGlassLogo.svg"
                 Visibility="{x:Bind w64c:AP.Config.ShowAppIcon}" />
 
 
