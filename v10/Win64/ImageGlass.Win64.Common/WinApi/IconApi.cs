@@ -1,0 +1,86 @@
+﻿/*
+ImageGlass Project - Image viewer for Windows
+Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+using System;
+using Windows.Win32;
+using Windows.Win32.Graphics.Gdi;
+using Windows.Win32.UI.WindowsAndMessaging;
+
+namespace ImageGlass.Win64.Common;
+
+public static class IconApi
+{
+
+    /// <summary>
+    /// Creates HICON from pixel byte array.
+    /// </summary>
+    public static unsafe IntPtr CreateHIcon(byte[] colorBytes, int width, int height)
+    {
+        var hbmColor = new HBITMAP(IntPtr.Zero);
+        var hbmMask = new HBITMAP(IntPtr.Zero);
+        var hIcon = IntPtr.Zero;
+
+        try
+        {
+            // create color and mask bitmaps
+            fixed (byte* pBytes = colorBytes)
+            {
+                hbmColor = PInvoke.CreateBitmap(width, height, 1, 32, pBytes); // Assuming 32-bit color
+                hbmMask = PInvoke.CreateBitmap(width, height, 1, 1, pBytes);   // Monochrome mask
+            }
+
+            if (hbmColor == IntPtr.Zero || hbmMask == IntPtr.Zero)
+            {
+                return IntPtr.Zero;
+            }
+
+            var iconInfo = new ICONINFO()
+            {
+                fIcon = true, // This is an icon
+                xHotspot = 0,
+                yHotspot = 0,
+                hbmColor = hbmColor,
+                hbmMask = hbmMask,
+            };
+
+            // create icon
+            var iconObj = PInvoke.CreateIconIndirect(in iconInfo);
+
+            // get icon handle
+            hIcon = iconObj.DangerousGetHandle();
+
+            return hIcon;
+        }
+        finally
+        {
+            // clean up GDI objects
+            if (hbmColor != IntPtr.Zero) PInvoke.DeleteObject(hbmColor);
+            if (hbmMask != IntPtr.Zero) PInvoke.DeleteObject(hbmMask);
+        }
+    }
+
+
+    /// <summary>
+    /// Destroys HICON.
+    /// </summary>
+    public static void DestroyHIcon(IntPtr hIcon)
+    {
+        if (hIcon != IntPtr.Zero) PInvoke.DeleteObject(new HGDIOBJ(hIcon));
+    }
+
+}

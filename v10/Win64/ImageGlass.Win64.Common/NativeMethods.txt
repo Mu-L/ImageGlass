@@ -4,3 +4,7 @@ IShellItem
 SHCreateItemFromParsingName
 IShellItemImageFactory
 SIIGBF
+
+ICONINFO
+CreateIconIndirect
+CreateBitmap
