@@ -9,10 +9,11 @@
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 
     <Nullable>enable</Nullable>
-    <LangVersion>Latest</LangVersion>
+    <LangVersion>Preview</LangVersion>
     <Platforms>x64;ARM64</Platforms>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Titlebar\TitlebarControl.xaml" />
     <None Remove="Toolbar\IgToolbarItemButton.xaml" />
     <None Remove="Toolbar\IgToolbarItemSeparator.xaml" />
   </ItemGroup>
@@ -43,6 +44,11 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Toolbar_Custom\ToolbarCustomControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Titlebar\TitlebarControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
