@@ -443,6 +443,30 @@ public class MagickDecoder
     }
 
 
+    /// <summary>
+    /// Gets thumbnail from the given image path.
+    /// </summary>
+    public static async Task<byte[]?> QuickDecodeAsync(string filePath, int width, int height, MagickFormat outputFormat)
+    {
+        var options = new PhotoReadOptions()
+        {
+            Width = (uint)width,
+            Height = (uint)height,
+        };
+        var settings = ParseSettings(options, false, filePath);
+
+        try
+        {
+            using var imgM = new MagickImage();
+            await imgM.ReadAsync(filePath, settings);
+
+            return imgM.ToByteArray(outputFormat);
+        }
+        catch { }
+
+        return null;
+    }
+
 
 
     /// <summary>
