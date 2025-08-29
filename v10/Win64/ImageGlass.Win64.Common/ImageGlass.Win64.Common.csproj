@@ -9,7 +9,7 @@
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 
     <Nullable>enable</Nullable>
-    <LangVersion>Latest</LangVersion>
+    <LangVersion>Preview</LangVersion>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Platforms>x64;ARM64</Platforms>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>

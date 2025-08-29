@@ -38,9 +38,9 @@ namespace ImageGlass;
 /// </summary>
 public sealed partial class MainWindow : Window
 {
-    private Progress<FileSearchingEventArgs> _searchProgress;
+    private readonly Progress<FileSearchingEventArgs> _searchProgress;
 
-    private IgWindowHook WinHook;
+    private readonly IgWindowHook WinHook;
 
 
     public MainWindow()
@@ -55,6 +55,7 @@ public sealed partial class MainWindow : Window
 
         AppWindow.Resize(new SizeInt32(2000, 1500));
     }
+
 
     private void WindowContent_Loaded(object sender, RoutedEventArgs e)
     {
@@ -124,7 +125,6 @@ public sealed partial class MainWindow : Window
         // 4.3 open the path
         IG_OpenPath(path);
     }
-
 
 
     private void ToolbarMain_ItemClicked(IgToolbarItemButton sender, ToolbarItemClickedEventArgs e)

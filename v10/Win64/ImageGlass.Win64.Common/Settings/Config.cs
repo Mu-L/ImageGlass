@@ -112,7 +112,17 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets welcome picture value
     /// </summary>
-    public bool ShowWelcomeImage { get; set; } = true;
+    public bool ShowWelcomeImage
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = true;
 
     ///// <summary>
     ///// Gets, sets value of visibility of toolbar on start up
@@ -127,7 +137,17 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets value of visibility of app icon
     /// </summary>
-    public bool ShowAppIcon { get; set; } = true;
+    public bool ShowAppIcon
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = true;
 
     ///// <summary>
     ///// Gets, sets value indicating that ImageGlass will loop back viewer to the first image when reaching the end of the list.
@@ -177,7 +197,17 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets the value indicates that to show last seen image on startup
     /// </summary>
-    public bool ShouldOpenLastSeenImage { get; set; } = true;
+    public bool ShouldOpenLastSeenImage
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = true;
 
     ///// <summary>
     ///// Gets, sets the value indicates that the ColorProfile will be applied for all or only the images with embedded profile
@@ -192,22 +222,62 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets recursive value
     /// </summary>
-    public bool EnableRecursiveLoading { get; set; } = false;
+    public bool EnableRecursiveLoading
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = false;
 
     /// <summary>
     /// Gets, sets the value indicates that Windows File Explorer sort order is used if possible
     /// </summary>
-    public bool ShouldUseExplorerSortOrder { get; set; } = true;
+    public bool ShouldUseExplorerSortOrder
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = true;
 
     /// <summary>
     /// Gets, sets the value indicates that images order should be grouped by directory
     /// </summary>
-    public bool ShouldGroupImagesByDirectory { get; set; } = false;
+    public bool ShouldGroupImagesByDirectory
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = false;
 
     /// <summary>
     /// Gets, sets showing/loading hidden images
     /// </summary>
-    public bool ShouldLoadHiddenImages { get; set; } = false;
+    public bool ShouldLoadHiddenImages
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = false;
 
     ///// <summary>
     ///// Gets, sets value specifying that Window Fit mode is on
@@ -267,7 +337,17 @@ public partial class Config : IgReactive
     /// <summary>
     /// Enables, disables debug mode.
     /// </summary>
-    public bool EnableDebug { get; set; } = false;
+    public bool EnableDebug
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = false;
 
     #endregion // Boolean items
 
@@ -323,13 +403,33 @@ public partial class Config : IgReactive
     /// Gets, sets the panning speed.
     /// Value range is from 0 to 100.
     /// </summary>
-    public float PanSpeed { get; set; } = 20f;
+    public float PanSpeed
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = 20f;
 
     /// <summary>
     /// Gets, sets the zooming speed.
     /// Value range is from -500 to 500.
     /// </summary>
-    public float ZoomSpeed { get; set; } = 0;
+    public float ZoomSpeed
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = 0f;
 
     ///// <summary>
     ///// Gets, sets slide show interval (minimum value if it's random)
@@ -349,7 +449,17 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets value of thumbnail dimension in pixel
     /// </summary>
-    public int ThumbnailSize { get; set; } = 70;
+    public int ThumbnailSize
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = 70;
 
     ///// <summary>
     ///// Gets, sets the maximum size in MB of thumbnail persistent cache.
@@ -386,7 +496,17 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets toolbar icon height
     /// </summary>
-    public uint ToolbarIconHeight { get; set; } = Const.TOOLBAR_ICON_HEIGHT;
+    public uint ToolbarIconHeight
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = Const.TOOLBAR_ICON_HEIGHT;
 
     ///// <summary>
     ///// Gets, sets value of image quality for editting
@@ -428,7 +548,17 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets the absolute file path of the last seen image
     /// </summary>
-    public string LastSeenImagePath { get; set; } = "";
+    public string LastSeenImagePath
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = "";
 
     ///// <summary>
     ///// Gets, sets the last view of settings window.
@@ -438,7 +568,17 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets background color of of the main window
     /// </summary>
-    public string BackgroundColor { get; set; } = "#00000000";
+    public string BackgroundColor
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = "#00000000";
 
     ///// <summary>
     ///// Gets, sets background color of slideshow
@@ -448,12 +588,32 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets the theme name for dark mode.
     /// </summary>
-    public string DarkTheme { get; set; } = Const.DEFAULT_THEME;
+    public string DarkTheme
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = Const.DEFAULT_THEME;
 
     /// <summary>
     /// Gets, sets the theme name for light mode.
     /// </summary>
-    public string LightTheme { get; set; } = "Kobe-Light";
+    public string LightTheme
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = "Kobe-Light";
 
     #endregion
 
@@ -464,7 +624,17 @@ public partial class Config : IgReactive
     /// Gets, sets zoom levels of the viewer
     /// </summary>
     [JsonConverter(typeof(JsonArrayToZoomFactorConverter))]
-    public double[] ZoomLevels { get; set; } = [];
+    public double[] ZoomLevels
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = [];
 
     ///// <summary>
     ///// Gets, sets the list of apps for edit action.
@@ -475,18 +645,48 @@ public partial class Config : IgReactive
     /// Gets, sets the list of supported image formats
     /// </summary>
     [JsonConverter(typeof(JsonArrayToStringConverter))]
-    public HashSet<string> FileFormats { get; set; } = [];
+    public HashSet<string> FileFormats
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = [];
 
     /// <summary>
     /// Gets, sets the list of formats that only load the first frame forcefully
     /// </summary>
     [JsonConverter(typeof(JsonArrayToStringConverter))]
-    public HashSet<string> SingleFrameFormats { get; set; } = [".avif", ".heic", ".heif", ".psd", ".jxl"];
+    public HashSet<string> SingleFrameFormats
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = [".avif", ".heic", ".heif", ".psd", ".jxl"];
 
     /// <summary>
     /// Gets, sets the list of toolbar buttons
     /// </summary>
-    public ObservableCollection<ToolbarItemModel> ToolbarButtons { get; set; } =
+    public ObservableCollection<ToolbarItemModel> ToolbarButtons
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } =
     [
         new ToolbarItemModel {
             Id = "Btn_Open",
@@ -592,32 +792,92 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets checkerboard mode of the viewer.
     /// </summary>
-    public CheckerboardMode CheckerboardMode { get; set; } = CheckerboardMode.None;
+    public CheckerboardMode CheckerboardMode
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = CheckerboardMode.None;
 
     /// <summary>
     /// Gets, sets image loading order
     /// </summary>
-    public ImageOrderBy ImageLoadingOrder { get; set; } = ImageOrderBy.Name;
+    public ImageOrderBy ImageLoadingOrder
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = ImageOrderBy.Name;
 
     /// <summary>
     /// Gets, sets image loading order type
     /// </summary>
-    public ImageOrderType ImageLoadingOrderType { get; set; } = ImageOrderType.Asc;
+    public ImageOrderType ImageLoadingOrderType
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = ImageOrderType.Asc;
 
     /// <summary>
     /// Gets, sets zoom mode value
     /// </summary>
-    public ZoomMode ZoomMode { get; set; } = ZoomMode.AutoZoom;
+    public ZoomMode ZoomMode
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = ZoomMode.AutoZoom;
 
     /// <summary>
     /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>less than or equals 100%</c>.
     /// </summary>
-    public ImageInterpolation ImageInterpolationScaleDown { get; set; } = ImageInterpolation.MultiSampleLinear;
+    public ImageInterpolation ImageInterpolationScaleDown
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = ImageInterpolation.MultiSampleLinear;
 
     /// <summary>
     /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
     /// </summary>
-    public ImageInterpolation ImageInterpolationScaleUp { get; set; } = ImageInterpolation.NearestNeighbor;
+    public ImageInterpolation ImageInterpolationScaleUp
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = ImageInterpolation.NearestNeighbor;
 
     ///// <summary>
     ///// Gets, sets value indicates what happens after clicking Edit menu
@@ -627,7 +887,17 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
     /// </summary>
-    public BackdropStyle WindowBackdrop { get; set; } = BackdropStyle.Mica;
+    public BackdropStyle WindowBackdrop
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = BackdropStyle.Mica;
 
     #endregion // Enum items
 

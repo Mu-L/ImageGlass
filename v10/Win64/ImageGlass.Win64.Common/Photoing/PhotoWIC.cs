@@ -21,7 +21,6 @@ using ImageGlass.Common.Photoing;
 using ImageMagick;
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Vortice.Direct2D1;
@@ -252,11 +251,12 @@ public static partial class PhotoWIC
         IWICColorContext? bestProfile = null;
         if (contexts == null) return bestProfile;
 
-
         // get the last non-uncalibrated color context
         // https://stackoverflow.com/a/70215280/403671
-        foreach (var ctx in contexts.Reverse())
+        for (var i = contexts.Length - 1; i >= 0; i--)
         {
+            var ctx = contexts[i];
+
             // Uncalibrated
             if (ctx.ExifColorSpace == 0xFFFF)
                 continue;

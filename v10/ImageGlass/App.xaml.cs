@@ -191,7 +191,7 @@ public partial class App : Application
         //}
 
 
-        AP.Config.LastSeenImagePath = AP.Photos.GetFilePath(AP.Photos.CurrentIndex);
+        AP.Config.LastSeenImagePath = AP.Photos.CurrentFilePath;
         //Config.ZoomLockValue = PicMain.ZoomFactor * 100f;
 
 
