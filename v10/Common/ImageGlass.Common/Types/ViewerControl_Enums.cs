@@ -45,12 +45,12 @@ public enum CheckerboardMode
 
 public enum ZoomMode
 {
-    AutoZoom = 1,
-    LockZoom = 2,
-    ScaleToWidth = 3,
-    ScaleToHeight = 4,
-    ScaleToFit = 5,
-    ScaleToFill = 6,
+    AutoZoom,
+    LockZoom,
+    ScaleToWidth,
+    ScaleToHeight,
+    ScaleToFit,
+    ScaleToFill,
 }
 
 

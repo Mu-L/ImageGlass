@@ -30,8 +30,8 @@ public class IgReactive : INotifyPropertyChanged
     #region INotifyPropertyChanged Implementation
 
     // to manage PropertyChanged events
-    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
-    private event PropertyChangedEventHandler? _propertyChangedHandler;
+    private List<PropertyChangedEventHandler> _propertyChangedEvents = [];
+    private event PropertyChangedEventHandler? _propertyChanged;
 
 
     /// <summary>
@@ -41,19 +41,18 @@ public class IgReactive : INotifyPropertyChanged
     {
         add
         {
-            if (value != null)
+            if (value is not null)
             {
-                _propertyChangedHandler += value;
-                _propertyChangedEvent.Add(value);
+                _propertyChanged += value;
+                _propertyChangedEvents.Add(value);
             }
         }
-
         remove
         {
-            if (value != null)
+            if (value is not null)
             {
-                _propertyChangedHandler -= value;
-                _propertyChangedEvent.Remove(value);
+                _propertyChanged -= value;
+                _propertyChangedEvents.Remove(value);
             }
         }
     }
@@ -64,7 +63,7 @@ public class IgReactive : INotifyPropertyChanged
     /// </summary>
     public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        _propertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
 
@@ -74,11 +73,11 @@ public class IgReactive : INotifyPropertyChanged
     public void CleanUpPropertyChangedEvents()
     {
         // remove PropertyChanged events
-        foreach (var eventHandler in _propertyChangedEvent)
+        foreach (var eventHandler in _propertyChangedEvents)
         {
-            _propertyChangedHandler -= eventHandler;
+            _propertyChanged -= eventHandler;
         }
-        _propertyChangedEvent.Clear();
+        _propertyChangedEvents.Clear();
     }
 
     #endregion // INotifyPropertyChanged Implementation
