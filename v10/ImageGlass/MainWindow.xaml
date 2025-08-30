@@ -31,8 +31,10 @@
             Grid.Row="0"
             Height="{x:Bind _winHook.TitleBarHeight}"
             Padding="{x:Bind _winHook.TitleBarPadding}"
+            BackgroundColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarBgColor}"
             Canvas.ZIndex="100"
-            Text="{x:Bind _winHook.Title}" />
+            Text="{x:Bind _winHook.Title}"
+            TextColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor}" />
 
 
         <!--  Toolbar  -->
@@ -49,6 +51,7 @@
             x:Name="Viewer"
             Grid.Row="2"
             AllowDrop="True"
+            BackgroundColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.BgColor}"
             CheckerboardMode="{x:Bind w64c:AP.Config.CheckerboardMode}"
             DragOver="Viewer_DragOver"
             Drop="Viewer_Drop"

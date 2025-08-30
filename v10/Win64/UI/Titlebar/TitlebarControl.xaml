@@ -10,7 +10,10 @@
     x:DefaultBindMode="OneWay"
     mc:Ignorable="d">
 
-    <Grid MinHeight="{x:Bind MinHeight}" Padding="{x:Bind Padding}">
+    <Grid
+        MinHeight="{x:Bind MinHeight}"
+        Padding="{x:Bind Padding}"
+        Background="{x:Bind BackgroundColor, Converter={StaticResource ColorToBrushConverter}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -33,6 +36,7 @@
             Grid.Column="1"
             Margin="5,0,0,0"
             VerticalAlignment="Center"
+            Foreground="{x:Bind TextColor, Converter={StaticResource ColorToBrushConverter}}"
             Style="{StaticResource CaptionTextBlockStyle}"
             Text="{x:Bind Text}"
             TextTrimming="CharacterEllipsis"

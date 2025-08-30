@@ -156,6 +156,7 @@ public partial class IgWindowHook : DisposableImpl
         }
 
         AP.ThemeChanged += AP_ThemeChanged;
+        _window.Activated += Window_Activated;
 
         var root = (FrameworkElement)_window.Content;
         root.Loaded += Root_Loaded;
@@ -166,6 +167,7 @@ public partial class IgWindowHook : DisposableImpl
         base.OnDisposing();
 
         AP.ThemeChanged -= AP_ThemeChanged;
+        _window.Activated -= Window_Activated;
 
         IconApi.DestroyHIcon(_appIconHandle);
     }
@@ -187,6 +189,21 @@ public partial class IgWindowHook : DisposableImpl
 
             // update app icon
             UpdateWindowIconAsync(true);
+        }
+    }
+
+    private void Window_Activated(object sender, WindowActivatedEventArgs e)
+    {
+        if (_titleBar?.FindName(TitlebarControl._PART_TitleBar_Text) is not TextBlock txtEl) return;
+
+        // change title bar text opacity according to window activation state
+        if (e.WindowActivationState == WindowActivationState.Deactivated)
+        {
+            txtEl.Opacity = 0.5;
+        }
+        else
+        {
+            txtEl.Opacity = 1;
         }
     }
 

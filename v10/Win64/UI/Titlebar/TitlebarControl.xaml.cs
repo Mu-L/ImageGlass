@@ -16,11 +16,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Windows.UI;
 
 namespace ImageGlass.Win64.UI;
 
@@ -134,6 +136,39 @@ public sealed partial class TitlebarControl : UserControl, INotifyPropertyChange
             }
         }
     }
+
+
+    /// <summary>
+    /// Gets, sets the background color of title bar.
+    /// </summary>
+    public Color? BackgroundColor
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = Colors.Transparent;
+
+
+    /// <summary>
+    /// Gets, sets the text color of title bar.
+    /// </summary>
+    public Color? TextColor
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = Colors.Transparent;
+
 
 
     public TitlebarControl()
