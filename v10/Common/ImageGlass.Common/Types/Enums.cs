@@ -23,25 +23,16 @@ namespace ImageGlass.Common;
 /// </summary>
 public enum BackdropStyle
 {
-    /// <summary>
-    /// Use default setting of Windows.
-    /// </summary>
-    None = 0,
+    Mica,
+    MicaAlt,
+    Acrylic,
+    AcrylicThin,
+    Transparent,
 
     /// <summary>
-    /// Mica effect.
+    /// No backdrop.
     /// </summary>
-    Mica = 2,
-
-    /// <summary>
-    /// Acrylic effect.
-    /// </summary>
-    Acrylic = 3,
-
-    /// <summary>
-    /// Draw the backdrop material effect corresponding to a window with a tabbed title bar.
-    /// </summary>
-    MicaAlt = 4,
+    None,
 }
 
 

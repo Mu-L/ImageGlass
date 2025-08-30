@@ -37,7 +37,9 @@ namespace ImageGlass.Win64.UI;
 public partial class IgWindowHook : DisposableImpl
 {
     private Window _window;
+    private WindowMessageMonitor _msgMonitor;
     private TitlebarControl? _titleBar = null;
+    private BackdropStyle _backdropStyle = BackdropStyle.None;
 
     private readonly IProgress<AppIconChangedEventArgs> _uiReporter;
     private nint _appIconHandle = IntPtr.Zero;
@@ -115,23 +117,6 @@ public partial class IgWindowHook : DisposableImpl
     /// </summary>
     public Thickness TitleBarPadding => new Thickness(0, 0, TitleBarRightInset, 0);
 
-
-    /// <summary>
-    /// Gets, sets window backdrop.
-    /// </summary>
-    public BackdropStyle Backdrop
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = BackdropStyle.None;
-
-
     #endregion // Public Properties
 
 
@@ -150,10 +135,12 @@ public partial class IgWindowHook : DisposableImpl
 
         AP.ThemeChanged += AP_ThemeChanged;
         _window.Activated += Window_Activated;
+        _msgMonitor = new WindowMessageMonitor(WindowHandle);
 
         var root = (FrameworkElement)_window.Content;
         root.Loaded += Root_Loaded;
     }
+
 
     protected override void OnDisposing()
     {
@@ -161,6 +148,7 @@ public partial class IgWindowHook : DisposableImpl
 
         AP.ThemeChanged -= AP_ThemeChanged;
         _window.Activated -= Window_Activated;
+        _msgMonitor.Dispose();
 
         IconApi.DestroyHIcon(_appIconHandle);
     }
@@ -291,26 +279,32 @@ public partial class IgWindowHook : DisposableImpl
     /// </summary>
     public void UpdateWindowBackdrop()
     {
-        if (Backdrop == AP.Config.WindowBackdrop) return;
+        SetWindowBackdrop(AP.Config.WindowBackdrop);
+    }
 
-        if (AP.Config.WindowBackdrop == BackdropStyle.None)
-        {
-            _window.SystemBackdrop = null;
-            return;
-        }
 
-        if (AP.Config.WindowBackdrop == BackdropStyle.Acrylic)
-        {
-            _window.SystemBackdrop = new DesktopAcrylicBackdrop();
-            return;
-        }
+    /// <summary>
+    /// Sets window backdrop style.
+    /// </summary>
+    public void SetWindowBackdrop(BackdropStyle style)
+    {
+        if (_backdropStyle == style) return;
 
-        _window.SystemBackdrop = new MicaBackdrop()
+        // get backdrop
+        SystemBackdrop? backdrop = style switch
         {
-            Kind = AP.Config.WindowBackdrop == BackdropStyle.MicaAlt
-                    ? MicaKind.BaseAlt
-                    : MicaKind.Base
+            BackdropStyle.Mica => new MicaBackdrop(),
+            BackdropStyle.MicaAlt => new MicaBackdrop { Kind = MicaKind.BaseAlt },
+            BackdropStyle.Acrylic => new DesktopAcrylicBackdrop(),
+            BackdropStyle.AcrylicThin => new AcrylicBackdrop(DesktopAcrylicKind.Thin),
+            BackdropStyle.Transparent => new TransparentBackdrop(_msgMonitor),
+            _ => null,
         };
+
+
+        // set backdrop
+        _backdropStyle = style;
+        _window.SystemBackdrop = backdrop;
     }
 
 
