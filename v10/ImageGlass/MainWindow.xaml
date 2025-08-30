@@ -13,7 +13,6 @@
     Title="{x:Bind _winHook.Title}"
     x:DefaultBindMode="OneWay"
     Closed="Window_Closed"
-    SystemBackdrop="{x:Bind w64ui:IgWindowHook.WindowBackdrop}"
     mc:Ignorable="d">
 
     <Grid x:Name="Root" Loaded="Root_Loaded">

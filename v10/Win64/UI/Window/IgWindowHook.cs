@@ -40,8 +40,6 @@ public partial class IgWindowHook : DisposableImpl
     private TitlebarControl? _titleBar = null;
 
     private readonly IProgress<AppIconChangedEventArgs> _uiReporter;
-    private double _titleBarHeight = 0;
-    private double _titleBarRightInset = 0;
     private nint _appIconHandle = IntPtr.Zero;
 
 
@@ -82,16 +80,16 @@ public partial class IgWindowHook : DisposableImpl
     /// </summary>
     public double TitleBarHeight
     {
-        get => _titleBarHeight / DpiScale;
+        get => Math.Max(0, field - 1) / DpiScale;
         set
         {
-            if (_titleBarHeight != value)
+            if (field != value)
             {
-                _titleBarHeight = value;
-                OnPropertyChanged(nameof(TitleBarHeight));
+                field = value;
+                OnPropertyChanged();
             }
         }
-    }
+    } = 0;
 
 
     /// <summary>
@@ -99,17 +97,17 @@ public partial class IgWindowHook : DisposableImpl
     /// </summary>
     public double TitleBarRightInset
     {
-        get => _titleBarRightInset / DpiScale;
+        get => field / DpiScale;
         set
         {
-            if (_titleBarRightInset != value)
+            if (field != value)
             {
-                _titleBarRightInset = value;
-                OnPropertyChanged(nameof(TitleBarRightInset));
+                field = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(TitleBarPadding));
             }
         }
-    }
+    } = 0;
 
 
     /// <summary>
@@ -118,26 +116,21 @@ public partial class IgWindowHook : DisposableImpl
     public Thickness TitleBarPadding => new Thickness(0, 0, TitleBarRightInset, 0);
 
 
-    public static SystemBackdrop? WindowBackdrop
+    /// <summary>
+    /// Gets, sets window backdrop.
+    /// </summary>
+    public BackdropStyle Backdrop
     {
-        get
+        get; set
         {
-            if (AP.Config.WindowBackdrop == BackdropStyle.None) return null;
-            if (AP.Config.WindowBackdrop == BackdropStyle.Acrylic)
+            if (field != value)
             {
-                return new DesktopAcrylicBackdrop();
-            }
-            else
-            {
-                return new MicaBackdrop()
-                {
-                    Kind = AP.Config.WindowBackdrop == BackdropStyle.MicaAlt
-                        ? MicaKind.BaseAlt
-                        : MicaKind.Base
-                };
+                field = value;
+                OnPropertyChanged();
             }
         }
-    }
+    } = BackdropStyle.None;
+
 
     #endregion // Public Properties
 
@@ -177,6 +170,7 @@ public partial class IgWindowHook : DisposableImpl
         UpdateWindowColorMode();
         UpdateTitleBarSize();
         UpdateWindowIconAsync(true);
+        UpdateWindowBackdrop();
     }
 
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
@@ -255,7 +249,7 @@ public partial class IgWindowHook : DisposableImpl
 
 
     /// <summary>
-    /// Updates icon for window, optional for taskbar
+    /// Updates icon for window, optional for taskbar.
     /// </summary>
     public void UpdateWindowIconAsync(bool updateTaskbarIcon = false)
     {
@@ -289,6 +283,34 @@ public partial class IgWindowHook : DisposableImpl
             });
         }
 
+    }
+
+
+    /// <summary>
+    /// Updates window backdrop according to user config.
+    /// </summary>
+    public void UpdateWindowBackdrop()
+    {
+        if (Backdrop == AP.Config.WindowBackdrop) return;
+
+        if (AP.Config.WindowBackdrop == BackdropStyle.None)
+        {
+            _window.SystemBackdrop = null;
+            return;
+        }
+
+        if (AP.Config.WindowBackdrop == BackdropStyle.Acrylic)
+        {
+            _window.SystemBackdrop = new DesktopAcrylicBackdrop();
+            return;
+        }
+
+        _window.SystemBackdrop = new MicaBackdrop()
+        {
+            Kind = AP.Config.WindowBackdrop == BackdropStyle.MicaAlt
+                    ? MicaKind.BaseAlt
+                    : MicaKind.Base
+        };
     }
 
 
