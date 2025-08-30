@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Microsoft.UI;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
-using System;
 using Windows.UI;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -34,16 +33,18 @@ public partial class TransparentBackdrop : CompositionBrushBackdrop
     private HBRUSH _bgHBrush = HBRUSH.Null;
     private WindowMessageMonitor _msgMonitor;
 
+    private static uint COLOR_TRANSPARENT = 0u;
+
     private Windows.UI.Composition.CompositionColorBrush? _brush;
-    private Color _color;
+    private Color _tintColor;
 
 
     public Color TintColor
     {
-        get => _color;
+        get => _tintColor;
         set
         {
-            _color = value;
+            _tintColor = value;
             if (_brush != null)
             {
                 _brush.Color = value;
@@ -57,7 +58,7 @@ public partial class TransparentBackdrop : CompositionBrushBackdrop
     public TransparentBackdrop(WindowMessageMonitor wndProc, Color tintColor)
     {
         _msgMonitor = wndProc;
-        _color = tintColor;
+        _tintColor = tintColor;
     }
 
 
@@ -72,13 +73,13 @@ public partial class TransparentBackdrop : CompositionBrushBackdrop
     {
         _msgMonitor.MessageReceived += Monitor_WindowMessageReceived;
 
-        var hWnd = xamlRoot.ContentIslandEnvironment.AppWindowId.Value;
-        ConfigureDwm(hWnd);
+        var winHandle = (nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value;
+        ConfigureDwm(winHandle);
 
         base.OnTargetConnected(connectedTarget, xamlRoot);
 
-        var hdc = PInvoke.GetDC(new HWND((nint)hWnd));
-        ClearBackground((nint)hWnd, hdc);
+        var dcHandle = PInvoke.GetDC(new HWND(winHandle));
+        ClearBackground(winHandle, dcHandle, COLOR_TRANSPARENT);
     }
 
 
@@ -100,12 +101,11 @@ public partial class TransparentBackdrop : CompositionBrushBackdrop
     }
 
 
-    private static void ConfigureDwm(ulong hWnd)
+    private static void ConfigureDwm(nint handle)
     {
-        var handle = new IntPtr((nint)hWnd);
-        var margins = new MARGINS(); // You may need to set appropriate values for margins
-
+        var margins = new MARGINS();
         _ = PInvoke.DwmExtendFrameIntoClientArea(new HWND(handle), in margins);
+
 
         var dwm = new DWM_BLURBEHIND()
         {
@@ -113,17 +113,16 @@ public partial class TransparentBackdrop : CompositionBrushBackdrop
             fEnable = true,
             hRgnBlur = PInvoke.CreateRectRgn(-2, -2, -1, -1),
         };
-
         _ = PInvoke.DwmEnableBlurBehindWindow(new HWND(handle), in dwm);
     }
 
 
-    private unsafe bool ClearBackground(nint hwnd, nint hdc)
+    private unsafe bool ClearBackground(nint hwnd, nint hdc, uint colorInt)
     {
         if (PInvoke.GetClientRect(new HWND(hwnd), out var rect))
         {
             if (_bgHBrush.IsNull)
-                _bgHBrush = PInvoke.CreateSolidBrush(new COLORREF(0));
+                _bgHBrush = PInvoke.CreateSolidBrush(new COLORREF(colorInt));
 
             _ = NativeMethods.FillRect(hdc, ref rect, _bgHBrush);
             return true;
@@ -137,7 +136,7 @@ public partial class TransparentBackdrop : CompositionBrushBackdrop
     {
         if (e.MessageType == (uint)NativeValues.WindowMessage.WM_ERASEBKGND)
         {
-            if (ClearBackground(e.Message.Hwnd, (nint)e.Message.WParam))
+            if (ClearBackground(e.Message.Hwnd, (nint)e.Message.WParam, COLOR_TRANSPARENT))
             {
                 e.Result = 1;
                 e.Handled = true;
@@ -145,7 +144,7 @@ public partial class TransparentBackdrop : CompositionBrushBackdrop
         }
         else if (e.MessageType == (uint)NativeValues.WindowMessage.WM_DWMCOMPOSITIONCHANGED)
         {
-            ConfigureDwm((ulong)e.Message.Hwnd);
+            ConfigureDwm(e.Message.Hwnd);
             e.Handled = true;
             e.Result = 0;
         }

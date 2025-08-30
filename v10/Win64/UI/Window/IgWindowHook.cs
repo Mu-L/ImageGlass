@@ -155,9 +155,10 @@ public partial class IgWindowHook : DisposableImpl
 
     private void Root_Loaded(object sender, RoutedEventArgs e)
     {
-        UpdateWindowColorMode();
         UpdateTitleBarSize();
-        UpdateWindowIconAsync(true);
+
+        UpdateWindowColorMode();
+        UpdateWindowIcon(true);
         UpdateWindowBackdrop();
     }
 
@@ -170,7 +171,10 @@ public partial class IgWindowHook : DisposableImpl
             UpdateWindowColorMode();
 
             // update app icon
-            UpdateWindowIconAsync(true);
+            UpdateWindowIcon(true);
+
+            // update backdrop
+            UpdateWindowBackdrop();
         }
     }
 
@@ -239,7 +243,7 @@ public partial class IgWindowHook : DisposableImpl
     /// <summary>
     /// Updates icon for window, optional for taskbar.
     /// </summary>
-    public void UpdateWindowIconAsync(bool updateTaskbarIcon = false)
+    public void UpdateWindowIcon(bool updateTaskbarIcon = false)
     {
         if (_titleBar?.FindName(TitlebarControl._PART_TitleBar_Icon) is not ImageIcon iconEl) return;
 
@@ -279,7 +283,24 @@ public partial class IgWindowHook : DisposableImpl
     /// </summary>
     public void UpdateWindowBackdrop()
     {
-        SetWindowBackdrop(AP.Config.WindowBackdrop);
+        // check if background has transparency
+        var isTransparentToolbar = AP.Config.Theme.ComputedColors.ToolbarBgColor.A < 255;
+        var isTransparentViewer = AP.Config.Theme.ComputedColors.BgColor.A < 255;
+        var isTransparentGallery = AP.Config.Theme.ComputedColors.GalleryBgColor.A < 255;
+        // TODO: check for Config.BackgroundColor
+
+        var hasTransparency = isTransparentToolbar || isTransparentViewer || isTransparentGallery;
+
+        // has transparency => support all backdrop
+        if (hasTransparency)
+        {
+            SetWindowBackdrop(AP.Config.WindowBackdrop);
+        }
+        // no transparency => no backdrop
+        else
+        {
+            SetWindowBackdrop(BackdropStyle.None);
+        }
     }
 
 

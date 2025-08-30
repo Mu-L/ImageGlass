@@ -78,9 +78,13 @@ public static class IconApi
     /// <summary>
     /// Destroys HICON.
     /// </summary>
-    public static void DestroyHIcon(IntPtr hIcon)
+    public static void DestroyHIcon(nint hIcon)
     {
-        if (hIcon != IntPtr.Zero) PInvoke.DeleteObject(new HGDIOBJ(hIcon));
+        if (hIcon != IntPtr.Zero)
+        {
+            _ = PInvoke.DeleteObject(new HGDIOBJ(hIcon));
+            hIcon = IntPtr.Zero;
+        }
     }
 
 }
