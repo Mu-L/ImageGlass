@@ -783,6 +783,7 @@ public partial class FrmSlideshow : ThemedForm
             UseEmbeddedThumbnailOtherFormats = Config.UseEmbeddedThumbnailOtherFormats,
             EmbeddedThumbnailMinWidth = Config.EmbeddedThumbnailMinWidth,
             EmbeddedThumbnailMinHeight = Config.EmbeddedThumbnailMinHeight,
+            MinDimensionToUseWIC = Config.MinDimensionToUseWIC,
             FirstFrameOnly = true,
             CorrectRotation = true,
         };

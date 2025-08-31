@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageMagick;
+using WicNet;
 
 namespace ImageGlass.Base.Photoing.Codecs;
 
@@ -72,6 +73,7 @@ public class IgMagickReadData : IDisposable
 
     public MagickImageCollection? MultiFrameImage { get; set; } = null;
     public MagickImage? SingleFrameImage { get; set; } = null;
+    public WicBitmapSource? SingleFrameSource { get; set; } = null;
 
     public IColorProfile? ColorProfile { get; set; } = null;
     public IExifProfile? ExifProfile { get; set; } = null;

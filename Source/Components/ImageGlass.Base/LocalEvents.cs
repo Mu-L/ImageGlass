@@ -71,9 +71,9 @@ public class ImageLoadedEventArgs : ImageEventArgs
     public IgPhoto? Data { get; init; }
 
     /// <summary>
-    /// Gets the loaded image error.
+    /// Gets, sets the loaded image error.
     /// </summary>
-    public Exception? Error { get; init; }
+    public Exception? Error { get; set; }
 
     /// <summary>
     /// Gets the value indicating that the viewer should reset zoom value.

@@ -1042,8 +1042,10 @@ public partial class FrmMain
         // rename ext FAX -> TIFF to multi-frame printing
         else if (ext.Equals(".FAX", StringComparison.OrdinalIgnoreCase))
         {
-            fileToPrint = App.ConfigDir(PathType.File, Dir.Temporary, Path.GetFileNameWithoutExtension(currentFile) + ".tiff");
+            var tempDir = App.ConfigDir(PathType.Dir, Dir.Temporary);
+            Directory.CreateDirectory(tempDir);
 
+            fileToPrint = Path.Combine(tempDir, Path.GetFileNameWithoutExtension(currentFile) + ".tiff");
             File.Copy(currentFile, fileToPrint, true);
         }
         else if (Local.Metadata?.FrameCount > 1

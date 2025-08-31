@@ -431,6 +431,11 @@ public static class Config
     public static int GalleryColumns { get; set; } = 3;
 
     /// <summary>
+    /// Gets, sets the minimum image dimension to use WIC decoder if the format is supported.
+    /// </summary>
+    public static int MinDimensionToUseWIC { get; set; } = 10_000;
+
+    /// <summary>
     /// Gets, sets the number of images cached by <see cref="Base.Services.ImageBooster"/>.
     /// </summary>
     public static int ImageBoosterCacheCount { get; set; } = 1;
@@ -777,6 +782,9 @@ public static class Config
         GalleryColumns = items.GetValueEx(nameof(GalleryColumns), GalleryColumns);
         GalleryColumns = Math.Max(1, GalleryColumns);
         #endregion
+
+        MinDimensionToUseWIC = items.GetValueEx(nameof(MinDimensionToUseWIC), MinDimensionToUseWIC);
+        MinDimensionToUseWIC = Math.Max(0, MinDimensionToUseWIC);
 
         ImageBoosterCacheCount = items.GetValueEx(nameof(ImageBoosterCacheCount), ImageBoosterCacheCount);
         ImageBoosterCacheCount = Math.Max(0, Math.Min(ImageBoosterCacheCount, 10));
@@ -1133,6 +1141,7 @@ public static class Config
         _ = settings.TryAdd(nameof(GalleryCacheSizeInMb), GalleryCacheSizeInMb);
         _ = settings.TryAdd(nameof(GalleryColumns), GalleryColumns);
         _ = settings.TryAdd(nameof(ImageBoosterCacheCount), ImageBoosterCacheCount);
+        _ = settings.TryAdd(nameof(MinDimensionToUseWIC), MinDimensionToUseWIC);
         _ = settings.TryAdd(nameof(ImageBoosterCacheMaxDimension), ImageBoosterCacheMaxDimension);
         _ = settings.TryAdd(nameof(ImageBoosterCacheMaxFileSizeInMb), ImageBoosterCacheMaxFileSizeInMb);
         _ = settings.TryAdd(nameof(ZoomLockValue), ZoomLockValue);
@@ -1923,14 +1932,13 @@ public static class Config
     public static async Task SetDefaultPhotoViewerAsync(bool enable)
     {
         var extensions = Config.GetImageFormats(Config.FileFormats);
-        var scope = App.IsPortable ? "" : IgCommands.PER_MACHINE;
 
         var cmd = enable
             ? IgCommands.SET_DEFAULT_PHOTO_VIEWER
             : IgCommands.REMOVE_DEFAULT_PHOTO_VIEWER;
 
         // run command and show the results
-        _ = await Config.RunIgcmd($"{cmd} {extensions} {scope} {IgCommands.SHOW_UI}");
+        _ = await Config.RunIgcmd($"{cmd} {extensions} {IgCommands.SHOW_UI}");
     }
 
 
@@ -2160,12 +2168,16 @@ public static class Config
         }
 
 
-        // migrate from < 9.2
-        if (Version <= 9.2)
+        // migrate from < 9.3
+        if (Version < 9.3)
         {
-            FileFormats.Add(".jxr");
-            FileFormats.Add(".hdp");
-            FileFormats.Add(".wdp");
+            FileFormats.AddRange([".jxr", ".hdp", ".wdp"]);
+        }
+
+        // migrate from < 9.4
+        if (Version < 9.4)
+        {
+            FileFormats.Add(".hif");
         }
     }
 

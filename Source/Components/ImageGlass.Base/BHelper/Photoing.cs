@@ -550,7 +550,7 @@ public partial class BHelper
             ".SVG" => "image/svg+xml",
             ".JPG" or ".JPEG" or ".JFIF" or ".JP2" => "image/jpeg",
             ".JXL" => "image/jxl",
-            ".TIF" or ".TIFF" or "FAX" => "image/tiff",
+            ".TIF" or ".TIFF" or ".FAX" => "image/tiff",
             ".ICO" or ".ICON" => "image/x-icon",
             _ => "image/png",
         };

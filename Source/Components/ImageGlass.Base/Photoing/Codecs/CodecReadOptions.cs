@@ -94,6 +94,11 @@ public record CodecReadOptions
     /// </summary>
     public bool AutoScaleDownLargeImage { get; set; } = false;
 
+    /// <summary>
+    /// Gets, sets the minimum image dimension to user WIC decoder if the format is supported.
+    /// </summary>
+    public int MinDimensionToUseWIC { get; set; } = int.MaxValue;
+
 
     /// <summary>
     /// Initializes <see cref="CodecReadOptions"/> instance.
