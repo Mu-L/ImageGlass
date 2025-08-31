@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System;
 using Windows.Win32;
+using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.UI.WindowsAndMessaging;
 
@@ -25,6 +26,18 @@ namespace ImageGlass.Win64.Common;
 
 public static class IconApi
 {
+    private const uint WM_SETICON = 0x80u;
+    private const int ICON_BIG = 1;
+
+
+    /// <summary>
+    /// Sets taskbar icon.
+    /// </summary>
+    public static void SetTaskbarIcon(IntPtr windowHandle, IntPtr hIcon)
+    {
+        _ = PInvoke.SendMessage(new HWND(windowHandle), WM_SETICON, ICON_BIG, hIcon);
+    }
+
 
     /// <summary>
     /// Creates HICON from pixel byte array.

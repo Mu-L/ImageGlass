@@ -11,6 +11,7 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
+    <ApplicationIcon>Assets\icon256.ico</ApplicationIcon>
     <LangVersion>Latest</LangVersion>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
@@ -21,6 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Assets\icon256.ico" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\Square150x150Logo.scale-200.png" />

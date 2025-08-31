@@ -20,7 +20,6 @@ using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Win64.Common;
 using ImageMagick;
-using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -28,6 +27,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using WinRT.Interop;
 
@@ -158,7 +158,7 @@ public partial class IgWindowHook : DisposableImpl
         UpdateTitleBarSize();
 
         UpdateWindowColorMode();
-        UpdateWindowIcon(true);
+        UpdateWindowIcon();
         UpdateWindowBackdrop();
     }
 
@@ -171,7 +171,7 @@ public partial class IgWindowHook : DisposableImpl
             UpdateWindowColorMode();
 
             // update app icon
-            UpdateWindowIcon(true);
+            UpdateWindowIcon();
 
             // update backdrop
             UpdateWindowBackdrop();
@@ -197,15 +197,12 @@ public partial class IgWindowHook : DisposableImpl
     {
         if (e.Bytes == null) return;
 
-        // destroy the old icon handle
-        IconApi.DestroyHIcon(_appIconHandle);
-
         // create new icon handle
         _appIconHandle = IconApi.CreateHIcon(e.Bytes, e.Size, e.Size);
 
-        // update app icon
-        var iconId = Win32Interop.GetIconIdFromIcon(_appIconHandle);
-        _window.AppWindow.SetIcon(iconId);
+        // update taskbar icon
+        IconApi.SetTaskbarIcon(WindowHandle, _appIconHandle);
+
     }
 
 
@@ -243,38 +240,53 @@ public partial class IgWindowHook : DisposableImpl
     /// <summary>
     /// Updates icon for window, optional for taskbar.
     /// </summary>
-    public void UpdateWindowIcon(bool updateTaskbarIcon = false)
+    public void UpdateWindowIcon()
     {
-        if (_titleBar?.FindName(TitlebarControl._PART_TitleBar_Icon) is not ImageIcon iconEl) return;
-
-        // get full path of icon
+        // 1. get full path of icon
         var iconPath = AP.Config.Theme.GetIconPath(IgThemeIcon.AppLogo);
-        Uri? iconUri = null;
+        var useDefaultIcon = !File.Exists(iconPath);
 
-        try
+        if (useDefaultIcon)
         {
-            // try to get icon URI from the given path
-            iconUri = new Uri(iconPath);
-            iconEl.Source = new SvgImageSource(iconUri);
+            // get default logo icon if theme's app logo does not exist
+            iconPath = BHelper.BaseDir(Dir.Assets, "icon256.ico");
+            _window.AppWindow.SetIcon(iconPath);
         }
-        catch { }
 
 
-        // set icon for taskbar
-        if (updateTaskbarIcon)
+        // 2. set custom title bar icon
+        if (_titleBar?.FindName(TitlebarControl._PART_TitleBar_Icon) is ImageIcon iconEl)
         {
-            // get default logo icon
-            if (iconUri == null) iconPath = BHelper.BaseDir("Assets", "ImageGlassLogo.svg");
-            var size = (int)DpiScale * 32;
-
-            _ = Task.Run(async () =>
+            try
             {
-                var bytes = await MagickDecoder.QuickDecodeAsync(iconPath, size, size, MagickFormat.Bgra);
+                // try to get icon URI from the given path
+                var iconUri = new Uri(iconPath);
 
-                _uiReporter.Report(new AppIconChangedEventArgs(bytes, size));
-            });
+                if (iconPath.EndsWith(".SVG", StringComparison.OrdinalIgnoreCase))
+                {
+                    iconEl.Source = new SvgImageSource(iconUri);
+                }
+                else
+                {
+                    iconEl.Source = new BitmapImage(iconUri)
+                    {
+                        DecodePixelWidth = (int)TitleBarHeight,
+                        DecodePixelHeight = (int)TitleBarHeight,
+                    };
+                }
+            }
+            catch { }
         }
+        if (useDefaultIcon) return;
 
+
+        // 3. set icon for taskbar & native titlebar
+        var size = (int)DpiScale * 32;
+        _ = Task.Run(async () =>
+        {
+            var bytes = await MagickDecoder.QuickDecodeAsync(iconPath, size, size, MagickFormat.Bgra);
+            _uiReporter.Report(new AppIconChangedEventArgs(bytes, size));
+        });
     }
 
 

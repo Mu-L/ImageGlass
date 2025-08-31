@@ -27,7 +27,7 @@
             Height="20"
             Margin="5,0,0,0"
             VerticalAlignment="Center"
-            Source="/Assets/ImageGlassLogo.svg"
+            Source="/Assets/icon256.ico"
             Visibility="{x:Bind w64c:AP.Config.ShowAppIcon}" />
 
 
