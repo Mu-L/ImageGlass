@@ -27,3 +27,7 @@ DwmEnableBlurBehindWindow
 GetClientRect
 CreateSolidBrush
 FillRect
+
+SetWindowLongPtr
+SetWindowLong
+GetDpiForWindow

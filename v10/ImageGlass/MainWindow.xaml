@@ -28,7 +28,6 @@
         <w64ui:TitlebarControl
             x:Name="WinTitleBar"
             Grid.Row="0"
-            Height="{x:Bind _winHook.TitleBarHeight}"
             Padding="{x:Bind _winHook.TitleBarPadding}"
             BackgroundColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarBgColor}"
             Canvas.ZIndex="100"

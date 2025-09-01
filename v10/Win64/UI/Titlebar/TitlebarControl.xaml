@@ -11,7 +11,7 @@
     mc:Ignorable="d">
 
     <Grid
-        MinHeight="{x:Bind MinHeight}"
+        Height="31"
         Padding="{x:Bind Padding}"
         Background="{x:Bind BackgroundColor, Converter={StaticResource ColorToBrushConverter}}">
         <Grid.ColumnDefinitions>
