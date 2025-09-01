@@ -61,7 +61,7 @@ public partial class IgWindowHook : DisposableImpl
 
 
     /// <summary>
-    /// Gets, set the title of <see cref="MainWindow"/>.
+    /// Gets, set the title of the window.
     /// </summary>
     public string? Title
     {
@@ -78,20 +78,9 @@ public partial class IgWindowHook : DisposableImpl
 
 
     /// <summary>
-    /// Gets, sets the title bar height of <see cref="MainWindow"/>.
+    /// Gets the title bar of window.
     /// </summary>
-    public double TitleBarHeight
-    {
-        get => Math.Max(0, field - 1) / DpiScale;
-        set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = 0;
+    public TitlebarControl? Titlebar => _titleBar;
 
 
     /// <summary>
@@ -123,15 +112,10 @@ public partial class IgWindowHook : DisposableImpl
     public IgWindowHook(Window window, TitlebarControl? customTitleBar = null)
     {
         _window = window;
-        _titleBar = customTitleBar;
         _uiReporter = new Progress<AppIconChangedEventArgs>(UIReporter_Report);
 
         // set title bar
-        if (_titleBar != null)
-        {
-            _window.ExtendsContentIntoTitleBar = true;
-            _window.SetTitleBar(_titleBar);
-        }
+        SetTitlebar(customTitleBar);
 
         AP.ThemeChanged += AP_ThemeChanged;
         _window.Activated += Window_Activated;
@@ -140,7 +124,6 @@ public partial class IgWindowHook : DisposableImpl
         var root = (FrameworkElement)_window.Content;
         root.Loaded += Root_Loaded;
     }
-
 
     protected override void OnDisposing()
     {
@@ -207,12 +190,26 @@ public partial class IgWindowHook : DisposableImpl
 
 
     /// <summary>
+    /// Set titlebar for window.
+    /// </summary>
+    public void SetTitlebar(TitlebarControl? titlebar = null)
+    {
+        _titleBar = titlebar;
+
+        // set title bar
+        _window.ExtendsContentIntoTitleBar = _titleBar != null;
+        _window.SetTitleBar(_titleBar);
+
+        UpdateTitleBarSize();
+    }
+
+
+    /// <summary>
     /// Updates the title bar size of this window.
     /// </summary>
     public void UpdateTitleBarSize()
     {
         // update title bar size according to API
-        TitleBarHeight = _window.AppWindow.TitleBar.Height;
         TitleBarRightInset = _window.AppWindow.TitleBar.RightInset;
     }
 
@@ -270,8 +267,8 @@ public partial class IgWindowHook : DisposableImpl
                 {
                     iconEl.Source = new BitmapImage(iconUri)
                     {
-                        DecodePixelWidth = (int)TitleBarHeight,
-                        DecodePixelHeight = (int)TitleBarHeight,
+                        DecodePixelWidth = 32,
+                        DecodePixelHeight = 32,
                     };
                 }
             }
@@ -340,6 +337,16 @@ public partial class IgWindowHook : DisposableImpl
         _window.SystemBackdrop = backdrop;
     }
 
+
+    /// <summary>
+    /// Sets the owner of this window.
+    /// </summary>
+    public void SetWindowOwner(Window owner)
+    {
+        var ownerHandle = WindowNative.GetWindowHandle(owner);
+
+        WindowApi.SetWindowOwner(WindowHandle, ownerHandle);
+    }
 
 }
 
