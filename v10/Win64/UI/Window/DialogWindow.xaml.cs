@@ -20,13 +20,73 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.System;
 
 namespace ImageGlass.Win64.UI;
 
-public partial class DialogWindow : Window
+public partial class DialogWindow : Window, INotifyPropertyChanged
 {
+    #region INotifyPropertyChanged Implementation
+
+    // to manage PropertyChanged events
+    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
+    private event PropertyChangedEventHandler? _propertyChangedHandler;
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event PropertyChangedEventHandler? PropertyChanged
+    {
+        add
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler += value;
+                _propertyChangedEvent.Add(value);
+            }
+        }
+
+        remove
+        {
+            if (value != null)
+            {
+                _propertyChangedHandler -= value;
+                _propertyChangedEvent.Remove(value);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Emits event <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+
+    /// <summary>
+    /// Clears event handlers list of <see cref="PropertyChanged"/>.
+    /// </summary>
+    public void ClearPropertyChangedEvents()
+    {
+        // remove PropertyChanged events
+        foreach (var eventHandler in _propertyChangedEvent)
+        {
+            _propertyChangedHandler -= eventHandler;
+        }
+        _propertyChangedEvent.Clear();
+    }
+
+    #endregion // INotifyPropertyChanged Implementation
+
+
     private IgWindowHook _winHook;
     private Window? _owner = null;
     private TaskCompletionSource<DialogResult> _resultCompletionSource = new();
@@ -38,17 +98,97 @@ public partial class DialogWindow : Window
     };
 
 
+    #region Public Properties
+
+    public FrameworkElement DialogContent
+    {
+        get => (FrameworkElement)PART_DialogContent.Content;
+        set => PART_DialogContent.Content = value;
+    }
+
+
     /// <summary>
     /// Gets or sets the result for the dialog.
     /// </summary>
     public DialogResult DialogResult { get; set; } = DialogResult.None;
+
+    public PopupWindowViewModel VM
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field?.Dispose();
+                field = value;
+                OnPropertyChanged();
+
+                // update view model in content dialog
+                DialogContent.DataContext = value;
+            }
+        }
+    } = new PopupWindowViewModel();
+
+    public string? TitlebarText
+    {
+        get => _winHook.TitlebarText;
+        set
+        {
+            if (_winHook.TitlebarText != value)
+            {
+                _winHook.TitlebarText = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool IsButton1Visible
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = true;
+    private Visibility Button1Visibility => IsButton1Visible ? Visibility.Visible : Visibility.Collapsed;
+
+    public bool IsButton2Visible
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = true;
+    private Visibility Button2Visibility => IsButton2Visible ? Visibility.Visible : Visibility.Collapsed;
+
+    public bool IsButton3Visible
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = false;
+    private Visibility Button3Visibility => IsButton3Visible ? Visibility.Visible : Visibility.Collapsed;
+
+    #endregion // Public Properties
 
 
     public DialogWindow()
     {
         InitializeComponent();
 
-        _winHook = new(this);
+        _winHook = new(this, PART_Titlebar);
+        _winHook.PropertyChanged += WinHook_PropertyChanged;
         Closed += DialogWindow_Closed;
         Root.Loaded += Root_Loaded;
         Root.SizeChanged += Root_SizeChanged;
@@ -56,6 +196,11 @@ public partial class DialogWindow : Window
         // hotkey: ESC to close
         _closeByEscKey.Invoked += CloseByEscKey_Invoked;
         Content.KeyboardAccelerators.Add(_closeByEscKey);
+    }
+
+    private void WinHook_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        OnPropertyChanged(e.PropertyName);
     }
 
 
@@ -81,16 +226,13 @@ public partial class DialogWindow : Window
 
     private void Root_Loaded(object sender, RoutedEventArgs e)
     {
-        if (_winHook.Titlebar == null)
-        {
-            _winHook.SetTitlebar(Root.Titlebar);
-        }
+
     }
 
 
     private void Root_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (_owner is null || sender is not DialogContent fe) return;
+        if (_owner is null || sender is not FrameworkElement fe) return;
 
         // only adjust the size once
         fe.SizeChanged -= Root_SizeChanged;
@@ -98,7 +240,7 @@ public partial class DialogWindow : Window
 
         // calculate the size of the dialog window according to the root content
         var dpiScale = fe.XamlRoot.RasterizationScale;
-        var titlebarHeight = fe.Titlebar.DesiredSize.Height - 1;
+        var titlebarHeight = PART_Titlebar.DesiredSize.Height - 1;
         var clientHeight = (int)Math.Ceiling((fe.DesiredSize.Height - titlebarHeight) * dpiScale);
         var clientWidth = (int)Math.Ceiling(fe.DesiredSize.Width * dpiScale);
 
