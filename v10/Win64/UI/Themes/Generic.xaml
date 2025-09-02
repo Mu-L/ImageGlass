@@ -16,8 +16,8 @@
                     <Grid
                         Name="PART_Root"
                         Height="Auto"
-                        MaxWidth="700"
-                        MaxHeight="700"
+                        MaxWidth="{TemplateBinding MaxWidth}"
+                        MaxHeight="{TemplateBinding MaxHeight}"
                         VerticalAlignment="Top"
                         Background="{TemplateBinding Background}"
                         BackgroundSizing="InnerBorderEdge"

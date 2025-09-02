@@ -15,16 +15,17 @@
     </Window.SystemBackdrop>
 
 
-
     <local:DialogContent
         x:Name="Root"
+        MaxWidth="600"
+        MaxHeight="600"
         Button1Click="PART_Dialog_BtnAccept_Click"
         Button2Click="PART_Dialog_BtnCancel_Click"
         Button3Click="PART_Dialog_BtnApply_Click"
         KeyboardAcceleratorPlacementMode="Hidden">
         <StackPanel
             Grid.Row="1"
-            Padding="24,24,24,24"
+            Padding="24,12,24,24"
             VerticalAlignment="Top"
             Background="{StaticResource CardBackgroundFillColorDefault}"
             Spacing="24">
@@ -34,12 +35,28 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Image
-                    Grid.Column="0"
-                    MaxWidth="100"
-                    MaxHeight="100"
-                    VerticalAlignment="Top"
-                    Source="/Assets/StoreLogo.png" />
+                <Grid
+                    Width="80"
+                    Height="80"
+                    Margin="0,8,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top">
+                    <Viewbox
+                        MaxWidth="80"
+                        MaxHeight="80"
+                        Stretch="Uniform">
+                        <Image
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Source="/Assets/StoreLogo.png" />
+                    </Viewbox>
+                    <Image
+                        Width="32"
+                        Height="32"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Source="/Assets/icon256.ico" />
+                </Grid>
 
                 <StackPanel
                     Grid.Column="1"
@@ -52,7 +69,7 @@
                         TextWrapping="WrapWholeWords" />
                     <TextBlock
                         Name="PART_Dialog_Description"
-                        Text="Duis semper eros in elit placerat placerat. Cras vehicula, erat vitae auctor dignissim, risus metus pharetra odio, vitae elemen."
+                        Text="Duis semper eros in elit placerat placerat. Cras vehicula, erat vitae auctor dignissim, risus metus pharetra odio, itae auctor dignissim, risus metus pharetra odio vitae elemen."
                         TextWrapping="WrapWholeWords" />
 
                     <TextBox
@@ -83,7 +100,7 @@
                         TextWrapping="WrapWholeWords" />
                 </Border>
 
-                <CheckBox Name="PART_Dialog_Checkbox" Content="Quisque et orci tincidunt, vestibulum purus eu" />
+                <CheckBox Name="PART_Dialog_Checkbox" Content="Quisque et orci tincidunt, vestibulum purus." />
             </StackPanel>
         </StackPanel>
     </local:DialogContent>

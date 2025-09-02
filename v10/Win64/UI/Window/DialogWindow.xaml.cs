@@ -25,7 +25,6 @@ using Windows.System;
 
 namespace ImageGlass.Win64.UI;
 
-
 public partial class DialogWindow : Window
 {
     private IgWindowHook _winHook;
@@ -96,19 +95,20 @@ public partial class DialogWindow : Window
         // only adjust the size once
         fe.SizeChanged -= Root_SizeChanged;
 
+
         // calculate the size of the dialog window according to the root content
         var dpiScale = fe.XamlRoot.RasterizationScale;
         var titlebarHeight = fe.Titlebar.DesiredSize.Height - 1;
-        var windowHeight = (int)Math.Ceiling((fe.DesiredSize.Height - titlebarHeight) * dpiScale);
-        var windowWidth = (int)Math.Ceiling(fe.DesiredSize.Width * dpiScale);
+        var clientHeight = (int)Math.Ceiling((fe.DesiredSize.Height - titlebarHeight) * dpiScale);
+        var clientWidth = (int)Math.Ceiling(fe.DesiredSize.Width * dpiScale);
 
         // set dialog position to center the owner
         var ownerSize = _owner.AppWindow.Size;
-        var posX = _owner.AppWindow.Position.X + ownerSize.Width / 2 - windowWidth / 2;
-        var posY = _owner.AppWindow.Position.Y + ownerSize.Height / 2 - windowHeight / 2;
+        var posX = _owner.AppWindow.Position.X + ownerSize.Width / 2 - clientWidth / 2;
+        var posY = _owner.AppWindow.Position.Y + ownerSize.Height / 2 - clientHeight / 2;
 
-        // resize the dialog
-        AppWindow.ResizeClient(new(windowWidth, windowHeight));
+        // update size and position of dialog
+        AppWindow.ResizeClient(new(clientWidth, clientHeight));
         AppWindow.Move(new(posX, posY));
     }
 
@@ -189,15 +189,21 @@ public partial class DialogWindow : Window
         _winHook.SetWindowOwner(_owner);
         _resultCompletionSource = new TaskCompletionSource<DialogResult>();
 
+        var dpiScale = _owner.Content.XamlRoot.RasterizationScale;
+        var maxWidth = (int)(Root.MaxWidth * dpiScale);
+        var maxHeight = (int)(Root.MaxHeight * dpiScale);
 
         // create a dialog modal
         var presenter = OverlappedPresenter.CreateForDialog();
         presenter.IsModal = true;
         presenter.IsResizable = false;
+        presenter.PreferredMaximumWidth = maxWidth;
+        presenter.PreferredMaximumHeight = maxHeight;
+        presenter.SetBorderAndTitleBar(true, false);
         AppWindow.SetPresenter(presenter);
 
-
         // show the dialog
+        AppWindow.Resize(new(maxWidth, maxHeight));
         AppWindow.Show();
 
 

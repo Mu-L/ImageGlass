@@ -115,7 +115,7 @@ public partial class IgWindowHook : DisposableImpl
         _uiReporter = new Progress<AppIconChangedEventArgs>(UIReporter_Report);
 
         // set title bar
-        SetTitlebar(customTitleBar);
+        if (customTitleBar != null) SetTitlebar(customTitleBar);
 
         AP.ThemeChanged += AP_ThemeChanged;
         _window.Activated += Window_Activated;
