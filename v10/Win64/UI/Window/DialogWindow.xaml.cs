@@ -16,9 +16,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Win64.Common;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -180,6 +182,19 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     } = false;
     private Visibility Button3Visibility => IsButton3Visible ? Visibility.Visible : Visibility.Collapsed;
 
+
+    public SolidColorBrush? FooterBackground
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = null;
+
     #endregion // Public Properties
 
 
@@ -192,11 +207,18 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         Closed += DialogWindow_Closed;
         Root.Loaded += Root_Loaded;
         Root.SizeChanged += Root_SizeChanged;
+        AP.ThemeChanged += AP_ThemeChanged;
 
         // hotkey: ESC to close
         _closeByEscKey.Invoked += CloseByEscKey_Invoked;
         Content.KeyboardAccelerators.Add(_closeByEscKey);
     }
+
+    private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
+    {
+        FooterBackground = GetThemeFooterBackground();
+    }
+
 
     private void WinHook_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -208,10 +230,14 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     {
         Closed -= DialogWindow_Closed;
         Root.Loaded -= Root_Loaded;
+        Root.SizeChanged -= Root_SizeChanged;
+        AP.ThemeChanged -= AP_ThemeChanged;
+
         _closeByEscKey.Invoked -= CloseByEscKey_Invoked;
         Content.KeyboardAccelerators.Remove(_closeByEscKey);
 
         _winHook.Dispose();
+        VM.Dispose();
 
         // if the dialog is closed unexpected, returns Abort code to break the while loop.
         if (DialogResult == DialogResult.None) DialogResult = DialogResult.Abort;
@@ -226,7 +252,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
     private void Root_Loaded(object sender, RoutedEventArgs e)
     {
-
+        FooterBackground = GetThemeFooterBackground();
     }
 
 
@@ -352,6 +378,19 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         // wait for dialog result
         return await _resultCompletionSource.Task;
     }
+
+
+    private static SolidColorBrush GetThemeFooterBackground()
+    {
+        var color = AP.Config.Theme.ComputedColors.GalleryBgColor;
+        var maxAlpha = AP.Config.Theme.Settings.IsDarkMode ? 100 : 150;
+
+        var alpha = Math.Min(color.A, (byte)maxAlpha);
+        var bgColor = color.WithAlpha(alpha);
+
+        return new SolidColorBrush(bgColor);
+    }
+
 
 
 }

@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:w64c="using:ImageGlass.Win64.Common"
     d:DataContext="{d:DesignInstance local:PopupWindow_Content,
                                      IsDesignTimeCreatable=True}"
     x:DefaultBindMode="OneWay"
@@ -16,8 +17,8 @@
         Grid.Row="1"
         Padding="24,12,24,24"
         VerticalAlignment="Top"
-        Background="{StaticResource CardBackgroundFillColorDefault}"
-        Spacing="24">
+        Background="{x:Bind w64c:AP.Config.Theme.ComputedColors.BgColor, Converter={StaticResource ColorToBrushConverter}}"
+        Spacing="16">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -66,6 +67,7 @@
                 <!--  Heading  -->
                 <TextBlock
                     x:Name="PART_Heading"
+                    Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
                     IsTextSelectionEnabled="True"
                     Style="{StaticResource SubtitleTextBlockStyle}"
                     Text="{x:Bind VM.Heading}"
@@ -75,6 +77,7 @@
                 <!--  Description  -->
                 <TextBlock
                     x:Name="PART_Description"
+                    Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
                     IsTextSelectionEnabled="True"
                     Text="{x:Bind VM.Description}"
                     TextWrapping="WrapWholeWords"
@@ -86,11 +89,12 @@
                 <!--  Details  -->
                 <TextBox
                     x:Name="PART_Details"
-                    MaxHeight="150"
+                    Height="100"
                     AcceptsReturn="True"
                     FontFamily="Cascadia Mono, Consolas"
                     FontSize="13"
                     FontWeight="SemiLight"
+                    Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
                     IsReadOnly="True"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                     ScrollViewer.VerticalScrollMode="Enabled"
@@ -102,23 +106,21 @@
         </Grid>
 
 
-        <StackPanel Spacing="12">
+        <StackPanel Spacing="8">
             <!--  Note  -->
-            <Border
-                Padding="8"
-                Background="{StaticResource SystemFillColorCautionBackgroundBrush}"
-                CornerRadius="4"
-                Visibility="{x:Bind VM.Note, Converter={StaticResource StringToVisibilityConverter}}">
-                <TextBlock
-                    x:Name="PART_Note"
-                    IsTextSelectionEnabled="True"
-                    Text="{x:Bind VM.Note}"
-                    TextWrapping="WrapWholeWords" />
-            </Border>
+            <InfoBar
+                IsClosable="False"
+                IsIconVisible="True"
+                IsOpen="{x:Bind VM.Note, Converter={StaticResource StringToBoolConverter}}"
+                Message="{x:Bind VM.Note}"
+                Severity="Warning" />
 
             <!--  RememberOption  -->
             <CheckBox x:Name="PART_Checkbox" Visibility="{x:Bind VM.IsRememberOptionVisible, Converter={StaticResource BoolToVisibilityConverter}}">
-                <TextBlock Text="{x:Bind VM.RememberOptionText}" />
+                <TextBlock
+                    Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
+                    Text="{x:Bind VM.RememberOptionText}"
+                    TextWrapping="WrapWholeWords" />
             </CheckBox>
 
         </StackPanel>
