@@ -5,10 +5,19 @@ SHCreateItemFromParsingName
 IShellItemImageFactory
 SIIGBF
 
+SHSTOCKICONINFO
+SHGSI_FLAGS
 ICONINFO
+SHGetStockIconInfo
+GetIconInfo
 CreateIconIndirect
 CreateBitmap
 SendMessage
+IMemoryBufferByteAccess
+CreateCompatibleDC
+SelectObject
+DrawIconEx
+DeleteDC
 
 LRESULT
 WPARAM
