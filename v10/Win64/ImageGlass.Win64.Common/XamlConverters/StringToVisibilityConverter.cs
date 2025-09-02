@@ -16,17 +16,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using System;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.Win64.Common;
 
 
-public partial class StringToBoolConverter : IValueConverter
+public partial class StringToVisibilityConverter : IValueConverter
 {
-    public object Convert(object? value, Type targetType, object parameter, string language)
+    public object Convert(object value, Type targetType, object parameter, string language)
     {
-        return !string.IsNullOrEmpty(value?.ToString());
+        if (value is not string text) return Visibility.Collapsed;
+
+        return string.IsNullOrEmpty(text)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
     }
 
 

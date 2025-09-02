@@ -16,23 +16,26 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.Win64.Common;
 
-
-
-public partial class StringToVisibilityConverter : IValueConverter
+public partial class SvgPathToImageSourceConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, string language)
+    public object? Convert(object value, Type targetType, object parameter, string language)
     {
-        if (value is not string text) return Visibility.Collapsed;
+        var svgPath = (string)value;
 
-        return string.IsNullOrEmpty(text)
-            ? Visibility.Collapsed
-            : Visibility.Visible;
+        try
+        {
+            // set new icon
+            return new SvgImageSource(new Uri(svgPath));
+        }
+        catch { }
+
+        return null;
     }
 
 

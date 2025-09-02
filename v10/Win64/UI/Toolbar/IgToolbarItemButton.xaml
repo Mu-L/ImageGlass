@@ -14,11 +14,6 @@
     DataContext="{x:Bind VM, Mode=OneWay}"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-    </UserControl.Resources>
-
-
     <local:IgButton
         Name="PART_Button"
         Padding="{x:Bind local:IgToolbarItemButton.ItemPadding}"
