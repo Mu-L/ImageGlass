@@ -63,7 +63,7 @@ public partial class IgWindowHook : DisposableImpl
     /// <summary>
     /// Gets, set the title of the window.
     /// </summary>
-    public string? Title
+    public string? TitlebarText
     {
         get => _window.Title;
         set
@@ -71,7 +71,7 @@ public partial class IgWindowHook : DisposableImpl
             if (value != _window.Title)
             {
                 _window.Title = value;
-                OnPropertyChanged(nameof(Title));
+                OnPropertyChanged(nameof(TitlebarText));
             }
         }
     }

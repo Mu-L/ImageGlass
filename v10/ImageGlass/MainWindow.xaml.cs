@@ -241,7 +241,7 @@ public sealed partial class MainWindow : Window
 
     private void ViewPhoto(Photo? photo)
     {
-        _winHook.Title = photo?.FilePath;
+        _winHook.TitlebarText = photo?.FilePath;
         Viewer.SetPhoto(photo);
 
         Gallery.ScrollToItem(AP.Photos.CurrentIndex);

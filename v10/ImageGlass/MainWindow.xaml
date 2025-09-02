@@ -10,7 +10,7 @@
     xmlns:w64="using:ImageGlass.WinNT"
     xmlns:w64c="using:ImageGlass.Win64.Common"
     xmlns:w64ui="using:ImageGlass.Win64.UI"
-    Title="{x:Bind _winHook.Title}"
+    Title="{x:Bind _winHook.TitlebarText}"
     x:DefaultBindMode="OneWay"
     Closed="Window_Closed"
     mc:Ignorable="d">
@@ -31,7 +31,7 @@
             Padding="{x:Bind _winHook.TitleBarPadding}"
             BackgroundColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarBgColor}"
             Canvas.ZIndex="100"
-            Text="{x:Bind _winHook.Title}"
+            Text="{x:Bind _winHook.TitlebarText}"
             TextColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor}" />
 
 
