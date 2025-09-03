@@ -17,11 +17,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 
 namespace ImageGlass.Win64.UI;
@@ -110,19 +114,53 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
         InitializeComponent();
 
         DataContextChanged += PopupWindow_Content_DataContextChanged;
+        Root.Loaded += Root_Loaded;
+        Root.Unloaded += Root_Unloaded;
     }
-
 
     private void PopupWindow_Content_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs e)
     {
         if (e.NewValue is PopupWindowViewModel vm) VM = vm;
         else VM = new();
     }
+
+    private void Root_Unloaded(object sender, RoutedEventArgs e)
+    {
+        DataContextChanged -= PopupWindow_Content_DataContextChanged;
+        Root.Loaded -= Root_Loaded;
+        Root.Unloaded -= Root_Unloaded;
+    }
+
+    private void Root_Loaded(object sender, RoutedEventArgs e)
+    {
+        _ = LoadThumbnailIconSourceAsync();
+    }
+
+
+    /// <summary>
+    /// Loads thumbnail icon.
+    /// </summary>
+    public async Task LoadThumbnailIconSourceAsync()
+    {
+        if (PART_ThumbnailIcon.Source is not null) return;
+
+        // get system icon
+        using var sb = await IconApi.GetSystemIconAsync(VM.ThumbnailIcon);
+
+        // create software bitmap source
+        var iconSrc = new SoftwareBitmapSource();
+        await iconSrc.SetBitmapAsync(sb);
+
+        // set the icon
+        PART_ThumbnailIcon.Source = iconSrc;
+    }
+
 }
 
 
 public partial class PopupWindowViewModel : DisposableImpl
 {
+
     public string Heading
     {
         get; set
@@ -195,7 +233,7 @@ public partial class PopupWindowViewModel : DisposableImpl
         }
     } = null;
 
-    public SoftwareBitmap? ThumbnailIcon
+    public ShellStockIcon? ThumbnailIcon
     {
         get; set
         {
@@ -203,11 +241,12 @@ public partial class PopupWindowViewModel : DisposableImpl
             {
                 field = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsThumbnailSectionVisible));
             }
         }
     } = null;
 
-    public bool IsThumbnailSectionVisible => Thumbnail != null && ThumbnailIcon != null;
+    public bool IsThumbnailSectionVisible => Thumbnail != null || ThumbnailIcon != null;
 
     public bool IsRememberOptionVisible
     {
@@ -240,9 +279,6 @@ public partial class PopupWindowViewModel : DisposableImpl
 
         Thumbnail?.Dispose();
         Thumbnail = null;
-
-        ThumbnailIcon?.Dispose();
-        ThumbnailIcon = null;
     }
 
 }

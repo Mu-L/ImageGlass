@@ -14,6 +14,7 @@
 
 
     <StackPanel
+        x:Name="Root"
         Grid.Row="1"
         Padding="24,12,24,24"
         VerticalAlignment="Top"
@@ -54,7 +55,6 @@
                     Height="32"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
-                    Source="/Assets/icon256.ico"
                     Visibility="{x:Bind VM.ThumbnailIcon, Converter={StaticResource NullableToVisibilityConverter}}" />
             </Grid>
 
