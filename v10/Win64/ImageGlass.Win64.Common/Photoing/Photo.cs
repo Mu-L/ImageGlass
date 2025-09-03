@@ -287,7 +287,7 @@ public partial class Photo : PhotoImpl
                     size, token, ShellThumbnailOptions.BiggerSizeOk);
 
                 if (token.IsCancellationRequested) return;
-                softwareBmp = await PhotoWIC.ConvertToSoftwareBitmap(wicBmp);
+                softwareBmp = await PhotoWIC.ConvertToSoftwareBitmapAsync(wicBmp);
 
                 if (token.IsCancellationRequested) return;
             }

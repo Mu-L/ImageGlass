@@ -41,6 +41,7 @@
         </PackageReference>
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4948" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250814004-preview" />
+        <PackageReference Include="System.Drawing.Common" Version="9.0.8" />
         <PackageReference Include="Vortice.Direct2D1" Version="3.7.5-beta" />
         <PackageReference Include="Vortice.Win32.Graphics.Imaging" Version="2.2.7" />
         <PackageReference Include="ZString" Version="2.6.0" />

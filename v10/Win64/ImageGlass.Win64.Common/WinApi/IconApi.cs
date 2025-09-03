@@ -16,13 +16,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Win64.Common.Photoing;
 using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
-using Windows.Win32.System.WinRT;
 using Windows.Win32.UI.Shell;
 using Windows.Win32.UI.WindowsAndMessaging;
 namespace ImageGlass.Win64.Common;
@@ -140,66 +142,27 @@ public static class IconApi
     /// <summary>
     /// Gets system icon.
     /// </summary>
-    public static SoftwareBitmap? GetSystemIcon(ShellStockIcon? iconType, bool useLargeIcon = true)
+    public static async Task<SoftwareBitmap?> GetSystemIconAsync(ShellStockIcon? iconType, bool useLargeIcon = true)
     {
+        var hIcon = IntPtr.Zero;
+
         try
         {
-            var hIcon = GetSystemHIcon(iconType, useLargeIcon);
-            var sb = ConvertHIconToSoftwareBitmap(hIcon);
+            hIcon = GetSystemHIcon(iconType, useLargeIcon);
+            using var gdiBmp = Icon.FromHandle(hIcon).ToBitmap();
 
-            DestroyHIcon(hIcon);
+            using var wicBmp = PhotoWIC.ConvertFromGdiBitmap(gdiBmp);
+            var sb = await PhotoWIC.ConvertToSoftwareBitmapAsync(wicBmp);
+
             return sb;
         }
         catch { }
-        ;
+        finally
+        {
+            DestroyHIcon(hIcon);
+        }
 
         return null;
-    }
-
-
-    /// <summary>
-    /// Convert HICON to Software bitmap
-    /// </summary>
-    public static unsafe SoftwareBitmap ConvertHIconToSoftwareBitmap(nint hIconPtr)
-    {
-        var iconInfo = new ICONINFO();
-
-        // Get icon info
-        var hIcon = new HICON(hIconPtr);
-        _ = PInvoke.GetIconInfo(hIcon, &iconInfo);
-
-        var width = (int)(iconInfo.xHotspot * 2);
-        var height = (int)(iconInfo.yHotspot * 2);
-
-        // Create SoftwareBitmap
-        var sb = new SoftwareBitmap(
-            BitmapPixelFormat.Bgra8,
-            width,
-            height,
-            BitmapAlphaMode.Premultiplied
-        );
-
-        // Draw HICON directly to a buffer
-        using var buffer = sb.LockBuffer(BitmapBufferAccessMode.Write);
-        using var reference = buffer.CreateReference();
-
-        byte* dest;
-        uint capacity;
-        ((IMemoryBufferByteAccess)reference).GetBuffer(out dest, out capacity);
-
-        // Use DrawIconEx from Win32 to draw icon into memory DC
-        var hdc = PInvoke.CreateCompatibleDC(new HDC());
-        var hBitmap = PInvoke.CreateBitmap(width, height, 1, 32, dest);
-        var oldBmp = PInvoke.SelectObject(hdc, hBitmap);
-
-        _ = PInvoke.DrawIconEx(hdc, 0, 0, hIcon, width, height, 0, new HBRUSH(), DI_FLAGS.DI_NORMAL);
-
-        // Cleanup
-        _ = PInvoke.SelectObject(hdc, oldBmp);
-        _ = PInvoke.DeleteObject(hBitmap);
-        _ = PInvoke.DeleteDC(hdc);
-
-        return sb;
     }
 
 }

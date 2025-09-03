@@ -53,7 +53,7 @@ public static partial class PhotoWIC
     /// <summary>
     /// Converts the given WIC bitmap to Software Bitmap.
     /// </summary>
-    public static async Task<SoftwareBitmap?> ConvertToSoftwareBitmap(IWICBitmapSource? wicBmp, BitmapTransform? transform = null)
+    public static async Task<SoftwareBitmap?> ConvertToSoftwareBitmapAsync(IWICBitmapSource? wicBmp, BitmapTransform? transform = null)
     {
         var newBmp = ConvertToWic32bppPBGRA(wicBmp);
         if (newBmp is null) return null;
@@ -379,6 +379,21 @@ public static partial class PhotoWIC
         return null;
     }
 
+
+    /// <summary>
+    /// Converts GDI Bitmap to <see cref="IWICBitmapSource"/> object.
+    /// </summary>
+    public static IWICBitmapSource? ConvertFromGdiBitmap(System.Drawing.Bitmap? gdiBmp)
+    {
+        if (gdiBmp is null) return null;
+
+        var hBitmap = gdiBmp.GetHbitmap();
+        using var wicFactory = new IWICImagingFactory2();
+
+        var wicBmp = wicFactory.CreateBitmapFromHBITMAP(hBitmap, IntPtr.Zero, BitmapAlphaChannelOption.UseAlpha);
+
+        return wicBmp;
+    }
 
 
     /// <summary>

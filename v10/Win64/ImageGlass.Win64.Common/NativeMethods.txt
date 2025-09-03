@@ -13,11 +13,6 @@ GetIconInfo
 CreateIconIndirect
 CreateBitmap
 SendMessage
-IMemoryBufferByteAccess
-CreateCompatibleDC
-SelectObject
-DrawIconEx
-DeleteDC
 
 LRESULT
 WPARAM
