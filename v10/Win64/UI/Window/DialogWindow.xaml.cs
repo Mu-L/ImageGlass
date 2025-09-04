@@ -28,6 +28,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.System;
 
 namespace ImageGlass.Win64.UI;
@@ -89,6 +90,11 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     }
 
     #endregion // INotifyPropertyChanged Implementation
+
+
+    public event TypedEventHandler<DialogWindow, DialogButtonClickedEventArgs>? Button1Clicked;
+    public event TypedEventHandler<DialogWindow, DialogButtonClickedEventArgs>? Button2Clicked;
+    public event TypedEventHandler<DialogWindow, DialogButtonClickedEventArgs>? Button3Clicked;
 
 
     private IgWindowHook _winHook;
@@ -226,9 +232,9 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         }
     } = "Button 3";
 
-    public DialogDefaultButton DefaultButton { get; set; } = DialogDefaultButton.Button1;
+    public DialogButton DefaultButton { get; set; } = DialogButton.Button1;
 
-    public DialogDefaultFocus DefaultFocus { get; set; } = DialogDefaultFocus.Button1;
+    public DialogFocus DefaultFocus { get; set; } = DialogFocus.Button1;
 
 
     public SolidColorBrush? FooterBackground
@@ -352,6 +358,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// </summary>
     protected virtual void OnButton1Clicked()
     {
+        var e = new DialogButtonClickedEventArgs(PART_Button1, DialogButton.Button1);
+        Button1Clicked?.Invoke(this, e);
+
+        if (!e.CanProceed) return;
         DialogResult = DialogResult.OK;
         Close();
     }
@@ -362,6 +372,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// </summary>
     protected virtual void OnButton2Clicked()
     {
+        var e = new DialogButtonClickedEventArgs(PART_Button2, DialogButton.Button2);
+        Button2Clicked?.Invoke(this, e);
+
+        if (!e.CanProceed) return;
         DialogResult = DialogResult.Cancel;
         Close();
     }
@@ -373,6 +387,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// </summary>
     protected virtual void OnButton3Clicked()
     {
+        var e = new DialogButtonClickedEventArgs(PART_Button3, DialogButton.Button3);
+        Button3Clicked?.Invoke(this, e);
+
+        if (!e.CanProceed) return;
         DialogResult = DialogResult.None;
     }
 
@@ -505,15 +523,15 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     {
         var accentStyle = (Style)Application.Current.Resources["AccentButtonStyle"];
 
-        if (DefaultButton == DialogDefaultButton.Button1)
+        if (DefaultButton == DialogButton.Button1)
         {
             PART_Button1.Style = accentStyle;
         }
-        else if (DefaultButton == DialogDefaultButton.Button2)
+        else if (DefaultButton == DialogButton.Button2)
         {
             PART_Button2.Style = accentStyle;
         }
-        else if (DefaultButton == DialogDefaultButton.Button3)
+        else if (DefaultButton == DialogButton.Button3)
         {
             PART_Button3.Style = accentStyle;
         }
@@ -525,17 +543,26 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// </summary>
     private void SetDefaultFocus()
     {
-        if (DefaultFocus == DialogDefaultFocus.Button1)
+        if (DefaultFocus == DialogFocus.Button1)
         {
-            PART_Button1.Focus(FocusState.Keyboard);
+            var focusState = DefaultButton == DialogButton.Button1
+                ? FocusState.Programmatic
+                : FocusState.Keyboard;
+            PART_Button1.Focus(focusState);
         }
-        else if (DefaultFocus == DialogDefaultFocus.Button2)
+        else if (DefaultFocus == DialogFocus.Button2)
         {
-            PART_Button2.Focus(FocusState.Keyboard);
+            var focusState = DefaultButton == DialogButton.Button2
+                ? FocusState.Programmatic
+                : FocusState.Keyboard;
+            PART_Button2.Focus(focusState);
         }
-        else if (DefaultFocus == DialogDefaultFocus.Button3)
+        else if (DefaultFocus == DialogFocus.Button3)
         {
-            PART_Button3.Focus(FocusState.Keyboard);
+            var focusState = DefaultButton == DialogButton.Button3
+                ? FocusState.Programmatic
+                : FocusState.Keyboard;
+            PART_Button3.Focus(focusState);
         }
     }
 

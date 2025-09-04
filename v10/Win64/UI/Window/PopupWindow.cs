@@ -26,6 +26,4 @@ public partial class PopupWindow : DialogWindow
     }
 
 
-
-
 }
