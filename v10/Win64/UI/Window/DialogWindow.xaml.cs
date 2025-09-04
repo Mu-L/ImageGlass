@@ -100,6 +100,12 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         Modifiers = VirtualKeyModifiers.None,
         IsEnabled = true,
     };
+    private readonly KeyboardAccelerator _submitByEnterKey = new KeyboardAccelerator()
+    {
+        Key = VirtualKey.Enter,
+        Modifiers = VirtualKeyModifiers.None,
+        IsEnabled = true,
+    };
 
 
     #region Public Properties
@@ -184,6 +190,41 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     } = false;
     private Visibility Button3Visibility => IsButton3Visible ? Visibility.Visible : Visibility.Collapsed;
 
+    public string? Button1Text
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = "Button 1";
+
+    public string? Button2Text
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = "Button 2";
+
+    public string? Button3Text
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = "Button 3";
 
     public DialogDefaultButton DefaultButton { get; set; } = DialogDefaultButton.Button1;
 
@@ -218,7 +259,9 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
         // hotkey: ESC to close
         _closeByEscKey.Invoked += CloseByEscKey_Invoked;
+        _submitByEnterKey.Invoked += SubmitByEnterKey_Invoked;
         Content.KeyboardAccelerators.Add(_closeByEscKey);
+        Content.KeyboardAccelerators.Add(_submitByEnterKey);
     }
 
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
@@ -240,8 +283,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         Root.SizeChanged -= Root_SizeChanged;
         AP.ThemeChanged -= AP_ThemeChanged;
 
+        // remove hotkeys
         _closeByEscKey.Invoked -= CloseByEscKey_Invoked;
         Content.KeyboardAccelerators.Remove(_closeByEscKey);
+        Content.KeyboardAccelerators.Remove(_submitByEnterKey);
 
         _winHook.Dispose();
         VM.Dispose();
@@ -305,7 +350,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Closes the form and returns <see cref="DialogResult.OK"/> code.
     /// </summary>
-    protected virtual void OnAccepted()
+    protected virtual void OnButton1Clicked()
     {
         DialogResult = DialogResult.OK;
         Close();
@@ -315,7 +360,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Closes the form and returns <see cref="DialogResult.Cancel"/> code.
     /// </summary>
-    protected virtual void OnCancelled()
+    protected virtual void OnButton2Clicked()
     {
         DialogResult = DialogResult.Cancel;
         Close();
@@ -326,7 +371,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// Sets <see cref="DialogResult"/> to <see cref="DialogResult.None"/>
     /// and does nothing.
     /// </summary>
-    protected virtual void OnApplied()
+    protected virtual void OnButton3Clicked()
     {
         DialogResult = DialogResult.None;
     }
@@ -336,6 +381,13 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     {
         e.Handled = true;
         OnAborted();
+    }
+
+
+    private void SubmitByEnterKey_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
+    {
+        e.Handled = true;
+        OnButton1Clicked();
     }
 
 
@@ -365,12 +417,12 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
             if (isMoveNext)
             {
                 // wrap around
-                focusedIndex = (focusedIndex - 1 + visibleButtons.Count) % visibleButtons.Count;
+                focusedIndex = (focusedIndex + 1) % visibleButtons.Count;
             }
             else if (isMoveBack)
             {
                 // wrap around
-                focusedIndex = (focusedIndex + 1) % visibleButtons.Count;
+                focusedIndex = (focusedIndex - 1 + visibleButtons.Count) % visibleButtons.Count;
             }
 
             visibleButtons[focusedIndex].Focus(FocusState.Keyboard);
@@ -380,21 +432,21 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     }
 
 
-    private void PART_Dialog_BtnAccept_Click(object sender, RoutedEventArgs e)
+    private void PART_Dialog_Button1_Click(object sender, RoutedEventArgs e)
     {
-        OnAccepted();
+        OnButton1Clicked();
     }
 
 
-    private void PART_Dialog_BtnCancel_Click(object sender, RoutedEventArgs e)
+    private void PART_Dialog_Button2_Click(object sender, RoutedEventArgs e)
     {
-        OnCancelled();
+        OnButton2Clicked();
     }
 
 
-    private void PART_Dialog_BtnApply_Click(object sender, RoutedEventArgs e)
+    private void PART_Dialog_Button3_Click(object sender, RoutedEventArgs e)
     {
-        OnApplied();
+        OnButton3Clicked();
     }
 
 
@@ -431,6 +483,9 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     }
 
 
+    /// <summary>
+    /// Get the footer background according to current theme.
+    /// </summary>
     private static SolidColorBrush GetThemeFooterBackground()
     {
         var color = AP.Config.Theme.ComputedColors.GalleryBgColor;
@@ -443,6 +498,9 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     }
 
 
+    /// <summary>
+    /// Set default button.
+    /// </summary>
     private void SetDefaultButton()
     {
         var accentStyle = (Style)Application.Current.Resources["AccentButtonStyle"];
@@ -461,6 +519,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         }
     }
 
+
+    /// <summary>
+    /// Set default focused element.
+    /// </summary>
     private void SetDefaultFocus()
     {
         if (DefaultFocus == DialogDefaultFocus.Button1)

@@ -68,22 +68,22 @@
                     Name="PART_Button1"
                     Grid.Column="0"
                     MinWidth="80"
-                    Click="PART_Dialog_BtnAccept_Click"
-                    Content="OK"
+                    Click="PART_Dialog_Button1_Click"
+                    Content="{x:Bind Button1Text}"
                     Visibility="{x:Bind Button1Visibility}" />
                 <Button
                     Name="PART_Button2"
                     Grid.Column="1"
                     MinWidth="80"
-                    Click="PART_Dialog_BtnCancel_Click"
-                    Content="Cancel"
+                    Click="PART_Dialog_Button2_Click"
+                    Content="{x:Bind Button2Text}"
                     Visibility="{x:Bind Button2Visibility}" />
                 <Button
                     Name="PART_Button3"
                     Grid.Column="2"
                     MinWidth="80"
-                    Click="PART_Dialog_BtnApply_Click"
-                    Content="Apply"
+                    Click="PART_Dialog_Button3_Click"
+                    Content="{x:Bind Button3Text}"
                     Visibility="{x:Bind Button3Visibility}" />
             </StackPanel>
         </StackPanel>

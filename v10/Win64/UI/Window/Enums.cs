@@ -50,8 +50,8 @@ public enum DialogDefaultButton
 
 public enum DialogDefaultFocus
 {
+    Default,
     Button1,
     Button2,
     Button3,
-    Input,
 }
