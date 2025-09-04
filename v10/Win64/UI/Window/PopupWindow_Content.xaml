@@ -36,23 +36,25 @@
                 Visibility="{x:Bind VM.IsThumbnailSectionVisible, Converter={StaticResource BoolToVisibilityConverter}}">
 
                 <!--  Thumbnail  -->
-                <Viewbox
-                    MaxWidth="80"
-                    MaxHeight="80"
-                    Stretch="Uniform"
-                    Visibility="{x:Bind VM.Thumbnail, Converter={StaticResource NullableToVisibilityConverter}}">
-                    <Image
-                        x:Name="PART_Thumbnail"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Source="/Assets/StoreLogo.png" />
-                </Viewbox>
+                <Border BorderBrush="Red" BorderThickness="0">
+                    <Viewbox
+                        x:Name="PART_ThumbnailViewbox"
+                        Width="80"
+                        Height="80"
+                        Stretch="Uniform"
+                        Visibility="{x:Bind VM.Thumbnail, Converter={StaticResource NullableToVisibilityConverter}}">
+                        <Image
+                            x:Name="PART_Thumbnail"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+                    </Viewbox>
+                </Border>
 
                 <!--  ThumbnailIcon  -->
                 <Image
                     x:Name="PART_ThumbnailIcon"
-                    Width="32"
-                    Height="32"
+                    Width="40"
+                    Height="40"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
                     Visibility="{x:Bind VM.ThumbnailIcon, Converter={StaticResource NullableToVisibilityConverter}}" />

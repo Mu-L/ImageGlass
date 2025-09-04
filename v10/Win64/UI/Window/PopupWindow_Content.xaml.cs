@@ -24,6 +24,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
@@ -133,7 +134,27 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
 
     private void Root_Loaded(object sender, RoutedEventArgs e)
     {
+        _ = LoadThumbnailSourceAsync();
         _ = LoadThumbnailIconSourceAsync();
+    }
+
+
+    /// <summary>
+    /// Loads thumbnail.
+    /// </summary>
+    public async Task LoadThumbnailSourceAsync()
+    {
+        if (VM.Thumbnail is null) return;
+        if (PART_Thumbnail.Source is not null) return;
+
+
+        // create software bitmap source
+        var sbSrc = new SoftwareBitmapSource();
+        await sbSrc.SetBitmapAsync(VM.Thumbnail);
+
+        // set the icon
+        PART_Thumbnail.Source = sbSrc;
+
     }
 
 
@@ -144,15 +165,18 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
     {
         if (PART_ThumbnailIcon.Source is not null) return;
 
+
         // get system icon
-        using var sb = await IconApi.GetSystemIconAsync(VM.ThumbnailIcon);
+        var dpiScale = XamlRoot.RasterizationScale;
+        using var sb = await IconApi.GetSystemIconAsync(VM.ThumbnailIcon, (int)(40 * dpiScale));
+        if (sb is null) return;
 
         // create software bitmap source
-        var iconSrc = new SoftwareBitmapSource();
-        await iconSrc.SetBitmapAsync(sb);
+        var sbSrc = new SoftwareBitmapSource();
+        await sbSrc.SetBitmapAsync(sb);
 
         // set the icon
-        PART_ThumbnailIcon.Source = iconSrc;
+        PART_ThumbnailIcon.Source = sbSrc;
     }
 
 }
@@ -160,7 +184,6 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
 
 public partial class PopupWindowViewModel : DisposableImpl
 {
-
     public string Heading
     {
         get; set
@@ -233,7 +256,7 @@ public partial class PopupWindowViewModel : DisposableImpl
         }
     } = null;
 
-    public ShellStockIcon? ThumbnailIcon
+    public StockIconId? ThumbnailIcon
     {
         get; set
         {
