@@ -184,7 +184,7 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
 
 public partial class PopupWindowViewModel : DisposableImpl
 {
-    public string Heading
+    public string? Heading
     {
         get; set
         {
@@ -194,9 +194,9 @@ public partial class PopupWindowViewModel : DisposableImpl
                 OnPropertyChanged();
             }
         }
-    } = string.Empty;
+    } = null;
 
-    public string Description
+    public string? Description
     {
         get; set
         {
@@ -206,9 +206,9 @@ public partial class PopupWindowViewModel : DisposableImpl
                 OnPropertyChanged();
             }
         }
-    } = string.Empty;
+    } = null;
 
-    public string Details
+    public string? Details
     {
         get; set
         {
@@ -218,9 +218,9 @@ public partial class PopupWindowViewModel : DisposableImpl
                 OnPropertyChanged();
             }
         }
-    } = string.Empty;
+    } = null;
 
-    public string Note
+    public string? Note
     {
         get; set
         {
@@ -230,9 +230,9 @@ public partial class PopupWindowViewModel : DisposableImpl
                 OnPropertyChanged();
             }
         }
-    } = string.Empty;
+    } = null;
 
-    public string RememberOptionText
+    public string? RememberOptionText
     {
         get; set
         {
