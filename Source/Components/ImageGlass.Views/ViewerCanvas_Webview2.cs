@@ -277,6 +277,16 @@ public partial class ViewerCanvas
             var obj = new ExpandoObject();
             _ = obj.TryAdd("ZoomMode", ZoomMode.ToString());
             _ = obj.TryAdd("ZoomFactor", ZoomFactor);
+            _ = obj.TryAdd("FilePath", data.FilePath);
+
+            // make sure dir path contains separator
+            var dirPath = Path.GetDirectoryName(data.FilePath);
+            if (!Path.EndsInDirectorySeparator(dirPath.AsSpan()))
+            {
+                dirPath += Path.DirectorySeparatorChar;
+            }
+            _ = obj.TryAdd("DirPath", dirPath);
+
 
             // if image file is SVG, we read its content
             if (!string.IsNullOrWhiteSpace(data.FilePath)
