@@ -19,11 +19,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.System;
@@ -183,6 +185,11 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     private Visibility Button3Visibility => IsButton3Visible ? Visibility.Visible : Visibility.Collapsed;
 
 
+    public DialogDefaultButton DefaultButton { get; set; } = DialogDefaultButton.Button1;
+
+    public DialogDefaultFocus DefaultFocus { get; set; } = DialogDefaultFocus.Button1;
+
+
     public SolidColorBrush? FooterBackground
     {
         get; set
@@ -253,6 +260,9 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     private void Root_Loaded(object sender, RoutedEventArgs e)
     {
         FooterBackground = GetThemeFooterBackground();
+
+        SetDefaultButton();
+        SetDefaultFocus();
     }
 
 
@@ -329,6 +339,47 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     }
 
 
+    // change the focused button using arrow keys
+    private void FooterButtonsPanel_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        var isMoveNext = e.Key == VirtualKey.Up || e.Key == VirtualKey.Right;
+        var isMoveBack = e.Key == VirtualKey.Down || e.Key == VirtualKey.Left;
+        if (!isMoveNext && !isMoveBack) return;
+
+
+        var panel = (StackPanel)sender;
+        var visibleButtons = panel.Children
+            .OfType<Button>()
+            .Where(i => i.Visibility == Visibility.Visible)
+            .ToList();
+        var focusedButton = (Button)FocusManager.GetFocusedElement(Content.XamlRoot);
+        int focusedIndex = visibleButtons.IndexOf(focusedButton);
+
+        if (focusedIndex == -1)
+        {
+            // No button has focus yet → focus the first one
+            visibleButtons[0].Focus(FocusState.Keyboard);
+        }
+        else
+        {
+            if (isMoveNext)
+            {
+                // wrap around
+                focusedIndex = (focusedIndex - 1 + visibleButtons.Count) % visibleButtons.Count;
+            }
+            else if (isMoveBack)
+            {
+                // wrap around
+                focusedIndex = (focusedIndex + 1) % visibleButtons.Count;
+            }
+
+            visibleButtons[focusedIndex].Focus(FocusState.Keyboard);
+        }
+
+        e.Handled = true;
+    }
+
+
     private void PART_Dialog_BtnAccept_Click(object sender, RoutedEventArgs e)
     {
         OnAccepted();
@@ -392,5 +443,38 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     }
 
 
+    private void SetDefaultButton()
+    {
+        var accentStyle = (Style)Application.Current.Resources["AccentButtonStyle"];
+
+        if (DefaultButton == DialogDefaultButton.Button1)
+        {
+            PART_Button1.Style = accentStyle;
+        }
+        else if (DefaultButton == DialogDefaultButton.Button2)
+        {
+            PART_Button2.Style = accentStyle;
+        }
+        else if (DefaultButton == DialogDefaultButton.Button3)
+        {
+            PART_Button3.Style = accentStyle;
+        }
+    }
+
+    private void SetDefaultFocus()
+    {
+        if (DefaultFocus == DialogDefaultFocus.Button1)
+        {
+            PART_Button1.Focus(FocusState.Keyboard);
+        }
+        else if (DefaultFocus == DialogDefaultFocus.Button2)
+        {
+            PART_Button2.Focus(FocusState.Keyboard);
+        }
+        else if (DefaultFocus == DialogDefaultFocus.Button3)
+        {
+            PART_Button3.Focus(FocusState.Keyboard);
+        }
+    }
 
 }

@@ -55,12 +55,14 @@
             Grid.Row="2"
             HorizontalAlignment="Stretch"
             Background="{x:Bind FooterBackground}">
+
             <StackPanel
                 Padding="24"
                 HorizontalAlignment="Right"
+                KeyDown="FooterButtonsPanel_KeyDown"
                 Orientation="Horizontal"
                 Spacing="8"
-                TabFocusNavigation="Cycle">
+                TabFocusNavigation="Once">
 
                 <Button
                     Name="PART_Button1"
@@ -68,7 +70,6 @@
                     MinWidth="80"
                     Click="PART_Dialog_BtnAccept_Click"
                     Content="OK"
-                    Style="{StaticResource AccentButtonStyle}"
                     Visibility="{x:Bind Button1Visibility}" />
                 <Button
                     Name="PART_Button2"

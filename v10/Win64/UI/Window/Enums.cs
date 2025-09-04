@@ -38,3 +38,20 @@ public enum DialogResult
     /// </summary>
     Abort = 3,
 }
+
+
+public enum DialogDefaultButton
+{
+    Button1,
+    Button2,
+    Button3,
+}
+
+
+public enum DialogDefaultFocus
+{
+    Button1,
+    Button2,
+    Button3,
+    Input,
+}
