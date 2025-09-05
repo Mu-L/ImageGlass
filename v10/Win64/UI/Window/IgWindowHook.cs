@@ -57,7 +57,7 @@ public partial class IgWindowHook : DisposableImpl
     /// <summary>
     /// Gets DPI scale of the window.
     /// </summary>
-    public double DpiScale => _window.Content.XamlRoot?.RasterizationScale ?? 1;
+    public double DpiScale => WindowApi.GetDpiScaleForWindow(WindowHandle);
 
 
     /// <summary>

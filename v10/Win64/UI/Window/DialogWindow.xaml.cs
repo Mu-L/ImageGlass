@@ -29,6 +29,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.Graphics;
 using Windows.System;
 
 namespace ImageGlass.Win64.UI;
@@ -329,10 +330,8 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
 
         // calculate the size of the dialog window according to the root content
-        var dpiScale = fe.XamlRoot.RasterizationScale;
-        var titlebarHeight = PART_Titlebar.DesiredSize.Height - 1;
-        var clientHeight = (int)Math.Ceiling((fe.DesiredSize.Height - titlebarHeight) * dpiScale);
-        var clientWidth = (int)Math.Ceiling(fe.DesiredSize.Width * dpiScale);
+        var clientHeight = (int)Math.Ceiling(fe.DesiredSize.Height * _winHook.DpiScale);
+        var clientWidth = (int)Math.Ceiling(fe.DesiredSize.Width * _winHook.DpiScale);
 
         // set dialog position to center the owner
         MoveCenterParent(clientWidth, clientHeight, true);
@@ -474,32 +473,53 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
     private void MoveCenterParent(int clientWidth, int clientHeight, bool limitWithinWorkarea)
     {
-        if (_owner is null) return;
+        RectInt32? workarea = null;
+        Rect parentBounds;
 
+        // get the parent bounds
+        if (_owner is null)
+        {
+            // get workarea of current window
+            workarea ??= DisplayArea
+                .GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest)
+                .WorkArea;
+
+            parentBounds = workarea.Value.ToRect();
+        }
+        else
+        {
+            parentBounds = new Rect(
+                _owner.AppWindow.Position.X,
+                _owner.AppWindow.Position.Y,
+                _owner.AppWindow.Size.Width,
+                _owner.AppWindow.Size.Height);
+        }
+
+        // get title bar height
+        var titlebarHeight = (int)((PART_Titlebar.DesiredSize.Height - 1) * _winHook.DpiScale);
 
         // set dialog position to center the owner
-        var ownerSize = _owner.AppWindow.Size;
-        var posX = _owner.AppWindow.Position.X + ownerSize.Width / 2 - clientWidth / 2;
-        var posY = _owner.AppWindow.Position.Y + ownerSize.Height / 2 - clientHeight / 2;
+        var posX = parentBounds.X + parentBounds.Width / 2 - clientWidth / 2;
+        var posY = parentBounds.Y + parentBounds.Height / 2 - clientHeight / 2;
 
 
         if (limitWithinWorkarea)
         {
             // get workarea of current window
-            var workarea = DisplayArea
+            var workareBounds = workarea ??= DisplayArea
                 .GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest)
                 .WorkArea;
 
             // check if the dialog is within workarea
-            var isWithinWorkarea = workarea
+            var isWithinWorkarea = workareBounds
                 .ToRect()
                 .Contains(new Rect(posX, posY, clientWidth, clientHeight));
 
             // reposition dialog if it's not
             if (!isWithinWorkarea)
             {
-                posX = workarea.X + workarea.Width / 2 - clientWidth / 2;
-                posY = workarea.Y + workarea.Height / 2 - clientHeight / 2;
+                posX = workareBounds.X + workareBounds.Width / 2 - clientWidth / 2;
+                posY = workareBounds.Y + workareBounds.Height / 2 - clientHeight / 2;
             }
 
 
@@ -516,10 +536,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
 
         // update the size of dialog window
-        AppWindow.ResizeClient(new(clientWidth, clientHeight));
+        AppWindow.ResizeClient(new(clientWidth, clientHeight - titlebarHeight));
 
         // update position of dialog window
-        AppWindow.Move(new(posX, posY));
+        AppWindow.Move(new((int)posX, (int)posY));
     }
 
 
@@ -600,8 +620,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         _winHook.SetWindowOwner(_owner);
         _resultCompletionSource = new TaskCompletionSource<DialogResult>();
 
-        var dpiScale = _owner.Content.XamlRoot.RasterizationScale;
-        var maxWidth = (int)(MAX_WIDTH * dpiScale);
+        var maxWidth = (int)(MAX_WIDTH * _winHook.DpiScale);
 
         // create a dialog modal
         var presenter = OverlappedPresenter.CreateForDialog();

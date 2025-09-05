@@ -265,7 +265,8 @@ public partial class Popup : DialogForm
             {
                 picThumbnail.Image = null;
                 return;
-            };
+            }
+            ;
 
             // draw thumbnail overlay
             var bmp = new Bitmap(picThumbnail.Width, picThumbnail.Height);

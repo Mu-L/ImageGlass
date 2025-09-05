@@ -19,7 +19,7 @@
     <Grid
         x:Name="Root"
         MaxWidth="{x:Bind MAX_WIDTH}"
-        HorizontalAlignment="Left"
+        HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         BackgroundSizing="InnerBorderEdge"
         KeyboardAcceleratorPlacementMode="Hidden"
