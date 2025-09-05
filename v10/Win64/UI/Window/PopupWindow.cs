@@ -27,6 +27,7 @@ namespace ImageGlass.Win64.UI;
 
 public partial class PopupWindow : DialogWindow
 {
+
     public PopupWindow()
     {
         DialogContent = new PopupWindow_Content();
@@ -38,18 +39,69 @@ public partial class PopupWindow : DialogWindow
     /// </summary>
     public static async Task<DialogResult> ShowAsync(Window? owner,
         string? title,
-        uint buttonCount,
+        PopupButton buttons,
         PopupWindowViewModel vm)
     {
         var popup = new PopupWindow()
         {
             TitlebarText = title,
-            IsButton1Visible = buttonCount >= 1,
-            IsButton2Visible = buttonCount >= 2,
-            IsButton3Visible = buttonCount >= 3,
             DefaultFocus = DialogFocus.Button1,
             VM = vm,
         };
+
+        // TODO: lang
+        switch (buttons)
+        {
+            case PopupButton.OK:
+                popup.Button1Text = "OK";
+                popup.IsButton1Visible = true;
+                popup.IsButton2Visible = popup.IsButton3Visible = false;
+                break;
+
+            case PopupButton.Close:
+                popup.Button1Text = "Close";
+                popup.IsButton1Visible = true;
+                popup.IsButton2Visible = popup.IsButton3Visible = false;
+                break;
+
+            case PopupButton.Yes_No:
+                popup.Button1Text = "Yes";
+                popup.Button2Text = "No";
+                popup.IsButton1Visible = popup.IsButton2Visible = true;
+                popup.IsButton3Visible = false;
+                break;
+
+            case PopupButton.OK_Cancel:
+                popup.Button1Text = "OK";
+                popup.Button2Text = "Cancel";
+                popup.IsButton1Visible = popup.IsButton2Visible = true;
+                popup.IsButton3Visible = false;
+                break;
+
+            case PopupButton.OK_Close:
+                popup.Button1Text = "OK";
+                popup.Button2Text = "Close";
+                popup.IsButton1Visible = popup.IsButton2Visible = true;
+                popup.IsButton3Visible = false;
+                break;
+
+            case PopupButton.LearnMore_Close:
+                popup.Button1Text = "Learn more";
+                popup.Button2Text = "Close";
+                popup.IsButton1Visible = popup.IsButton2Visible = true;
+                popup.IsButton3Visible = false;
+                break;
+
+            case PopupButton.Continue_Quit:
+                popup.Button1Text = "Continue";
+                popup.Button2Text = "Quit";
+                popup.IsButton1Visible = popup.IsButton2Visible = true;
+                popup.IsButton3Visible = false;
+                break;
+
+            default:
+                break;
+        }
 
         var result = await popup.ShowAsync(owner);
 
@@ -65,10 +117,11 @@ public partial class PopupWindow : DialogWindow
         string? description = null,
         string? heading = null,
         string? note = null,
-        bool showRememberOption = false,
+        PopupButton buttons = PopupButton.OK,
         StockIconId? thumbnailIcon = null,
         SoftwareBitmap? thumbnail = null,
-        InfoBarSeverity noteStyle = InfoBarSeverity.Warning)
+        InfoBarSeverity noteStyle = InfoBarSeverity.Warning,
+        bool showRememberOption = false)
     {
         heading ??= "Warning"; // TODO: lang
 
@@ -90,7 +143,7 @@ public partial class PopupWindow : DialogWindow
             IsRememberOptionVisible = showRememberOption,
         };
 
-        return await ShowAsync(owner, title, 2, vm);
+        return await ShowAsync(owner, title, buttons, vm);
     }
 
 
@@ -101,11 +154,12 @@ public partial class PopupWindow : DialogWindow
         string? title = null,
         string? description = null,
         string? heading = null,
-        string? details = null)
+        string? details = null,
+        PopupButton buttons = PopupButton.OK)
     {
         heading ??= "Error"; // TODO: lang
 
-        return await ShowWarningAsync(owner, title, description, heading, null, false, StockIconId.Error, null, InfoBarSeverity.Error);
+        return await ShowWarningAsync(owner, title, description, heading, null, buttons, StockIconId.Error, null, InfoBarSeverity.Error, false);
     }
 
 
@@ -117,6 +171,7 @@ public partial class PopupWindow : DialogWindow
         string? description = null,
         string? heading = null,
         string? note = null,
+        PopupButton buttons = PopupButton.OK,
         StockIconId? thumbnailIcon = null,
         SoftwareBitmap? thumbnail = null,
         InfoBarSeverity noteStyle = InfoBarSeverity.Informational)
@@ -124,7 +179,7 @@ public partial class PopupWindow : DialogWindow
         heading ??= "";
         thumbnailIcon ??= StockIconId.Info;
 
-        return await ShowWarningAsync(owner, title, description, heading, note, false, thumbnailIcon, thumbnail, noteStyle);
+        return await ShowWarningAsync(owner, title, description, heading, note, buttons, thumbnailIcon, thumbnail, noteStyle, false);
     }
 
 }

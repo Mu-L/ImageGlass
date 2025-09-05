@@ -60,6 +60,18 @@ public enum DialogFocus
 }
 
 
+public enum PopupButton
+{
+    OK,
+    Close,
+    Yes_No,
+    OK_Cancel,
+    OK_Close,
+    LearnMore_Close,
+    Continue_Quit,
+}
+
+
 public class DialogButtonClickedEventArgs(Button btn, DialogButton btnType) : EventArgs
 {
     public Button Button => btn;
