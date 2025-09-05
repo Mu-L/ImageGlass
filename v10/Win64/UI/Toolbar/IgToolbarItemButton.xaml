@@ -36,6 +36,7 @@
                 Name="PART_ButtonText"
                 VerticalAlignment="Center"
                 Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
+                IsColorFontEnabled="True"
                 Text="{x:Bind VM.Text}"
                 Visibility="{x:Bind VM.IsTextVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
         </StackPanel>

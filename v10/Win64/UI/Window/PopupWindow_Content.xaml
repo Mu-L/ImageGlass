@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:CommunityToolkit.WinUI"
     xmlns:w64c="using:ImageGlass.Win64.Common"
     d:DataContext="{d:DesignInstance local:PopupWindow_Content,
                                      IsDesignTimeCreatable=True}"
@@ -68,6 +69,7 @@
                 <TextBlock
                     x:Name="PART_Heading"
                     Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                    IsColorFontEnabled="True"
                     IsTextSelectionEnabled="True"
                     Style="{StaticResource SubtitleTextBlockStyle}"
                     Text="{x:Bind VM.Heading}"
@@ -78,13 +80,18 @@
                 <TextBlock
                     x:Name="PART_Description"
                     Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
+                    IsColorFontEnabled="True"
                     IsTextSelectionEnabled="True"
                     Text="{x:Bind VM.Description}"
                     TextWrapping="WrapWholeWords"
                     Visibility="{x:Bind VM.Description, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <!--  Input  -->
-                <TextBox x:Name="PART_Input" Visibility="{x:Bind VM.IsInputVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBox
+                    x:Name="PART_Input"
+                    IsColorFontEnabled="True"
+                    Text="{x:Bind VM.InputValue}"
+                    Visibility="{x:Bind VM.IsInputVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                 <!--  Details  -->
                 <TextBox
@@ -95,6 +102,7 @@
                     FontSize="13"
                     FontWeight="SemiLight"
                     Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
+                    IsColorFontEnabled="True"
                     IsReadOnly="True"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                     ScrollViewer.VerticalScrollMode="Enabled"

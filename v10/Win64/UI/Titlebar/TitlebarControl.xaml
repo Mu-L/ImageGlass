@@ -37,6 +37,7 @@
             Margin="5,0,0,0"
             VerticalAlignment="Center"
             Foreground="{x:Bind TextColor, Converter={StaticResource ColorToBrushConverter}}"
+            IsColorFontEnabled="True"
             Style="{StaticResource CaptionTextBlockStyle}"
             Text="{x:Bind Text}"
             TextTrimming="CharacterEllipsis"
