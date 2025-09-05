@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using CommunityToolkit.WinUI;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -107,7 +108,6 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
         }
     } = new PopupWindowViewModel();
 
-
     public string RememberOptionText
     {
         get; set
@@ -151,6 +151,9 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
     {
         _ = LoadThumbnailSourceAsync();
         _ = LoadThumbnailIconSourceAsync();
+
+        TextBoxExtensions.SetValidationMode(PART_Input, TextBoxExtensions.ValidationMode.Dynamic);
+        TextBoxExtensions.SetValidationType(PART_Input, TextBoxExtensions.ValidationType.Number);
     }
 
 
@@ -210,4 +213,37 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
         PART_ThumbnailIcon.Source = sbSrc;
     }
 
+
+    /// <summary>
+    /// Validates the form.
+    /// </summary>
+    public bool Validate()
+    {
+        if (!VM.IsInputVisible) return true;
+
+        return TextBoxExtensions.GetIsValid(PART_Input);
+    }
+
+
+    /// <summary>
+    /// Gets form value.
+    /// </summary>
+    public PopupFormValue GetFormValue()
+    {
+        var value = new PopupFormValue()
+        {
+            InputValue = PART_Input.Text,
+            IsRememberOptionChecked = PART_Checkbox.IsChecked ?? false,
+        };
+
+        return value;
+    }
+
+}
+
+
+public class PopupFormValue
+{
+    public string InputValue { get; set; } = "";
+    public bool IsRememberOptionChecked { get; set; } = false;
 }

@@ -27,17 +27,27 @@ namespace ImageGlass.Win64.UI;
 
 public partial class PopupWindow : DialogWindow
 {
+    private readonly PopupWindow_Content _contentEl = new();
 
     public PopupWindow()
     {
-        DialogContent = new PopupWindow_Content();
+        DialogContent = _contentEl;
+    }
+
+
+    protected override void OnButton1Clicked(DialogButtonClickedEventArgs e)
+    {
+        // don't proceed if value is invalid
+        if (!_contentEl.Validate()) return;
+
+        base.OnButton1Clicked(e);
     }
 
 
     /// <summary>
     /// Shows modal dialog.
     /// </summary>
-    public static async Task<DialogResult> ShowAsync(Window? owner,
+    public static async Task<PopupResult> ShowAsync(Window? owner,
         string? title,
         PopupButton buttons,
         PopupWindowViewModel vm,
@@ -104,7 +114,17 @@ public partial class PopupWindow : DialogWindow
                 break;
         }
 
-        var result = await popup.ShowAsync(owner);
+
+        var exitCode = await popup.ShowAsync(owner);
+
+        // get dialog result
+        var formValue = popup._contentEl.GetFormValue();
+        var result = new PopupResult()
+        {
+            ExitCode = exitCode,
+            InputValue = formValue.InputValue,
+            IsRememberOptionChecked = formValue.IsRememberOptionChecked,
+        };
 
         return result;
     }
@@ -113,7 +133,7 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for warning.
     /// </summary>
-    public static async Task<DialogResult> ShowWarningAsync(Window? owner,
+    public static async Task<PopupResult> ShowWarningAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
@@ -151,7 +171,7 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for error.
     /// </summary>
-    public static async Task<DialogResult> ShowErrorAsync(Window? owner,
+    public static async Task<PopupResult> ShowErrorAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
@@ -167,7 +187,7 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for information.
     /// </summary>
-    public static async Task<DialogResult> ShowInfoAsync(Window? owner,
+    public static async Task<PopupResult> ShowInfoAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
@@ -187,11 +207,11 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for input.
     /// </summary>
-    public static async Task<DialogResult> ShowInputAsync(Window? owner,
+    public static async Task<PopupResult> ShowInputAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
-        string? note = null,
+        string? inputValue = null,
         PopupButton buttons = PopupButton.OK_Cancel,
         StockIconId? thumbnailIcon = null,
         SoftwareBitmap? thumbnail = null)
@@ -210,6 +230,7 @@ public partial class PopupWindow : DialogWindow
             Thumbnail = thumbnail,
             ThumbnailIcon = thumbnailIcon,
             IsInputVisible = true,
+            InputValue = inputValue ?? "",
         };
 
         return await ShowAsync(owner, title, buttons, vm, DialogFocus.Default);

@@ -138,6 +138,19 @@ public partial class PopupWindowViewModel : DisposableImpl
     } = false;
 
 
+    public string InputValue
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = "";
+
+
     protected override void OnDisposing()
     {
         base.OnDisposing();
