@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -25,10 +24,8 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Windows.Graphics.Imaging;
 
 namespace ImageGlass.Win64.UI;
 
@@ -94,6 +91,7 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
 
     private readonly double THUMBNAIL_SIZE = 80;
 
+
     #region Public Properties
 
     public PopupWindowViewModel VM
@@ -108,6 +106,20 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
             }
         }
     } = new PopupWindowViewModel();
+
+
+    public string RememberOptionText
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = "Don't show this message again";
+
 
     #endregion Public Properties
 
@@ -145,7 +157,7 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
     /// <summary>
     /// Loads thumbnail.
     /// </summary>
-    public async Task LoadThumbnailSourceAsync()
+    private async Task LoadThumbnailSourceAsync()
     {
         if (VM.Thumbnail is null) return;
         if (PART_Thumbnail.Source is not null) return;
@@ -180,7 +192,7 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
     /// <summary>
     /// Loads thumbnail icon.
     /// </summary>
-    public async Task LoadThumbnailIconSourceAsync()
+    private async Task LoadThumbnailIconSourceAsync()
     {
         if (PART_ThumbnailIcon.Source is not null) return;
 
@@ -196,131 +208,6 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
 
         // set the icon
         PART_ThumbnailIcon.Source = sbSrc;
-    }
-
-}
-
-
-public partial class PopupWindowViewModel : DisposableImpl
-{
-    public string? Heading
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = null;
-
-    public string? Description
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = null;
-
-    public string? Details
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = null;
-
-    public string? Note
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = null;
-
-    public string? RememberOptionText
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = string.Empty;
-
-    public SoftwareBitmap? Thumbnail
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = null;
-
-    public StockIconId? ThumbnailIcon
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsThumbnailSectionVisible));
-            }
-        }
-    } = null;
-
-    public bool IsThumbnailSectionVisible => Thumbnail != null || ThumbnailIcon != null;
-
-    public bool IsRememberOptionVisible
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = false;
-
-    public bool IsInputVisible
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = false;
-
-
-    protected override void OnDisposing()
-    {
-        base.OnDisposing();
-
-        Thumbnail?.Dispose();
-        Thumbnail = null;
     }
 
 }

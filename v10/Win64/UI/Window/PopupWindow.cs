@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using System.Drawing;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
@@ -37,15 +38,8 @@ public partial class PopupWindow : DialogWindow
     /// </summary>
     public static async Task<DialogResult> ShowAsync(Window owner,
         string? title,
-        string? heading,
-        string? description,
-        string? details,
-        string? note,
-        bool showInput,
-        bool showRemember,
         uint buttonCount,
-        SoftwareBitmap? thumbnail,
-        StockIconId? thumbnailIcon)
+        PopupWindowViewModel vm)
     {
         var popup = new PopupWindow()
         {
@@ -54,17 +48,7 @@ public partial class PopupWindow : DialogWindow
             IsButton2Visible = buttonCount >= 2,
             IsButton3Visible = buttonCount >= 3,
             DefaultFocus = DialogFocus.Button1,
-            VM = new PopupWindowViewModel()
-            {
-                Heading = heading,
-                Description = description,
-                Details = details,
-                Note = note,
-                IsRememberOptionVisible = showRemember,
-                IsInputVisible = showInput,
-                Thumbnail = thumbnail,
-                ThumbnailIcon = thumbnailIcon,
-            },
+            VM = vm,
         };
 
         var result = await popup.ShowAsync(owner);
@@ -73,6 +57,9 @@ public partial class PopupWindow : DialogWindow
     }
 
 
+    /// <summary>
+    /// Shows modal dialog window for error.
+    /// </summary>
     public static async Task<DialogResult> ShowErrorAsync(Window owner,
         string? title = null,
         string? description = null,
@@ -80,10 +67,56 @@ public partial class PopupWindow : DialogWindow
         string? details = null)
     {
         heading ??= "Error"; // TODO: lang
-        using var thumbnail = await IconApi.GetSystemIconAsync(StockIconId.Error, 128);
 
-        return await ShowAsync(owner,
-            title, heading, description, details, null, false, false, 1, thumbnail, null);
+        using var errorImg = await IconApi.GetSystemIconAsync(StockIconId.Error, 128);
+        using var vm = new PopupWindowViewModel()
+        {
+            Description = description,
+            Heading = heading,
+            Details = details,
+            NoteStyle = InfoBarSeverity.Error,
+            Thumbnail = errorImg,
+        };
+
+        return await ShowAsync(owner, title, 1, vm);
+    }
+
+
+
+    /// <summary>
+    /// Shows modal dialog window for warning.
+    /// </summary>
+    public static async Task<DialogResult> ShowWarningAsync(Window owner,
+        string? title = null,
+        string? description = null,
+        string? heading = null,
+        string? note = null,
+        bool showRememberOption = false,
+        StockIconId? thumbnailIcon = null,
+        SoftwareBitmap? thumbnail = null,
+        InfoBarSeverity noteStyle = InfoBarSeverity.Warning)
+    {
+        heading ??= "Warning"; // TODO: lang
+
+        // use stock icon as thumbnail
+        if (thumbnail is null)
+        {
+            thumbnail = await IconApi.GetSystemIconAsync(thumbnailIcon ?? StockIconId.Warning, 128);
+            thumbnailIcon = null;
+        }
+
+        using var vm = new PopupWindowViewModel()
+        {
+            Description = description,
+            Heading = heading,
+            Note = note,
+            NoteStyle = noteStyle,
+            Thumbnail = thumbnail,
+            ThumbnailIcon = thumbnailIcon,
+            IsRememberOptionVisible = showRememberOption,
+        };
+
+        return await ShowAsync(owner, title, 2, vm);
     }
 
 }
