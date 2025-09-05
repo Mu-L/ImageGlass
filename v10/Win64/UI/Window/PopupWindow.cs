@@ -58,32 +58,6 @@ public partial class PopupWindow : DialogWindow
 
 
     /// <summary>
-    /// Shows modal dialog window for error.
-    /// </summary>
-    public static async Task<DialogResult> ShowErrorAsync(Window owner,
-        string? title = null,
-        string? description = null,
-        string? heading = null,
-        string? details = null)
-    {
-        heading ??= "Error"; // TODO: lang
-
-        using var errorImg = await IconApi.GetSystemIconAsync(StockIconId.Error, 128);
-        using var vm = new PopupWindowViewModel()
-        {
-            Description = description,
-            Heading = heading,
-            Details = details,
-            NoteStyle = InfoBarSeverity.Error,
-            Thumbnail = errorImg,
-        };
-
-        return await ShowAsync(owner, title, 1, vm);
-    }
-
-
-
-    /// <summary>
     /// Shows modal dialog window for warning.
     /// </summary>
     public static async Task<DialogResult> ShowWarningAsync(Window owner,
@@ -117,6 +91,40 @@ public partial class PopupWindow : DialogWindow
         };
 
         return await ShowAsync(owner, title, 2, vm);
+    }
+
+
+    /// <summary>
+    /// Shows modal dialog window for error.
+    /// </summary>
+    public static async Task<DialogResult> ShowErrorAsync(Window owner,
+        string? title = null,
+        string? description = null,
+        string? heading = null,
+        string? details = null)
+    {
+        heading ??= "Error"; // TODO: lang
+
+        return await ShowWarningAsync(owner, title, description, heading, null, false, StockIconId.Error, null, InfoBarSeverity.Error);
+    }
+
+
+    /// <summary>
+    /// Shows modal dialog window for information.
+    /// </summary>
+    public static async Task<DialogResult> ShowInfoAsync(Window owner,
+        string? title = null,
+        string? description = null,
+        string? heading = null,
+        string? note = null,
+        StockIconId? thumbnailIcon = null,
+        SoftwareBitmap? thumbnail = null,
+        InfoBarSeverity noteStyle = InfoBarSeverity.Informational)
+    {
+        heading ??= "";
+        thumbnailIcon ??= StockIconId.Info;
+
+        return await ShowWarningAsync(owner, title, description, heading, note, false, thumbnailIcon, thumbnail, noteStyle);
     }
 
 }
