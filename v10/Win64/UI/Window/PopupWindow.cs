@@ -29,6 +29,7 @@ public partial class PopupWindow : DialogWindow
 {
     private readonly PopupWindow_Content _contentEl = new();
 
+
     public PopupWindow()
     {
         DialogContent = _contentEl;
@@ -57,7 +58,7 @@ public partial class PopupWindow : DialogWindow
         {
             TitlebarText = title,
             DefaultFocus = defaultFocus,
-            VM = vm,
+            DialogContentDataContext = vm,
         };
 
         // TODO: lang

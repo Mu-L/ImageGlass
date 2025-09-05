@@ -95,18 +95,11 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
 
     #region Public Properties
 
-    public PopupWindowViewModel VM
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field?.Dispose();
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = new PopupWindowViewModel();
+    /// <summary>
+    /// Gets view model from data context.
+    /// </summary>
+    public PopupWindowViewModel VM => ((PopupWindowViewModel)DataContext) ?? new();
+
 
     public string RememberOptionText
     {
@@ -121,7 +114,7 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
     } = "Don't show this message again";
 
 
-    #endregion Public Properties
+    #endregion // Public Properties
 
 
 
@@ -129,22 +122,16 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
     {
         InitializeComponent();
 
-        DataContextChanged += PopupWindow_Content_DataContextChanged;
         Root.Loaded += Root_Loaded;
         Root.Unloaded += Root_Unloaded;
-    }
-
-    private void PopupWindow_Content_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs e)
-    {
-        if (e.NewValue is PopupWindowViewModel vm) VM = vm;
-        else VM = new();
+        DataContextChanged += PopupWindow_Content_DataContextChanged;
     }
 
     private void Root_Unloaded(object sender, RoutedEventArgs e)
     {
-        DataContextChanged -= PopupWindow_Content_DataContextChanged;
         Root.Loaded -= Root_Loaded;
         Root.Unloaded -= Root_Unloaded;
+        DataContextChanged -= PopupWindow_Content_DataContextChanged;
     }
 
     private void Root_Loaded(object sender, RoutedEventArgs e)
@@ -152,8 +139,15 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
         _ = LoadThumbnailSourceAsync();
         _ = LoadThumbnailIconSourceAsync();
 
+        // set textbox input validation type
         TextBoxExtensions.SetValidationMode(PART_Input, TextBoxExtensions.ValidationMode.Dynamic);
         TextBoxExtensions.SetValidationType(PART_Input, TextBoxExtensions.ValidationType.Number);
+    }
+
+    private void PopupWindow_Content_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs e)
+    {
+        // notify the change of view model
+        OnPropertyChanged(nameof(VM));
     }
 
 

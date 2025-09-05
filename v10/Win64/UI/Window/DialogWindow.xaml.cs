@@ -118,10 +118,30 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
     #region Public Properties
 
+    /// <summary>
+    /// Gets, sets the content of dialog window.
+    /// </summary>
     public FrameworkElement DialogContent
     {
         get => (FrameworkElement)PART_DialogContent.Content;
         set => PART_DialogContent.Content = value;
+    }
+
+    /// <summary>
+    /// Gets, sets the data context for <see cref="DialogContent"/>.
+    /// </summary>
+    public object DialogContentDataContext
+    {
+        get => DialogContent.DataContext;
+        set
+        {
+            if (DialogContent.DataContext != value)
+            {
+                // update view model in content dialog
+                DialogContent.DataContext = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
 
@@ -129,22 +149,6 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// Gets or sets the result for the dialog.
     /// </summary>
     public DialogExitCode DialogResult { get; set; } = DialogExitCode.None;
-
-    public PopupWindowViewModel VM
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field?.Dispose();
-                field = value;
-                OnPropertyChanged();
-
-                // update view model in content dialog
-                DialogContent.DataContext = value;
-            }
-        }
-    } = new PopupWindowViewModel();
 
     public string? TitlebarText
     {
@@ -297,7 +301,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         Content.KeyboardAccelerators.Remove(_submitByEnterKey);
 
         _winHook.Dispose();
-        VM.Dispose();
+        if (DialogContentDataContext is IDisposable dcdc) dcdc.Dispose();
 
         // if the dialog is closed unexpected, returns Abort code to break the while loop.
         if (DialogResult == DialogExitCode.None) DialogResult = DialogExitCode.Abort;
