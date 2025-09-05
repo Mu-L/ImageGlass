@@ -101,7 +101,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     protected IgWindowHook _winHook;
     protected Window? _owner = null;
     protected readonly int MAX_WIDTH = 600;
-    protected TaskCompletionSource<DialogResult> _resultCompletionSource = new();
+    protected TaskCompletionSource<DialogExitCode> _resultCompletionSource = new();
     protected readonly KeyboardAccelerator _closeByEscKey = new KeyboardAccelerator()
     {
         Key = VirtualKey.Escape,
@@ -128,7 +128,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Gets or sets the result for the dialog.
     /// </summary>
-    public DialogResult DialogResult { get; set; } = DialogResult.None;
+    public DialogExitCode DialogResult { get; set; } = DialogExitCode.None;
 
     public PopupWindowViewModel VM
     {
@@ -300,7 +300,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         VM.Dispose();
 
         // if the dialog is closed unexpected, returns Abort code to break the while loop.
-        if (DialogResult == DialogResult.None) DialogResult = DialogResult.Abort;
+        if (DialogResult == DialogExitCode.None) DialogResult = DialogExitCode.Abort;
 
         // set the result to complete the task
         _resultCompletionSource.SetResult(DialogResult);
@@ -339,54 +339,51 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
 
     /// <summary>
-    /// Closes the form and returns <see cref="DialogResult.Abort"/> code.
+    /// Closes the form and returns <see cref="DialogExitCode.Abort"/> code.
     /// </summary>
     protected virtual void OnAborted()
     {
-        DialogResult = DialogResult.Abort;
+        DialogResult = DialogExitCode.Abort;
         Close();
     }
 
 
     /// <summary>
-    /// Closes the form and returns <see cref="DialogResult.OK"/> code.
+    /// Closes the form and returns <see cref="DialogExitCode.OK"/> code.
     /// </summary>
-    protected virtual void OnButton1Clicked()
+    protected virtual void OnButton1Clicked(DialogButtonClickedEventArgs e)
     {
-        var e = new DialogButtonClickedEventArgs(PART_Button1, DialogButton.Button1);
         Button1Clicked?.Invoke(this, e);
 
         if (!e.CanProceed) return;
-        DialogResult = DialogResult.OK;
+        DialogResult = DialogExitCode.OK;
         Close();
     }
 
 
     /// <summary>
-    /// Closes the form and returns <see cref="DialogResult.Cancel"/> code.
+    /// Closes the form and returns <see cref="DialogExitCode.Cancel"/> code.
     /// </summary>
-    protected virtual void OnButton2Clicked()
+    protected virtual void OnButton2Clicked(DialogButtonClickedEventArgs e)
     {
-        var e = new DialogButtonClickedEventArgs(PART_Button2, DialogButton.Button2);
         Button2Clicked?.Invoke(this, e);
 
         if (!e.CanProceed) return;
-        DialogResult = DialogResult.Cancel;
+        DialogResult = DialogExitCode.Cancel;
         Close();
     }
 
 
     /// <summary>
-    /// Sets <see cref="DialogResult"/> to <see cref="DialogResult.None"/>
+    /// Sets <see cref="DialogResult"/> to <see cref="DialogExitCode.None"/>
     /// and does nothing.
     /// </summary>
-    protected virtual void OnButton3Clicked()
+    protected virtual void OnButton3Clicked(DialogButtonClickedEventArgs e)
     {
-        var e = new DialogButtonClickedEventArgs(PART_Button3, DialogButton.Button3);
         Button3Clicked?.Invoke(this, e);
 
         if (!e.CanProceed) return;
-        DialogResult = DialogResult.None;
+        DialogResult = DialogExitCode.None;
     }
 
 
@@ -400,7 +397,8 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     private void SubmitByEnterKey_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
     {
         e.Handled = true;
-        OnButton1Clicked();
+
+        OnButton1Clicked(new DialogButtonClickedEventArgs(PART_Button1, DialogButton.Button1));
     }
 
 
@@ -455,19 +453,19 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
     private void PART_Dialog_Button1_Click(object sender, RoutedEventArgs e)
     {
-        OnButton1Clicked();
+        OnButton1Clicked(new DialogButtonClickedEventArgs(PART_Button1, DialogButton.Button1));
     }
 
 
     private void PART_Dialog_Button2_Click(object sender, RoutedEventArgs e)
     {
-        OnButton2Clicked();
+        OnButton2Clicked(new DialogButtonClickedEventArgs(PART_Button2, DialogButton.Button2));
     }
 
 
     private void PART_Dialog_Button3_Click(object sender, RoutedEventArgs e)
     {
-        OnButton3Clicked();
+        OnButton3Clicked(new DialogButtonClickedEventArgs(PART_Button3, DialogButton.Button3));
     }
 
 
@@ -604,12 +602,12 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Shows dialog.
     /// </summary>
-    public async Task<DialogResult> ShowAsync(Window? owner = null)
+    public async Task<DialogExitCode> ShowAsync(Window? owner = null)
     {
         // set window owner
         _owner = owner;
         _winHook.SetWindowOwner(_owner);
-        _resultCompletionSource = new TaskCompletionSource<DialogResult>();
+        _resultCompletionSource = new TaskCompletionSource<DialogExitCode>();
 
         var maxWidth = (int)(MAX_WIDTH * _winHook.DpiScale);
 
@@ -628,8 +626,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         AppWindow.Show();
 
 
-        // wait for dialog result
-        return await _resultCompletionSource.Task;
+        // wait for exit code
+        var exitCode = await _resultCompletionSource.Task;
+
+        return exitCode;
     }
 
 

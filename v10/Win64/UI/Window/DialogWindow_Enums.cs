@@ -22,7 +22,7 @@ using System;
 namespace ImageGlass.Win64.UI;
 
 
-public enum DialogResult
+public enum DialogExitCode
 {
     /// <summary>
     /// Nothing is returned from the dialog box. This means that the modal dialog continues running.
@@ -60,6 +60,9 @@ public enum DialogFocus
 }
 
 
+/// <summary>
+/// The built-in buttons for <see cref="PopupWindow"/>.
+/// </summary>
 public enum PopupButton
 {
     OK,
@@ -69,6 +72,28 @@ public enum PopupButton
     OK_Close,
     LearnMore_Close,
     Continue_Quit,
+}
+
+
+/// <summary>
+/// Specifies identifiers to indicate the return data of a dialog.
+/// </summary>
+public class PopupResult
+{
+    /// <summary>
+    /// Gets the exit result of the dialog.
+    /// </summary>
+    public DialogExitCode ExitCode { get; internal set; } = DialogExitCode.None;
+
+    /// <summary>
+    /// Gets the value of input.
+    /// </summary>
+    public string InputValue { get; internal set; } = "";
+
+    /// <summary>
+    /// Gets the check state of the Remember checkbox option.
+    /// </summary>
+    public bool IsRememberOptionChecked { get; internal set; } = false;
 }
 
 
