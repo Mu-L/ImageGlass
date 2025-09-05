@@ -587,24 +587,15 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     {
         if (DefaultFocus == DialogFocus.Button1)
         {
-            var focusState = DefaultButton == DialogButton.Button1
-                ? FocusState.Programmatic
-                : FocusState.Keyboard;
-            PART_Button1.Focus(focusState);
+            PART_Button1.Focus(FocusState.Keyboard);
         }
         else if (DefaultFocus == DialogFocus.Button2)
         {
-            var focusState = DefaultButton == DialogButton.Button2
-                ? FocusState.Programmatic
-                : FocusState.Keyboard;
-            PART_Button2.Focus(focusState);
+            PART_Button2.Focus(FocusState.Keyboard);
         }
         else if (DefaultFocus == DialogFocus.Button3)
         {
-            var focusState = DefaultButton == DialogButton.Button3
-                ? FocusState.Programmatic
-                : FocusState.Keyboard;
-            PART_Button3.Focus(focusState);
+            PART_Button3.Focus(FocusState.Keyboard);
         }
     }
 
@@ -613,7 +604,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Shows dialog.
     /// </summary>
-    public async Task<DialogResult> ShowAsync(Window owner)
+    public async Task<DialogResult> ShowAsync(Window? owner = null)
     {
         // set window owner
         _owner = owner;
@@ -624,7 +615,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
         // create a dialog modal
         var presenter = OverlappedPresenter.CreateForDialog();
-        presenter.IsModal = true;
+        presenter.IsModal = _owner is not null;
         presenter.IsResizable = false;
         presenter.PreferredMaximumWidth = maxWidth;
         presenter.SetBorderAndTitleBar(true, false);

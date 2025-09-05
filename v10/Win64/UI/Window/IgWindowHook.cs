@@ -341,10 +341,11 @@ public partial class IgWindowHook : DisposableImpl
     /// <summary>
     /// Sets the owner of this window.
     /// </summary>
-    public void SetWindowOwner(Window owner)
+    public void SetWindowOwner(Window? owner)
     {
-        var ownerHandle = WindowNative.GetWindowHandle(owner);
+        if (owner is null) return;
 
+        var ownerHandle = WindowNative.GetWindowHandle(owner);
         WindowApi.SetWindowOwner(WindowHandle, ownerHandle);
     }
 

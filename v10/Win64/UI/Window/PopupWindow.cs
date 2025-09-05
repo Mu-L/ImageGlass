@@ -36,7 +36,7 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog window.
     /// </summary>
-    public static async Task<DialogResult> ShowAsync(Window owner,
+    public static async Task<DialogResult> ShowAsync(Window? owner,
         string? title,
         uint buttonCount,
         PopupWindowViewModel vm)
@@ -60,7 +60,7 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog window for warning.
     /// </summary>
-    public static async Task<DialogResult> ShowWarningAsync(Window owner,
+    public static async Task<DialogResult> ShowWarningAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
@@ -97,7 +97,7 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog window for error.
     /// </summary>
-    public static async Task<DialogResult> ShowErrorAsync(Window owner,
+    public static async Task<DialogResult> ShowErrorAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
@@ -112,7 +112,7 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog window for information.
     /// </summary>
-    public static async Task<DialogResult> ShowInfoAsync(Window owner,
+    public static async Task<DialogResult> ShowInfoAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
