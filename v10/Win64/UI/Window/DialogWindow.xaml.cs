@@ -97,16 +97,17 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     public event TypedEventHandler<DialogWindow, DialogButtonClickedEventArgs>? Button3Clicked;
 
 
-    private IgWindowHook _winHook;
-    private Window? _owner = null;
-    private TaskCompletionSource<DialogResult> _resultCompletionSource = new();
-    private readonly KeyboardAccelerator _closeByEscKey = new KeyboardAccelerator()
+    protected IgWindowHook _winHook;
+    protected Window? _owner = null;
+    protected readonly int MAX_WIDTH = 600;
+    protected TaskCompletionSource<DialogResult> _resultCompletionSource = new();
+    protected readonly KeyboardAccelerator _closeByEscKey = new KeyboardAccelerator()
     {
         Key = VirtualKey.Escape,
         Modifiers = VirtualKeyModifiers.None,
         IsEnabled = true,
     };
-    private readonly KeyboardAccelerator _submitByEnterKey = new KeyboardAccelerator()
+    protected readonly KeyboardAccelerator _submitByEnterKey = new KeyboardAccelerator()
     {
         Key = VirtualKey.Enter,
         Modifiers = VirtualKeyModifiers.None,
@@ -314,12 +315,14 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
         SetDefaultButton();
         SetDefaultFocus();
+
+        Root.SizeChanged += Root_SizeChanged;
     }
 
 
     private void Root_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (_owner is null || sender is not FrameworkElement fe) return;
+        if (sender is not FrameworkElement fe || fe.DesiredSize.IsEmpty()) return;
 
         // only adjust the size once
         fe.SizeChanged -= Root_SizeChanged;
@@ -332,15 +335,8 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         var clientWidth = (int)Math.Ceiling(fe.DesiredSize.Width * dpiScale);
 
         // set dialog position to center the owner
-        var ownerSize = _owner.AppWindow.Size;
-        var posX = _owner.AppWindow.Position.X + ownerSize.Width / 2 - clientWidth / 2;
-        var posY = _owner.AppWindow.Position.Y + ownerSize.Height / 2 - clientHeight / 2;
-
-        // update size and position of dialog
-        AppWindow.ResizeClient(new(clientWidth, clientHeight));
-        AppWindow.Move(new(posX, posY));
+        MoveCenterParent(clientWidth, clientHeight, true);
     }
-
 
 
     /// <summary>
@@ -415,19 +411,27 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         var isMoveNext = e.Key == VirtualKey.Up || e.Key == VirtualKey.Right;
         var isMoveBack = e.Key == VirtualKey.Down || e.Key == VirtualKey.Left;
         if (!isMoveNext && !isMoveBack) return;
+        if (sender is not StackPanel panel) return;
 
 
-        var panel = (StackPanel)sender;
+        // get visible footer buttons
         var visibleButtons = panel.Children
             .OfType<Button>()
             .Where(i => i.Visibility == Visibility.Visible)
             .ToList();
-        var focusedButton = (Button)FocusManager.GetFocusedElement(Content.XamlRoot);
-        int focusedIndex = visibleButtons.IndexOf(focusedButton);
+        if (visibleButtons.Count == 0) return;
 
+        // get focused button and it's index
+        var focusedIndex = -1;
+        if (FocusManager.GetFocusedElement(Content.XamlRoot) is Button focusedButton)
+        {
+            focusedIndex = visibleButtons.IndexOf(focusedButton);
+        }
+
+
+        // if no button has focus yet => focus the first one
         if (focusedIndex == -1)
         {
-            // No button has focus yet → focus the first one
             visibleButtons[0].Focus(FocusState.Keyboard);
         }
         else
@@ -468,36 +472,54 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     }
 
 
-    /// <summary>
-    /// Shows dialog.
-    /// </summary>
-    public async Task<DialogResult> ShowAsync(Window owner)
+    private void MoveCenterParent(int clientWidth, int clientHeight, bool limitWithinWorkarea)
     {
-        // set window owner
-        _owner = owner;
-        _winHook.SetWindowOwner(_owner);
-        _resultCompletionSource = new TaskCompletionSource<DialogResult>();
-
-        var dpiScale = _owner.Content.XamlRoot.RasterizationScale;
-        var maxWidth = (int)(Root.MaxWidth * dpiScale);
-        var maxHeight = (int)(Root.MaxHeight * dpiScale);
-
-        // create a dialog modal
-        var presenter = OverlappedPresenter.CreateForDialog();
-        presenter.IsModal = true;
-        presenter.IsResizable = false;
-        presenter.PreferredMaximumWidth = maxWidth;
-        presenter.PreferredMaximumHeight = maxHeight;
-        presenter.SetBorderAndTitleBar(true, false);
-        AppWindow.SetPresenter(presenter);
-
-        // show the dialog
-        AppWindow.Resize(new(maxWidth, maxHeight));
-        AppWindow.Show();
+        if (_owner is null) return;
 
 
-        // wait for dialog result
-        return await _resultCompletionSource.Task;
+        // set dialog position to center the owner
+        var ownerSize = _owner.AppWindow.Size;
+        var posX = _owner.AppWindow.Position.X + ownerSize.Width / 2 - clientWidth / 2;
+        var posY = _owner.AppWindow.Position.Y + ownerSize.Height / 2 - clientHeight / 2;
+
+
+        if (limitWithinWorkarea)
+        {
+            // get workarea of current window
+            var workarea = DisplayArea
+                .GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest)
+                .WorkArea;
+
+            // check if the dialog is within workarea
+            var isWithinWorkarea = workarea
+                .ToRect()
+                .Contains(new Rect(posX, posY, clientWidth, clientHeight));
+
+            // reposition dialog if it's not
+            if (!isWithinWorkarea)
+            {
+                posX = workarea.X + workarea.Width / 2 - clientWidth / 2;
+                posY = workarea.Y + workarea.Height / 2 - clientHeight / 2;
+            }
+
+
+            //// make sure the window position is within the workarea
+            //var gap = 10;
+            //var posRight = posX + clientWidth;
+            //var posBottom = posY + clientHeight;
+
+            //if (posX > workarea.X + workarea.Width - gap) posX -= clientWidth;
+            //if (posY > workarea.Y + workarea.Height - gap) posY -= clientHeight;
+            //if (posRight < workarea.X + gap) posX = 0;
+            //if (posBottom < workarea.Y + gap) posY = 0;
+        }
+
+
+        // update the size of dialog window
+        AppWindow.ResizeClient(new(clientWidth, clientHeight));
+
+        // update position of dialog window
+        AppWindow.Move(new(posX, posY));
     }
 
 
@@ -565,5 +587,40 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
             PART_Button3.Focus(focusState);
         }
     }
+
+
+
+    /// <summary>
+    /// Shows dialog.
+    /// </summary>
+    public async Task<DialogResult> ShowAsync(Window owner)
+    {
+        // set window owner
+        _owner = owner;
+        _winHook.SetWindowOwner(_owner);
+        _resultCompletionSource = new TaskCompletionSource<DialogResult>();
+
+        var dpiScale = _owner.Content.XamlRoot.RasterizationScale;
+        var maxWidth = (int)(MAX_WIDTH * dpiScale);
+
+        // create a dialog modal
+        var presenter = OverlappedPresenter.CreateForDialog();
+        presenter.IsModal = true;
+        presenter.IsResizable = false;
+        presenter.PreferredMaximumWidth = maxWidth;
+        presenter.SetBorderAndTitleBar(true, false);
+        AppWindow.SetPresenter(presenter);
+
+        // set initial size
+        MoveCenterParent(maxWidth, maxWidth, false);
+
+        // show dialog
+        AppWindow.Show();
+
+
+        // wait for dialog result
+        return await _resultCompletionSource.Task;
+    }
+
 
 }

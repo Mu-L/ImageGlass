@@ -18,13 +18,11 @@
 
     <Grid
         x:Name="Root"
-        Height="Auto"
-        MaxWidth="600"
+        MaxWidth="{x:Bind MAX_WIDTH}"
         HorizontalAlignment="Left"
         VerticalAlignment="Stretch"
         BackgroundSizing="InnerBorderEdge"
         KeyboardAcceleratorPlacementMode="Hidden"
-        SizeChanged="Root_SizeChanged"
         TabFocusNavigation="Cycle">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
