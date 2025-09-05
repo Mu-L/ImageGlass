@@ -35,17 +35,18 @@ public partial class PopupWindow : DialogWindow
 
 
     /// <summary>
-    /// Shows modal dialog window.
+    /// Shows modal dialog.
     /// </summary>
     public static async Task<DialogResult> ShowAsync(Window? owner,
         string? title,
         PopupButton buttons,
-        PopupWindowViewModel vm)
+        PopupWindowViewModel vm,
+        DialogFocus defaultFocus = DialogFocus.Button1)
     {
         var popup = new PopupWindow()
         {
             TitlebarText = title,
-            DefaultFocus = DialogFocus.Button1,
+            DefaultFocus = defaultFocus,
             VM = vm,
         };
 
@@ -110,7 +111,7 @@ public partial class PopupWindow : DialogWindow
 
 
     /// <summary>
-    /// Shows modal dialog window for warning.
+    /// Shows modal dialog for warning.
     /// </summary>
     public static async Task<DialogResult> ShowWarningAsync(Window? owner,
         string? title = null,
@@ -148,7 +149,7 @@ public partial class PopupWindow : DialogWindow
 
 
     /// <summary>
-    /// Shows modal dialog window for error.
+    /// Shows modal dialog for error.
     /// </summary>
     public static async Task<DialogResult> ShowErrorAsync(Window? owner,
         string? title = null,
@@ -164,7 +165,7 @@ public partial class PopupWindow : DialogWindow
 
 
     /// <summary>
-    /// Shows modal dialog window for information.
+    /// Shows modal dialog for information.
     /// </summary>
     public static async Task<DialogResult> ShowInfoAsync(Window? owner,
         string? title = null,
@@ -180,6 +181,39 @@ public partial class PopupWindow : DialogWindow
         thumbnailIcon ??= StockIconId.Info;
 
         return await ShowWarningAsync(owner, title, description, heading, note, buttons, thumbnailIcon, thumbnail, noteStyle, false);
+    }
+
+
+    /// <summary>
+    /// Shows modal dialog for input.
+    /// </summary>
+    public static async Task<DialogResult> ShowInputAsync(Window? owner,
+        string? title = null,
+        string? description = null,
+        string? heading = null,
+        string? note = null,
+        PopupButton buttons = PopupButton.OK_Cancel,
+        StockIconId? thumbnailIcon = null,
+        SoftwareBitmap? thumbnail = null)
+    {
+        // use stock icon as thumbnail
+        if (thumbnail is null)
+        {
+            thumbnail = await IconApi.GetSystemIconAsync(thumbnailIcon ?? StockIconId.Warning, 128);
+            thumbnailIcon = null;
+        }
+
+        using var vm = new PopupWindowViewModel()
+        {
+            Description = description,
+            Heading = heading,
+            Thumbnail = thumbnail,
+            ThumbnailIcon = thumbnailIcon,
+            IsInputVisible = true,
+        };
+
+        return await ShowAsync(owner, title, buttons, vm, DialogFocus.Default);
+
     }
 
 }
