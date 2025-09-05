@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Microsoft.UI.Xaml.Controls;
 using System;
 
 namespace ImageGlass.Win64.UI;
@@ -48,6 +47,14 @@ public enum DialogButton
     Button1,
     Button2,
     Button3,
+}
+
+
+public enum DialogAction
+{
+    Submit,
+    Cancel,
+    Apply,
 }
 
 
@@ -97,9 +104,8 @@ public class PopupResult
 }
 
 
-public class DialogButtonClickedEventArgs(Button btn, DialogButton btnType) : EventArgs
+public class DialogEventArgs(DialogAction actionType) : EventArgs
 {
-    public Button Button => btn;
-    public DialogButton ButtonType => btnType;
+    public DialogAction ActionType => actionType;
     public bool CanProceed { get; set; } = true;
 }

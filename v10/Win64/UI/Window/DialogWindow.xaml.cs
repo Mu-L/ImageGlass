@@ -93,9 +93,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     #endregion // INotifyPropertyChanged Implementation
 
 
-    public event TypedEventHandler<DialogWindow, DialogButtonClickedEventArgs>? Button1Clicked;
-    public event TypedEventHandler<DialogWindow, DialogButtonClickedEventArgs>? Button2Clicked;
-    public event TypedEventHandler<DialogWindow, DialogButtonClickedEventArgs>? Button3Clicked;
+    // public events
+    public event TypedEventHandler<DialogWindow, DialogEventArgs>? Submitted;
+    public event TypedEventHandler<DialogWindow, DialogEventArgs>? Cancelled;
+    public event TypedEventHandler<DialogWindow, DialogEventArgs>? Applied;
 
 
     protected IgWindowHook _winHook;
@@ -127,6 +128,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         set => PART_DialogContent.Content = value;
     }
 
+
     /// <summary>
     /// Gets, sets the data context for <see cref="DialogContent"/>.
     /// </summary>
@@ -150,6 +152,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     /// </summary>
     public DialogExitCode DialogResult { get; set; } = DialogExitCode.None;
 
+
+    /// <summary>
+    /// Gets, sets the title of dialog.
+    /// </summary>
     public string? TitlebarText
     {
         get => _winHook.TitlebarText;
@@ -163,6 +169,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         }
     }
 
+
+    /// <summary>
+    /// Gets, sets the visibility of button 1.
+    /// </summary>
     public bool IsButton1Visible
     {
         get; set
@@ -176,6 +186,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     } = true;
     private Visibility Button1Visibility => IsButton1Visible ? Visibility.Visible : Visibility.Collapsed;
 
+
+    /// <summary>
+    /// Gets, sets the visibility of button 2.
+    /// </summary>
     public bool IsButton2Visible
     {
         get; set
@@ -186,9 +200,13 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
                 OnPropertyChanged();
             }
         }
-    } = true;
+    } = false;
     private Visibility Button2Visibility => IsButton2Visible ? Visibility.Visible : Visibility.Collapsed;
 
+
+    /// <summary>
+    /// Gets, sets the visibility of button 3.
+    /// </summary>
     public bool IsButton3Visible
     {
         get; set
@@ -202,6 +220,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     } = false;
     private Visibility Button3Visibility => IsButton3Visible ? Visibility.Visible : Visibility.Collapsed;
 
+
+    /// <summary>
+    /// Gets, sets the text of button 1.
+    /// </summary>
     public string? Button1Text
     {
         get; set
@@ -214,6 +236,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         }
     } = "Button 1";
 
+
+    /// <summary>
+    /// Gets, sets the text of button 2.
+    /// </summary>
     public string? Button2Text
     {
         get; set
@@ -226,6 +252,10 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         }
     } = "Button 2";
 
+
+    /// <summary>
+    /// Gets, sets the text of button 3.
+    /// </summary>
     public string? Button3Text
     {
         get; set
@@ -238,12 +268,23 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         }
     } = "Button 3";
 
+
+    /// <summary>
+    /// Gets, sets the default button of dialog.
+    /// </summary>
     public DialogButton DefaultButton { get; set; } = DialogButton.Button1;
 
+
+    /// <summary>
+    /// Gets, sets the default focus of dialog.
+    /// </summary>
     public DialogFocus DefaultFocus { get; set; } = DialogFocus.Button1;
 
 
-    public SolidColorBrush? FooterBackground
+    /// <summary>
+    /// Gets, sets the background for dialog footer.
+    /// </summary>
+    protected SolidColorBrush? FooterBackground
     {
         get; set
         {
@@ -256,6 +297,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     } = null;
 
     #endregion // Public Properties
+
 
 
     public DialogWindow()
@@ -276,6 +318,65 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         Content.KeyboardAccelerators.Add(_submitByEnterKey);
     }
 
+
+
+    #region Virtual methods
+
+    /// <summary>
+    /// Closes the form and returns <see cref="DialogExitCode.Abort"/> code.
+    /// </summary>
+    protected virtual void OnDialogAborted()
+    {
+        DialogResult = DialogExitCode.Abort;
+        Close();
+    }
+
+
+    /// <summary>
+    /// Closes the form and returns <see cref="DialogExitCode.OK"/> code.
+    /// </summary>
+    protected virtual void OnDialogSubmitted(DialogEventArgs e)
+    {
+        Submitted?.Invoke(this, e);
+
+        if (!e.CanProceed) return;
+        DialogResult = DialogExitCode.OK;
+        Close();
+    }
+
+
+    /// <summary>
+    /// Closes the form and returns <see cref="DialogExitCode.Cancel"/> code.
+    /// </summary>
+    protected virtual void OnDialogCancelled(DialogEventArgs e)
+    {
+        Cancelled?.Invoke(this, e);
+
+        if (!e.CanProceed) return;
+        DialogResult = DialogExitCode.Cancel;
+        Close();
+    }
+
+
+    /// <summary>
+    /// Sets <see cref="DialogResult"/> to <see cref="DialogExitCode.None"/>
+    /// and does nothing.
+    /// </summary>
+    protected virtual void OnDialogApplied(DialogEventArgs e)
+    {
+        Applied?.Invoke(this, e);
+
+        if (!e.CanProceed) return;
+        DialogResult = DialogExitCode.None;
+    }
+
+
+    #endregion // Virtual methods
+
+
+
+    #region Window Events
+
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {
         FooterBackground = GetThemeFooterBackground();
@@ -285,6 +386,20 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     private void WinHook_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         OnPropertyChanged(e.PropertyName);
+    }
+
+
+    private void CloseByEscKey_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
+    {
+        e.Handled = true;
+        OnDialogAborted();
+    }
+
+
+    private void SubmitByEnterKey_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
+    {
+        e.Handled = true;
+        OnDialogSubmitted(new DialogEventArgs(DialogAction.Submit));
     }
 
 
@@ -342,70 +457,6 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     }
 
 
-    /// <summary>
-    /// Closes the form and returns <see cref="DialogExitCode.Abort"/> code.
-    /// </summary>
-    protected virtual void OnAborted()
-    {
-        DialogResult = DialogExitCode.Abort;
-        Close();
-    }
-
-
-    /// <summary>
-    /// Closes the form and returns <see cref="DialogExitCode.OK"/> code.
-    /// </summary>
-    protected virtual void OnButton1Clicked(DialogButtonClickedEventArgs e)
-    {
-        Button1Clicked?.Invoke(this, e);
-
-        if (!e.CanProceed) return;
-        DialogResult = DialogExitCode.OK;
-        Close();
-    }
-
-
-    /// <summary>
-    /// Closes the form and returns <see cref="DialogExitCode.Cancel"/> code.
-    /// </summary>
-    protected virtual void OnButton2Clicked(DialogButtonClickedEventArgs e)
-    {
-        Button2Clicked?.Invoke(this, e);
-
-        if (!e.CanProceed) return;
-        DialogResult = DialogExitCode.Cancel;
-        Close();
-    }
-
-
-    /// <summary>
-    /// Sets <see cref="DialogResult"/> to <see cref="DialogExitCode.None"/>
-    /// and does nothing.
-    /// </summary>
-    protected virtual void OnButton3Clicked(DialogButtonClickedEventArgs e)
-    {
-        Button3Clicked?.Invoke(this, e);
-
-        if (!e.CanProceed) return;
-        DialogResult = DialogExitCode.None;
-    }
-
-
-    private void CloseByEscKey_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
-    {
-        e.Handled = true;
-        OnAborted();
-    }
-
-
-    private void SubmitByEnterKey_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
-    {
-        e.Handled = true;
-
-        OnButton1Clicked(new DialogButtonClickedEventArgs(PART_Button1, DialogButton.Button1));
-    }
-
-
     // change the focused button using arrow keys
     private void FooterButtonsPanel_KeyDown(object sender, KeyRoutedEventArgs e)
     {
@@ -457,22 +508,30 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
     private void PART_Dialog_Button1_Click(object sender, RoutedEventArgs e)
     {
-        OnButton1Clicked(new DialogButtonClickedEventArgs(PART_Button1, DialogButton.Button1));
+        OnDialogSubmitted(new DialogEventArgs(DialogAction.Submit));
     }
 
 
     private void PART_Dialog_Button2_Click(object sender, RoutedEventArgs e)
     {
-        OnButton2Clicked(new DialogButtonClickedEventArgs(PART_Button2, DialogButton.Button2));
+        OnDialogCancelled(new DialogEventArgs(DialogAction.Cancel));
     }
 
 
     private void PART_Dialog_Button3_Click(object sender, RoutedEventArgs e)
     {
-        OnButton3Clicked(new DialogButtonClickedEventArgs(PART_Button3, DialogButton.Button3));
+        OnDialogApplied(new DialogEventArgs(DialogAction.Apply));
     }
 
+    #endregion // Window Events
 
+
+
+    #region Private methods
+
+    /// <summary>
+    /// Moves the dialog to center its parent.
+    /// </summary>
     private void MoveCenterParent(int clientWidth, int clientHeight, bool limitWithinWorkarea)
     {
         RectInt32? workarea = null;
@@ -600,6 +659,8 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
             PART_Button3.Focus(FocusState.Keyboard);
         }
     }
+
+    #endregion // Private methods
 
 
 

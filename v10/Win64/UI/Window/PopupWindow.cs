@@ -36,12 +36,12 @@ public partial class PopupWindow : DialogWindow
     }
 
 
-    protected override void OnButton1Clicked(DialogButtonClickedEventArgs e)
+    protected override void OnDialogSubmitted(DialogEventArgs e)
     {
         // don't proceed if value is invalid
         if (!_contentEl.Validate()) return;
 
-        base.OnButton1Clicked(e);
+        base.OnDialogSubmitted(e);
     }
 
 
