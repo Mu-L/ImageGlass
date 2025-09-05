@@ -1,5 +1,21 @@
-﻿
+﻿/*
+ImageGlass Project - Image viewer for Windows
+Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
 
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 using Microsoft.UI.Xaml;
 using System;
 using Windows.Foundation;
@@ -51,6 +67,25 @@ public static class Windows_Foundation_Rect_Exts
         var h = double.IsFinite(rect.Height) ? rect.Height : 0;
 
         return new Rect(rect.X, rect.Y, w, h);
+    }
+
+
+    /// <summary>
+    /// Determines if the this rectangle contains the given rectangle.
+    /// </summary>
+    public static bool Contains(this Rect rect, Rect rect2)
+    {
+        if (rect.Width < 0f || rect2.Width < 0f) return false;
+
+        if (rect2.X >= rect.X
+            && rect2.Y >= rect.Y
+            && rect2.Right <= rect.Right
+            && rect2.Bottom <= rect.Bottom)
+        {
+            return true;
+        }
+
+        return false;
     }
 
 
@@ -124,7 +159,7 @@ public static class Windows_Foundation_Rect_Exts
 
 
     /// <summary>
-    /// Converts a rectangle object into a <see cref="Vortice.RawRectF"/> object.
+    /// Converts the given rectangle to <see cref="Vortice.RawRectF"/>.
     /// </summary>
     public static Vortice.RawRectF ToRawRectF(this Rect rect)
     {
@@ -133,6 +168,21 @@ public static class Windows_Foundation_Rect_Exts
             (float)rect.Y,
             (float)(rect.X + rect.Width),
             (float)(rect.Y + rect.Height));
+    }
+
+
+    /// <summary>
+    /// Converts the given rectangle to <see cref="Windows.Graphics.RectInt32"/>.
+    /// </summary>
+    public static Windows.Graphics.RectInt32 ToRectInt32(this Rect rect)
+    {
+        var wgRect = new Windows.Graphics.RectInt32(
+            (int)rect.X,
+            (int)rect.Y,
+            (int)rect.Width,
+            (int)rect.Height);
+
+        return wgRect;
     }
 
 }
