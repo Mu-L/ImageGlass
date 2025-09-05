@@ -28,9 +28,7 @@
 
 
             <Grid
-                Width="80"
-                Height="80"
-                Margin="0,8,16,0"
+                Margin="0,8,24,0"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
                 Visibility="{x:Bind VM.IsThumbnailSectionVisible, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -39,8 +37,8 @@
                 <Border BorderBrush="Red" BorderThickness="0">
                     <Viewbox
                         x:Name="PART_ThumbnailViewbox"
-                        Width="80"
-                        Height="80"
+                        Width="{x:Bind THUMBNAIL_SIZE}"
+                        Height="{x:Bind THUMBNAIL_SIZE}"
                         Stretch="Uniform"
                         Visibility="{x:Bind VM.Thumbnail, Converter={StaticResource NullableToVisibilityConverter}}">
                         <Image
@@ -69,7 +67,7 @@
                 <!--  Heading  -->
                 <TextBlock
                     x:Name="PART_Heading"
-                    Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
+                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                     IsTextSelectionEnabled="True"
                     Style="{StaticResource SubtitleTextBlockStyle}"
                     Text="{x:Bind VM.Heading}"

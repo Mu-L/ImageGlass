@@ -20,6 +20,7 @@ using ImageGlass.Common;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
@@ -91,6 +92,8 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
     #endregion // INotifyPropertyChanged Implementation
 
 
+    private readonly double THUMBNAIL_SIZE = 80;
+
     #region Public Properties
 
     public PopupWindowViewModel VM
@@ -147,6 +150,23 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
         if (VM.Thumbnail is null) return;
         if (PART_Thumbnail.Source is not null) return;
 
+        // get the max size after DPI
+        var dpiScale = Content.XamlRoot.RasterizationScale;
+        var maxSize = THUMBNAIL_SIZE * dpiScale;
+
+        var imgWidth = VM.Thumbnail.PixelWidth;
+        var imgHeight = VM.Thumbnail.PixelHeight;
+
+        // check if the thumbnail is smaller than max siE
+        if (imgWidth < maxSize || imgHeight < maxSize)
+        {
+            // render as original size
+            PART_Thumbnail.Width = imgWidth / dpiScale;
+            PART_Thumbnail.Height = imgHeight / dpiScale;
+
+            PART_ThumbnailViewbox.Stretch = Stretch.None;
+        }
+
 
         // create software bitmap source
         var sbSrc = new SoftwareBitmapSource();
@@ -154,7 +174,6 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
 
         // set the icon
         PART_Thumbnail.Source = sbSrc;
-
     }
 
 
