@@ -96,15 +96,14 @@
                     Visibility="{x:Bind VM.IsInputVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                 <!--  Details  -->
-                <TextBox
+                <local:IgTextBox
                     x:Name="PART_Details"
-                    Height="100"
+                    MinHeight="50"
+                    MaxHeight="150"
                     AcceptsReturn="True"
-                    FontFamily="Cascadia Mono, Consolas"
-                    FontSize="13"
-                    FontWeight="SemiLight"
-                    Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
-                    IsColorFontEnabled="True"
+                    ContentFontFamily="Cascadia Mono, Consolas"
+                    ContentFontSize="12"
+                    ContentFontWeight="SemiLight"
                     IsReadOnly="True"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                     ScrollViewer.VerticalScrollMode="Enabled"

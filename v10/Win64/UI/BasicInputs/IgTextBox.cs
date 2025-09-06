@@ -17,9 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,6 +30,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Windows.Foundation;
 using Windows.System;
+using Windows.UI.Text;
 
 namespace ImageGlass.Win64.UI;
 
@@ -113,9 +116,66 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
 
     public event TypedEventHandler<IgTextBox, ValidatedEventArgs>? Validated;
     private readonly IgTextBox_Description _descriptionEl = new();
+    private ContentPresenter? _headerEl;
+    private ScrollViewer? _contentEl;
 
 
     #region Public Properties
+
+    /// <summary>
+    /// Gets, sets the font family of the content element.
+    /// </summary>
+    public FontFamily ContentFontFamily
+    {
+        get => field ?? FontFamily;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+
+                _contentEl?.FontFamily = value;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Gets, sets the font size of the content element.
+    /// </summary>
+    public double ContentFontSize
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+
+                _contentEl?.FontSize = value;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Gets, sets the font size of the content element.
+    /// </summary>
+    public FontWeight ContentFontWeight
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+
+                _contentEl?.FontWeight = value;
+            }
+        }
+    }
+
 
     /// <summary>
     /// Gets, sets the message.
@@ -207,13 +267,12 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
     public IgTextBox()
     {
         Description = _descriptionEl;
-        Grid.SetColumnSpan((FrameworkElement)Description, 2);
-
         IsColorFontEnabled = true;
         CornerRadius = (CornerRadius)Application.Current.Resources["ControlCornerRadius"];
 
         Unloaded += IgTextBox_Unloaded;
         TextChanged += IgTextBox_TextChanged;
+        AP.ThemeChanged += AP_ThemeChanged;
     }
 
 
@@ -224,6 +283,21 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
     {
         base.OnApplyTemplate();
 
+        // get header element
+        if (GetTemplateChild("HeaderContentPresenter") is ContentPresenter header)
+        {
+            _headerEl = header;
+        }
+
+        // get content element
+        if (GetTemplateChild("ContentElement") is ScrollViewer contentEl)
+        {
+            _contentEl = contentEl;
+            _contentEl.FontFamily = ContentFontFamily;
+            _contentEl.FontSize = ContentFontSize;
+            _contentEl.FontWeight = ContentFontWeight;
+        }
+
         // remove delete button
         if (GetTemplateChild("DeleteButton") is Button btnDelete)
         {
@@ -232,6 +306,9 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
                 btnDeleteParent.Children.Remove(btnDelete);
             }
         }
+
+        // update theme
+        UpdateForeground();
     }
 
 
@@ -239,6 +316,13 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
     {
         Unloaded -= IgTextBox_Unloaded;
         TextChanged -= IgTextBox_TextChanged;
+        AP.ThemeChanged -= AP_ThemeChanged;
+    }
+
+
+    private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
+    {
+        UpdateForeground();
     }
 
 
@@ -277,6 +361,22 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
 
 
     #region Public Methods
+
+
+    /// <summary>
+    /// Updates the foreground according to theme.
+    /// </summary>
+    private void UpdateForeground()
+    {
+        Foreground = AP.Config.Theme.ComputedColors.TextColor
+            .ToBrush();
+
+        if (_headerEl is not null)
+        {
+            _headerEl.Foreground = Foreground;
+        }
+    }
+
 
     /// <summary>
     /// Validates the input and shows error.

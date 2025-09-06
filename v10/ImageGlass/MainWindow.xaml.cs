@@ -130,9 +130,7 @@ public sealed partial class MainWindow : Window
         var error = await RunActionAsync(e.VM.OnClick);
         if (error != null)
         {
-            _ = await PopupWindow.ShowErrorAsync(this,
-                e.VM.Text,
-                error.Message, null, error.ToString());
+            _ = await PopupWindow.ShowErrorAsync(this, e.VM.Text, error.Message);
         }
     }
 
