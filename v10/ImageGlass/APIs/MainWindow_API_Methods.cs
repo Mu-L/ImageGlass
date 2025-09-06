@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.Storage.Pickers;
@@ -148,7 +149,47 @@ public partial class MainWindow
     }
 
 
+    /// <summary>
+    /// Toggles the viewer's checkerboard mode.
+    /// </summary>
+    public void IG_ToggleCheckerboard(string? mode = null)
+    {
+        var isValid = Enum.TryParse<CheckerboardMode>(mode, out var wantedMode);
 
+        IG_ToggleCheckerboard(isValid ? wantedMode : null);
+    }
+
+    /// <summary>
+    /// Toggles the viewer's checkerboard mode.
+    /// </summary>
+    public void IG_ToggleCheckerboard(CheckerboardMode? mode = null)
+    {
+        var wantedMode = AP.Config.CheckerboardMode;
+
+        if (mode is not null)
+        {
+            wantedMode = mode.Value;
+        }
+        else
+        {
+            switch (wantedMode)
+            {
+                case CheckerboardMode.None:
+                    wantedMode = CheckerboardMode.Client;
+                    break;
+                case CheckerboardMode.Client:
+                    wantedMode = CheckerboardMode.Image;
+                    break;
+                case CheckerboardMode.Image:
+                    wantedMode = CheckerboardMode.None;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        Viewer.CheckerboardMode = AP.Config.CheckerboardMode = wantedMode;
+    }
 
 
 }

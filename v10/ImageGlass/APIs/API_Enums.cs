@@ -49,6 +49,7 @@ public enum API
     // Menu > Slideshow
 
     // Menu > Layout
+    IG_ToggleCheckerboard,
 
     // Menu > Tools
 

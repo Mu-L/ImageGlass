@@ -157,14 +157,17 @@ public partial class MainWindow
         _apis.Add(nameof(API.IG_OpenPath), IgCommands.Create(IG_OpenPath));
 
 
-        // Naviagtion
+        // Navigation
         _apis.Add(nameof(API.IG_ViewByStep), IgCommands.Create(IG_ViewByStep));
         _apis.Add(nameof(API.IG_ViewByIndex), IgCommands.Create(IG_ViewByIndex));
 
 
+        // Layout
+        _apis.Add(nameof(API.IG_ToggleCheckerboard), IgCommands.Create(IG_ToggleCheckerboard));
+
+
         // Exit
         _apis.Add(nameof(API.IG_Exit), IgCommands.Create(IG_Exit));
-
 
     }
 
