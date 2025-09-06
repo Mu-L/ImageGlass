@@ -147,6 +147,7 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
         InitializeComponent();
 
         AP.ThemeChanged += AP_ThemeChanged;
+        AP.Config.PropertyChanged += Config_PropertyChanged;
         Loaded += IgToolbarItemButton_Loaded;
         Unloaded += IgToolbarItemButton_Unloaded;
     }
@@ -161,6 +162,8 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     private void IgToolbarItemButton_Unloaded(object sender, RoutedEventArgs e)
     {
         AP.ThemeChanged -= AP_ThemeChanged;
+        AP.Config.PropertyChanged -= Config_PropertyChanged;
+        Loaded -= IgToolbarItemButton_Loaded;
         Unloaded -= IgToolbarItemButton_Unloaded;
 
         ClearPropertyChangedEvents();
@@ -170,6 +173,17 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {
         UpdateIcon();
+    }
+
+
+    private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (!VM.IsToggle) return;
+
+        if (VM.ConfigBinding.Equals(e.PropertyName, StringComparison.OrdinalIgnoreCase))
+        {
+            // TODO:
+        }
     }
 
 

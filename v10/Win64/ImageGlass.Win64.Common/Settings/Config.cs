@@ -697,7 +697,6 @@ public partial class Config : IgReactive
             Id = "Btn_Save",
             Text = "Save",
             Image = "Save",
-            IsToggle = true,
             ShowText = true,
         },
         new ToolbarItemModel {

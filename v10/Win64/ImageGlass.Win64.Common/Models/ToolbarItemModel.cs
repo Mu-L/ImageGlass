@@ -125,20 +125,20 @@ public partial class ToolbarItemModel : IgReactive
 
 
     /// <summary>
-    /// Gets, sets the value indicating that the toolbar button can be toggled.
+    /// Gets, sets the config name for toggle binding.
     /// </summary>
-    public bool IsToggle
+    public string ConfigBinding
     {
-        get => _isToggle;
-        set
+        get; set
         {
-            if (_isToggle != value)
+            if (field != value)
             {
-                _isToggle = value;
+                field = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsToggle));
             }
         }
-    }
+    } = string.Empty;
 
 
     /// <summary>
@@ -179,6 +179,13 @@ public partial class ToolbarItemModel : IgReactive
 
 
     #region Non-JSON Properties
+
+    /// <summary>
+    /// Gets the value indicating that the toolbar button can be toggled.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsToggle => !string.IsNullOrWhiteSpace(ConfigBinding);
+
 
     /// <summary>
     /// Gets, sets the check state of toolbar button.
