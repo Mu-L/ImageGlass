@@ -219,17 +219,24 @@ public partial class IgWindowHook : DisposableImpl
     /// </summary>
     public void UpdateWindowColorMode()
     {
-        var root = (FrameworkElement)_window.Content;
+        try
+        {
+            var root = (FrameworkElement)_window.Content;
 
-        if (AP.Config.Theme.Settings.IsDarkMode)
-        {
-            root.RequestedTheme = ElementTheme.Dark;
-            _window.AppWindow.TitleBar.PreferredTheme = TitleBarTheme.Dark;
+            if (AP.Config.Theme.Settings.IsDarkMode)
+            {
+                root.RequestedTheme = ElementTheme.Dark;
+                _window.AppWindow.TitleBar.PreferredTheme = TitleBarTheme.Dark;
+            }
+            else
+            {
+                root.RequestedTheme = ElementTheme.Light;
+                _window.AppWindow.TitleBar.PreferredTheme = TitleBarTheme.Light;
+            }
         }
-        else
+        catch (Exception)
         {
-            root.RequestedTheme = ElementTheme.Light;
-            _window.AppWindow.TitleBar.PreferredTheme = TitleBarTheme.Light;
+            // COMException: DCOMPOSITION_ERROR_SURFACE_BEING_RENDERED
         }
     }
 
