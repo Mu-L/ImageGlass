@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using CommunityToolkit.WinUI;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -101,7 +100,7 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
     public PopupWindowViewModel VM => ((PopupWindowViewModel)DataContext) ?? new();
 
 
-    public string RememberOptionText
+    internal string RememberOptionText
     {
         get; set
         {
@@ -112,6 +111,19 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
             }
         }
     } = "Don't show this message again";
+
+
+    internal bool IsInputInvalid
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = false;
 
 
     #endregion // Public Properties
@@ -127,6 +139,9 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
         DataContextChanged += PopupWindow_Content_DataContextChanged;
     }
 
+
+    #region Control Events
+
     private void Root_Unloaded(object sender, RoutedEventArgs e)
     {
         Root.Loaded -= Root_Loaded;
@@ -138,10 +153,6 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
     {
         _ = LoadThumbnailSourceAsync();
         _ = LoadThumbnailIconSourceAsync();
-
-        // set textbox input validation type
-        TextBoxExtensions.SetValidationMode(PART_Input, TextBoxExtensions.ValidationMode.Dynamic);
-        TextBoxExtensions.SetValidationType(PART_Input, TextBoxExtensions.ValidationType.Number);
     }
 
     private void PopupWindow_Content_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs e)
@@ -150,6 +161,10 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
         OnPropertyChanged(nameof(VM));
     }
 
+    #endregion // Control Events
+
+
+    #region Private Methods
 
     /// <summary>
     /// Loads thumbnail.
@@ -207,15 +222,30 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
         PART_ThumbnailIcon.Source = sbSrc;
     }
 
+    #endregion // Private Methods
+
+
+    #region Public Methods
 
     /// <summary>
     /// Validates the form.
     /// </summary>
     public bool Validate()
     {
-        if (!VM.IsInputVisible) return true;
+        var isValid = true;
 
-        return TextBoxExtensions.GetIsValid(PART_Input);
+        // validate the input
+        if (VM.IsInputVisible)
+        {
+            isValid = PART_Input.Validate();
+        }
+
+
+        // animate error icon
+        if (!isValid) PART_Input.AnimateErrorIcon();
+
+        IsInputInvalid = !isValid;
+        return isValid;
     }
 
 
@@ -233,7 +263,11 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
         return value;
     }
 
+    #endregion // Public Methods
+
+
 }
+
 
 
 public class PopupFormValue

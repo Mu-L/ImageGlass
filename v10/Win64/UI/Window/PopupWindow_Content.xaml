@@ -87,10 +87,12 @@
                     Visibility="{x:Bind VM.Description, Converter={StaticResource StringToVisibilityConverter}}" />
 
                 <!--  Input  -->
-                <TextBox
+                <local:IgTextBox
                     x:Name="PART_Input"
-                    IsColorFontEnabled="True"
+                    AcceptValue="UnsignedIntValueOnly"
+                    IsRequired="True"
                     Text="{x:Bind VM.InputValue}"
+                    ValidateByPressingEnter="False"
                     Visibility="{x:Bind VM.IsInputVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                 <!--  Details  -->
