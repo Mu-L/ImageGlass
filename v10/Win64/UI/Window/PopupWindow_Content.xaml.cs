@@ -268,10 +268,3 @@ public sealed partial class PopupWindow_Content : UserControl, INotifyPropertyCh
 
 }
 
-
-
-public class PopupFormValue
-{
-    public string InputValue { get; set; } = "";
-    public bool IsRememberOptionChecked { get; set; } = false;
-}

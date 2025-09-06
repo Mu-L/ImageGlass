@@ -125,9 +125,15 @@ public sealed partial class MainWindow : Window
     }
 
 
-    private void ToolbarMain_ItemClicked(IgToolbarItemButton sender, ToolbarItemClickedEventArgs e)
+    private async void ToolbarMain_ItemClicked(IgToolbarItemButton sender, ToolbarItemClickedEventArgs e)
     {
-        _ = RunActionAsync(e.VM.OnClick);
+        var error = await RunActionAsync(e.VM.OnClick);
+        if (error != null)
+        {
+            _ = await PopupWindow.ShowErrorAsync(this,
+                e.VM.Text,
+                error.Message, null, error.ToString());
+        }
     }
 
 

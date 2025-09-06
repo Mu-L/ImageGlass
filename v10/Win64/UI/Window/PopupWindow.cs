@@ -143,7 +143,8 @@ public partial class PopupWindow : DialogWindow
         StockIconId? thumbnailIcon = null,
         SoftwareBitmap? thumbnail = null,
         InfoBarSeverity noteStyle = InfoBarSeverity.Warning,
-        bool showRememberOption = false)
+        bool showRememberOption = false,
+        string? details = null)
     {
         heading ??= "Warning"; // TODO: lang
 
@@ -158,6 +159,7 @@ public partial class PopupWindow : DialogWindow
         {
             Description = description,
             Heading = heading,
+            Details = details,
             Note = note,
             NoteStyle = noteStyle,
             Thumbnail = thumbnail,
@@ -181,7 +183,7 @@ public partial class PopupWindow : DialogWindow
     {
         heading ??= "Error"; // TODO: lang
 
-        return await ShowWarningAsync(owner, title, description, heading, null, buttons, StockIconId.Error, null, InfoBarSeverity.Error, false);
+        return await ShowWarningAsync(owner, title, description, heading, null, buttons, StockIconId.Error, null, InfoBarSeverity.Error, false, details);
     }
 
 
@@ -215,7 +217,8 @@ public partial class PopupWindow : DialogWindow
         string? inputValue = null,
         PopupButton buttons = PopupButton.OK_Cancel,
         StockIconId? thumbnailIcon = null,
-        SoftwareBitmap? thumbnail = null)
+        SoftwareBitmap? thumbnail = null,
+        TextBoxAcceptValue acceptValue = TextBoxAcceptValue.Any)
     {
         // use stock icon as thumbnail
         if (thumbnail is null)
@@ -232,6 +235,7 @@ public partial class PopupWindow : DialogWindow
             ThumbnailIcon = thumbnailIcon,
             IsInputVisible = true,
             InputValue = inputValue ?? "",
+            AcceptValue = acceptValue,
         };
 
         return await ShowAsync(owner, title, buttons, vm, DialogFocus.Default);

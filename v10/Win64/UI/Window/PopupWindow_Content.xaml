@@ -89,7 +89,7 @@
                 <!--  Input  -->
                 <local:IgTextBox
                     x:Name="PART_Input"
-                    AcceptValue="UnsignedIntValueOnly"
+                    AcceptValue="{x:Bind VM.AcceptValue}"
                     IsRequired="True"
                     Text="{x:Bind VM.InputValue}"
                     ValidateByPressingEnter="False"

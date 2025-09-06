@@ -97,23 +97,22 @@ public partial class MainWindow
     /// <summary>
     /// Executes a single action.
     /// </summary>
-    public async Task RunActionAsync(SingleAction? ac, bool showError = true)
+    public async Task<Exception?> RunActionAsync(SingleAction? ac)
     {
-        if (string.IsNullOrWhiteSpace(ac?.Executable)) return;
+        if (string.IsNullOrWhiteSpace(ac?.Executable)) return null;
 
         // 1. run the current action
         var acResults = await RunApiAsync(ac.Executable, ac.Argument);
 
 
         // 2. exit if the action was cancelled.
-        if (acResults.ExitCode == ActionExitCode.Cancelled) return;
+        if (acResults.ExitCode == ActionExitCode.Cancelled) return null;
 
 
         // 3. run next action on success
         if (acResults.ExitCode == ActionExitCode.Success)
         {
-            await RunActionAsync(ac.NextAction);
-            return;
+            return await RunActionAsync(ac.NextAction);
         }
 
 
@@ -142,10 +141,7 @@ public partial class MainWindow
         }
 
 
-        if (showError)
-        {
-            // TODO: show error message
-        }
+        return error;
     }
 
 
