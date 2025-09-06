@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using System.Globalization;
+
 namespace ImageGlass.Common;
 
 
@@ -36,6 +38,10 @@ public static class Const
     public const string APP_CODE = "kobe";
     public const string MS_APPSTORE_ID = "9N33VZK3C7TH";
     public const int MAX_IMAGE_DIMENSION = 16_384;
+
+    public static readonly string SIGN_POSITIVE = NumberFormatInfo.CurrentInfo.PositiveSign;
+    public static readonly string SIGN_NEGATIVE = NumberFormatInfo.CurrentInfo.NegativeSign;
+    public static readonly string DECIMAL_SEPARATOR = NumberFormatInfo.CurrentInfo.NumberDecimalSeparator;
 
     /// <summary>
     /// A file macro to replace with the current viewing image file path in double quotes.

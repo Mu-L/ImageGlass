@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using Microsoft.UI;
+using Microsoft.UI.Xaml.Media;
 using System;
 using Windows.UI;
 
@@ -31,6 +32,15 @@ public static class Window_UI_Color_Exts
     public static Vortice.Mathematics.Color ToVorticeColor(this Color c)
     {
         return new Vortice.Mathematics.Color(c.R, c.G, c.B, c.A);
+    }
+
+
+    /// <summary>
+    /// Converts to <see cref="SolidColorBrush"/>.
+    /// </summary>
+    public static SolidColorBrush ToBrush(this Color c)
+    {
+        return new SolidColorBrush(c);
     }
 
 

@@ -96,6 +96,22 @@ public partial class IgTheme : IgReactive
     [JsonIgnore]
     public IgThemeComputedColors ComputedColors => _computedColors;
 
+    /// <summary>
+    /// Gets the base color according to <see cref="Settings.IsDarkMode"/>.
+    /// </summary>
+    [JsonIgnore]
+    public Color BaseColor => Settings.IsDarkMode
+        ? Microsoft.UI.Colors.Black
+        : Microsoft.UI.Colors.White;
+
+    /// <summary>
+    /// Gets the inverted base color according to <see cref="Settings.IsDarkMode"/>.
+    /// </summary>
+    [JsonIgnore]
+    public Color InvertedBaseColor => Settings.IsDarkMode
+        ? Microsoft.UI.Colors.White
+        : Microsoft.UI.Colors.Black;
+
     #endregion // Instance Properties
 
 

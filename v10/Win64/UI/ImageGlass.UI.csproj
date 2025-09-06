@@ -13,6 +13,7 @@
     <Platforms>x64;ARM64</Platforms>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="BasicInputs\IgTextBox_Description.xaml" />
     <None Remove="Titlebar\TitlebarControl.xaml" />
     <None Remove="Toolbar\IgToolbarItemButton.xaml" />
     <None Remove="Toolbar\IgToolbarItemSeparator.xaml" />
@@ -26,6 +27,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Common\ImageGlass.Common\ImageGlass.Common.csproj" />
     <ProjectReference Include="..\..\Win64\ImageGlass.Win64.Common\ImageGlass.Win64.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="BasicInputs\IgTextBox_Description.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Window\PopupWindow_Content.xaml">
