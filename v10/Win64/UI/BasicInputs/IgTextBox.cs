@@ -220,6 +220,21 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
 
     #region Control Events
 
+    protected override void OnApplyTemplate()
+    {
+        base.OnApplyTemplate();
+
+        // remove delete button
+        if (GetTemplateChild("DeleteButton") is Button btnDelete)
+        {
+            if (btnDelete.Parent is Grid btnDeleteParent)
+            {
+                btnDeleteParent.Children.Remove(btnDelete);
+            }
+        }
+    }
+
+
     private void IgTextBox_Unloaded(object sender, RoutedEventArgs e)
     {
         Unloaded -= IgTextBox_Unloaded;

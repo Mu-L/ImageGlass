@@ -48,7 +48,7 @@
             IsTextSelectionEnabled="True"
             Text="{x:Bind Message}"
             TextTrimming="WordEllipsis"
-            TextWrapping="NoWrap"
+            TextWrapping="WrapWholeWords"
             Visibility="{x:Bind Message, Converter={StaticResource StringToVisibilityConverter}}" />
 
     </Grid>
