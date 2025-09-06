@@ -45,4 +45,21 @@ public static class WindowApi
         return dpiScale;
     }
 
+
+    /// <summary>
+    /// Loads window in the background but don't visually show it.
+    /// </summary>
+    public static void ShowWindowHidden(nint windowHandle)
+    {
+        _ = PInvoke.SetWindowPos(new HWND(windowHandle), new HWND(),
+            0, 0, 0, 0,
+            SET_WINDOW_POS_FLAGS.SWP_NOMOVE
+            | SET_WINDOW_POS_FLAGS.SWP_NOSIZE
+            | SET_WINDOW_POS_FLAGS.SWP_NOZORDER
+            | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE
+            | SET_WINDOW_POS_FLAGS.SWP_NOSENDCHANGING
+            | SET_WINDOW_POS_FLAGS.SWP_HIDEWINDOW);
+    }
+
+
 }

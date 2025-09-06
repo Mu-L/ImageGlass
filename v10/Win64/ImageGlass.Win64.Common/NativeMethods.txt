@@ -35,3 +35,4 @@ FillRect
 SetWindowLongPtr
 SetWindowLong
 GetDpiForWindow
+SetWindowPos

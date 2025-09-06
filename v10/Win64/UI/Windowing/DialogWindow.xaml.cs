@@ -103,6 +103,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     protected Window? _owner = null;
     protected readonly int MAX_WIDTH = 600;
     protected TaskCompletionSource<DialogExitCode> _resultCompletionSource = new();
+    protected TaskCompletionSource<bool> _resizeCompletionSource = new();
     protected readonly KeyboardAccelerator _closeByEscKey = new KeyboardAccelerator()
     {
         Key = VirtualKey.Escape,
@@ -308,7 +309,6 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         _winHook.PropertyChanged += WinHook_PropertyChanged;
         Closed += DialogWindow_Closed;
         Root.Loaded += Root_Loaded;
-        Root.SizeChanged += Root_SizeChanged;
         AP.ThemeChanged += AP_ThemeChanged;
 
         // hotkey: ESC to close
@@ -454,6 +454,9 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
         // set dialog position to center the owner
         MoveCenterParent(clientWidth, clientHeight, true);
+
+        // done resizing
+        _resizeCompletionSource.TrySetResult(true);
     }
 
 
@@ -684,8 +687,11 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
         presenter.SetBorderAndTitleBar(true, false);
         AppWindow.SetPresenter(presenter);
 
-        // set initial size
-        MoveCenterParent(maxWidth, maxWidth, false);
+        // load the window in background
+        WindowApi.ShowWindowHidden(_winHook.WindowHandle);
+
+        // wait for the window size updated
+        await _resizeCompletionSource.Task;
 
         // show dialog
         AppWindow.Show();
