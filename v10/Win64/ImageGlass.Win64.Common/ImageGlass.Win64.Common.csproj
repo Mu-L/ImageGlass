@@ -49,10 +49,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Common\ImageGlass.Common\ImageGlass.Common.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Page Update="Popup\Popup.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
   
 </Project>

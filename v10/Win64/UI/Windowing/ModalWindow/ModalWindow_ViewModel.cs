@@ -24,14 +24,7 @@ using Windows.Graphics.Imaging;
 namespace ImageGlass.Win64.UI;
 
 
-public class PopupFormValue
-{
-    public string InputValue { get; set; } = "";
-    public bool IsRememberOptionChecked { get; set; } = false;
-}
-
-
-public partial class PopupWindowViewModel : DisposableImpl
+public partial class ModalWindowViewModel : DisposableImpl
 {
     public string? Heading
     {
@@ -181,4 +174,5 @@ public partial class PopupWindowViewModel : DisposableImpl
     }
 
 }
+
 

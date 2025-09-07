@@ -16,61 +16,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using System;
-
 namespace ImageGlass.Win64.UI;
 
 
-public enum DialogExitCode
-{
-    /// <summary>
-    /// Nothing is returned from the dialog box. This means that the modal dialog continues running.
-    /// </summary>
-    None = 0,
-    /// <summary>
-    /// The dialog box return value is OK (usually sent from a button labeled OK).
-    /// </summary>
-    OK = 1,
-    /// <summary>
-    /// The dialog box return value is Cancel (usually sent from a button labeled Cancel).
-    /// </summary>
-    Cancel = 2,
-    /// <summary>
-    /// The dialog box return value is Abort (usually sent from a button labeled Abort).
-    /// </summary>
-    Abort = 3,
-}
-
-
-public enum DialogButton
-{
-    Button1,
-    Button2,
-    Button3,
-}
-
-
-public enum DialogAction
-{
-    Submit,
-    Cancel,
-    Apply,
-}
-
-
-public enum DialogFocus
-{
-    Default,
-    Button1,
-    Button2,
-    Button3,
-}
-
-
 /// <summary>
-/// The built-in buttons for <see cref="PopupWindow"/>.
+/// The built-in buttons for <see cref="ModalWindow"/>.
 /// </summary>
-public enum PopupButton
+public enum ModalWindowButton
 {
     OK,
     Close,
@@ -83,9 +35,19 @@ public enum PopupButton
 
 
 /// <summary>
+/// Stores modal window data.
+/// </summary>
+public class ModalWindowData
+{
+    public string InputValue { get; set; } = "";
+    public bool IsRememberOptionChecked { get; set; } = false;
+}
+
+
+/// <summary>
 /// Specifies identifiers to indicate the return data of a dialog.
 /// </summary>
-public class PopupResult
+public class ModalWindowResult
 {
     /// <summary>
     /// Gets the exit result of the dialog.
@@ -103,9 +65,3 @@ public class PopupResult
     public bool IsRememberOptionChecked { get; internal set; } = false;
 }
 
-
-public class DialogEventArgs(DialogAction actionType) : EventArgs
-{
-    public DialogAction ActionType => actionType;
-    public bool CanProceed { get; set; } = true;
-}

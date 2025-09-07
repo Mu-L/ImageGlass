@@ -17,7 +17,6 @@
     <None Remove="Titlebar\TitlebarControl.xaml" />
     <None Remove="Toolbar\IgToolbarItemButton.xaml" />
     <None Remove="Toolbar\IgToolbarItemSeparator.xaml" />
-    <None Remove="Windowing\PopupWindow_Content.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250402" />
@@ -30,11 +29,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="BasicInputs\IgTextBox_Description.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Window\PopupWindow_Content.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -62,6 +56,9 @@
     <Page Update="Titlebar\TitlebarControl.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Windowing\DialogWindow\" />
   </ItemGroup>
   
 </Project>

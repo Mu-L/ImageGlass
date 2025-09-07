@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 namespace ImageGlass.Win64.UI;
 
 
-public sealed partial class PopupWindow_Content : IgControl
+internal sealed partial class ModalWindow_Content : IgControl
 {
     private readonly double THUMBNAIL_SIZE = 80;
 
@@ -36,7 +36,7 @@ public sealed partial class PopupWindow_Content : IgControl
     /// <summary>
     /// Gets view model from data context.
     /// </summary>
-    public PopupWindowViewModel VM => ((PopupWindowViewModel)DataContext) ?? new();
+    public ModalWindowViewModel VM => ((ModalWindowViewModel)DataContext) ?? new();
 
 
     internal string RememberOptionText
@@ -69,7 +69,7 @@ public sealed partial class PopupWindow_Content : IgControl
 
 
 
-    public PopupWindow_Content()
+    public ModalWindow_Content()
     {
         InitializeComponent();
     }
@@ -184,9 +184,9 @@ public sealed partial class PopupWindow_Content : IgControl
     /// <summary>
     /// Gets form value.
     /// </summary>
-    public PopupFormValue GetFormValue()
+    public ModalWindowData GetFormValue()
     {
-        var value = new PopupFormValue()
+        var value = new ModalWindowData()
         {
             InputValue = PART_Input.Text,
             IsRememberOptionChecked = PART_Checkbox.IsChecked ?? false,

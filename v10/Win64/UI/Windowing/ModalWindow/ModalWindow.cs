@@ -25,12 +25,12 @@ using Windows.Graphics.Imaging;
 
 namespace ImageGlass.Win64.UI;
 
-public partial class PopupWindow : DialogWindow
+public partial class ModalWindow : DialogWindow
 {
-    private readonly PopupWindow_Content _contentEl = new();
+    private readonly ModalWindow_Content _contentEl = new();
 
 
-    public PopupWindow()
+    public ModalWindow()
     {
         DialogContent = _contentEl;
     }
@@ -48,13 +48,13 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog.
     /// </summary>
-    public static async Task<PopupResult> ShowAsync(Window? owner,
+    public static async Task<ModalWindowResult> ShowAsync(Window? owner,
         string? title,
-        PopupButton buttons,
-        PopupWindowViewModel vm,
+        ModalWindowButton buttons,
+        ModalWindowViewModel vm,
         DialogFocus defaultFocus = DialogFocus.Button1)
     {
-        var popup = new PopupWindow()
+        var modal = new ModalWindow()
         {
             TitlebarText = title,
             DefaultFocus = defaultFocus,
@@ -64,51 +64,51 @@ public partial class PopupWindow : DialogWindow
         // TODO: lang
         switch (buttons)
         {
-            case PopupButton.OK:
-                popup.Button1Text = "OK";
-                popup.IsButton1Visible = true;
-                popup.IsButton2Visible = popup.IsButton3Visible = false;
+            case ModalWindowButton.OK:
+                modal.Button1Text = "OK";
+                modal.IsButton1Visible = true;
+                modal.IsButton2Visible = modal.IsButton3Visible = false;
                 break;
 
-            case PopupButton.Close:
-                popup.Button1Text = "Close";
-                popup.IsButton1Visible = true;
-                popup.IsButton2Visible = popup.IsButton3Visible = false;
+            case ModalWindowButton.Close:
+                modal.Button1Text = "Close";
+                modal.IsButton1Visible = true;
+                modal.IsButton2Visible = modal.IsButton3Visible = false;
                 break;
 
-            case PopupButton.Yes_No:
-                popup.Button1Text = "Yes";
-                popup.Button2Text = "No";
-                popup.IsButton1Visible = popup.IsButton2Visible = true;
-                popup.IsButton3Visible = false;
+            case ModalWindowButton.Yes_No:
+                modal.Button1Text = "Yes";
+                modal.Button2Text = "No";
+                modal.IsButton1Visible = modal.IsButton2Visible = true;
+                modal.IsButton3Visible = false;
                 break;
 
-            case PopupButton.OK_Cancel:
-                popup.Button1Text = "OK";
-                popup.Button2Text = "Cancel";
-                popup.IsButton1Visible = popup.IsButton2Visible = true;
-                popup.IsButton3Visible = false;
+            case ModalWindowButton.OK_Cancel:
+                modal.Button1Text = "OK";
+                modal.Button2Text = "Cancel";
+                modal.IsButton1Visible = modal.IsButton2Visible = true;
+                modal.IsButton3Visible = false;
                 break;
 
-            case PopupButton.OK_Close:
-                popup.Button1Text = "OK";
-                popup.Button2Text = "Close";
-                popup.IsButton1Visible = popup.IsButton2Visible = true;
-                popup.IsButton3Visible = false;
+            case ModalWindowButton.OK_Close:
+                modal.Button1Text = "OK";
+                modal.Button2Text = "Close";
+                modal.IsButton1Visible = modal.IsButton2Visible = true;
+                modal.IsButton3Visible = false;
                 break;
 
-            case PopupButton.LearnMore_Close:
-                popup.Button1Text = "Learn more";
-                popup.Button2Text = "Close";
-                popup.IsButton1Visible = popup.IsButton2Visible = true;
-                popup.IsButton3Visible = false;
+            case ModalWindowButton.LearnMore_Close:
+                modal.Button1Text = "Learn more";
+                modal.Button2Text = "Close";
+                modal.IsButton1Visible = modal.IsButton2Visible = true;
+                modal.IsButton3Visible = false;
                 break;
 
-            case PopupButton.Continue_Quit:
-                popup.Button1Text = "Continue";
-                popup.Button2Text = "Quit";
-                popup.IsButton1Visible = popup.IsButton2Visible = true;
-                popup.IsButton3Visible = false;
+            case ModalWindowButton.Continue_Quit:
+                modal.Button1Text = "Continue";
+                modal.Button2Text = "Quit";
+                modal.IsButton1Visible = modal.IsButton2Visible = true;
+                modal.IsButton3Visible = false;
                 break;
 
             default:
@@ -116,11 +116,11 @@ public partial class PopupWindow : DialogWindow
         }
 
 
-        var exitCode = await popup.ShowAsync(owner);
+        var exitCode = await modal.ShowAsync(owner);
 
         // get dialog result
-        var formValue = popup._contentEl.GetFormValue();
-        var result = new PopupResult()
+        var formValue = modal._contentEl.GetFormValue();
+        var result = new ModalWindowResult()
         {
             ExitCode = exitCode,
             InputValue = formValue.InputValue,
@@ -134,12 +134,12 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for warning.
     /// </summary>
-    public static async Task<PopupResult> ShowWarningAsync(Window? owner,
+    public static async Task<ModalWindowResult> ShowWarningAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
         string? note = null,
-        PopupButton buttons = PopupButton.OK,
+        ModalWindowButton buttons = ModalWindowButton.OK,
         StockIconId? thumbnailIcon = null,
         SoftwareBitmap? thumbnail = null,
         InfoBarSeverity noteStyle = InfoBarSeverity.Warning,
@@ -155,7 +155,7 @@ public partial class PopupWindow : DialogWindow
             thumbnailIcon = null;
         }
 
-        using var vm = new PopupWindowViewModel()
+        using var vm = new ModalWindowViewModel()
         {
             Description = description,
             Heading = heading,
@@ -174,12 +174,12 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for error.
     /// </summary>
-    public static async Task<PopupResult> ShowErrorAsync(Window? owner,
+    public static async Task<ModalWindowResult> ShowErrorAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
         string? details = null,
-        PopupButton buttons = PopupButton.OK)
+        ModalWindowButton buttons = ModalWindowButton.OK)
     {
         heading ??= "Error"; // TODO: lang
 
@@ -190,12 +190,12 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for information.
     /// </summary>
-    public static async Task<PopupResult> ShowInfoAsync(Window? owner,
+    public static async Task<ModalWindowResult> ShowInfoAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
         string? note = null,
-        PopupButton buttons = PopupButton.OK,
+        ModalWindowButton buttons = ModalWindowButton.OK,
         StockIconId? thumbnailIcon = null,
         SoftwareBitmap? thumbnail = null,
         InfoBarSeverity noteStyle = InfoBarSeverity.Informational)
@@ -210,12 +210,12 @@ public partial class PopupWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for input.
     /// </summary>
-    public static async Task<PopupResult> ShowInputAsync(Window? owner,
+    public static async Task<ModalWindowResult> ShowInputAsync(Window? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
         string? inputValue = null,
-        PopupButton buttons = PopupButton.OK_Cancel,
+        ModalWindowButton buttons = ModalWindowButton.OK_Cancel,
         StockIconId? thumbnailIcon = null,
         SoftwareBitmap? thumbnail = null,
         TextBoxAcceptValue acceptValue = TextBoxAcceptValue.Any)
@@ -227,7 +227,7 @@ public partial class PopupWindow : DialogWindow
             thumbnailIcon = null;
         }
 
-        using var vm = new PopupWindowViewModel()
+        using var vm = new ModalWindowViewModel()
         {
             Description = description,
             Heading = heading,
