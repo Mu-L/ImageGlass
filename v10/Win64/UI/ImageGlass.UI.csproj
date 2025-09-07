@@ -13,7 +13,7 @@
     <Platforms>x64;ARM64</Platforms>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="BasicInputs\IgTextBox_Description.xaml" />
+    <None Remove="BaseControls\IgTextBox_Description.xaml" />
     <None Remove="Titlebar\TitlebarControl.xaml" />
     <None Remove="Toolbar\IgToolbarItemButton.xaml" />
     <None Remove="Toolbar\IgToolbarItemSeparator.xaml" />

@@ -16,16 +16,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
+using ImageGlass.Win64.Common;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace ImageGlass.Common;
+namespace ImageGlass.Win64.UI;
 
 
 /// <summary>
-/// Provides a base implementation of <see cref="INotifyPropertyChanged"/> interface.
+/// Provides a base content control with theme and reactivity support.
 /// </summary>
-public class IgReactive : INotifyPropertyChanged
+public partial class IgControl : ContentControl, INotifyPropertyChanged
 {
     #region INotifyPropertyChanged Implementation
 
@@ -122,27 +128,93 @@ public class IgReactive : INotifyPropertyChanged
 
     #endregion // INotifyPropertyChanged Implementation
 
-}
 
-
-public class ReactiveEventArgs : PropertyChangedEventArgs
-{
-    /// <summary>
-    /// Checks if both <see cref="Value"/>
-    /// and <see cref="OldValue"/> are not <c>null</c>.
-    /// </summary>
-    public bool HasValues => Value is not null && OldValue is not null;
-
-    public object? Value { get; set; }
-    public object? OldValue { get; set; }
-
-
-    public ReactiveEventArgs(
-        string? propertyName,
-        object? value = null,
-        object? oldValue = null) : base(propertyName)
+    public IgControl()
     {
-        Value = value;
-        OldValue = oldValue;
+        DefaultStyleKey = typeof(IgControl);
+
+        AP.ThemeChanged += AP_ThemeChanged;
+        Loaded += IgControl_Loaded;
+        Unloaded += IgControl_Unloaded;
+        SizeChanged += IgControl_SizeChanged;
+        DataContextChanged += IgControl_DataContextChanged;
     }
+
+
+    #region Control Events
+
+    private void IgControl_Loaded(object sender, RoutedEventArgs e)
+    {
+        OnIgLoaded((FrameworkElement)sender);
+    }
+
+
+    private void IgControl_Unloaded(object sender, RoutedEventArgs e)
+    {
+        AP.ThemeChanged -= AP_ThemeChanged;
+        Loaded -= IgControl_Loaded;
+        Unloaded -= IgControl_Unloaded;
+        SizeChanged -= IgControl_SizeChanged;
+        DataContextChanged -= IgControl_DataContextChanged;
+
+        OnIgUnloaded((FrameworkElement)sender);
+    }
+
+
+    private void IgControl_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        OnIgSizeChanged((FrameworkElement)sender, e);
+    }
+
+
+    private void IgControl_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs e)
+    {
+        OnIgDataContextChanged(sender, e);
+    }
+
+
+    private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
+    {
+        OnIgThemeChanged(e);
+    }
+
+    #endregion // Control Events
+
+
+    #region Virtual Methods
+
+    /// <summary>
+    /// Occurs when the control is loaded.
+    /// </summary>
+    protected virtual void OnIgLoaded(FrameworkElement fe) { }
+
+
+    /// <summary>
+    /// Occurs when the control is unloaded.
+    /// </summary>
+    protected virtual void OnIgUnloaded(FrameworkElement fe) { }
+
+
+    /// <summary>
+    /// Occurs when the control size is changed.
+    /// </summary>
+    protected virtual void OnIgSizeChanged(FrameworkElement fe, SizeChangedEventArgs e) { }
+
+
+    /// <summary>
+    /// Occurs when the control data context is changed.
+    /// </summary>
+    protected virtual void OnIgDataContextChanged(FrameworkElement fe, DataContextChangedEventArgs e) { }
+
+
+    /// <summary>
+    /// Occurs when the app theme is changed.
+    /// </summary>
+    protected virtual void OnIgThemeChanged(ThemePackChangedEventArgs e) { }
+
+    #endregion // Virtual Methods
+
+
+
 }
+

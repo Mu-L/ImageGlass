@@ -6,4 +6,16 @@
 
     <!--    -->
 
+
+    <!--  IG: Base Control  -->
+    <Style TargetType="local:IgControl">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:IgControl">
+                    <ContentPresenter Content="{TemplateBinding Content}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
