@@ -34,6 +34,8 @@ public class IgReactive : INotifyPropertyChanged
     private event PropertyChangedEventHandler? _propertyChanged;
 
 
+    #region IgReactive > Properties & Events
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
@@ -59,11 +61,35 @@ public class IgReactive : INotifyPropertyChanged
 
 
     /// <summary>
-    /// Emits event <see cref="PropertyChanged"/>.
+    /// Suspends the <see cref="PropertyChanged"/> event.
     /// </summary>
-    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    public bool SuspendEvent { get; set; } = false;
+
+    #endregion // IgReactive > Properties & Events
+
+
+    #region IgReactive > Methods
+
+    /// <summary>
+    /// Raises event <see cref="PropertyChanged"/>,
+    /// returns <c>False</c> if the event is suspended.
+    /// </summary>
+    public bool OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-        _propertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return OnPropertyChanged(propertyName, null, null);
+    }
+
+
+    /// <summary>
+    /// Raises event <see cref="PropertyChanged"/>,
+    /// returns <c>False</c> if the event is suspended.
+    /// </summary>
+    public bool OnPropertyChanged(object? value, object? oldValue, [CallerMemberName] string? propertyName = null)
+    {
+        if (SuspendEvent) return false;
+
+        _propertyChanged?.Invoke(this, new ReactiveEventArgs(propertyName, value, oldValue));
+        return true;
     }
 
 
@@ -80,6 +106,43 @@ public class IgReactive : INotifyPropertyChanged
         _propertyChangedEvents.Clear();
     }
 
+
+    /// <summary>
+    /// Runs an action without triggering <see cref="PropertyChanged"/> event.
+    /// </summary>
+    public void WithNoReactive(Action fn)
+    {
+        SuspendEvent = true;
+        fn();
+        SuspendEvent = false;
+    }
+
+    #endregion IgReactive > Methods
+
+
     #endregion // INotifyPropertyChanged Implementation
 
+}
+
+
+public class ReactiveEventArgs : PropertyChangedEventArgs
+{
+    /// <summary>
+    /// Checks if both <see cref="Value"/>
+    /// and <see cref="OldValue"/> are not <c>null</c>.
+    /// </summary>
+    public bool HasValues => Value is not null && OldValue is not null;
+
+    public object? Value { get; set; }
+    public object? OldValue { get; set; }
+
+
+    public ReactiveEventArgs(
+        string? propertyName,
+        object? value = null,
+        object? oldValue = null) : base(propertyName)
+    {
+        Value = value;
+        OldValue = oldValue;
+    }
 }

@@ -118,8 +118,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = true;
@@ -143,8 +144,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = true;
@@ -203,8 +205,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = true;
@@ -228,8 +231,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = false;
@@ -243,8 +247,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = true;
@@ -258,8 +263,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = false;
@@ -273,8 +279,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = false;
@@ -343,8 +350,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = false;
@@ -409,8 +417,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = 20f;
@@ -425,8 +434,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = 0f;
@@ -455,8 +465,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = 70;
@@ -502,8 +513,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = Const.TOOLBAR_ICON_HEIGHT;
@@ -554,8 +566,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = "";
@@ -574,8 +587,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = "#00000000";
@@ -594,8 +608,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = Const.DEFAULT_THEME;
@@ -609,8 +624,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = "Kobe-Light";
@@ -630,8 +646,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = [];
@@ -651,8 +668,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = [];
@@ -667,8 +685,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = [".avif", ".heic", ".heif", ".psd", ".jxl"];
@@ -682,8 +701,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } =
@@ -797,8 +817,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = CheckerboardMode.None;
@@ -812,8 +833,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = ImageOrderBy.Name;
@@ -827,8 +849,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = ImageOrderType.Asc;
@@ -842,8 +865,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = ZoomMode.AutoZoom;
@@ -857,8 +881,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = ImageInterpolation.MultiSampleLinear;
@@ -872,8 +897,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = ImageInterpolation.NearestNeighbor;
@@ -892,8 +918,9 @@ public partial class Config : IgReactive
         {
             if (field != value)
             {
+                var oldValue = field;
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged(value, oldValue);
             }
         }
     } = BackdropStyle.Mica;

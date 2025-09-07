@@ -47,9 +47,9 @@ public partial class Photo : PhotoImpl
             if (_galleryThumbnail != value)
             {
                 _galleryThumbnail = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsGalleryThumbnailLoaded));
-                OnPropertyChanged(nameof(IsGalleryThumbnailLoading));
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(IsGalleryThumbnailLoaded));
+                _ = OnPropertyChanged(nameof(IsGalleryThumbnailLoading));
             }
         }
     }

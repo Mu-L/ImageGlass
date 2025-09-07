@@ -23,11 +23,6 @@ namespace ImageGlass.Win64.Common;
 
 public partial class Config
 {
-    private bool _isSystemDarkMode = true;
-    private Color _accentColor = new();
-    private IgTheme _theme = new();
-
-
 
     // Public Reactive properties
     #region Public Reactive properties
@@ -38,19 +33,22 @@ public partial class Config
     [JsonIgnore]
     public bool IsSystemDarkMode
     {
-        get => _isSystemDarkMode;
+        get => field;
         set
         {
-            if (_isSystemDarkMode != value)
+            if (field != value)
             {
-                _isSystemDarkMode = value;
-                OnPropertyChanged();
+                var oldValue = field;
+                field = value;
 
-                // load theme
-                LoadCurrentTheme(_isSystemDarkMode, AccentColor, true, true, false);
+                if (OnPropertyChanged(value, oldValue))
+                {
+                    // load theme
+                    LoadCurrentTheme(field, AccentColor, true, true, false);
+                }
             }
         }
-    }
+    } = true;
 
 
     /// <summary>
@@ -59,15 +57,18 @@ public partial class Config
     [JsonIgnore]
     public Color AccentColor
     {
-        get => _accentColor;
+        get => field;
         set
         {
-            if (_accentColor != value)
+            if (field != value)
             {
-                _accentColor = value;
-                OnPropertyChanged();
+                var oldValue = field;
+                field = value;
 
-                Theme.LoadColors(AccentColor);
+                if (OnPropertyChanged(value, oldValue))
+                {
+                    Theme.LoadColors(AccentColor);
+                }
             }
         }
     }
@@ -79,18 +80,20 @@ public partial class Config
     [JsonIgnore]
     public IgTheme Theme
     {
-        get => _theme;
-        set
+        get; set
         {
-            if (_theme != value)
+            if (field != value)
             {
-                _theme = value;
+                var oldValue = field;
+                field = value;
 
-                OnPropertyChanged();
-                AP.RaiseThemeChangedEvent();
+                if (OnPropertyChanged(value, oldValue))
+                {
+                    AP.RaiseThemeChangedEvent();
+                }
             }
         }
-    }
+    } = new();
 
 
     #endregion // Public Reactive properties

@@ -71,7 +71,7 @@ public partial class IgWindowHook : DisposableImpl
             if (value != _window.Title)
             {
                 _window.Title = value;
-                OnPropertyChanged(nameof(TitlebarText));
+                _ = OnPropertyChanged(nameof(TitlebarText));
             }
         }
     }
@@ -94,8 +94,8 @@ public partial class IgWindowHook : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(TitleBarPadding));
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(TitleBarPadding));
             }
         }
     } = 0;

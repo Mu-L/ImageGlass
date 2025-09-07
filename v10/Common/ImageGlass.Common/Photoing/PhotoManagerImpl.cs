@@ -62,8 +62,8 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
             if (_items != value)
             {
                 _items = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(Count));
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(Count));
             }
         }
     }

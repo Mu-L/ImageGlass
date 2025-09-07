@@ -171,18 +171,21 @@ public partial class Config
     /// Determine which theme should be loaded: <see cref="DarkTheme"/> or <see cref="LightTheme"/>.
     /// </param>
     /// <param name="useFallBackTheme">
-    /// If theme pack is invalid, should load the default theme pack <see cref="Const.DEFAULT_THEME"/>?
+    /// If theme pack is invalid, should load the default theme pack <see cref="Const.DEFAULT_THEME"/>.
     /// </param>
     /// <param name="throwIfThemeInvalid">
-    /// If theme pack is invalid, should throw exception?
+    /// If theme pack is invalid, should throw exception.
     /// </param>
     /// <param name="forceUpdateBackground">Force updating background according to theme value</param>
     /// <exception cref="ArgumentException"></exception>
     public void LoadCurrentTheme(bool darkMode, Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
     {
         // 1. save instance settings
-        _isSystemDarkMode = darkMode;
-        if (accent != null) _accentColor = accent.Value;
+        WithNoReactive(() =>
+        {
+            IsSystemDarkMode = darkMode;
+            if (accent != null) AccentColor = accent.Value;
+        });
 
         // 2. get the theme folder name
         var themeFolderName = darkMode ? DarkTheme : LightTheme;

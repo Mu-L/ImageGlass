@@ -40,7 +40,7 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = null;
@@ -52,7 +52,7 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = null;
@@ -64,7 +64,7 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = null;
@@ -76,7 +76,7 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = null;
@@ -88,7 +88,7 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = InfoBarSeverity.Informational;
@@ -100,7 +100,7 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = null;
@@ -112,8 +112,8 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsThumbnailSectionVisible));
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(IsThumbnailSectionVisible));
             }
         }
     } = null;
@@ -127,7 +127,7 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = false;
@@ -139,7 +139,7 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = false;
@@ -152,7 +152,7 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = "";
@@ -165,7 +165,7 @@ public partial class PopupWindowViewModel : DisposableImpl
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = TextBoxAcceptValue.Any;

@@ -62,8 +62,8 @@ public partial class ToolbarItemModel : IgReactive
             if (_id != value)
             {
                 _id = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsSeparator));
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(IsSeparator));
             }
         }
     }
@@ -82,7 +82,7 @@ public partial class ToolbarItemModel : IgReactive
             if (_image != value)
             {
                 _image = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     }
@@ -99,8 +99,8 @@ public partial class ToolbarItemModel : IgReactive
             if (_text != value)
             {
                 _text = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsTextVisible));
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(IsTextVisible));
             }
         }
     }
@@ -117,8 +117,8 @@ public partial class ToolbarItemModel : IgReactive
             if (_showText != value)
             {
                 _showText = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsTextVisible));
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(IsTextVisible));
             }
         }
     }
@@ -134,8 +134,8 @@ public partial class ToolbarItemModel : IgReactive
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsToggle));
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(IsToggle));
             }
         }
     } = string.Empty;
@@ -152,7 +152,7 @@ public partial class ToolbarItemModel : IgReactive
             if (_alignment != value)
             {
                 _alignment = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     }
@@ -169,7 +169,7 @@ public partial class ToolbarItemModel : IgReactive
             if (_onClick != value)
             {
                 _onClick = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     }
@@ -199,7 +199,7 @@ public partial class ToolbarItemModel : IgReactive
             if (_isChecked != value)
             {
                 _isChecked = value;
-                OnPropertyChanged(nameof(IsChecked));
+                _ = OnPropertyChanged(nameof(IsChecked));
             }
         }
     }
@@ -217,7 +217,7 @@ public partial class ToolbarItemModel : IgReactive
             if (_sourceIndex != value)
             {
                 _sourceIndex = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     }
@@ -235,7 +235,7 @@ public partial class ToolbarItemModel : IgReactive
             if (_isOverflow != value)
             {
                 _isOverflow = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     }
