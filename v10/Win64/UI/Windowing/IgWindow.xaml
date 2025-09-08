@@ -24,6 +24,7 @@
             Padding="{x:Bind _winHook.TitleBarPadding}"
             BackgroundColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarBgColor}"
             Canvas.ZIndex="100"
+            IsTabStop="False"
             Text="{x:Bind _winHook.TitlebarText}"
             TextColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor}" />
 

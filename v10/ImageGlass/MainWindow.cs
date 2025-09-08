@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Catel.Collections;
 using D2Phap;
 using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
@@ -24,66 +23,88 @@ using ImageGlass.Win64.Common;
 using ImageGlass.Win64.Common.FileSystem;
 using ImageGlass.Win64.Common.Photoing;
 using ImageGlass.Win64.UI;
+using ImageGlass.WinNT;
 using Microsoft.UI.Xaml;
 using System;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Graphics;
-
 
 namespace ImageGlass;
 
-/// <summary>
-/// An empty window that can be used on its own or navigated to within a Frame.
-/// </summary>
-public sealed partial class MainWindow : Window
+public partial class MainWindow : IgWindow
 {
-    private readonly IgWindowHook _winHook;
+    private readonly MainWindow_Content _contentEl = new();
     private readonly Progress<FileSearchingEventArgs> _searchProgress;
+
+
+    public ToolbarControl ToolbarMain => _contentEl.ToolbarMain;
+    public GalleryControl Gallery => _contentEl.Gallery;
+    public VirtualViewerControl Viewer => _contentEl.Viewer;
 
 
     public MainWindow()
     {
-        InitializeComponent();
-
         // create APIs
         RegisterImageGlassAPIs();
 
-        _winHook = new(this, WinTitleBar);
+        WindowContent = _contentEl;
         _searchProgress = new(Files_Searched);
 
-        AppWindow.Resize(new SizeInt32(2000, 1500));
+        _contentEl.ToolbarButtonClicked += Toolbar_ButtonClicked;
+        _contentEl.GalleryItemClicked += Gallery_ItemClicked;
+        _contentEl.ViewerDrop += Viewer_Drop;
     }
 
 
-    private void Root_Loaded(object sender, RoutedEventArgs e)
+    protected override void OnIgClosed(WindowEventArgs e)
     {
+        base.OnIgClosed(e);
+
+        Viewer.UnloadPhoto();
+
+        _contentEl.ToolbarButtonClicked -= Toolbar_ButtonClicked;
+        _contentEl.GalleryItemClicked -= Gallery_ItemClicked;
+        _contentEl.ViewerDrop -= Viewer_Drop;
+    }
+
+
+    protected override void OnIgLoaded(FrameworkElement fe)
+    {
+        base.OnIgLoaded(fe);
+
         // load image from command line arguments
         LoadImagesFromCmdArgs();
-
-    }
-
-    private void Window_Closed(object sender, WindowEventArgs e)
-    {
-        Viewer.UnloadPhoto();
-        _winHook.Dispose();
     }
 
 
-    private void Viewer_DragOver(object sender, DragEventArgs e)
+
+
+
+
+
+
+
+
+
+
+    private async void Toolbar_ButtonClicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
     {
-        if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+        var error = await RunActionAsync(e.VM.OnClick);
+        if (error != null)
         {
-            e.AcceptedOperation = DataPackageOperation.None;
-            return;
+            _ = await ModalWindow.ShowErrorAsync(this, e.VM.Text, error.Message);
         }
-
-        e.AcceptedOperation = DataPackageOperation.Link;
-        e.DragUIOverride.Caption = "Open with ImageGlass";
     }
 
 
-    private async void Viewer_Drop(object sender, DragEventArgs e)
+    private void Gallery_ItemClicked(IgGalleryItem sender, EventArgs e)
+    {
+        var photoIndex = AP.Photos.IndexOf(sender.VM.FilePath);
+        IG_ViewByIndex(photoIndex);
+    }
+
+
+    private async void Viewer_Drop(VirtualViewerControl sender, DragEventArgs e)
     {
         if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
 
@@ -125,21 +146,46 @@ public sealed partial class MainWindow : Window
     }
 
 
-    private async void ToolbarMain_ItemClicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
+    private void Files_Searched(FileSearchingEventArgs e)
     {
-        var error = await RunActionAsync(e.VM.OnClick);
-        if (error != null)
+        var isEmptyList = AP.Photos.Count == 0;
+        AP.Photos.Add(e.Results);
+
+        // if we haven't found current index for the init photo yet
+        if (AP.Photos.InitPhoto is not null && AP.Photos.CurrentIndex == -1)
         {
-            _ = await ModalWindow.ShowErrorAsync(this, e.VM.Text, error.Message);
+            // find index of the init photo and select it
+            _ = AP.Photos.Select(AP.Photos.InitPhoto.FilePath);
+
+            // save the init photo to the list
+            if (AP.Photos.CurrentIndex >= 0)
+            {
+                AP.Photos.Items[AP.Photos.CurrentIndex]?.Dispose();
+                AP.Photos.Items[AP.Photos.CurrentIndex] = AP.Photos.InitPhoto;
+                AP.Photos.Items[AP.Photos.CurrentIndex].IsCurrent = true;
+            }
+        }
+        // display the first file in a folder
+        else
+        {
+            AP.Photos.InitPhoto = AP.Photos.Select(0);
+            ViewPhoto(AP.Photos.InitPhoto);
+        }
+
+
+        // Gallery: scroll to the selected item
+        if (isEmptyList)
+        {
+            // make sure gallery is rendered
+            Gallery.UpdateLayout();
+            Gallery.ScrollToItem(AP.Photos.CurrentIndex);
         }
     }
 
 
-    private void Gallery_ItemClicked(IgGalleryItem sender, EventArgs e)
-    {
-        var photoIndex = AP.Photos.IndexOf(sender.VM.FilePath);
-        IG_ViewByIndex(photoIndex);
-    }
+
+
+
 
 
 
@@ -205,44 +251,6 @@ public sealed partial class MainWindow : Window
     }
 
 
-    private void Files_Searched(FileSearchingEventArgs e)
-    {
-        var isEmptyList = AP.Photos.Count == 0;
-        AP.Photos.Add(e.Results);
-
-        // if we haven't found current index for the init photo yet
-        if (AP.Photos.InitPhoto is not null && AP.Photos.CurrentIndex == -1)
-        {
-            // find index of the init photo and select it
-            _ = AP.Photos.Select(AP.Photos.InitPhoto.FilePath);
-
-            // save the init photo to the list
-            if (AP.Photos.CurrentIndex >= 0)
-            {
-                AP.Photos.Items[AP.Photos.CurrentIndex]?.Dispose();
-                AP.Photos.Items[AP.Photos.CurrentIndex] = AP.Photos.InitPhoto;
-                AP.Photos.Items[AP.Photos.CurrentIndex].IsCurrent = true;
-            }
-        }
-        // display the first file in a folder
-        else
-        {
-            AP.Photos.InitPhoto = AP.Photos.Select(0);
-            ViewPhoto(AP.Photos.InitPhoto);
-        }
-
-
-        // Gallery: scroll to the selected item
-        if (isEmptyList)
-        {
-            // make sure gallery is rendered
-            Gallery.UpdateLayout();
-            Gallery.ScrollToItem(AP.Photos.CurrentIndex);
-        }
-    }
-
-
-
     private void ViewPhoto(Photo? photo)
     {
         _winHook.TitlebarText = photo?.FilePath;
@@ -250,6 +258,7 @@ public sealed partial class MainWindow : Window
 
         Gallery.ScrollToItem(AP.Photos.CurrentIndex);
     }
+
 
 
 }

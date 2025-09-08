@@ -1,60 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<Window
-    x:Class="ImageGlass.MainWindow"
+<ui:IgControl
+    x:Class="ImageGlass.MainWindow_Content"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:ImageGlass.Win64.UI"
     xmlns:w64="using:ImageGlass.WinNT"
     xmlns:w64c="using:ImageGlass.Win64.Common"
-    xmlns:w64ui="using:ImageGlass.Win64.UI"
-    Title="{x:Bind _winHook.TitlebarText}"
-    x:DefaultBindMode="OneWay"
-    Closed="Window_Closed"
     mc:Ignorable="d">
 
-    <Grid x:Name="Root" Loaded="Root_Loaded">
+    <Grid TabFocusNavigation="Local">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
 
-        <!--  Title bar  -->
-        <w64ui:TitlebarControl
-            x:Name="WinTitleBar"
-            Grid.Row="0"
-            Padding="{x:Bind _winHook.TitleBarPadding}"
-            BackgroundColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarBgColor}"
-            Canvas.ZIndex="100"
-            Text="{x:Bind _winHook.TitlebarText}"
-            TextColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor}" />
-
-
         <!--  Toolbar  -->
-        <w64ui:ToolbarControl
-            x:Name="ToolbarMain"
-            Grid.Row="1"
+        <ui:ToolbarControl
+            x:Name="PART_ToolbarMain"
+            Grid.Row="0"
             Canvas.ZIndex="90"
-            ItemClicked="ToolbarMain_ItemClicked"
-            ItemsSource="{x:Bind w64c:AP.Config.ToolbarButtons}" />
+            ItemClicked="PART_ToolbarMain_ItemClicked"
+            ItemsSource="{x:Bind w64c:AP.Config.ToolbarButtons}"
+            TabNavigation="Local" />
 
 
         <!--  Viewer  -->
         <w64:VirtualViewerControl
-            x:Name="Viewer"
-            Grid.Row="2"
+            x:Name="PART_Viewer"
+            Grid.Row="1"
             AllowDrop="True"
             BackgroundColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.BgColor}"
             CheckerboardMode="{x:Bind w64c:AP.Config.CheckerboardMode}"
-            DragOver="Viewer_DragOver"
-            Drop="Viewer_Drop"
+            DragOver="PART_Viewer_DragOver"
+            Drop="PART_Viewer_Drop"
             EnableDebug="{x:Bind w64c:AP.Config.EnableDebug}"
-            EnableSelection="False"
             PanSpeed="{x:Bind w64c:AP.Config.PanSpeed}"
             ZoomLevels="{x:Bind w64c:AP.Config.ZoomLevels}"
             ZoomMode="{x:Bind w64c:AP.Config.ZoomMode}"
@@ -62,14 +46,15 @@
 
 
         <!--  Gallery  -->
-        <w64ui:GalleryControl
-            x:Name="Gallery"
-            Grid.Row="3"
+        <ui:GalleryControl
+            x:Name="PART_Gallery"
+            Grid.Row="2"
             Grid.Column="1"
             Canvas.ZIndex="80"
-            ItemClicked="Gallery_ItemClicked"
+            ItemClicked="PART_Gallery_ItemClicked"
             VM="{x:Bind w64c:AP.Photos, Mode=OneWay}" />
 
     </Grid>
 
-</Window>
+
+</ui:IgControl>
