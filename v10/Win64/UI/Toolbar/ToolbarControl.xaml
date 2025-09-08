@@ -78,7 +78,6 @@
         </StackPanel>
 
 
-
         <!--  Right Column  -->
         <StackPanel
             x:Name="PanelRight"
@@ -130,7 +129,6 @@
                     <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:ToolbarControl.ItemSpacing, Mode=OneTime}" />
                 </ItemsRepeater.Layout>
             </ItemsRepeater>
-
 
 
             <!--  Menu button  -->
@@ -250,4 +248,6 @@
         </StackPanel>
 
     </Grid>
+
+
 </local:IgControl>

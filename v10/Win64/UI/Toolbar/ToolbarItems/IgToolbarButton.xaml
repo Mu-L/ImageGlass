@@ -12,12 +12,14 @@
     x:DefaultBindMode="OneWay"
     AutomationProperties.AutomationControlType="Button"
     DataContext="{x:Bind VM, Mode=OneWay}"
+    IsTabStop="False"
     mc:Ignorable="d">
 
     <local:IgButton
         Name="PART_Button"
         Padding="{x:Bind local:IgToolbarButton.ItemPadding}"
         x:DefaultBindMode="OneWay"
+        AutomationProperties.Name="{x:Bind VM.Text}"
         Click="PART_Button_Click"
         Flyout="{x:Bind Flyout}"
         Id="{x:Bind VM.Id}"

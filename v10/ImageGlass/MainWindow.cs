@@ -253,7 +253,7 @@ public partial class MainWindow : IgWindow
 
     private void ViewPhoto(Photo? photo)
     {
-        _winHook.TitlebarText = photo?.FilePath;
+        WindowTitle = photo?.FilePath;
         Viewer.SetPhoto(photo);
 
         Gallery.ScrollToItem(AP.Photos.CurrentIndex);

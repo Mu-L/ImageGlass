@@ -9,6 +9,9 @@
     xmlns:ui="using:ImageGlass.Win64.UI"
     xmlns:w64="using:ImageGlass.WinNT"
     xmlns:w64c="using:ImageGlass.Win64.Common"
+    d:DataContext="{d:DesignInstance Type=local:MainWindow_Content}"
+    x:DefaultBindMode="OneWay"
+    IsTabStop="False"
     mc:Ignorable="d">
 
     <Grid TabFocusNavigation="Local">
@@ -24,9 +27,9 @@
             x:Name="PART_ToolbarMain"
             Grid.Row="0"
             Canvas.ZIndex="90"
+            IsTabStop="False"
             ItemClicked="PART_ToolbarMain_ItemClicked"
-            ItemsSource="{x:Bind w64c:AP.Config.ToolbarButtons}"
-            TabNavigation="Local" />
+            ItemsSource="{x:Bind w64c:AP.Config.ToolbarButtons}" />
 
 
         <!--  Viewer  -->
@@ -39,6 +42,7 @@
             DragOver="PART_Viewer_DragOver"
             Drop="PART_Viewer_Drop"
             EnableDebug="{x:Bind w64c:AP.Config.EnableDebug}"
+            IsTabStop="False"
             PanSpeed="{x:Bind w64c:AP.Config.PanSpeed}"
             ZoomLevels="{x:Bind w64c:AP.Config.ZoomLevels}"
             ZoomMode="{x:Bind w64c:AP.Config.ZoomMode}"
@@ -51,6 +55,7 @@
             Grid.Row="2"
             Grid.Column="1"
             Canvas.ZIndex="80"
+            IsTabStop="False"
             ItemClicked="PART_Gallery_ItemClicked"
             VM="{x:Bind w64c:AP.Photos, Mode=OneWay}" />
 

@@ -9,6 +9,7 @@
     xmlns:w64c="using:ImageGlass.Win64.Common"
     x:DefaultBindMode="OneWay"
     DataContext="{x:Bind VM, Mode=OneWay}"
+    IsTabStop="False"
     mc:Ignorable="d">
 
     <StackPanel

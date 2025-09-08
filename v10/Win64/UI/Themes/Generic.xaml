@@ -12,7 +12,10 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:IgControl">
-                    <ContentPresenter Content="{TemplateBinding Content}" />
+                    <ContentPresenter
+                        Content="{TemplateBinding Content}"
+                        IsTabStop="False"
+                        TabFocusNavigation="Local" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

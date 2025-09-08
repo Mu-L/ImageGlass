@@ -71,16 +71,10 @@ public partial class IgWindowHook : DisposableImpl
             if (value != _window.Title)
             {
                 _window.Title = value;
-                _ = OnPropertyChanged(nameof(TitlebarText));
+                _ = OnPropertyChanged();
             }
         }
     }
-
-
-    /// <summary>
-    /// Gets the title bar of window.
-    /// </summary>
-    public TitlebarControl? Titlebar => _titleBar;
 
 
     /// <summary>
