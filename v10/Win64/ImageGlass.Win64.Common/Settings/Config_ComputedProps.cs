@@ -68,6 +68,7 @@ public partial class Config
                 if (OnPropertyChanged(value, oldValue))
                 {
                     Theme.LoadColors(AccentColor);
+                    AP.RaiseThemeChangedEvent(nameof(IgTheme.ComputedColors));
                 }
             }
         }

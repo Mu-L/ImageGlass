@@ -50,9 +50,9 @@
 
         <!--  Footer  -->
         <StackPanel
+            x:Name="PART_Footer"
             Grid.Row="2"
-            HorizontalAlignment="Stretch"
-            Background="{x:Bind FooterBackground}">
+            HorizontalAlignment="Stretch">
 
             <StackPanel
                 Padding="24"

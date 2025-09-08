@@ -163,7 +163,6 @@ public partial class IgTheme : IgReactive
         ComputedColors.Load(Colors, accent);
 
         OnPropertyChanged(nameof(ComputedColors));
-        AP.RaiseThemeChangedEvent(nameof(ComputedColors));
     }
 
 

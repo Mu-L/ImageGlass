@@ -282,21 +282,6 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
     public DialogFocus DefaultFocus { get; set; } = DialogFocus.Button1;
 
 
-    /// <summary>
-    /// Gets, sets the background for dialog footer.
-    /// </summary>
-    protected SolidColorBrush? FooterBackground
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    } = null;
-
     #endregion // Public Properties
 
 
@@ -379,7 +364,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {
-        FooterBackground = GetThemeFooterBackground();
+        UpdateFooterBackground();
     }
 
 
@@ -431,7 +416,7 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
     private void Root_Loaded(object sender, RoutedEventArgs e)
     {
-        FooterBackground = GetThemeFooterBackground();
+        UpdateFooterBackground();
 
         SetDefaultButton();
         SetDefaultFocus();
@@ -608,17 +593,15 @@ public partial class DialogWindow : Window, INotifyPropertyChanged
 
 
     /// <summary>
-    /// Get the footer background according to current theme.
+    /// Updates the footer background according to current theme.
     /// </summary>
-    private static SolidColorBrush GetThemeFooterBackground()
+    private void UpdateFooterBackground()
     {
         var color = AP.Config.Theme.ComputedColors.GalleryBgColor;
         var maxAlpha = AP.Config.Theme.Settings.IsDarkMode ? 100 : 150;
+        var bgColor = color.Blend(AP.Config.Theme.BaseColor, 0.7f, maxAlpha);
 
-        var alpha = Math.Min(color.A, (byte)maxAlpha);
-        var bgColor = color.WithAlpha(alpha);
-
-        return new SolidColorBrush(bgColor);
+        PART_Footer.Background = new SolidColorBrush(bgColor);
     }
 
 
