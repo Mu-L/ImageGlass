@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <local:IgToolbarItem
-    x:Class="ImageGlass.Win64.UI.IgToolbarItemButton"
+    x:Class="ImageGlass.Win64.UI.IgToolbarButton"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:common="using:ImageGlass.Common"
@@ -16,7 +16,7 @@
 
     <local:IgButton
         Name="PART_Button"
-        Padding="{x:Bind local:IgToolbarItemButton.ItemPadding}"
+        Padding="{x:Bind local:IgToolbarButton.ItemPadding}"
         x:DefaultBindMode="OneWay"
         Click="PART_Button_Click"
         Flyout="{x:Bind Flyout}"
@@ -26,7 +26,7 @@
         Style="{StaticResource IgButtonStyle}"
         Text="{x:Bind VM.Text}"
         ToolTipService.ToolTip="{x:Bind VM.Text}">
-        <StackPanel Orientation="Horizontal" Spacing="{x:Bind local:IgToolbarItemButton.InnerSpacing}">
+        <StackPanel Orientation="Horizontal" Spacing="{x:Bind local:IgToolbarButton.InnerSpacing}">
             <ImageIcon
                 Name="PART_ButtonIcon"
                 Width="{x:Bind w64c:AP.Config.ToolbarIconHeight}"

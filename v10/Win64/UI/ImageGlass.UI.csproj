@@ -15,8 +15,6 @@
   <ItemGroup>
     <None Remove="BaseControls\IgTextBox_Description.xaml" />
     <None Remove="Titlebar\TitlebarControl.xaml" />
-    <None Remove="Toolbar\IgToolbarItemButton.xaml" />
-    <None Remove="Toolbar\IgToolbarItemSeparator.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250402" />
@@ -33,12 +31,12 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Toolbar\IgToolbarItemButton.xaml">
+    <Page Update="Toolbar\IgToolbarButton.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Toolbar\IgToolbarItemSeparator.xaml">
+    <Page Update="Toolbar\IgToolbarSeparator.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

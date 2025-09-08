@@ -89,7 +89,7 @@ public partial class ToolbarControl : UserControl, INotifyPropertyChanged
     #endregion // INotifyPropertyChanged Implementation
 
 
-    public event TypedEventHandler<IgToolbarItemButton, ToolbarItemClickedEventArgs>? ItemClicked;
+    public event TypedEventHandler<IgToolbarButton, ToolbarItemClickedEventArgs>? ItemClicked;
 
     public static string _PART_ItemButton => "PART_ItemButton";
     public static string _PART_ItemSeparator => "PART_ItemSeparator";
@@ -163,7 +163,7 @@ public partial class ToolbarControl : UserControl, INotifyPropertyChanged
     }
 
 
-    private void PART_ItemButton_Clicked(IgToolbarItemButton sender, ToolbarItemClickedEventArgs e)
+    private void PART_ItemButton_Clicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
     {
         OnItemClicked(sender, e);
     }
@@ -172,7 +172,7 @@ public partial class ToolbarControl : UserControl, INotifyPropertyChanged
     /// <summary>
     /// Raises event <see cref="ItemClicked"/>.
     /// </summary>
-    protected virtual void OnItemClicked(IgToolbarItemButton sender, ToolbarItemClickedEventArgs e)
+    protected virtual void OnItemClicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
     {
         ItemClicked?.Invoke(sender, e);
     }
@@ -201,11 +201,11 @@ public partial class ToolbarControl : UserControl, INotifyPropertyChanged
             // get toolbar item metadata
             if (!_itemsMetadata.TryGetValue(item.SourceIndex, out var meta)) continue;
             if (RepeaterPrimaryItems.TryGetElement(meta.PrimaryItemIndex) is not FrameworkElement fe) continue;
-            if (fe.FindName(_PART_ItemButton) is not IgToolbarItemButton btnEl) continue;
+            if (fe.FindName(_PART_ItemButton) is not IgToolbarButton btnEl) continue;
 
 
             // get image source from toolbar item
-            if (btnEl.FindName(IgToolbarItemButton._PART_ButtonIcon) is ImageIcon iconEl)
+            if (btnEl.FindName(IgToolbarButton._PART_ButtonIcon) is ImageIcon iconEl)
             {
                 imgSrc = iconEl.Source;
             }

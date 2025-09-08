@@ -29,7 +29,7 @@
                 Value="{x:Bind IsSeparator}">
                 <!--  Separator  -->
                 <ctk:Case Value="True">
-                    <local:IgToolbarItemSeparator
+                    <local:IgToolbarSeparator
                         Name="PART_ItemSeparator"
                         Loaded="ToolbarItem_Loaded"
                         VM="{x:Bind}" />
@@ -37,7 +37,7 @@
 
                 <!--  Button  -->
                 <ctk:Case IsDefault="True">
-                    <local:IgToolbarItemButton
+                    <local:IgToolbarButton
                         Name="PART_ItemButton"
                         Clicked="PART_ItemButton_Clicked"
                         Loaded="ToolbarItem_Loaded"
@@ -52,7 +52,7 @@
 
     <Grid
         x:Name="GridToolbar"
-        Padding="{x:Bind local:IgToolbarItemButton.ItemPadding}"
+        Padding="{x:Bind local:IgToolbarButton.ItemPadding}"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         Background="{x:Bind w64c:AP.Config.Theme.Colors.ToolbarBgColor, Converter={StaticResource HexStringToBrushConverter}}">
@@ -92,7 +92,7 @@
             <!--  Toolbar: Overflow button  -->
             <local:IgButton
                 x:Name="BtnOverflowMenu"
-                Padding="{x:Bind local:IgToolbarItemButton.ItemPadding}"
+                Padding="{x:Bind local:IgToolbarButton.ItemPadding}"
                 VerticalAlignment="Stretch"
                 VerticalContentAlignment="Bottom"
                 Style="{StaticResource IgButtonStyle}"
@@ -134,13 +134,13 @@
 
 
             <!--  Menu button  -->
-            <local:IgToolbarItemButton x:Name="BtnMainMenu">
-                <local:IgToolbarItemButton.VM>
+            <local:IgToolbarButton x:Name="BtnMainMenu">
+                <local:IgToolbarButton.VM>
                     <w64c:ToolbarItemModel Image="{x:Bind local:ToolbarControl.MainMenuIconName}" Text="Main Menu" />
-                </local:IgToolbarItemButton.VM>
+                </local:IgToolbarButton.VM>
 
 
-                <local:IgToolbarItemButton.Flyout>
+                <local:IgToolbarButton.Flyout>
                     <MenuFlyout x:Name="MnuMain" Placement="BottomEdgeAlignedRight">
 
                         <!--  File  -->
@@ -242,9 +242,9 @@
                         </MenuFlyoutItem>
 
                     </MenuFlyout>
-                </local:IgToolbarItemButton.Flyout>
+                </local:IgToolbarButton.Flyout>
 
-            </local:IgToolbarItemButton>
+            </local:IgToolbarButton>
 
 
         </StackPanel>

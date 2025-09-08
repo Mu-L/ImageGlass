@@ -19,9 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace ImageGlass.Win64.UI;
 
-public partial class IgToolbarItemSeparator : IgToolbarItem
+public partial class IgToolbarSeparator : IgToolbarItem
 {
-    public IgToolbarItemSeparator()
+    public IgToolbarSeparator()
     {
         InitializeComponent();
     }

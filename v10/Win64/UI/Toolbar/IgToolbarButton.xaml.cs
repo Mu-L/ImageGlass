@@ -26,7 +26,7 @@ using Windows.Foundation;
 
 namespace ImageGlass.Win64.UI;
 
-public partial class IgToolbarItemButton : IgToolbarItem
+public partial class IgToolbarButton : IgToolbarItem
 {
     public static string _PART_Button => "PART_Button";
     public static string _PART_ButtonIcon => "PART_ButtonIcon";
@@ -36,7 +36,7 @@ public partial class IgToolbarItemButton : IgToolbarItem
 
 
     // events
-    public event TypedEventHandler<IgToolbarItemButton, ToolbarItemClickedEventArgs>? Clicked;
+    public event TypedEventHandler<IgToolbarButton, ToolbarItemClickedEventArgs>? Clicked;
 
 
     // Public Properties
@@ -60,7 +60,7 @@ public partial class IgToolbarItemButton : IgToolbarItem
     #endregion // Public Properties
 
 
-    public IgToolbarItemButton()
+    public IgToolbarButton()
     {
         InitializeComponent();
     }
