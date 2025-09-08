@@ -18,74 +18,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using Windows.UI;
 
 namespace ImageGlass.Win64.UI;
 
 
-public sealed partial class TitlebarControl : UserControl, INotifyPropertyChanged
+public sealed partial class TitlebarControl : IgControl
 {
-    #region INotifyPropertyChanged Implementation
-
-    // to manage PropertyChanged events
-    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
-    private event PropertyChangedEventHandler? _propertyChangedHandler;
-
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public event PropertyChangedEventHandler? PropertyChanged
-    {
-        add
-        {
-            if (value != null)
-            {
-                _propertyChangedHandler += value;
-                _propertyChangedEvent.Add(value);
-            }
-        }
-
-        remove
-        {
-            if (value != null)
-            {
-                _propertyChangedHandler -= value;
-                _propertyChangedEvent.Remove(value);
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// Emits event <see cref="PropertyChanged"/>.
-    /// </summary>
-    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-
-    /// <summary>
-    /// Clears event handlers list of <see cref="PropertyChanged"/>.
-    /// </summary>
-    public void ClearPropertyChangedEvents()
-    {
-        // remove PropertyChanged events
-        foreach (var eventHandler in _propertyChangedEvent)
-        {
-            _propertyChangedHandler -= eventHandler;
-        }
-        _propertyChangedEvent.Clear();
-    }
-
-    #endregion // INotifyPropertyChanged Implementation
-
-
     public static string _PART_TitleBar_Icon => "PART_TitleBar_Icon";
     public static string _PART_TitleBar_Text => "PART_TitleBar_Text";
 
@@ -100,7 +39,7 @@ public sealed partial class TitlebarControl : UserControl, INotifyPropertyChange
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = "";
@@ -116,7 +55,7 @@ public sealed partial class TitlebarControl : UserControl, INotifyPropertyChange
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     }
@@ -132,7 +71,7 @@ public sealed partial class TitlebarControl : UserControl, INotifyPropertyChange
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     }
@@ -148,7 +87,7 @@ public sealed partial class TitlebarControl : UserControl, INotifyPropertyChange
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = Colors.Transparent;
@@ -164,7 +103,7 @@ public sealed partial class TitlebarControl : UserControl, INotifyPropertyChange
             if (field != value)
             {
                 field = value;
-                OnPropertyChanged();
+                _ = OnPropertyChanged();
             }
         }
     } = Colors.Transparent;
