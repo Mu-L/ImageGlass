@@ -56,6 +56,8 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="BaseControls\TextBox\" />
+    <Folder Include="Toolbar\ToolbarItems\" />
     <Folder Include="Windowing\DialogWindow\" />
   </ItemGroup>
   
