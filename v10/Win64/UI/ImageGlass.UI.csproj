@@ -15,6 +15,7 @@
   <ItemGroup>
     <None Remove="BaseControls\IgTextBox_Description.xaml" />
     <None Remove="Titlebar\TitlebarControl.xaml" />
+    <None Remove="Windowing\IgWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250402" />
@@ -59,6 +60,11 @@
     <Folder Include="BaseControls\TextBox\" />
     <Folder Include="Toolbar\ToolbarItems\" />
     <Folder Include="Windowing\DialogWindow\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Windowing\IgWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   
 </Project>

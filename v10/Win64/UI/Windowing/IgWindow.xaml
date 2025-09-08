@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="ImageGlass.Win64.UI.IgWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:ImageGlass.Win64.UI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:w64c="using:ImageGlass.Win64.Common"
+    x:DefaultBindMode="OneWay"
+    mc:Ignorable="d">
+
+    <Grid x:Name="Root">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+
+        <!--  Titlebar  -->
+        <local:TitlebarControl
+            x:Name="PART_Titlebar"
+            Grid.Row="0"
+            Padding="{x:Bind _winHook.TitleBarPadding}"
+            BackgroundColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarBgColor}"
+            Canvas.ZIndex="100"
+            Text="{x:Bind _winHook.TitlebarText}"
+            TextColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor}" />
+
+
+        <!--  Window Content  -->
+        <ContentPresenter
+            x:Name="PART_WindowContent"
+            Grid.Row="1"
+            Content="{x:Bind WindowContent}" />
+    </Grid>
+
+</Window>
