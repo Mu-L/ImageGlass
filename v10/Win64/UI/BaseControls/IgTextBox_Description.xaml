@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<UserControl
+<local:IgControl
     x:Class="ImageGlass.Win64.UI.IgTextBox_Description"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -52,4 +52,4 @@
             Visibility="{x:Bind Message, Converter={StaticResource StringToVisibilityConverter}}" />
 
     </Grid>
-</UserControl>
+</local:IgControl>

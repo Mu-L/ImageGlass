@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<UserControl
+<local:IgControl
     x:Class="ImageGlass.Win64.UI.ToolbarControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,7 +15,7 @@
     AutomationProperties.AutomationControlType="ToolBar"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
+    <local:IgControl.Resources>
 
         <!--  ToolbarItemTemplate  -->
         <DataTemplate
@@ -46,7 +46,7 @@
             </ctk:SwitchPresenter>
 
         </DataTemplate>
-    </UserControl.Resources>
+    </local:IgControl.Resources>
 
 
 
@@ -250,4 +250,4 @@
         </StackPanel>
 
     </Grid>
-</UserControl>
+</local:IgControl>

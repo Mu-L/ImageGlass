@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<UserControl
+<local:IgControl
     x:Class="ImageGlass.Win64.UI.GalleryControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,7 +13,7 @@
     x:DefaultBindMode="OneWay"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
+    <local:IgControl.Resources>
 
         <!--  Gallery Item: Template  -->
         <DataTemplate
@@ -82,7 +82,7 @@
             </local:IgGalleryItem>
         </DataTemplate>
 
-    </UserControl.Resources>
+    </local:IgControl.Resources>
 
 
 
@@ -107,4 +107,4 @@
         </ItemsRepeater>
     </ScrollViewer>
 
-</UserControl>
+</local:IgControl>
