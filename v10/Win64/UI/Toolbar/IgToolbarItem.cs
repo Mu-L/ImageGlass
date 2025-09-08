@@ -17,15 +17,27 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Win64.Common;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace ImageGlass.Win64.UI;
 
-interface IIgToolbarItem : INotifyPropertyChanged
-{
-    ToolbarItemModel VM { get; set; }
 
-    void OnPropertyChanged([CallerMemberName] string? propertyName = null);
+public partial class IgToolbarItem : IgControl
+{
+
+    /// <summary>
+    /// Gets, sets view model for the control.
+    /// </summary>
+    public ToolbarItemModel VM
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+            }
+        }
+    } = new();
+
 }
 

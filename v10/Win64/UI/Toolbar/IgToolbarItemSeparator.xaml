@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<UserControl
+<local:IgToolbarItem
     x:Class="ImageGlass.Win64.UI.IgToolbarItemSeparator"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -34,4 +34,4 @@
             Y1="0"
             Y2="{x:Bind w64c:AP.Config.ToolbarIconHeight}" />
     </StackPanel>
-</UserControl>
+</local:IgToolbarItem>

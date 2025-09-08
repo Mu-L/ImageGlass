@@ -151,6 +151,8 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
 
     private void IgControl_Unloaded(object sender, RoutedEventArgs e)
     {
+        CleanUpPropertyChangedEvents();
+
         AP.ThemeChanged -= AP_ThemeChanged;
         Loaded -= IgControl_Loaded;
         Unloaded -= IgControl_Unloaded;

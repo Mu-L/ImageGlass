@@ -152,7 +152,7 @@ public partial class ToolbarControl : UserControl, INotifyPropertyChanged
 
     private void ToolbarItem_Loaded(object sender, RoutedEventArgs e)
     {
-        if (sender is not IIgToolbarItem item) return;
+        if (sender is not IgToolbarItem item) return;
         if (sender is not FrameworkElement fe) return;
 
         // save toolbar item width

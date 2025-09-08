@@ -18,80 +18,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
 using Windows.Foundation;
-
 
 namespace ImageGlass.Win64.UI;
 
-public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
+public partial class IgToolbarItemButton : IgToolbarItem
 {
-    #region INotifyPropertyChanged Implementation
-
-    // to manage PropertyChanged events
-    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
-    private event PropertyChangedEventHandler? _propertyChangedHandler;
-
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public event PropertyChangedEventHandler? PropertyChanged
-    {
-        add
-        {
-            if (value != null)
-            {
-                _propertyChangedHandler += value;
-                _propertyChangedEvent.Add(value);
-            }
-        }
-
-        remove
-        {
-            if (value != null)
-            {
-                _propertyChangedHandler -= value;
-                _propertyChangedEvent.Remove(value);
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// Emits event <see cref="PropertyChanged"/>.
-    /// </summary>
-    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-
-    /// <summary>
-    /// Clears event handlers list of <see cref="PropertyChanged"/>.
-    /// </summary>
-    public void ClearPropertyChangedEvents()
-    {
-        // remove PropertyChanged events
-        foreach (var eventHandler in _propertyChangedEvent)
-        {
-            _propertyChangedHandler -= eventHandler;
-        }
-        _propertyChangedEvent.Clear();
-    }
-
-    #endregion // INotifyPropertyChanged Implementation
-
-
-    public event TypedEventHandler<IgToolbarItemButton, ToolbarItemClickedEventArgs>? Clicked;
-
     public static string _PART_Button => "PART_Button";
     public static string _PART_ButtonIcon => "PART_ButtonIcon";
     public static string _PART_ButtonText => "PART_ButtonText";
@@ -99,42 +35,24 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     public static Thickness ItemPadding => new(AP.Config.ToolbarIconHeight / 4.8f); // 5
 
 
-    protected FlyoutBase? _flyout = null;
-    protected ToolbarItemModel _vm = new();
+    // events
+    public event TypedEventHandler<IgToolbarItemButton, ToolbarItemClickedEventArgs>? Clicked;
 
 
     // Public Properties
     #region Public Properties
 
     /// <summary>
-    /// Gets, sets view model for the control.
-    /// </summary>
-    public ToolbarItemModel VM
-    {
-        get => _vm;
-        set
-        {
-            if (_vm != value)
-            {
-                _vm = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-
-    /// <summary>
     /// Gets or sets the flyout associated with this button.
     /// </summary>
     public FlyoutBase? Flyout
     {
-        get => _flyout;
-        set
+        get; set
         {
-            if (_flyout != value)
+            if (field != value)
             {
-                _flyout = value;
-                OnPropertyChanged();
+                field = value;
+                _ = OnPropertyChanged();
             }
         }
     }
@@ -145,45 +63,20 @@ public partial class IgToolbarItemButton : UserControl, IIgToolbarItem
     public IgToolbarItemButton()
     {
         InitializeComponent();
-
-        AP.ThemeChanged += AP_ThemeChanged;
-        AP.Config.PropertyChanged += Config_PropertyChanged;
-        Loaded += IgToolbarItemButton_Loaded;
-        Unloaded += IgToolbarItemButton_Unloaded;
     }
 
 
-    private void IgToolbarItemButton_Loaded(object sender, RoutedEventArgs e)
+    protected override void OnIgLoaded(FrameworkElement fe)
     {
+        base.OnIgLoaded(fe);
         UpdateIcon();
     }
 
 
-    private void IgToolbarItemButton_Unloaded(object sender, RoutedEventArgs e)
+    protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
     {
-        AP.ThemeChanged -= AP_ThemeChanged;
-        AP.Config.PropertyChanged -= Config_PropertyChanged;
-        Loaded -= IgToolbarItemButton_Loaded;
-        Unloaded -= IgToolbarItemButton_Unloaded;
-
-        ClearPropertyChangedEvents();
-    }
-
-
-    private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
-    {
+        base.OnIgThemeChanged(e);
         UpdateIcon();
-    }
-
-
-    private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (!VM.IsToggle) return;
-
-        if (VM.ConfigBinding.Equals(e.PropertyName, StringComparison.OrdinalIgnoreCase))
-        {
-            // TODO:
-        }
     }
 
 
