@@ -21,11 +21,11 @@
         <local:TitlebarControl
             x:Name="PART_Titlebar"
             Grid.Row="0"
-            Padding="{x:Bind _winHook.TitleBarPadding}"
+            Padding="{x:Bind TitleBarPadding}"
             BackgroundColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarBgColor}"
             Canvas.ZIndex="100"
             IsTabStop="False"
-            Text="{x:Bind _winHook.TitlebarText}"
+            Text="{x:Bind WindowTitle}"
             TextColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor}" />
 
 

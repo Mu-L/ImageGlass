@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Win64.Common;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Drawing;
 using System.Threading.Tasks;
@@ -48,7 +47,7 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog.
     /// </summary>
-    public static async Task<ModalWindowResult> ShowAsync(Window? owner,
+    public static async Task<ModalWindowResult> ShowAsync(IgWindow? owner,
         string? title,
         ModalWindowButton buttons,
         ModalWindowViewModel vm,
@@ -134,7 +133,7 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for warning.
     /// </summary>
-    public static async Task<ModalWindowResult> ShowWarningAsync(Window? owner,
+    public static async Task<ModalWindowResult> ShowWarningAsync(IgWindow? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
@@ -174,7 +173,7 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for error.
     /// </summary>
-    public static async Task<ModalWindowResult> ShowErrorAsync(Window? owner,
+    public static async Task<ModalWindowResult> ShowErrorAsync(IgWindow? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
@@ -190,7 +189,7 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for information.
     /// </summary>
-    public static async Task<ModalWindowResult> ShowInfoAsync(Window? owner,
+    public static async Task<ModalWindowResult> ShowInfoAsync(IgWindow? owner,
         string? title = null,
         string? description = null,
         string? heading = null,
@@ -210,7 +209,7 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for input.
     /// </summary>
-    public static async Task<ModalWindowResult> ShowInputAsync(Window? owner,
+    public static async Task<ModalWindowResult> ShowInputAsync(IgWindow? owner,
         string? title = null,
         string? description = null,
         string? heading = null,

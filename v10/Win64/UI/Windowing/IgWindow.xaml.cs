@@ -17,12 +17,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Win64.Common;
+using ImageMagick;
+using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using WinRT.Interop;
 
 namespace ImageGlass.Win64.UI;
@@ -129,7 +138,11 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     #endregion // INotifyPropertyChanged Implementation
 
 
-    protected IgWindowHook _winHook;
+    protected readonly WindowMessageMonitor _msgMonitor;
+    protected readonly IProgress<AppIconChangedEventArgs> _uiReporter;
+
+    protected BackdropStyle _actualBackdropStyle = BackdropStyle.None;
+    protected nint _windowIconHandle = IntPtr.Zero;
 
 
     #region Control Properties
@@ -144,12 +157,6 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// Gets DPI scale of the window.
     /// </summary>
     public double DpiScale => WindowApi.GetDpiScaleForWindow(Handle);
-
-
-    /// <summary>
-    /// Gets the titlebar control.
-    /// </summary>
-    public TitlebarControl TitleBar => PART_Titlebar;
 
 
     /// <summary>
@@ -197,6 +204,71 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     }
 
 
+    /// <summary>
+    /// Gets the titlebar control.
+    /// </summary>
+    public TitlebarControl TitleBar => PART_Titlebar;
+
+
+    /// <summary>
+    /// Gets, sets the title bar's right inset width of <see cref="MainWindow"/>.
+    /// </summary>
+    protected double TitleBarRightInset
+    {
+        get => field / DpiScale;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(TitleBarPadding));
+            }
+        }
+    } = 0;
+
+
+    /// <summary>
+    /// Gets the title bar padding of <see cref="MainWindow"/>.
+    /// </summary>
+    protected Thickness TitleBarPadding => new Thickness(0, 0, TitleBarRightInset, 0);
+
+
+    /// <summary>
+    /// Gets, sets the value indicates that the window backdrop
+    /// should be used only if the window background color has transparency.
+    /// </summary>
+    public bool UseBackdropForTransparentWindowOnly
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+            }
+        }
+    } = true;
+
+
+    /// <summary>
+    /// Gets, sets the window backdrop style.
+    /// </summary>
+    public BackdropStyle BackdropStyle
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+
+                UpdateWindowBackdrop();
+            }
+        }
+    } = AP.Config.WindowBackdrop;
+
+
     #endregion // Control Properties
 
 
@@ -205,9 +277,12 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     {
         InitializeComponent();
 
-        _winHook = new(this, PART_Titlebar);
-        _winHook.PropertyChanged += WinHook_PropertyChanged;
+        // setup window style
+        SetupWindowTitlebar();
+        _msgMonitor = new WindowMessageMonitor(Handle);
+        _uiReporter = new Progress<AppIconChangedEventArgs>(UIReporter_Report);
 
+        // setup events
         AP.ThemeChanged += AP_ThemeChanged;
         PART_WindowContent.Loaded += PART_WindowContent_Loaded;
         Closed += IgWindow_Closed;
@@ -222,6 +297,11 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
     private void PART_WindowContent_Loaded(object sender, RoutedEventArgs e)
     {
+        UpdateTitleBarSize();
+        UpdateWindowColorMode();
+        UpdateWindowIcon();
+        UpdateWindowBackdrop();
+
         OnIgLoaded((FrameworkElement)sender);
     }
 
@@ -240,8 +320,8 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         Activated -= IgWindow_Activated;
         SizeChanged -= IgWindow_SizeChanged;
 
-        _winHook.PropertyChanged -= WinHook_PropertyChanged;
-        _winHook.Dispose();
+        _msgMonitor.Dispose();
+        IconApi.DestroyHIcon(_windowIconHandle);
 
         if (WindowContentDataContext is IDisposable dc) dc.Dispose();
     }
@@ -249,6 +329,18 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
     private void IgWindow_Activated(object sender, WindowActivatedEventArgs e)
     {
+        if (TitleBar.FindName(TitlebarControl._PART_TitleBar_Text) is not TextBlock txtEl) return;
+
+        // change title bar text opacity according to window activation state
+        if (e.WindowActivationState == WindowActivationState.Deactivated)
+        {
+            txtEl.Opacity = 0.5;
+        }
+        else
+        {
+            txtEl.Opacity = 1;
+        }
+
         OnIgActivated(e);
     }
 
@@ -267,6 +359,20 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {
+        // a new theme just loaded
+        if (string.IsNullOrEmpty(e.PropertyName))
+        {
+            // update app color mode according to the theme's color mode
+            UpdateWindowColorMode();
+
+            // update app icon
+            UpdateWindowIcon();
+
+            // update backdrop
+            UpdateWindowBackdrop();
+        }
+
+
         OnIgThemeChanged(e);
     }
 
@@ -275,6 +381,20 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     {
         OnPropertyChanged(e.PropertyName);
     }
+
+
+    private void UIReporter_Report(AppIconChangedEventArgs e)
+    {
+        if (e.IconData == null) return;
+
+        // create new icon handle
+        _windowIconHandle = IconApi.CreateHIcon(e.IconData, e.Size, e.Size);
+
+        // update taskbar icon
+        IconApi.SetTaskbarIcon(Handle, _windowIconHandle);
+
+    }
+
 
     #endregion // Window Events
 
@@ -321,5 +441,179 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
 
 
+    #region Internal Methods
 
+    /// <summary>
+    /// Updates the title bar size of this window.
+    /// </summary>
+    protected void UpdateTitleBarSize()
+    {
+        // update title bar size according to API
+        TitleBarRightInset = AppWindow.TitleBar.RightInset;
+    }
+
+
+    /// <summary>
+    /// Set titlebar for window.
+    /// </summary>
+    protected void SetupWindowTitlebar()
+    {
+        // set title bar
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(PART_Titlebar);
+
+        UpdateTitleBarSize();
+    }
+
+
+    /// <summary>
+    /// Updates the color mode of this window.
+    /// </summary>
+    protected void UpdateWindowColorMode()
+    {
+        try
+        {
+            var root = (FrameworkElement)Content;
+
+            if (AP.Config.Theme.Settings.IsDarkMode)
+            {
+                root.RequestedTheme = ElementTheme.Dark;
+                AppWindow.TitleBar.PreferredTheme = TitleBarTheme.Dark;
+            }
+            else
+            {
+                root.RequestedTheme = ElementTheme.Light;
+                AppWindow.TitleBar.PreferredTheme = TitleBarTheme.Light;
+            }
+        }
+        catch (Exception)
+        {
+            // COMException: DCOMPOSITION_ERROR_SURFACE_BEING_RENDERED
+        }
+    }
+
+
+    /// <summary>
+    /// Updates icon for window, optional for taskbar.
+    /// </summary>
+    protected void UpdateWindowIcon()
+    {
+        // 1. get full path of icon
+        var iconPath = AP.Config.Theme.GetIconPath(IgThemeIcon.AppLogo);
+        var useDefaultIcon = !File.Exists(iconPath);
+
+        if (useDefaultIcon)
+        {
+            // get default logo icon if theme's app logo does not exist
+            iconPath = BHelper.BaseDir(Dir.Assets, "icon256.ico");
+            AppWindow.SetIcon(iconPath);
+        }
+
+
+        // 2. set custom title bar icon
+        if (TitleBar.FindName(TitlebarControl._PART_TitleBar_Icon) is ImageIcon iconEl)
+        {
+            try
+            {
+                // try to get icon URI from the given path
+                var iconUri = new Uri(iconPath);
+
+                if (iconPath.EndsWith(".SVG", StringComparison.OrdinalIgnoreCase))
+                {
+                    iconEl.Source = new SvgImageSource(iconUri);
+                }
+                else
+                {
+                    iconEl.Source = new BitmapImage(iconUri)
+                    {
+                        DecodePixelWidth = 32,
+                        DecodePixelHeight = 32,
+                    };
+                }
+            }
+            catch { }
+        }
+        if (useDefaultIcon) return;
+
+
+        // 3. set icon for taskbar & native titlebar
+        var size = (int)DpiScale * 32;
+        _ = Task.Run(async () =>
+        {
+            var bytes = await MagickDecoder.QuickDecodeAsync(iconPath, size, size, MagickFormat.Bgra);
+            _uiReporter.Report(new AppIconChangedEventArgs(bytes, size));
+        });
+    }
+
+
+    /// <summary>
+    /// Updates window backdrop according to user config.
+    /// </summary>
+    protected void UpdateWindowBackdrop()
+    {
+        if (!UseBackdropForTransparentWindowOnly)
+        {
+            SetWindowBackdrop(BackdropStyle);
+            return;
+        }
+
+
+        // check if background has transparency
+        var isTransparentToolbar = AP.Config.Theme.ComputedColors.ToolbarBgColor.A < 255;
+        var isTransparentViewer = AP.Config.Theme.ComputedColors.BgColor.A < 255;
+        var isTransparentGallery = AP.Config.Theme.ComputedColors.GalleryBgColor.A < 255;
+        // TODO: check for Config.BackgroundColor
+
+        var hasTransparency = isTransparentToolbar || isTransparentViewer || isTransparentGallery;
+
+        // has transparency => support all backdrop
+        if (hasTransparency)
+        {
+            SetWindowBackdrop(BackdropStyle);
+        }
+        // no transparency => no backdrop
+        else
+        {
+            SetWindowBackdrop(BackdropStyle.None);
+        }
+    }
+
+
+    /// <summary>
+    /// Sets window backdrop style.
+    /// </summary>
+    protected void SetWindowBackdrop(BackdropStyle style)
+    {
+        if (_actualBackdropStyle == style) return;
+
+        // get backdrop
+        SystemBackdrop? backdrop = style switch
+        {
+            BackdropStyle.Mica => new MicaBackdrop(),
+            BackdropStyle.MicaAlt => new MicaBackdrop { Kind = MicaKind.BaseAlt },
+            BackdropStyle.Acrylic => new DesktopAcrylicBackdrop(),
+            BackdropStyle.AcrylicThin => new AcrylicBackdrop(DesktopAcrylicKind.Thin),
+            BackdropStyle.Transparent => new TransparentBackdrop(_msgMonitor),
+            _ => null,
+        };
+
+
+        // set backdrop
+        _actualBackdropStyle = style;
+        SystemBackdrop = backdrop;
+    }
+
+
+    #endregion // Internal Methods
+
+
+
+}
+
+
+
+public class AppIconChangedEventArgs(byte[]? iconData, int size) : EventArgs
+{
+    public byte[]? IconData { get; set; } = iconData;
+    public int Size { get; set; } = size;
 }

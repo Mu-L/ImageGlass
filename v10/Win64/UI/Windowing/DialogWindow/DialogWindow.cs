@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics;
 using Windows.System;
+using WinRT.Interop;
 
 namespace ImageGlass.Win64.UI;
 
@@ -39,10 +40,11 @@ public partial class DialogWindow : IgWindow
     public event TypedEventHandler<DialogWindow, DialogEventArgs>? Applied;
 
 
+    protected IgWindow? _owner = null;
     protected readonly DialogWindow_Content _dialogContentEl = new();
-    protected Window? _owner = null;
-    protected TaskCompletionSource<DialogExitCode> _resultCompletionSource = new();
-    protected TaskCompletionSource<bool> _resizeCompletionSource = new();
+    protected readonly TaskCompletionSource<bool> _taskSourceResized = new();
+    protected TaskCompletionSource<DialogExitCode> _taskSourceExitCode = new();
+
     protected readonly KeyboardAccelerator _closeByEscKey = new()
     {
         Key = VirtualKey.Escape,
@@ -222,8 +224,8 @@ public partial class DialogWindow : IgWindow
         WindowContent = _dialogContentEl;
         WindowContent.SizeChanged += WindowContent_SizeChanged;
 
-        _winHook.UseBackdropForTransparentWindowOnly = false;
-        _winHook.BackdropStyle = BackdropStyle.MicaAlt;
+        UseBackdropForTransparentWindowOnly = false;
+        BackdropStyle = BackdropStyle.MicaAlt;
     }
 
 
@@ -265,7 +267,7 @@ public partial class DialogWindow : IgWindow
         if (DialogResult == DialogExitCode.None) DialogResult = DialogExitCode.Abort;
 
         // set the result to complete the task
-        _resultCompletionSource.SetResult(DialogResult);
+        _taskSourceExitCode.SetResult(DialogResult);
 
         // reactivate the owner window
         _owner?.Activate();
@@ -287,7 +289,7 @@ public partial class DialogWindow : IgWindow
         ResizeAndMoveCenterParent(clientWidth, clientHeight, true);
 
         // done resizing
-        _resizeCompletionSource.TrySetResult(true);
+        _taskSourceResized.TrySetResult(true);
     }
 
 
@@ -460,14 +462,26 @@ public partial class DialogWindow : IgWindow
 
 
     /// <summary>
+    /// Sets the owner of this window.
+    /// </summary>
+    private void SetWindowOwner(IgWindow? owner)
+    {
+        _owner = owner;
+        if (owner is null) return;
+
+        var ownerHandle = WindowNative.GetWindowHandle(owner);
+        WindowApi.SetWindowOwner(Handle, ownerHandle);
+    }
+
+
+    /// <summary>
     /// Shows dialog.
     /// </summary>
-    public async Task<DialogExitCode> ShowAsync(Window? owner = null)
+    public async Task<DialogExitCode> ShowAsync(IgWindow? owner = null)
     {
         // set window owner
-        _owner = owner;
-        _winHook.SetWindowOwner(_owner);
-        _resultCompletionSource = new TaskCompletionSource<DialogExitCode>();
+        SetWindowOwner(owner);
+        _taskSourceExitCode = new TaskCompletionSource<DialogExitCode>();
 
         var maxWidth = (int)(_dialogContentEl.MAX_WIDTH * DpiScale);
 
@@ -483,14 +497,14 @@ public partial class DialogWindow : IgWindow
         WindowApi.ShowWindowHidden(Handle);
 
         // wait for the window size updated
-        await _resizeCompletionSource.Task;
+        await _taskSourceResized.Task;
 
         // show dialog
         AppWindow.Show();
 
 
         // wait for exit code
-        var exitCode = await _resultCompletionSource.Task;
+        var exitCode = await _taskSourceExitCode.Task;
 
         return exitCode;
     }
