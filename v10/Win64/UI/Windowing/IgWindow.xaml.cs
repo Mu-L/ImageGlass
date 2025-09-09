@@ -165,7 +165,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Gets, sets the data context for <see cref="WindowContent"/>.
     /// </summary>
-    public object DialogContentDataContext
+    public object WindowContentDataContext
     {
         get => WindowContent.DataContext;
         set
@@ -242,6 +242,8 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
         _winHook.PropertyChanged -= WinHook_PropertyChanged;
         _winHook.Dispose();
+
+        if (WindowContentDataContext is IDisposable dc) dc.Dispose();
     }
 
 

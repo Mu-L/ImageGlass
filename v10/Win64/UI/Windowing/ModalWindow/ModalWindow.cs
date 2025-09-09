@@ -56,9 +56,9 @@ public partial class ModalWindow : DialogWindow
     {
         var modal = new ModalWindow()
         {
-            TitlebarText = title,
+            WindowTitle = title,
             DefaultFocus = defaultFocus,
-            DialogContentDataContext = vm,
+            WindowContentDataContext = vm,
         };
 
         // TODO: lang

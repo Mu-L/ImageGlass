@@ -11,6 +11,7 @@
     d:DataContext="{d:DesignInstance local:ModalWindow_Content,
                                      IsDesignTimeCreatable=True}"
     x:DefaultBindMode="OneWay"
+    IsTabStop="False"
     mc:Ignorable="d">
 
 

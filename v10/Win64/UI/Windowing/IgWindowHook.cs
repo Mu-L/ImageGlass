@@ -100,6 +100,42 @@ public partial class IgWindowHook : DisposableImpl
     /// </summary>
     public Thickness TitleBarPadding => new Thickness(0, 0, TitleBarRightInset, 0);
 
+
+    /// <summary>
+    /// Gets, sets the value indicates that the window backdrop
+    /// should be used only if the window background color has transparency.
+    /// </summary>
+    public bool UseBackdropForTransparentWindowOnly
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+            }
+        }
+    } = true;
+
+
+    /// <summary>
+    /// Gets, sets the window backdrop style.
+    /// </summary>
+    public BackdropStyle BackdropStyle
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+
+                UpdateWindowBackdrop();
+            }
+        }
+    } = AP.Config.WindowBackdrop;
+
+
     #endregion // Public Properties
 
 
@@ -293,6 +329,13 @@ public partial class IgWindowHook : DisposableImpl
     /// </summary>
     public void UpdateWindowBackdrop()
     {
+        if (!UseBackdropForTransparentWindowOnly)
+        {
+            SetWindowBackdrop(BackdropStyle);
+            return;
+        }
+
+
         // check if background has transparency
         var isTransparentToolbar = AP.Config.Theme.ComputedColors.ToolbarBgColor.A < 255;
         var isTransparentViewer = AP.Config.Theme.ComputedColors.BgColor.A < 255;
@@ -304,7 +347,7 @@ public partial class IgWindowHook : DisposableImpl
         // has transparency => support all backdrop
         if (hasTransparency)
         {
-            SetWindowBackdrop(AP.Config.WindowBackdrop);
+            SetWindowBackdrop(BackdropStyle);
         }
         // no transparency => no backdrop
         else
