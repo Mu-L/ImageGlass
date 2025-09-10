@@ -39,9 +39,12 @@ public sealed partial class DialogWindow_Content : IgControl
 
     #region Control Properties
 
-    public Button Button1 => PART_Button1;
-    public Button Button2 => PART_Button2;
-    public Button Button3 => PART_Button3;
+    public Grid ContentEl => PART_Content;
+    public StackPanel FooterEl => PART_Footer;
+
+    public Button Button1El => PART_Button1;
+    public Button Button2El => PART_Button2;
+    public Button Button3El => PART_Button3;
 
 
     /// <summary>
@@ -175,25 +178,16 @@ public sealed partial class DialogWindow_Content : IgControl
     }
 
 
+
     #region Control Events
 
     protected override void OnIgLoaded(FrameworkElement fe)
     {
         base.OnIgLoaded(fe);
 
-        UpdateFooterBackground();
         SetDefaultButton();
         SetDefaultFocus();
     }
-
-
-    protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
-    {
-        base.OnIgThemeChanged(e);
-
-        UpdateFooterBackground();
-    }
-
 
 
     private void PART_Button1_Click(object sender, RoutedEventArgs e)
@@ -265,18 +259,26 @@ public sealed partial class DialogWindow_Content : IgControl
     #endregion // Control Events
 
 
+
     #region Public methods
 
     /// <summary>
-    /// Updates the footer background according to current theme.
+    /// Updates background according to theme color.
     /// </summary>
-    public void UpdateFooterBackground()
+    public void ApplyTheme()
     {
-        var color = AP.Config.Theme.ComputedColors.GalleryBgColor;
-        var maxAlpha = AP.Config.Theme.Settings.IsDarkMode ? 100 : 150;
-        var bgColor = color.Blend(AP.Config.Theme.BaseColor, 0.7f, maxAlpha);
+        var isDarkMode = AP.Config.Theme.Settings.IsDarkMode;
+        var bg = AP.Config.Theme.ComputedColors.BgColor.NoAlpha();
 
-        PART_Footer.Background = new SolidColorBrush(bgColor);
+        // content bg
+        var contentAlpha = isDarkMode ? 180 : 220;
+        var contentBg = bg.WithAlpha(contentAlpha);
+        PART_Content.Background = new SolidColorBrush(contentBg);
+
+        // footer bg
+        var footerAlpha = isDarkMode ? 100 : 150;
+        var footerBg = bg.Blend(AP.Config.Theme.InvertedBaseColor, 0.925f, footerAlpha);
+        PART_Footer.Background = new SolidColorBrush(footerBg);
     }
 
 

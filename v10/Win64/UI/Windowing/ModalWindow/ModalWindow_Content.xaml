@@ -20,7 +20,6 @@
         Grid.Row="1"
         Padding="24,16,24,24"
         VerticalAlignment="Top"
-        Background="{x:Bind w64c:AP.Config.Theme.ComputedColors.BgColor, Converter={StaticResource ColorToBrushConverter}}"
         Spacing="16">
         <Grid>
             <Grid.ColumnDefinitions>
@@ -36,19 +35,17 @@
                 Visibility="{x:Bind VM.IsThumbnailSectionVisible, Converter={StaticResource BoolToVisibilityConverter}}">
 
                 <!--  Thumbnail  -->
-                <Border BorderBrush="Red" BorderThickness="0">
-                    <Viewbox
-                        x:Name="PART_ThumbnailViewbox"
-                        Width="{x:Bind THUMBNAIL_SIZE}"
-                        Height="{x:Bind THUMBNAIL_SIZE}"
-                        Stretch="Uniform"
-                        Visibility="{x:Bind VM.Thumbnail, Converter={StaticResource NullableToVisibilityConverter}}">
-                        <Image
-                            x:Name="PART_Thumbnail"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center" />
-                    </Viewbox>
-                </Border>
+                <Viewbox
+                    x:Name="PART_ThumbnailViewbox"
+                    Width="{x:Bind THUMBNAIL_SIZE}"
+                    Height="{x:Bind THUMBNAIL_SIZE}"
+                    Stretch="Uniform"
+                    Visibility="{x:Bind VM.Thumbnail, Converter={StaticResource NullableToVisibilityConverter}}">
+                    <Image
+                        x:Name="PART_Thumbnail"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </Viewbox>
 
                 <!--  ThumbnailIcon  -->
                 <Image

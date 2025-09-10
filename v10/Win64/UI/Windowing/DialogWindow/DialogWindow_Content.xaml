@@ -6,11 +6,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.Win64.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:DialogWindow_Content}"
     x:DefaultBindMode="OneWay"
     mc:Ignorable="d">
 
     <Grid
-        x:Name="Root"
+        x:Name="PART_Root"
         MaxWidth="{x:Bind MAX_WIDTH}"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
@@ -24,7 +25,7 @@
 
 
         <!--  DialogContent  -->
-        <Grid Grid.Row="0">
+        <Grid x:Name="PART_Content" Grid.Row="0">
             <ContentPresenter x:Name="PART_DialogContent" Content="{x:Bind DialogContent}" />
         </Grid>
 

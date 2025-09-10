@@ -22,6 +22,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -245,6 +246,8 @@ public partial class DialogWindow : IgWindow
         _submitByEnterKey.Invoked += SubmitByEnterKey_Invoked;
         Content.KeyboardAccelerators.Add(_closeByEscKey);
         Content.KeyboardAccelerators.Add(_submitByEnterKey);
+
+        ApplyTheme();
     }
 
 
@@ -271,6 +274,14 @@ public partial class DialogWindow : IgWindow
 
         // reactivate the owner window
         _owner?.Activate();
+    }
+
+
+    protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
+    {
+        base.OnIgThemeChanged(e);
+
+        ApplyTheme();
     }
 
 
@@ -385,6 +396,17 @@ public partial class DialogWindow : IgWindow
 
 
     #region Methods
+
+    /// <summary>
+    /// Updates background according to theme color.
+    /// </summary>
+    private void ApplyTheme()
+    {
+        _dialogContentEl.ApplyTheme();
+        TitleBar.BackgroundColor = ((SolidColorBrush)_dialogContentEl.ContentEl.Background).Color;
+    }
+
+
 
     /// <summary>
     /// Moves the dialog to center its parent.
