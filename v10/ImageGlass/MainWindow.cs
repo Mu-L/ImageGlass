@@ -21,7 +21,6 @@ using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
 using ImageGlass.UI;
 using ImageGlass.Win64.Common;
-using ImageGlass.Win64.Common.FileSystem;
 using ImageGlass.Win64.Common.Photoing;
 using Microsoft.UI.Xaml;
 using System;

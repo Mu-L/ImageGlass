@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Win64.Common;
 using Microsoft.UI;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
@@ -26,7 +27,7 @@ using Windows.Win32.Graphics.Dwm;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.UI.Controls;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public partial class TransparentBackdrop : CompositionBrushBackdrop
 {

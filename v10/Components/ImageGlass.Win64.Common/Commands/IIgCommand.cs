@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 
 public interface IIgCommand : ICommand

@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public static class IgCommands
 {

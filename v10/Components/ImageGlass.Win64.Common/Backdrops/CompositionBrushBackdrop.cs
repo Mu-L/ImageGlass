@@ -23,7 +23,7 @@ using System.Threading;
 using Windows.UI.Composition;
 using MsComposition = Microsoft.UI.Composition;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public abstract partial class CompositionBrushBackdrop : SystemBackdrop
 {

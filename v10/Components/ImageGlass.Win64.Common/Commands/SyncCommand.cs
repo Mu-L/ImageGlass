@@ -20,7 +20,7 @@ using Microsoft.UI.Dispatching;
 using System;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public sealed partial class SyncCommand : IIgCommand
 {

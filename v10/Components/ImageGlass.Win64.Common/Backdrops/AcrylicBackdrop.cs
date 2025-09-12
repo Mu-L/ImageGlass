@@ -22,7 +22,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public sealed partial class AcrylicBackdrop : SystemBackdrop
 {

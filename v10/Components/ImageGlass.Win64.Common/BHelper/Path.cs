@@ -28,7 +28,6 @@ using Windows.System;
 
 namespace ImageGlass.Common;
 
-
 public partial class BHelper
 {
     public static string AppName => "ImageGlass_10";

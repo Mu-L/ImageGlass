@@ -17,9 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using D2Phap;
-using ImageGlass.Common.FileSystem;
 
-namespace ImageGlass.Win64.Common.FileSystem;
+namespace ImageGlass.Common.FileSystem;
 
 public class FileShellSearchOptions : FileSearchOptions
 {

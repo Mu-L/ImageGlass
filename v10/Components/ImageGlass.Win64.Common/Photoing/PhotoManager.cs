@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
 using ImageGlass.Common.Photoing;
-using ImageGlass.Win64.Common.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
