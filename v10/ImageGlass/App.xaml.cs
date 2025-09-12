@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using D2Phap;
+using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Win64.Common;
 using Microsoft.UI.Xaml;
@@ -115,7 +116,7 @@ public partial class App : Application
     {
         var info = GetSystemColorInfo(sender);
 
-        WHelper.Debounce(200, (args) =>
+        BHelper.Debounce(200, (args) =>
         {
             _uiReporter.Report(args!);
         }, info);

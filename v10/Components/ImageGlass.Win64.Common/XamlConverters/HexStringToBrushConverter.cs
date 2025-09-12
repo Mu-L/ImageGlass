@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using System;
@@ -33,7 +34,7 @@ public partial class HexStringToBrushConverter : IValueConverter
             return new SolidColorBrush();
         }
 
-        var color = WHelper.ColorFromHex(hexColor);
+        var color = BHelper.ColorFromHex(hexColor);
         return new SolidColorBrush(color);
     }
 

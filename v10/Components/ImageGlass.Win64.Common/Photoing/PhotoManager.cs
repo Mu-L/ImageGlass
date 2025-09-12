@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Win64.Common.FileSystem;
@@ -71,7 +72,7 @@ public partial class PhotoManager : PhotoManagerImpl<Photo, FileSearcher, FileSh
 
 
         // 2. get distinct dir paths for searching
-        var inputPaths = WHelper.GetDistinctDirsFromPaths(paths);
+        var inputPaths = BHelper.GetDistinctDirsFromPaths(paths);
 
 
         // 3. create init photo

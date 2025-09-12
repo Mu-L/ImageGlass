@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using CommunityToolkit.WinUI;
+using Microsoft.UI.Dispatching;
 using System;
 using System.Runtime;
 using System.Threading;
@@ -26,6 +28,7 @@ namespace ImageGlass.Common;
 public partial class BHelper
 {
     private static CancellationTokenSource? _cancelGcCollect;
+    private static DispatcherQueueTimer? _debounceTimer;
 
 
     /// <summary>
@@ -56,6 +59,33 @@ public partial class BHelper
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
+    }
+
+
+    /// <summary>
+    /// Takes the last called action, delays the execution after a certain amount of time has passed.
+    /// </summary>
+    public static void Debounce(int delayMs, Action action)
+    {
+        Debounce(delayMs, (a) => action(), 0);
+    }
+
+
+    /// <summary>
+    /// Takes the last called action, delays the execution after a certain amount of time has passed.
+    /// </summary>
+    public static void Debounce<T>(int delayMs, Action<T?> action, T? param = default)
+    {
+        if (_debounceTimer is null)
+        {
+            var controller = DispatcherQueueController.CreateOnDedicatedThread();
+            _debounceTimer = controller.DispatcherQueue.CreateTimer();
+        }
+
+        _debounceTimer.Debounce(() =>
+        {
+            action(param);
+        }, TimeSpan.FromMilliseconds(delayMs));
     }
 
 }

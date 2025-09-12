@@ -121,7 +121,7 @@ public partial class MainWindow : IgWindow
 
 
         // 3. load single directory path
-        var path = WHelper.ResolvePath(paths[0]);
+        var path = BHelper.ResolvePath(paths[0]);
         if (BHelper.CheckPath(path) == PathType.Dir)
         {
             PrepareLoadPhoto([path], true);
