@@ -22,7 +22,7 @@ using Microsoft.UI.Xaml.Media;
 using System;
 using Windows.UI;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public static class Window_UI_Color_Exts
 {

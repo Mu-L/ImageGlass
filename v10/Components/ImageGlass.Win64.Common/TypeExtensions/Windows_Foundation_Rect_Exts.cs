@@ -21,7 +21,7 @@ using System;
 using Windows.Foundation;
 
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public static class Windows_Foundation_Rect_Exts
 {

@@ -20,7 +20,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public partial class SvgPathToImageSourceConverter : IValueConverter
 {

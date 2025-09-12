@@ -3,9 +3,9 @@
     x:Class="ImageGlass.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cm="using:ImageGlass.Common"
     xmlns:local="using:ImageGlass"
-    xmlns:revealBrushPresent="using:Microsoft.UI.Xaml"
-    xmlns:w64c="using:ImageGlass.Win64.Common">
+    xmlns:revealBrushPresent="using:Microsoft.UI.Xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -16,13 +16,13 @@
 
 
             <!--  Xaml Converters  -->
-            <w64c:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-            <w64c:ColorToBrushConverter x:Key="ColorToBrushConverter" />
-            <w64c:HexStringToBrushConverter x:Key="HexStringToBrushConverter" />
-            <w64c:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter" />
-            <w64c:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
-            <w64c:StringToBoolConverter x:Key="StringToBoolConverter" />
-            <w64c:SvgPathToImageSourceConverter x:Key="SvgPathToImageSourceConverter" />
+            <cm:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <cm:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+            <cm:HexStringToBrushConverter x:Key="HexStringToBrushConverter" />
+            <cm:NullableToVisibilityConverter x:Key="NullableToVisibilityConverter" />
+            <cm:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+            <cm:StringToBoolConverter x:Key="StringToBoolConverter" />
+            <cm:SvgPathToImageSourceConverter x:Key="SvgPathToImageSourceConverter" />
 
 
             <!--  Style: IgButtonStyle  -->

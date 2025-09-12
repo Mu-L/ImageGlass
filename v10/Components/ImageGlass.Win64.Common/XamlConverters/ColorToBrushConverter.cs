@@ -21,7 +21,7 @@ using Microsoft.UI.Xaml.Media;
 using System;
 using Windows.UI;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 
 public partial class ColorToBrushConverter : IValueConverter

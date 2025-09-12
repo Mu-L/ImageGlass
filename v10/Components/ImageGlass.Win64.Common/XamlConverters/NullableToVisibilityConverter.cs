@@ -20,7 +20,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using System;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 
 public partial class NullableToVisibilityConverter : IValueConverter

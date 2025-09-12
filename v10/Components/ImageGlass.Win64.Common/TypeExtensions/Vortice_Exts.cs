@@ -21,7 +21,7 @@ using SharpGen.Runtime;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 
 public static class Vortice_Exts

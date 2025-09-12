@@ -25,7 +25,8 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.UI.WindowsAndMessaging;
-namespace ImageGlass.Win64.Common;
+
+namespace ImageGlass.Common;
 
 public static class IconApi
 {

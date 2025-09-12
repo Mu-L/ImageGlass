@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Windows.Graphics;
 
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public static class Windows_Graphics_RectInt32_Exts
 {

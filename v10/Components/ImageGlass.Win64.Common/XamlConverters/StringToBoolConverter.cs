@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Microsoft.UI.Xaml.Data;
 using System;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public partial class StringToBoolConverter : IValueConverter
 {
