@@ -60,7 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\D2Phap.Canvas2D\Source\D2Phap.Canvas2D\D2Phap.Canvas2D\D2Phap.Canvas2D.csproj" />
-    <ProjectReference Include="..\ImageGlass.Win64.Common\ImageGlass.Common.csproj" />
+    <ProjectReference Include="..\Common\ImageGlass.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Windowing\DialogWindow\DialogWindow_Content.xaml">
