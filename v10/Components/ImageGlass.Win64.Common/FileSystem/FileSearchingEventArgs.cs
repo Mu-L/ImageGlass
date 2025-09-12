@@ -16,29 +16,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 using System;
-using System.Threading.Tasks;
-using Windows.Storage.Streams;
+using System.Collections.Generic;
 
-namespace ImageGlass.Common;
+namespace ImageGlass.Common.FileSystem;
 
 
-public static class IRandomAccessStream_Exts
+/// <summary>
+/// Event arguments for the <see cref="FileSearcherImpl.FileSearching"/> event.
+/// </summary>
+public class FileSearchingEventArgs(IEnumerable<string> filePaths, bool isSearchEnded) : EventArgs
 {
+    /// <summary>
+    /// Gets the file paths that have been enumerated.
+    /// </summary>
+    public IEnumerable<string> Results { get; } = filePaths;
 
     /// <summary>
-    /// Reads all bytes from a random access stream asynchronously.
+    /// Gets a value indicating whether the search operation has completed.
     /// </summary>
-    public static async Task<byte[]> ReadBytesAsync(this IRandomAccessStream stream)
-    {
-        using var reader = new DataReader(stream);
-        var bytes = new byte[stream.Size];
-
-        await reader.LoadAsync((uint)stream.Size).AsTask().ConfigureAwait(false);
-        reader.ReadBytes(bytes);
-
-        return bytes;
-    }
+    public bool IsSearchEnded => isSearchEnded;
 
 }

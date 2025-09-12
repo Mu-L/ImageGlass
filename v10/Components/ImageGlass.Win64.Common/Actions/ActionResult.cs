@@ -16,29 +16,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 using System;
-using System.Threading.Tasks;
-using Windows.Storage.Streams;
 
 namespace ImageGlass.Common;
 
 
-public static class IRandomAccessStream_Exts
+public class ActionResult(ActionExitCode exitCode, Exception? error = null)
 {
-
-    /// <summary>
-    /// Reads all bytes from a random access stream asynchronously.
-    /// </summary>
-    public static async Task<byte[]> ReadBytesAsync(this IRandomAccessStream stream)
-    {
-        using var reader = new DataReader(stream);
-        var bytes = new byte[stream.Size];
-
-        await reader.LoadAsync((uint)stream.Size).AsTask().ConfigureAwait(false);
-        reader.ReadBytes(bytes);
-
-        return bytes;
-    }
-
+    public ActionExitCode ExitCode { get; set; } = exitCode;
+    public Exception? Error { get; set; } = error;
 }
+
+
+public enum ActionExitCode
+{
+    Success,
+    Error,
+    Cancelled,
+    ApiNotFound,
+}
+
+
+

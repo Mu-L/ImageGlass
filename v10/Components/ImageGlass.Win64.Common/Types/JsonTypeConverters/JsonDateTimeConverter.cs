@@ -16,29 +16,26 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 using System;
-using System.Threading.Tasks;
-using Windows.Storage.Streams;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ImageGlass.Common;
 
 
-public static class IRandomAccessStream_Exts
+/// <summary>
+/// Convert <see cref="DateTime"/> to <see cref="Const.DATETIME_FORMAT"/> format.
+/// </summary>
+public class JsonDateTimeConverter : JsonConverter<DateTime>
 {
-
-    /// <summary>
-    /// Reads all bytes from a random access stream asynchronously.
-    /// </summary>
-    public static async Task<byte[]> ReadBytesAsync(this IRandomAccessStream stream)
+    public override void Write(Utf8JsonWriter writer, DateTime date, JsonSerializerOptions options)
     {
-        using var reader = new DataReader(stream);
-        var bytes = new byte[stream.Size];
-
-        await reader.LoadAsync((uint)stream.Size).AsTask().ConfigureAwait(false);
-        reader.ReadBytes(bytes);
-
-        return bytes;
+        writer.WriteStringValue(date.ToString(Const.DATETIME_FORMAT));
     }
 
+    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return DateTime.ParseExact(reader.GetString()!, Const.DATETIME_FORMAT, null);
+    }
 }
+

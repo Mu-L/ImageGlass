@@ -1,53 +1,52 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>ImageGlass.Win64.Common</RootNamespace>
-    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-    <UseWinUI>true</UseWinUI>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+	<PropertyGroup>
+		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+		<RootNamespace>ImageGlass.Common</RootNamespace>
+		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+		<UseWinUI>true</UseWinUI>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 
-    <Nullable>enable</Nullable>
-    <LangVersion>Preview</LangVersion>
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <Platforms>x64;ARM64</Platforms>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <ItemGroup>
-    <AdditionalFiles Remove="NativeMethods.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <AdditionalFiles Include="NativeMethods.txt" />
-  </ItemGroup>
-    <ItemGroup>
-        <COMReference Include="IWshRuntimeLibrary">
-            <WrapperTool>tlbimp</WrapperTool>
-            <VersionMinor>0</VersionMinor>
-            <VersionMajor>1</VersionMajor>
-            <Guid>f935dc20-1cf0-11d0-adb9-00c04fd58a0b</Guid>
-            <Lcid>0</Lcid>
-            <Isolated>false</Isolated>
-            <EmbedInteropTypes>true</EmbedInteropTypes>
-        </COMReference>
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.250402" />
-        <PackageReference Include="D2Phap.EggShell-x64" Version="1.0.517" />
-        <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4948" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250907003" />
-        <PackageReference Include="System.Drawing.Common" Version="10.0.0-rc.1.25451.107" />
-        <PackageReference Include="Vortice.Direct2D1" Version="3.7.5-beta" />
-        <PackageReference Include="Vortice.Win32.Graphics.Imaging" Version="2.2.7" />
-        <PackageReference Include="ZString" Version="2.6.0" />
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Common\ImageGlass.Common.csproj" />
-    </ItemGroup>
-  
+		<Nullable>enable</Nullable>
+		<LangVersion>Preview</LangVersion>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<Platforms>x64;ARM64</Platforms>
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+	<ItemGroup>
+		<AdditionalFiles Remove="NativeMethods.json" />
+	</ItemGroup>
+	<ItemGroup>
+		<AdditionalFiles Include="NativeMethods.txt" />
+	</ItemGroup>
+	<ItemGroup>
+		<COMReference Include="IWshRuntimeLibrary">
+			<WrapperTool>tlbimp</WrapperTool>
+			<VersionMinor>0</VersionMinor>
+			<VersionMajor>1</VersionMajor>
+			<Guid>f935dc20-1cf0-11d0-adb9-00c04fd58a0b</Guid>
+			<Lcid>0</Lcid>
+			<Isolated>false</Isolated>
+			<EmbedInteropTypes>true</EmbedInteropTypes>
+		</COMReference>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Catel.Core" Version="6.1.4" />
+		<PackageReference Include="Magick.NET-Q8-OpenMP-x64" Version="14.8.2" />
+		<PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.250402" />
+		<PackageReference Include="D2Phap.EggShell-x64" Version="1.0.517" />
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4948" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250907003" />
+		<PackageReference Include="System.Drawing.Common" Version="10.0.0-rc.1.25451.107" />
+		<PackageReference Include="Vortice.Direct2D1" Version="3.7.5-beta" />
+		<PackageReference Include="Vortice.Win32.Graphics.Imaging" Version="2.2.7" />
+		<PackageReference Include="ZString" Version="2.6.0" />
+	</ItemGroup>
+
 </Project>

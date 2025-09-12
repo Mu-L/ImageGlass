@@ -16,29 +16,19 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 using System;
-using System.Threading.Tasks;
-using Windows.Storage.Streams;
+using System.Globalization;
 
 namespace ImageGlass.Common;
 
-
-public static class IRandomAccessStream_Exts
+public static class DateTime_Exts
 {
-
     /// <summary>
-    /// Reads all bytes from a random access stream asynchronously.
+    /// Convert the current value of <see cref="DateTime"/> to string in ISO 8601 date format.
     /// </summary>
-    public static async Task<byte[]> ReadBytesAsync(this IRandomAccessStream stream)
+    public static string ToISO8601String(this DateTime thisDT)
     {
-        using var reader = new DataReader(stream);
-        var bytes = new byte[stream.Size];
-
-        await reader.LoadAsync((uint)stream.Size).AsTask().ConfigureAwait(false);
-        reader.ReadBytes(bytes);
-
-        return bytes;
+        return thisDT.ToString("O", CultureInfo.InvariantCulture);
     }
 
 }

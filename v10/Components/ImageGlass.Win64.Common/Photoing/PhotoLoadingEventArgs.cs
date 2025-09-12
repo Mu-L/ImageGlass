@@ -16,29 +16,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 using System;
-using System.Threading.Tasks;
-using Windows.Storage.Streams;
+using System.Threading;
 
-namespace ImageGlass.Common;
+namespace ImageGlass.Common.Photoing;
 
 
-public static class IRandomAccessStream_Exts
+public delegate void TEventHandler<TSender, TResult>(TSender sender, TResult e);
+
+
+
+public class PhotoLoadingEventArgs(PhotoImpl photo, CancellationToken token) : EventArgs
 {
+    public PhotoImpl Photo => photo;
 
-    /// <summary>
-    /// Reads all bytes from a random access stream asynchronously.
-    /// </summary>
-    public static async Task<byte[]> ReadBytesAsync(this IRandomAccessStream stream)
-    {
-        using var reader = new DataReader(stream);
-        var bytes = new byte[stream.Size];
+    public PhotoMetadata Metadata => photo.Metadata;
 
-        await reader.LoadAsync((uint)stream.Size).AsTask().ConfigureAwait(false);
-        reader.ReadBytes(bytes);
+    public CancellationToken CancelToken => token;
 
-        return bytes;
-    }
+    public bool IsDone => photo.IsDone;
 
 }
+

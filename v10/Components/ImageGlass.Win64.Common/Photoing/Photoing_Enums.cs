@@ -16,29 +16,64 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 using System;
-using System.Threading.Tasks;
-using Windows.Storage.Streams;
 
-namespace ImageGlass.Common;
+namespace ImageGlass.Common.Photoing;
 
 
-public static class IRandomAccessStream_Exts
+
+/// <summary>
+/// Color profile options.
+/// </summary>
+public enum ColorProfileOption
 {
+    None,
+    Custom,
+    CurrentMonitorProfile,
 
-    /// <summary>
-    /// Reads all bytes from a random access stream asynchronously.
-    /// </summary>
-    public static async Task<byte[]> ReadBytesAsync(this IRandomAccessStream stream)
-    {
-        using var reader = new DataReader(stream);
-        var bytes = new byte[stream.Size];
+    // ImageMagick's profiles
+    AdobeRGB1998,
+    AppleRGB,
+    CoatedFOGRA39,
+    ColorMatchRGB,
+    sRGB,
+    USWebCoatedSWOP,
+}
 
-        await reader.LoadAsync((uint)stream.Size).AsTask().ConfigureAwait(false);
-        reader.ReadBytes(bytes);
 
-        return bytes;
-    }
+/// <summary>
+/// Flip options.
+/// </summary>
+[Flags]
+public enum FlipOptions
+{
+    None = 0,
+    Horizontal = 1 << 1,
+    Vertical = 1 << 2,
+}
 
+
+/// <summary>
+/// Rotate option.
+/// </summary>
+public enum RotateOption
+{
+    Left = 0,
+    Right = 1,
+}
+
+
+/// <summary>
+/// Color channels
+/// </summary>
+[Flags]
+public enum ColorChannels
+{
+    R = 1 << 1,
+    G = 1 << 2,
+    B = 1 << 3,
+    A = 1 << 4,
+
+    RGB = R | G | B,
+    RGBA = RGB | A,
 }
