@@ -658,7 +658,7 @@ public partial class Popup : DialogForm
         string note = "",
         ColorStatusType? noteStatusType = null,
         PopupButton buttons = PopupButton.OK,
-        ShellStockIcon? icon = null,
+        StockIconId? icon = null,
         Image? thumbnail = null,
         string optionText = "",
         bool topMost = false,

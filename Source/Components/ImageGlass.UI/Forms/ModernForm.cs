@@ -304,6 +304,7 @@ public partial class ModernForm : Form
     {
         if (DesignMode) return;
 
+        Application.SetColorMode(darkMode ? SystemColorMode.Dark : SystemColorMode.Classic);
         DarkMode = darkMode;
         BackdropStyle = style ?? _backdropStyle;
     }

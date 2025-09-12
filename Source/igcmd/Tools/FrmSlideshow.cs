@@ -225,9 +225,9 @@ public partial class FrmSlideshow : ThemedForm
     }
 
 
-    protected override void OnClosing(CancelEventArgs e)
+    protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        base.OnClosing(e);
+        base.OnFormClosing(e);
         _igTool.Dispose();
     }
 
@@ -2032,7 +2032,7 @@ public partial class FrmSlideshow : ThemedForm
         {
             Title = Config.Language[$"FrmMain.{nameof(MnuCustomZoom)}"],
             Value = oldZoom.ToString(),
-            Thumbnail = SystemIconApi.GetSystemIcon(ShellStockIcon.SIID_FIND),
+            Thumbnail = SystemIconApi.GetSystemIcon(StockIconId.Find),
 
             UnsignedFloatValueOnly = true,
             TopMost = TopMost,
@@ -2205,8 +2205,8 @@ public partial class FrmSlideshow : ThemedForm
                 : Config.Language[$"FrmMain.{nameof(MnuDeleteFromHardDisk)}._Description"];
 
             var overlayIcon = moveToRecycleBin
-                ? ShellStockIcon.SIID_RECYCLER
-                : ShellStockIcon.SIID_DELETE;
+                ? StockIconId.Recycler
+                : StockIconId.Delete;
 
             var fi = new FileInfo(filePath);
             var description = filePath + "\r\n" +

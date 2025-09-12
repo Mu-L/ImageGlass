@@ -94,7 +94,7 @@ public static class Functions
                     title: Config.Language[langPath],
                     heading: Config.Language[$"{langPath}._Success"],
                     note: note,
-                    icon: ShellStockIcon.SIID_INFO);
+                    icon: StockIconId.Info);
             }
         }, (error) =>
         {
@@ -355,7 +355,7 @@ public static class Functions
                     heading: Config.Language[$"{langPath}.{(enable ? "_Enabled" : "_Disabled")}"],
                     description: description,
                     note: note,
-                    icon: ShellStockIcon.SIID_INFO);
+                    icon: StockIconId.Info);
             }
         }, (error) =>
         {

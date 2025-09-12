@@ -1996,7 +1996,7 @@ public static class Config
         string heading = "",
         string details = "",
         string note = "",
-        ShellStockIcon? icon = ShellStockIcon.SIID_INFO,
+        StockIconId? icon = StockIconId.Info,
         Image? thumbnail = null,
         PopupButton buttons = PopupButton.OK,
         string optionText = "")
@@ -2021,7 +2021,7 @@ public static class Config
         string? heading = null,
         string details = "",
         string note = "",
-        ShellStockIcon? icon = ShellStockIcon.SIID_WARNING,
+        StockIconId? icon = StockIconId.Warning,
         Image? thumbnail = null,
         PopupButton buttons = PopupButton.OK,
         string optionText = "")
@@ -2048,7 +2048,7 @@ public static class Config
         string? heading = null,
         string details = "",
         string note = "",
-        ShellStockIcon? icon = ShellStockIcon.SIID_ERROR,
+        StockIconId? icon = StockIconId.Error,
         Image? thumbnail = null,
         PopupButton buttons = PopupButton.OK,
         string optionText = "")

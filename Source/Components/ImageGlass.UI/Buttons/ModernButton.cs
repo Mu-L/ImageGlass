@@ -48,7 +48,7 @@ public class ModernButton : Button
     private static readonly int _padding = 4;
     private int _imagePadding = 2;
 
-    private ShellStockIcon? _systemIcon = null;
+    private StockIconId? _systemIcon = null;
     private IconName _svgIcon = IconName.None;
 
     #endregion // Private variables
@@ -77,7 +77,7 @@ public class ModernButton : Button
     /// Gets, sets the system icon.
     /// </summary>
     [DefaultValue(false)]
-    public ShellStockIcon? SystemIcon
+    public StockIconId? SystemIcon
     {
         get => _systemIcon;
         set
@@ -235,7 +235,7 @@ public class ModernButton : Button
                  ControlStyles.ResizeRedraw |
                  ControlStyles.UserPaint, true);
 
-        base.UseVisualStyleBackColor = false;
+        base.UseVisualStyleBackColor = true;
         base.UseCompatibleTextRendering = false;
 
         SetButtonState(ModernControlState.Normal);

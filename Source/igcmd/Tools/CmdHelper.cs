@@ -49,7 +49,7 @@ public static class CmdHelper
                 var result = Config.ShowInfo(formOwner,
                     title: formOwner?.Text ?? string.Empty,
                     heading: Config.Language[$"{nameof(FrmQuickSetup)}._ConfirmCloseProcess"],
-                    icon: ImageGlass.Base.WinApi.ShellStockIcon.SIID_HELP,
+                    icon: StockIconId.Help,
                     buttons: PopupButton.Yes_No);
 
                 canProceed = result.ExitResult == PopupExitResult.OK;

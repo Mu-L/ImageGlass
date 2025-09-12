@@ -55,6 +55,7 @@ public static class ID2D1EffectExtensions
 
         // draw Image on Target
         dc.BeginDraw();
+        dc.Clear();
         if (ignoreAlpha)
         {
             // fill back background if alpha is ignored

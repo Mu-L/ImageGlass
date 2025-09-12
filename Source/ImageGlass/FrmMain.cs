@@ -26,7 +26,7 @@ using ImageGlass.Base.WinApi;
 using ImageGlass.Gallery;
 using ImageGlass.Settings;
 using ImageGlass.UI;
-using System.Diagnostics.CodeAnalysis;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json;
 using WicNet;
@@ -35,9 +35,7 @@ namespace ImageGlass;
 
 public partial class FrmMain : ThemedForm
 {
-#pragma warning disable CA1051 // Do not declare visible instance fields
     public readonly ModernToolbar ToolbarContext = new();
-#pragma warning restore CA1051 // Do not declare visible instance fields
 
     // cancellation tokens of synchronious task
     private CancellationTokenSource? _loadCancelTokenSrc = new();
@@ -1579,8 +1577,6 @@ public partial class FrmMain : ThemedForm
     /// <summary>
     /// Executes user action
     /// </summary>
-    [SuppressMessage("Usage", "CA2208:Instantiate argument exceptions correctly", Justification = "<Pending>")]
-    [SuppressMessage("Usage", "CA2201:Do not raise reserved exception types", Justification = "<Pending>")]
     public async Task ExecuteUserActionAsync(SingleAction? ac)
     {
         if (ac == null) return;
@@ -1642,9 +1638,8 @@ public partial class FrmMain : ThemedForm
                     }
                     else
                     {
-                        error = new ArgumentException(
-                            ZString.Format(Config.Language[$"{langPath}._MethodArgumentNotSupported"], ac.Executable),
-                            nameof(ac.Arguments));
+                        error = new MissingMethodException(
+                            ZString.Format(Config.Language[$"{langPath}._MethodArgumentNotSupported"], ac.Executable), ac.Executable);
                     }
 
 
@@ -1687,7 +1682,7 @@ public partial class FrmMain : ThemedForm
             var result = await BHelper.RunExeCmd(Executable, Args, false, false);
             if (result != IgExitCode.Done)
             {
-                error = new Exception(ZString.Format(Config.Language[$"{langPath}._Win32ExeError"], ac.Executable));
+                error = new Win32Exception(ZString.Format(Config.Language[$"{langPath}._Win32ExeError"], ac.Executable));
             }
         }
 
