@@ -7,7 +7,7 @@
     xmlns:local="using:ImageGlass"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:ImageGlass.Win64.UI"
-    xmlns:w64="using:ImageGlass.WinNT"
+    xmlns:ui2="using:ImageGlass.UI"
     xmlns:w64c="using:ImageGlass.Win64.Common"
     d:DataContext="{d:DesignInstance Type=local:MainWindow_Content}"
     x:DefaultBindMode="OneWay"
@@ -33,7 +33,7 @@
 
 
         <!--  Viewer  -->
-        <w64:VirtualViewerControl
+        <ui2:VirtualViewerControl
             x:Name="PART_Viewer"
             Grid.Row="1"
             AllowDrop="True"

@@ -19,11 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using D2Phap;
 using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
+using ImageGlass.UI;
 using ImageGlass.Win64.Common;
 using ImageGlass.Win64.Common.FileSystem;
 using ImageGlass.Win64.Common.Photoing;
 using ImageGlass.Win64.UI;
-using ImageGlass.WinNT;
 using Microsoft.UI.Xaml;
 using System;
 using System.Linq;
