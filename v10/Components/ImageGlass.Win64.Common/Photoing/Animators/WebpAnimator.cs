@@ -16,11 +16,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common.Photoing;
 using Vortice.Direct2D1;
 using Vortice.WIC;
 
-namespace ImageGlass.Win64.Common.Photoing;
+namespace ImageGlass.Common.Photoing;
 
 
 /// <summary>

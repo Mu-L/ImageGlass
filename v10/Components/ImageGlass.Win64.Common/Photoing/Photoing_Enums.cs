@@ -21,7 +21,6 @@ using System;
 namespace ImageGlass.Common.Photoing;
 
 
-
 /// <summary>
 /// Color profile options.
 /// </summary>

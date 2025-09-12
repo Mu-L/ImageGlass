@@ -16,8 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
-using ImageGlass.Common.Photoing;
 using ImageMagick;
 using Microsoft.UI.Xaml.Media;
 using System.Collections.Concurrent;
@@ -28,7 +26,7 @@ using Vortice.Direct2D1;
 using Vortice.WIC;
 using WinRT;
 
-namespace ImageGlass.Win64.Common.Photoing;
+namespace ImageGlass.Common.Photoing;
 
 
 /// <summary>

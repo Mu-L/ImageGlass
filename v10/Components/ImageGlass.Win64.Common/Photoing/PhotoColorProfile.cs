@@ -22,7 +22,7 @@ using System;
 namespace ImageGlass.Common.Photoing;
 
 
-public class PhotoColorProfile(PhotoColorSpace colorSpace, byte[]? data, IDisposable? native = null) : IDisposable
+public partial class PhotoColorProfile(PhotoColorSpace colorSpace, byte[]? data, IDisposable? native = null) : IDisposable
 {
 
     #region IDisposable Disposing

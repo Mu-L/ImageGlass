@@ -16,8 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
-using ImageGlass.Common.Photoing;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Threading;
@@ -25,7 +23,7 @@ using System.Threading.Tasks;
 using Vortice.WIC;
 using Windows.Graphics.Imaging;
 
-namespace ImageGlass.Win64.Common.Photoing;
+namespace ImageGlass.Common.Photoing;
 
 public partial class Photo : PhotoImpl
 {

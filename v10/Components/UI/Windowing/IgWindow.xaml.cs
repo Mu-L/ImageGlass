@@ -18,7 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
-using ImageGlass.Win64.Common;
 using ImageMagick;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;

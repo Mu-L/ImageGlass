@@ -19,8 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using D2Phap.Canvas2D;
 using ImageGlass.Common;
-using ImageGlass.Win64.Common;
-using ImageGlass.Win64.Common.Photoing;
+using ImageGlass.Common.Photoing;
 using Vortice.Direct2D1;
 using Windows.Foundation;
 

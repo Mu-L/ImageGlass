@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
-using ImageGlass.Win64.Common;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

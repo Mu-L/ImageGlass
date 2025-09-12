@@ -18,7 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using ImageGlass.Common;
-using ImageGlass.Win64.Common;
 using Microsoft.UI;
 using Windows.Foundation;
 using Windows.UI;

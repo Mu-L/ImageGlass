@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
-using ImageGlass.Win64.Common.Photoing;
+using ImageGlass.Common.Photoing;
 using System.ComponentModel;
 using Windows.UI;
 
