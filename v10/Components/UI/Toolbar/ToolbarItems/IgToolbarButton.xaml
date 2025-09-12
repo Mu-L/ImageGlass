@@ -3,12 +3,12 @@
     x:Class="ImageGlass.UI.IgToolbarButton"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cm="using:ImageGlass.Common"
     xmlns:common="using:ImageGlass.Common"
     xmlns:converters="using:CommunityToolkit.WinUI.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:w64c="using:ImageGlass.Win64.Common"
     x:DefaultBindMode="OneWay"
     AutomationProperties.AutomationControlType="Button"
     DataContext="{x:Bind VM, Mode=OneWay}"
@@ -31,13 +31,13 @@
         <StackPanel Orientation="Horizontal" Spacing="{x:Bind local:IgToolbarButton.InnerSpacing}">
             <ImageIcon
                 Name="PART_ButtonIcon"
-                Width="{x:Bind w64c:AP.Config.ToolbarIconHeight}"
-                Height="{x:Bind w64c:AP.Config.ToolbarIconHeight}" />
+                Width="{x:Bind cm:AP.Config.ToolbarIconHeight}"
+                Height="{x:Bind cm:AP.Config.ToolbarIconHeight}" />
 
             <TextBlock
                 Name="PART_ButtonText"
                 VerticalAlignment="Center"
-                Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
+                Foreground="{x:Bind cm:AP.Config.Theme.ComputedColors.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
                 IsColorFontEnabled="True"
                 Text="{x:Bind VM.Text}"
                 Visibility="{x:Bind VM.IsTextVisible, Converter={StaticResource BoolToVisibilityConverter}}" />

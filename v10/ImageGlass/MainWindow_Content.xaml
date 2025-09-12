@@ -3,11 +3,11 @@
     x:Class="ImageGlass.MainWindow_Content"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cm="using:ImageGlass.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:ImageGlass.UI"
-    xmlns:w64c="using:ImageGlass.Win64.Common"
     d:DataContext="{d:DesignInstance Type=local:MainWindow_Content}"
     x:DefaultBindMode="OneWay"
     IsTabStop="False"
@@ -28,7 +28,7 @@
             Canvas.ZIndex="90"
             IsTabStop="False"
             ItemClicked="PART_ToolbarMain_ItemClicked"
-            ItemsSource="{x:Bind w64c:AP.Config.ToolbarButtons}" />
+            ItemsSource="{x:Bind cm:AP.Config.ToolbarButtons}" />
 
 
         <!--  Viewer  -->
@@ -36,16 +36,16 @@
             x:Name="PART_Viewer"
             Grid.Row="1"
             AllowDrop="True"
-            BackgroundColor="{x:Bind w64c:AP.Config.Theme.ComputedColors.BgColor}"
-            CheckerboardMode="{x:Bind w64c:AP.Config.CheckerboardMode}"
+            BackgroundColor="{x:Bind cm:AP.Config.Theme.ComputedColors.BgColor}"
+            CheckerboardMode="{x:Bind cm:AP.Config.CheckerboardMode}"
             DragOver="PART_Viewer_DragOver"
             Drop="PART_Viewer_Drop"
-            EnableDebug="{x:Bind w64c:AP.Config.EnableDebug}"
+            EnableDebug="{x:Bind cm:AP.Config.EnableDebug}"
             IsTabStop="False"
-            PanSpeed="{x:Bind w64c:AP.Config.PanSpeed}"
-            ZoomLevels="{x:Bind w64c:AP.Config.ZoomLevels}"
-            ZoomMode="{x:Bind w64c:AP.Config.ZoomMode}"
-            ZoomSpeed="{x:Bind w64c:AP.Config.ZoomSpeed}" />
+            PanSpeed="{x:Bind cm:AP.Config.PanSpeed}"
+            ZoomLevels="{x:Bind cm:AP.Config.ZoomLevels}"
+            ZoomMode="{x:Bind cm:AP.Config.ZoomMode}"
+            ZoomSpeed="{x:Bind cm:AP.Config.ZoomSpeed}" />
 
 
         <!--  Gallery  -->
@@ -56,7 +56,7 @@
             Canvas.ZIndex="80"
             IsTabStop="False"
             ItemClicked="PART_Gallery_ItemClicked"
-            VM="{x:Bind w64c:AP.Photos, Mode=OneWay}" />
+            VM="{x:Bind cm:AP.Photos, Mode=OneWay}" />
 
     </Grid>
 

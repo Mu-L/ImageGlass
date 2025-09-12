@@ -17,14 +17,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using D2Phap;
-using ImageGlass.Common;
 using ImageGlass.Win64.Common.Photoing;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public static class AP
 {

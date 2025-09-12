@@ -8,7 +8,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:w64c="using:ImageGlass.Win64.Common"
     x:Name="Root"
     d:DataContext="{d:DesignInstance local:ToolbarControl,
                                      IsDesignTimeCreatable=True}"
@@ -56,7 +55,7 @@
         Padding="{x:Bind local:IgToolbarButton.ItemPadding}"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
-        Background="{x:Bind w64c:AP.Config.Theme.Colors.ToolbarBgColor, Converter={StaticResource HexStringToBrushConverter}}">
+        Background="{x:Bind cm:AP.Config.Theme.Colors.ToolbarBgColor, Converter={StaticResource HexStringToBrushConverter}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
@@ -100,12 +99,12 @@
                 Visibility="Collapsed">
                 <StackPanel VerticalAlignment="Stretch" Orientation="Horizontal">
                     <Viewbox
-                        Width="{x:Bind w64c:AP.Config.ToolbarIconHeight}"
+                        Width="{x:Bind cm:AP.Config.ToolbarIconHeight}"
                         Height="{x:Bind local:ToolbarControl.OverflowIconHeight}"
                         VerticalAlignment="Bottom">
                         <FontIcon
                             AutomationProperties.AccessibilityView="Raw"
-                            Foreground="{x:Bind w64c:AP.Config.Theme.ComputedColors.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
+                            Foreground="{x:Bind cm:AP.Config.Theme.ComputedColors.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
                             Glyph="&#xE712;" />
                     </Viewbox>
                 </StackPanel>
