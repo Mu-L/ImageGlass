@@ -17,38 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System;
-using System.Runtime.InteropServices;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public static partial class NativeValues
 {
-    public delegate IntPtr WNDPROC(IntPtr hWnd, NativeValues.WindowMessage Msg, IntPtr wParam, IntPtr lParam);
 
-    public static partial class ExternDll
-    {
-        public const string
-            User32 = "user32.dll",
-            Gdi32 = "gdi32.dll",
-            GdiPlus = "gdiplus.dll",
-            Kernel32 = "kernel32.dll",
-            Shell32 = "shell32.dll",
-            MsImg = "msimg32.dll",
-            NTdll = "ntdll.dll",
-            DwmApi = "dwmapi.dll",
-            UxTheme = "uxtheme.dll",
-            ComCtl32 = "comctl32.dll";
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct MINMAXINFO
-    {
-        public POINT ptReserved;
-        public POINT ptMaxSize;
-        public POINT ptMaxPosition;
-        public POINT ptMinTrackSize;
-        public POINT ptMaxTrackSize;
-    }
     internal struct POINT
     {
         /// <summary>
@@ -79,35 +53,6 @@ public static partial class NativeValues
         BlurRegion = 0x00000002,
         TransitionMaximized = 0x00000004,
     }
-
-    [Flags]
-    internal enum WindowStyle : uint
-    {
-        WS_SYSMENU = 0x80000,
-        WS_BORDER = 0x00800000,
-        WS_CAPTION = 0x00C00000,
-        WS_THICKFRAME = 0x00040000,
-        WS_EX_LAYERED = 0x00080000,
-        WS_EX_TRANSPARENT = 0x00000020,
-        WS_EX_LAYOUTLTR = 0x00000000,
-        WS_EX_LAYOUTRTL = 0x00400000
-    }
-    public enum DWM_WINDOW_CORNER_PREFERENCE
-    {
-        DWMWCP_DEFAULT = 0,
-        DWMWCP_DONOTROUND = 1,
-        DWMWCP_ROUND = 2,
-        DWMWCP_ROUNDSMALL = 3
-    }
-
-    public enum PreferredAppMode
-    {
-        Default,
-        AllowDark,
-        ForceDark,
-        ForceLight,
-        Max
-    };
 
     public enum WindowMessage
     {

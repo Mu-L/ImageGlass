@@ -20,7 +20,7 @@ using System;
 using System.Runtime.InteropServices;
 using Windows.Win32.Foundation;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 public struct Message
 {

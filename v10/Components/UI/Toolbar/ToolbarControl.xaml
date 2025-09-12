@@ -3,6 +3,7 @@
     x:Class="ImageGlass.UI.ToolbarControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cm="using:ImageGlass.Common"
     xmlns:ctk="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass.UI"
@@ -20,7 +21,7 @@
         <!--  ToolbarItemTemplate  -->
         <DataTemplate
             x:Key="ToolbarItemTemplate"
-            x:DataType="w64c:ToolbarItemModel"
+            x:DataType="cm:ToolbarItemModel"
             x:DefaultBindMode="OneWay">
 
             <ctk:SwitchPresenter
@@ -134,7 +135,7 @@
             <!--  Menu button  -->
             <local:IgToolbarButton x:Name="BtnMainMenu">
                 <local:IgToolbarButton.VM>
-                    <w64c:ToolbarItemModel Image="{x:Bind local:ToolbarControl.MainMenuIconName}" Text="Main Menu" />
+                    <cm:ToolbarItemModel Image="{x:Bind local:ToolbarControl.MainMenuIconName}" Text="Main Menu" />
                 </local:IgToolbarButton.VM>
 
 

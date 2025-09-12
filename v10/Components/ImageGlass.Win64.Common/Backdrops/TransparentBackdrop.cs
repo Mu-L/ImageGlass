@@ -16,10 +16,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Win64.Common;
 using Microsoft.UI;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
+using System;
+using System.Runtime.InteropServices;
 using Windows.UI;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -38,6 +39,12 @@ public partial class TransparentBackdrop : CompositionBrushBackdrop
 
     private Windows.UI.Composition.CompositionColorBrush? _brush;
     private Color _tintColor;
+
+
+    [DllImport("user32.dll")]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    internal static unsafe extern int FillRect(IntPtr hDC, ref RECT lprc, HBRUSH hbr);
+
 
 
     public Color TintColor
@@ -125,7 +132,7 @@ public partial class TransparentBackdrop : CompositionBrushBackdrop
             if (_bgHBrush.IsNull)
                 _bgHBrush = PInvoke.CreateSolidBrush(new COLORREF(colorInt));
 
-            _ = NativeMethods.FillRect(hdc, ref rect, _bgHBrush);
+            _ = FillRect(hdc, ref rect, _bgHBrush);
             return true;
         }
 

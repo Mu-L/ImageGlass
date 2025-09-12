@@ -16,14 +16,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
 using System;
 using System.Collections.Generic;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Shell;
 
-namespace ImageGlass.Win64.Common;
+namespace ImageGlass.Common;
 
 
 public partial class WindowMessageMonitor : DisposableImpl
