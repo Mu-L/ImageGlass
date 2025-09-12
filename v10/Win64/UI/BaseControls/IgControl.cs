@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 
 /// <summary>

@@ -23,7 +23,6 @@ using ImageGlass.UI;
 using ImageGlass.Win64.Common;
 using ImageGlass.Win64.Common.FileSystem;
 using ImageGlass.Win64.Common.Photoing;
-using ImageGlass.Win64.UI;
 using Microsoft.UI.Xaml;
 using System;
 using System.Linq;

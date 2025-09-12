@@ -21,7 +21,7 @@ using ImageGlass.Win64.Common.Photoing;
 using System.ComponentModel;
 using Windows.UI;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 
 public partial class IgGalleryItem : IgButton

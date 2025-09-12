@@ -23,7 +23,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 
 internal sealed partial class ModalWindow_Content : IgControl

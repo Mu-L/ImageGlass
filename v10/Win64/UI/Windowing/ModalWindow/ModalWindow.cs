@@ -22,7 +22,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 public partial class ModalWindow : DialogWindow
 {

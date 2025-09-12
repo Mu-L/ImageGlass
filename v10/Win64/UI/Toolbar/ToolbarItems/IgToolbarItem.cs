@@ -18,8 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Win64.Common;
 
-namespace ImageGlass.Win64.UI;
-
+namespace ImageGlass.UI;
 
 public partial class IgToolbarItem : IgControl
 {

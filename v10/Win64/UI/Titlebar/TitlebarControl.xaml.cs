@@ -20,7 +20,7 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Windows.UI;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 
 public sealed partial class TitlebarControl : IgControl

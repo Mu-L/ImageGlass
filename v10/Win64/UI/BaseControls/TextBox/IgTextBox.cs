@@ -32,7 +32,7 @@ using Windows.Foundation;
 using Windows.System;
 using Windows.UI.Text;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 public partial class IgTextBox : TextBox, INotifyPropertyChanged
 {

@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Win64.Common;
 using System;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 
 public class ToolbarItemClickedEventArgs(ToolbarItemModel vm, IgButton btn) : EventArgs

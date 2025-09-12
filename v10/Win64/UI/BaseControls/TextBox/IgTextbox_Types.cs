@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 
 public class ValidatedEventArgs(bool isValid, string? value) : EventArgs

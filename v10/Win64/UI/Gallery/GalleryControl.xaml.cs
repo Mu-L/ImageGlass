@@ -24,7 +24,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using Windows.Foundation;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 public sealed partial class GalleryControl : IgControl
 {

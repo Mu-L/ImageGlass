@@ -25,7 +25,7 @@ using System.Linq;
 using Windows.Foundation;
 using Windows.System;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 public sealed partial class DialogWindow_Content : IgControl
 {

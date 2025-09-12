@@ -24,7 +24,7 @@ using System;
 using System.IO;
 using Windows.Foundation;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 public partial class IgToolbarButton : IgToolbarItem
 {

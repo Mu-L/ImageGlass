@@ -22,7 +22,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using System;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 public sealed partial class IgTextBox_Description : IgControl
 {

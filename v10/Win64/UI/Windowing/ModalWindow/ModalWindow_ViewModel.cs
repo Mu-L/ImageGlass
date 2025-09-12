@@ -21,7 +21,7 @@ using Microsoft.UI.Xaml.Controls;
 using System.Drawing;
 using Windows.Graphics.Imaging;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 
 public partial class ModalWindowViewModel : DisposableImpl

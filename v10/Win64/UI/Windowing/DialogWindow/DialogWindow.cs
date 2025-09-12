@@ -30,7 +30,7 @@ using Windows.Graphics;
 using Windows.System;
 using WinRT.Interop;
 
-namespace ImageGlass.Win64.UI;
+namespace ImageGlass.UI;
 
 
 public partial class DialogWindow : IgWindow

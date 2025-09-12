@@ -6,8 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageGlass"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="using:ImageGlass.Win64.UI"
-    xmlns:ui2="using:ImageGlass.UI"
+    xmlns:ui="using:ImageGlass.UI"
     xmlns:w64c="using:ImageGlass.Win64.Common"
     d:DataContext="{d:DesignInstance Type=local:MainWindow_Content}"
     x:DefaultBindMode="OneWay"
@@ -33,7 +32,7 @@
 
 
         <!--  Viewer  -->
-        <ui2:VirtualViewerControl
+        <ui:VirtualViewerControl
             x:Name="PART_Viewer"
             Grid.Row="1"
             AllowDrop="True"
