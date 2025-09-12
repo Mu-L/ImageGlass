@@ -3,17 +3,15 @@
     <Platform Name="ARM64" />
     <Platform Name="x64" />
   </Configurations>
-  <Folder Name="/Common/">
-    <Project Path="Common/ImageGlass.Common/ImageGlass.Common.csproj">
-      <Platform Solution="*|ARM64" Project="ARM64" />
-      <Platform Solution="*|x64" Project="x64" />
-    </Project>
-  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
   <Folder Name="/Win64/">
     <Project Path="../../D2Phap.Canvas2D/Source/D2Phap.Canvas2D/D2Phap.Canvas2D/D2Phap.Canvas2D.csproj">
+      <Platform Solution="*|ARM64" Project="ARM64" />
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="Win64/Common/ImageGlass.Common.csproj">
       <Platform Solution="*|ARM64" Project="ARM64" />
       <Platform Solution="*|x64" Project="x64" />
     </Project>

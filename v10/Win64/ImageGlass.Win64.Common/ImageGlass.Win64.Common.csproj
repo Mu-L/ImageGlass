@@ -46,8 +46,8 @@
         <PackageReference Include="Vortice.Win32.Graphics.Imaging" Version="2.2.7" />
         <PackageReference Include="ZString" Version="2.6.0" />
     </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Common\ImageGlass.Common\ImageGlass.Common.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Common\ImageGlass.Common.csproj" />
+    </ItemGroup>
   
 </Project>

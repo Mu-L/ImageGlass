@@ -54,7 +54,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250907003" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\ImageGlass.Common\ImageGlass.Common.csproj" />
+    <ProjectReference Include="..\Win64\Common\ImageGlass.Common.csproj" />
     <ProjectReference Include="..\Win64\ImageGlass.Win64.Common\ImageGlass.Win64.Common.csproj" />
     <ProjectReference Include="..\Win64\UI\ImageGlass.UI.csproj" />
   </ItemGroup>
