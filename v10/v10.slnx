@@ -11,7 +11,7 @@
       <Platform Solution="*|ARM64" Project="ARM64" />
       <Platform Solution="*|x64" Project="x64" />
     </Project>
-    <Project Path="Components/ImageGlass.Win64.Common/ImageGlass.Win64.Common.csproj">
+    <Project Path="Components/ImageGlass.Win64.Common/ImageGlass.Common.csproj">
       <Platform Solution="*|ARM64" Project="ARM64" />
       <Platform Solution="*|x64" Project="x64" />
     </Project>
