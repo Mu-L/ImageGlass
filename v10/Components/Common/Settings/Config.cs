@@ -20,6 +20,7 @@ using ImageGlass.Common.FileSystem;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
+using Windows.Foundation;
 
 namespace ImageGlass.Common;
 
@@ -366,46 +367,6 @@ public partial class Config : IgReactive
     ///// </summary>
     //public float QuickSetupVersion { get; set; } = 0f;
 
-    ///// <summary>
-    ///// Gets, sets 'Left' position of main window
-    ///// </summary>
-    //public int FrmMainPositionX { get; set; } = 200;
-
-    ///// <summary>
-    ///// Gets, sets 'Top' position of main window
-    ///// </summary>
-    //public int FrmMainPositionY { get; set; } = 200;
-
-    ///// <summary>
-    ///// Gets, sets width of main window
-    ///// </summary>
-    //public int FrmMainWidth { get; set; } = 1300;
-
-    ///// <summary>
-    ///// Gets, sets height of main window
-    ///// </summary>
-    //public int FrmMainHeight { get; set; } = 800;
-
-    ///// <summary>
-    ///// Gets, sets 'Left' position of settings window
-    ///// </summary>
-    //public int FrmSettingsPositionX { get; set; } = 200;
-
-    ///// <summary>
-    ///// Gets, sets 'Top' position of settings window
-    ///// </summary>
-    //public int FrmSettingsPositionY { get; set; } = 200;
-
-    ///// <summary>
-    ///// Gets, sets width of settings window
-    ///// </summary>
-    //public int FrmSettingsWidth { get; set; } = 1300;
-
-    ///// <summary>
-    ///// Gets, sets height of settings window
-    ///// </summary>
-    //public int FrmSettingsHeight { get; set; } = 800;
-
     /// <summary>
     /// Gets, sets the panning speed.
     /// Value range is from 0 to 100.
@@ -652,6 +613,23 @@ public partial class Config : IgReactive
     #region Array items
 
     /// <summary>
+    /// Gets, sets the size and position of main window.
+    /// </summary>
+    [JsonConverter(typeof(JsonArrayToRectConverter))]
+    public Rect MainWindowBounds
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = new(200, 200, 1500, 1000);
+
+    /// <summary>
     /// Gets, sets zoom levels of the viewer
     /// </summary>
     [JsonConverter(typeof(JsonArrayToZoomFactorConverter))]
@@ -676,7 +654,7 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets the list of supported image formats
     /// </summary>
-    [JsonConverter(typeof(JsonArrayToStringConverter))]
+    [JsonConverter(typeof(JsonHashSetToStringConverter))]
     public HashSet<string> FileFormats
     {
         get; set
@@ -693,7 +671,7 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets the list of formats that only load the first frame forcefully
     /// </summary>
-    [JsonConverter(typeof(JsonArrayToStringConverter))]
+    [JsonConverter(typeof(JsonHashSetToStringConverter))]
     public HashSet<string> SingleFrameFormats
     {
         get; set

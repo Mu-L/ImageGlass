@@ -69,6 +69,12 @@ public partial class Config
         .ToArray();
 
 
+    /// <summary>
+    /// Gets the exception while loading app settings.
+    /// </summary>
+    [JsonIgnore]
+    public static Exception? LoadingException { get; private set; } = null;
+
     #endregion // Public static properties
 
 
@@ -79,7 +85,6 @@ public partial class Config
     /// <summary>
     /// Loads and parses configs from file.
     /// </summary>
-    /// <exception cref="FileLoadException"></exception>
     public static Config Load(string configFileName)
     {
         // 1. get user config file path
@@ -91,15 +96,26 @@ public partial class Config
         var jsonOptions = BHelper.CreateJsonOptions();
         var jsonContext = new ConfigJsonContext(jsonOptions);
 
-        var config = BHelper.ReadJsonFromFile(configPath, jsonContext.Config);
-        if (config == null)
-            throw new FileLoadException($"Cannot parse settings from file: {configPath}");
+
+        try
+        {
+            var config = BHelper.ReadJsonFromFile(configPath, jsonContext.Config);
+            if (config == null)
+                throw new FileLoadException($"Cannot parse settings from file: {configPath}");
 
 
-        // 3. migrate user config file if config version is changed
-        config = MigrateUserConfigFile(config);
+            // 3. migrate user config file if config version is changed
+            config = MigrateUserConfigFile(config);
 
-        return config;
+            return config;
+        }
+        catch (Exception ex)
+        {
+            // save error
+            LoadingException = ex;
+        }
+
+        return new Config();
     }
 
 
