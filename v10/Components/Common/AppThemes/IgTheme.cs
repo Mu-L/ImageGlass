@@ -138,6 +138,8 @@ public partial class IgTheme : IgReactive
 
         var th = await Task.Run(async () =>
         {
+            if (!File.Exists(ConfigFilePath)) return null;
+
             try
             {
                 // 1. create json context

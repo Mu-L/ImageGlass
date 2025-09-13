@@ -460,17 +460,6 @@ public partial class DialogWindow : IgWindow
                 posX = workareBounds.X + workareBounds.Width / 2 - clientWidth / 2;
                 posY = workareBounds.Y + workareBounds.Height / 2 - clientHeight / 2;
             }
-
-
-            //// make sure the window position is within the workarea
-            //var gap = 10;
-            //var posRight = posX + clientWidth;
-            //var posBottom = posY + clientHeight;
-
-            //if (posX > workarea.X + workarea.Width - gap) posX -= clientWidth;
-            //if (posY > workarea.Y + workarea.Height - gap) posY -= clientHeight;
-            //if (posRight < workarea.X + gap) posX = 0;
-            //if (posBottom < workarea.Y + gap) posY = 0;
         }
 
 

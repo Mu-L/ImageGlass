@@ -126,6 +126,8 @@ public partial class BHelper
     /// </summary>
     public static PathType CheckPath(string path)
     {
+        if (string.IsNullOrWhiteSpace(path)) return PathType.Unknown;
+
         try
         {
             var attrs = File.GetAttributes(path);

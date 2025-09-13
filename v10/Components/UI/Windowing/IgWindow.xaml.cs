@@ -31,6 +31,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Windows.Foundation;
+using Windows.Graphics;
 using WinRT.Interop;
 
 namespace ImageGlass.UI;
@@ -284,6 +286,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         // setup events
         AP.ThemeChanged += AP_ThemeChanged;
         AP.LanguageChanged += AP_LanguageChanged;
+        AppWindow.Closing += AppWindow_Closing;
 
         PART_WindowContent.Loaded += PART_WindowContent_Loaded;
         Closed += IgWindow_Closed;
@@ -307,6 +310,12 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     }
 
 
+    private void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs e)
+    {
+        OnIgClosing(sender, e);
+    }
+
+
     private void IgWindow_Closed(object sender, WindowEventArgs e)
     {
         OnIgClosed(e);
@@ -316,6 +325,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
         AP.ThemeChanged -= AP_ThemeChanged;
         AP.LanguageChanged -= AP_LanguageChanged;
+        AppWindow.Closing -= AppWindow_Closing;
 
         PART_WindowContent.Loaded -= PART_WindowContent_Loaded;
         Closed -= IgWindow_Closed;
@@ -415,6 +425,12 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// Occurs when the window is loaded.
     /// </summary>
     protected virtual void OnIgLoaded(FrameworkElement fe) { }
+
+
+    /// <summary>
+    /// Occurs when the window is being closed.
+    /// </summary>
+    protected virtual void OnIgClosing(AppWindow sender, AppWindowClosingEventArgs e) { }
 
 
     /// <summary>
@@ -618,6 +634,43 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         SystemBackdrop = backdrop;
     }
 
+
+    /// <summary>
+    /// Sets window size and position.
+    /// </summary>
+    public void SetWindowBounds(Rect bounds)
+    {
+        var posX = Math.Max(0, bounds.X);
+        var posY = Math.Max(0, bounds.Y);
+        var clientWidth = bounds.Width;
+        var clientHeight = bounds.Height;
+
+        // 1. set the default size of window of the input size is invalid
+        if (bounds.IsEmpty())
+        {
+            clientWidth = 1500;
+            clientHeight = 1000;
+        }
+
+        // 2. get workarea of current window
+        var workareBounds = DisplayArea
+            .GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest)
+            .WorkArea;
+
+        // 3. make sure the window position is within the workarea
+        var gap = 10;
+        var posRight = posX + clientWidth;
+        var posBottom = posY + clientHeight;
+
+        if (posX > workareBounds.X + workareBounds.Width - gap) posX -= clientWidth;
+        if (posY > workareBounds.Y + workareBounds.Height - gap) posY -= clientHeight;
+        if (posRight < workareBounds.X + gap) posX = 0;
+        if (posBottom < workareBounds.Y + gap) posY = 0;
+
+        // 4. update window bounds
+        var rect = new RectInt32((int)posX, (int)posY, (int)clientWidth, (int)clientHeight);
+        AppWindow.MoveAndResize(rect);
+    }
 
     #endregion // Internal Methods
 

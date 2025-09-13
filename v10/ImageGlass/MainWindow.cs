@@ -21,8 +21,10 @@ using ImageGlass.Common;
 using ImageGlass.Common.FileSystem;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System;
+using System.IO;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 
@@ -50,12 +52,18 @@ public partial class MainWindow : IgWindow
         _contentEl.ToolbarButtonClicked += Toolbar_ButtonClicked;
         _contentEl.GalleryItemClicked += Gallery_ItemClicked;
         _contentEl.ViewerDrop += Viewer_Drop;
+
+        SetWindowBounds(AP.Config.MainWindowBounds);
     }
 
 
-    protected override void OnIgClosed(WindowEventArgs e)
+    protected override void OnIgClosing(AppWindow sender, AppWindowClosingEventArgs e)
     {
-        base.OnIgClosed(e);
+        base.OnIgClosing(sender, e);
+
+        // save window bounds
+        AP.Config.MainWindowBounds = new(sender.Position.X, sender.Position.Y,
+            sender.Size.Width, sender.Size.Height);
 
         Viewer.UnloadPhoto();
 
@@ -211,6 +219,7 @@ public partial class MainWindow : IgWindow
             }
         }
 
+        if (!File.Exists(pathToLoad)) return;
 
         // start loading path with the foreground shell
         PrepareLoadPhoto([pathToLoad], false);
