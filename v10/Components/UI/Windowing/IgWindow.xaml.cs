@@ -640,35 +640,37 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// </summary>
     public void SetWindowBounds(Rect bounds)
     {
-        var posX = Math.Max(0, bounds.X);
-        var posY = Math.Max(0, bounds.Y);
-        var clientWidth = bounds.Width;
-        var clientHeight = bounds.Height;
+        // 1. get workarea of current window
+        var workarea = DisplayArea
+            .GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest)
+            .WorkArea
+            .ToRect();
 
-        // 1. set the default size of window of the input size is invalid
+
+        // 2. set the default size of window of the input size is invalid
+        var wX = bounds.X;
+        var wY = bounds.Y;
+        var wW = bounds.Width;
+        var wH = bounds.Height;
+
         if (bounds.IsEmpty())
         {
-            clientWidth = 1500;
-            clientHeight = 1000;
+            wW = 1500;
+            wH = 1000;
         }
 
-        // 2. get workarea of current window
-        var workareBounds = DisplayArea
-            .GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest)
-            .WorkArea;
 
         // 3. make sure the window position is within the workarea
-        var gap = 10;
-        var posRight = posX + clientWidth;
-        var posBottom = posY + clientHeight;
+        var posRight = wX + wW;
 
-        if (posX > workareBounds.X + workareBounds.Width - gap) posX -= clientWidth;
-        if (posY > workareBounds.Y + workareBounds.Height - gap) posY -= clientHeight;
-        if (posRight < workareBounds.X + gap) posX = 0;
-        if (posBottom < workareBounds.Y + gap) posY = 0;
+        if (wX > workarea.Right) wX = workarea.Right - wW;
+        if (wY < 0) wY = 0;
+        else if (wY > workarea.Bottom) wY = workarea.Bottom - wH;
+        if (posRight < workarea.X) wX = 0;
+
 
         // 4. update window bounds
-        var rect = new RectInt32((int)posX, (int)posY, (int)clientWidth, (int)clientHeight);
+        var rect = new RectInt32((int)wX, (int)wY, (int)wW, (int)wH);
         AppWindow.MoveAndResize(rect);
     }
 
