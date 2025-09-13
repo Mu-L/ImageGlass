@@ -185,4 +185,13 @@ public static class Windows_Foundation_Rect_Exts
         return wgRect;
     }
 
+
+    /// <summary>
+    /// Converts the given rectangle to double array.
+    /// </summary>
+    public static double[] ToArray(this Rect rect)
+    {
+        return [rect.X, rect.Y, rect.Width, rect.Height];
+    }
+
 }
