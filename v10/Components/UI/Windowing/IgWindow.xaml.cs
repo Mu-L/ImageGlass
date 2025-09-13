@@ -283,6 +283,8 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
         // setup events
         AP.ThemeChanged += AP_ThemeChanged;
+        AP.LanguageChanged += AP_LanguageChanged;
+
         PART_WindowContent.Loaded += PART_WindowContent_Loaded;
         Closed += IgWindow_Closed;
         VisibilityChanged += IgWindow_VisibilityChanged;
@@ -313,6 +315,8 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         CleanUpPropertyChangedEvents();
 
         AP.ThemeChanged -= AP_ThemeChanged;
+        AP.LanguageChanged -= AP_LanguageChanged;
+
         PART_WindowContent.Loaded -= PART_WindowContent_Loaded;
         Closed -= IgWindow_Closed;
         VisibilityChanged -= IgWindow_VisibilityChanged;
@@ -376,6 +380,12 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     }
 
 
+    private void AP_LanguageChanged(object? sender, LanguageChangedEventArgs e)
+    {
+        OnIgLanguageChanged(e);
+    }
+
+
     private void WinHook_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         OnPropertyChanged(e.PropertyName);
@@ -435,6 +445,12 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// Occurs when the app theme is changed.
     /// </summary>
     protected virtual void OnIgThemeChanged(ThemePackChangedEventArgs e) { }
+
+
+    /// <summary>
+    /// Occurs when the app language is changed.
+    /// </summary>
+    protected virtual void OnIgLanguageChanged(LanguageChangedEventArgs e) { }
 
     #endregion // Virtual Methods
 

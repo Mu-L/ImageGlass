@@ -133,6 +133,8 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
         DefaultStyleKey = typeof(IgControl);
 
         AP.ThemeChanged += AP_ThemeChanged;
+        AP.LanguageChanged += AP_LanguageChanged;
+
         Loaded += IgControl_Loaded;
         Unloaded += IgControl_Unloaded;
         SizeChanged += IgControl_SizeChanged;
@@ -153,6 +155,8 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
         CleanUpPropertyChangedEvents();
 
         AP.ThemeChanged -= AP_ThemeChanged;
+        AP.LanguageChanged -= AP_LanguageChanged;
+
         Loaded -= IgControl_Loaded;
         Unloaded -= IgControl_Unloaded;
         SizeChanged -= IgControl_SizeChanged;
@@ -177,6 +181,12 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {
         OnIgThemeChanged(e);
+    }
+
+
+    private void AP_LanguageChanged(object? sender, LanguageChangedEventArgs e)
+    {
+        OnIgLanguageChanged(e);
     }
 
     #endregion // Control Events
@@ -212,6 +222,12 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
     /// Occurs when the app theme is changed.
     /// </summary>
     protected virtual void OnIgThemeChanged(ThemePackChangedEventArgs e) { }
+
+
+    /// <summary>
+    /// Occurs when the app language is changed.
+    /// </summary>
+    protected virtual void OnIgLanguageChanged(LanguageChangedEventArgs e) { }
 
     #endregion // Virtual Methods
 

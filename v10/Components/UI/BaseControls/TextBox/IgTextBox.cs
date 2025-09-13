@@ -38,9 +38,11 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
     #region INotifyPropertyChanged Implementation
 
     // to manage PropertyChanged events
-    private List<PropertyChangedEventHandler> _propertyChangedEvent = new();
-    private event PropertyChangedEventHandler? _propertyChangedHandler;
+    private List<PropertyChangedEventHandler> _propertyChangedEvents = [];
+    private event PropertyChangedEventHandler? _propertyChanged;
 
+
+    #region IgReactive > Properties & Events
 
     /// <summary>
     /// <inheritdoc/>
@@ -49,47 +51,85 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
     {
         add
         {
-            if (value != null)
+            if (value is not null)
             {
-                _propertyChangedHandler += value;
-                _propertyChangedEvent.Add(value);
+                _propertyChanged += value;
+                _propertyChangedEvents.Add(value);
             }
         }
-
         remove
         {
-            if (value != null)
+            if (value is not null)
             {
-                _propertyChangedHandler -= value;
-                _propertyChangedEvent.Remove(value);
+                _propertyChanged -= value;
+                _propertyChangedEvents.Remove(value);
             }
         }
     }
 
 
     /// <summary>
-    /// Emits event <see cref="PropertyChanged"/>.
+    /// Suspends the <see cref="PropertyChanged"/> event.
     /// </summary>
-    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    public bool SuspendReactivity { get; set; } = false;
+
+    #endregion // IgReactive > Properties & Events
+
+
+    #region IgReactive > Methods
+
+    /// <summary>
+    /// Raises event <see cref="PropertyChanged"/>,
+    /// returns <c>False</c> if the event is suspended.
+    /// </summary>
+    public bool OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-        _propertyChangedHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return OnPropertyChanged(propertyName, null, null);
+    }
+
+
+    /// <summary>
+    /// Raises event <see cref="PropertyChanged"/>,
+    /// returns <c>False</c> if the event is suspended.
+    /// </summary>
+    public bool OnPropertyChanged(object? value, object? oldValue, [CallerMemberName] string? propertyName = null)
+    {
+        if (SuspendReactivity) return false;
+
+        _propertyChanged?.Invoke(this, new ReactiveEventArgs(propertyName, value, oldValue));
+        return true;
     }
 
 
     /// <summary>
     /// Clears event handlers list of <see cref="PropertyChanged"/>.
     /// </summary>
-    public void ClearPropertyChangedEvents()
+    public void CleanUpPropertyChangedEvents()
     {
         // remove PropertyChanged events
-        foreach (var eventHandler in _propertyChangedEvent)
+        foreach (var eventHandler in _propertyChangedEvents)
         {
-            _propertyChangedHandler -= eventHandler;
+            _propertyChanged -= eventHandler;
         }
-        _propertyChangedEvent.Clear();
+        _propertyChangedEvents.Clear();
     }
 
+
+    /// <summary>
+    /// Runs an action without triggering <see cref="PropertyChanged"/> event.
+    /// </summary>
+    public void WithNoReactive(Action fn)
+    {
+        SuspendReactivity = true;
+        fn();
+        SuspendReactivity = false;
+    }
+
+    #endregion IgReactive > Methods
+
+
     #endregion // INotifyPropertyChanged Implementation
+
 
 
     #region Private Regex
@@ -271,7 +311,9 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
 
         Unloaded += IgTextBox_Unloaded;
         TextChanged += IgTextBox_TextChanged;
+
         AP.ThemeChanged += AP_ThemeChanged;
+        AP.LanguageChanged += AP_LanguageChanged;
     }
 
 
@@ -316,12 +358,22 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
         Unloaded -= IgTextBox_Unloaded;
         TextChanged -= IgTextBox_TextChanged;
         AP.ThemeChanged -= AP_ThemeChanged;
+        AP.LanguageChanged -= AP_LanguageChanged;
+
+        CleanUpPropertyChangedEvents();
     }
 
 
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {
         UpdateForeground();
+        OnIgThemeChanged(e);
+    }
+
+
+    private void AP_LanguageChanged(object? sender, LanguageChangedEventArgs e)
+    {
+        OnIgLanguageChanged(e);
     }
 
 
@@ -354,6 +406,19 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
 
         _descriptionEl.IsErrorIconVisible = !e.IsValid;
     }
+
+
+    /// <summary>
+    /// Occurs when the app theme is changed.
+    /// </summary>
+    protected virtual void OnIgThemeChanged(ThemePackChangedEventArgs e) { }
+
+
+    /// <summary>
+    /// Occurs when the app language is changed.
+    /// </summary>
+    protected virtual void OnIgLanguageChanged(LanguageChangedEventArgs e) { }
+
 
     #endregion // Control Events
 
