@@ -134,8 +134,8 @@ public partial class MainWindow
             var exeCode = await BHelper.RunExeCmd(exeInfo.Executable, exeInfo.Args, false, false);
             if (exeCode != IgExitCode.Done)
             {
-                // TODO: lang
-                error = new Win32Exception($"Cannot execute command '{ac.Executable}'. Make sure the name is correct.");
+                var errorMsg = AP.Config.Lang["_._UserAction._Win32ExeError", ac.Executable];
+                error = new Win32Exception(errorMsg);
             }
         }
 

@@ -60,52 +60,51 @@ public partial class ModalWindow : DialogWindow
             WindowContentDataContext = vm,
         };
 
-        // TODO: lang
         switch (buttons)
         {
             case ModalWindowButton.OK:
-                modal.Button1Text = "OK";
+                modal.Button1Text = AP.Config.Lang["_._OK"];
                 modal.IsButton1Visible = true;
                 modal.IsButton2Visible = modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.Close:
-                modal.Button1Text = "Close";
+                modal.Button1Text = AP.Config.Lang["_._Close"];
                 modal.IsButton1Visible = true;
                 modal.IsButton2Visible = modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.Yes_No:
-                modal.Button1Text = "Yes";
-                modal.Button2Text = "No";
+                modal.Button1Text = AP.Config.Lang["_._Yes"];
+                modal.Button2Text = AP.Config.Lang["_._No"];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.OK_Cancel:
-                modal.Button1Text = "OK";
-                modal.Button2Text = "Cancel";
+                modal.Button1Text = AP.Config.Lang["_._OK"];
+                modal.Button2Text = AP.Config.Lang["_._Cancel"];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.OK_Close:
-                modal.Button1Text = "OK";
-                modal.Button2Text = "Close";
+                modal.Button1Text = AP.Config.Lang["_._OK"];
+                modal.Button2Text = AP.Config.Lang["_._Close"];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.LearnMore_Close:
-                modal.Button1Text = "Learn more";
-                modal.Button2Text = "Close";
+                modal.Button1Text = AP.Config.Lang["_._LearnMore"];
+                modal.Button2Text = AP.Config.Lang["_._Close"];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.Continue_Quit:
-                modal.Button1Text = "Continue";
-                modal.Button2Text = "Quit";
+                modal.Button1Text = AP.Config.Lang["_._Continue"];
+                modal.Button2Text = AP.Config.Lang["_._Quit"];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
@@ -145,7 +144,7 @@ public partial class ModalWindow : DialogWindow
         bool showRememberOption = false,
         string? details = null)
     {
-        heading ??= "Warning"; // TODO: lang
+        heading ??= AP.Config.Lang["_._Warning"];
 
         // use stock icon as thumbnail
         if (thumbnail is null)
@@ -180,7 +179,7 @@ public partial class ModalWindow : DialogWindow
         string? details = null,
         ModalWindowButton buttons = ModalWindowButton.OK)
     {
-        heading ??= "Error"; // TODO: lang
+        heading ??= AP.Config.Lang["_._Error"];
 
         return await ShowWarningAsync(owner, title, description, heading, null, buttons, StockIconId.Error, null, InfoBarSeverity.Error, false, details);
     }

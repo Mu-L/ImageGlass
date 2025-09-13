@@ -48,7 +48,7 @@ public class IgLang
     /// <summary>
     /// Gets, sets the language string dictionary.
     /// </summary>
-    public FrozenDictionary<string, string> Items { get; set; } = FrozenDictionary<string, string>.Empty;
+    public IDictionary<string, string> Items { get; set; } = FrozenDictionary<string, string>.Empty;
 
     #endregion // JSON Serializable Properties
 
