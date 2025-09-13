@@ -68,6 +68,10 @@ public partial class App : Application
     }
 
 
+    // App Events
+    #region App Events
+
+
     /// <summary>
     /// Invoked when the application is launched.
     /// </summary>
@@ -85,20 +89,12 @@ public partial class App : Application
             AP.ForegroundShell = shell.GetForegroundWindowView();
         }
 
+        // load other app settings
+        LoadOtherAppSettings();
 
         // show the main window
         _winMain.Activate();
-
-        // get current monitor profile
-        _ = AP.ColorProfileService.InitializeAsync(_winMain.AppWindow.Id);
-
-        // initialize Magick decoder
-        MagickDecoder.Initialize();
     }
-
-
-    // App Events
-    #region App Events
 
     private async void MainWindow_Closed(object sender, WindowEventArgs args)
     {
@@ -160,6 +156,22 @@ public partial class App : Application
         // set the initial app color mode
         if (AP.Config.Theme.Settings.IsDarkMode) RequestedTheme = ApplicationTheme.Dark;
         else RequestedTheme = ApplicationTheme.Light;
+    }
+
+
+    /// <summary>
+    /// Loads other app settings.
+    /// </summary>
+    private void LoadOtherAppSettings()
+    {
+        // load app language
+        _ = AP.Config.LoadCurrentLanguageAsync();
+
+        // get current monitor profile
+        _ = AP.ColorProfileService.InitializeAsync(_winMain!.AppWindow.Id);
+
+        // initialize Magick decoder
+        MagickDecoder.Initialize();
     }
 
 

@@ -28,6 +28,7 @@ namespace ImageGlass.Common;
 public static class AP
 {
     public static event EventHandler<ThemePackChangedEventArgs>? ThemeChanged;
+    public static event EventHandler<LanguageChangedEventArgs>? LanguageChanged;
 
     private static ExplorerView? _foregroundShell;
     private static string _foregroundShellPath = "";
@@ -162,6 +163,15 @@ public static class AP
         ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
     }
 
+
+    /// <summary>
+    /// Triggers event <see cref="ThemeChanged"/>.
+    /// </summary>
+    public static void RaiseLanguageChangedEvent()
+    {
+        LanguageChanged?.Invoke(null, new LanguageChangedEventArgs());
+    }
+
     #endregion // Public Methods
 
 
@@ -176,3 +186,6 @@ public class ThemePackChangedEventArgs(string propName = "") : EventArgs
     /// </summary>
     public string PropertyName => propName;
 }
+
+
+public class LanguageChangedEventArgs() : EventArgs { }

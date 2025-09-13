@@ -164,7 +164,23 @@ public partial class Config
 
 
     /// <summary>
-    /// Loads theme pack <see cref="AP.Theme"/>.
+    /// Loads app language <see cref="Config.Lang"/>.
+    /// </summary>
+    public async Task LoadCurrentLanguageAsync()
+    {
+        var langPath = BHelper.BaseDir(Dir.Language, Language);
+        var lang = new IgLang(langPath);
+
+        // load language pack
+        await lang.LoadAsync();
+
+        // set app language
+        Lang = lang;
+    }
+
+
+    /// <summary>
+    /// Loads theme pack <see cref="Config.Theme"/>.
     /// </summary>
     /// <param name="darkMode">
     /// Determine which theme should be loaded: <see cref="DarkTheme"/> or <see cref="LightTheme"/>.

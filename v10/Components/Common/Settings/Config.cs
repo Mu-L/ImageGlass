@@ -630,6 +630,22 @@ public partial class Config : IgReactive
         }
     } = "Kobe-Light";
 
+    /// <summary>
+    /// Gets, sets app language.
+    /// </summary>
+    public string Language
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = "English";
+
     #endregion
 
 
@@ -926,16 +942,6 @@ public partial class Config : IgReactive
 
     #endregion // Enum items
 
-
-    #region Other types items
-
-
-    ///// <summary>
-    ///// Gets, sets language pack
-    ///// </summary>
-    //public IgLang Language { get; set; }
-
-    #endregion // Other types items
 
     #endregion // Setting items
 

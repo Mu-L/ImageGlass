@@ -97,6 +97,28 @@ public partial class Config
     } = new();
 
 
+    /// <summary>
+    /// Gets, sets the current language.
+    /// </summary>
+    [JsonIgnore]
+    public IgLang Lang
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+
+                if (OnPropertyChanged(value, oldValue))
+                {
+                    AP.RaiseLanguageChangedEvent();
+                }
+            }
+        }
+    } = new();
+
+
     #endregion // Public Reactive properties
 
 
