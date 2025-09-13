@@ -37,7 +37,7 @@
 		<PackageReference Include="Magick.NET-Q8-OpenMP-x64" Version="14.8.2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.250402" />
 		<PackageReference Include="D2Phap.EggShell-x64" Version="1.0.517" />
-		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.205">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

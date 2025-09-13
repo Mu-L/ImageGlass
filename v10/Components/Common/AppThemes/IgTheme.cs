@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Windows.UI;
 
 namespace ImageGlass.Common;
@@ -123,29 +124,48 @@ public partial class IgTheme : IgReactive
     /// <returns>The current instance of this theme pack.</returns>
     public IgTheme Load(string themeFolderPath, Color? accent = null)
     {
+        return BHelper.RunSync(() => LoadAsync(themeFolderPath, accent));
+    }
+
+
+    /// <summary>
+    /// Reads theme config file and loads the theme properties.
+    /// </summary>
+    /// <returns>The current instance of this theme pack.</returns>
+    public async Task<IgTheme> LoadAsync(string themeFolderPath, Color? accent = null)
+    {
         FolderPath = themeFolderPath;
 
-        // 1. parse theme config file to theme pack
-        var jsonOptions = BHelper.CreateJsonOptions();
-        var jsonContext = new IgThemeJsonContext(jsonOptions);
-
-        try
+        var th = await Task.Run(async () =>
         {
-            // 2. parse theme config
-            var th = BHelper.ReadJsonFromFile(ConfigFilePath, jsonContext.IgTheme);
-            IsValid = th != null;
-
-            // 3. load theme properties
-            if (th != null)
+            try
             {
-                _Metadata = th._Metadata;
-                Info = th.Info;
-                Settings = th.Settings;
-                Colors = th.Colors;
-                ToolbarIcons = th.ToolbarIcons;
+                // 1. create json context
+                var jsonOptions = BHelper.CreateJsonOptions();
+                var jsonContext = new IgThemeJsonContext(jsonOptions);
+
+                // 2. parse theme config
+                var th = await BHelper.ReadJsonFromFileAsync(ConfigFilePath, jsonContext.IgTheme);
+
+                return th;
             }
+            catch { }
+
+            return null;
+        }).ConfigureAwait(false);
+
+
+        IsValid = th != null;
+
+        // 3. load theme properties
+        if (th != null)
+        {
+            _Metadata = th._Metadata;
+            Info = th.Info;
+            Settings = th.Settings;
+            Colors = th.Colors;
+            ToolbarIcons = th.ToolbarIcons;
         }
-        catch { }
 
         // load colors
         LoadColors(accent);

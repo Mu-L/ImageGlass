@@ -135,7 +135,7 @@ public partial class BHelper
 
 
     /// <summary>
-    /// Runs an async function synchronous.
+    /// Runs an async function synchronous in a new thread.
     /// Source: <see href="https://github.com/aspnet/AspNetIdentity/blob/b7826741279450c58b230ece98bd04b4815beabf/src/Microsoft.AspNet.Identity.Core/AsyncHelper.cs" />
     /// </summary>
     public static TResult RunSync<TResult>(Func<Task<TResult>> func)
@@ -153,7 +153,7 @@ public partial class BHelper
 
 
     /// <summary>
-    /// Runs an async function synchronous.
+    /// Runs an async function synchronous in a new thread.
     /// Source: <see href="https://github.com/aspnet/AspNetIdentity/blob/b7826741279450c58b230ece98bd04b4815beabf/src/Microsoft.AspNet.Identity.Core/AsyncHelper.cs" />
     /// </summary>
     public static void RunSync(Func<Task> func)

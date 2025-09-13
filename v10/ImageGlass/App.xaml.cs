@@ -155,7 +155,7 @@ public partial class App : Application
 
         // get accent, color mode & load theme for the first time
         var info = GetSystemColorInfo(_systemUI);
-        AP.Config.LoadCurrentTheme(info.IsDarkMode, info.AccentColor, true, true, false);
+        BHelper.RunSync(() => AP.Config.LoadCurrentThemeAsync(info.IsDarkMode, info.AccentColor, true, true, false));
 
         // set the initial app color mode
         if (AP.Config.Theme.Settings.IsDarkMode) RequestedTheme = ApplicationTheme.Dark;

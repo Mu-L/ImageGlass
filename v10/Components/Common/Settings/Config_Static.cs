@@ -177,7 +177,7 @@ public partial class Config
     /// </param>
     /// <param name="forceUpdateBackground">Force updating background according to theme value</param>
     /// <exception cref="ArgumentException"></exception>
-    public void LoadCurrentTheme(bool darkMode, Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
+    public async Task LoadCurrentThemeAsync(bool darkMode, Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
     {
         // 1. save instance settings
         WithNoReactive(() =>
@@ -200,7 +200,7 @@ public partial class Config
         }
 
         // 4. load theme pack
-        var th = FindAndLoadThemePack(themeFolderName, accent, useFallBackTheme, throwIfThemeInvalid);
+        var th = await FindAndLoadThemePackAsync(themeFolderName, accent, useFallBackTheme, throwIfThemeInvalid);
 
         // 5. update the name of dark/light theme
         if (darkMode) DarkTheme = th.FolderName;
@@ -222,24 +222,25 @@ public partial class Config
     /// Finds the correct location of theme name and loads it.
     /// </summary>
     /// <exception cref="ArgumentException"></exception>
-    private static IgTheme FindAndLoadThemePack(string themeFolderName, Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid)
+    private static async Task<IgTheme> FindAndLoadThemePackAsync(string themeFolderName,
+        Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid)
     {
         // 1. look for theme pack in the Config dir
         var themeConfigPath = BHelper.ConfigDir(Dir.Themes, themeFolderName);
-        var th = new IgTheme().Load(themeConfigPath, accent);
+        var th = await new IgTheme().LoadAsync(themeConfigPath, accent);
 
         if (!th.IsValid)
         {
             // 2. look for theme pack in the base dir
             var baseThemeConfigPath = BHelper.BaseDir(Dir.Themes, themeFolderName);
-            th = new IgTheme().Load(baseThemeConfigPath, accent);
+            th = await new IgTheme().LoadAsync(baseThemeConfigPath, accent);
 
             // 3. cannot find theme, use fall back theme
             if (!th.IsValid && useFallBackTheme)
             {
                 // 4. load default theme
                 baseThemeConfigPath = BHelper.BaseDir(Dir.Themes, Const.DEFAULT_THEME);
-                th = new IgTheme().Load(baseThemeConfigPath, accent);
+                th = await new IgTheme().LoadAsync(baseThemeConfigPath, accent);
             }
         }
 

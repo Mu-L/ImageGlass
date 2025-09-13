@@ -44,7 +44,7 @@ public partial class Config
                 if (OnPropertyChanged(value, oldValue))
                 {
                     // load theme
-                    LoadCurrentTheme(field, AccentColor, true, true, false);
+                    _ = LoadCurrentThemeAsync(field, AccentColor, true, true, false);
                 }
             }
         }

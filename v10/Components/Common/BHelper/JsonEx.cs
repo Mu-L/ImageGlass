@@ -100,6 +100,17 @@ public partial class BHelper
 
 
     /// <summary>
+    /// Reads JSON file and parses to object.
+    /// </summary>
+    public static async Task<T?> ReadJsonFromFileAsync<T>(string jsonFilePath, JsonTypeInfo<T> jsonTypeInfo)
+    {
+        using var stream = File.OpenRead(jsonFilePath);
+
+        return await JsonSerializer.DeserializeAsync<T>(stream, jsonTypeInfo);
+    }
+
+
+    /// <summary>
     /// Writes an object value to JSON file.
     /// </summary>
     public static async Task WriteJsonToFileAsync<T>(string jsonFilePath, T value, JsonTypeInfo<T> jsonTypeInfo, CancellationToken token = default)
