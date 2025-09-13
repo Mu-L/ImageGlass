@@ -43,6 +43,10 @@ public class MagickDecoder
     {
         if (IsInitialized) return;
 
+#if DEBUG
+        MagickNET.SetLogEvents(LogEventTypes.Exception);
+#endif
+
         if (!ImageMagick.OpenCL.IsEnabled)
         {
             ImageMagick.OpenCL.IsEnabled = true;

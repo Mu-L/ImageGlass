@@ -19,11 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using D2Phap;
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
+using ImageGlass.UI;
 using Microsoft.UI.Xaml;
 using System;
 using System.Globalization;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 
@@ -38,7 +41,6 @@ public partial class App : Application
     private MainWindow? _winMain;
     private IProgress<SystemColorInfoChangedEventArgs> _uiReporter;
     private static UISettings _systemUI = new UISettings();
-
 
 
     /// <summary>
@@ -58,26 +60,37 @@ public partial class App : Application
 
         _uiReporter = new Progress<SystemColorInfoChangedEventArgs>(UIReporter_Reported);
 
-        Application.Current.UnhandledException += Current_UnhandledException;
+        // register unhandled exception handlers
+        UnhandledException += App_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-        _systemUI.ColorValuesChanged += UiSettings_ColorValuesChanged;
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
+        CoreApplication.UnhandledErrorDetected += CoreApplication_UnhandledErrorDetected;
 
+        _systemUI.ColorValuesChanged += UiSettings_ColorValuesChanged;
 
         // load initial settings
         LoadInitAppSettings();
     }
 
 
+
     // App Events
     #region App Events
-
 
     /// <summary>
     /// Invoked when the application is launched.
     /// </summary>
     /// <param name="e">Details about the launch request and process.</param>
-    protected override void OnLaunched(LaunchActivatedEventArgs e)
+    protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
+        // check if the config has any error
+        if (Config.LoadingException is not null)
+        {
+            var isContinue = await ShowUnhandledException(Config.LoadingException);
+            if (!isContinue) return;
+        }
+
         _winMain = new MainWindow();
         _winMain.Closed += MainWindow_Closed;
 
@@ -123,20 +136,50 @@ public partial class App : Application
         AP.Config.IsSystemDarkMode = e.IsDarkMode;
     }
 
-    private void Current_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+
+
+    private async void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        // TODO:
+        e.Handled = await ShowUnhandledException(e.Exception);
+
+#if DEBUG
         throw e.Exception;
+#endif
     }
 
-    private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    private async void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        // TODO:
+        _ = await ShowUnhandledException(e.Exception);
+
+#if DEBUG
         throw e.Exception;
+#endif
     }
+
+    private async void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
+    {
+        var ex = (Exception)e.ExceptionObject;
+
+        _ = await ShowUnhandledException(ex);
+
+#if DEBUG
+        throw ex;
+#endif
+    }
+
+    private void CurrentDomain_FirstChanceException(object? sender, FirstChanceExceptionEventArgs e)
+    {
+        //var ex = e.Exception;
+        //_ = await ShowUnhandledException(e.Exception);
+    }
+
+    private void CoreApplication_UnhandledErrorDetected(object? sender, UnhandledErrorDetectedEventArgs e)
+    {
+        e.UnhandledError.Propagate();
+    }
+
 
     #endregion // App Events
-
 
 
     /// <summary>
@@ -194,15 +237,37 @@ public partial class App : Application
     }
 
 
+    /// <summary>
+    /// Reports unhandled exception,
+    /// returns <c>true</c> if user ignores the error to continue.
+    /// </summary>
+    private static async Task<bool> ShowUnhandledException(Exception ex)
+    {
+        var isContinue = false;
+
+        var result = await ModalWindow.ShowErrorAsync(null,
+            AP.Config.Lang["_._UnhandledException"],
+            AP.Config.Lang["_._UnhandledException._Description"],
+            ex.Message,
+            ex.ToString(),
+            ModalWindowButton.Continue_Quit);
+
+        // user chooses 'Quit'
+        if (result.ExitCode == DialogExitCode.Cancel)
+        {
+            Application.Current.Exit();
+        }
+        else if (result.ExitCode == DialogExitCode.OK)
+        {
+            isContinue = true;
+        }
+
+        return isContinue;
+    }
+
+
     public static async Task SaveConfigsOnClosing()
     {
-        //// save FrmMain placement
-        //if (!Config.EnableFullScreen)
-        //{
-        //    WindowSettings.SaveFrmMainPlacementToConfig(this);
-        //}
-
-
         AP.Config.LastSeenImagePath = AP.Photos.CurrentFilePath;
         //Config.ZoomLockValue = PicMain.ZoomFactor * 100f;
 
