@@ -43,9 +43,6 @@ public partial class MainWindow : IgWindow
 
     public MainWindow()
     {
-        // create APIs
-        RegisterImageGlassAPIs();
-
         WindowContent = _contentEl;
         _searchProgress = new(Files_Searched);
 

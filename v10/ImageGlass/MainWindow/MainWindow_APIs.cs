@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -26,7 +27,26 @@ namespace ImageGlass;
 
 public partial class MainWindow
 {
-    private Dictionary<string, IIgCommand> _apis = new(StringComparer.OrdinalIgnoreCase);
+    private FrozenDictionary<string, IIgCommand> _apis => new Dictionary<string, IIgCommand>(StringComparer.OrdinalIgnoreCase)
+    {
+        // Main Menu
+        {nameof(API.IG_OpenFile), IgCommands.Create(IG_OpenFileAsync)},
+        {nameof(API.IG_OpenFolder), IgCommands.Create(IG_OpenFolderAsync)},
+        {nameof(API.IG_OpenPath), IgCommands.Create(IG_OpenPath)},
+
+
+        // Navigation
+        {nameof(API.IG_ViewByStep), IgCommands.Create(IG_ViewByStep)},
+        {nameof(API.IG_ViewByIndex), IgCommands.Create(IG_ViewByIndex)},
+
+
+        // Layout
+        {nameof(API.IG_ToggleCheckerboard), IgCommands.Create(IG_ToggleCheckerboard)},
+
+
+        // Exit
+        {nameof(API.IG_Exit), IgCommands.Create(IG_Exit)},
+    }.ToFrozenDictionary();
 
 
     /// <summary>
@@ -143,32 +163,6 @@ public partial class MainWindow
         return error;
     }
 
-
-
-    /// <summary>
-    /// Register ImageGlass API commands.
-    /// </summary>
-    public void RegisterImageGlassAPIs()
-    {
-        // Main Menu
-        _apis.Add(nameof(API.IG_OpenFile), IgCommands.Create(IG_OpenFileAsync));
-        _apis.Add(nameof(API.IG_OpenFolder), IgCommands.Create(IG_OpenFolderAsync));
-        _apis.Add(nameof(API.IG_OpenPath), IgCommands.Create(IG_OpenPath));
-
-
-        // Navigation
-        _apis.Add(nameof(API.IG_ViewByStep), IgCommands.Create(IG_ViewByStep));
-        _apis.Add(nameof(API.IG_ViewByIndex), IgCommands.Create(IG_ViewByIndex));
-
-
-        // Layout
-        _apis.Add(nameof(API.IG_ToggleCheckerboard), IgCommands.Create(IG_ToggleCheckerboard));
-
-
-        // Exit
-        _apis.Add(nameof(API.IG_Exit), IgCommands.Create(IG_Exit));
-
-    }
 
 
 }
