@@ -142,8 +142,9 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     protected readonly WindowMessageMonitor _msgMonitor;
     protected readonly IProgress<AppIconChangedEventArgs> _uiReporter;
 
-    protected BackdropStyle _actualBackdropStyle = BackdropStyle.None;
     protected nint _windowIconHandle = IntPtr.Zero;
+    protected BackdropStyle _actualBackdropStyle = BackdropStyle.None;
+    protected OverlappedPresenterState _windowState = OverlappedPresenterState.Restored;
 
 
     #region Control Properties
@@ -186,6 +187,18 @@ public partial class IgWindow : Window, INotifyPropertyChanged
             }
         }
     }
+
+
+    /// <summary>
+    /// Gets window's overlapped presenter.
+    /// </summary>
+    public OverlappedPresenter Presenter => (OverlappedPresenter)AppWindow.Presenter;
+
+
+    /// <summary>
+    /// Gets the current window state.
+    /// </summary>
+    public OverlappedPresenterState WindowState => _windowState;
 
 
     /// <summary>
@@ -284,6 +297,8 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         _uiReporter = new Progress<AppIconChangedEventArgs>(UIReporter_Report);
 
         // setup events
+        _msgMonitor.MessageReceived += MsgMonitor_MessageReceived;
+
         AP.ThemeChanged += AP_ThemeChanged;
         AP.LanguageChanged += AP_LanguageChanged;
         AppWindow.Closing += AppWindow_Closing;
@@ -294,6 +309,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         Activated += IgWindow_Activated;
         SizeChanged += IgWindow_SizeChanged;
     }
+
 
 
 
@@ -333,6 +349,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         Activated -= IgWindow_Activated;
         SizeChanged -= IgWindow_SizeChanged;
 
+        _msgMonitor.MessageReceived -= MsgMonitor_MessageReceived;
         _msgMonitor.Dispose();
         IconApi.DestroyHIcon(_windowIconHandle);
 
@@ -396,9 +413,35 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     }
 
 
-    private void WinHook_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void MsgMonitor_MessageReceived(object? sender, WindowMessageReceivedEventArgs e)
     {
-        OnPropertyChanged(e.PropertyName);
+        // monitor window state changes
+        if (e.MessageType == 0x0112) // WM_SYSCOMMAND
+        {
+            OverlappedPresenterState? winState = null;
+
+            if (e.Message.WParam == 0xF030) // SC_MAXIMIZE
+            {
+                // The window is being maximized
+                winState = OverlappedPresenterState.Maximized;
+            }
+            else if (e.Message.WParam == 0xF120) // SC_RESTORE
+            {
+                // The window is being restored
+                winState = OverlappedPresenterState.Restored;
+            }
+            else if (e.Message.WParam == 0xF020) // SC_MINIMIZE
+            {
+                // The window is being minimized
+                winState = OverlappedPresenterState.Minimized;
+            }
+
+            // update state without invoking presenter
+            if (winState is not null) SetWindowState(winState.Value, false);
+        }
+
+
+        WndProc(e);
     }
 
 
@@ -422,6 +465,12 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     #region Virtual Methods
 
     /// <summary>
+    /// Occurs when the window recieved a message.
+    /// </summary>
+    protected virtual void WndProc(WindowMessageReceivedEventArgs e) { }
+
+
+    /// <summary>
     /// Occurs when the window is loaded.
     /// </summary>
     protected virtual void OnIgLoaded(FrameworkElement fe) { }
@@ -437,6 +486,12 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// Occurs when the window is closed.
     /// </summary>
     protected virtual void OnIgClosed(WindowEventArgs e) { }
+
+
+    /// <summary>
+    /// Occurs when window state is changed.
+    /// </summary>
+    protected virtual void OnIgWindowStateChanged(WindowStateChangedEventArgs e) { }
 
 
     /// <summary>
@@ -635,10 +690,17 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     }
 
 
+    #endregion // Internal Methods
+
+
+
+
+    #region Public Methods
+
     /// <summary>
     /// Sets window size and position.
     /// </summary>
-    public void SetWindowBounds(Rect bounds)
+    public void SetWindowBounds(Rect bounds, bool setMaximize)
     {
         // 1. get workarea of current window
         var workarea = DisplayArea
@@ -672,11 +734,46 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         // 4. update window bounds
         var rect = new RectInt32((int)wX, (int)wY, (int)wW, (int)wH);
         AppWindow.MoveAndResize(rect);
+
+
+        // 5. maximize window if requested
+        if (setMaximize)
+        {
+            SetWindowState(OverlappedPresenterState.Maximized);
+        }
     }
 
-    #endregion // Internal Methods
+
+    /// <summary>
+    /// Sets window state.
+    /// </summary>
+    public void SetWindowState(OverlappedPresenterState state, bool invokePresenter = true)
+    {
+        if (_windowState == state) return;
+
+        if (invokePresenter)
+        {
+            if (state == OverlappedPresenterState.Maximized)
+            {
+                Presenter.Maximize();
+            }
+            else if (state == OverlappedPresenterState.Minimized)
+            {
+                Presenter.Minimize();
+            }
+            else
+            {
+                Presenter.Restore();
+            }
+        }
+
+        _windowState = state;
+        OnPropertyChanged(nameof(WindowState));
+        OnIgWindowStateChanged(new WindowStateChangedEventArgs(state));
+    }
 
 
+    #endregion // Public Methods
 
 }
 
@@ -686,4 +783,10 @@ public class AppIconChangedEventArgs(byte[]? iconData, int size) : EventArgs
 {
     public byte[]? IconData { get; set; } = iconData;
     public int Size { get; set; } = size;
+}
+
+
+public class WindowStateChangedEventArgs(OverlappedPresenterState state) : EventArgs
+{
+    public OverlappedPresenterState State { get; internal set; } = state;
 }
