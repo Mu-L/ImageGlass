@@ -53,17 +53,24 @@ public partial class MainWindow : IgWindow
         _contentEl.GalleryItemClicked += Gallery_ItemClicked;
         _contentEl.ViewerDrop += Viewer_Drop;
 
-        SetWindowBounds(AP.Config.MainWindowBounds);
+        // load window bounds from settings
+        SetWindowBounds(AP.Config.MainWindowBounds, AP.Config.IsMainWindowMaximized);
     }
 
 
-    protected override void OnIgClosing(AppWindow sender, AppWindowClosingEventArgs e)
+    protected override void OnIgWindowClosing(AppWindow sender, AppWindowClosingEventArgs e)
     {
-        base.OnIgClosing(sender, e);
+        base.OnIgWindowClosing(sender, e);
+
+        // save window maximized state
+        AP.Config.IsMainWindowMaximized = WindowState == OverlappedPresenterState.Maximized;
 
         // save window bounds
-        AP.Config.MainWindowBounds = new(sender.Position.X, sender.Position.Y,
-            sender.Size.Width, sender.Size.Height);
+        if (WindowState == OverlappedPresenterState.Restored)
+        {
+            AP.Config.MainWindowBounds = GetWindowBounds();
+        }
+
 
         Viewer.UnloadPhoto();
 
@@ -73,21 +80,25 @@ public partial class MainWindow : IgWindow
     }
 
 
-    protected override void OnIgLoaded(FrameworkElement fe)
+    protected override void OnIgWindowLoaded(FrameworkElement fe)
     {
-        base.OnIgLoaded(fe);
+        base.OnIgWindowLoaded(fe);
 
         // load image from command line arguments
         LoadImagesFromCmdArgs();
     }
 
 
+    protected override void OnIgWindowStateChanged(WindowStateChangedEventArgs e)
+    {
+        base.OnIgWindowStateChanged(e);
 
-
-
-
-
-
+        // save window bounds
+        if (e.OldState == OverlappedPresenterState.Restored)
+        {
+            AP.Config.MainWindowBounds = e.OldBounds;
+        }
+    }
 
 
 

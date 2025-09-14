@@ -140,7 +140,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
 
     protected readonly WindowMessageMonitor _msgMonitor;
-    protected readonly IProgress<AppIconChangedEventArgs> _uiReporter;
+    protected readonly IProgress<WindowIconChangedEventArgs> _uiReporter;
 
     protected nint _windowIconHandle = IntPtr.Zero;
     protected BackdropStyle _actualBackdropStyle = BackdropStyle.None;
@@ -294,7 +294,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         // setup window style
         SetupWindowTitlebar();
         _msgMonitor = new WindowMessageMonitor(Handle);
-        _uiReporter = new Progress<AppIconChangedEventArgs>(UIReporter_Report);
+        _uiReporter = new Progress<WindowIconChangedEventArgs>(UIReporter_Report);
 
         // setup events
         _msgMonitor.MessageReceived += MsgMonitor_MessageReceived;
@@ -322,19 +322,19 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         UpdateWindowIcon();
         UpdateWindowBackdrop();
 
-        OnIgLoaded((FrameworkElement)sender);
+        OnIgWindowLoaded((FrameworkElement)sender);
     }
 
 
     private void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs e)
     {
-        OnIgClosing(sender, e);
+        OnIgWindowClosing(sender, e);
     }
 
 
     private void IgWindow_Closed(object sender, WindowEventArgs e)
     {
-        OnIgClosed(e);
+        OnIgWindowClosed(e);
 
 
         CleanUpPropertyChangedEvents();
@@ -371,19 +371,19 @@ public partial class IgWindow : Window, INotifyPropertyChanged
             txtEl.Opacity = 1;
         }
 
-        OnIgActivated(e);
+        OnIgWindowActivated(e);
     }
 
 
     private void IgWindow_VisibilityChanged(object sender, WindowVisibilityChangedEventArgs e)
     {
-        OnIgVisibilityChanged(e);
+        OnIgWindowVisibilityChanged(e);
     }
 
 
     private void IgWindow_SizeChanged(object sender, WindowSizeChangedEventArgs e)
     {
-        OnIgSizeChanged(e);
+        OnIgWindowSizeChanged(e);
     }
 
 
@@ -441,11 +441,11 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         }
 
 
-        WndProc(e);
+        OnIgWndProc(e);
     }
 
 
-    private void UIReporter_Report(AppIconChangedEventArgs e)
+    private void UIReporter_Report(WindowIconChangedEventArgs e)
     {
         if (e.IconData == null) return;
 
@@ -467,25 +467,25 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Occurs when the window recieved a message.
     /// </summary>
-    protected virtual void WndProc(WindowMessageReceivedEventArgs e) { }
+    protected virtual void OnIgWndProc(WindowMessageReceivedEventArgs e) { }
 
 
     /// <summary>
     /// Occurs when the window is loaded.
     /// </summary>
-    protected virtual void OnIgLoaded(FrameworkElement fe) { }
+    protected virtual void OnIgWindowLoaded(FrameworkElement fe) { }
 
 
     /// <summary>
     /// Occurs when the window is being closed.
     /// </summary>
-    protected virtual void OnIgClosing(AppWindow sender, AppWindowClosingEventArgs e) { }
+    protected virtual void OnIgWindowClosing(AppWindow sender, AppWindowClosingEventArgs e) { }
 
 
     /// <summary>
     /// Occurs when the window is closed.
     /// </summary>
-    protected virtual void OnIgClosed(WindowEventArgs e) { }
+    protected virtual void OnIgWindowClosed(WindowEventArgs e) { }
 
 
     /// <summary>
@@ -497,19 +497,19 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Occurs when the window visibility is changed.
     /// </summary>
-    protected virtual void OnIgVisibilityChanged(WindowVisibilityChangedEventArgs e) { }
+    protected virtual void OnIgWindowVisibilityChanged(WindowVisibilityChangedEventArgs e) { }
 
 
     /// <summary>
     /// Occurs when the window is activated.
     /// </summary>
-    protected virtual void OnIgActivated(WindowActivatedEventArgs e) { }
+    protected virtual void OnIgWindowActivated(WindowActivatedEventArgs e) { }
 
 
     /// <summary>
     /// Occurs when the window size is changed.
     /// </summary>
-    protected virtual void OnIgSizeChanged(WindowSizeChangedEventArgs e) { }
+    protected virtual void OnIgWindowSizeChanged(WindowSizeChangedEventArgs e) { }
 
 
     /// <summary>
@@ -627,7 +627,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         _ = Task.Run(async () =>
         {
             var bytes = await MagickDecoder.QuickDecodeAsync(iconPath, size, size, MagickFormat.Bgra);
-            _uiReporter.Report(new AppIconChangedEventArgs(bytes, size));
+            _uiReporter.Report(new WindowIconChangedEventArgs(bytes, size));
         });
     }
 
@@ -694,13 +694,21 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
 
 
-
     #region Public Methods
+
+    /// <summary>
+    /// Gets window size and position.
+    /// </summary>
+    public Rect GetWindowBounds()
+    {
+        return new(AppWindow.Position.X, AppWindow.Position.Y, AppWindow.Size.Width, AppWindow.Size.Height);
+    }
+
 
     /// <summary>
     /// Sets window size and position.
     /// </summary>
-    public void SetWindowBounds(Rect bounds, bool setMaximize)
+    public void SetWindowBounds(Rect bounds, bool isMaximized)
     {
         // 1. get workarea of current window
         var workarea = DisplayArea
@@ -737,7 +745,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
 
         // 5. maximize window if requested
-        if (setMaximize)
+        if (isMaximized)
         {
             SetWindowState(OverlappedPresenterState.Maximized);
         }
@@ -750,6 +758,9 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     public void SetWindowState(OverlappedPresenterState state, bool invokePresenter = true)
     {
         if (_windowState == state) return;
+
+        var oldState = _windowState;
+        var oldBounds = GetWindowBounds();
 
         if (invokePresenter)
         {
@@ -769,7 +780,12 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
         _windowState = state;
         OnPropertyChanged(nameof(WindowState));
-        OnIgWindowStateChanged(new WindowStateChangedEventArgs(state));
+        OnIgWindowStateChanged(new WindowStateChangedEventArgs()
+        {
+            State = state,
+            OldState = oldState,
+            OldBounds = oldBounds,
+        });
     }
 
 
@@ -777,16 +793,3 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
 }
 
-
-
-public class AppIconChangedEventArgs(byte[]? iconData, int size) : EventArgs
-{
-    public byte[]? IconData { get; set; } = iconData;
-    public int Size { get; set; } = size;
-}
-
-
-public class WindowStateChangedEventArgs(OverlappedPresenterState state) : EventArgs
-{
-    public OverlappedPresenterState State { get; internal set; } = state;
-}

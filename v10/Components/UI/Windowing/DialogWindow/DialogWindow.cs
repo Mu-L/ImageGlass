@@ -232,9 +232,9 @@ public partial class DialogWindow : IgWindow
 
     #region Window Events
 
-    protected override void OnIgLoaded(FrameworkElement fe)
+    protected override void OnIgWindowLoaded(FrameworkElement fe)
     {
-        base.OnIgLoaded(fe);
+        base.OnIgWindowLoaded(fe);
 
         _dialogContentEl.Button1Click += ContentEl_Button1Click;
         _dialogContentEl.Button2Click += ContentEl_Button2Click;
@@ -250,9 +250,9 @@ public partial class DialogWindow : IgWindow
     }
 
 
-    protected override void OnIgClosed(WindowEventArgs e)
+    protected override void OnIgWindowClosed(WindowEventArgs e)
     {
-        base.OnIgClosed(e);
+        base.OnIgWindowClosed(e);
 
         WindowContent.SizeChanged -= WindowContent_SizeChanged;
         _dialogContentEl.Button1Click -= ContentEl_Button1Click;

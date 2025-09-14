@@ -44,6 +44,22 @@ public partial class Config : IgReactive
 
     #region Boolean items
 
+    /// <summary>
+    /// Gets, sets maximized state of main window.
+    /// </summary>
+    public bool IsMainWindowMaximized
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = false;
+
     ///// <summary>
     ///// Gets, sets value indicating whether the slideshow mode is enabled or not.
     ///// </summary>
@@ -610,6 +626,128 @@ public partial class Config : IgReactive
     #endregion
 
 
+    #region Enum items
+
+    /// <summary>
+    /// Gets, sets checkerboard mode of the viewer.
+    /// </summary>
+    public CheckerboardMode CheckerboardMode
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = CheckerboardMode.None;
+
+    /// <summary>
+    /// Gets, sets image loading order
+    /// </summary>
+    public ImageOrderBy ImageLoadingOrder
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = ImageOrderBy.Name;
+
+    /// <summary>
+    /// Gets, sets image loading order type
+    /// </summary>
+    public ImageOrderType ImageLoadingOrderType
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = ImageOrderType.Asc;
+
+    /// <summary>
+    /// Gets, sets zoom mode value
+    /// </summary>
+    public ZoomMode ZoomMode
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = ZoomMode.AutoZoom;
+
+    /// <summary>
+    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>less than or equals 100%</c>.
+    /// </summary>
+    public ImageInterpolation ImageInterpolationScaleDown
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = ImageInterpolation.MultiSampleLinear;
+
+    /// <summary>
+    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
+    /// </summary>
+    public ImageInterpolation ImageInterpolationScaleUp
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = ImageInterpolation.NearestNeighbor;
+
+    ///// <summary>
+    ///// Gets, sets value indicates what happens after clicking Edit menu
+    ///// </summary>
+    //public AfterEditAppAction AfterEditingAction { get; set; } = AfterEditAppAction.Nothing;
+
+    /// <summary>
+    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
+    /// </summary>
+    public BackdropStyle WindowBackdrop
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = BackdropStyle.Mica;
+
+    #endregion // Enum items
+
+
     #region Array items
 
     /// <summary>
@@ -786,139 +924,6 @@ public partial class Config : IgReactive
     //public FrozenSet<string> DisabledMenus { get; set; } = FrozenSet<string>.Empty;
 
     #endregion // Array items
-
-
-    #region Enum items
-
-    ///// <summary>
-    ///// Gets, sets state of main window
-    ///// </summary>
-    //public FormWindowState FrmMainState { get; set; } = FormWindowState.Normal;
-
-    ///// <summary>
-    ///// Gets, sets state of settings window
-    ///// </summary>
-    //public FormWindowState FrmSettingsState { get; set; } = FormWindowState.Normal;
-
-
-    /// <summary>
-    /// Gets, sets checkerboard mode of the viewer.
-    /// </summary>
-    public CheckerboardMode CheckerboardMode
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
-        }
-    } = CheckerboardMode.None;
-
-    /// <summary>
-    /// Gets, sets image loading order
-    /// </summary>
-    public ImageOrderBy ImageLoadingOrder
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
-        }
-    } = ImageOrderBy.Name;
-
-    /// <summary>
-    /// Gets, sets image loading order type
-    /// </summary>
-    public ImageOrderType ImageLoadingOrderType
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
-        }
-    } = ImageOrderType.Asc;
-
-    /// <summary>
-    /// Gets, sets zoom mode value
-    /// </summary>
-    public ZoomMode ZoomMode
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
-        }
-    } = ZoomMode.AutoZoom;
-
-    /// <summary>
-    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>less than or equals 100%</c>.
-    /// </summary>
-    public ImageInterpolation ImageInterpolationScaleDown
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
-        }
-    } = ImageInterpolation.MultiSampleLinear;
-
-    /// <summary>
-    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
-    /// </summary>
-    public ImageInterpolation ImageInterpolationScaleUp
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
-        }
-    } = ImageInterpolation.NearestNeighbor;
-
-    ///// <summary>
-    ///// Gets, sets value indicates what happens after clicking Edit menu
-    ///// </summary>
-    //public AfterEditAppAction AfterEditingAction { get; set; } = AfterEditAppAction.Nothing;
-
-    /// <summary>
-    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
-    /// </summary>
-    public BackdropStyle WindowBackdrop
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
-        }
-    } = BackdropStyle.Mica;
-
-    #endregion // Enum items
 
 
     #endregion // Setting items
