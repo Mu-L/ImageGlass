@@ -350,6 +350,8 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
 
         // update theme
         UpdateForeground();
+
+        OnIgLanguageChanged();
     }
 
 
@@ -371,9 +373,9 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
     }
 
 
-    private void AP_LanguageChanged(object? sender, LanguageChangedEventArgs e)
+    private void AP_LanguageChanged(object? sender, EventArgs e)
     {
-        OnIgLanguageChanged(e);
+        OnIgLanguageChanged();
     }
 
 
@@ -417,7 +419,7 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
     /// <summary>
     /// Occurs when the app language is changed.
     /// </summary>
-    protected virtual void OnIgLanguageChanged(LanguageChangedEventArgs e) { }
+    protected virtual void OnIgLanguageChanged() { }
 
 
     #endregion // Control Events

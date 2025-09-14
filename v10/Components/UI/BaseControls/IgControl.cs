@@ -146,6 +146,7 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
 
     private void IgControl_Loaded(object sender, RoutedEventArgs e)
     {
+        OnIgLanguageChanged();
         OnIgLoaded((FrameworkElement)sender);
     }
 
@@ -184,9 +185,9 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
     }
 
 
-    private void AP_LanguageChanged(object? sender, LanguageChangedEventArgs e)
+    private void AP_LanguageChanged(object? sender, EventArgs e)
     {
-        OnIgLanguageChanged(e);
+        OnIgLanguageChanged();
     }
 
     #endregion // Control Events
@@ -227,7 +228,7 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
     /// <summary>
     /// Occurs when the app language is changed.
     /// </summary>
-    protected virtual void OnIgLanguageChanged(LanguageChangedEventArgs e) { }
+    protected virtual void OnIgLanguageChanged() { }
 
     #endregion // Virtual Methods
 

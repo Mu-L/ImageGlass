@@ -239,10 +239,13 @@ public partial class IgButton : Button, INotifyPropertyChanged
 
     private void IgButton_Loaded(object sender, RoutedEventArgs e)
     {
-        if (Flyout is null) return;
+        if (Flyout is not null)
+        {
+            Flyout.Opened += Flyout_Opened;
+            Flyout.Closed += Flyout_Closed;
+        }
 
-        Flyout.Opened += Flyout_Opened;
-        Flyout.Closed += Flyout_Closed;
+        OnIgLanguageChanged();
     }
 
     private void IgButton_Unloaded(object sender, RoutedEventArgs e)
@@ -266,9 +269,9 @@ public partial class IgButton : Button, INotifyPropertyChanged
         OnIgThemeChanged(e);
     }
 
-    private void AP_LanguageChanged(object? sender, LanguageChangedEventArgs e)
+    private void AP_LanguageChanged(object? sender, EventArgs e)
     {
-        OnIgLanguageChanged(e);
+        OnIgLanguageChanged();
     }
 
     private void IgButton_StateChanged(DependencyObject sender, DependencyProperty dp)
@@ -307,7 +310,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
     /// <summary>
     /// Occurs when the app language is changed.
     /// </summary>
-    protected virtual void OnIgLanguageChanged(LanguageChangedEventArgs e) { }
+    protected virtual void OnIgLanguageChanged() { }
 
 
     protected virtual Color GetColorForText()

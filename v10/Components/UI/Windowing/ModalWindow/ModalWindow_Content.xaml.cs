@@ -49,7 +49,7 @@ internal sealed partial class ModalWindow_Content : IgControl
                 OnPropertyChanged();
             }
         }
-    } = "Don't show this message again";
+    } = "[Don't show this message again]";
 
 
     internal bool IsInputInvalid
@@ -83,6 +83,13 @@ internal sealed partial class ModalWindow_Content : IgControl
 
         _ = LoadThumbnailSourceAsync();
         _ = LoadThumbnailIconSourceAsync();
+    }
+
+    protected override void OnIgLanguageChanged()
+    {
+        base.OnIgLanguageChanged();
+
+        RememberOptionText = AP.Config.Lang["_._DoNotShowThisMessageAgain"];
     }
 
     protected override void OnIgDataContextChanged(FrameworkElement fe, DataContextChangedEventArgs e)

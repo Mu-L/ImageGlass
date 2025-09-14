@@ -322,6 +322,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         UpdateWindowIcon();
         UpdateWindowBackdrop();
 
+        OnIgLanguageChanged();
         OnIgWindowLoaded((FrameworkElement)sender);
     }
 
@@ -407,9 +408,9 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     }
 
 
-    private void AP_LanguageChanged(object? sender, LanguageChangedEventArgs e)
+    private void AP_LanguageChanged(object? sender, EventArgs e)
     {
-        OnIgLanguageChanged(e);
+        OnIgLanguageChanged();
     }
 
 
@@ -521,7 +522,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Occurs when the app language is changed.
     /// </summary>
-    protected virtual void OnIgLanguageChanged(LanguageChangedEventArgs e) { }
+    protected virtual void OnIgLanguageChanged() { }
 
     #endregion // Virtual Methods
 
