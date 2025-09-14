@@ -17,8 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using ImageMagick;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -138,7 +140,33 @@ public partial class BHelper
     }
 
 
+    /// <summary>
+    /// Returns exception details including environment info.
+    /// </summary>
+    public static string GetExceptionDetails(Exception ex)
+    {
+        // get system info
+        var osArch = Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit";
+        var exeVersion = FileVersionInfo.GetVersionInfo(BHelper.AppExePath).FileVersion;
 
+        var details = $"""
+            Version: {BHelper.AppName} v{exeVersion}
+                     {BHelper.AppPackageId}
+            Release code: {Const.APP_CODE}
+            Magick.NET: {MagickNET.Version}
+            Runtime: .NET {Environment.Version}
+            OS: {Environment.OSVersion.VersionString} {osArch}
+
+                                  :>>>>>>>:
+                                  | Error |
+                                  :<<<<<<<:
+            
+            {ex.ToString()}
+
+            """;
+
+        return details;
+    }
 
 
 }

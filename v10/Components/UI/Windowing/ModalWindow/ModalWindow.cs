@@ -17,7 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Drawing;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
@@ -238,6 +240,41 @@ public partial class ModalWindow : DialogWindow
 
         return await ShowAsync(owner, title, buttons, vm, DialogFocus.Default);
 
+    }
+
+
+
+    /// <summary>
+    /// Reports unhandled exception,
+    /// returns <c>true</c> if user ignores the error to continue.
+    /// </summary>
+    public static async Task<bool> ShowUnhandledErrorAsync(Exception ex)
+    {
+        // get error details
+        var details = BHelper.GetExceptionDetails(ex);
+        var isContinue = false;
+
+
+        // show error modal dialog
+        var result = await ShowErrorAsync(null,
+            AP.Config.Lang["_._UnhandledException"],
+            AP.Config.Lang["_._UnhandledException._Description"],
+            ex.Message,
+            details,
+            ModalWindowButton.Continue_Quit);
+
+
+        // user chooses 'Quit'
+        if (result.ExitCode == DialogExitCode.Cancel)
+        {
+            Application.Current.Exit();
+        }
+        else if (result.ExitCode == DialogExitCode.OK)
+        {
+            isContinue = true;
+        }
+
+        return isContinue;
     }
 
 }

@@ -87,7 +87,7 @@ public partial class App : Application
         // check if the config has any error
         if (Config.LoadingException is not null)
         {
-            var isContinue = await ShowUnhandledException(Config.LoadingException);
+            var isContinue = await ModalWindow.ShowUnhandledErrorAsync(Config.LoadingException);
             if (!isContinue) return;
         }
 
@@ -140,7 +140,7 @@ public partial class App : Application
 
     private async void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        e.Handled = await ShowUnhandledException(e.Exception);
+        e.Handled = await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
 
 #if DEBUG
         throw e.Exception;
@@ -149,7 +149,7 @@ public partial class App : Application
 
     private async void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        _ = await ShowUnhandledException(e.Exception);
+        _ = await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
 
 #if DEBUG
         throw e.Exception;
@@ -160,7 +160,7 @@ public partial class App : Application
     {
         var ex = (Exception)e.ExceptionObject;
 
-        _ = await ShowUnhandledException(ex);
+        _ = await ModalWindow.ShowUnhandledErrorAsync(ex);
 
 #if DEBUG
         throw ex;
@@ -170,7 +170,7 @@ public partial class App : Application
     private void CurrentDomain_FirstChanceException(object? sender, FirstChanceExceptionEventArgs e)
     {
         //var ex = e.Exception;
-        //_ = await ShowUnhandledException(e.Exception);
+        //_ = await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
     }
 
     private void CoreApplication_UnhandledErrorDetected(object? sender, UnhandledErrorDetectedEventArgs e)
@@ -234,35 +234,6 @@ public partial class App : Application
         };
 
         return info;
-    }
-
-
-    /// <summary>
-    /// Reports unhandled exception,
-    /// returns <c>true</c> if user ignores the error to continue.
-    /// </summary>
-    private static async Task<bool> ShowUnhandledException(Exception ex)
-    {
-        var isContinue = false;
-
-        var result = await ModalWindow.ShowErrorAsync(null,
-            AP.Config.Lang["_._UnhandledException"],
-            AP.Config.Lang["_._UnhandledException._Description"],
-            ex.Message,
-            ex.ToString(),
-            ModalWindowButton.Continue_Quit);
-
-        // user chooses 'Quit'
-        if (result.ExitCode == DialogExitCode.Cancel)
-        {
-            Application.Current.Exit();
-        }
-        else if (result.ExitCode == DialogExitCode.OK)
-        {
-            isContinue = true;
-        }
-
-        return isContinue;
     }
 
 

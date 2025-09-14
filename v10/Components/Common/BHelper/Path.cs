@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Windows.ApplicationModel;
 using Windows.System;
 
 namespace ImageGlass.Common;
@@ -30,6 +31,30 @@ namespace ImageGlass.Common;
 public partial class BHelper
 {
     public static string AppName => "ImageGlass_10";
+
+
+    /// <summary>
+    /// Gets app package ID.
+    /// </summary>
+    public static string AppPackageId
+    {
+        get
+        {
+            try
+            {
+                return Package.Current.Id.ProductId;
+            }
+            catch { }
+
+            return string.Empty;
+        }
+    }
+
+
+    /// <summary>
+    /// Gets the app executable file path.
+    /// </summary>
+    public static string AppExePath => Environment.ProcessPath ?? "";
 
 
     /// <summary>
