@@ -435,7 +435,7 @@ public partial class DialogWindow : IgWindow
         }
 
         // get title bar height
-        var titlebarHeight = (int)((TitleBar.DesiredSize.Height - 1) * DpiScale);
+        var titlebarHeight = (int)TitleBar.DesiredSize.Height - 1;
 
         // set dialog position to center the owner
         var posX = parentBounds.X + parentBounds.Width / 2 - clientWidth / 2;
@@ -502,6 +502,7 @@ public partial class DialogWindow : IgWindow
         presenter.PreferredMaximumWidth = maxWidth;
         presenter.SetBorderAndTitleBar(true, false);
         AppWindow.SetPresenter(presenter);
+
 
         // load the window in background
         WindowApi.ShowWindowHidden(Handle);
