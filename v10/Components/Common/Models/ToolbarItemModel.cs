@@ -40,7 +40,7 @@ public partial class ToolbarItemModel : IgReactive
     protected bool _showText = false;
     protected bool _isToggle = false;
     protected ToolbarItemAlignment _alignment = ToolbarItemAlignment.Left;
-    protected SingleAction? _onClick = null;
+    protected HotkeySingleAction? _onClick = null;
 
     // Non-JSON properties
     protected bool _isChecked = false;
@@ -160,7 +160,7 @@ public partial class ToolbarItemModel : IgReactive
     /// <summary>
     /// Gets, sets the click action of toolbar button.
     /// </summary>
-    public SingleAction? OnClick
+    public HotkeySingleAction? OnClick
     {
         get => _onClick;
         set
