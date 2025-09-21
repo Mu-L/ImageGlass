@@ -18,6 +18,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
 using ImageGlass.UI;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using Windows.System;
 
@@ -25,7 +28,7 @@ namespace ImageGlass;
 
 public partial class MainWindow
 {
-    private Dictionary<Hotkey, string> _hotkeys = new()
+    private static FrozenDictionary<Hotkey, string> _hotkeys => new Dictionary<Hotkey, string>()
     {
         { new(VirtualKeyModifiers.Control, VirtualKey.O, new SingleAction(nameof(API.IG_OpenFile))), "FrmMain.MnuOpenFile" },
 
@@ -36,52 +39,59 @@ public partial class MainWindow
 
 
         { new(VirtualKey.Escape, new SingleAction(nameof(API.IG_Exit))), "FrmMain.MnuExit" },
-    };
+    }.ToFrozenDictionary();
 
 
     private async void Hotkey_Invoked(object? sender, HotkeyInvokedEventArgs e)
     {
-        var error = await RunActionAsync(e.Hotkey.Action);
-        if (error is null) return;
+        // 1. backup the current focused element
+        var focusedEl = (UIElement?)FocusManager.GetFocusedElement(Content.XamlRoot);
 
-        // get the language string for error title
-        string? errorTitle = null;
-        if (_hotkeys.TryGetValue(e.Hotkey, out var langKey))
+        // 2. run the action
+        var error = await RunActionAsync(e.Hotkey.Action);
+
+        // 3. show error message if any
+        if (error is not null)
         {
-            errorTitle = AP.Config.Lang[langKey];
+            // get the language string for error title
+            string? errorTitle = null;
+            if (_hotkeys.TryGetValue(e.Hotkey, out var langKey))
+            {
+                errorTitle = AP.Config.Lang[langKey];
+            }
+
+            _ = await ModalWindow.ShowErrorAsync(this, errorTitle, error.Message);
         }
 
-        // show error message
-        _ = await ModalWindow.ShowErrorAsync(this, errorTitle, error.Message);
+        // 4. restore the focus
+        focusedEl ??= Content;
+        focusedEl.Focus(FocusState.Keyboard);
     }
 
 
-    public void RegisterDefaultHotkeys()
+    public void RegisterHotkeys()
     {
+        // 1. register the default hotkeys
         foreach (var item in _hotkeys)
         {
             Content.KeyboardAccelerators.Add(item.Key.Data);
         }
-    }
 
 
-    public void RegisterHotkey(Hotkey hk, string? langKey)
-    {
-        // delete the hotkey if value is null
-        if (langKey is null)
+        // 2. register hotkeys from toolbar buttons
+        foreach (var item in AP.Config.ToolbarButtons)
         {
-            _ = _hotkeys.Remove(hk);
-            return;
-        }
+            if (item.IsSeparator || item.OnClick is null) continue;
 
-        // add or update the command
-        if (_hotkeys.ContainsKey(hk))
-        {
-            _hotkeys[hk] = langKey;
-        }
-        else
-        {
-            _hotkeys.TryAdd(hk, langKey);
+            foreach (var hk in item.OnClick.Hotkeys)
+            {
+                if (Content.KeyboardAccelerators.Contains(hk.Data))
+                {
+                    Content.KeyboardAccelerators.Remove(hk.Data);
+                }
+
+                Content.KeyboardAccelerators.Add(hk.Data);
+            }
         }
     }
 

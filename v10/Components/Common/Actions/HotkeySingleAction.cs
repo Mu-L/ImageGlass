@@ -25,11 +25,22 @@ namespace ImageGlass.Common;
 public partial class HotkeySingleActionJsonContext : JsonSerializerContext { }
 
 
-public partial class HotkeySingleAction : SingleAction
+
+public partial class HotkeySingleAction : SingleAction, IJsonOnDeserialized
 {
     /// <summary>
     /// Gets, sets hotkeys.
     /// </summary>
     public Hotkey[] Hotkeys { get; set; } = [];
 
+
+    public void OnDeserialized()
+    {
+        // bind the action for the hotkey
+        foreach (var hk in Hotkeys)
+        {
+            hk.SetAction(this);
+        }
+    }
 }
+

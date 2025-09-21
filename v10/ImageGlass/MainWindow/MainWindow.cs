@@ -92,7 +92,7 @@ public partial class MainWindow : IgWindow
         LoadImagesFromCmdArgs();
 
         // register hotkeys
-        RegisterDefaultHotkeys();
+        RegisterHotkeys();
     }
 
 

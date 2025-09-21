@@ -13,6 +13,7 @@
                                      IsDesignTimeCreatable=True}"
     x:DefaultBindMode="OneWay"
     AutomationProperties.AutomationControlType="ToolBar"
+    IsTabStop="False"
     mc:Ignorable="d">
 
     <local:IgControl.Resources>
@@ -31,6 +32,7 @@
                 <ctk:Case Value="True">
                     <local:IgToolbarSeparator
                         Name="PART_ItemSeparator"
+                        IsTabStop="False"
                         Loaded="ToolbarItem_Loaded"
                         VM="{x:Bind}" />
                 </ctk:Case>
@@ -40,6 +42,7 @@
                     <local:IgToolbarButton
                         Name="PART_ItemButton"
                         Clicked="PART_ItemButton_Clicked"
+                        IsTabStop="False"
                         Loaded="ToolbarItem_Loaded"
                         VM="{x:Bind}" />
                 </ctk:Case>
@@ -132,7 +135,7 @@
 
 
             <!--  Menu button  -->
-            <local:IgToolbarButton x:Name="BtnMainMenu">
+            <local:IgToolbarButton x:Name="BtnMainMenu" IsTabStop="False">
                 <local:IgToolbarButton.VM>
                     <cm:ToolbarItemModel Image="{x:Bind local:ToolbarControl.MainMenuIconName}" Text="Main Menu" />
                 </local:IgToolbarButton.VM>

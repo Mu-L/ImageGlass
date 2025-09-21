@@ -13,7 +13,7 @@
     IsTabStop="False"
     mc:Ignorable="d">
 
-    <Grid TabFocusNavigation="Local">
+    <Grid IsTabStop="True" TabFocusNavigation="Local">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
