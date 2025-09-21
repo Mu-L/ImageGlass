@@ -66,6 +66,7 @@
                 <!--  Heading  -->
                 <TextBlock
                     x:Name="PART_Heading"
+                    MaxHeight="200"
                     Foreground="{ThemeResource AccentTextFillColorTertiaryBrush}"
                     IsColorFontEnabled="True"
                     IsTextSelectionEnabled="True"
@@ -77,6 +78,7 @@
                 <!--  Description  -->
                 <TextBlock
                     x:Name="PART_Description"
+                    MaxHeight="200"
                     Foreground="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
                     IsColorFontEnabled="True"
                     IsTextSelectionEnabled="True"

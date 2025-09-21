@@ -50,6 +50,15 @@ public class Hotkey
 
     public Hotkey() { }
 
+    public Hotkey(VirtualKeyModifiers modifiers, VirtualKey key)
+    {
+        Data = new KeyboardAccelerator()
+        {
+            Modifiers = modifiers,
+            Key = key,
+        };
+    }
+
     public Hotkey(KeyboardAccelerator accel)
     {
         Data = new KeyboardAccelerator()
