@@ -132,7 +132,16 @@ public partial class MainWindow
     /// </summary>
     public void IG_ViewByStep(string? stepStr)
     {
-        if (!int.TryParse(stepStr, out var step)) return;
+        if (!int.TryParse(stepStr, out var step))
+        {
+            throw new ArgumentException($"""
+                Step '{stepStr}' is not a valid integer.
+                
+                ----------
+                👉🏼 Method: {nameof(IG_ViewByStep)}
+                """,
+                nameof(stepStr));
+        }
 
         IG_ViewByStep(step);
     }

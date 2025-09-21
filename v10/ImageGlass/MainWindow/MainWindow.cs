@@ -46,9 +46,11 @@ public partial class MainWindow : IgWindow
         WindowContent = _contentEl;
         _searchProgress = new(Files_Searched);
 
+
         _contentEl.ToolbarButtonClicked += Toolbar_ButtonClicked;
         _contentEl.GalleryItemClicked += Gallery_ItemClicked;
         _contentEl.ViewerDrop += Viewer_Drop;
+        Hotkey.Invoked += Hotkey_Invoked;
 
         // load window bounds from settings
         SetWindowBounds(AP.Config.MainWindowBounds, AP.Config.IsMainWindowMaximized);
@@ -71,9 +73,14 @@ public partial class MainWindow : IgWindow
 
         Viewer.UnloadPhoto();
 
+        // clear hotkeys
+        Content.KeyboardAccelerators.Clear();
+        Hotkey.Invoked -= Hotkey_Invoked;
+
         _contentEl.ToolbarButtonClicked -= Toolbar_ButtonClicked;
         _contentEl.GalleryItemClicked -= Gallery_ItemClicked;
         _contentEl.ViewerDrop -= Viewer_Drop;
+
     }
 
 
@@ -83,6 +90,9 @@ public partial class MainWindow : IgWindow
 
         // load image from command line arguments
         LoadImagesFromCmdArgs();
+
+        // register hotkeys
+        RegisterDefaultHotkeys();
     }
 
 

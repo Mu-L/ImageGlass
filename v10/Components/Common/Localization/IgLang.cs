@@ -163,7 +163,7 @@ public class IgLang
 
 
     /// <summary>
-    /// Gets the formatted language string. If not exist, returns the key with <c>#</c> prefix.
+    /// Gets the formatted language string. If not exist, returns the key.
     /// </summary>
     /// <param name="key">The key to get the language string</param>
     /// <param name="args">The arguments to format the language string.</param>
@@ -181,10 +181,10 @@ public class IgLang
             _ = DefaultLangDictionary.TryGetValue(key, out value);
         }
 
-        // 3. if not found, return the # + key
+        // 3. if not found, return the key
         if (string.IsNullOrWhiteSpace(value))
         {
-            return value ?? $"#{key}";
+            return value ?? key;
         }
 
         // 4. if value has arguments, return the formatted string

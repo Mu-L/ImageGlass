@@ -37,7 +37,7 @@ public class Hotkey
     /// <summary>
     /// Gets, sets the command of the hotkey.
     /// </summary>
-    public IIgCommand? Command { get; set; } = null;
+    public SingleAction? Action { get; private set; } = null;
 
 
     public bool Control => Data.Modifiers.HasFlag(VirtualKeyModifiers.Control);
@@ -50,22 +50,25 @@ public class Hotkey
 
     public Hotkey() { }
 
-    public Hotkey(VirtualKeyModifiers modifiers, VirtualKey key)
+    public Hotkey(VirtualKey key, SingleAction? action = null)
+    {
+        Data = new KeyboardAccelerator()
+        {
+            Key = key,
+        };
+
+        SetAction(action);
+    }
+
+    public Hotkey(VirtualKeyModifiers modifiers, VirtualKey key, SingleAction? action = null)
     {
         Data = new KeyboardAccelerator()
         {
             Modifiers = modifiers,
             Key = key,
         };
-    }
 
-    public Hotkey(KeyboardAccelerator accel)
-    {
-        Data = new KeyboardAccelerator()
-        {
-            Modifiers = accel.Modifiers,
-            Key = accel.Key,
-        };
+        SetAction(action);
     }
 
 
@@ -73,6 +76,34 @@ public class Hotkey
     /// <inheritdoc/>
     /// </summary>
     public override string ToString() => KeyString;
+
+
+    /// <summary>
+    /// Sets the action for this hotkey.
+    /// </summary>
+    public void SetAction(SingleAction? action)
+    {
+        Action = action;
+
+        Data.Invoked -= KeyAccelerator_Invoked;
+        if (Action is not null)
+        {
+            Data.Invoked += KeyAccelerator_Invoked;
+        }
+    }
+
+
+    private void KeyAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
+    {
+        if (Action is null) return;
+        e.Handled = true;
+
+        RaiseHotkeyInvokedEvent(new HotkeyInvokedEventArgs()
+        {
+            Hotkey = this,
+            Args = e,
+        });
+    }
 
 
     /// <summary>
@@ -134,4 +165,25 @@ public class Hotkey
     }
 
 
+
+    /// <summary>
+    /// Occurs when a hotkey is invoked.
+    /// </summary>
+    public static event EventHandler<HotkeyInvokedEventArgs>? Invoked;
+
+    /// <summary>
+    /// Raises the event <see cref="Invoked"/>.
+    /// </summary>
+    public static void RaiseHotkeyInvokedEvent(HotkeyInvokedEventArgs e)
+    {
+        Invoked?.Invoke(null, e);
+    }
+}
+
+
+
+public class HotkeyInvokedEventArgs : EventArgs
+{
+    public required Hotkey Hotkey { get; set; }
+    public required KeyboardAcceleratorInvokedEventArgs Args { get; set; }
 }
