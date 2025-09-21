@@ -25,9 +25,10 @@ namespace ImageGlass.UI;
 
 public class WindowStateChangedEventArgs() : EventArgs
 {
+    public Rect Bounds { get; internal set; } = new();
     public Rect OldBounds { get; internal set; } = new();
-    public OverlappedPresenterState OldState { get; internal set; }
     public OverlappedPresenterState State { get; internal set; }
+    public OverlappedPresenterState OldState { get; internal set; }
 }
 
 

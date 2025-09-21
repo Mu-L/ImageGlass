@@ -145,6 +145,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     protected nint _windowIconHandle = IntPtr.Zero;
     protected BackdropStyle _actualBackdropStyle = BackdropStyle.None;
     protected OverlappedPresenterState _windowState = OverlappedPresenterState.Restored;
+    private Rect _boundsBeforeStateChanged = new();
 
 
     #region Control Properties
@@ -416,31 +417,42 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
     private void MsgMonitor_MessageReceived(object? sender, WindowMessageReceivedEventArgs e)
     {
+        if (e.MessageType == (uint)NativeValues.WindowMessage.WM_MOVING
+            || e.MessageType == (uint)NativeValues.WindowMessage.WM_SIZING)
+        {
+            _boundsBeforeStateChanged = GetWindowBounds();
+        }
+
         // monitor window state changes
-        if (e.MessageType == 0x0112) // WM_SYSCOMMAND
+        else if (e.MessageType == (uint)NativeValues.WindowMessage.WM_SIZE)
         {
             OverlappedPresenterState? winState = null;
 
-            if (e.Message.WParam == 0xF030) // SC_MAXIMIZE
+            if (e.Message.WParam == 0) // SIZE_RESTORED
             {
-                // The window is being maximized
-                winState = OverlappedPresenterState.Maximized;
-            }
-            else if (e.Message.WParam == 0xF120) // SC_RESTORE
-            {
-                // The window is being restored
                 winState = OverlappedPresenterState.Restored;
             }
-            else if (e.Message.WParam == 0xF020) // SC_MINIMIZE
+            else if (e.Message.WParam == 1) // SIZE_MINIMIZED
             {
-                // The window is being minimized
                 winState = OverlappedPresenterState.Minimized;
             }
+            else if (e.Message.WParam == 2) // SIZE_MAXIMIZED
+            {
+                winState = OverlappedPresenterState.Maximized;
+            }
+
 
             // update state without invoking presenter
-            if (winState is not null) SetWindowState(winState.Value, false);
-        }
+            if (winState is not null)
+            {
+                if (_boundsBeforeStateChanged.IsEmpty())
+                {
+                    _boundsBeforeStateChanged = GetWindowBounds();
+                }
 
+                SetWindowState(winState.Value, false);
+            }
+        }
 
         OnIgWndProc(e);
     }
@@ -761,7 +773,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         if (_windowState == state) return;
 
         var oldState = _windowState;
-        var oldBounds = GetWindowBounds();
+        var oldBounds = _boundsBeforeStateChanged;
 
         if (invokePresenter)
         {
@@ -780,10 +792,13 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         }
 
         _windowState = state;
+        var newBounds = GetWindowBounds();
+
         OnPropertyChanged(nameof(WindowState));
         OnIgWindowStateChanged(new WindowStateChangedEventArgs()
         {
             State = state,
+            Bounds = newBounds,
             OldState = oldState,
             OldBounds = oldBounds,
         });

@@ -91,7 +91,11 @@ public partial class MainWindow : IgWindow
         base.OnIgWindowStateChanged(e);
 
         // save window bounds
-        if (e.OldState == OverlappedPresenterState.Restored)
+        if (e.State == OverlappedPresenterState.Restored)
+        {
+            AP.Config.MainWindowBounds = e.Bounds;
+        }
+        else if (e.OldState == OverlappedPresenterState.Restored)
         {
             AP.Config.MainWindowBounds = e.OldBounds;
         }
