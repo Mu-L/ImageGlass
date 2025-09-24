@@ -41,8 +41,8 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4948" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250907003" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.6584" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250916003" />
 		<PackageReference Include="System.Drawing.Common" Version="10.0.0-rc.1.25451.107" />
 		<PackageReference Include="Vortice.Direct2D1" Version="3.7.5-beta" />
 		<PackageReference Include="Vortice.Win32.Graphics.Imaging" Version="2.2.7" />
