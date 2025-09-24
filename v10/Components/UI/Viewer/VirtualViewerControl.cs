@@ -212,15 +212,19 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     protected override void OnUnloaded()
     {
-        base.OnUnloaded();
-
         UnloadPhoto();
         DisposeCheckerboardBrushes();
+
+        base.OnUnloaded();
     }
 
 
     private void DisposeNativePhotoResources()
     {
+        // flush pending D3D11 context
+        _d3dContext?.ClearState();
+        _d3dContext?.Flush();
+
         // dispose preview bitmap
         _bmpPreview?.Dispose();
         _bmpPreview = null;
