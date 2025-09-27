@@ -557,6 +557,9 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// </summary>
     protected void SetupWindowTitlebar()
     {
+        // reset default window title
+        Title = BHelper.AppName;
+
         // set title bar
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(PART_Titlebar);

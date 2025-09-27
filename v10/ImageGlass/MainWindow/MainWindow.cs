@@ -32,8 +32,10 @@ namespace ImageGlass;
 
 public partial class MainWindow : IgWindow
 {
+    private readonly AppStatusInfo _status;
     private readonly MainWindow_Content _contentEl = new();
     private readonly Progress<FileSearchingEventArgs> _searchProgress;
+
 
 
     public ToolbarControl ToolbarMain => _contentEl.ToolbarMain;
@@ -45,16 +47,37 @@ public partial class MainWindow : IgWindow
     {
         WindowContent = _contentEl;
         _searchProgress = new(Files_Searched);
+        _status = new(_contentEl.Viewer);
+
+
+        // load window bounds from settings
+        SetWindowBounds(AP.Config.MainWindowBounds, AP.Config.IsMainWindowMaximized);
+    }
+
+
+    #region Override methods
+
+    protected override void OnIgWindowLoaded(FrameworkElement fe)
+    {
+        base.OnIgWindowLoaded(fe);
+
+        // load image from command line arguments
+        LoadImagesFromCmdArgs();
+
+        // register hotkeys
+        RegisterHotkeys();
 
 
         _contentEl.ToolbarButtonClicked += Toolbar_ButtonClicked;
         _contentEl.GalleryItemClicked += Gallery_ItemClicked;
         _contentEl.ViewerDrop += Viewer_Drop;
+        _contentEl.ViewerZoomChanged += Viewer_ZoomChanged;
+
+        _status.Changed += Status_Changed;
         Hotkey.Invoked += Hotkey_Invoked;
 
-        // load window bounds from settings
-        SetWindowBounds(AP.Config.MainWindowBounds, AP.Config.IsMainWindowMaximized);
     }
+
 
 
     protected override void OnIgWindowClosing(AppWindow sender, AppWindowClosingEventArgs e)
@@ -80,19 +103,10 @@ public partial class MainWindow : IgWindow
         _contentEl.ToolbarButtonClicked -= Toolbar_ButtonClicked;
         _contentEl.GalleryItemClicked -= Gallery_ItemClicked;
         _contentEl.ViewerDrop -= Viewer_Drop;
+        _contentEl.ViewerZoomChanged -= Viewer_ZoomChanged;
 
-    }
-
-
-    protected override void OnIgWindowLoaded(FrameworkElement fe)
-    {
-        base.OnIgWindowLoaded(fe);
-
-        // load image from command line arguments
-        LoadImagesFromCmdArgs();
-
-        // register hotkeys
-        RegisterHotkeys();
+        _status.Changed -= Status_Changed;
+        _status.Dispose();
     }
 
 
@@ -111,7 +125,15 @@ public partial class MainWindow : IgWindow
         }
     }
 
+    #endregion // Override methods
 
+
+    #region Control events
+
+    private void Status_Changed(object? sender, EventArgs e)
+    {
+        WindowTitle = _status.Text;
+    }
 
 
     private async void Toolbar_ButtonClicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
@@ -173,6 +195,12 @@ public partial class MainWindow : IgWindow
     }
 
 
+    private void Viewer_ZoomChanged(VirtualViewerControl sender, ZoomEventArgs e)
+    {
+
+    }
+
+
     private void Files_Searched(FileSearchingEventArgs e)
     {
         var isEmptyList = AP.Photos.Count == 0;
@@ -210,7 +238,7 @@ public partial class MainWindow : IgWindow
     }
 
 
-
+    #endregion // Control events
 
 
 
@@ -281,12 +309,10 @@ public partial class MainWindow : IgWindow
 
     private void ViewPhoto(Photo? photo)
     {
-        WindowTitle = photo?.FilePath;
         Viewer.SetPhoto(photo);
 
         Gallery.ScrollToItem(AP.Photos.CurrentIndex);
     }
-
 
 
 }
