@@ -78,10 +78,39 @@ public partial class Config
 
 
     /// <summary>
+    /// Gets the default image formats.
+    /// </summary>
+    [JsonIgnore]
+    public static ReadOnlyCollection<string> DefaultFileFormats => new(
+        Const.IMAGE_FORMATS.Split(';',
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
+        )
+    );
+
+
+    /// <summary>
+    /// Gets the default image info tags.
+    /// </summary>
+    [JsonIgnore]
+    public static ReadOnlyCollection<string> DefaultImageInfoTags => [
+        nameof(ImageInfo.Name),
+        nameof(ImageInfo.ListCount),
+        nameof(ImageInfo.FrameCount),
+        nameof(ImageInfo.Zoom),
+        nameof(ImageInfo.Dimension),
+        nameof(ImageInfo.FileSize),
+        nameof(ImageInfo.ColorSpace),
+        nameof(ImageInfo.ExifRating),
+        nameof(ImageInfo.DateTimeAuto),
+        nameof(ImageInfo.AppName),
+    ];
+
+
+    /// <summary>
     /// Gets the default toolbar items.
     /// </summary>
     [JsonIgnore]
-    public static readonly ReadOnlyCollection<ToolbarItemModel> DefaultToolbarItems =
+    public static ReadOnlyCollection<ToolbarItemModel> DefaultToolbarItems =>
     [
         new() {
             Id = "Btn_MnuOpenFile",
@@ -160,7 +189,6 @@ public partial class Config
 
         // initialize app config
         appConfig ??= new();
-        appConfig.LoadDefaults();
 
         return appConfig;
     }
@@ -197,27 +225,6 @@ public partial class Config
 
     // Public methods
     #region Public methods
-
-    /// <summary>
-    /// Sets default value of app settings.
-    /// </summary>
-    public void LoadDefaults()
-    {
-        // load default toolbar items
-        if (ToolbarButtons.Count == 0)
-        {
-            ToolbarButtons = new(DefaultToolbarItems);
-        }
-
-
-        // set default value for file formats
-        if (FileFormats.Count == 0)
-        {
-            FileFormats = Const.IMAGE_FORMATS
-                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .ToHashSet();
-        }
-    }
 
 
     /// <summary>

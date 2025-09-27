@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -25,14 +25,14 @@ namespace ImageGlass.Common;
 
 
 /// <summary>
-/// Converts an <see cref="HashSet{string}"/> of strings to a single delimited string
+/// Converts an <see cref="ObservableCollection{string}"/> of strings to a single delimited string
 /// and vice versa.
 /// </summary>
-public class JsonArrayToStringConverter : JsonConverter<HashSet<string>>
+public class JsonObservableCollectionToStringConverter : JsonConverter<ObservableCollection<string>>
 {
     private readonly string _delimiter = ";";
 
-    public override void Write(Utf8JsonWriter writer, HashSet<string> arr, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ObservableCollection<string> arr, JsonSerializerOptions options)
     {
         // convert string[] to string
         var str = string.Join(_delimiter, arr);
@@ -40,11 +40,11 @@ public class JsonArrayToStringConverter : JsonConverter<HashSet<string>>
         writer.WriteStringValue(str);
     }
 
-    public override HashSet<string> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ObservableCollection<string> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var str = reader.GetString();
         var arr = str?.Split(_delimiter, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        return new HashSet<string>(arr ?? []);
+        return new ObservableCollection<string>(arr ?? []);
     }
 }

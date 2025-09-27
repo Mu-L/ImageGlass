@@ -790,23 +790,6 @@ public partial class Config : IgReactive
     //public Dictionary<string, EditApp?> EditApps { get; set; } = [];
 
     /// <summary>
-    /// Gets, sets the list of supported image formats
-    /// </summary>
-    [JsonConverter(typeof(JsonHashSetToStringConverter))]
-    public HashSet<string> FileFormats
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
-        }
-    } = [];
-
-    /// <summary>
     /// Gets, sets the list of formats that only load the first frame forcefully
     /// </summary>
     [JsonConverter(typeof(JsonHashSetToStringConverter))]
@@ -824,9 +807,10 @@ public partial class Config : IgReactive
     } = [".avif", ".heic", ".heif", ".psd", ".jxl"];
 
     /// <summary>
-    /// Gets, sets the list of toolbar buttons
+    /// Gets, sets the list of supported image formats
     /// </summary>
-    public ObservableCollection<ToolbarItemModel> ToolbarButtons
+    [JsonConverter(typeof(JsonHashSetToStringConverter))]
+    public HashSet<string> FileFormats
     {
         get; set
         {
@@ -837,12 +821,14 @@ public partial class Config : IgReactive
                 _ = OnPropertyChanged(value, oldValue);
             }
         }
-    } = [];
+    } = new HashSet<string>(DefaultFileFormats);
 
-    ///// <summary>
-    ///// Gets, sets the tags for displaying image info
-    ///// </summary>
-    //public List<string> ImageInfoTags { get; set; } = DefaultImageInfoTags;
+    /// <summary>
+    /// Gets, sets the tags for displaying image info.
+    /// </summary>
+    [JsonConverter(typeof(JsonObservableCollectionToStringConverter))]
+    public ObservableCollection<string> ImageInfoTags { get; set; } = new(DefaultImageInfoTags);
+
 
     ///// <summary>
     ///// Gets, sets hotkeys list of menu
@@ -884,6 +870,22 @@ public partial class Config : IgReactive
     ///// Gets, sets the list of disabled menus
     ///// </summary>
     //public FrozenSet<string> DisabledMenus { get; set; } = FrozenSet<string>.Empty;
+
+    /// <summary>
+    /// Gets, sets the list of toolbar buttons
+    /// </summary>
+    public ObservableCollection<ToolbarItemModel> ToolbarButtons
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = new(DefaultToolbarItems);
 
     #endregion // Array items
 
