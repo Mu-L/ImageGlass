@@ -93,16 +93,16 @@ public partial class Config
     /// </summary>
     [JsonIgnore]
     public static ReadOnlyCollection<string> DefaultImageInfoTags => [
-        nameof(ImageInfo.Name),
-        nameof(ImageInfo.ListCount),
-        nameof(ImageInfo.FrameCount),
-        nameof(ImageInfo.Zoom),
-        nameof(ImageInfo.Dimension),
-        nameof(ImageInfo.FileSize),
-        nameof(ImageInfo.ColorSpace),
-        nameof(ImageInfo.ExifRating),
-        nameof(ImageInfo.DateTimeAuto),
-        nameof(ImageInfo.AppName),
+        "Name",
+        "ListCount",
+        "FrameCount",
+        "Zoom",
+        "Dimension",
+        "FileSize",
+        "ColorSpace",
+        "ExifRating",
+        "DateTimeAuto",
+        "AppName",
     ];
 
 

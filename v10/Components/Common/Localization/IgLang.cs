@@ -283,9 +283,9 @@ public class IgLang
         { $"_.Metadata._ExifDateTime", "EXIF: DateTime" }, //v9.0
         { $"_.Metadata._ExifDateTimeOriginal", "EXIF: DateTimeOriginal" }, //v9.0
 
-        //// image info
-        //{ $"_.{nameof(ImageInfo)}._{nameof(ImageInfo.ListCount)}", "{0} file(s)" }, //v9.0
-        //{ $"_.{nameof(ImageInfo)}._{nameof(ImageInfo.FrameCount)}", "{0} frame(s)" }, //v9.0
+        // image info
+        { $"_.ImageInfo._ListCount", "{0} file(s)" }, //v9.0
+        { $"_.ImageInfo._FrameCount", "{0} frame(s)" }, //v9.0
 
         // layout position
         { $"_.Position._Left", "Left" },
