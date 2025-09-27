@@ -43,6 +43,12 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
 
 
     /// <summary>
+    /// Gets the metadata of the viewed photo.
+    /// </summary>
+    public PhotoMetadata? CurrentMetadata => Get(CurrentIndex)?.Metadata;
+
+
+    /// <summary>
     /// The initial photo,
     /// can be the photo from the initial file path or the first photo of the directory.
     /// </summary>

@@ -119,7 +119,10 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         // select new index
         Items[index].IsCurrent = true;
         _currentIndex = index;
+
         OnPropertyChanged(nameof(CurrentIndex));
+        OnPropertyChanged(nameof(CurrentFilePath));
+        OnPropertyChanged(nameof(CurrentMetadata));
 
         return Get(index);
     }
@@ -167,6 +170,12 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
 
         _dict.Remove(filePath, out _);
         _dict.AddOrUpdate(filePath, index, (fIndex, oldValue) => index);
+
+        if (index == _currentIndex)
+        {
+            OnPropertyChanged(nameof(CurrentFilePath));
+            OnPropertyChanged(nameof(CurrentMetadata));
+        }
     }
 
 
