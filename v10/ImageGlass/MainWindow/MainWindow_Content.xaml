@@ -27,7 +27,6 @@
             Grid.Row="0"
             Canvas.ZIndex="90"
             IsTabStop="False"
-            ItemClicked="PART_ToolbarMain_ItemClicked"
             ItemsSource="{x:Bind cm:AP.Config.ToolbarButtons}" />
 
 
@@ -38,8 +37,6 @@
             AllowDrop="True"
             BackgroundColor="{x:Bind cm:AP.Config.Theme.ComputedColors.BgColor}"
             CheckerboardMode="{x:Bind cm:AP.Config.CheckerboardMode}"
-            DragOver="PART_Viewer_DragOver"
-            Drop="PART_Viewer_Drop"
             EnableDebug="{x:Bind cm:AP.Config.EnableDebug}"
             IsTabStop="False"
             PanSpeed="{x:Bind cm:AP.Config.PanSpeed}"
@@ -55,7 +52,6 @@
             Grid.Column="1"
             Canvas.ZIndex="80"
             IsTabStop="False"
-            ItemClicked="PART_Gallery_ItemClicked"
             VM="{x:Bind cm:AP.Photos, Mode=OneWay}" />
 
     </Grid>

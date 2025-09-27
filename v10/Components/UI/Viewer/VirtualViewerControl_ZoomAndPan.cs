@@ -38,13 +38,13 @@ public partial class VirtualViewerControl
     /// <summary>
     /// Occurs when <see cref="ZoomFactor"/> value changes.
     /// </summary>
-    public event EventHandler<ZoomEventArgs>? OnZoomChanged;
+    public event TypedEventHandler<VirtualViewerControl, ZoomEventArgs>? ZoomChanged;
 
 
     /// <summary>
     /// Occurs when the image is being panned.
     /// </summary>
-    public event EventHandler<PanningEventArgs>? Panning;
+    public event TypedEventHandler<VirtualViewerControl, PanningEventArgs>? Panning;
 
     #endregion // Public Events
 
@@ -293,7 +293,7 @@ public partial class VirtualViewerControl
         Invalidate();
 
 
-        OnZoomChanged?.Invoke(this, new ZoomEventArgs()
+        ZoomChanged?.Invoke(this, new ZoomEventArgs()
         {
             ZoomFactor = _zooming.Factor,
             IsManualZoom = _zooming.IsManual,
@@ -319,7 +319,7 @@ public partial class VirtualViewerControl
         CalculateDrawingRegion();
 
 
-        OnZoomChanged?.Invoke(this, new ZoomEventArgs()
+        ZoomChanged?.Invoke(this, new ZoomEventArgs()
         {
             ZoomFactor = _zooming.Factor,
             IsManualZoom = _zooming.IsManual,
@@ -452,8 +452,8 @@ public partial class VirtualViewerControl
 
             PanTo(zoomedDistance.Width, zoomedDistance.Height, location, requestRerender);
 
-            // emit OnZoomChanged event
-            OnZoomChanged?.Invoke(this, new ZoomEventArgs()
+            // emit ZoomChanged event
+            ZoomChanged?.Invoke(this, new ZoomEventArgs()
             {
                 ZoomFactor = _zooming.Factor,
                 IsManualZoom = _zooming.IsManual,
@@ -560,8 +560,8 @@ public partial class VirtualViewerControl
         if (requestRerender) Invalidate();
 
 
-        // emit OnZoomChanged event
-        OnZoomChanged?.Invoke(this, new ZoomEventArgs()
+        // emit ZoomChanged event
+        ZoomChanged?.Invoke(this, new ZoomEventArgs()
         {
             ZoomFactor = _zooming.Factor,
             IsManualZoom = _zooming.IsManual,

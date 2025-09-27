@@ -40,7 +40,7 @@ public partial class VirtualViewerControl
     /// <summary>
     /// Occurs when the <see cref="ClientSelection"/> is changed.
     /// </summary>
-    public event EventHandler<SelectionEventArgs>? SelectionChanged;
+    public event TypedEventHandler<VirtualViewerControl, SelectionEventArgs>? SelectionChanged;
 
 
 

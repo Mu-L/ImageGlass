@@ -16,12 +16,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using ImageGlass.UI;
 using Microsoft.UI.Xaml;
 using System;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
-
 
 namespace ImageGlass;
 
@@ -30,6 +30,9 @@ public sealed partial class MainWindow_Content : IgControl
     public event TypedEventHandler<IgToolbarButton, ToolbarItemClickedEventArgs>? ToolbarButtonClicked;
     public event TypedEventHandler<IgGalleryItem, EventArgs>? GalleryItemClicked;
     public event TypedEventHandler<VirtualViewerControl, DragEventArgs>? ViewerDrop;
+    public event TypedEventHandler<VirtualViewerControl, ZoomEventArgs>? ViewerZoomChanged;
+    public event TypedEventHandler<VirtualViewerControl, SelectionEventArgs>? ViewerSelectionChanged;
+    public event TypedEventHandler<VirtualViewerControl, PanningEventArgs>? ViewerPanning;
 
 
     public ToolbarControl ToolbarMain => PART_ToolbarMain;
@@ -44,6 +47,43 @@ public sealed partial class MainWindow_Content : IgControl
     }
 
 
+
+    #region Override methods
+
+    protected override void OnIgLoaded(FrameworkElement fe)
+    {
+        base.OnIgLoaded(fe);
+
+        PART_ToolbarMain.ItemClicked += PART_ToolbarMain_ItemClicked;
+        PART_Gallery.ItemClicked += PART_Gallery_ItemClicked;
+
+        PART_Viewer.DragOver += PART_Viewer_DragOver;
+        PART_Viewer.Drop += PART_Viewer_Drop;
+        PART_Viewer.ZoomChanged += PART_Viewer_ZoomChanged;
+        PART_Viewer.Panning += PART_Viewer_Panning;
+        PART_Viewer.SelectionChanged += PART_Viewer_SelectionChanged;
+    }
+
+
+    protected override void OnIgUnloaded(FrameworkElement fe)
+    {
+        base.OnIgUnloaded(fe);
+
+        PART_ToolbarMain.ItemClicked -= PART_ToolbarMain_ItemClicked;
+        PART_Gallery.ItemClicked -= PART_Gallery_ItemClicked;
+
+        PART_Viewer.DragOver -= PART_Viewer_DragOver;
+        PART_Viewer.Drop -= PART_Viewer_Drop;
+        PART_Viewer.ZoomChanged -= PART_Viewer_ZoomChanged;
+        PART_Viewer.Panning -= PART_Viewer_Panning;
+        PART_Viewer.SelectionChanged -= PART_Viewer_SelectionChanged;
+    }
+
+
+    #endregion // Override methods
+
+
+    #region Control Events
 
     private void PART_ToolbarMain_ItemClicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
     {
@@ -66,7 +106,7 @@ public sealed partial class MainWindow_Content : IgControl
         }
 
         e.AcceptedOperation = DataPackageOperation.Link;
-        e.DragUIOverride.Caption = "Open with ImageGlass";
+        e.DragUIOverride.Caption = AP.Config.Lang["FrmMain._OpenWith", BHelper.AppName];
     }
 
 
@@ -75,5 +115,24 @@ public sealed partial class MainWindow_Content : IgControl
         ViewerDrop?.Invoke((VirtualViewerControl)sender, e);
     }
 
+
+    private void PART_Viewer_ZoomChanged(VirtualViewerControl sender, ZoomEventArgs e)
+    {
+        ViewerZoomChanged?.Invoke(sender, e);
+    }
+
+
+    private void PART_Viewer_SelectionChanged(VirtualViewerControl sender, SelectionEventArgs e)
+    {
+        ViewerSelectionChanged?.Invoke(sender, e);
+    }
+
+
+    private void PART_Viewer_Panning(VirtualViewerControl sender, PanningEventArgs e)
+    {
+        ViewerPanning?.Invoke(sender, e);
+    }
+
+    #endregion // Control Events
 
 }

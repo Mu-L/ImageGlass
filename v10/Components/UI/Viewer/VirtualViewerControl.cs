@@ -53,27 +53,23 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private ImageInterpolation _interpolationScaleDown = ImageInterpolation.MultiSampleLinear;
     private ImageInterpolation _interpolationScaleUp = ImageInterpolation.NearestNeighbor;
 
-
     // loading
     private CancellationTokenSource? _cancelPreview;
     private Progress<PhotoLoadingEventArgs> _loadingProgress;
     private bool _isPreviewing = false;
-
 
     // control
     private Color _accentColor = Colors.Blue;
     private InputSystemCursorShape _cursor = InputSystemCursorShape.Arrow;
 
 
-
-    public event EventHandler<EventArgs>? Error;
-
-
     public double FontSize { get; set; } = 13;
     public double FontSize_Dpi => this.DpiScale(FontSize);
 
 
-
+    /// <summary>
+    /// Gets the drawing area.
+    /// </summary>
     public Rect DrawingArea => new(
         Padding.Left,
         Padding.Top,
@@ -232,12 +228,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // dispose native bitmap
         _bmpSource?.Dispose();
         _bmpSource = null;
-    }
-
-
-    protected virtual void OnError(EventArgs e)
-    {
-        Error?.Invoke(this, e);
     }
 
 
