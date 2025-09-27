@@ -364,6 +364,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 var scaleDelta = e.Delta.Expansion * 8;
                 _ = ZoomByDeltaToPoint(scaleDelta, e.Position);
             }
+
+            // stop velocity if requested
+            if (!_enablePanningVelocity) e.Complete();
         }
 
         e.Handled = true;
@@ -521,6 +524,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         _photo?.Unload();
 
         // reset selection
+        _enablePanningVelocity = false;
         SetSourceSelection(Rect.Empty, false);
         SetBitmapSize(0, 0, false);
 
@@ -556,6 +560,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             _ = inputPhoto.LoadAsync(true, null, _loadingProgress);
         }
 
+        _enablePanningVelocity = true;
         _photo = inputPhoto;
     }
 

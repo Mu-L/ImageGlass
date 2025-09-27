@@ -30,6 +30,7 @@ public partial class VirtualViewerControl
 
     private ZoomInfo _zooming = new();
     private double _panSpeed = 20f;
+    private bool _enablePanningVelocity = true;
 
 
     // Public Events
