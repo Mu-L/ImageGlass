@@ -837,45 +837,7 @@ public partial class Config : IgReactive
                 _ = OnPropertyChanged(value, oldValue);
             }
         }
-    } =
-    [
-        new ToolbarItemModel {
-            Id = "Btn_Open",
-            Text = "Open",
-            Image = "OpenFile",
-        },
-        new ToolbarItemModel {
-            Id = "Btn_Save",
-            Text = "Save",
-            Image = "Save",
-            ShowText = true,
-        },
-        new ToolbarItemModel {
-            Id = "Btn_Print",
-            Text = "Print",
-            Image = "Print",
-            ShowText = true,
-        },
-        new ToolbarItemModel {
-            Id = "Btn_Crop",
-            Text = "Crop",
-            Image = "Crop",
-        },
-
-
-        new ToolbarItemModel {
-            Id = "Btn_Checkerboard",
-            Text = "Checkerboard",
-            Image = "Checkerboard",
-            Alignment = ToolbarItemAlignment.Right,
-        },
-        new ToolbarItemModel {
-            Id = "Btn_ColorPicker",
-            Text = "ColorPicker",
-            Image = "ColorPicker",
-            Alignment = ToolbarItemAlignment.Right,
-        },
-    ];
+    } = [];
 
     ///// <summary>
     ///// Gets, sets the tags for displaying image info

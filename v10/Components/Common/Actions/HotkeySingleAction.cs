@@ -34,6 +34,23 @@ public partial class HotkeySingleAction : SingleAction, IJsonOnDeserialized
     public Hotkey[] Hotkeys { get; set; } = [];
 
 
+    public HotkeySingleAction() { }
+
+
+    public HotkeySingleAction(string executable, Hotkey[]? hotkeys = null)
+        : base(executable)
+    {
+        if (hotkeys is not null) Hotkeys = hotkeys;
+    }
+
+
+    public HotkeySingleAction(string executable, string arg, Hotkey[]? hotkeys = null)
+        : base(executable, arg)
+    {
+        if (hotkeys is not null) Hotkeys = hotkeys;
+    }
+
+
     public void OnDeserialized()
     {
         // bind the action for the hotkey

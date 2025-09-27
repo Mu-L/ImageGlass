@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -75,6 +76,46 @@ public partial class Config
     [JsonIgnore]
     public static Exception? LoadingException { get; private set; } = null;
 
+
+    /// <summary>
+    /// Gets the default toolbar items.
+    /// </summary>
+    [JsonIgnore]
+    public static readonly ReadOnlyCollection<ToolbarItemModel> DefaultToolbarItems =
+    [
+        new() {
+            Id = "Btn_MnuOpenFile",
+            Image = "OpenFile",
+            Text = "FrmMain.MnuOpenFile",
+            Alignment = ToolbarItemAlignment.Right,
+            OnClick = new(nameof(API.IG_OpenFile)),
+        },
+
+
+
+        new() {
+            Id = "Btn_MnuViewPrevious",
+            Image = "ViewPreviousImage",
+            Text = "FrmMain.MnuViewPrevious",
+            OnClick = new(nameof(API.IG_ViewByStep), "1"),
+        },
+        new() {
+            Id = "Btn_MnuViewNext",
+            Image = "ViewNextImage",
+            Text = "FrmMain.MnuViewNext",
+            OnClick = new(nameof(API.IG_ViewByStep), "-1"),
+        },
+        ToolbarItemModel.Separator,
+
+
+        new() {
+            Id = "Btn_MnuToggleCheckerboard",
+            Image = "Checkerboard",
+            Text = "FrmMain.MnuToggleCheckerboard",
+            OnClick = new(nameof(API.IG_ToggleCheckerboard)),
+        },
+    ];
+
     #endregion // Public static properties
 
 
@@ -87,35 +128,41 @@ public partial class Config
     /// </summary>
     public static Config Load(string configFileName)
     {
+        Config? appConfig = null;
+
+
         // 1. get user config file path
         var configPath = BHelper.ConfigDir(configFileName);
-        if (!File.Exists(configPath)) return new Config();
 
-
-        // 2. load user settings
-        var jsonOptions = BHelper.CreateJsonOptions();
-        var jsonContext = new ConfigJsonContext(jsonOptions);
-
-
-        try
+        if (File.Exists(configPath))
         {
-            var config = BHelper.ReadJsonFromFile(configPath, jsonContext.Config);
-            if (config == null)
-                throw new FileLoadException($"Cannot parse settings from file: {configPath}");
+            // 2. load user settings
+            var jsonOptions = BHelper.CreateJsonOptions();
+            var jsonContext = new ConfigJsonContext(jsonOptions);
 
 
-            // 3. migrate user config file if config version is changed
-            config = MigrateUserConfigFile(config);
+            try
+            {
+                var config = BHelper.ReadJsonFromFile(configPath, jsonContext.Config);
+                if (config == null)
+                    throw new FileLoadException($"Cannot parse settings from file: {configPath}");
 
-            return config;
+
+                // 3. migrate user config file if config version is changed
+                appConfig = MigrateUserConfigFile(config);
+            }
+            catch (Exception ex)
+            {
+                // save error
+                LoadingException = ex;
+            }
         }
-        catch (Exception ex)
-        {
-            // save error
-            LoadingException = ex;
-        }
 
-        return new Config();
+        // initialize app config
+        appConfig ??= new();
+        appConfig.LoadDefaults();
+
+        return appConfig;
     }
 
 
@@ -152,6 +199,28 @@ public partial class Config
     #region Public methods
 
     /// <summary>
+    /// Sets default value of app settings.
+    /// </summary>
+    public void LoadDefaults()
+    {
+        // load default toolbar items
+        if (ToolbarButtons.Count == 0)
+        {
+            ToolbarButtons = new(DefaultToolbarItems);
+        }
+
+
+        // set default value for file formats
+        if (FileFormats.Count == 0)
+        {
+            FileFormats = Const.IMAGE_FORMATS
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToHashSet();
+        }
+    }
+
+
+    /// <summary>
     /// Writes configs to file.
     /// </summary>
     public async Task SaveAsync()
@@ -161,21 +230,6 @@ public partial class Config
         var jsonContext = new ConfigJsonContext(jsonOptions);
 
         await BHelper.WriteJsonToFileAsync(jsonFilePath, this, jsonContext.Config);
-    }
-
-
-    /// <summary>
-    /// Sets default value of app settings
-    /// </summary>
-    public void LoadDefaults()
-    {
-        // set default value for file formats
-        if (FileFormats.Count == 0)
-        {
-            FileFormats = Const.IMAGE_FORMATS
-                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .ToHashSet();
-        }
     }
 
 

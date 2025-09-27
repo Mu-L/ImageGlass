@@ -33,6 +33,12 @@ public partial class ToolbarItemModel : IgReactive
     /// </summary>
     public static string ID_SEPARATOR => "SEPARATOR";
 
+    /// <summary>
+    /// Gets a separator toolbar item.
+    /// </summary>
+    public static ToolbarItemModel Separator => new(ID_SEPARATOR);
+
+
     // JSON properties
     protected string _id = "";
     protected string _image = string.Empty;
@@ -88,11 +94,11 @@ public partial class ToolbarItemModel : IgReactive
 
 
     /// <summary>
-    /// Gets, sets the text of toolbar button.
+    /// Gets, sets the text of toolbar button, or a language key for localization.
     /// </summary>
     public string Text
     {
-        get => _text;
+        get => AP.Config.Lang[_text];
         set
         {
             if (_text != value)
@@ -254,6 +260,14 @@ public partial class ToolbarItemModel : IgReactive
     public bool IsTextVisible => ShowText && !string.IsNullOrWhiteSpace(Text);
 
     #endregion // Non-JSON Properties
+
+
+
+    public ToolbarItemModel() { }
+    public ToolbarItemModel(string id)
+    {
+        Id = id;
+    }
 
 
     /// <summary>
