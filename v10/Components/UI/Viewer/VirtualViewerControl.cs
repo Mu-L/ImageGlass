@@ -617,9 +617,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         try
         {
-            Log.Info($"Previewing: {e.Metadata.FilePath}",
-                nameof(HandlePhotoPreviewAsync), nameof(VirtualViewerControl));
-
             // cancel if requested
             token.ThrowIfCancellationRequested();
             ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
@@ -657,19 +654,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
         catch (Exception ex)
             when (ex is ObjectDisposedException or TaskCanceledException or OperationCanceledException)
         {
-            Log.Info($"\t-> Cancelled previewing: {e.Metadata.FilePath}",
-                nameof(HandlePhotoPreviewAsync), nameof(VirtualViewerControl));
-
             hasPreview = false;
             previewBitmap?.Dispose();
             previewBitmap = null;
         }
-        catch (Exception ex)
+        catch
         {
-            Log.Error(ex,
-                $"\t-> Error previewing: {e.Metadata.FilePath}",
-                nameof(HandlePhotoPreviewAsync), nameof(VirtualViewerControl));
-
             hasPreview = false;
             previewBitmap?.Dispose();
             previewBitmap = null;
@@ -719,10 +709,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         try
         {
-            Log.Info($"Loading full photo: {e.Metadata.FilePath}",
-                nameof(HandlePhotoLoadedAsync), nameof(VirtualViewerControl));
-
-
             // cancel if requested
             e.CancelToken.ThrowIfCancellationRequested();
             ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
@@ -734,12 +720,43 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 // native bitmap is a single-frame bitmap
                 if (e.Photo.Bitmap is IWICBitmapSource bmpSrc)
                 {
-                    // create new native bitmap
-                    bitmap = PhotoWIC.CreateD2dBitmap(bmpSrc, D2dContext);
+                    using var newBmp = PhotoWIC.ConvertToWic32bppPBGRA(bmpSrc);
+                    using var info = newBmp?.GetPixelInfo();
+                    if (info is not null)
+                    {
+                        // decode into raw pixels (off-thread)
+                        var buffer = await Task.Run(() =>
+                        {
+                            var buffer = new byte[info.BufferSize];
+                            newBmp?.CopyPixels(info.Stride, buffer);
 
-                    //bitmap = await Task
-                    //  .Run(() => PhotoWIC.CreateD2dBitmap(bmpSrc, D2dContext), e.CancelToken)
-                    //  .ConfigureAwait(true);
+                            return buffer;
+                        });
+
+
+                        // upload pixel buffer to GPU
+                        if (buffer is not null)
+                        {
+                            var texDesc = new Vortice.Direct3D11.Texture2DDescription
+                            {
+                                Width = info.Width,
+                                Height = info.Height,
+                                MipLevels = 1,
+                                ArraySize = 1,
+                                Format = Vortice.DXGI.Format.B8G8R8A8_UNorm,
+                                SampleDescription = Vortice.DXGI.SampleDescription.Default,
+                                Usage = Vortice.Direct3D11.ResourceUsage.Default,
+                                BindFlags = Vortice.Direct3D11.BindFlags.ShaderResource | Vortice.Direct3D11.BindFlags.RenderTarget,
+                                CPUAccessFlags = Vortice.Direct3D11.CpuAccessFlags.None,
+                                MiscFlags = Vortice.Direct3D11.ResourceOptionFlags.None,
+                            };
+                            using var texture = _d3dDevice!.CreateTexture2D(texDesc);
+                            _d3dDevice!.ImmediateContext.UpdateSubresource(buffer, texture, 0, info.Stride, 0);
+
+                            using var dxgiSurface = texture.QueryInterface<Vortice.DXGI.IDXGISurface>();
+                            bitmap = D2dContext.CreateBitmapFromDxgiSurface(dxgiSurface);
+                        }
+                    }
 
                     hasSource = bitmap != null;
                 }
@@ -836,9 +853,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException)
         {
-            Log.Info($"\t-> Cancelled loading full photo: {e.Metadata.FilePath}",
-                nameof(HandlePhotoLoadedAsync), nameof(VirtualViewerControl));
-
             e.Photo.Unload();
 
             bitmap?.Dispose();
@@ -847,12 +861,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
             animator?.Dispose();
             animator = null;
         }
-        catch (Exception ex)
+        catch
         {
-            Log.Error(ex,
-                $"Error loading full photo: {e.Metadata.FilePath}",
-                nameof(HandlePhotoLoadedAsync), nameof(VirtualViewerControl));
-
             bitmap?.Dispose();
             bitmap = null;
 
