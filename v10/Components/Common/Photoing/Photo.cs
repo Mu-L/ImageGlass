@@ -28,10 +28,12 @@ namespace ImageGlass.Common.Photoing;
 public partial class Photo : PhotoImpl
 {
     // private properties
-    private CancellationTokenSource? _cancelLoadingThumbnail = null;
     private PhotoColorProfile? _colorContext;
     private IWICPixelFormatInfo2? _pixelFormatInfo;
     private ImageSource? _galleryThumbnail;
+
+    private Task? _taskThumbnail;
+    private CancellationTokenSource? _cancelLoadingThumbnail;
 
 
 
@@ -81,7 +83,6 @@ public partial class Photo : PhotoImpl
 
 
 
-    // Override Functions
     #region Override Functions
 
     /// <summary>
@@ -135,7 +136,6 @@ public partial class Photo : PhotoImpl
 
 
 
-    // Private Functions
     #region Private Functions
 
     /// <summary>
@@ -263,17 +263,29 @@ public partial class Photo : PhotoImpl
 
 
 
+    #region Public Functions
+
     /// <summary>
     /// Starts loading thumbnail in a thread.
     /// </summary>
-    public void LoadGalleryThumbnail(double size, IProgress<ThumbnailLoadedEventArgs> progress)
+    public async Task LoadGalleryThumbnail(double size, IProgress<ThumbnailLoadedEventArgs> progress)
     {
         if (GalleryThumbnail != null) return;
 
         _cancelLoadingThumbnail ??= new();
         var token = _cancelLoadingThumbnail.Token;
 
-        _ = Task.Run(async () =>
+        // if already started loading, wait for the task completes
+        if (_taskThumbnail is not null
+            && _taskThumbnail.Status != TaskStatus.Canceled
+            && _taskThumbnail.Status != TaskStatus.Faulted)
+        {
+            await _taskThumbnail;
+            return;
+        }
+
+
+        _taskThumbnail = Task.Run(async () =>
         {
             SoftwareBitmap? softwareBmp = null;
 
@@ -283,7 +295,7 @@ public partial class Photo : PhotoImpl
                 await LoadMetadataAsync();
 
                 using var wicBmp = await Metadata.GetPreviewAsync(
-                    size, token, ShellThumbnailOptions.BiggerSizeOk);
+                    size, default, ShellThumbnailOptions.ThumbnailOnly);
 
                 if (token.IsCancellationRequested) return;
                 softwareBmp = await PhotoWIC.ConvertToSoftwareBitmapAsync(wicBmp);
@@ -300,7 +312,7 @@ public partial class Photo : PhotoImpl
                 progress.Report(new ThumbnailLoadedEventArgs(this, softwareBmp));
                 _cancelLoadingThumbnail = null;
             }
-        });
+        }, token);
     }
 
 
@@ -312,6 +324,10 @@ public partial class Photo : PhotoImpl
         _cancelLoadingThumbnail?.Cancel();
         _cancelLoadingThumbnail = null;
     }
+
+    #endregion // Public Functions
+
+
 }
 
 

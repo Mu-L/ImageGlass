@@ -21,7 +21,6 @@ using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -167,26 +166,16 @@ public partial class PhotoMetadata : DisposableImpl
     /// <summary>
     /// Retrieves an embedded thumbnail from either a RAW format or an EXIF profile if exists.
     /// </summary>
-    /// <exception cref="OperationCanceledException"></exception>
-    /// <exception cref="TaskCanceledException"></exception>
-    public MagickImage? GetEmbeddedPreview(CancellationToken token)
+    public MagickImage? GetEmbeddedPreview()
     {
         if (RawThumbnail is null && ExifProfile is null) return null;
 
         MagickImage? thumbM = null;
 
-        // cancel if requested
-        token.ThrowIfCancellationRequested();
-        Log.Info($"Retrieving preview: {FilePath}",
-            nameof(GetEmbeddedPreview), nameof(PhotoMetadata));
-
 
         // 1. try get from RAW format
         if (RawThumbnail is not null)
         {
-            Log.Info($"\t-> from RAW format...",
-                nameof(GetEmbeddedPreview), nameof(PhotoMetadata));
-
             thumbM = new MagickImage(RawThumbnail.ToReadOnlySpan());
         }
 
@@ -194,9 +183,6 @@ public partial class PhotoMetadata : DisposableImpl
         // 2. try get from EXIF profile
         if (thumbM is null && ExifProfile is not null)
         {
-            Log.Info($"\t-> from EXIF profile...",
-                nameof(GetEmbeddedPreview), nameof(PhotoMetadata));
-
             thumbM = (MagickImage?)ExifProfile.CreateThumbnail();
         }
 

@@ -37,30 +37,23 @@ public static class PhotoMetadata_Extensions
         this PhotoMetadata meta, double? minHeight, CancellationToken token,
         ShellThumbnailOptions thumbnailOptions = ShellThumbnailOptions.ThumbnailOnly | ShellThumbnailOptions.BiggerSizeOk)
     {
-        IWICBitmapSource? wicThumb = null;
-
-        // try to get embedded preview
-        using var thumbM = meta.GetEmbeddedPreview(token);
-
-
-        // cancel if requested
-        token.ThrowIfCancellationRequested();
         var previewHeight = minHeight ?? double.MinValue;
 
+        // get thumbnail from Shell first
+        var wicThumb = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath,
+            (int)previewHeight, (int)previewHeight, thumbnailOptions), token);
 
-        // get thumbnail using Magick decoder
-        if (thumbM is not null && thumbM.Height >= previewHeight)
+        if (wicThumb is null)
         {
-            wicThumb = PhotoWIC.ConvertFromMagick(thumbM);
-        }
-        // get the thumbnail using WinRT
-        // if no embedded thumbnail found or the size is too small
-        else
-        {
-            wicThumb = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath,
-                (int)previewHeight, (int)previewHeight, thumbnailOptions), token);
-        }
+            // try to get embedded preview
+            using var thumbM = meta.GetEmbeddedPreview();
 
+            // get thumbnail using Magick decoder
+            if (thumbM is not null && thumbM.Height >= previewHeight)
+            {
+                wicThumb = PhotoWIC.ConvertFromMagick(thumbM);
+            }
+        }
 
         return wicThumb;
     }

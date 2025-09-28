@@ -181,7 +181,7 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
 
 
         // get thumbnail from the photo
-        thumbnail = await Task.Run(() => photo.Metadata.GetEmbeddedPreview(token), token);
+        thumbnail = await Task.Run(() => photo.Metadata.GetEmbeddedPreview(), token);
 
 
         if (token.IsCancellationRequested)
