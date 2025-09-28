@@ -55,7 +55,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     // loading
     private CancellationTokenSource? _cancelPreview;
-    private Progress<PhotoLoadingEventArgs> _loadingProgress;
     private bool _isPreviewing = false;
 
     // control
@@ -183,8 +182,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         ManipulationMode = ManipulationModes.Scale
             | ManipulationModes.TranslateX | ManipulationModes.TranslateY
             | ManipulationModes.TranslateInertia;
-
-        _loadingProgress = new(Photo_Loading);
     }
 
 
@@ -548,16 +545,18 @@ public partial class VirtualViewerControl : SwapChainCanvas
             return;
         }
 
+
         // photo is cached
         if (inputPhoto.IsDone)
         {
             var token = inputPhoto.CancelToken ?? default;
-            _ = HandlePhotoLoadedAsync(new(inputPhoto, token));
+            _ = HandlePhotoLoadedAsync(new PhotoLoadingEventArgs(true, inputPhoto, token));
         }
         // photo is not cached
         else
         {
-            _ = inputPhoto.LoadAsync(true, null, _loadingProgress);
+            var loadingProgress = new Progress<PhotoLoadingEventArgs>(Photo_Loading);
+            _ = inputPhoto.LoadAsync(true, null, loadingProgress);
         }
 
         _enablePanningVelocity = true;

@@ -25,7 +25,7 @@ namespace ImageGlass.Common.Photoing;
 public delegate void TEventHandler<TSender, TResult>(TSender sender, TResult e);
 
 
-public class PhotoLoadingEventArgs(PhotoImpl photo, CancellationToken token) : EventArgs
+public class PhotoLoadingEventArgs(bool isDone, PhotoImpl photo, CancellationToken token) : EventArgs
 {
     public PhotoImpl Photo => photo;
 
@@ -33,7 +33,7 @@ public class PhotoLoadingEventArgs(PhotoImpl photo, CancellationToken token) : E
 
     public CancellationToken CancelToken => token;
 
-    public bool IsDone => photo.IsDone;
+    public bool IsDone => isDone;
 
 }
 

@@ -294,7 +294,7 @@ public abstract class PhotoImpl : DisposableImpl
             // load image data
             ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
 
-            progress?.Report(new PhotoLoadingEventArgs(this, token));
+            progress?.Report(new PhotoLoadingEventArgs(false, this, token));
 
 
             // 2. load image data ===================
@@ -310,7 +310,7 @@ public abstract class PhotoImpl : DisposableImpl
             // done loading
             IsDone = true;
 
-            progress?.Report(new PhotoLoadingEventArgs(this, token));
+            progress?.Report(new PhotoLoadingEventArgs(true, this, token));
         }
         catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
         {
