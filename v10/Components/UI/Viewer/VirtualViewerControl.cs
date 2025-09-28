@@ -611,8 +611,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 SetBitmapSize(prevWidth, prevHeight, true);
 
 
-                // create new native bitmap for previewing
-                previewBitmap = PhotoWIC.CreateD2dBitmap(wicThumb, D2dContext);
+                // create new native bitmap for previewing off-thread
+                previewBitmap = await wicThumb.ToD2BitmapAsync(_d3dDevice!, D2dContext);
 
                 // cancel if requested
                 token.ThrowIfCancellationRequested();
@@ -686,27 +686,14 @@ public partial class VirtualViewerControl : SwapChainCanvas
             // create the native bitmap
             if (e.Photo.Bitmap is not null)
             {
+                // update bitmap size, check if we can use the hardware acceleration
+                SetBitmapSize(e.Photo.Size.ToSize(), true);
+
                 // native bitmap is a single-frame bitmap
                 if (e.Photo.Bitmap is IWICBitmapSource bmpSrc)
                 {
-                    using var newBmp = PhotoWIC.ConvertToWic32bppPBGRA(bmpSrc);
-                    using var info = newBmp?.GetPixelInfo();
-                    if (info is not null)
-                    {
-                        // decode into raw pixels (off-thread)
-                        var buffer = await Task.Run(() =>
-                        {
-                            var buffer = new byte[info.BufferSize];
-                            newBmp?.CopyPixels(info.Stride, buffer);
-
-                            return buffer;
-                        });
-
-
-                        // upload pixel buffer to GPU
-                        bitmap = PhotoWIC.CreateD2dBitmap(buffer, info, _d3dDevice!, D2dContext);
-                    }
-
+                    // convert WIC bitmap to D2 bitmap off-thread
+                    bitmap = await bmpSrc.ToD2BitmapAsync(_d3dDevice!, D2dContext);
                     hasSource = bitmap != null;
                 }
                 // native bitmap is a multi-frame bitmap
@@ -714,10 +701,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 {
                     using var frame = decoder.GetFrame(0);
 
-                    bitmap = await Task
-                      .Run(() => PhotoWIC.CreateD2dBitmap(frame, D2dContext), e.CancelToken)
-                      .ConfigureAwait(true);
-
+                    bitmap = await frame.ToD2BitmapAsync(_d3dDevice!, D2dContext);
                     hasSource = bitmap != null;
                 }
                 // native bitmap is a animated bitmap
@@ -741,9 +725,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
             CancelPreview();
             _bmpPreview?.Dispose();
             _bmpPreview = null;
-
-            // update bitmap size, MUST BE AFTER cancelling preview
-            SetBitmapSize(e.Photo.Size.ToSize(), true);
 
 
             // calculate the source viewport to match with the preview
@@ -808,7 +789,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             animator?.Dispose();
             animator = null;
         }
-        catch
+        catch (Exception ex)
         {
             bitmap?.Dispose();
             bitmap = null;

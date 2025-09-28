@@ -23,7 +23,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Vortice.Direct2D1;
-using Vortice.Direct3D11;
 using Vortice.WIC;
 using Windows.Foundation;
 using Windows.Graphics.Imaging;
@@ -99,40 +98,6 @@ public static partial class PhotoWIC
         });
 
         return dc.CreateBitmapFromWicBitmap(newBmp, bmpProps);
-    }
-
-
-    /// <summary>
-    /// Create Direct2D bitmap by directly uploading pixel buffer to GPU.
-    /// </summary>
-    public static ID2D1Bitmap1? CreateD2dBitmap(byte[]? buffer,
-        PhotoPixelInfo info, ID3D11Device d3Device, ID2D1DeviceContext dc2)
-    {
-        if (buffer is null) return null;
-
-        var texDesc = new Texture2DDescription
-        {
-            Width = info.Width,
-            Height = info.Height,
-            MipLevels = 1,
-            ArraySize = 1,
-            Format = Vortice.DXGI.Format.B8G8R8A8_UNorm,
-            SampleDescription = Vortice.DXGI.SampleDescription.Default,
-            Usage = ResourceUsage.Default,
-            BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
-            CPUAccessFlags = CpuAccessFlags.None,
-            MiscFlags = ResourceOptionFlags.None,
-        };
-
-        // upload pixel buffer to GPU
-        using var texture = d3Device.CreateTexture2D(texDesc);
-        d3Device.ImmediateContext.UpdateSubresource(buffer, texture, 0, info.Stride, 0);
-
-        // get bitmap from GPU
-        using var dxgiSurface = texture.QueryInterface<Vortice.DXGI.IDXGISurface>();
-        var bmpSrc = dc2.CreateBitmapFromDxgiSurface(dxgiSurface);
-
-        return bmpSrc;
     }
 
 

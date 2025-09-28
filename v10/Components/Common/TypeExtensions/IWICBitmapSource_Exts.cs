@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using System.Threading.Tasks;
+using Vortice.Direct2D1;
+using Vortice.Direct3D11;
 using Vortice.WIC;
 
 namespace ImageGlass.Common;
@@ -26,7 +29,7 @@ public static class IWICBitmapSource_Exts
 {
 
     /// <summary>
-    /// Gets pixel info.
+    /// Gets pixel info of the current bitmap.
     /// </summary>
     public static PhotoPixelInfo? GetPixelInfo(this IWICBitmapSource? wicBmp)
     {
@@ -53,6 +56,98 @@ public static class IWICBitmapSource_Exts
             NumericRepresentation = info.NumericRepresentation,
             ColorContext = info.ColorContext,
         };
+    }
+
+
+    /// <summary>
+    /// Gets pixels buffer of the current bitmap.
+    /// </summary>
+    public static async Task<byte[]?> GetPixelsAsync(this IWICBitmapSource? srcBmp)
+    {
+        using var info = srcBmp?.GetPixelInfo();
+        if (info is null) return null;
+
+        // decode into raw pixels (off-thread)
+        var pixels = await Task.Run(() =>
+        {
+            var buffer = new byte[info.BufferSize];
+            srcBmp?.CopyPixels(info.Stride, buffer);
+
+            return buffer;
+        });
+
+        return pixels;
+    }
+
+
+    /// <summary>
+    /// Converts the current bitmap to GUID_WICPixelFormat32bppPBGRA format.
+    /// </summary>
+    public static void To32bppPBGRA(this IWICBitmapSource? srcBmp)
+    {
+        if (srcBmp.IsDisposed()) return;
+
+        var pxFormat = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA;
+        if (srcBmp.PixelFormat == pxFormat) return;
+
+        try
+        {
+            var newBmp = WIC.WICConvertBitmapSource(pxFormat, srcBmp);
+
+            // dispose the old bitmap
+            srcBmp.Dispose();
+
+            // save the new bitmap to the old one
+            srcBmp.NativePointer = newBmp.NativePointer;
+        }
+        catch { }
+
+        return;
+    }
+
+
+    /// <summary>
+    /// Converts WIC bitmap to Direct2D bitmap off-thread.
+    /// </summary>
+    public static async Task<ID2D1Bitmap1?> ToD2BitmapAsync(this IWICBitmapSource? srcBmp,
+        ID3D11Device d3Device, ID2D1DeviceContext d2Context)
+    {
+        if (srcBmp is null) return null;
+
+        // make sure the bitmap is in correct format
+        srcBmp.To32bppPBGRA();
+
+        using var info = srcBmp.GetPixelInfo();
+        if (info is null) return null;
+
+        // get raw pixels
+        var buffer = await srcBmp.GetPixelsAsync();
+        if (buffer is null) return null;
+
+
+        var texDesc = new Texture2DDescription
+        {
+            Width = info.Width,
+            Height = info.Height,
+            MipLevels = 1,
+            ArraySize = 1,
+            Format = Vortice.DXGI.Format.B8G8R8A8_UNorm,
+            SampleDescription = Vortice.DXGI.SampleDescription.Default,
+            Usage = ResourceUsage.Default,
+            BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
+            CPUAccessFlags = CpuAccessFlags.None,
+            MiscFlags = ResourceOptionFlags.None,
+        };
+
+        // upload pixel buffer to GPU
+        using var texture = d3Device.CreateTexture2D(texDesc);
+        d3Device.ImmediateContext.UpdateSubresource(buffer, texture, 0, info.Stride, 0);
+
+        // get bitmap from GPU
+        using var dxgiSurface = texture.QueryInterface<Vortice.DXGI.IDXGISurface>();
+        var wicBmp = d2Context.CreateBitmapFromDxgiSurface(dxgiSurface);
+
+        return wicBmp;
     }
 
 }
