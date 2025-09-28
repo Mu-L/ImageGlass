@@ -272,11 +272,11 @@ public abstract class PhotoImpl : DisposableImpl
         // use cached data
         if (useCache && IsDone) return;
 
+        CancelLoading();
+        var token = _cancelPhotoLoading.Token;
+
         try
         {
-            CancelLoading();
-            var token = _cancelPhotoLoading.Token;
-
             // reset dispose status
             IsDisposed = false;
             IsDone = false;
@@ -286,43 +286,37 @@ public abstract class PhotoImpl : DisposableImpl
 
             // 1. load metadata ===================
             // cancel if requested
-            token.ThrowIfCancellationRequested();
+            if (token.IsCancellationRequested) return;
 
             // load metadata
             await LoadMetadataAsync();
-
-            // load image data
             ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
-
             progress?.Report(new PhotoLoadingEventArgs(false, this, token));
 
 
             // 2. load image data ===================
             // cancel if requested
-            token.ThrowIfCancellationRequested();
+            if (token.IsCancellationRequested) return;
 
             // decode the photo
             await OnDecodingAsync(Metadata, token);
 
             // cancel if requested
-            token.ThrowIfCancellationRequested();
+            if (token.IsCancellationRequested) return;
 
             // done loading
             IsDone = true;
 
             progress?.Report(new PhotoLoadingEventArgs(true, this, token));
         }
-        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
-        {
-            Log.Info($"Cancelled loading {FilePath}", nameof(LoadAsync), nameof(PhotoImpl));
-            Unload();
-        }
         catch (Exception ex)
         {
             Error = ex;
             IsDone = true;
-
-            Log.Error(ex);
+        }
+        finally
+        {
+            if (token.IsCancellationRequested) Unload();
         }
     }
 

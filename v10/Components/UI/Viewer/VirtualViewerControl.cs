@@ -704,27 +704,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
                         // upload pixel buffer to GPU
-                        if (buffer is not null)
-                        {
-                            var texDesc = new Vortice.Direct3D11.Texture2DDescription
-                            {
-                                Width = info.Width,
-                                Height = info.Height,
-                                MipLevels = 1,
-                                ArraySize = 1,
-                                Format = Vortice.DXGI.Format.B8G8R8A8_UNorm,
-                                SampleDescription = Vortice.DXGI.SampleDescription.Default,
-                                Usage = Vortice.Direct3D11.ResourceUsage.Default,
-                                BindFlags = Vortice.Direct3D11.BindFlags.ShaderResource | Vortice.Direct3D11.BindFlags.RenderTarget,
-                                CPUAccessFlags = Vortice.Direct3D11.CpuAccessFlags.None,
-                                MiscFlags = Vortice.Direct3D11.ResourceOptionFlags.None,
-                            };
-                            using var texture = _d3dDevice!.CreateTexture2D(texDesc);
-                            _d3dDevice!.ImmediateContext.UpdateSubresource(buffer, texture, 0, info.Stride, 0);
-
-                            using var dxgiSurface = texture.QueryInterface<Vortice.DXGI.IDXGISurface>();
-                            bitmap = D2dContext.CreateBitmapFromDxgiSurface(dxgiSurface);
-                        }
+                        bitmap = PhotoWIC.CreateD2dBitmap(buffer, info, _d3dDevice!, D2dContext);
                     }
 
                     hasSource = bitmap != null;
