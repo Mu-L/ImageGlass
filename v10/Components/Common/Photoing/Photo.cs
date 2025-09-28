@@ -288,12 +288,14 @@ public partial class Photo : PhotoImpl
 
             try
             {
+                // ensure metadata is loaded
                 await LoadMetadataAsync();
 
-                using var wicBmp = await Metadata.GetPreviewAsync(
-                    size, default, ShellThumbnailOptions.ThumbnailOnly);
+                // load thumbnail
+                using var wicBmp = await Metadata.GetThumbnailAsync(size);
 
-                softwareBmp = await PhotoWIC.ConvertToSoftwareBitmapAsync(wicBmp);
+                // convert to software bitmap
+                softwareBmp = await wicBmp.ToSoftwareBitmapAsync();
             }
             catch
             {

@@ -39,16 +39,16 @@ public static class PhotoMetadata_Extensions
     {
         var previewHeight = minHeight ?? double.MinValue;
 
-        // get thumbnail from Shell first
+        // 1. get thumbnail from Shell first
         var wicThumb = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath,
             (int)previewHeight, (int)previewHeight, thumbnailOptions), token);
 
+
+        // 2. try to get embedded preview
         if (wicThumb is null)
         {
-            // try to get embedded preview
             using var thumbM = meta.GetEmbeddedPreview();
 
-            // get thumbnail using Magick decoder
             if (thumbM is not null && thumbM.Height >= previewHeight)
             {
                 wicThumb = PhotoWIC.ConvertFromMagick(thumbM);
@@ -56,6 +56,25 @@ public static class PhotoMetadata_Extensions
         }
 
         return wicThumb;
+    }
+
+
+    /// <summary>
+    /// Gets thumbnail photo.
+    /// </summary>
+    public static async Task<IWICBitmapSource?> GetThumbnailAsync(
+        this PhotoMetadata meta, double minHeight, CancellationToken token = default)
+    {
+        // 1. try to get thumbnail from the Shell & embedded thumbnail
+        var wicBmp = await meta.GetPreviewAsync(minHeight, default, ShellThumbnailOptions.ThumbnailOnly);
+        if (wicBmp is not null) return wicBmp;
+
+
+        // 2. use ImageMagick to decode the unsupported formats
+        using var imgM = await MagickDecoder.QuickDecodeAsync(meta.FilePath, (int)minHeight, (int)minHeight);
+        wicBmp = PhotoWIC.ConvertFromMagick(imgM);
+
+        return wicBmp;
     }
 
 }
