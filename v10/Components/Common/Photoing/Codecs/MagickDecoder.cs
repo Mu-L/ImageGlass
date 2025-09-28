@@ -251,7 +251,8 @@ public class MagickDecoder
                 meta.Orientation = imgC[frameIndex].Orientation;
 
                 // correct the image size according to orientation
-                if (meta.Orientation != OrientationType.Undefined)
+                if (meta.Orientation != OrientationType.Undefined
+                    && meta.Orientation != OrientationType.TopLeft)
                 {
                     // swap width and height
                     meta.Width = meta.OriginalHeight;
@@ -322,7 +323,7 @@ public class MagickDecoder
             if (token.IsCancellationRequested) return;
 
 
-            // 5 read color profile
+            // 5. read color profile
             try
             {
                 // Color profile
@@ -335,19 +336,10 @@ public class MagickDecoder
             }
             catch { }
 
-        }, token);
+        }, token).ConfigureAwait(false);
 
 
-
-        try
-        {
-            await readingTask;
-        }
-        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
-        {
-            Log.Info($"Cancelled decoding {filePath}",
-                nameof(LoadMetadataAsync), nameof(MagickDecoder));
-        }
+        await readingTask;
 
         return meta;
     }

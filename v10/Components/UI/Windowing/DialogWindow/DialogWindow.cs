@@ -42,8 +42,8 @@ public partial class DialogWindow : IgWindow
 
     protected IgWindow? _owner = null;
     protected readonly DialogWindow_Content _dialogContentEl = new();
-    protected readonly TaskCompletionSource<bool> _taskSourceResized = new();
-    protected TaskCompletionSource<DialogExitCode> _taskSourceExitCode = new();
+    protected readonly TaskCompletionSource<bool> _taskSourceResized = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    protected TaskCompletionSource<DialogExitCode> _taskSourceExitCode = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     protected readonly KeyboardAccelerator _closeByEscKey = new()
     {

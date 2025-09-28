@@ -112,15 +112,7 @@ public partial class AppStatusInfo : DisposableImpl
             if (AP.Config.ImageInfoTags.Contains(nameof(Dimension))
                 && AP.Photos.CurrentMetadata != null)
             {
-                var dimension = $"{AP.Photos.CurrentMetadata.Width:n0}×{AP.Photos.CurrentMetadata.Height:n0}";
-
-                if (AP.Photos.CurrentMetadata.Width != AP.Photos.CurrentMetadata.OriginalWidth
-                    || AP.Photos.CurrentMetadata.Height != AP.Photos.CurrentMetadata.OriginalHeight)
-                {
-                    dimension += $"  ({AP.Photos.CurrentMetadata.OriginalWidth:n0}×{AP.Photos.CurrentMetadata.OriginalHeight:n0})";
-                }
-
-                return dimension;
+                return $"{AP.Photos.CurrentMetadata.Width:n0}×{AP.Photos.CurrentMetadata.Height:n0}";
             }
 
             return null;

@@ -87,9 +87,9 @@ public partial class Photo : PhotoImpl
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    protected override void OnDisposing(bool disposeMetadata)
+    protected override async Task OnDisposing(bool disposeMetadata)
     {
-        base.OnDisposing(disposeMetadata);
+        await base.OnDisposing(disposeMetadata);
 
         // dispose native resources
         DisposeNativeResources();

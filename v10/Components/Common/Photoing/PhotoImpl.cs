@@ -36,6 +36,7 @@ public abstract class PhotoImpl : DisposableImpl
     private string _filePath = "";
     private bool _isCurrent = false;
 
+    private Task<PhotoMetadata>? _taskMetadata;
     protected CancellationTokenSource? _cancelPhotoLoading;
 
 
@@ -183,11 +184,11 @@ public abstract class PhotoImpl : DisposableImpl
     /// <inheritdoc/>
     /// Calling this function also disposes <see cref="Metadata"/> object.
     /// </summary>
-    protected override void OnDisposing()
+    protected override async void OnDisposing()
     {
         base.OnDisposing();
 
-        OnDisposing(true);
+        await OnDisposing(true);
     }
 
 
@@ -197,7 +198,7 @@ public abstract class PhotoImpl : DisposableImpl
     /// <param name="disposeEverything">
     /// Option to dispose everything or only the <see cref="Bitmap"/> object.
     /// </param>
-    protected virtual void OnDisposing(bool disposeEverything)
+    protected virtual async Task OnDisposing(bool disposeEverything)
     {
         CancelLoading();
 
@@ -207,6 +208,11 @@ public abstract class PhotoImpl : DisposableImpl
         // dispose everything
         if (disposeEverything)
         {
+            if (_taskMetadata is not null)
+            {
+                await _taskMetadata;
+            }
+
             _metadata?.Dispose();
             _metadata = null;
 
@@ -241,7 +247,7 @@ public abstract class PhotoImpl : DisposableImpl
         Error = null;
 
         // unload image
-        OnDisposing(false);
+        _ = OnDisposing(false);
     }
 
 
@@ -321,6 +327,7 @@ public abstract class PhotoImpl : DisposableImpl
     }
 
 
+
     /// <summary>
     /// Loads <c><see cref="Metadata"/></c> for the photo.
     /// Returns the cached metadata if it's not null and up-to-date.
@@ -332,8 +339,19 @@ public abstract class PhotoImpl : DisposableImpl
             ReadOptions = newOptions ?? ReadOptions;
             ReadSettings ??= MagickDecoder.ParseSettings(ReadOptions, false, FilePath);
 
+            // if already started loading, wait for the task completes
+            if (_taskMetadata is not null
+                && _taskMetadata.Status != TaskStatus.Canceled
+                && _taskMetadata.Status != TaskStatus.Faulted)
+            {
+                _metadata = await _taskMetadata;
+                return;
+            }
+
+
             // check if the current Metadata is outdated or not
             var hasOutdatedCache = _metadata is null;
+
             if (_metadata is not null)
             {
                 try
@@ -348,7 +366,8 @@ public abstract class PhotoImpl : DisposableImpl
             // load the metadata if it's outdated
             if (hasOutdatedCache)
             {
-                _metadata = await MagickDecoder.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings);
+                _taskMetadata = MagickDecoder.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings);
+                _metadata = await _taskMetadata;
             }
         }
         catch (Exception ex)
