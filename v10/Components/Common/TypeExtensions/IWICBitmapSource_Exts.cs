@@ -17,10 +17,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using Vortice.Direct2D1;
 using Vortice.Direct3D11;
 using Vortice.WIC;
+using Windows.Foundation;
+using Windows.Graphics.Imaging;
 
 namespace ImageGlass.Common;
 
@@ -81,6 +85,55 @@ public static class IWICBitmapSource_Exts
 
 
     /// <summary>
+    /// Saves the input bitmap to a file in the given format.
+    /// </summary>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
+    public static void SaveAs(this IWICBitmapSource? srcBmp, string destFilePath, Size? size = null,
+        ContainerFormat format = ContainerFormat.Png)
+    {
+        if (srcBmp.IsDisposed()) return;
+
+        using var fs = new FileStream(destFilePath,
+            FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+
+        srcBmp.SaveAs(fs, size, format);
+    }
+
+
+    /// <summary>
+    /// Saves the input bitmap to a file in the given format.
+    /// </summary>
+    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
+    public static void SaveAs(this IWICBitmapSource? srcBmp, Stream destStream, Size? size = null,
+        ContainerFormat format = ContainerFormat.Png)
+    {
+        if (srcBmp.IsDisposed()) return;
+
+        using var fac = new IWICImagingFactory2();
+        using var stream = fac.CreateStream(destStream);
+        using var encoder = fac.CreateEncoder(format);
+        encoder.Initialize(stream, BitmapEncoderCacheOption.NoCache);
+
+        size ??= new Size(srcBmp.Size.Width, srcBmp.Size.Height);
+
+        // writing a frame
+        using (var frameEncode = encoder.CreateNewFrame(out _))
+        {
+            frameEncode.Initialize();
+
+            frameEncode.SetSize((uint)size.Value.Width, (uint)size.Value.Height);
+            frameEncode.SetPixelFormat(Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA);
+
+            frameEncode.WriteSource(srcBmp);
+            frameEncode.Commit();
+        }
+
+        encoder.Commit();
+        destStream.Position = 0;
+    }
+
+
+    /// <summary>
     /// Converts the current bitmap to GUID_WICPixelFormat32bppPBGRA format.
     /// </summary>
     public static void To32bppPBGRA(this IWICBitmapSource? srcBmp)
@@ -103,6 +156,36 @@ public static class IWICBitmapSource_Exts
         catch { }
 
         return;
+    }
+
+
+    /// <summary>
+    /// Converts the current bitmap to Software Bitmap.
+    /// </summary>
+    public static async Task<SoftwareBitmap?> ToSoftwareBitmapAsync(this IWICBitmapSource? srcBmp, BitmapTransform? transform = null)
+    {
+        // make sure correct pixel format
+        srcBmp?.To32bppPBGRA();
+
+        using var ms = new Windows.Storage.Streams.InMemoryRandomAccessStream();
+        using var stream = ms.AsStream();
+
+        // convert to stream
+        srcBmp.SaveAs(stream);
+
+        // create SoftwareBitmap from stream
+        var bmpDecoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(ms)
+            .AsTask().ConfigureAwait(false);
+
+        var softwareBmp = await bmpDecoder.GetSoftwareBitmapAsync(
+            BitmapPixelFormat.Bgra8,
+            BitmapAlphaMode.Premultiplied,
+            transform ?? new(),
+            ExifOrientationMode.RespectExifOrientation,
+            ColorManagementMode.ColorManageToSRgb)
+            .AsTask().ConfigureAwait(false);
+
+        return softwareBmp;
     }
 
 

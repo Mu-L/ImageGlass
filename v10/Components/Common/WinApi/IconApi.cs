@@ -118,7 +118,7 @@ public static class IconApi
             using var gdiBmp = icon.ToBitmap();
 
             using var wicBmp = PhotoWIC.ConvertFromGdiBitmap(gdiBmp);
-            var sb = await PhotoWIC.ConvertToSoftwareBitmapAsync(wicBmp);
+            var sb = await wicBmp.ToSoftwareBitmapAsync();
 
             return sb;
         }
