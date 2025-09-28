@@ -564,34 +564,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    /// <summary>
-    /// Compares the path of <see cref="_photo"/> and the one being loaded,
-    /// return <c>true</c> or throws exception if they are not same.
-    /// </summary>
-    /// <exception cref="OperationCanceledException"></exception>
-    private static bool ShouldCancelIfPathNotSame(PhotoImpl loadingPhoto, string? loadingPath, bool throwException)
-    {
-        var isSame = loadingPhoto.FilePath.Equals(loadingPath, StringComparison.InvariantCultureIgnoreCase);
-        if (isSame) return false;
-
-        loadingPhoto.CancelLoading();
-        loadingPhoto.Unload();
-
-        if (throwException)
-        {
-            throw new OperationCanceledException("Photo paths are not same!");
-        }
-
-        return true;
-    }
-
-
     private async void Photo_Loading(PhotoLoadingEventArgs e)
     {
-        // if new _photo is started loading
-        if (ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, false)) return;
-
-
         // previewing
         if (!e.IsDone)
         {
@@ -619,8 +593,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         {
             // cancel if requested
             token.ThrowIfCancellationRequested();
-            ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
-
             var previewHeight = Math.Min(DrawingArea.Height, e.Metadata.Height) / DpiY;
 
             // try to get photo preview
@@ -630,7 +602,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             // cancel if requested
             token.ThrowIfCancellationRequested();
-            ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
 
             if (hasPreview)
             {
@@ -645,7 +616,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
                 // cancel if requested
                 token.ThrowIfCancellationRequested();
-                ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
 
                 //set preview source
                 _bmpPreview = previewBitmap;
@@ -711,7 +681,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         {
             // cancel if requested
             e.CancelToken.ThrowIfCancellationRequested();
-            ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
 
 
             // create the native bitmap
@@ -782,8 +751,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             // cancel if requested
             e.CancelToken.ThrowIfCancellationRequested();
-            ShouldCancelIfPathNotSame(e.Photo, _photo?.FilePath, true);
-
             if (e.Photo.Error is not null)
             {
                 throw e.Photo.Error;
