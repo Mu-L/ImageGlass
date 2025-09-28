@@ -33,31 +33,15 @@ public static partial class PhotoWIC
 {
 
     /// <summary>
-    /// Converts the given WIC bitmap to a 32bpp PBGRA format.
-    /// </summary>
-    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
-    public static IWICBitmapSource? ConvertToWic32bppPBGRA(IWICBitmapSource? wicBmp)
-    {
-        if (wicBmp.IsDisposed()) return null;
-
-        return WIC.WICConvertBitmapSource(
-            Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA,
-            wicBmp);
-    }
-
-
-
-    /// <summary>
     /// Creates a Direct2D bitmap from the given WIC bitmap.
     /// </summary>
     /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
-    public static ID2D1Bitmap1? CreateD2dBitmap(IWICBitmapSource? wicBmp, ID2D1DeviceContext dc)
+    public static ID2D1Bitmap1? CreateD2dBitmap(IWICBitmapSource? srcBmp, ID2D1DeviceContext dc)
     {
         if (dc.IsDisposed()) return null;
 
-
-        using var newBmp = ConvertToWic32bppPBGRA(wicBmp);
-        if (newBmp == null) return null;
+        srcBmp?.To32bppPBGRA();
+        if (srcBmp is null) return null;
 
         var bmpProps = new BitmapProperties1(new Vortice.DCommon.PixelFormat()
         {
@@ -65,8 +49,9 @@ public static partial class PhotoWIC
             AlphaMode = Vortice.DCommon.AlphaMode.Premultiplied,
         });
 
-        return dc.CreateBitmapFromWicBitmap(newBmp, bmpProps);
+        return dc.CreateBitmapFromWicBitmap(srcBmp, bmpProps);
     }
+
 
 
     /// <summary>
@@ -91,6 +76,7 @@ public static partial class PhotoWIC
     }
 
 
+
     /// <summary>
     /// Creates a Direct2D render target from WIC Bitmap for drawing operation.
     /// </summary>
@@ -108,6 +94,7 @@ public static partial class PhotoWIC
     }
 
 
+
     /// <summary>
     /// Creates a Direct2D device context from WIC Bitmap for drawing operation.
     /// </summary>
@@ -119,6 +106,7 @@ public static partial class PhotoWIC
 
         return rt.As<ID2D1DeviceContext7>();
     }
+
 
 
     /// <summary>
@@ -136,6 +124,7 @@ public static partial class PhotoWIC
         fn(dc);
         dc.EndDraw();
     }
+
 
 
     /// <summary>
@@ -210,6 +199,7 @@ public static partial class PhotoWIC
     }
 
 
+
     /// <summary>
     /// Finds the best color profile.
     /// </summary>
@@ -237,6 +227,7 @@ public static partial class PhotoWIC
 
         return bestProfile;
     }
+
 
 
     /// <summary>
@@ -314,6 +305,7 @@ public static partial class PhotoWIC
     }
 
 
+
     /// <summary>
     /// Converts GDI Bitmap to <see cref="IWICBitmapSource"/> object.
     /// </summary>
@@ -329,26 +321,6 @@ public static partial class PhotoWIC
         return wicBmp;
     }
 
-
-    /// <summary>
-    /// Converts a byte array to <see cref="IWICBitmapSource"/> object.
-    /// </summary>
-    public static IWICBitmapSource? ConvertFromBytes(byte[] bytes)
-    {
-        try
-        {
-            var decoder = ConvertFromBytesToDecoder(bytes);
-            var wicBmp = ConvertToWic32bppPBGRA(decoder?.GetFrame(0));
-
-            return wicBmp;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex);
-        }
-
-        return null;
-    }
 
 
     /// <summary>
