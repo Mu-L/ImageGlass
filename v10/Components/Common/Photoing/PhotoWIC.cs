@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageMagick;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Vortice.Direct2D1;
@@ -349,60 +350,27 @@ public static partial class PhotoWIC
     /// </summary>
     public static IWICBitmapSource? ConvertFromMagick(MagickImage? imgM)
     {
-        if (imgM == null) return null;
+        if (imgM is null) return null;
 
         try
         {
             using var pixels = imgM.GetPixelsUnsafe();
-            if (pixels is null) return null;
+            var buffer = pixels?.ToByteArray(PixelMapping.BGRA);
+            if (buffer is null) return null;
 
-
-            // RGBA (with alpha)
-            Guid? format = null;
-            var pxMap = PixelMapping.RGB;
-
-            // Grayscale
-            if (imgM.ChannelCount == 1)
-            {
-                format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat8bppGray;
-            }
-            // RGB (no alpha)
-            else if (imgM.ChannelCount == 3)
-            {
-                format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat24bppRGB;
-            }
-            // RGBA
-            else if (imgM.ChannelCount == 4)
-            {
-                format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppBGRA;
-                pxMap = PixelMapping.BGRA;
-            }
-
-
+            // create empty WIC bitmap
             using var fac = new IWICImagingFactory2();
-            byte[]? bytes = null;
+            var wicBitmap = fac.CreateBitmap(imgM.Width, imgM.Height, Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppBGRA);
 
-            if (format != null)
+            using (var bmpLock = wicBitmap.Lock(BitmapLockFlags.Write))
             {
-                //bytes = pixels.ToByteArray(pxMap);
-                bytes = pixels.ToArray();
-            }
-            else
-            {
-                format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat24bppRGB;
-                if (imgM.HasAlpha)
-                {
-                    pxMap = PixelMapping.BGRA;
-                    format = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppBGRA;
-                }
-
-                bytes = pixels.ToByteArray(pxMap);
+                // copy Magick's raw pixels directly into WIC buffer
+                Marshal.Copy(buffer, 0, bmpLock.Data.DataPointer, buffer.Length);
             }
 
-            if (bytes is null) return null;
-            var wicSrc = fac.CreateBitmapFromMemory<byte>(imgM.Width, imgM.Height, format.Value, bytes);
+            Array.Clear(buffer);
 
-            return wicSrc;
+            return wicBitmap;
         }
         catch (Exception ex)
         {
