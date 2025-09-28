@@ -288,8 +288,8 @@ public abstract class PhotoImpl : DisposableImpl
             // cancel if requested
             if (token.IsCancellationRequested) return;
 
-            // load metadata
-            await LoadMetadataAsync();
+            // load metadata off-thread
+            await Task.Run(() => LoadMetadataAsync(), token);
             ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
             progress?.Report(new PhotoLoadingEventArgs(false, this, token));
 
@@ -298,8 +298,8 @@ public abstract class PhotoImpl : DisposableImpl
             // cancel if requested
             if (token.IsCancellationRequested) return;
 
-            // decode the photo
-            await OnDecodingAsync(Metadata, token);
+            // decode the photo off-thread
+            await Task.Run(() => OnDecodingAsync(Metadata, token), token);
 
             // cancel if requested
             if (token.IsCancellationRequested) return;

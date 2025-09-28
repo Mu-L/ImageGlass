@@ -354,6 +354,7 @@ public static partial class PhotoWIC
 
         try
         {
+            // get raw pixel data
             using var pixels = imgM.GetPixelsUnsafe();
             var buffer = pixels?.ToByteArray(PixelMapping.BGRA);
             if (buffer is null) return null;
@@ -362,13 +363,12 @@ public static partial class PhotoWIC
             using var fac = new IWICImagingFactory2();
             var wicBitmap = fac.CreateBitmap(imgM.Width, imgM.Height, Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppBGRA);
 
+            // copy Magick's raw pixels directly into WIC buffer
             using (var bmpLock = wicBitmap.Lock(BitmapLockFlags.Write))
             {
-                // copy Magick's raw pixels directly into WIC buffer
                 Marshal.Copy(buffer, 0, bmpLock.Data.DataPointer, buffer.Length);
+                Array.Clear(buffer);
             }
-
-            Array.Clear(buffer);
 
             return wicBitmap;
         }
