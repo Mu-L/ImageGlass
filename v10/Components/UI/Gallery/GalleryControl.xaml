@@ -97,7 +97,6 @@
         <ItemsRepeater
             x:Name="GalleryItemRepeater"
             HorizontalAlignment="Center"
-            ElementClearing="GalleryItemRepeater_ElementClearing"
             ElementPrepared="GalleryItemRepeater_ElementPrepared"
             ItemTemplate="{StaticResource GalleryItemTemplate}"
             ItemsSource="{x:Bind VM.Items}">

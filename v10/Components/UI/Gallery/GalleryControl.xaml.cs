@@ -93,16 +93,7 @@ public sealed partial class GalleryControl : IgControl
         if (e.Element is not IgGalleryItem item) return;
 
         // start loading thumbnail
-        item.VM.LoadGalleryThumbnail(AP.Config.ThumbnailSize, _progressThumbnailLoader);
-    }
-
-
-    private void GalleryItemRepeater_ElementClearing(ItemsRepeater sender, ItemsRepeaterElementClearingEventArgs e)
-    {
-        if (e.Element is not IgGalleryItem item) return;
-
-        // cancel loading thumbnail
-        item.VM.CancelLoadingGalleryThumbnail();
+        _ = item.VM.StartLoadingGalleryThumbnail(AP.Config.ThumbnailSize, _progressThumbnailLoader);
     }
 
 

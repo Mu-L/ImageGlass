@@ -33,7 +33,6 @@ public partial class Photo : PhotoImpl
     private ImageSource? _galleryThumbnail;
 
     private Task? _taskThumbnail;
-    private CancellationTokenSource? _cancelLoadingThumbnail;
 
 
 
@@ -266,14 +265,12 @@ public partial class Photo : PhotoImpl
     #region Public Functions
 
     /// <summary>
-    /// Starts loading thumbnail in a thread.
+    /// Starts loading thumbnail off-thread.
     /// </summary>
-    public async Task LoadGalleryThumbnail(double size, IProgress<ThumbnailLoadedEventArgs> progress)
+    public async Task StartLoadingGalleryThumbnail(double size, IProgress<ThumbnailLoadedEventArgs> progress)
     {
-        if (GalleryThumbnail != null) return;
+        if (GalleryThumbnail is not null) return;
 
-        _cancelLoadingThumbnail ??= new();
-        var token = _cancelLoadingThumbnail.Token;
 
         // if already started loading, wait for the task completes
         if (_taskThumbnail is not null
@@ -291,16 +288,12 @@ public partial class Photo : PhotoImpl
 
             try
             {
-                if (token.IsCancellationRequested) return;
                 await LoadMetadataAsync();
 
                 using var wicBmp = await Metadata.GetPreviewAsync(
                     size, default, ShellThumbnailOptions.ThumbnailOnly);
 
-                if (token.IsCancellationRequested) return;
                 softwareBmp = await PhotoWIC.ConvertToSoftwareBitmapAsync(wicBmp);
-
-                if (token.IsCancellationRequested) return;
             }
             catch
             {
@@ -310,19 +303,8 @@ public partial class Photo : PhotoImpl
             finally
             {
                 progress.Report(new ThumbnailLoadedEventArgs(this, softwareBmp));
-                _cancelLoadingThumbnail = null;
             }
-        }, token);
-    }
-
-
-    /// <summary>
-    /// Cancels the gallery thumbnail loading.
-    /// </summary>
-    public void CancelLoadingGalleryThumbnail()
-    {
-        _cancelLoadingThumbnail?.Cancel();
-        _cancelLoadingThumbnail = null;
+        });
     }
 
     #endregion // Public Functions
