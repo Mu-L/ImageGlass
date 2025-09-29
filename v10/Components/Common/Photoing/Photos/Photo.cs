@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageMagick;
 using Microsoft.UI.Xaml.Media;
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
@@ -48,6 +49,9 @@ public partial class Photo : DisposableImpl
     private Task? _taskThumbnail;
     private Task<PhotoMetadata>? _taskMetadata;
     private CancellationTokenSource? _cancelPhotoLoading;
+
+    // track pending tasks
+    private ConcurrentDictionary<Guid, bool> _taskRefs = new();
 
 
 
@@ -438,14 +442,20 @@ public partial class Photo : DisposableImpl
     /// Disposes the <c><see cref="Bitmap"/></c> and resets the relevant info.
     /// This method keeps the <c><see cref="Metadata"/></c> and neccessary resources.
     /// </summary>
-    public void Unload()
+    public async void Unload()
     {
+        // wait for all pending tasks are done
+        while (!_taskRefs.IsEmpty)
+        {
+            await Task.Delay(10);
+        }
+
         // reset info
         IsDone = false;
         Error = null;
 
         // unload image
-        _ = OnDisposing(false);
+        await OnDisposing(false);
     }
 
 
@@ -590,6 +600,9 @@ public partial class Photo : DisposableImpl
 
         _taskThumbnail = Task.Run(async () =>
         {
+            var taskId = Guid.NewGuid();
+            _ = _taskRefs.TryAdd(taskId, true);
+
             SoftwareBitmap? softwareBmp = null;
 
             try
@@ -611,6 +624,7 @@ public partial class Photo : DisposableImpl
             finally
             {
                 progress.Report(new ThumbnailLoadedEventArgs(this, softwareBmp));
+                _ = _taskRefs.TryRemove(taskId, out _);
             }
         });
     }
@@ -622,28 +636,38 @@ public partial class Photo : DisposableImpl
     public async Task<ID2D1Bitmap1?> GetD2BitmapAsync(
         ID3D11Device d3Device, ID2D1DeviceContext d2Context, uint frameIndex = 0)
     {
-        // native bitmap is a single-frame bitmap
-        if (_bitmap is IWICBitmapSource srcBmp)
+        var taskId = Guid.NewGuid();
+        _ = _taskRefs.TryAdd(taskId, true);
+
+        try
         {
-            if (srcBmp.IsDisposed()) return null;
+            // native bitmap is a single-frame bitmap
+            if (_bitmap is IWICBitmapSource srcBmp)
+            {
+                if (srcBmp.IsDisposed()) return null;
 
-            var d2Bmp = await srcBmp.ToD2BitmapAsync(d3Device, d2Context);
-            return d2Bmp;
+                var d2Bmp = await srcBmp.ToD2BitmapAsync(d3Device, d2Context);
+                return d2Bmp;
+            }
+
+            // native bitmap is a multi-frame bitmap
+            if (_bitmap is IWICBitmapDecoder decoder)
+            {
+                if (decoder.IsDisposed()) return null;
+
+                using var frameBmp = decoder.GetFrame(frameIndex);
+                var d2Bmp = await frameBmp.ToD2BitmapAsync(d3Device, d2Context);
+
+                return d2Bmp;
+            }
+
+
+            return null;
         }
-
-        // native bitmap is a multi-frame bitmap
-        if (_bitmap is IWICBitmapDecoder decoder)
+        finally
         {
-            if (decoder.IsDisposed()) return null;
-
-            using var frameBmp = decoder.GetFrame(frameIndex);
-            var d2Bmp = await frameBmp.ToD2BitmapAsync(d3Device, d2Context);
-
-            return d2Bmp;
+            _ = _taskRefs.TryRemove(taskId, out _);
         }
-
-
-        return null;
     }
 
     #endregion // Public Functions

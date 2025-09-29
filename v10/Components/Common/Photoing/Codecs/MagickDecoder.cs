@@ -447,9 +447,10 @@ public class MagickDecoder
     /// <summary>
     /// Gets thumbnail from the given image path.
     /// </summary>
-    public static async Task<byte[]?> QuickDecodeAsync(string filePath, int width, int height, MagickFormat outputFormat)
+    public static async Task<byte[]?> QuickDecodeAsync(string filePath,
+        int width, int height, MagickFormat outputFormat, CancellationToken token = default)
     {
-        using var imgM = await QuickDecodeAsync(filePath, width, height);
+        using var imgM = await QuickDecodeAsync(filePath, width, height, token);
 
         return imgM?.ToByteArray(outputFormat);
     }
@@ -458,7 +459,8 @@ public class MagickDecoder
     /// <summary>
     /// Gets thumbnail from the given image path.
     /// </summary>
-    public static async Task<MagickImage?> QuickDecodeAsync(string filePath, int width, int height)
+    public static async Task<MagickImage?> QuickDecodeAsync(string filePath,
+        int width, int height, CancellationToken token = default)
     {
         var options = new PhotoReadOptions()
         {
@@ -470,7 +472,7 @@ public class MagickDecoder
         try
         {
             var imgM = new MagickImage();
-            await imgM.ReadAsync(filePath, settings);
+            await imgM.ReadAsync(filePath, settings, token);
 
             return imgM;
         }
