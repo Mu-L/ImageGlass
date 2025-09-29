@@ -456,7 +456,8 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public virtual async Task LoadAsync(bool useCache,
         PhotoReadOptions? newOptions = null,
-        IProgress<PhotoLoadingEventArgs>? progress = null)
+        IProgress<PhotoLoadingEventArgs>? progress = null,
+        bool skipLoadingEvent = false)
     {
         // use cached data
         if (useCache && IsDone) return;
@@ -480,7 +481,11 @@ public partial class Photo : DisposableImpl
             // load metadata off-thread
             await Task.Run(() => LoadMetadataAsync(), token);
             ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
-            progress?.Report(new PhotoLoadingEventArgs(false, this, token));
+
+            if (!skipLoadingEvent)
+            {
+                progress?.Report(new PhotoLoadingEventArgs(false, this, token));
+            }
 
 
             // 2. load image data ===================

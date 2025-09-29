@@ -62,8 +62,31 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private InputSystemCursorShape _cursor = InputSystemCursorShape.Arrow;
 
 
+    #region Public Properties
+
     public double FontSize { get; set; } = 13;
     public double FontSize_Dpi => this.DpiScale(FontSize);
+
+
+    /// <summary>
+    /// Gets, sets value indicates whether full resolution is loaded or not.
+    /// </summary>
+    public bool ShouldLoadFullResolution
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+
+                if (value is true && _photo is not null)
+                {
+                    // load full resolution, skip loading event
+                    _ = LoadPhotoAsync(_photo, true);
+                }
+            }
+        }
+    }
 
 
     /// <summary>
@@ -175,6 +198,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
     }
 
+    #endregion // Public Properties
 
 
     public VirtualViewerControl()
@@ -555,12 +579,20 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // photo is not cached
         else
         {
-            var loadingProgress = new Progress<PhotoLoadingEventArgs>(Photo_Loading);
-            _ = inputPhoto.LoadAsync(true, null, loadingProgress);
+            _ = LoadPhotoAsync(inputPhoto);
         }
 
         _enablePanningVelocity = true;
         _photo = inputPhoto;
+    }
+
+
+    private async Task LoadPhotoAsync(Photo? inputPhoto, bool skipLoadingEvent = false)
+    {
+        if (inputPhoto is null) return;
+
+        var loadingProgress = new Progress<PhotoLoadingEventArgs>(Photo_Loading);
+        await inputPhoto.LoadAsync(true, null, loadingProgress, skipLoadingEvent);
     }
 
 
@@ -582,10 +614,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     private async Task HandlePhotoPreviewAsync(PhotoLoadingEventArgs e)
     {
-        var token = _cancelPreview?.Token ?? default;
+        if (!ShouldLoadFullResolution) e.Photo.CancelLoading();
 
         IWICBitmapSource? wicThumb = null;
         ID2D1Bitmap1? previewBitmap = null;
+
+        var token = _cancelPreview?.Token ?? default;
         var hasPreview = false;
 
 
@@ -673,6 +707,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     private async Task HandlePhotoLoadedAsync(PhotoLoadingEventArgs e)
     {
+        if (!ShouldLoadFullResolution) return;
+
+
         // back up size of preview image
         var prevSize = BitmapSize;
 
