@@ -79,14 +79,14 @@ public partial class VirtualViewerControl : SwapChainCanvas
             {
                 field = value;
 
-                if (value is true && _photo is not null)
+                if (value is true)
                 {
                     // load full resolution, skip loading event
                     _ = LoadPhotoAsync(_photo, true);
                 }
             }
         }
-    }
+    } = true;
 
 
     /// <summary>

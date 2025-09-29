@@ -126,13 +126,13 @@ public partial class Config
             Id = "Btn_MnuViewPrevious",
             Image = "ViewPreviousImage",
             Text = "FrmMain.MnuViewPrevious",
-            OnClick = new(nameof(API.IG_ViewByStep), "1"),
+            OnClick = new(nameof(API.IG_ViewByStep), "-1"),
         },
         new() {
             Id = "Btn_MnuViewNext",
             Image = "ViewNextImage",
             Text = "FrmMain.MnuViewNext",
-            OnClick = new(nameof(API.IG_ViewByStep), "-1"),
+            OnClick = new(nameof(API.IG_ViewByStep), "1"),
         },
         ToolbarItemModel.Separator,
 

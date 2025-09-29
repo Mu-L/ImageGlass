@@ -72,12 +72,11 @@ public partial class MainWindow : IgWindow
         _contentEl.GalleryItemClicked += Gallery_ItemClicked;
         _contentEl.ViewerDrop += Viewer_Drop;
         _contentEl.ViewerZoomChanged += Viewer_ZoomChanged;
+        Content.PreviewKeyUp += Content_PreviewKeyUp;
 
         _status.Changed += Status_Changed;
         Hotkey.Invoked += Hotkey_Invoked;
-
     }
-
 
 
     protected override void OnIgWindowClosing(AppWindow sender, AppWindowClosingEventArgs e)
@@ -100,10 +99,12 @@ public partial class MainWindow : IgWindow
         Content.KeyboardAccelerators.Clear();
         Hotkey.Invoked -= Hotkey_Invoked;
 
+
         _contentEl.ToolbarButtonClicked -= Toolbar_ButtonClicked;
         _contentEl.GalleryItemClicked -= Gallery_ItemClicked;
         _contentEl.ViewerDrop -= Viewer_Drop;
         _contentEl.ViewerZoomChanged -= Viewer_ZoomChanged;
+        Content.PreviewKeyUp -= Content_PreviewKeyUp;
 
         _status.Changed -= Status_Changed;
         _status.Dispose();

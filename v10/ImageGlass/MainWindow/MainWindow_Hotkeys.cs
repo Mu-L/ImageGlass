@@ -20,6 +20,7 @@ using ImageGlass.Common;
 using ImageGlass.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using Windows.System;
@@ -28,6 +29,9 @@ namespace ImageGlass;
 
 public partial class MainWindow
 {
+    private Hotkey? _lastHotkeyPressed = null;
+
+
     private static FrozenDictionary<Hotkey, string> _hotkeys => new Dictionary<Hotkey, string>()
     {
         { new(VirtualKeyModifiers.Control, VirtualKey.O, new SingleAction(nameof(API.IG_OpenFile))), "FrmMain.MnuOpenFile" },
@@ -42,15 +46,38 @@ public partial class MainWindow
     }.ToFrozenDictionary();
 
 
+    private void Content_PreviewKeyUp(object sender, KeyRoutedEventArgs e)
+    {
+        // the quick browsing ends, now start loading full resolution
+        Viewer.ShouldLoadFullResolution = true;
+
+        _lastHotkeyPressed = null;
+    }
+
+
     private async void Hotkey_Invoked(object? sender, HotkeyInvokedEventArgs e)
     {
-        // 1. backup the current focused element
+        var isPressedMultipleTimes = e.Hotkey == _lastHotkeyPressed;
+        var executable = e.Hotkey.Action?.Executable ?? string.Empty;
+
+        // 1. handle special hotkeys
+        // save the last hotkey pressed
+        _lastHotkeyPressed = e.Hotkey;
+
+        // for quick browsing, only load photo preview
+        if (executable.Equals(nameof(API.IG_ViewByStep), StringComparison.Ordinal))
+        {
+            if (isPressedMultipleTimes) Viewer.ShouldLoadFullResolution = false;
+        }
+
+
+        // 2. backup the current focused element
         var focusedEl = (UIElement?)FocusManager.GetFocusedElement(Content.XamlRoot);
 
-        // 2. run the action
+        // 3. run the action
         var error = await RunActionAsync(e.Hotkey.Action);
 
-        // 3. show error message if any
+        // 4. show error message if any
         if (error is not null)
         {
             // get the language string for error title
@@ -63,7 +90,7 @@ public partial class MainWindow
             _ = await ModalWindow.ShowErrorAsync(this, errorTitle, error.Message);
         }
 
-        // 4. restore the focus
+        // 5. restore the focus
         focusedEl ??= Content;
         focusedEl.Focus(FocusState.Keyboard);
     }
@@ -94,5 +121,6 @@ public partial class MainWindow
             }
         }
     }
+
 
 }
