@@ -815,7 +815,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    private ID2D1Bitmap1? ApplyColorManagementEffect(ID2D1Bitmap1? bmpD2, PhotoImpl? photo)
+    private ID2D1Bitmap1? ApplyColorManagementEffect(ID2D1Bitmap1? bmpD2, Photo? photo)
     {
         if (photo is null) return bmpD2;
 

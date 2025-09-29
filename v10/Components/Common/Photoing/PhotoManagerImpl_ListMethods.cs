@@ -23,7 +23,7 @@ using System.Linq;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class PhotoManagerImpl<T, Fs, FsOptions>
+public partial class PhotoManagerImpl<Fs, FsOptions>
 {
 
     /// <summary>
@@ -72,7 +72,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// <summary>
     /// Gets a photo from the list.
     /// </summary>
-    public T? Get(int index)
+    public Photo? Get(int index)
     {
         if (index < 0 || index >= Count) return null;
         var item = Items[index];
@@ -84,7 +84,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// <summary>
     /// Gets a photo from the list.
     /// </summary>
-    public T? Get(string filePath)
+    public Photo? Get(string filePath)
     {
         var index = _dict.GetValueOrDefault(filePath, -1);
         return Get(index);
@@ -94,7 +94,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// <summary>
     /// Selects the specified file by its path, updating the current selection.
     /// </summary>
-    public T? Select(string filePath)
+    public Photo? Select(string filePath)
     {
         var newSelectionIndex = IndexOf(filePath);
 
@@ -105,7 +105,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// <summary>
     /// Selects an item at the specified index, updating the current selection.
     /// </summary>
-    public T? Select(int index)
+    public Photo? Select(int index)
     {
         // deselect old index
         if (0 <= CurrentIndex && CurrentIndex < Count)
@@ -270,7 +270,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
         _dict.Clear();
         DistinctDirs.Clear();
 
-        Log.Info($"Cleared photo list!", nameof(Clear), nameof(PhotoManagerImpl<T, Fs, FsOptions>));
+        Log.Info($"Cleared photo list!", nameof(Clear), nameof(PhotoManagerImpl<Fs, FsOptions>));
     }
 
 }

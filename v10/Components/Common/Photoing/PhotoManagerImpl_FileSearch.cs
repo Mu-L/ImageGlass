@@ -21,7 +21,7 @@ using System;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class PhotoManagerImpl<T, Fs, FsOptions>
+public partial class PhotoManagerImpl<Fs, FsOptions>
 {
     protected Fs _fileSearcher;
     protected int _currentIndex = -1;
@@ -52,7 +52,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// The initial photo,
     /// can be the photo from the initial file path or the first photo of the directory.
     /// </summary>
-    public T? InitPhoto { get; set; } = null;
+    public Photo? InitPhoto { get; set; } = null;
 
     #endregion // Public properties
 
@@ -78,7 +78,7 @@ public partial class PhotoManagerImpl<T, Fs, FsOptions>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
     /// <param name="path">Full path of file or directory</param>
-    public virtual T? StartLoadingFiles(string[] paths, FsOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
+    public virtual Photo? StartLoadingFiles(string[] paths, FsOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
     {
         throw new NotImplementedException();
     }

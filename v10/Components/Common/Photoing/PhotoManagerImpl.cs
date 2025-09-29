@@ -34,13 +34,12 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// Class for managing a collection of photos.
 /// </summary>
-public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImpl
-    where T : PhotoImpl
+public abstract partial class PhotoManagerImpl<Fs, FsOptions> : DisposableImpl
     where Fs : FileSearcherImpl<FsOptions>
     where FsOptions : FileSearchOptions
 {
     // photo list
-    protected FastObservableCollection<T> _items = [];
+    protected FastObservableCollection<Photo> _items = [];
     protected readonly ConcurrentDictionary<string, int> _dict = new(StringComparer.OrdinalIgnoreCase);
 
     // thumbnail
@@ -60,7 +59,7 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     /// <summary>
     /// Gets a list of photos.
     /// </summary>
-    public FastObservableCollection<T> Items
+    public FastObservableCollection<Photo> Items
     {
         get => _items;
         set
@@ -123,7 +122,7 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     /// <summary>
     /// Creates a photo item from the specified file path.
     /// </summary>
-    protected abstract T CreatePhotoItem(string filePath);
+    protected abstract Photo CreatePhotoItem(string filePath);
 
 
     /// <summary>
@@ -149,7 +148,7 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
     /// <summary>
     /// Selects and gets a photo by step.
     /// </summary>
-    public T? GetByStep(int step, bool loopBackNavigation)
+    public Photo? GetByStep(int step, bool loopBackNavigation)
     {
         // calculate new index
         var newIndex = CurrentIndex + step;
@@ -234,7 +233,7 @@ public abstract partial class PhotoManagerImpl<T, Fs, FsOptions> : DisposableImp
             if (token.IsCancellationRequested)
             {
                 Log.Info($"Cancelled {nameof(totalCacheSizeInMb)}={totalCacheSizeInMb}",
-                    nameof(ManageThumbnailsDiskCache), nameof(PhotoManagerImpl<T, Fs, FsOptions>));
+                    nameof(ManageThumbnailsDiskCache), nameof(PhotoManagerImpl<Fs, FsOptions>));
                 break;
             }
 

@@ -27,7 +27,7 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// <inheritdoc/>
 /// </summary>
-public partial class PhotoManager : PhotoManagerImpl<Photo, FileSearcher, FileShellSearchOptions>
+public partial class PhotoManager : PhotoManagerImpl<FileSearcher, FileShellSearchOptions>
 {
 
     public PhotoManager(IEnumerable<string>? list = null) : base(list)
