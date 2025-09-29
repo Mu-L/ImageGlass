@@ -726,6 +726,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
             _bmpPreview?.Dispose();
             _bmpPreview = null;
 
+            // update bitmap size after the preview is cancelled
+            SetBitmapSize(e.Photo.Size.ToSize(), true);
 
             // calculate the source viewport to match with the preview
             if (hasSource)
