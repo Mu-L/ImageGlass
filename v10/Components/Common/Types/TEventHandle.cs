@@ -16,24 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using System;
-using System.Threading;
-
-namespace ImageGlass.Common.Photoing;
+namespace ImageGlass.Common;
 
 
 public delegate void TEventHandler<TSender, TResult>(TSender sender, TResult e);
-
-
-public class PhotoLoadingEventArgs(bool isDone, Photo photo, CancellationToken token) : EventArgs
-{
-    public Photo Photo => photo;
-
-    public PhotoMetadata Metadata => photo.Metadata;
-
-    public CancellationToken CancelToken => token;
-
-    public bool IsDone => isDone;
-
-}
-

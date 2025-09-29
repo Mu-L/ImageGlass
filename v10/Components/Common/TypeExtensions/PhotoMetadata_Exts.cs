@@ -25,7 +25,7 @@ using Vortice.WIC;
 namespace ImageGlass.Common.Photoing;
 
 
-public static class PhotoMetadata_Extensions
+public static class PhotoMetadata_Exts
 {
     /// <summary>
     /// Retrieves an embedded thumbnail from either a RAW format or an EXIF profile if exists.

@@ -21,7 +21,7 @@ using Vortice.Direct2D1;
 namespace ImageGlass.Common.Photoing;
 
 
-public static class PhotoColorContextExtensions
+public static class PhotoColorSpace_Exts
 {
     /// <summary>
     /// Converts a <see cref="PhotoColorSpace"/> value

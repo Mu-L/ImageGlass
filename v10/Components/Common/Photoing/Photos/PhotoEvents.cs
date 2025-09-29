@@ -16,13 +16,31 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using System;
+using System.Threading;
+using Windows.Graphics.Imaging;
+
 namespace ImageGlass.Common.Photoing;
 
 
-public abstract class PhotoImpl : DisposableImpl
+public class PhotoLoadingEventArgs(bool isDone, Photo photo, CancellationToken token) : EventArgs
 {
+    public Photo Photo => photo;
 
+    public PhotoMetadata Metadata => photo.Metadata;
 
+    public CancellationToken CancelToken => token;
 
+    public bool IsDone => isDone;
 
 }
+
+
+public class ThumbnailLoadedEventArgs(Photo sender, SoftwareBitmap? bmp) : EventArgs
+{
+    public Photo Sender { get; set; } = sender;
+
+    public SoftwareBitmap? Bitmap { get; set; } = bmp;
+}
+
+

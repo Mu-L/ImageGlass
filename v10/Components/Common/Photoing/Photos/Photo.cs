@@ -620,9 +620,3 @@ public partial class Photo : DisposableImpl
 }
 
 
-public class ThumbnailLoadedEventArgs(Photo sender, SoftwareBitmap? bmp) : EventArgs
-{
-    public Photo Sender { get; set; } = sender;
-
-    public SoftwareBitmap? Bitmap { get; set; } = bmp;
-}
