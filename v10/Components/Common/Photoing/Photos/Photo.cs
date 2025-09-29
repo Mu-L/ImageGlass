@@ -42,8 +42,6 @@ public partial class Photo : DisposableImpl
     private string _filePath = "";
     private bool _isCurrent = false;
 
-    private PhotoColorProfile? _colorContext;
-    private IWICPixelFormatInfo2? _pixelFormatInfo;
     private ImageSource? _galleryThumbnail;
 
     private Task? _taskThumbnail;
@@ -225,8 +223,6 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public Photo(IWICBitmapSource wicSrc)
     {
-        DisposeNativeResources();
-
         _bitmap = wicSrc;
         _width = (uint)wicSrc.Size.Width;
         _height = (uint)wicSrc.Size.Height;
@@ -262,7 +258,6 @@ public partial class Photo : DisposableImpl
     private async Task OnDisposing(bool disposeEverything)
     {
         CancelLoading();
-        DisposeNativeResources();
 
         _bitmap?.Dispose();
         _bitmap = null;
@@ -289,20 +284,6 @@ public partial class Photo : DisposableImpl
 
 
     #region Private Functions
-
-    /// <summary>
-    /// Releases unmanaged resources.
-    /// </summary>
-    private void DisposeNativeResources()
-    {
-        // dispose color contexts
-        _colorContext?.Dispose();
-        _colorContext = null;
-
-        // dispose pixel format info
-        _pixelFormatInfo?.Dispose();
-        _pixelFormatInfo = null;
-    }
 
 
     /// <summary>
@@ -481,7 +462,6 @@ public partial class Photo : DisposableImpl
         if (useCache && IsDone) return;
 
         CancelLoading();
-        DisposeNativeResources();
         var token = _cancelPhotoLoading.Token;
 
         try
@@ -552,17 +532,7 @@ public partial class Photo : DisposableImpl
 
 
             // check if the current Metadata is outdated or not
-            var hasOutdatedCache = _metadata is null;
-
-            if (_metadata is not null)
-            {
-                try
-                {
-                    var fi = new FileInfo(FilePath);
-                    hasOutdatedCache = _metadata.FileLastWriteTimeUtc < fi.LastWriteTimeUtc;
-                }
-                catch { }
-            }
+            var hasOutdatedCache = _metadata?.IsOutdated() ?? true;
 
 
             // load the metadata if it's outdated

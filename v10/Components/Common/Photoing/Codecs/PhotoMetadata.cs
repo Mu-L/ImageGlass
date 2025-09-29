@@ -164,6 +164,25 @@ public partial class PhotoMetadata : DisposableImpl
 
 
     /// <summary>
+    /// Checks if the metadata is outdated.
+    /// </summary>
+    public bool IsOutdated()
+    {
+        // check if the current Metadata is outdated or not
+        var hasOutdatedCache = false;
+
+        try
+        {
+            var fi = new FileInfo(FilePath);
+            hasOutdatedCache = FileLastWriteTimeUtc < fi.LastWriteTimeUtc;
+        }
+        catch { }
+
+        return hasOutdatedCache;
+    }
+
+
+    /// <summary>
     /// Retrieves an embedded thumbnail from either a RAW format or an EXIF profile if exists.
     /// </summary>
     public MagickImage? GetEmbeddedPreview()

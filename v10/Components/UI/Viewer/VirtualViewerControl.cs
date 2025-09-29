@@ -591,8 +591,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         try
         {
-            // cancel if requested
-            token.ThrowIfCancellationRequested();
             var previewHeight = Math.Min(DrawingArea.Height, e.Metadata.Height) / DpiY;
 
             // try to get photo preview
@@ -601,7 +599,11 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
             // cancel if requested
-            token.ThrowIfCancellationRequested();
+            if (token.IsCancellationRequested)
+            {
+                HandleCancelLoading();
+                return;
+            }
 
             if (hasPreview)
             {
@@ -615,7 +617,11 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 previewBitmap = await wicThumb.ToD2BitmapAsync(_d3dDevice!, D2dContext);
 
                 // cancel if requested
-                token.ThrowIfCancellationRequested();
+                if (token.IsCancellationRequested)
+                {
+                    HandleCancelLoading();
+                    return;
+                }
 
                 //set preview source
                 _bmpPreview = previewBitmap;
@@ -623,9 +629,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         catch
         {
-            hasPreview = false;
-            previewBitmap?.Dispose();
-            previewBitmap = null;
+            HandleCancelLoading();
         }
         finally
         {
@@ -633,6 +637,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
             wicThumb = null;
         }
 
+
+        void HandleCancelLoading()
+        {
+            hasPreview = false;
+            previewBitmap?.Dispose();
+            previewBitmap = null;
+        }
 
         // calculate viewport of preview
         _isPreviewing = hasPreview;
@@ -673,7 +684,11 @@ public partial class VirtualViewerControl : SwapChainCanvas
         try
         {
             // cancel if requested
-            e.CancelToken.ThrowIfCancellationRequested();
+            if (e.CancelToken.IsCancellationRequested)
+            {
+                HandleCancellLoaded(true);
+                return;
+            }
 
 
             // create the native bitmap
@@ -701,12 +716,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
             // cancel if requested
-            e.CancelToken.ThrowIfCancellationRequested();
-            if (e.Photo.Error is not null)
+            if (e.CancelToken.IsCancellationRequested)
             {
-                throw e.Photo.Error;
+                HandleCancellLoaded(true);
+                return;
             }
 
+            if (e.Photo.Error is not null) throw e.Photo.Error;
 
             // cancel the preview process
             CancelPreview();
@@ -767,13 +783,19 @@ public partial class VirtualViewerControl : SwapChainCanvas
                     Refresh(true);
                 }
             }
+
+
+            BHelper.GcCollect();
         }
         catch (Exception ex)
         {
-            if (ex is OperationCanceledException or TaskCanceledException)
-            {
-                e.Photo.Unload();
-            }
+            HandleCancellLoaded(false);
+        }
+
+
+        void HandleCancellLoaded(bool userCancelled)
+        {
+            if (userCancelled) e.Photo.Unload();
 
             bitmap?.Dispose();
             bitmap = null;
@@ -781,9 +803,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
             animator?.Dispose();
             animator = null;
         }
-
-
-        BHelper.GcCollect();
     }
 
 
