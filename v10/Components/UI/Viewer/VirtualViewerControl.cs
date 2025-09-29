@@ -621,13 +621,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 _bmpPreview = previewBitmap;
             }
         }
-        catch (Exception ex)
-            when (ex is ObjectDisposedException or TaskCanceledException or OperationCanceledException)
-        {
-            hasPreview = false;
-            previewBitmap?.Dispose();
-            previewBitmap = null;
-        }
         catch
         {
             hasPreview = false;
@@ -689,26 +682,20 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 // update bitmap size, check if we can use the hardware acceleration
                 SetBitmapSize(e.Photo.Size.ToSize(), true);
 
-                // native bitmap is a single-frame bitmap
-                if (e.Photo.Bitmap is IWICBitmapSource bmpSrc)
-                {
-                    // convert WIC bitmap to D2 bitmap off-thread
-                    bitmap = await bmpSrc.ToD2BitmapAsync(_d3dDevice!, D2dContext);
-                    hasSource = bitmap != null;
-                }
-                // native bitmap is a multi-frame bitmap
-                else if (e.Photo.Bitmap is IWICBitmapDecoder decoder)
-                {
-                    using var frame = decoder.GetFrame(0);
 
-                    bitmap = await frame.ToD2BitmapAsync(_d3dDevice!, D2dContext);
-                    hasSource = bitmap != null;
-                }
                 // native bitmap is a animated bitmap
-                else if (e.Photo.Bitmap is WicAnimator wicAnimator)
+                if (e.Photo.Bitmap is WicAnimator wicAnimator)
                 {
                     animator = wicAnimator;
                     hasSource = true;
+                }
+
+                // native bitmap is a single-frame bitmap
+                else
+                {
+                    // convert WIC bitmap to D2 bitmap off-thread
+                    bitmap = await e.Photo.GetD2BitmapAsync(_d3dDevice!, D2dContext);
+                    hasSource = bitmap != null;
                 }
             }
 
@@ -781,18 +768,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 }
             }
         }
-        catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException)
-        {
-            e.Photo.Unload();
-
-            bitmap?.Dispose();
-            bitmap = null;
-
-            animator?.Dispose();
-            animator = null;
-        }
         catch (Exception ex)
         {
+            if (ex is OperationCanceledException or TaskCanceledException)
+            {
+                e.Photo.Unload();
+            }
+
             bitmap?.Dispose();
             bitmap = null;
 
@@ -823,8 +805,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (photo.Metadata.ColorSpace == ImageMagick.ColorSpace.CMYK
             || photo.Metadata.ColorProfileData is null) return bmpD2;
 
-        Log.Info($"Applying color management effect",
-            nameof(ApplyColorManagementEffect), nameof(VirtualViewerControl));
 
         // create color management effect
         using var colorEffect = new ColorManagement(D2dContext);

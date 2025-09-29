@@ -24,6 +24,8 @@ using System.IO;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using Vortice.Direct2D1;
+using Vortice.Direct3D11;
 using Vortice.WIC;
 using Windows.Graphics.Imaging;
 
@@ -32,7 +34,6 @@ namespace ImageGlass.Common.Photoing;
 public partial class Photo : DisposableImpl
 {
     // private properties
-
     private IDisposable? _bitmap;
     private PhotoMetadata? _metadata;
     private uint _width = 0;
@@ -571,7 +572,8 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Starts loading thumbnail off-thread.
     /// </summary>
-    public async Task StartLoadingGalleryThumbnail(double size, IProgress<ThumbnailLoadedEventArgs> progress)
+    public async Task StartLoadingGalleryThumbnail(double size,
+        IProgress<ThumbnailLoadedEventArgs> progress)
     {
         if (GalleryThumbnail is not null) return;
 
@@ -613,6 +615,36 @@ public partial class Photo : DisposableImpl
         });
     }
 
+
+    /// <summary>
+    /// Gets Direct2D bitmap.
+    /// </summary>
+    public async Task<ID2D1Bitmap1?> GetD2BitmapAsync(
+        ID3D11Device d3Device, ID2D1DeviceContext d2Context, uint frameIndex = 0)
+    {
+        // native bitmap is a single-frame bitmap
+        if (_bitmap is IWICBitmapSource srcBmp)
+        {
+            if (srcBmp.IsDisposed()) return null;
+
+            var d2Bmp = await srcBmp.ToD2BitmapAsync(d3Device, d2Context);
+            return d2Bmp;
+        }
+
+        // native bitmap is a multi-frame bitmap
+        if (_bitmap is IWICBitmapDecoder decoder)
+        {
+            if (decoder.IsDisposed()) return null;
+
+            using var frameBmp = decoder.GetFrame(frameIndex);
+            var d2Bmp = await frameBmp.ToD2BitmapAsync(d3Device, d2Context);
+
+            return d2Bmp;
+        }
+
+
+        return null;
+    }
 
     #endregion // Public Functions
 
