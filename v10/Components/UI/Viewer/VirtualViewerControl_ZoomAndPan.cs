@@ -175,7 +175,12 @@ public partial class VirtualViewerControl
     /// </summary>
     public virtual void CalculateDrawingRegion()
     {
-        if (DrawingArea.IsEmpty() || BitmapSize.IsEmpty()) return;
+        if (DrawingArea.IsEmpty() || BitmapSize.IsEmpty())
+        {
+            _srcRect = new();
+            _destRect = new();
+            return;
+        }
 
         // 1. scale the values according to DPI
         // 1.1 zoom point

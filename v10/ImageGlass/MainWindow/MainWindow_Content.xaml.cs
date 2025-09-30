@@ -94,6 +94,8 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgLoaded(fe);
 
+        UpdateMessageBoxStyle();
+
         PART_ToolbarMain.ItemClicked += PART_ToolbarMain_ItemClicked;
         PART_Gallery.ItemClicked += PART_Gallery_ItemClicked;
 
@@ -104,7 +106,6 @@ public sealed partial class MainWindow_Content : IgControl
         PART_Viewer.SelectionChanged += PART_Viewer_SelectionChanged;
         PART_Viewer.Error += PART_Viewer_Error;
     }
-
 
 
     protected override void OnIgUnloaded(FrameworkElement fe)
@@ -120,6 +121,14 @@ public sealed partial class MainWindow_Content : IgControl
         PART_Viewer.Panning -= PART_Viewer_Panning;
         PART_Viewer.SelectionChanged -= PART_Viewer_SelectionChanged;
         PART_Viewer.Error -= PART_Viewer_Error;
+    }
+
+
+    protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
+    {
+        base.OnIgThemeChanged(e);
+
+        UpdateMessageBoxStyle();
     }
 
 
@@ -191,8 +200,18 @@ public sealed partial class MainWindow_Content : IgControl
     #endregion // Control Events
 
 
+    /// <summary>
+    /// Update message box style according to current theme.
+    /// </summary>
+    private void UpdateMessageBoxStyle()
+    {
+        PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor.WithAlpha(180).ToBrush();
+    }
 
 
+    /// <summary>
+    /// Sets in-app message. Sets all params to <c>null</c> to hide the message.
+    /// </summary>
     public void SetInAppMessage(string? description, string? heading = null, string? details = null)
     {
         MessageHeading = heading;
