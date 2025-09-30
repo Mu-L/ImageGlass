@@ -493,7 +493,18 @@ public partial class Photo : DisposableImpl
             if (token.IsCancellationRequested) return;
 
             // decode the photo off-thread
-            await Task.Run(() => OnDecodingAsync(Metadata, token), token);
+            Error = await Task.Run(async () =>
+            {
+                try
+                {
+                    await OnDecodingAsync(Metadata, token);
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    return ex;
+                }
+            }, token);
 
             // cancel if requested
             if (token.IsCancellationRequested) return;

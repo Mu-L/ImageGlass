@@ -310,8 +310,11 @@ public partial class MainWindow : IgWindow
 
     private void ViewPhoto(Photo? photo)
     {
-        Viewer.SetPhoto(photo);
+        // clear the current in-app message
+        _contentEl.SetInAppMessage(null);
 
+        // set photo to the viewer
+        Viewer.SetPhoto(photo);
         Gallery.ScrollToItem(AP.Photos.CurrentIndex);
     }
 

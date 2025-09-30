@@ -40,6 +40,46 @@ public sealed partial class MainWindow_Content : IgControl
     public VirtualViewerControl Viewer => PART_Viewer;
 
 
+    private string? MessageHeading
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(IsMessageVisible));
+            }
+        }
+    }
+    private string? MessageDescription
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(IsMessageVisible));
+            }
+        }
+    }
+    private string? MessageDetails
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(IsMessageVisible));
+            }
+        }
+    }
+    private bool IsMessageVisible => !string.IsNullOrWhiteSpace(MessageHeading)
+        && !string.IsNullOrWhiteSpace(MessageDescription)
+        && !string.IsNullOrWhiteSpace(MessageDetails);
+
 
     public MainWindow_Content()
     {
@@ -62,7 +102,9 @@ public sealed partial class MainWindow_Content : IgControl
         PART_Viewer.ZoomChanged += PART_Viewer_ZoomChanged;
         PART_Viewer.Panning += PART_Viewer_Panning;
         PART_Viewer.SelectionChanged += PART_Viewer_SelectionChanged;
+        PART_Viewer.Error += PART_Viewer_Error;
     }
+
 
 
     protected override void OnIgUnloaded(FrameworkElement fe)
@@ -77,10 +119,12 @@ public sealed partial class MainWindow_Content : IgControl
         PART_Viewer.ZoomChanged -= PART_Viewer_ZoomChanged;
         PART_Viewer.Panning -= PART_Viewer_Panning;
         PART_Viewer.SelectionChanged -= PART_Viewer_SelectionChanged;
+        PART_Viewer.Error -= PART_Viewer_Error;
     }
 
 
     #endregion // Override methods
+
 
 
     #region Control Events
@@ -133,6 +177,29 @@ public sealed partial class MainWindow_Content : IgControl
         ViewerPanning?.Invoke(sender, e);
     }
 
+    private void PART_Viewer_Error(VirtualViewerControl sender, ViewerErrorEventArgs e)
+
+    {
+        var emoji = BHelper.IsOS(WindowsOS.Win11OrLater) ? "🥲" : "🙄";
+        var heading = AP.Config.Lang["FrmMain.PicMain._ErrorText"] + $" {emoji}";
+        var err = BHelper.GetInAppError(e.Error);
+
+        SetInAppMessage(err.DebugInfo, heading, err.Details);
+    }
+
+
     #endregion // Control Events
+
+
+
+
+    public void SetInAppMessage(string? description, string? heading = null, string? details = null)
+    {
+        MessageHeading = heading;
+        MessageDescription = description;
+        MessageDetails = details;
+    }
+
+
 
 }

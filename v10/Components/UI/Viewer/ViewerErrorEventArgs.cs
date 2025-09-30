@@ -16,52 +16,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-namespace ImageGlass.Common;
+using System;
 
-/// <summary>
-/// Window backdrop effect.
-/// </summary>
-public enum BackdropStyle
+namespace ImageGlass.UI;
+
+public class ViewerErrorEventArgs(Exception ex) : EventArgs
 {
-    Mica,
-    MicaAlt,
-    Acrylic,
-    AcrylicThin,
-    Transparent,
+    public Exception Error => ex;
 
-    /// <summary>
-    /// No backdrop.
-    /// </summary>
-    None,
-}
-
-
-/// <summary>
-/// Exit codes of ImageGlass ultilities
-/// </summary>
-public enum IgExitCode
-{
-    Done = 0,
-    AdminRequired = 1,
-    Error = 2,
-    Error_FileNotFound = 3,
-}
-
-
-/// <summary>
-/// Determines Windows OS requirement
-/// </summary>
-public enum WindowsOS
-{
-    /// <summary>
-    /// Build 22621
-    /// </summary>
-    Win11_22H2_OrLater,
-
-    /// <summary>
-    /// Build 22000
-    /// </summary>
-    Win11OrLater,
-    Win10,
-    Win10OrLater,
 }

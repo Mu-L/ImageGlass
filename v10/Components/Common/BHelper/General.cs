@@ -141,6 +141,39 @@ public partial class BHelper
 
 
     /// <summary>
+    /// Checks if the given Windows version is matched.
+    /// </summary>
+    public static bool IsOS(WindowsOS ver)
+    {
+        if (ver == WindowsOS.Win11_22H2_OrLater)
+        {
+            return Environment.OSVersion.Version.Major >= 10
+                && Environment.OSVersion.Version.Build >= 22621;
+        }
+
+        if (ver == WindowsOS.Win11OrLater)
+        {
+            return Environment.OSVersion.Version.Major >= 10
+                && Environment.OSVersion.Version.Build >= 22000;
+        }
+
+        if (ver == WindowsOS.Win10)
+        {
+            return Environment.OSVersion.Version.Major == 10
+                && Environment.OSVersion.Version.Build < 22000;
+        }
+
+        if (ver == WindowsOS.Win10OrLater)
+        {
+            return Environment.OSVersion.Version.Major >= 10;
+        }
+
+
+        return false;
+    }
+
+
+    /// <summary>
     /// Returns exception details including environment info.
     /// </summary>
     public static string GetExceptionDetails(Exception ex)
@@ -168,5 +201,31 @@ public partial class BHelper
         return details;
     }
 
+
+    /// <summary>
+    /// Returns debug info and error details for in-app message.
+    /// </summary>
+    public static (string DebugInfo, string Details) GetInAppError(Exception ex)
+    {
+        // get system info
+        var osArch = Environment.Is64BitOperatingSystem ? "64" : "32";
+        var exeVersion = FileVersionInfo.GetVersionInfo(BHelper.AppExePath).FileVersion;
+        var storeCode = string.IsNullOrWhiteSpace(BHelper.AppPackageId) ? "🛍️" : "";
+
+        var debugInfo = $"""
+            {BHelper.AppName} {Const.APP_CODE} v{exeVersion} {storeCode}
+            {MagickNET.Version}
+            Win{osArch} {Environment.OSVersion.Version}, .NET {Environment.Version}
+            """;
+
+        var errorLines = ex.StackTrace?.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Take(4) ?? [];
+        var errDetails = $"""
+            {ex.Message}
+
+            {string.Join("\r\n", errorLines)}
+            """;
+
+        return (debugInfo, errDetails);
+    }
 
 }

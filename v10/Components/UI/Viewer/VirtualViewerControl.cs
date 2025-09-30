@@ -61,6 +61,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private Color _accentColor = Colors.Blue;
     private InputSystemCursorShape _cursor = InputSystemCursorShape.Arrow;
 
+    // events
+    public event TEventHandler<VirtualViewerControl, ViewerErrorEventArgs>? Error;
+
 
     #region Public Properties
 
@@ -249,6 +252,15 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // dispose native bitmap
         _bmpSource?.Dispose();
         _bmpSource = null;
+    }
+
+
+    /// <summary>
+    /// Raises <see cref="Error"/> event.
+    /// </summary>
+    protected virtual void OnError(ViewerErrorEventArgs e)
+    {
+        Error?.Invoke(this, e);
     }
 
 
@@ -827,6 +839,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         catch (Exception ex)
         {
             HandleCancellLoaded(false);
+            OnError(new(ex));
         }
 
 
@@ -839,6 +852,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             animator?.Dispose();
             animator = null;
+
+            Refresh(true);
         }
     }
 
