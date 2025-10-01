@@ -251,8 +251,11 @@ public class MagickDecoder
                 meta.Orientation = imgC[frameIndex].Orientation;
 
                 // correct the image size according to orientation
-                if (meta.Orientation != OrientationType.Undefined
-                    && meta.Orientation != OrientationType.TopLeft)
+                if (meta.Orientation != OrientationType.Undefined // no tag: Undefined
+                    && meta.Orientation != OrientationType.TopLeft // Do nothing
+                    && meta.Orientation != OrientationType.TopRight // Flip horizontally
+                    && meta.Orientation != OrientationType.BottomLeft // Flip vertically
+                )
                 {
                     // swap width and height
                     meta.Width = meta.OriginalHeight;
