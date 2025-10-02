@@ -23,15 +23,27 @@ using Windows.Graphics.Imaging;
 namespace ImageGlass.Common.Photoing;
 
 
-public class PhotoLoadingEventArgs(bool isDone, Photo photo, CancellationToken token) : EventArgs
+public class PhotoLoadingEventArgs(bool isLoaded, Photo photo, CancellationToken token) : EventArgs
 {
+    /// <summary>
+    /// Checks if the event is fired when photo is loaded.
+    /// </summary>
+    public bool IsLoaded => isLoaded;
+
+    /// <summary>
+    /// Gets the current photo instance.
+    /// </summary>
     public Photo Photo => photo;
 
+    /// <summary>
+    /// Gets the current metadata instance.
+    /// </summary>
     public PhotoMetadata Metadata => photo.Metadata;
 
+    /// <summary>
+    /// Gets the cancellation token of the current photo.
+    /// </summary>
     public CancellationToken CancelToken => token;
-
-    public bool IsDone => isDone;
 
 }
 

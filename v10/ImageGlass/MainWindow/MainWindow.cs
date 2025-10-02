@@ -311,7 +311,7 @@ public partial class MainWindow : IgWindow
     private void ViewPhoto(Photo? photo)
     {
         // clear the current in-app message
-        _contentEl.SetInAppMessage(null);
+        _ = _contentEl.ShowMessageAsync(null);
 
         // set photo to the viewer
         Viewer.SetPhoto(photo);

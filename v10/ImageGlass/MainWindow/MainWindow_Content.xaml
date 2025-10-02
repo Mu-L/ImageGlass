@@ -29,7 +29,6 @@
             IsTabStop="False"
             ItemsSource="{x:Bind cm:AP.Config.ToolbarButtons}" />
 
-
         <!--  Viewer  -->
         <ui:VirtualViewerControl
             x:Name="PART_Viewer"
@@ -49,11 +48,10 @@
                 x:Name="PART_ViewerMessage"
                 MaxWidth="1200"
                 Margin="20"
-                Padding="20"
+                Padding="10"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                CornerRadius="1"
-                RowSpacing="12"
+                CornerRadius="8"
                 Visibility="{x:Bind IsMessageVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -66,34 +64,36 @@
                     Orientation="Vertical"
                     Spacing="12">
                     <!--  Heading  -->
-                    <TextBlock
-                        FontSize="18"
-                        Foreground="{ThemeResource AccentTextFillColorTertiaryBrush}"
-                        HorizontalTextAlignment="Center"
-                        IsColorFontEnabled="True"
-                        Text="{x:Bind MessageHeading}"
-                        TextWrapping="WrapWholeWords"
-                        Visibility="{x:Bind MessageHeading, Converter={StaticResource StringToVisibilityConverter}}" />
+                    <Border Visibility="{x:Bind MessageHeading, Converter={StaticResource StringToVisibilityConverter}}">
+                        <TextBlock
+                            FontSize="18"
+                            Foreground="{ThemeResource AccentTextFillColorTertiaryBrush}"
+                            HorizontalTextAlignment="Center"
+                            IsColorFontEnabled="True"
+                            Text="{x:Bind MessageHeading}"
+                            TextWrapping="WrapWholeWords" />
+                    </Border>
 
                     <!--  Description  -->
-                    <TextBlock
-                        FontSize="12"
-                        Foreground="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
-                        HorizontalTextAlignment="Center"
-                        IsColorFontEnabled="True"
-                        Text="{x:Bind MessageDescription}"
-                        TextWrapping="WrapWholeWords"
-                        Visibility="{x:Bind MessageDescription, Converter={StaticResource StringToVisibilityConverter}}" />
-
+                    <Border Visibility="{x:Bind MessageDescription, Converter={StaticResource StringToVisibilityConverter}}">
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
+                            HorizontalTextAlignment="Center"
+                            IsColorFontEnabled="True"
+                            Text="{x:Bind MessageDescription}"
+                            TextWrapping="WrapWholeWords" />
+                    </Border>
                 </StackPanel>
 
                 <!--  Details  -->
                 <ScrollViewer
                     Grid.Row="1"
+                    Margin="0,12,0,0"
                     Padding="5"
                     BorderBrush="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
                     BorderThickness="1"
-                    CornerRadius="1"
+                    CornerRadius="6"
                     VerticalScrollBarVisibility="Auto"
                     VerticalScrollMode="Auto"
                     Visibility="{x:Bind MessageDetails, Converter={StaticResource StringToVisibilityConverter}}">
@@ -107,6 +107,8 @@
                         TextWrapping="Wrap" />
                 </ScrollViewer>
             </Grid>
+
+
         </ui:VirtualViewerControl>
 
 

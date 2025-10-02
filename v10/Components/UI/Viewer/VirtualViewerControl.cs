@@ -62,7 +62,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private InputSystemCursorShape _cursor = InputSystemCursorShape.Arrow;
 
     // events
-    public event TEventHandler<VirtualViewerControl, ViewerErrorEventArgs>? Error;
+    public event TEventHandler<VirtualViewerControl, PhotoLoadingEventArgs>? PhotoLoading;
 
 
     #region Public Properties
@@ -252,15 +252,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // dispose native bitmap
         _bmpSource?.Dispose();
         _bmpSource = null;
-    }
-
-
-    /// <summary>
-    /// Raises <see cref="Error"/> event.
-    /// </summary>
-    protected virtual void OnError(ViewerErrorEventArgs e)
-    {
-        Error?.Invoke(this, e);
     }
 
 
@@ -483,6 +474,14 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
+    /// <summary>
+    /// Raises <see cref="PhotoLoading"/> event.
+    /// </summary>
+    protected virtual void OnPhotoLoading(PhotoLoadingEventArgs e)
+    {
+        PhotoLoading?.Invoke(this, e);
+    }
+
 
     /// <summary>
     /// Forces the control to reset zoom mode and invalidate itself.
@@ -608,17 +607,17 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    private async void Photo_Loading(PhotoLoadingEventArgs e)
+    private void Photo_Loading(PhotoLoadingEventArgs e)
     {
         // previewing
-        if (!e.IsDone)
+        if (!e.IsLoaded)
         {
-            await HandlePhotoPreviewAsync(e);
+            _ = HandlePhotoPreviewAsync(e);
         }
         // load full resolution photo
         else
         {
-            await HandlePhotoLoadedAsync(e);
+            _ = HandlePhotoLoadedAsync(e);
         }
     }
 
@@ -672,6 +671,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 //set preview source
                 _bmpPreview = previewBitmap;
             }
+
         }
         catch
         {
@@ -714,6 +714,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
             Refresh(false);
         }
+
+
+        // raise event
+        OnPhotoLoading(e);
     }
 
 
@@ -834,12 +838,17 @@ public partial class VirtualViewerControl : SwapChainCanvas
             }
 
 
+            // raise event
+            OnPhotoLoading(e);
+
             BHelper.GcCollect();
         }
         catch (Exception ex)
         {
             HandleCancellLoaded(false);
-            OnError(new(ex));
+
+            e.Photo.Error = ex;
+            OnPhotoLoading(e);
         }
 
 

@@ -17,9 +17,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 
@@ -27,12 +31,17 @@ namespace ImageGlass;
 
 public sealed partial class MainWindow_Content : IgControl
 {
+    // in-app message
+    private CancellationTokenSource? _cancelMessage;
+    private readonly Lock _lockCancelMessage = new();
+
     public event TypedEventHandler<IgToolbarButton, ToolbarItemClickedEventArgs>? ToolbarButtonClicked;
     public event TypedEventHandler<IgGalleryItem, EventArgs>? GalleryItemClicked;
     public event TypedEventHandler<VirtualViewerControl, DragEventArgs>? ViewerDrop;
     public event TypedEventHandler<VirtualViewerControl, ZoomEventArgs>? ViewerZoomChanged;
     public event TypedEventHandler<VirtualViewerControl, SelectionEventArgs>? ViewerSelectionChanged;
     public event TypedEventHandler<VirtualViewerControl, PanningEventArgs>? ViewerPanning;
+    public event TypedEventHandler<VirtualViewerControl, PhotoLoadingEventArgs>? PhotoLoading;
 
 
     public ToolbarControl ToolbarMain => PART_ToolbarMain;
@@ -77,8 +86,8 @@ public sealed partial class MainWindow_Content : IgControl
         }
     }
     private bool IsMessageVisible => !string.IsNullOrWhiteSpace(MessageHeading)
-        && !string.IsNullOrWhiteSpace(MessageDescription)
-        && !string.IsNullOrWhiteSpace(MessageDetails);
+        || !string.IsNullOrWhiteSpace(MessageDescription)
+        || !string.IsNullOrWhiteSpace(MessageDetails);
 
 
     public MainWindow_Content()
@@ -94,7 +103,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgLoaded(fe);
 
-        UpdateMessageBoxStyle();
+        UpdateMessageBoxStyle__();
 
         PART_ToolbarMain.ItemClicked += PART_ToolbarMain_ItemClicked;
         PART_Gallery.ItemClicked += PART_Gallery_ItemClicked;
@@ -104,7 +113,7 @@ public sealed partial class MainWindow_Content : IgControl
         PART_Viewer.ZoomChanged += PART_Viewer_ZoomChanged;
         PART_Viewer.Panning += PART_Viewer_Panning;
         PART_Viewer.SelectionChanged += PART_Viewer_SelectionChanged;
-        PART_Viewer.Error += PART_Viewer_Error;
+        PART_Viewer.PhotoLoading += PART_Viewer_PhotoLoading;
     }
 
 
@@ -120,7 +129,7 @@ public sealed partial class MainWindow_Content : IgControl
         PART_Viewer.ZoomChanged -= PART_Viewer_ZoomChanged;
         PART_Viewer.Panning -= PART_Viewer_Panning;
         PART_Viewer.SelectionChanged -= PART_Viewer_SelectionChanged;
-        PART_Viewer.Error -= PART_Viewer_Error;
+        PART_Viewer.PhotoLoading -= PART_Viewer_PhotoLoading;
     }
 
 
@@ -128,7 +137,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgThemeChanged(e);
 
-        UpdateMessageBoxStyle();
+        UpdateMessageBoxStyle__();
     }
 
 
@@ -186,14 +195,10 @@ public sealed partial class MainWindow_Content : IgControl
         ViewerPanning?.Invoke(sender, e);
     }
 
-    private void PART_Viewer_Error(VirtualViewerControl sender, ViewerErrorEventArgs e)
 
+    private void PART_Viewer_PhotoLoading(VirtualViewerControl sender, PhotoLoadingEventArgs e)
     {
-        var emoji = BHelper.IsOS(WindowsOS.Win11OrLater) ? "🥲" : "🙄";
-        var heading = AP.Config.Lang["FrmMain.PicMain._ErrorText"] + $" {emoji}";
-        var err = BHelper.GetInAppError(e.Error);
-
-        SetInAppMessage(err.DebugInfo, heading, err.Details);
+        HandlePhotoLoading__(sender, e);
     }
 
 
@@ -203,21 +208,129 @@ public sealed partial class MainWindow_Content : IgControl
     /// <summary>
     /// Update message box style according to current theme.
     /// </summary>
-    private void UpdateMessageBoxStyle()
+    private void UpdateMessageBoxStyle__()
     {
-        PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor.WithAlpha(180).ToBrush();
+        PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor.WithAlpha(200).ToBrush();
     }
 
 
     /// <summary>
-    /// Sets in-app message. Sets all params to <c>null</c> to hide the message.
+    /// Handles photo loading event.
     /// </summary>
-    public void SetInAppMessage(string? description, string? heading = null, string? details = null)
+    private void HandlePhotoLoading__(VirtualViewerControl sender, PhotoLoadingEventArgs e)
     {
-        MessageHeading = heading;
-        MessageDescription = description;
-        MessageDetails = details;
+        // 1. handle loading error first
+        if (e.Photo.Error is not null)
+        {
+            var emoji = BHelper.IsOS(WindowsOS.Win11OrLater) ? "🥲" : "🙄";
+            var heading = AP.Config.Lang["FrmMain.PicMain._ErrorText"] + $" {emoji}";
+            var err = BHelper.GetInAppError(e.Photo.Error);
+
+            // show error message
+            _ = ShowMessageAsync(err.DebugInfo, heading, err.Details);
+        }
+
+        // 2. handle photo loading
+        else if (!e.IsLoaded)
+        {
+            // show loading message after 2s
+            _ = ShowMessageAsync(AP.Config.Lang["FrmMain._Loading"] + e.Photo.FilePath, delayMs: 2000);
+        }
+
+        // 3. handle photo loaded
+        else if (e.IsLoaded)
+        {
+            // clear in-app message
+            _ = ShowMessageAsync(null);
+        }
+
+
+        // raise event
+        PhotoLoading?.Invoke(sender, e);
     }
+
+
+    /// <summary>
+    /// Sets the in-app message.
+    /// </summary>
+    private void SetMessage__(string? message, string? heading = null, string? details = null)
+    {
+        DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () =>
+        {
+            MessageHeading = heading;
+            MessageDescription = message;
+            MessageDetails = details;
+        });
+    }
+
+
+    /// <summary>
+    /// Shows in-app message.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="heading"></param>
+    /// <param name="details"></param>
+    /// <param name="durationMs">The duration to display (ms). <c>null</c> = permanent.</param>
+    /// <param name="delayMs">The delay time before showing (ms). Default = <c>0</c>.</param>
+    public async Task ShowMessageAsync(
+        string? message,
+        string? heading = null,
+        string? details = null,
+        int? durationMs = null,
+        int delayMs = 0)
+    {
+        // 1. if intent to clear message
+        var clearMessage = message == null && heading == null && details == null;
+        if (clearMessage)
+        {
+            lock (_lockCancelMessage)
+            {
+                _cancelMessage?.Cancel();
+                _cancelMessage?.Dispose();
+                _cancelMessage = null; // do not allocate new CTS
+            }
+
+            SetMessage__(null);
+            return;
+        }
+
+
+        // 2. if intent to show message
+        CancellationTokenSource localCancelMessage;
+        lock (_lockCancelMessage)
+        {
+            _cancelMessage?.Cancel();
+            _cancelMessage?.Dispose();
+
+            _cancelMessage = new CancellationTokenSource();
+            localCancelMessage = _cancelMessage;
+        }
+
+        var token = localCancelMessage.Token;
+
+
+        try
+        {
+            // wait for the delay
+            if (delayMs > 0)
+            {
+                await Task.Delay(delayMs, token);
+            }
+            SetMessage__(message, heading, details);
+
+
+            // clear text after duration
+            if (durationMs.HasValue && durationMs > 0)
+            {
+                await Task.Delay(durationMs.Value, token);
+                SetMessage__(null);
+            }
+        }
+        catch { }
+    }
+
+
+
 
 
 
