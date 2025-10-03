@@ -94,7 +94,8 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
-            if (AP.Config.ImageInfoTags.Contains(nameof(ModifiedDateTime))
+            if ((AP.Config.ImageInfoTags.Contains(nameof(ModifiedDateTime))
+                || AP.Config.ImageInfoTags.Contains(nameof(DateTimeAuto)))
                 && AP.Photos.CurrentMetadata != null)
             {
                 return AP.Photos.CurrentMetadata.FileLastWriteTimeFormated + " (m)";
@@ -195,7 +196,8 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
-            if (AP.Config.ImageInfoTags.Contains(nameof(ExifDateTime))
+            if ((AP.Config.ImageInfoTags.Contains(nameof(ExifDateTime))
+                || AP.Config.ImageInfoTags.Contains(nameof(DateTimeAuto)))
                 && AP.Photos.CurrentMetadata != null
                 && AP.Photos.CurrentMetadata.ExifDateTime != null)
             {
@@ -211,7 +213,8 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
-            if (AP.Config.ImageInfoTags.Contains(nameof(ExifDateTimeOriginal))
+            if ((AP.Config.ImageInfoTags.Contains(nameof(ExifDateTimeOriginal))
+                || AP.Config.ImageInfoTags.Contains(nameof(DateTimeAuto)))
                 && AP.Photos.CurrentMetadata != null
                 && AP.Photos.CurrentMetadata.ExifDateTimeOriginal != null)
             {
