@@ -450,10 +450,12 @@ public class MagickDecoder
     /// <summary>
     /// Gets thumbnail from the given image path.
     /// </summary>
-    public static async Task<byte[]?> QuickDecodeAsync(string filePath,
-        int width, int height, MagickFormat outputFormat, CancellationToken token = default)
+    public static async Task<byte[]?> QuickDecodeAsync(string filePath, MagickFormat outputFormat,
+        double desiredWidth, double desiredHeight,
+        double minSize = 0, double maxSize = double.PositiveInfinity,
+        CancellationToken token = default)
     {
-        using var imgM = await QuickDecodeAsync(filePath, width, height, token);
+        using var imgM = await QuickDecodeAsync(filePath, desiredWidth, desiredHeight, minSize, maxSize, token);
 
         return imgM?.ToByteArray(outputFormat);
     }
@@ -463,18 +465,28 @@ public class MagickDecoder
     /// Gets thumbnail from the given image path.
     /// </summary>
     public static async Task<MagickImage?> QuickDecodeAsync(string filePath,
-        int width, int height, CancellationToken token = default)
+        double desiredWidth, double desiredHeight,
+        double minSize = 0, double maxSize = double.PositiveInfinity,
+        CancellationToken token = default)
     {
         var options = new PhotoReadOptions()
         {
-            Width = (uint)width,
-            Height = (uint)height,
+            Width = (uint)desiredWidth,
+            Height = (uint)desiredHeight,
         };
         var settings = ParseSettings(options, false, filePath);
 
         try
         {
             var imgM = new MagickImage();
+            imgM.Ping(filePath);
+
+            // check the dimention constraint
+            if (imgM.Width < minSize
+                || imgM.Height < minSize
+                || imgM.Width > maxSize
+                || imgM.Height > maxSize) return null;
+
             await imgM.ReadAsync(filePath, settings, token);
 
             return imgM;
