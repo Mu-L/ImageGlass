@@ -21,7 +21,9 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -35,6 +37,8 @@ public sealed partial class MainWindow_Content : IgControl
     private CancellationTokenSource? _cancelMessage;
     private readonly Lock _lockCancelMessage = new();
 
+    private readonly MenuFlyout _mnuMain = new();
+
     public event TypedEventHandler<IgToolbarButton, ToolbarItemClickedEventArgs>? ToolbarButtonClicked;
     public event TypedEventHandler<IgGalleryItem, EventArgs>? GalleryItemClicked;
     public event TypedEventHandler<VirtualViewerControl, DragEventArgs>? ViewerDrop;
@@ -47,6 +51,8 @@ public sealed partial class MainWindow_Content : IgControl
     public ToolbarControl ToolbarMain => PART_ToolbarMain;
     public GalleryControl Gallery => PART_Gallery;
     public VirtualViewerControl Viewer => PART_Viewer;
+
+    public MenuFlyout MainMenu => PART_MainMenu;
 
 
     private string? MessageHeading
@@ -90,6 +96,8 @@ public sealed partial class MainWindow_Content : IgControl
         || !string.IsNullOrWhiteSpace(MessageDetails);
 
 
+
+
     public MainWindow_Content()
     {
         InitializeComponent();
@@ -103,7 +111,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgLoaded(fe);
 
-        UpdateMessageBoxStyle__();
+        UpdateMessageBoxStyle_();
 
         PART_ToolbarMain.ItemClicked += PART_ToolbarMain_ItemClicked;
         PART_Gallery.ItemClicked += PART_Gallery_ItemClicked;
@@ -137,7 +145,15 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgThemeChanged(e);
 
-        UpdateMessageBoxStyle__();
+        UpdateMessageBoxStyle_();
+    }
+
+
+    protected override void OnIgLanguageChanged()
+    {
+        base.OnIgLanguageChanged();
+
+        LoadMenuText_(MainMenu.Items);
     }
 
 
@@ -198,26 +214,48 @@ public sealed partial class MainWindow_Content : IgControl
 
     private void PART_Viewer_PhotoLoading(VirtualViewerControl sender, PhotoLoadingEventArgs e)
     {
-        HandlePhotoLoading__(sender, e);
+        HandlePhotoLoading_(sender, e);
     }
 
 
     #endregion // Control Events
 
 
+
     /// <summary>
     /// Update message box style according to current theme.
     /// </summary>
-    private void UpdateMessageBoxStyle__()
+    private void UpdateMessageBoxStyle_()
     {
         PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor.WithAlpha(200).ToBrush();
     }
 
 
     /// <summary>
+    /// Loads menu text.
+    /// </summary>.
+    private static void LoadMenuText_(IList<MenuFlyoutItemBase> items)
+    {
+        foreach (var item in items)
+        {
+            if (item is MenuFlyoutItem mnuItem)
+            {
+                mnuItem.Text = AP.Config.Lang[$"FrmMain.{mnuItem.Name}"];
+            }
+            else if (item is MenuFlyoutSubItem mnuSubItem)
+            {
+                mnuSubItem.Text = AP.Config.Lang[$"FrmMain.{mnuSubItem.Name}"];
+
+                LoadMenuText_(mnuSubItem.Items);
+            }
+        }
+    }
+
+
+    /// <summary>
     /// Handles photo loading event.
     /// </summary>
-    private void HandlePhotoLoading__(VirtualViewerControl sender, PhotoLoadingEventArgs e)
+    private void HandlePhotoLoading_(VirtualViewerControl sender, PhotoLoadingEventArgs e)
     {
         // 1. handle loading error first
         if (e.Photo.Error is not null)
@@ -253,7 +291,7 @@ public sealed partial class MainWindow_Content : IgControl
     /// <summary>
     /// Sets the in-app message.
     /// </summary>
-    private void SetMessage__(string? message, string? heading = null, string? details = null)
+    private void SetMessage_(string? message, string? heading = null, string? details = null)
     {
         DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () =>
         {
@@ -290,7 +328,7 @@ public sealed partial class MainWindow_Content : IgControl
                 _cancelMessage = null; // do not allocate new CTS
             }
 
-            SetMessage__(null);
+            SetMessage_(null);
             return;
         }
 
@@ -316,19 +354,18 @@ public sealed partial class MainWindow_Content : IgControl
             {
                 await Task.Delay(delayMs, token);
             }
-            SetMessage__(message, heading, details);
+            SetMessage_(message, heading, details);
 
 
             // clear text after duration
             if (durationMs.HasValue && durationMs > 0)
             {
                 await Task.Delay(durationMs.Value, token);
-                SetMessage__(null);
+                SetMessage_(null);
             }
         }
         catch { }
     }
-
 
 
 

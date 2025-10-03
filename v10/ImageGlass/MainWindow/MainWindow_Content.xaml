@@ -13,6 +13,116 @@
     IsTabStop="False"
     mc:Ignorable="d">
 
+    <ui:IgControl.Resources>
+
+        <MenuFlyout x:Key="RES_MainMenu" x:Name="PART_MainMenu">
+
+            <!--  File  -->
+            <MenuFlyoutSubItem x:Name="MnuFile" Text="[File]">
+                <MenuFlyoutItem x:Name="MnuOpenFile" Text="[Open file...]" />
+                <MenuFlyoutItem x:Name="MnuNewWindow" Text="[Open new window]" />
+                <MenuFlyoutItem x:Name="MnuSave" Text="[Save]" />
+                <MenuFlyoutItem x:Name="MnuSaveAs" Text="[Save as...]" />
+                <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem x:Name="MnuOpenWith" Text="[Open with...]" />
+                <MenuFlyoutItem x:Name="MnuEdit" Text="[Edit image]" />
+                <MenuFlyoutItem x:Name="MnuPrint" Text="[Print...]" />
+                <MenuFlyoutItem x:Name="MnuShare" Text="[Share...]" />
+                <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem x:Name="MnuRefresh" Text="[Refresh]" />
+                <MenuFlyoutItem x:Name="MnuReload" Text="[Reload image]" />
+                <MenuFlyoutItem x:Name="MnuReloadImageList" Text="[Reload list]" />
+                <MenuFlyoutItem x:Name="MnuUnload" Text="[Unload]" />
+            </MenuFlyoutSubItem>
+
+
+            <!--  Navigation  -->
+            <MenuFlyoutSubItem x:Name="MnuNavigation" Text="[Navigation]">
+                <MenuFlyoutItem Text="[Save]" />
+                <MenuFlyoutSeparator />
+            </MenuFlyoutSubItem>
+
+
+            <!--  Zoom  -->
+            <MenuFlyoutSubItem Text="[Zoom]">
+                <MenuFlyoutItem Text="[Save]" />
+                <MenuFlyoutSeparator />
+            </MenuFlyoutSubItem>
+
+            <!--  Panning  -->
+            <MenuFlyoutSubItem Text="[Panning]">
+                <MenuFlyoutItem Text="[Save]" />
+                <MenuFlyoutSeparator />
+            </MenuFlyoutSubItem>
+
+
+            <!--  Image  -->
+            <MenuFlyoutSubItem Text="[Image]">
+                <MenuFlyoutItem Text="[Save]" />
+                <MenuFlyoutSeparator />
+            </MenuFlyoutSubItem>
+
+
+            <!--  Clipboard  -->
+            <MenuFlyoutSubItem Text="[Clipboard]">
+                <MenuFlyoutItem Text="[Save]" />
+                <MenuFlyoutSeparator />
+            </MenuFlyoutSubItem>
+
+
+            <!--  Window modes  -->
+            <MenuFlyoutSeparator />
+            <ToggleMenuFlyoutItem Text="[WindowFit]" />
+            <ToggleMenuFlyoutItem IsChecked="True" Text="[Frameless]" />
+            <ToggleMenuFlyoutItem Text="[Fullscreen]" />
+            <ToggleMenuFlyoutItem Text="[Slideshow]" />
+            <MenuFlyoutSeparator />
+
+
+            <!--  Layout  -->
+            <MenuFlyoutSubItem Text="[Layout]">
+                <MenuFlyoutItem Text="[Save]" />
+                <MenuFlyoutSeparator />
+            </MenuFlyoutSubItem>
+
+
+            <!--  Tools  -->
+            <MenuFlyoutSubItem Text="[Tools]">
+                <MenuFlyoutItem Text="[Save]" />
+                <MenuFlyoutSeparator />
+            </MenuFlyoutSubItem>
+
+
+            <!--  Settings  -->
+            <MenuFlyoutSeparator />
+            <MenuFlyoutItem Text="[Settings]" />
+
+
+            <!--  Help  -->
+            <MenuFlyoutSubItem Text="[Help]">
+                <MenuFlyoutItem Text="[About]" />
+                <MenuFlyoutItem Text="[Check for update]" />
+                <MenuFlyoutItem Text="[Report an issue]" />
+                <MenuFlyoutItem Text="[Open ImageGlass Quick Setup]" />
+                <MenuFlyoutSeparator />
+            </MenuFlyoutSubItem>
+
+
+            <!--  Exit  -->
+            <MenuFlyoutSeparator />
+            <MenuFlyoutItem Text="[Exit]">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="Escape" />
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+        </MenuFlyout>
+
+    </ui:IgControl.Resources>
+
+
+
     <Grid IsTabStop="True" TabFocusNavigation="Local">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -27,7 +137,9 @@
             Grid.Row="0"
             Canvas.ZIndex="90"
             IsTabStop="False"
-            ItemsSource="{x:Bind cm:AP.Config.ToolbarButtons}" />
+            ItemsSource="{x:Bind cm:AP.Config.ToolbarButtons}"
+            MainMenu="{StaticResource RES_MainMenu}" />
+
 
         <!--  Viewer  -->
         <ui:VirtualViewerControl
