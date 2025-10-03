@@ -238,15 +238,19 @@ public sealed partial class MainWindow_Content : IgControl
     {
         foreach (var item in items)
         {
-            if (item is MenuFlyoutItem mnuItem)
+            if (item is MenuFlyoutItem mnu)
             {
-                mnuItem.Text = AP.Config.Lang[$"FrmMain.{mnuItem.Name}"];
+                mnu.Text = AP.Config.Lang[$"FrmMain.{mnu.Name}"];
             }
-            else if (item is MenuFlyoutSubItem mnuSubItem)
+            else if (item is MenuFlyoutSubItem submenu)
             {
-                mnuSubItem.Text = AP.Config.Lang[$"FrmMain.{mnuSubItem.Name}"];
+                submenu.Text = AP.Config.Lang[$"FrmMain.{submenu.Name}"];
 
-                LoadMenuText_(mnuSubItem.Items);
+                // don't localize menu View Channels items
+                if (submenu.Name.Equals(nameof(MnuViewChannels), StringComparison.Ordinal)) continue;
+
+                // jump into submenu items
+                LoadMenuText_(submenu.Items);
             }
         }
     }

@@ -21,14 +21,26 @@
             <MenuFlyoutSubItem x:Name="MnuFile" Text="[File]">
                 <MenuFlyoutItem x:Name="MnuOpenFile" Text="[Open file...]" />
                 <MenuFlyoutItem x:Name="MnuNewWindow" Text="[Open new window]" />
-                <MenuFlyoutItem x:Name="MnuSave" Text="[Save]" />
+                <MenuFlyoutItem
+                    x:Name="MnuSave"
+                    Icon="Save"
+                    Text="[Save]" />
                 <MenuFlyoutItem x:Name="MnuSaveAs" Text="[Save as...]" />
                 <MenuFlyoutSeparator />
 
                 <MenuFlyoutItem x:Name="MnuOpenWith" Text="[Open with...]" />
-                <MenuFlyoutItem x:Name="MnuEdit" Text="[Edit image]" />
-                <MenuFlyoutItem x:Name="MnuPrint" Text="[Print...]" />
-                <MenuFlyoutItem x:Name="MnuShare" Text="[Share...]" />
+                <MenuFlyoutItem
+                    x:Name="MnuEdit"
+                    Icon="Edit"
+                    Text="[Edit image]" />
+                <MenuFlyoutItem
+                    x:Name="MnuPrint"
+                    Icon="Print"
+                    Text="[Print...]" />
+                <MenuFlyoutItem
+                    x:Name="MnuShare"
+                    Icon="Share"
+                    Text="[Share...]" />
                 <MenuFlyoutSeparator />
 
                 <MenuFlyoutItem x:Name="MnuRefresh" Text="[Refresh]" />
@@ -40,35 +52,203 @@
 
             <!--  Navigation  -->
             <MenuFlyoutSubItem x:Name="MnuNavigation" Text="[Navigation]">
-                <MenuFlyoutItem Text="[Save]" />
+                <MenuFlyoutItem x:Name="MnuViewNext" Text="[View next image]" />
+                <MenuFlyoutItem x:Name="MnuViewPrevious" Text="[View previous image]" />
                 <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem x:Name="MnuGoTo" Text="[Go to...]" />
+                <MenuFlyoutItem x:Name="MnuGoToFirst" Text="[Go to first image]" />
+                <MenuFlyoutItem x:Name="MnuGoToLast" Text="[Go to last image]" />
+                <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem x:Name="MnuViewNextFrame" Text="[View next frame]" />
+                <MenuFlyoutItem x:Name="MnuViewPreviousFrame" Text="[View previous frame]" />
+                <MenuFlyoutItem x:Name="MnuViewFirstFrame" Text="[View first frame]" />
+                <MenuFlyoutItem x:Name="MnuViewLastFrame" Text="[View last frame]" />
             </MenuFlyoutSubItem>
 
 
             <!--  Zoom  -->
-            <MenuFlyoutSubItem Text="[Zoom]">
-                <MenuFlyoutItem Text="[Save]" />
+            <MenuFlyoutSubItem x:Name="MnuZoom" Text="[Zoom]">
+                <MenuFlyoutItem
+                    x:Name="MnuZoomIn"
+                    Icon="ZoomIn"
+                    Text="[Zoom in]" />
+                <MenuFlyoutItem
+                    x:Name="MnuZoomOut"
+                    Icon="ZoomOut"
+                    Text="[Zoom out]" />
+                <MenuFlyoutItem x:Name="MnuCustomZoom" Text="[Custom zoom...]" />
+                <MenuFlyoutItem x:Name="MnuActualSize" Text="[Actual size]" />
                 <MenuFlyoutSeparator />
+
+                <RadioMenuFlyoutItem
+                    x:Name="MnuAutoZoom"
+                    GroupName="ZoomMode"
+                    IsChecked="True"
+                    Text="[Auto zoom]" />
+                <RadioMenuFlyoutItem
+                    x:Name="MnuLockZoom"
+                    GroupName="ZoomMode"
+                    Text="[Lock zoom ratio]" />
+                <RadioMenuFlyoutItem
+                    x:Name="MnuScaleToWidth"
+                    GroupName="ZoomMode"
+                    Text="[Scale to width]" />
+                <RadioMenuFlyoutItem
+                    x:Name="MnuScaleToHeight"
+                    GroupName="ZoomMode"
+                    Text="[Scale to height]" />
+                <RadioMenuFlyoutItem
+                    x:Name="MnuScaleToFit"
+                    GroupName="ZoomMode"
+                    Text="[Scale to fit]" />
+                <RadioMenuFlyoutItem
+                    x:Name="MnuScaleToFill"
+                    GroupName="ZoomMode"
+                    Text="[Scale to fill]" />
             </MenuFlyoutSubItem>
 
+
             <!--  Panning  -->
-            <MenuFlyoutSubItem Text="[Panning]">
-                <MenuFlyoutItem Text="[Save]" />
+            <MenuFlyoutSubItem x:Name="MnuPanning" Text="[Panning]">
+                <MenuFlyoutItem x:Name="MnuPanLeft" Text="[Pan image left]" />
+                <MenuFlyoutItem x:Name="MnuPanRight" Text="[Pan image right]" />
+                <MenuFlyoutItem x:Name="MnuPanUp" Text="[Pan image up]" />
+                <MenuFlyoutItem x:Name="MnuPanDown" Text="[Pan image down]" />
                 <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem x:Name="MnuPanToLeftSide" Text="[Pan image to left edge]" />
+                <MenuFlyoutItem x:Name="MnuPanToRightSide" Text="[Pan image to right edge]" />
+                <MenuFlyoutItem x:Name="MnuPanToTop" Text="[Pan image to top]" />
+                <MenuFlyoutItem x:Name="MnuPanToBottom" Text="[Pan image to bottom]" />
             </MenuFlyoutSubItem>
 
 
             <!--  Image  -->
-            <MenuFlyoutSubItem Text="[Image]">
-                <MenuFlyoutItem Text="[Save]" />
+            <MenuFlyoutSubItem x:Name="MnuImage" Text="[Image]">
+                <MenuFlyoutSubItem
+                    x:Name="MnuLoadingOrders"
+                    Icon="Sort"
+                    Text="[Loading orders]">
+                    <ToggleMenuFlyoutItem
+                        x:Name="MnuUseExplorerSortOrder"
+                        IsChecked="{x:Bind cm:AP.Config.ShouldUseExplorerSortOrder}"
+                        Text="[Use Explorer sort order if possible]" />
+                    <MenuFlyoutSeparator />
+
+                    <RadioMenuFlyoutItem GroupName="ImageOrderBy" Text="[Name (default)]" />
+                    <RadioMenuFlyoutItem GroupName="ImageOrderBy" Text="[Random]" />
+                    <RadioMenuFlyoutItem GroupName="ImageOrderBy" Text="[File size]" />
+                    <RadioMenuFlyoutItem GroupName="ImageOrderBy" Text="[Extension]" />
+                    <RadioMenuFlyoutItem GroupName="ImageOrderBy" Text="[Date created]" />
+                    <RadioMenuFlyoutItem GroupName="ImageOrderBy" Text="[Date accessed]" />
+                    <RadioMenuFlyoutItem GroupName="ImageOrderBy" Text="[Date modified]" />
+                    <RadioMenuFlyoutItem GroupName="ImageOrderBy" Text="[EXIF: Date taken]" />
+                    <RadioMenuFlyoutItem GroupName="ImageOrderBy" Text="[EXIF: Rating]" />
+                    <MenuFlyoutSeparator />
+
+                    <RadioMenuFlyoutItem GroupName="ImageOrderType" Text="[Ascending]" />
+                    <RadioMenuFlyoutItem GroupName="ImageOrderType" Text="[Descending]" />
+                </MenuFlyoutSubItem>
+
+                <MenuFlyoutSubItem x:Name="MnuViewChannels" Text="[View channels]">
+                    <ToggleMenuFlyoutItem
+                        x:Name="MnuToggleChannel_R"
+                        IsChecked="True"
+                        Text="R">
+                        <ToggleMenuFlyoutItem.Icon>
+                            <FontIcon Foreground="Red" Glyph="&#xEA3B;" />
+                        </ToggleMenuFlyoutItem.Icon>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem
+                        x:Name="MnuToggleChannel_G"
+                        IsChecked="True"
+                        Text="G">
+                        <ToggleMenuFlyoutItem.Icon>
+                            <FontIcon Foreground="Green" Glyph="&#xEA3B;" />
+                        </ToggleMenuFlyoutItem.Icon>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem
+                        x:Name="MnuToggleChannel_B"
+                        IsChecked="True"
+                        Text="B">
+                        <ToggleMenuFlyoutItem.Icon>
+                            <FontIcon Foreground="Blue" Glyph="&#xEA3B;" />
+                        </ToggleMenuFlyoutItem.Icon>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem
+                        x:Name="MnuToggleChannel_A"
+                        IsChecked="True"
+                        Text="A">
+                        <ToggleMenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xEA3A;" />
+                        </ToggleMenuFlyoutItem.Icon>
+                    </ToggleMenuFlyoutItem>
+                    <MenuFlyoutSeparator />
+
+                    <MenuFlyoutItem x:Name="MnuViewChannel_RGBA" Text="RGBA" />
+                    <MenuFlyoutItem x:Name="MnuViewChannel_RGB" Text="RGB" />
+                    <MenuFlyoutItem x:Name="MnuViewChannel_RA" Text="R + A" />
+                    <MenuFlyoutItem x:Name="MnuViewChannel_GA" Text="G + A" />
+                    <MenuFlyoutItem x:Name="MnuViewChannel_BA" Text="B + A" />
+                    <MenuFlyoutItem x:Name="MnuViewChannel_A" Text="A" />
+                </MenuFlyoutSubItem>
+                <MenuFlyoutItem x:Name="MnuInvertColors" Text="[Invert colors]" />
                 <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem x:Name="MnuRotateLeft" Text="[Rotate left]" />
+                <MenuFlyoutItem x:Name="MnuRotateRight" Text="[Rotate right]" />
+                <MenuFlyoutItem x:Name="MnuFlipHorizontal" Text="[Flip horizontal]" />
+                <MenuFlyoutItem x:Name="MnuFlipVertical" Text="[Flip vertical]" />
+                <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem
+                    x:Name="MnuRename"
+                    Icon="Rename"
+                    Text="[Rename image]" />
+                <MenuFlyoutItem
+                    x:Name="MnuMoveToRecycleBin"
+                    Icon="Delete"
+                    Text="[Move to Recycle Bin]" />
+                <MenuFlyoutItem
+                    x:Name="MnuDeleteFromHardDisk"
+                    Icon="Clear"
+                    Text="[Delete permanently]" />
+                <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem x:Name="MnuToggleImageAnimation" Text="[Start / stop animating image]" />
+                <MenuFlyoutItem x:Name="MnuExportFrames" Text="[Export image frames...]" />
+                <MenuFlyoutItem x:Name="MnuSetDesktopBackground" Text="[Set as Desktop background]" />
+                <MenuFlyoutItem x:Name="MnuSetLockScreen" Text="[Set as Lock screen image]" />
+                <MenuFlyoutItem x:Name="MnuOpenLocation" Text="[Open image location]" />
+                <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem x:Name="MnuImageProperties" Text="[Image properties]" />
             </MenuFlyoutSubItem>
 
 
             <!--  Clipboard  -->
-            <MenuFlyoutSubItem Text="[Clipboard]">
-                <MenuFlyoutItem Text="[Save]" />
+            <MenuFlyoutSubItem x:Name="MnuClipboard" Text="[Clipboard]">
+                <MenuFlyoutItem
+                    x:Name="MnuPasteImage"
+                    Icon="Paste"
+                    Text="[Paste image]" />
                 <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem x:Name="MnuCopyImageData" Text="[Copy image data]" />
+                <MenuFlyoutItem x:Name="MnuCopyPath" Text="[Copy image path]" />
+                <MenuFlyoutItem
+                    x:Name="MnuCopyFile"
+                    Icon="Copy"
+                    Text="[Copy file]" />
+                <MenuFlyoutItem
+                    x:Name="MnuCutFile"
+                    Icon="Cut"
+                    Text="[Cut file]" />
+                <MenuFlyoutSeparator />
+
+                <MenuFlyoutItem x:Name="MnuClearClipboard" Text="[Clear clipboard]" />
             </MenuFlyoutSubItem>
 
 
