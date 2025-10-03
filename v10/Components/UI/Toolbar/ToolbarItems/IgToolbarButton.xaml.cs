@@ -52,6 +52,24 @@ public partial class IgToolbarButton : IgToolbarItem
             if (field != value)
             {
                 field = value;
+
+                FlyoutBase.SetAttachedFlyout(this, field);
+                _ = OnPropertyChanged();
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Gets, sets value indicates that the <see cref="Flyout"/> should be open on clicked.
+    /// </summary>
+    public bool OpenFlyoutOnClick
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
                 _ = OnPropertyChanged();
             }
         }
@@ -69,14 +87,14 @@ public partial class IgToolbarButton : IgToolbarItem
     protected override void OnIgLoaded(FrameworkElement fe)
     {
         base.OnIgLoaded(fe);
-        UpdateIcon();
+        UpdateIcon_();
     }
 
 
     protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
     {
         base.OnIgThemeChanged(e);
-        UpdateIcon();
+        UpdateIcon_();
     }
 
 
@@ -93,14 +111,21 @@ public partial class IgToolbarButton : IgToolbarItem
     {
         if (e.OriginalSource is not IgButton btn) return;
 
-        Clicked?.Invoke(this, new ToolbarItemClickedEventArgs(VM, btn));
+        var args = new ToolbarItemClickedEventArgs(VM, btn);
+        Clicked?.Invoke(this, args);
+
+        // open flyout menu
+        if (OpenFlyoutOnClick && !args.CancelFlyoutMenu)
+        {
+            OpenFlyoutMenu(args.FlyoutMenuPlacement);
+        }
     }
 
 
     /// <summary>
     /// Updates icon.
     /// </summary>
-    private void UpdateIcon()
+    private void UpdateIcon_()
     {
         if (string.IsNullOrWhiteSpace(VM.Image)) return;
         var svgPath = "";
@@ -125,6 +150,22 @@ public partial class IgToolbarButton : IgToolbarItem
             PART_ButtonIcon.Source = new SvgImageSource(new Uri(svgPath));
         }
         catch { }
+    }
+
+
+    /// <summary>
+    /// Open flyout menu.
+    /// </summary>
+    public void OpenFlyoutMenu(FlyoutPlacementMode? placement = null)
+    {
+        if (Flyout is null) return;
+
+        // set the placement
+        Flyout.Placement = placement ?? FlyoutPlacementMode.BottomEdgeAlignedRight;
+
+        // open the flyout menu on click
+        FlyoutBase.ShowAttachedFlyout(this);
+
     }
 
 }

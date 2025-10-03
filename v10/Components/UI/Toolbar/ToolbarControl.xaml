@@ -135,116 +135,14 @@
 
 
             <!--  Menu button  -->
-            <local:IgToolbarButton x:Name="BtnMainMenu" IsTabStop="False">
+            <local:IgToolbarButton
+                x:Name="BtnMainMenu"
+                Flyout="{x:Bind MainMenu}"
+                IsTabStop="False"
+                OpenFlyoutOnClick="True">
                 <local:IgToolbarButton.VM>
                     <cm:ToolbarItemModel Image="{x:Bind local:ToolbarControl.MainMenuIconName}" Text="Main Menu" />
                 </local:IgToolbarButton.VM>
-
-
-                <local:IgToolbarButton.Flyout>
-                    <MenuFlyout x:Name="MnuMain" Placement="BottomEdgeAlignedRight">
-
-                        <!--  File  -->
-                        <MenuFlyoutSubItem x:Name="MnuFile" Text="File">
-                            <MenuFlyoutItem Text="Open file..." />
-                            <MenuFlyoutItem Text="Open new window" />
-                            <MenuFlyoutItem Text="Save" />
-                            <MenuFlyoutItem Text="Save as..." />
-                            <MenuFlyoutSeparator />
-
-                            <MenuFlyoutItem Text="Open with..." />
-                            <MenuFlyoutItem Text="Edit image" />
-                            <MenuFlyoutItem Text="Print..." />
-                            <MenuFlyoutItem Text="Share..." />
-                            <MenuFlyoutSeparator />
-
-                            <MenuFlyoutItem Text="Refresh" />
-                            <MenuFlyoutItem Text="Reload image" />
-                            <MenuFlyoutItem Text="Reload list" />
-                            <MenuFlyoutItem Text="Unload" />
-                        </MenuFlyoutSubItem>
-
-
-                        <!--  Navigation  -->
-                        <MenuFlyoutSubItem Text="Navigation">
-                            <MenuFlyoutItem Text="Save" />
-                            <MenuFlyoutSeparator />
-                        </MenuFlyoutSubItem>
-
-
-                        <!--  Zoom  -->
-                        <MenuFlyoutSubItem Text="Zoom">
-                            <MenuFlyoutItem Text="Save" />
-                            <MenuFlyoutSeparator />
-                        </MenuFlyoutSubItem>
-
-                        <!--  Panning  -->
-                        <MenuFlyoutSubItem Text="Panning">
-                            <MenuFlyoutItem Text="Save" />
-                            <MenuFlyoutSeparator />
-                        </MenuFlyoutSubItem>
-
-
-                        <!--  Image  -->
-                        <MenuFlyoutSubItem Text="Image">
-                            <MenuFlyoutItem Text="Save" />
-                            <MenuFlyoutSeparator />
-                        </MenuFlyoutSubItem>
-
-
-                        <!--  Clipboard  -->
-                        <MenuFlyoutSubItem Text="Clipboard">
-                            <MenuFlyoutItem Text="Save" />
-                            <MenuFlyoutSeparator />
-                        </MenuFlyoutSubItem>
-
-
-                        <!--  Window modes  -->
-                        <MenuFlyoutSeparator />
-                        <ToggleMenuFlyoutItem Text="Window Fit" />
-                        <ToggleMenuFlyoutItem IsChecked="True" Text="Frameless" />
-                        <ToggleMenuFlyoutItem Text="Fullscreen" />
-                        <ToggleMenuFlyoutItem Text="Slideshow" />
-                        <MenuFlyoutSeparator />
-
-
-                        <!--  Layout  -->
-                        <MenuFlyoutSubItem Text="Layout">
-                            <MenuFlyoutItem Text="Save" />
-                            <MenuFlyoutSeparator />
-                        </MenuFlyoutSubItem>
-
-
-                        <!--  Tools  -->
-                        <MenuFlyoutSubItem Text="Tools">
-                            <MenuFlyoutItem Text="Save" />
-                            <MenuFlyoutSeparator />
-                        </MenuFlyoutSubItem>
-
-
-                        <!--  Settings  -->
-                        <MenuFlyoutSeparator />
-                        <MenuFlyoutItem Text="Settings" />
-
-
-                        <!--  Help  -->
-                        <MenuFlyoutSubItem Text="Help">
-                            <MenuFlyoutItem Text="Save" />
-                            <MenuFlyoutSeparator />
-                        </MenuFlyoutSubItem>
-
-
-                        <!--  Exit  -->
-                        <MenuFlyoutSeparator />
-                        <MenuFlyoutItem Text="Exit">
-                            <MenuFlyoutItem.KeyboardAccelerators>
-                                <KeyboardAccelerator Key="Escape" />
-                            </MenuFlyoutItem.KeyboardAccelerators>
-                        </MenuFlyoutItem>
-
-                    </MenuFlyout>
-                </local:IgToolbarButton.Flyout>
-
             </local:IgToolbarButton>
 
 

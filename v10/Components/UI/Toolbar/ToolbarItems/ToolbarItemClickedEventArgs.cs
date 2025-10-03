@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using System;
 
 namespace ImageGlass.UI;
@@ -26,5 +27,8 @@ public class ToolbarItemClickedEventArgs(ToolbarItemModel vm, IgButton btn) : Ev
 {
     public ToolbarItemModel VM => vm;
     public IgButton Button => btn;
+
+    public bool CancelFlyoutMenu { get; set; } = false;
+    public FlyoutPlacementMode? FlyoutMenuPlacement { get; set; } = null;
 
 }

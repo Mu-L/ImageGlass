@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Common;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using System.Collections;
 using System.Collections.Generic;
@@ -45,9 +46,9 @@ public partial class ToolbarControl : IgControl
     public readonly ObservableCollection<ToolbarItemModel> SecondaryItems = [];
 
 
-    // Dependency Properties
-    #region Dependency Properties
+    #region Public Properties
 
+    #region ItemsSource
     /// <summary>
     /// Gets, sets the items source of toolbar.
     /// </summary>
@@ -62,9 +63,26 @@ public partial class ToolbarControl : IgControl
         if (d is not ToolbarControl toolbar) return;
         toolbar.UpdateLayoutItems();
     }
+    #endregion // ItemsSource
 
 
-    #endregion // Dependency Properties
+    /// <summary>
+    /// Gets or sets the main menu.
+    /// </summary>
+    public MenuFlyout? MainMenu
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+            }
+        }
+    }
+
+    #endregion // Public Properties
+
 
 
     public ToolbarControl()
@@ -76,7 +94,7 @@ public partial class ToolbarControl : IgControl
     protected override void OnIgSizeChanged(FrameworkElement fe, SizeChangedEventArgs e)
     {
         base.OnIgSizeChanged(fe, e);
-        HandleOverflow();
+        HandleOverflow_();
     }
 
 
@@ -179,51 +197,7 @@ public partial class ToolbarControl : IgControl
     }
 
 
-    public void UpdateLayoutItems()
-    {
-        _itemsMetadata.Clear();
-        PrimaryItems.Clear();
-        PrimaryItemsOverflow.Clear();
-        SecondaryItems.Clear();
-
-        if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
-
-
-        int srcIndex = -1;
-        int primaryIndex = -1;
-        int secondaryIndex = -1;
-
-        foreach (var item in allItems)
-        {
-            srcIndex++;
-            item.SourceIndex = srcIndex;
-
-            // group: secondary
-            if (item.Alignment == ToolbarItemAlignment.Right)
-            {
-                secondaryIndex++;
-                SecondaryItems.Add(item);
-            }
-            // group: primary
-            else
-            {
-                primaryIndex++;
-                PrimaryItems.Add(item);
-            }
-
-            // save item metadata
-            _itemsMetadata.TryAdd(srcIndex, new ToolbarItemMetadata()
-            {
-                SourceIndex = srcIndex,
-                PrimaryItemIndex = primaryIndex,
-                SecondaryItemIndex = secondaryIndex,
-                RenderedWidth = 0,
-            });
-        }
-    }
-
-
-    private void HandleOverflow()
+    private void HandleOverflow_()
     {
         if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
 
@@ -288,6 +262,61 @@ public partial class ToolbarControl : IgControl
             : Visibility.Collapsed;
     }
 
+
+    /// <summary>
+    /// Updates layout of items
+    /// </summary>
+    public void UpdateLayoutItems()
+    {
+        _itemsMetadata.Clear();
+        PrimaryItems.Clear();
+        PrimaryItemsOverflow.Clear();
+        SecondaryItems.Clear();
+
+        if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
+
+
+        int srcIndex = -1;
+        int primaryIndex = -1;
+        int secondaryIndex = -1;
+
+        foreach (var item in allItems)
+        {
+            srcIndex++;
+            item.SourceIndex = srcIndex;
+
+            // group: secondary
+            if (item.Alignment == ToolbarItemAlignment.Right)
+            {
+                secondaryIndex++;
+                SecondaryItems.Add(item);
+            }
+            // group: primary
+            else
+            {
+                primaryIndex++;
+                PrimaryItems.Add(item);
+            }
+
+            // save item metadata
+            _itemsMetadata.TryAdd(srcIndex, new ToolbarItemMetadata()
+            {
+                SourceIndex = srcIndex,
+                PrimaryItemIndex = primaryIndex,
+                SecondaryItemIndex = secondaryIndex,
+                RenderedWidth = 0,
+            });
+        }
+    }
+
+
+    /// <summary>
+    /// Opens the main menu.
+    /// </summary>
+    public void OpenMainMenu(FlyoutPlacementMode? placement = null)
+    {
+        BtnMainMenu.OpenFlyoutMenu(placement);
+    }
 
 }
 
