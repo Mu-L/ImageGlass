@@ -210,7 +210,7 @@ public partial class BHelper
         // get system info
         var osArch = Environment.Is64BitOperatingSystem ? "64" : "32";
         var exeVersion = FileVersionInfo.GetVersionInfo(BHelper.AppExePath).FileVersion;
-        var storeCode = string.IsNullOrWhiteSpace(BHelper.AppPackageId) ? "🛍️" : "";
+        var storeCode = !string.IsNullOrWhiteSpace(BHelper.AppPackageId) ? "🛍️" : "";
 
         var debugInfo = $"""
             {BHelper.AppName} {Const.APP_CODE} v{exeVersion} {storeCode}

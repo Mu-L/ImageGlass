@@ -396,7 +396,7 @@ public partial class Photo : DisposableImpl
             // multi-frame formats
             else
             {
-                var bytes = data.MultiFrameImage.ToByteArray(ImageMagick.MagickFormat.Tiff);
+                var bytes = data.MultiFrameImage.ToByteArray(MagickFormat.Tiff);
                 _bitmap = PhotoWIC.ConvertFromBytesToDecoder(bytes);
             }
         }

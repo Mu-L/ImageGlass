@@ -313,6 +313,18 @@ public partial class MainWindow : IgWindow
         // clear the current in-app message
         _ = _contentEl.ShowMessageAsync(null);
 
+
+        // set read options for photo
+        if (photo is not null)
+        {
+            photo.ReadOptions = new()
+            {
+                FrameIndex = 0,
+                FirstFrameOnly = AP.Config.SingleFrameFormats.Contains(photo.Extension),
+            };
+        }
+
+
         // set photo to the viewer
         Viewer.SetPhoto(photo);
         Gallery.ScrollToItem(AP.Photos.CurrentIndex);
