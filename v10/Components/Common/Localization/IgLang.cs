@@ -532,7 +532,7 @@ public class IgLang
 
 
         #region Form message texts
-        { "FrmMain.PicMain._ErrorText", "Could not open this image" }, // v2.0 beta, updated 4.0, 9.0
+        { "FrmMain.PicMain._ErrorText", "Could not load this image" }, // v2.0 beta, updated 4.0, 9.0, 10.0
         { "FrmMain.MnuMain", "Main menu" }, // v3.0
 
         { "FrmMain._OpenFileDialog", "All supported files" },

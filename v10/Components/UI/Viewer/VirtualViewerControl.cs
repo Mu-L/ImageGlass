@@ -736,10 +736,18 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         try
         {
+            // check if photo error
+            if (e.Photo.Error is not null)
+            {
+                HandleCancelLoaded(false);
+                OnPhotoLoading(e);
+                return;
+            }
+
             // cancel if requested
             if (e.CancelToken.IsCancellationRequested)
             {
-                HandleCancellLoaded(true);
+                HandleCancelLoaded(true);
                 return;
             }
 
@@ -771,11 +779,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
             // cancel if requested
             if (e.CancelToken.IsCancellationRequested)
             {
-                HandleCancellLoaded(true);
+                HandleCancelLoaded(true);
                 return;
             }
 
-            if (e.Photo.Error is not null) throw e.Photo.Error;
 
             // cancel the preview process
             CancelPreview();
@@ -845,14 +852,13 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         catch (Exception ex)
         {
-            HandleCancellLoaded(false);
-
-            e.Photo.Error = ex;
+            e.Photo.Error = ex; // the rendering error
+            HandleCancelLoaded(false);
             OnPhotoLoading(e);
         }
 
 
-        void HandleCancellLoaded(bool userCancelled)
+        void HandleCancelLoaded(bool userCancelled)
         {
             if (userCancelled) e.Photo.Unload();
 
@@ -862,7 +868,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             animator?.Dispose();
             animator = null;
 
-            Refresh(true);
+            Refresh(userCancelled);
         }
     }
 

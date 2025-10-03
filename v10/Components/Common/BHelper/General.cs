@@ -218,11 +218,11 @@ public partial class BHelper
             Win{osArch} {Environment.OSVersion.Version}, .NET {Environment.Version}
             """;
 
-        var errorLines = ex.StackTrace?.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Take(4) ?? [];
+        var errorLines = ex.StackTrace?.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Take(2) ?? [];
         var errDetails = $"""
-            {ex.Message}
-
-            {string.Join("\r\n", errorLines)}
+            {ex.Source} ▶ {ex.GetType().FullName} ▶ {ex.Message}
+               
+            ▶{string.Join("\r\n▶", errorLines)}
             """;
 
         return (debugInfo, errDetails);
