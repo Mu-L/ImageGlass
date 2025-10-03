@@ -234,7 +234,7 @@ public sealed partial class MainWindow_Content : IgControl
         else if (!e.IsLoaded)
         {
             // show loading message after 2s
-            _ = ShowMessageAsync(AP.Config.Lang["FrmMain._Loading"] + e.Photo.FilePath, delayMs: 2000);
+            _ = ShowMessageAsync(AP.Config.Lang["FrmMain._Loading"], delayMs: 2000);
         }
 
         // 3. handle photo loaded

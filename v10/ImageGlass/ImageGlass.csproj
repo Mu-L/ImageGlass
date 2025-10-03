@@ -16,6 +16,7 @@
 		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<Version>10.0.1.1003</Version>
 
 		<!-- Unpacked app -->
 		<WindowsPackageType>None</WindowsPackageType>
@@ -54,8 +55,8 @@
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250916003" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Components\Common\ImageGlass.Common.csproj" />
-		<ProjectReference Include="..\Components\UI\ImageGlass.UI.csproj" />
+	  <ProjectReference Include="..\Components\Common\ImageGlass.Common.csproj" />
+	  <ProjectReference Include="..\Components\UI\ImageGlass.UI.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Page Update="MainWindow_Content.xaml">
