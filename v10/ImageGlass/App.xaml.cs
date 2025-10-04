@@ -39,7 +39,7 @@ namespace ImageGlass;
 public partial class App : Application
 {
     private MainWindow? _winMain;
-    private IProgress<SystemColorInfoChangedEventArgs> _uiReporter;
+    private IProgress<UIReportEventArgs> _uiReporter;
     private static UISettings _systemUI = new UISettings();
 
 
@@ -58,7 +58,7 @@ public partial class App : Application
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
 
-        _uiReporter = new Progress<SystemColorInfoChangedEventArgs>(UIReporter_Reported);
+        _uiReporter = new Progress<UIReportEventArgs>(UIReporter_Reported);
 
         // register unhandled exception handlers
         UnhandledException += App_UnhandledException;
@@ -68,9 +68,15 @@ public partial class App : Application
         CoreApplication.UnhandledErrorDetected += CoreApplication_UnhandledErrorDetected;
 
         _systemUI.ColorValuesChanged += UiSettings_ColorValuesChanged;
+        AP.ThemeChanged += AP_ThemeChanged;
 
         // load initial settings
         LoadInitAppSettings();
+    }
+
+    private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
+    {
+        _uiReporter.Report(new(UIReportType.ThemeChanged, e));
     }
 
 
@@ -109,6 +115,7 @@ public partial class App : Application
         _winMain.Activate();
     }
 
+
     private async void MainWindow_Closed(object sender, WindowEventArgs args)
     {
         // save configs
@@ -120,23 +127,40 @@ public partial class App : Application
         _systemUI.ColorValuesChanged -= UiSettings_ColorValuesChanged;
     }
 
+
     private void UiSettings_ColorValuesChanged(UISettings sender, object args)
     {
         var info = GetSystemColorInfo(sender);
 
         BHelper.Debounce(200, (args) =>
         {
-            _uiReporter.Report(args!);
+            _uiReporter.Report(new(UIReportType.SystemColorChanged, args));
         }, info);
     }
 
-    private void UIReporter_Reported(SystemColorInfoChangedEventArgs e)
+
+    private void UIReporter_Reported(UIReportEventArgs e)
     {
-        AP.Config.AccentColor = e.AccentColor;
-        AP.Config.IsSystemDarkMode = e.IsDarkMode;
+        // system color changed
+        if (e.Type == UIReportType.SystemColorChanged && e.Data is SystemColorInfoChangedEventArgs data)
+        {
+            AP.Config.AccentColor = data.AccentColor;
+            AP.Config.IsSystemDarkMode = data.IsDarkMode;
+            return;
+        }
+
+
+        // theme changed
+        if (e.Type == UIReportType.ThemeChanged)
+        {
+            ApplyMenuTheme();
+
+            return;
+        }
     }
 
 
+    #region Unhandled Exception
 
     private async void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
@@ -177,6 +201,8 @@ public partial class App : Application
     {
         e.UnhandledError.Propagate();
     }
+
+    #endregion // Unhandled Exception
 
 
     #endregion // App Events
@@ -237,6 +263,73 @@ public partial class App : Application
     }
 
 
+    /// <summary>
+    /// Update flyout menu according to theme pack.
+    /// </summary>
+    private static void ApplyMenuTheme()
+    {
+        var bgHover = AP.Config.Theme.ComputedColors.MenuBgHoverColor;
+        var bgPressed = AP.Config.Theme.ComputedColors.MenuBgActiveColor;
+
+        var textNormal = AP.Config.Theme.ComputedColors.MenuTextColor;
+        var textHover = AP.Config.Theme.ComputedColors.MenuTextHoverColor;
+        var textPressed = textHover;
+        var textDisabled = textNormal.Blend(AP.Config.Theme.BaseColor, 0.5f, textNormal.A);
+
+
+        // 1. menu dropdown
+        Application.Current.Resources["MenuFlyoutPresenterBackground"] = AP.Config.Theme.ComputedColors.MenuBgColor.ToBrush();
+
+
+        // 2. menu separator
+        Application.Current.Resources["MenuFlyoutSeparatorBackground"] = textNormal.WithAlpha(10).ToBrush();
+
+
+        // 4. menu item
+        // background
+        Application.Current.Resources["MenuFlyoutItemBackgroundPointerOver"] = bgHover.ToBrush();
+        Application.Current.Resources["MenuFlyoutItemBackgroundPressed"] = bgPressed.ToBrush();
+        // foreground
+        Application.Current.Resources["MenuFlyoutItemForeground"] = textNormal.ToBrush();
+        Application.Current.Resources["MenuFlyoutItemForegroundPointerOver"] = textHover.ToBrush();
+        Application.Current.Resources["MenuFlyoutItemForegroundPressed"] = textPressed.ToBrush();
+        Application.Current.Resources["MenuFlyoutItemForegroundDisabled"] = textDisabled.ToBrush();
+        // hotkey
+        Application.Current.Resources["MenuFlyoutItemKeyboardAcceleratorTextForeground"] = textNormal.WithAlpha(150).ToBrush();
+        Application.Current.Resources["MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver"] = textHover.WithAlpha(150).ToBrush();
+        Application.Current.Resources["MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed"] = textPressed.WithAlpha(150).ToBrush();
+        Application.Current.Resources["MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled"] = textDisabled.WithAlpha(150).ToBrush();
+
+
+        // 3. menu subitem
+        // background
+        Application.Current.Resources["MenuFlyoutSubItemBackgroundPointerOver"] = bgHover.ToBrush();
+        Application.Current.Resources["MenuFlyoutSubItemBackgroundSubMenuOpened"] = bgHover.ToBrush();
+        Application.Current.Resources["MenuFlyoutSubItemBackgroundPressed"] = bgPressed.ToBrush();
+        // foreground
+        Application.Current.Resources["MenuFlyoutSubItemForeground"] = textNormal.ToBrush();
+        Application.Current.Resources["MenuFlyoutSubItemForegroundPointerOver"] = textHover.ToBrush();
+        Application.Current.Resources["MenuFlyoutSubItemForegroundPressed"] = textPressed.ToBrush();
+        Application.Current.Resources["MenuFlyoutSubItemForegroundSubMenuOpened"] = textHover.ToBrush();
+        Application.Current.Resources["MenuFlyoutSubItemForegroundDisabled"] = textDisabled.ToBrush();
+        // chevron
+        Application.Current.Resources["MenuFlyoutSubItemChevron"] = textNormal.ToBrush();
+        Application.Current.Resources["MenuFlyoutSubItemChevronPointerOver"] = textHover.ToBrush();
+        Application.Current.Resources["MenuFlyoutSubItemChevronPressed"] = textPressed.ToBrush();
+        Application.Current.Resources["MenuFlyoutSubItemChevronSubMenuOpened"] = textHover.ToBrush();
+        Application.Current.Resources["MenuFlyoutSubItemChevronDisabled"] = textDisabled.ToBrush();
+
+
+        // 5. toggle menu item
+        // hotkey
+        Application.Current.Resources["ToggleMenuFlyoutItemKeyboardAcceleratorTextForeground"] = textNormal.WithAlpha(180).ToBrush();
+        Application.Current.Resources["ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver"] = textHover.WithAlpha(180).ToBrush();
+        Application.Current.Resources["ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPressed"] = textPressed.WithAlpha(180).ToBrush();
+        Application.Current.Resources["ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled"] = textDisabled.WithAlpha(180).ToBrush();
+
+    }
+
+
     public static async Task SaveConfigsOnClosing()
     {
         AP.Config.LastSeenImagePath = AP.Photos.CurrentFilePath;
@@ -257,6 +350,21 @@ public partial class App : Application
     }
 
 
+}
+
+
+public enum UIReportType
+{
+    ThemeChanged,
+    SystemColorChanged,
+}
+
+
+
+public class UIReportEventArgs(UIReportType type, object? data) : EventArgs
+{
+    public UIReportType Type => type;
+    public object? Data => data;
 }
 
 
