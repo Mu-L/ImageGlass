@@ -36,6 +36,15 @@ public static class Window_UI_Color_Exts
 
 
     /// <summary>
+    /// Checks if this color is empty (all values are <c>0</c>).
+    /// </summary>
+    public static bool IsEmpty(this Color c)
+    {
+        return c.R == 0 && c.G == 0 && c.B == 0 && c.A == 0;
+    }
+
+
+    /// <summary>
     /// Converts to <see cref="SolidColorBrush"/>.
     /// </summary>
     public static SolidColorBrush ToBrush(this Color c)

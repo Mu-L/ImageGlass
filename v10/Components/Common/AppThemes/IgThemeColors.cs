@@ -47,10 +47,11 @@ public class IgThemeColors
 
 
     // Menu
-    public string MenuBgColor { get; set; } = "#1E2429";
-    public string MenuBgHoverColor { get; set; } = "#ffffff15";
-    public string MenuTextColor { get; set; } = "#dedede";
-    public string MenuTextHoverColor { get; set; } = "#dedede";
+    public string MenuBgColor { get; set; } = "#0000";
+    public string MenuBgHoverColor { get; set; } = "#ffffff10";
+    public string MenuBgActiveColor { get; set; } = "#ffffff08";
+    public string MenuTextColor { get; set; } = "#d3d3d3";
+    public string MenuTextHoverColor { get; set; } = "#d3d3d3";
 
 }
 

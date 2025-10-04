@@ -45,6 +45,7 @@ public partial class IgThemeComputedColors : IgReactive
     // Menu
     public Color MenuBgColor { get; set; } = new();
     public Color MenuBgHoverColor { get; set; } = new();
+    public Color MenuBgActiveColor { get; set; } = new();
     public Color MenuTextColor { get; set; } = new();
     public Color MenuTextHoverColor { get; set; } = new();
 
@@ -167,6 +168,12 @@ public partial class IgThemeComputedColors : IgReactive
         {
             MenuBgHoverColor = color;
             OnPropertyChanged(nameof(MenuBgHoverColor));
+        }
+        color = BHelper.ColorFromHex(colors.MenuBgActiveColor, accentColor);
+        if (MenuBgActiveColor != color)
+        {
+            MenuBgActiveColor = color;
+            OnPropertyChanged(nameof(MenuBgActiveColor));
         }
         color = BHelper.ColorFromHex(colors.MenuTextColor, accentColor);
         if (MenuTextColor != color)

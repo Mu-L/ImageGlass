@@ -371,7 +371,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
         }
 
 
-        // checked style for border
+        // border style
         if (IsChecked || IsPointerOver || IsPressed)
         {
             var alpha = bgBrush.Color.A + (int)(bgBrush.Color.A / 1.5f);
