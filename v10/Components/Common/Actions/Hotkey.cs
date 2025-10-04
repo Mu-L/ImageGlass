@@ -29,6 +29,12 @@ namespace ImageGlass.Common;
 public class Hotkey
 {
     /// <summary>
+    /// Gets, sets value indicates that the global hotkey processing is enabled
+    /// </summary>
+    public static bool IsEnabled { get; set; } = true;
+
+
+    /// <summary>
     /// Gets, sets the keyboard accelerator.
     /// </summary>
     public KeyboardAccelerator Data { get; private set; } = new();
@@ -95,7 +101,7 @@ public class Hotkey
 
     private void KeyAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
     {
-        if (Action is null) return;
+        if (!IsEnabled || Action is null) return;
         e.Handled = true;
 
         RaiseHotkeyInvokedEvent(new HotkeyInvokedEventArgs()

@@ -51,7 +51,6 @@ public sealed partial class MainWindow_Content : IgControl
     public ToolbarControl ToolbarMain => PART_ToolbarMain;
     public GalleryControl Gallery => PART_Gallery;
     public VirtualViewerControl Viewer => PART_Viewer;
-
     public MenuFlyout MainMenu => PART_MainMenu;
 
 
@@ -113,6 +112,9 @@ public sealed partial class MainWindow_Content : IgControl
 
         UpdateMessageBoxStyle_();
 
+        PART_MainMenu.Opened += PART_MainMenu_Opened;
+        PART_MainMenu.Closed += PART_MainMenu_Closed;
+
         PART_ToolbarMain.ItemClicked += PART_ToolbarMain_ItemClicked;
         PART_Gallery.ItemClicked += PART_Gallery_ItemClicked;
 
@@ -128,6 +130,9 @@ public sealed partial class MainWindow_Content : IgControl
     protected override void OnIgUnloaded(FrameworkElement fe)
     {
         base.OnIgUnloaded(fe);
+
+        PART_MainMenu.Opened -= PART_MainMenu_Opened;
+        PART_MainMenu.Closed -= PART_MainMenu_Closed;
 
         PART_ToolbarMain.ItemClicked -= PART_ToolbarMain_ItemClicked;
         PART_Gallery.ItemClicked -= PART_Gallery_ItemClicked;
@@ -162,6 +167,18 @@ public sealed partial class MainWindow_Content : IgControl
 
 
     #region Control Events
+
+    private void PART_MainMenu_Opened(object? sender, object e)
+    {
+        Hotkey.IsEnabled = false;
+    }
+
+
+    private void PART_MainMenu_Closed(object? sender, object e)
+    {
+        Hotkey.IsEnabled = true;
+    }
+
 
     private void PART_ToolbarMain_ItemClicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
     {
