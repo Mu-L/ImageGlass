@@ -64,6 +64,11 @@ public partial class IgGalleryItem : IgButton
 
     protected override Color GetColorForText()
     {
+        if (IsChecked || IsPointerOver)
+        {
+            return AP.Config.Theme.ComputedColors.GalleryTextHoverColor;
+        }
+
         return AP.Config.Theme.ComputedColors.GalleryTextColor;
     }
 

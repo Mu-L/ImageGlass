@@ -41,6 +41,7 @@ public class IgThemeColors
     // Gallery
     public string GalleryBgColor { get; set; } = "#1E242900";
     public string GalleryTextColor { get; set; } = "#dedede";
+    public string GalleryTextHoverColor { get; set; } = "#d3d3d3";
     public string GalleryItemHoverColor { get; set; } = "#ffffff33";
     public string GalleryItemActiveColor { get; set; } = "#ffffff22";
     public string GalleryItemSelectedColor { get; set; } = "#ffffff44";

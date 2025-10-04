@@ -264,8 +264,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
 
     private void AP_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {
-        UpdateStyle(true);
-
+        UpdateStyle();
         OnIgThemeChanged(e);
     }
 
@@ -345,7 +344,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
     /// <summary>
     /// Update the style of control.
     /// </summary>
-    public void UpdateStyle(bool includeTextColor = false)
+    public void UpdateStyle()
     {
         // normal style: must not be null for interaction
         SolidColorBrush bgBrush = new(GetColorForDefault());
@@ -383,11 +382,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
 
         Background = bgBrush;
         BorderBrush = borderBrush;
-
-        if (includeTextColor)
-        {
-            Foreground = new SolidColorBrush(GetColorForText());
-        }
+        Foreground = GetColorForText().ToBrush();
     }
 
 
