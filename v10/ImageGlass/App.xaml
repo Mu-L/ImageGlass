@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cm="using:ImageGlass.Common"
     xmlns:local="using:ImageGlass"
-    xmlns:revealBrushPresent="using:Microsoft.UI.Xaml">
+    xmlns:revealBrushPresent="using:Microsoft.UI.Xaml"
+    xmlns:ui="using:ImageGlass.UI">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -23,6 +24,12 @@
             <cm:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <cm:StringToBoolConverter x:Key="StringToBoolConverter" />
             <cm:SvgPathToImageSourceConverter x:Key="SvgPathToImageSourceConverter" />
+
+
+            <!--  Set default style for: menu items  -->
+            <Style BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}" TargetType="ui:IgMenuItem" />
+            <Style BasedOn="{StaticResource DefaultToggleMenuFlyoutItemStyle}" TargetType="ui:IgToggleMenuItem" />
+            <Style BasedOn="{StaticResource DefaultRadioMenuFlyoutItemStyle}" TargetType="ui:IgRadioMenuItem" />
 
 
             <!--  Style: IgButtonStyle  -->
