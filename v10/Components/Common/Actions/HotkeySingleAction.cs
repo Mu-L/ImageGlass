@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System.Text.Json.Serialization;
+using Windows.System;
 
 namespace ImageGlass.Common;
 
@@ -26,7 +27,7 @@ public partial class HotkeySingleActionJsonContext : JsonSerializerContext { }
 
 
 
-public partial class HotkeySingleAction : SingleAction, IJsonOnDeserialized
+public partial class HotkeySingleAction : SingleAction
 {
     /// <summary>
     /// Gets, sets hotkeys.
@@ -34,7 +35,7 @@ public partial class HotkeySingleAction : SingleAction, IJsonOnDeserialized
     public Hotkey[] Hotkeys { get; set; } = [];
 
 
-    public HotkeySingleAction() { }
+    public HotkeySingleAction() : base(null) { }
 
 
     public HotkeySingleAction(string executable, Hotkey[]? hotkeys = null)
@@ -51,13 +52,29 @@ public partial class HotkeySingleAction : SingleAction, IJsonOnDeserialized
     }
 
 
-    public void OnDeserialized()
+    public HotkeySingleAction(API api, Hotkey[]? hotkeys = null) : base(api)
     {
-        // bind the action for the hotkey
-        foreach (var hk in Hotkeys)
-        {
-            hk.SetAction(this);
-        }
+        if (hotkeys is not null) Hotkeys = hotkeys;
     }
+
+
+    public HotkeySingleAction(API api, string arg, Hotkey[]? hotkeys = null) : base(api, arg)
+    {
+        if (hotkeys is not null) Hotkeys = hotkeys;
+    }
+
+
+    public HotkeySingleAction(VirtualKey key, SingleAction? action = null) : base(action)
+    {
+        Hotkeys = [new Hotkey(key)];
+    }
+
+
+    public HotkeySingleAction(MKeys modifiers, VirtualKey key, SingleAction? action = null) : base(action)
+    {
+        Hotkeys = [new Hotkey(modifiers, key)];
+    }
+
+
 }
 

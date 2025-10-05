@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using System;
 using System.Text.Json.Serialization;
 
 namespace ImageGlass.Common;
@@ -53,7 +54,14 @@ public partial class SingleAction : IgReactive
     /// <summary>
     /// The next command to execute after running the <see cref="Executable"/>.
     /// </summary>
-    public SingleAction? NextAction { get; set; } = null;
+    public SingleAction? NextAction { get; set; }
+
+
+    /// <summary>
+    /// Gets, sets the language key of this action.
+    /// </summary>
+    [JsonIgnore]
+    public string? LangKey { get; set; }
 
 
     public SingleAction(string executable = "", string argument = "", SingleAction? nextAction = null)
@@ -61,6 +69,23 @@ public partial class SingleAction : IgReactive
         Executable = executable;
         Argument = argument;
         NextAction = nextAction;
+    }
+
+
+    public SingleAction(API api, string argument = "", string langKey = "")
+    {
+        Executable = Enum.GetName<API>(api) ?? "";
+        Argument = argument;
+        LangKey = langKey;
+    }
+
+
+    public SingleAction(SingleAction? action = null)
+    {
+        Executable = action?.Executable ?? "";
+        Argument = action?.Argument ?? "";
+        NextAction = action?.NextAction;
+        LangKey = action?.LangKey;
     }
 
 

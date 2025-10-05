@@ -81,7 +81,7 @@ public class IgLang
     /// This is a shortcut for <see cref="Get(string, object?[])"/> method.
     /// </remarks>
     [JsonIgnore]
-    public string this[string key, params object?[] args] => Get(key, args);
+    public string this[string? key, params object?[] args] => Get(key, args);
 
 
     #endregion // Non-Serializable Properties
@@ -167,8 +167,10 @@ public class IgLang
     /// </summary>
     /// <param name="key">The key to get the language string</param>
     /// <param name="args">The arguments to format the language string.</param>
-    public string Get(string key, params object?[] args)
+    public string Get(string? key, params object?[] args)
     {
+        if (string.IsNullOrWhiteSpace(key)) return key ?? "";
+
         string? value = null;
 
         // 1. try getting value from language file
