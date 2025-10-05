@@ -173,9 +173,9 @@ public partial class ToolbarControl : IgControl
 
             if (btnEl.VM.IsToggle)
             {
-                mnuItem = new ToggleMenuFlyoutItem()
+                mnuItem = new IgToggleMenuItem()
                 {
-                    Text = item.Text,
+                    LangKey = item.Text,
                     Icon = iconFe,
                     IsChecked = item.IsChecked,
                     //Command = btnEl.Command,
@@ -184,9 +184,9 @@ public partial class ToolbarControl : IgControl
             }
             else
             {
-                mnuItem = new MenuFlyoutItem()
+                mnuItem = new IgMenuItem()
                 {
-                    Text = item.Text,
+                    LangKey = item.Text,
                     Icon = iconFe,
                 };
             }

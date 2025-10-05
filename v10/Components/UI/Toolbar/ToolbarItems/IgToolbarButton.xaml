@@ -19,15 +19,15 @@
         Name="PART_Button"
         Padding="{x:Bind local:IgToolbarButton.ItemPadding}"
         x:DefaultBindMode="OneWay"
-        AutomationProperties.Name="{x:Bind VM.Text}"
+        AutomationProperties.Name="{x:Bind VM.DisplayText}"
         Click="PART_Button_Click"
         Flyout="{x:Bind Flyout}"
         Id="{x:Bind VM.Id}"
         IsChecked="{x:Bind VM.IsChecked}"
         IsToggle="{x:Bind VM.IsToggle}"
         Style="{StaticResource IgButtonStyle}"
-        Text="{x:Bind VM.Text}"
-        ToolTipService.ToolTip="{x:Bind VM.Text}">
+        Text="{x:Bind VM.DisplayText}"
+        ToolTipService.ToolTip="{x:Bind VM.DisplayText}">
         <StackPanel Orientation="Horizontal" Spacing="{x:Bind local:IgToolbarButton.InnerSpacing}">
             <ImageIcon
                 Name="PART_ButtonIcon"
@@ -39,7 +39,7 @@
                 VerticalAlignment="Center"
                 Foreground="{x:Bind cm:AP.Config.Theme.ComputedColors.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
                 IsColorFontEnabled="True"
-                Text="{x:Bind VM.Text}"
+                Text="{x:Bind VM.DisplayText}"
                 Visibility="{x:Bind VM.IsTextVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
         </StackPanel>
     </local:IgButton>

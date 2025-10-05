@@ -117,7 +117,7 @@ public partial class Config
             Image = "OpenFile",
             Text = "FrmMain.MnuOpenFile",
             Alignment = ToolbarItemAlignment.Right,
-            OnClick = new(nameof(API.IG_OpenFile)),
+            OnClick = new(API.IG_OpenFile),
         },
 
 
@@ -126,13 +126,13 @@ public partial class Config
             Id = "Btn_MnuViewPrevious",
             Image = "ViewPreviousImage",
             Text = "FrmMain.MnuViewPrevious",
-            OnClick = new(nameof(API.IG_ViewByStep), "-1"),
+            OnClick = new(API.IG_ViewByStep, "-1"),
         },
         new() {
             Id = "Btn_MnuViewNext",
             Image = "ViewNextImage",
             Text = "FrmMain.MnuViewNext",
-            OnClick = new(nameof(API.IG_ViewByStep), "1"),
+            OnClick = new(API.IG_ViewByStep, "1"),
         },
         ToolbarItemModel.Separator,
 
@@ -141,7 +141,7 @@ public partial class Config
             Id = "Btn_MnuToggleCheckerboard",
             Image = "Checkerboard",
             Text = "FrmMain.MnuToggleCheckerboard",
-            OnClick = new(nameof(API.IG_ToggleCheckerboard)),
+            OnClick = new(API.IG_ToggleCheckerboard),
         },
     ];
 

@@ -26,7 +26,7 @@ namespace ImageGlass.Common;
 public partial class ToolbarItemModelJsonContext : JsonSerializerContext { }
 
 
-public partial class ToolbarItemModel : IgReactive
+public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
 {
     /// <summary>
     /// Gets the ID for toolbar separator.
@@ -39,21 +39,6 @@ public partial class ToolbarItemModel : IgReactive
     public static ToolbarItemModel Separator => new(ID_SEPARATOR);
 
 
-    // JSON properties
-    protected string _id = "";
-    protected string _image = string.Empty;
-    protected string _text = string.Empty;
-    protected bool _showText = false;
-    protected bool _isToggle = false;
-    protected ToolbarItemAlignment _alignment = ToolbarItemAlignment.Left;
-    protected HotkeySingleAction? _onClick = null;
-
-    // Non-JSON properties
-    protected bool _isChecked = false;
-    protected bool _isOverflow = false;
-    protected int _sourceIndex = -1;
-
-
     #region JSON Properties
 
     /// <summary>
@@ -61,17 +46,16 @@ public partial class ToolbarItemModel : IgReactive
     /// </summary>
     public string Id
     {
-        get => _id;
-        set
+        get; set
         {
-            if (_id != value)
+            if (field != value)
             {
-                _id = value;
+                field = value;
                 _ = OnPropertyChanged();
                 _ = OnPropertyChanged(nameof(IsSeparator));
             }
         }
-    }
+    } = "";
 
 
     /// <summary>
@@ -81,16 +65,15 @@ public partial class ToolbarItemModel : IgReactive
     /// </summary>
     public string Image
     {
-        get => _image;
-        set
+        get; set
         {
-            if (_image != value)
+            if (field != value)
             {
-                _image = value;
+                field = value;
                 _ = OnPropertyChanged();
             }
         }
-    }
+    } = "";
 
 
     /// <summary>
@@ -98,17 +81,23 @@ public partial class ToolbarItemModel : IgReactive
     /// </summary>
     public string Text
     {
-        get => AP.Config.Lang[_text];
-        set
+        get; set
         {
-            if (_text != value)
+            if (field != value)
             {
-                _text = value;
+                field = value;
                 _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(DisplayText));
                 _ = OnPropertyChanged(nameof(IsTextVisible));
             }
         }
-    }
+    } = "";
+
+
+    /// <summary>
+    /// Gets the display text of toolbar button
+    /// </summary>
+    public string DisplayText => AP.Config.Lang[Text];
 
 
     /// <summary>
@@ -116,17 +105,16 @@ public partial class ToolbarItemModel : IgReactive
     /// </summary>
     public bool ShowText
     {
-        get => _showText;
-        set
+        get; set
         {
-            if (_showText != value)
+            if (field != value)
             {
-                _showText = value;
+                field = value;
                 _ = OnPropertyChanged();
                 _ = OnPropertyChanged(nameof(IsTextVisible));
             }
         }
-    }
+    } = false;
 
 
     /// <summary>
@@ -151,16 +139,15 @@ public partial class ToolbarItemModel : IgReactive
     /// </summary>
     public ToolbarItemAlignment Alignment
     {
-        get => _alignment;
-        set
+        get; set
         {
-            if (_alignment != value)
+            if (field != value)
             {
-                _alignment = value;
+                field = value;
                 _ = OnPropertyChanged();
             }
         }
-    }
+    } = ToolbarItemAlignment.Left;
 
 
     /// <summary>
@@ -168,16 +155,16 @@ public partial class ToolbarItemModel : IgReactive
     /// </summary>
     public HotkeySingleAction? OnClick
     {
-        get => _onClick;
+        get => field;
         set
         {
-            if (_onClick != value)
+            if (field != value)
             {
-                _onClick = value;
+                field = value;
                 _ = OnPropertyChanged();
             }
         }
-    }
+    } = null;
 
 
     #endregion // JSON Properties
@@ -198,16 +185,15 @@ public partial class ToolbarItemModel : IgReactive
     [JsonIgnore]
     public bool IsChecked
     {
-        get => _isChecked;
-        set
+        get; set
         {
-            if (_isChecked != value)
+            if (field != value)
             {
-                _isChecked = value;
+                field = value;
                 _ = OnPropertyChanged(nameof(IsChecked));
             }
         }
-    }
+    } = false;
 
 
     /// <summary>
@@ -216,16 +202,15 @@ public partial class ToolbarItemModel : IgReactive
     [JsonIgnore]
     public int SourceIndex
     {
-        get => _sourceIndex;
-        set
+        get; set
         {
-            if (_sourceIndex != value)
+            if (field != value)
             {
-                _sourceIndex = value;
+                field = value;
                 _ = OnPropertyChanged();
             }
         }
-    }
+    } = -1;
 
 
     /// <summary>
@@ -234,16 +219,15 @@ public partial class ToolbarItemModel : IgReactive
     [JsonIgnore]
     public bool IsOverflow
     {
-        get => _isOverflow;
-        set
+        get; set
         {
-            if (_isOverflow != value)
+            if (field != value)
             {
-                _isOverflow = value;
+                field = value;
                 _ = OnPropertyChanged();
             }
         }
-    }
+    } = false;
 
 
     /// <summary>
@@ -276,6 +260,14 @@ public partial class ToolbarItemModel : IgReactive
     public override string ToString()
     {
         return $"[{SourceIndex} | {Id} | {Text} | {nameof(IsOverflow)}={IsOverflow}";
+    }
+
+
+
+    public void OnDeserialized()
+    {
+        // save action display text
+        OnClick?.LangKey = Text;
     }
 
 }
