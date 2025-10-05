@@ -201,7 +201,7 @@ public sealed partial class MainWindow_Content : IgControl
         }
 
         e.AcceptedOperation = DataPackageOperation.Link;
-        e.DragUIOverride.Caption = AP.Config.Lang["FrmMain._OpenWith", BHelper.AppName];
+        e.DragUIOverride.Caption = AP.Config.Lang[LangId.FrmMain_OpenWith, BHelper.AppName];
     }
 
 
@@ -258,7 +258,7 @@ public sealed partial class MainWindow_Content : IgControl
             // only localize subitem menu because it's sealed!
             if (item is MenuFlyoutSubItem submenu)
             {
-                submenu.Text = AP.Config.Lang[$"FrmMain.{submenu.Name}"];
+                submenu.Text = AP.Config.Lang[$"FrmMain_{submenu.Name}"];
 
                 // jump into submenu items
                 LoadMenuText_(submenu.Items);
@@ -276,7 +276,7 @@ public sealed partial class MainWindow_Content : IgControl
         if (e.Photo.Error is not null)
         {
             var emoji = BHelper.IsOS(WindowsOS.Win11OrLater) ? "🥲" : "🙄";
-            var heading = AP.Config.Lang["FrmMain.PicMain._ErrorText"] + $" {emoji}";
+            var heading = AP.Config.Lang[LangId.FrmMain_PicMain_ErrorText] + $" {emoji}";
             var err = BHelper.GetInAppError(e.Photo.Error);
 
             // show error message
@@ -287,7 +287,7 @@ public sealed partial class MainWindow_Content : IgControl
         else if (!e.IsLoaded)
         {
             // show loading message after 2s
-            _ = ShowMessageAsync(AP.Config.Lang["FrmMain._Loading"], delayMs: 2000);
+            _ = ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_Loading], delayMs: 2000);
         }
 
         // 3. handle photo loaded

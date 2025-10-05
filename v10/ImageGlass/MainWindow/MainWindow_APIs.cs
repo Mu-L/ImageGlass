@@ -184,7 +184,7 @@ public partial class MainWindow
             var exeCode = await BHelper.RunExeCmd(exeInfo.Executable, exeInfo.Args, false, false);
             if (exeCode != IgExitCode.Done)
             {
-                var errorMsg = AP.Config.Lang["_._UserAction._Win32ExeError", ac.Executable];
+                var errorMsg = AP.Config.Lang[LangId._UserAction_Win32ExeError, ac.Executable];
                 error = new Win32Exception(errorMsg);
             }
         }

@@ -130,7 +130,10 @@
                             Icon="ZoomOut"
                             LangKey="FrmMain_MnuZoomOut"
                             Text="[Zoom out]" />
-                        <ui:IgMenuItem LangKey="FrmMain_MnuCustomZoom" Text="[Custom zoom...]" />
+                        <ui:IgMenuItem
+                            Icon="Zoom"
+                            LangKey="FrmMain_MnuCustomZoom"
+                            Text="[Custom zoom...]" />
                         <ui:IgMenuItem LangKey="FrmMain_MnuActualSize" Text="[Actual size]" />
                         <MenuFlyoutSeparator />
 
@@ -199,22 +202,62 @@
                             x:Name="MnuLoadingOrders"
                             Icon="Sort"
                             Text="[Loading orders]">
-                            <ui:IgToggleMenuItem IsChecked="{x:Bind cm:AP.Config.ShouldUseExplorerSortOrder}" Text="[Use Explorer sort order if possible]" />
+                            <ui:IgToggleMenuItem
+                                IsChecked="{x:Bind cm:AP.Config.ShouldUseExplorerSortOrder}"
+                                LangKey="FrmSettings_ShouldUseExplorerSortOrder"
+                                Text="[Use Explorer sort order if possible]">
+                                <ui:IgToggleMenuItem.Icon>
+                                    <FontIcon Glyph="&#xEC50;" />
+                                </ui:IgToggleMenuItem.Icon>
+                            </ui:IgToggleMenuItem>
                             <MenuFlyoutSeparator />
 
-                            <ui:IgRadioMenuItem GroupName="ImageOrderBy" Text="[Name (default)]" />
-                            <ui:IgRadioMenuItem GroupName="ImageOrderBy" Text="[Random]" />
-                            <ui:IgRadioMenuItem GroupName="ImageOrderBy" Text="[File size]" />
-                            <ui:IgRadioMenuItem GroupName="ImageOrderBy" Text="[Extension]" />
-                            <ui:IgRadioMenuItem GroupName="ImageOrderBy" Text="[Date created]" />
-                            <ui:IgRadioMenuItem GroupName="ImageOrderBy" Text="[Date accessed]" />
-                            <ui:IgRadioMenuItem GroupName="ImageOrderBy" Text="[Date modified]" />
-                            <ui:IgRadioMenuItem GroupName="ImageOrderBy" Text="[EXIF: Date taken]" />
-                            <ui:IgRadioMenuItem GroupName="ImageOrderBy" Text="[EXIF: Rating]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderBy"
+                                LangKey="ImageOrderBy_Name"
+                                Text="[Name (default)]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderBy"
+                                LangKey="ImageOrderBy_Random"
+                                Text="[Random]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderBy"
+                                LangKey="ImageOrderBy_FileSize"
+                                Text="[File size]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderBy"
+                                LangKey="ImageOrderBy_Extension"
+                                Text="[Extension]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderBy"
+                                LangKey="ImageOrderBy_DateCreated"
+                                Text="[Date created]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderBy"
+                                LangKey="ImageOrderBy_DateAccessed"
+                                Text="[Date accessed]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderBy"
+                                LangKey="ImageOrderBy_DateModified"
+                                Text="[Date modified]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderBy"
+                                LangKey="ImageOrderBy_ExifDateTaken"
+                                Text="[EXIF: Date taken]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderBy"
+                                LangKey="ImageOrderBy_ExifRating"
+                                Text="[EXIF: Rating]" />
                             <MenuFlyoutSeparator />
 
-                            <ui:IgRadioMenuItem GroupName="ImageOrderType" Text="[Ascending]" />
-                            <ui:IgRadioMenuItem GroupName="ImageOrderType" Text="[Descending]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderType"
+                                LangKey="ImageOrderType_Asc"
+                                Text="[Ascending]" />
+                            <ui:IgRadioMenuItem
+                                GroupName="ImageOrderType"
+                                LangKey="ImageOrderType_Desc"
+                                Text="[Descending]" />
                         </MenuFlyoutSubItem>
 
                         <MenuFlyoutSubItem x:Name="MnuViewChannels" Text="[View channels]">
@@ -375,7 +418,7 @@
                                 <FontIcon Glyph="&#xE946;" />
                             </ui:IgMenuItem.Icon>
                         </ui:IgMenuItem>
-                        <ui:IgMenuItem Text="[Check for update]" />
+                        <ui:IgMenuItem LangKey="_CheckForUpdate" Text="[Check for update]" />
                         <ui:IgMenuItem LangKey="FrmMain_MnuReportIssue" Text="[Report an issue]" />
                         <ui:IgMenuItem LangKey="FrmMain_MnuQuickSetup" Text="[Open ImageGlass Quick Setup]" />
                         <MenuFlyoutSeparator />

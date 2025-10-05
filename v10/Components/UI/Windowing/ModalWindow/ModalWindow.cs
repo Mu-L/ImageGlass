@@ -65,48 +65,48 @@ public partial class ModalWindow : DialogWindow
         switch (buttons)
         {
             case ModalWindowButton.OK:
-                modal.Button1Text = AP.Config.Lang["_._OK"];
+                modal.Button1Text = AP.Config.Lang[LangId._OK];
                 modal.IsButton1Visible = true;
                 modal.IsButton2Visible = modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.Close:
-                modal.Button1Text = AP.Config.Lang["_._Close"];
+                modal.Button1Text = AP.Config.Lang[LangId._Close];
                 modal.IsButton1Visible = true;
                 modal.IsButton2Visible = modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.Yes_No:
-                modal.Button1Text = AP.Config.Lang["_._Yes"];
-                modal.Button2Text = AP.Config.Lang["_._No"];
+                modal.Button1Text = AP.Config.Lang[LangId._Yes];
+                modal.Button2Text = AP.Config.Lang[LangId._No];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.OK_Cancel:
-                modal.Button1Text = AP.Config.Lang["_._OK"];
-                modal.Button2Text = AP.Config.Lang["_._Cancel"];
+                modal.Button1Text = AP.Config.Lang[LangId._OK];
+                modal.Button2Text = AP.Config.Lang[LangId._Cancel];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.OK_Close:
-                modal.Button1Text = AP.Config.Lang["_._OK"];
-                modal.Button2Text = AP.Config.Lang["_._Close"];
+                modal.Button1Text = AP.Config.Lang[LangId._OK];
+                modal.Button2Text = AP.Config.Lang[LangId._Close];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.LearnMore_Close:
-                modal.Button1Text = AP.Config.Lang["_._LearnMore"];
-                modal.Button2Text = AP.Config.Lang["_._Close"];
+                modal.Button1Text = AP.Config.Lang[LangId._LearnMore];
+                modal.Button2Text = AP.Config.Lang[LangId._Close];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.Continue_Quit:
-                modal.Button1Text = AP.Config.Lang["_._Continue"];
-                modal.Button2Text = AP.Config.Lang["_._Quit"];
+                modal.Button1Text = AP.Config.Lang[LangId._Continue];
+                modal.Button2Text = AP.Config.Lang[LangId._Quit];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
@@ -146,7 +146,7 @@ public partial class ModalWindow : DialogWindow
         bool showRememberOption = false,
         string? details = null)
     {
-        heading ??= AP.Config.Lang["_._Warning"];
+        heading ??= AP.Config.Lang[LangId._Warning];
 
         // use stock icon as thumbnail
         if (thumbnail is null)
@@ -181,7 +181,7 @@ public partial class ModalWindow : DialogWindow
         string? details = null,
         ModalWindowButton buttons = ModalWindowButton.OK)
     {
-        heading ??= AP.Config.Lang["_._Error"];
+        heading ??= AP.Config.Lang[LangId._Error];
 
         return await ShowWarningAsync(owner, title, description, heading, null, buttons, StockIconId.Error, null, InfoBarSeverity.Error, false, details);
     }
@@ -257,8 +257,8 @@ public partial class ModalWindow : DialogWindow
 
         // show error modal dialog
         var result = await ShowErrorAsync(null,
-            AP.Config.Lang["_._UnhandledException"],
-            AP.Config.Lang["_._UnhandledException._Description"],
+            AP.Config.Lang[LangId._UnhandledException],
+            AP.Config.Lang[LangId._UnhandledException_Description],
             ex.Message,
             details,
             ModalWindowButton.Continue_Quit);

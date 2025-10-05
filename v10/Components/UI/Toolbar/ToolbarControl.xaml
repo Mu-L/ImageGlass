@@ -141,7 +141,7 @@
                 IsTabStop="False"
                 OpenFlyoutOnClick="True">
                 <local:IgToolbarButton.VM>
-                    <cm:ToolbarItemModel Image="{x:Bind local:ToolbarControl.MainMenuIconName}" Text="Main Menu" />
+                    <cm:ToolbarItemModel Image="{x:Bind local:ToolbarControl.MainMenuIconName}" Text="FrmMain_MnuMain" />
                 </local:IgToolbarButton.VM>
             </local:IgToolbarButton>
 

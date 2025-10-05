@@ -89,7 +89,7 @@ internal sealed partial class ModalWindow_Content : IgControl
     {
         base.OnIgLanguageChanged();
 
-        RememberOptionText = AP.Config.Lang["_._DoNotShowThisMessageAgain"];
+        RememberOptionText = AP.Config.Lang[LangId._DoNotShowThisMessageAgain];
     }
 
     protected override void OnIgDataContextChanged(FrameworkElement fe, DataContextChangedEventArgs e)
