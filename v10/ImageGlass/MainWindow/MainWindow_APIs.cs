@@ -27,35 +27,26 @@ namespace ImageGlass;
 
 public partial class MainWindow
 {
-    private FrozenDictionary<string, IIgCommand> _apis => new Dictionary<string, IIgCommand>(StringComparer.OrdinalIgnoreCase)
+    private FrozenDictionary<API, IIgCommand> _apis => new Dictionary<API, IIgCommand>()
     {
         // Main Menu
-        {nameof(API.IG_OpenFile), IgCommands.Create(IG_OpenFileAsync)},
-        {nameof(API.IG_OpenFolder), IgCommands.Create(IG_OpenFolderAsync)},
-        {nameof(API.IG_OpenPath), IgCommands.Create(IG_OpenPath)},
+        { API.IG_OpenFile, IgCommands.Create(IG_OpenFileAsync) },
+        { API.IG_OpenFolder, IgCommands.Create(IG_OpenFolderAsync) },
+        { API.IG_OpenPath, IgCommands.Create(IG_OpenPath) },
 
 
         // Navigation
-        {nameof(API.IG_ViewByStep), IgCommands.Create(IG_ViewByStep)},
-        {nameof(API.IG_ViewByIndex), IgCommands.Create(IG_ViewByIndex)},
+        { API.IG_ViewByStep, IgCommands.Create(IG_ViewByStep) },
+        { API.IG_ViewByIndex, IgCommands.Create(IG_ViewByIndex) },
 
 
         // Layout
-        {nameof(API.IG_ToggleCheckerboard), IgCommands.Create(IG_ToggleCheckerboard)},
+        { API.IG_ToggleCheckerboard, IgCommands.Create(IG_ToggleCheckerboard) },
 
 
         // Exit
-        {nameof(API.IG_Exit), IgCommands.Create(IG_Exit)},
+        { API.IG_Exit, IgCommands.Create(IG_Exit) },
     }.ToFrozenDictionary();
-
-
-    /// <summary>
-    /// Gets the API command.
-    /// </summary>
-    public IIgCommand? GetApiCommand(API api)
-    {
-        return GetApiCommand(api.ToString());
-    }
 
 
     /// <summary>
@@ -63,11 +54,24 @@ public partial class MainWindow
     /// </summary>
     public IIgCommand? GetApiCommand(string? apiName)
     {
-        // get the command from API name
-        _apis.TryGetValue(apiName ?? "", out var cmd);
+        if (Enum.TryParse<API>(apiName, out var api))
+        {
+            return GetApiCommand(api);
+        }
 
-        return cmd;
+        return null;
     }
+
+
+
+    /// <summary>
+    /// Gets the API command.
+    /// </summary>
+    public IIgCommand? GetApiCommand(API api)
+    {
+        return _apis.GetValueOrDefault(api);
+    }
+
 
 
     /// <summary>
@@ -75,8 +79,11 @@ public partial class MainWindow
     /// </summary>
     public async Task<ActionResult> RunApiAsync(API api, string? args = null)
     {
-        return await RunApiAsync(api.ToString(), args);
+        var cmd = GetApiCommand(api);
+
+        return await RunApiCommandAsync_(cmd, args);
     }
+
 
 
     /// <summary>
@@ -84,8 +91,20 @@ public partial class MainWindow
     /// </summary>
     public async Task<ActionResult> RunApiAsync(string? apiName, string? args = null)
     {
+        var cmd = GetApiCommand(apiName);
+
+        return await RunApiCommandAsync_(cmd, args);
+    }
+
+
+
+    /// <summary>
+    /// Executes the API command and returns results
+    /// </summary>
+    private static async Task<ActionResult> RunApiCommandAsync_(IIgCommand? cmd, string? args = null)
+    {
         // get the command from API name
-        if (GetApiCommand(apiName) is not IIgCommand cmd)
+        if (cmd is null)
             return new ActionResult(ActionExitCode.ApiNotFound);
 
         // check if the command can be executed
@@ -111,6 +130,7 @@ public partial class MainWindow
 
         return new ActionResult(ActionExitCode.Success);
     }
+
 
 
     /// <summary>
@@ -139,7 +159,6 @@ public partial class MainWindow
         Exception? error = null;
         if (acResults.ExitCode == ActionExitCode.Error && acResults.Error != null)
         {
-            // TODO: show error message
             error = acResults.Error;
         }
 
