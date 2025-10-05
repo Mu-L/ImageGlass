@@ -137,13 +137,9 @@ public partial class MainWindow : IgWindow
     }
 
 
-    private async void Toolbar_ButtonClicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
+    private void Toolbar_ButtonClicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
     {
-        var error = await RunActionAsync(e.VM.OnClick);
-        if (error != null)
-        {
-            _ = await ModalWindow.ShowErrorAsync(this, e.VM.Text, error.Message);
-        }
+        _ = RunActionAsync(e.VM.OnClick);
     }
 
 

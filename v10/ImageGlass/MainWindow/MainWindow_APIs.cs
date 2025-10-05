@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.UI;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -134,9 +135,19 @@ public partial class MainWindow
 
 
     /// <summary>
+    /// Executes a single action, shows error popup.
+    /// </summary>
+    public async Task RunActionAsync(SingleAction? ac)
+    {
+        _ = await RunActionAsync(ac, true);
+    }
+
+
+
+    /// <summary>
     /// Executes a single action.
     /// </summary>
-    public async Task<Exception?> RunActionAsync(SingleAction? ac)
+    public async Task<Exception?> RunActionAsync(SingleAction? ac, bool showError)
     {
         if (string.IsNullOrWhiteSpace(ac?.Executable)) return null;
 
@@ -151,7 +162,7 @@ public partial class MainWindow
         // 3. run next action on success
         if (acResults.ExitCode == ActionExitCode.Success)
         {
-            return await RunActionAsync(ac.NextAction);
+            return await RunActionAsync(ac.NextAction, showError);
         }
 
 
@@ -178,6 +189,15 @@ public partial class MainWindow
             }
         }
 
+
+        // 6. show error message
+        if (error is not null && showError)
+        {
+            // get the language string for error title
+            var errorTitle = AP.Config.Lang[ac.LangKey];
+
+            _ = await ModalWindow.ShowErrorAsync(this, errorTitle, error.Message);
+        }
 
         return error;
     }
