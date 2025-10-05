@@ -72,10 +72,10 @@ public partial class SingleAction : IgReactive
     }
 
 
-    public SingleAction(API api, string argument = "", string langKey = "")
+    public SingleAction(API api, string? argument = null, string langKey = "")
     {
         Executable = Enum.GetName<API>(api) ?? "";
-        Argument = argument;
+        Argument = argument ?? "";
         LangKey = langKey;
     }
 

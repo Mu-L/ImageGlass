@@ -35,21 +35,23 @@ public class Hotkey
 
 
     /// <summary>
-    /// Gets, sets the keyboard accelerator.
+    /// Occurs when a hotkey is invoked.
     /// </summary>
-    public KeyboardAccelerator Data { get; private set; } = new();
+    public static event EventHandler<HotkeyInvokedEventArgs>? Invoked;
+
 
 
     /// <summary>
-    /// Gets, sets the command of the hotkey.
+    /// Gets, sets the keyboard accelerator.
     /// </summary>
-    public SingleAction? Action { get; private set; } = null;
+    public KeyboardAccelerator Data { get; private set; } = new();
 
 
     public bool Control => Data.Modifiers.HasFlag(VirtualKeyModifiers.Control);
     public bool Shift => Data.Modifiers.HasFlag(VirtualKeyModifiers.Shift);
     public bool Alt => Data.Modifiers.HasFlag(VirtualKeyModifiers.Menu);
     public VirtualKey Key => Data.Key;
+    public MKeys Modifiers => (MKeys)Data.Modifiers;
     public string KeyString => ToString(this);
 
 
@@ -63,19 +65,20 @@ public class Hotkey
             Key = key,
         };
 
-        SetAction(action);
+        RegisterEvents();
     }
 
-    public Hotkey(VirtualKeyModifiers modifiers, VirtualKey key, SingleAction? action = null)
+    public Hotkey(MKeys modifiers, VirtualKey key, SingleAction? action = null)
     {
         Data = new KeyboardAccelerator()
         {
-            Modifiers = modifiers,
+            Modifiers = (VirtualKeyModifiers)modifiers,
             Key = key,
         };
 
-        SetAction(action);
+        RegisterEvents();
     }
+
 
 
     /// <summary>
@@ -85,23 +88,18 @@ public class Hotkey
 
 
     /// <summary>
-    /// Sets the action for this hotkey.
+    /// Registers events of hotkey.
     /// </summary>
-    public void SetAction(SingleAction? action)
+    public void RegisterEvents()
     {
-        Action = action;
-
         Data.Invoked -= KeyAccelerator_Invoked;
-        if (Action is not null)
-        {
-            Data.Invoked += KeyAccelerator_Invoked;
-        }
+        Data.Invoked += KeyAccelerator_Invoked;
     }
 
 
     private void KeyAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
     {
-        if (!IsEnabled || Action is null) return;
+        if (!IsEnabled) return;
         e.Handled = true;
 
         RaiseHotkeyInvokedEvent(new HotkeyInvokedEventArgs()
@@ -147,6 +145,7 @@ public class Hotkey
                 }
             }
 
+            hotkey.RegisterEvents();
             return hotkey;
         }
         catch { }
@@ -171,12 +170,6 @@ public class Hotkey
     }
 
 
-
-    /// <summary>
-    /// Occurs when a hotkey is invoked.
-    /// </summary>
-    public static event EventHandler<HotkeyInvokedEventArgs>? Invoked;
-
     /// <summary>
     /// Raises the event <see cref="Invoked"/>.
     /// </summary>
@@ -190,6 +183,22 @@ public class Hotkey
 
 public class HotkeyInvokedEventArgs : EventArgs
 {
-    public required Hotkey Hotkey { get; set; }
-    public required KeyboardAcceleratorInvokedEventArgs Args { get; set; }
+    public required Hotkey Hotkey { get; init; }
+    public required KeyboardAcceleratorInvokedEventArgs Args { get; init; }
 }
+
+
+
+/// <summary>
+/// Modifier keys, mirror of <see cref="VirtualKeyModifiers"/>.
+/// </summary>
+[Flags]
+public enum MKeys : uint
+{
+    None = 0u,
+    Ctrl = 1u,
+    Alt = 2u,
+    Shift = 4u,
+    Windows = 8u,
+}
+
