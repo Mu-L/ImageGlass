@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using Microsoft.UI.Xaml.Controls;
 
 namespace ImageGlass.UI;
@@ -28,7 +29,7 @@ public partial class IgMenuItem : MenuFlyoutItem
     /// <summary>
     /// Gets, sets the language key for localization.
     /// </summary>
-    public string LangKey
+    public LangId? LangKey
     {
         get => _helper.LangKey;
         set => _helper.LangKey = value;

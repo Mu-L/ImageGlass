@@ -32,7 +32,7 @@ public partial class MenuItemHelper : IgReactive
     /// <summary>
     /// Gets, sets the language key for localization.
     /// </summary>
-    public string LangKey
+    public LangId? LangKey
     {
         get; set
         {
@@ -44,7 +44,7 @@ public partial class MenuItemHelper : IgReactive
                 _ = OnPropertyChanged();
             }
         }
-    } = string.Empty;
+    }
 
 
     /// <summary>
@@ -103,9 +103,10 @@ public partial class MenuItemHelper : IgReactive
     /// </summary>
     private void LocalizeText()
     {
-        if (string.IsNullOrWhiteSpace(LangKey)) return;
+        var localizedText = AP.Config.Lang[LangKey, LangParams];
+        if (string.IsNullOrWhiteSpace(localizedText)) return;
 
-        _menuItem.Text = AP.Config.Lang[LangKey, LangParams];
+        _menuItem.Text = localizedText;
     }
 
 }

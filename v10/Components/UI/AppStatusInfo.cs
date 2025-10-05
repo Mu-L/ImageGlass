@@ -134,8 +134,7 @@ public partial class AppStatusInfo : DisposableImpl
                 frameInfo.Append('/');
                 frameInfo.Append(AP.Photos.CurrentMetadata.FrameCount);
 
-                return AP.Config.Lang["_.ImageInfo._FrameCount",
-                    frameInfo.ToString()];
+                return AP.Config.Lang[LangId._ImageInfo_FrameCount, frameInfo];
             }
 
             return null;
@@ -155,7 +154,7 @@ public partial class AppStatusInfo : DisposableImpl
                 listInfo.Append('/');
                 listInfo.Append(AP.Photos.Count);
 
-                return AP.Config.Lang["_.ImageInfo._ListCount", listInfo.ToString()];
+                return AP.Config.Lang[LangId._ImageInfo_ListCount, listInfo.ToString()];
             }
 
             return null;

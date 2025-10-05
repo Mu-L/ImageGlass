@@ -35,60 +35,60 @@
                     <!--  File  -->
                     <MenuFlyoutSubItem x:Name="MnuFile" Text="[File]">
                         <ui:IgMenuItem
-                            LangKey="FrmMain.MnuOpenFile"
+                            LangKey="FrmMain_MnuOpenFile"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Open file...]" />
                         <ui:IgMenuItem
-                            LangKey="FrmMain.MnuNewWindow"
+                            LangKey="FrmMain_MnuNewWindow"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Open new window]" />
                         <ui:IgMenuItem
                             Icon="Save"
-                            LangKey="FrmMain.MnuSave"
+                            LangKey="FrmMain_MnuSave"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Save]" />
                         <ui:IgMenuItem
-                            LangKey="FrmMain.MnuSaveAs"
+                            LangKey="FrmMain_MnuSaveAs"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Save as...]" />
                         <MenuFlyoutSeparator />
 
                         <ui:IgMenuItem
                             Icon="OpenWith"
-                            LangKey="FrmMain.MnuOpenWith"
+                            LangKey="FrmMain_MnuOpenWith"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Open with...]" />
                         <ui:IgMenuItem
                             Icon="Edit"
-                            LangKey="FrmMain.MnuEdit"
+                            LangKey="FrmMain_MnuEdit"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Edit image]" />
                         <ui:IgMenuItem
                             Icon="Print"
-                            LangKey="FrmMain.MnuPrint"
+                            LangKey="FrmMain_MnuPrint"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Print...]" />
                         <ui:IgMenuItem
                             Icon="Share"
-                            LangKey="FrmMain.MnuShare"
+                            LangKey="FrmMain_MnuShare"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Share...]" />
                         <MenuFlyoutSeparator />
 
                         <ui:IgMenuItem
-                            LangKey="FrmMain.MnuRefresh"
+                            LangKey="FrmMain_MnuRefresh"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Refresh]" />
                         <ui:IgMenuItem
-                            LangKey="FrmMain.MnuReload"
+                            LangKey="FrmMain_MnuReload"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Reload image]" />
                         <ui:IgMenuItem
-                            LangKey="FrmMain.MnuReloadImageList"
+                            LangKey="FrmMain_MnuReloadImageList"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Reload list]" />
                         <ui:IgMenuItem
-                            LangKey="FrmMain.MnuUnload"
+                            LangKey="FrmMain_MnuUnload"
                             Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Unload]" />
                     </MenuFlyoutSubItem>
@@ -96,27 +96,27 @@
 
                     <!--  Navigation  -->
                     <MenuFlyoutSubItem x:Name="MnuNavigation" Text="[Navigation]">
-                        <ui:IgMenuItem LangKey="FrmMain.MnuViewNext" Text="[View next image]">
+                        <ui:IgMenuItem LangKey="FrmMain_MnuViewNext" Text="[View next image]">
                             <ui:IgMenuItem.Icon>
                                 <FontIcon Glyph="&#xEBE7;" />
                             </ui:IgMenuItem.Icon>
                         </ui:IgMenuItem>
-                        <ui:IgMenuItem LangKey="FrmMain.MnuViewPrevious" Text="[View previous image]">
+                        <ui:IgMenuItem LangKey="FrmMain_MnuViewPrevious" Text="[View previous image]">
                             <ui:IgMenuItem.Icon>
                                 <FontIcon Glyph="&#xEC52;" />
                             </ui:IgMenuItem.Icon>
                         </ui:IgMenuItem>
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem LangKey="FrmMain.MnuGoTo" Text="[Go to...]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuGoToFirst" Text="[Go to first image]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuGoToLast" Text="[Go to last image]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuGoTo" Text="[Go to...]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuGoToFirst" Text="[Go to first image]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuGoToLast" Text="[Go to last image]" />
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem LangKey="FrmMain.MnuViewNextFrame" Text="[View next frame]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuViewPreviousFrame" Text="[View previous frame]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuViewFirstFrame" Text="[View first frame]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuViewLastFrame" Text="[View last frame]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuViewNextFrame" Text="[View next frame]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuViewPreviousFrame" Text="[View previous frame]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuViewFirstFrame" Text="[View first frame]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuViewLastFrame" Text="[View last frame]" />
                     </MenuFlyoutSubItem>
 
 
@@ -124,72 +124,72 @@
                     <MenuFlyoutSubItem x:Name="MnuZoom" Text="[Zoom]">
                         <ui:IgMenuItem
                             Icon="ZoomIn"
-                            LangKey="FrmMain.MnuZoomIn"
+                            LangKey="FrmMain_MnuZoomIn"
                             Text="[Zoom in]" />
                         <ui:IgMenuItem
                             Icon="ZoomOut"
-                            LangKey="FrmMain.MnuZoomOut"
+                            LangKey="FrmMain_MnuZoomOut"
                             Text="[Zoom out]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuCustomZoom" Text="[Custom zoom...]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuActualSize" Text="[Actual size]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuCustomZoom" Text="[Custom zoom...]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuActualSize" Text="[Actual size]" />
                         <MenuFlyoutSeparator />
 
                         <ui:IgRadioMenuItem
                             GroupName="ZoomMode"
                             IsChecked="True"
-                            LangKey="FrmMain.MnuAutoZoom"
+                            LangKey="FrmMain_MnuAutoZoom"
                             Text="[Auto zoom]" />
                         <ui:IgRadioMenuItem
                             GroupName="ZoomMode"
-                            LangKey="FrmMain.MnuLockZoom"
+                            LangKey="FrmMain_MnuLockZoom"
                             Text="[Lock zoom ratio]" />
                         <ui:IgRadioMenuItem
                             GroupName="ZoomMode"
-                            LangKey="FrmMain.MnuScaleToWidth"
+                            LangKey="FrmMain_MnuScaleToWidth"
                             Text="[Scale to width]" />
                         <ui:IgRadioMenuItem
                             GroupName="ZoomMode"
-                            LangKey="FrmMain.MnuScaleToHeight"
+                            LangKey="FrmMain_MnuScaleToHeight"
                             Text="[Scale to height]" />
                         <ui:IgRadioMenuItem
                             GroupName="ZoomMode"
-                            LangKey="FrmMain.MnuScaleToFit"
+                            LangKey="FrmMain_MnuScaleToFit"
                             Text="[Scale to fit]" />
                         <ui:IgRadioMenuItem
                             GroupName="ZoomMode"
-                            LangKey="FrmMain.MnuScaleToFill"
+                            LangKey="FrmMain_MnuScaleToFill"
                             Text="[Scale to fill]" />
                     </MenuFlyoutSubItem>
 
 
                     <!--  Panning  -->
                     <MenuFlyoutSubItem x:Name="MnuPanning" Text="[Panning]">
-                        <ui:IgMenuItem LangKey="FrmMain.MnuPanLeft" Text="[Pan image left]">
+                        <ui:IgMenuItem LangKey="FrmMain_MnuPanLeft" Text="[Pan image left]">
                             <ui:IgMenuItem.Icon>
                                 <FontIcon Glyph="&#xE76B;" />
                             </ui:IgMenuItem.Icon>
                         </ui:IgMenuItem>
-                        <ui:IgMenuItem LangKey="FrmMain.MnuPanRight" Text="[Pan image right]">
+                        <ui:IgMenuItem LangKey="FrmMain_MnuPanRight" Text="[Pan image right]">
                             <ui:IgMenuItem.Icon>
                                 <FontIcon Glyph="&#xE76C;" />
                             </ui:IgMenuItem.Icon>
                         </ui:IgMenuItem>
-                        <ui:IgMenuItem LangKey="FrmMain.MnuPanUp" Text="[Pan image up]">
+                        <ui:IgMenuItem LangKey="FrmMain_MnuPanUp" Text="[Pan image up]">
                             <ui:IgMenuItem.Icon>
                                 <FontIcon Glyph="&#xE70E;" />
                             </ui:IgMenuItem.Icon>
                         </ui:IgMenuItem>
-                        <ui:IgMenuItem LangKey="FrmMain.MnuPanDown" Text="[Pan image down]">
+                        <ui:IgMenuItem LangKey="FrmMain_MnuPanDown" Text="[Pan image down]">
                             <ui:IgMenuItem.Icon>
                                 <FontIcon Glyph="&#xE70D;" />
                             </ui:IgMenuItem.Icon>
                         </ui:IgMenuItem>
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem LangKey="FrmMain.MnuPanToLeftSide" Text="[Pan image to left edge]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuPanToRightSide" Text="[Pan image to right edge]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuPanToTop" Text="[Pan image to top]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuPanToBottom" Text="[Pan image to bottom]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuPanToLeftSide" Text="[Pan image to left edge]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuPanToRightSide" Text="[Pan image to right edge]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuPanToTop" Text="[Pan image to top]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuPanToBottom" Text="[Pan image to bottom]" />
                     </MenuFlyoutSubItem>
 
 
@@ -259,41 +259,41 @@
                             <ui:IgMenuItem x:Name="MnuViewChannel_BA" Text="B + A" />
                             <ui:IgMenuItem x:Name="MnuViewChannel_A" Text="A" />
                         </MenuFlyoutSubItem>
-                        <ui:IgMenuItem LangKey="FrmMain.MnuInvertColors" Text="[Invert colors]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuInvertColors" Text="[Invert colors]" />
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem LangKey="FrmMain.MnuRotateLeft" Text="[Rotate left]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuRotateRight" Text="[Rotate right]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuFlipHorizontal" Text="[Flip horizontal]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuFlipVertical" Text="[Flip vertical]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuRotateLeft" Text="[Rotate left]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuRotateRight" Text="[Rotate right]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuFlipHorizontal" Text="[Flip horizontal]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuFlipVertical" Text="[Flip vertical]" />
                         <MenuFlyoutSeparator />
 
                         <ui:IgMenuItem
                             Icon="Rename"
-                            LangKey="FrmMain.MnuRename"
+                            LangKey="FrmMain_MnuRename"
                             Text="[Rename image]" />
                         <ui:IgMenuItem
                             Icon="Delete"
-                            LangKey="FrmMain.MnuMoveToRecycleBin"
+                            LangKey="FrmMain_MnuMoveToRecycleBin"
                             Text="[Move to Recycle Bin]" />
                         <ui:IgMenuItem
                             Icon="Clear"
-                            LangKey="FrmMain.MnuDeleteFromHardDisk"
+                            LangKey="FrmMain_MnuDeleteFromHardDisk"
                             Text="[Delete permanently]" />
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem LangKey="FrmMain.MnuToggleImageAnimation" Text="[Start / stop animating image]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuExportFrames" Text="[Export image frames...]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuSetDesktopBackground" Text="[Set as Desktop background]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuSetLockScreen" Text="[Set as Lock screen image]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuOpenLocation" Text="[Open image location]">
+                        <ui:IgMenuItem LangKey="FrmMain_MnuToggleImageAnimation" Text="[Start / stop animating image]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuExportFrames" Text="[Export image frames...]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuSetDesktopBackground" Text="[Set as Desktop background]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuSetLockScreen" Text="[Set as Lock screen image]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuOpenLocation" Text="[Open image location]">
                             <ui:IgMenuItem.Icon>
                                 <FontIcon Glyph="&#xE838;" />
                             </ui:IgMenuItem.Icon>
                         </ui:IgMenuItem>
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem LangKey="FrmMain.MnuImageProperties" Text="[Image properties]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuImageProperties" Text="[Image properties]" />
                     </MenuFlyoutSubItem>
 
 
@@ -301,90 +301,90 @@
                     <MenuFlyoutSubItem x:Name="MnuClipboard" Text="[Clipboard]">
                         <ui:IgMenuItem
                             Icon="Paste"
-                            LangKey="FrmMain.MnuPasteImage"
+                            LangKey="FrmMain_MnuPasteImage"
                             Text="[Paste image]" />
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem LangKey="FrmMain.MnuCopyImageData" Text="[Copy image data]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuCopyPath" Text="[Copy image path]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuCopyImageData" Text="[Copy image data]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuCopyPath" Text="[Copy image path]" />
                         <ui:IgMenuItem
                             Icon="Copy"
-                            LangKey="FrmMain.MnuCopyFile"
+                            LangKey="FrmMain_MnuCopyFile"
                             Text="[Copy file]" />
                         <ui:IgMenuItem
                             Icon="Cut"
-                            LangKey="FrmMain.MnuCutFile"
+                            LangKey="FrmMain_MnuCutFile"
                             Text="[Cut file]" />
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem LangKey="FrmMain.MnuClearClipboard" Text="[Clear clipboard]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuClearClipboard" Text="[Clear clipboard]" />
                     </MenuFlyoutSubItem>
 
 
                     <!--  Window modes  -->
                     <MenuFlyoutSeparator />
-                    <ui:IgToggleMenuItem LangKey="FrmMain.MnuWindowFit" Text="[WindowFit]" />
-                    <ui:IgToggleMenuItem LangKey="FrmMain.MnuFrameless" Text="[Frameless]" />
-                    <ui:IgToggleMenuItem LangKey="FrmMain.MnuFullScreen" Text="[Fullscreen]" />
-                    <ui:IgToggleMenuItem LangKey="FrmMain.MnuSlideshow" Text="[Slideshow]" />
+                    <ui:IgToggleMenuItem LangKey="FrmMain_MnuWindowFit" Text="[WindowFit]" />
+                    <ui:IgToggleMenuItem LangKey="FrmMain_MnuFrameless" Text="[Frameless]" />
+                    <ui:IgToggleMenuItem LangKey="FrmMain_MnuFullScreen" Text="[Fullscreen]" />
+                    <ui:IgToggleMenuItem LangKey="FrmMain_MnuSlideshow" Text="[Slideshow]" />
                     <MenuFlyoutSeparator />
 
 
                     <!--  Layout  -->
                     <MenuFlyoutSubItem x:Name="MnuLayout" Text="[Layout]">
-                        <ui:IgToggleMenuItem LangKey="FrmMain.MnuToggleToolbar" Text="[Toolbar]" />
-                        <ui:IgToggleMenuItem LangKey="FrmMain.MnuToggleGallery" Text="[Gallery panel]" />
-                        <ui:IgToggleMenuItem LangKey="FrmMain.MnuToggleCheckerboard" Text="[Checkerboard background]" />
+                        <ui:IgToggleMenuItem LangKey="FrmMain_MnuToggleToolbar" Text="[Toolbar]" />
+                        <ui:IgToggleMenuItem LangKey="FrmMain_MnuToggleGallery" Text="[Gallery panel]" />
+                        <ui:IgToggleMenuItem LangKey="FrmMain_MnuToggleCheckerboard" Text="[Checkerboard background]" />
                         <MenuFlyoutSeparator />
 
-                        <ui:IgToggleMenuItem LangKey="FrmMain.MnuToggleTopMost" Text="[Keep window always on top]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuChangeBackgroundColor" Text="[Change background color...]" />
+                        <ui:IgToggleMenuItem LangKey="FrmMain_MnuToggleTopMost" Text="[Keep window always on top]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuChangeBackgroundColor" Text="[Change background color...]" />
                     </MenuFlyoutSubItem>
 
 
                     <!--  Tools  -->
                     <MenuFlyoutSubItem x:Name="MnuTools" Text="[Tools]">
-                        <ui:IgToggleMenuItem LangKey="FrmMain.MnuColorPicker" Text="[Color picker]">
+                        <ui:IgToggleMenuItem LangKey="FrmMain_MnuColorPicker" Text="[Color picker]">
                             <ui:IgToggleMenuItem.Icon>
                                 <FontIcon Glyph="&#xEF3C;" />
                             </ui:IgToggleMenuItem.Icon>
                         </ui:IgToggleMenuItem>
                         <ui:IgToggleMenuItem
                             Icon="Crop"
-                            LangKey="FrmMain.MnuCropTool"
+                            LangKey="FrmMain_MnuCropTool"
                             Text="[Crop image]" />
-                        <ui:IgToggleMenuItem LangKey="FrmMain.MnuFrameNav" Text="[Frame navigation]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuResizeTool" Text="[Resize image]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuLosslessCompression" Text="[Magick.NET Lossless Compression]" />
+                        <ui:IgToggleMenuItem LangKey="FrmMain_MnuFrameNav" Text="[Frame navigation]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuResizeTool" Text="[Resize image]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuLosslessCompression" Text="[Magick.NET Lossless Compression]" />
                         <MenuFlyoutSeparator />
 
                         <MenuFlyoutSeparator />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuGetMoreTools" Text="[Get more tools]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuGetMoreTools" Text="[Get more tools]" />
                     </MenuFlyoutSubItem>
 
 
                     <!--  Settings  -->
                     <MenuFlyoutSeparator />
-                    <ui:IgMenuItem LangKey="FrmMain.MnuSettings" Text="[Settings]" />
+                    <ui:IgMenuItem LangKey="FrmMain_MnuSettings" Text="[Settings]" />
 
 
                     <!--  Help  -->
                     <MenuFlyoutSubItem x:Name="MnuHelp" Text="[Help]">
-                        <ui:IgMenuItem LangKey="FrmMain.MnuAbout" Text="[About]">
+                        <ui:IgMenuItem LangKey="FrmMain_MnuAbout" Text="[About]">
                             <ui:IgMenuItem.Icon>
                                 <FontIcon Glyph="&#xE946;" />
                             </ui:IgMenuItem.Icon>
                         </ui:IgMenuItem>
                         <ui:IgMenuItem Text="[Check for update]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuReportIssue" Text="[Report an issue]" />
-                        <ui:IgMenuItem LangKey="FrmMain.MnuQuickSetup" Text="[Open ImageGlass Quick Setup]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuReportIssue" Text="[Report an issue]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuQuickSetup" Text="[Open ImageGlass Quick Setup]" />
                         <MenuFlyoutSeparator />
                     </MenuFlyoutSubItem>
 
 
                     <!--  Exit  -->
                     <MenuFlyoutSeparator />
-                    <ui:IgMenuItem LangKey="FrmMain.MnuExit" Text="[Exit]" />
+                    <ui:IgMenuItem LangKey="FrmMain_MnuExit" Text="[Exit]" />
                 </MenuFlyout>
 
             </ui:ToolbarControl.MainMenu>

@@ -171,11 +171,14 @@ public partial class ToolbarControl : IgControl
             }
 
 
+            var langKey = IgLang.GetKey(item.Text);
+
             if (btnEl.VM.IsToggle)
             {
                 mnuItem = new IgToggleMenuItem()
                 {
-                    LangKey = item.Text,
+                    LangKey = langKey,
+                    Text = item.Text,
                     Icon = iconFe,
                     IsChecked = item.IsChecked,
                     //Command = btnEl.Command,
@@ -186,7 +189,8 @@ public partial class ToolbarControl : IgControl
             {
                 mnuItem = new IgMenuItem()
                 {
-                    LangKey = item.Text,
+                    LangKey = langKey,
+                    Text = item.Text,
                     Icon = iconFe,
                 };
             }

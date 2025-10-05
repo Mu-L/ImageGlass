@@ -173,13 +173,27 @@ public class IgLang
 
 
     /// <summary>
+    /// Gets a valid <see cref="LangId"/> from string.
+    /// </summary>
+    public static LangId? GetKey(string? key)
+    {
+        if (Enum.TryParse<LangId>(key, out var langKey))
+        {
+            return langKey;
+        }
+
+        return null;
+    }
+
+
+    /// <summary>
     /// Gets the formatted language string. If not exist, returns the key.
     /// </summary>
     /// <param name="key">The key to get the language string</param>
     /// <param name="args">The arguments to format the language string.</param>
     public string Get(string? key, params object?[] args)
     {
-        if (Enum.TryParse<LangId>(key, out var langKey))
+        if (GetKey(key) is LangId langKey)
         {
             return Get(langKey, args);
         }
@@ -227,6 +241,7 @@ public class IgLang
     }
 
     #endregion // Public Methods
+
 
 
     /// <summary>
