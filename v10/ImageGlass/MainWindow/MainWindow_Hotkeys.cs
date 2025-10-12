@@ -31,7 +31,7 @@ public partial class MainWindow
 
 
     // default hotkeys
-    private static IReadOnlyCollection<HotkeySingleAction> _menuHotkeys => [
+    private static IReadOnlyCollection<HotkeySingleAction> _defaultMenuHotkeys => [
         new(LangId.FrmMain_MnuOpenFile,                 API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
         new(LangId.FrmMain_MnuViewNext,                 API.IG_ViewNext,            VKey.Right),
         new(LangId.FrmMain_MnuViewPrevious,             API.IG_ViewPrevious,        VKey.Left),
@@ -39,8 +39,12 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuExit,                     API.IG_Exit,                [new(VKey.Escape), new(MKeys.Ctrl, VKey.W)]),
     ];
 
-    // all runtime hotkeys
-    private static Dictionary<Hotkey, SingleAction> _appHotkeys { get; set; } = new();
+
+    // all hotkeys
+    private static Dictionary<Hotkey, SingleAction> _appHotkeysMap { get; set; } = new();
+
+    // a map of menu and hotkeys
+    public Dictionary<LangId, Hotkey[]> MenuHotkeysMap { get; set; } = new();
 
 
 
@@ -58,7 +62,7 @@ public partial class MainWindow
     private async void Hotkey_Invoked(object? sender, HotkeyInvokedEventArgs e)
     {
         // 0. get hotkey action
-        var action = _appHotkeys.GetValueOrDefault(e.Hotkey);
+        var action = _appHotkeysMap.GetValueOrDefault(e.Hotkey);
         if (action is null) return;
 
         var isPressedMultipleTimes = e.Hotkey == _lastHotkeyPressed;
@@ -92,12 +96,15 @@ public partial class MainWindow
     private void RegisterHotkeys()
     {
         // 1. register the default hotkeys
-        foreach (var item in _menuHotkeys)
+        foreach (var item in _defaultMenuHotkeys)
         {
             foreach (var hk in item.Hotkeys)
             {
                 Content.KeyboardAccelerators.Add(hk.Data);
-                _appHotkeys.TryAdd(hk, item);
+
+                // save to the maps
+                _appHotkeysMap.TryAdd(hk, item);
+                MenuHotkeysMap.TryAdd(IgLang.GetKey(item.LangKey)!.Value, item.Hotkeys);
             }
         }
 
@@ -119,14 +126,12 @@ public partial class MainWindow
                     item.OnClick.LangKey = item.Text;
                 }
 
-                // save custom hotkey to the list
-                _ = _appHotkeys.Remove(hk);
-                _ = _appHotkeys.TryAdd(hk, item.OnClick);
+                // save custom hotkey to the map
+                _ = _appHotkeysMap.Remove(hk);
+                _ = _appHotkeysMap.TryAdd(hk, item.OnClick);
             }
         }
     }
-
-
 
 
 }

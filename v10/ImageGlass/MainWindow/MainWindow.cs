@@ -33,7 +33,7 @@ namespace ImageGlass;
 public partial class MainWindow : IgWindow
 {
     private readonly AppStatusInfo _status;
-    private readonly MainWindow_Content _contentEl = new();
+    private readonly MainWindow_Content _contentEl;
     private readonly Progress<FileSearchingEventArgs> _searchProgress;
 
 
@@ -45,7 +45,7 @@ public partial class MainWindow : IgWindow
 
     public MainWindow()
     {
-        WindowContent = _contentEl;
+        WindowContent = _contentEl = new(this);
         _searchProgress = new(Files_Searched);
         _status = new(_contentEl.Viewer);
 

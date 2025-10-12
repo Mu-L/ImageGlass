@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Cysharp.Text;
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
@@ -33,11 +34,13 @@ namespace ImageGlass;
 
 public sealed partial class MainWindow_Content : IgControl
 {
+    private readonly MainWindow _winMain;
+    private readonly MenuFlyout _mnuMain = new();
+    private bool _shouldUpdateMenuText = false;
+
     // in-app message
     private CancellationTokenSource? _cancelMessage;
     private readonly Lock _lockCancelMessage = new();
-
-    private readonly MenuFlyout _mnuMain = new();
 
     public event TypedEventHandler<IgToolbarButton, ToolbarItemClickedEventArgs>? ToolbarButtonClicked;
     public event TypedEventHandler<IgGalleryItem, EventArgs>? GalleryItemClicked;
@@ -97,9 +100,11 @@ public sealed partial class MainWindow_Content : IgControl
 
 
 
-    public MainWindow_Content()
+    public MainWindow_Content(MainWindow mainWindow)
     {
         InitializeComponent();
+
+        _winMain = mainWindow;
     }
 
 
@@ -112,6 +117,7 @@ public sealed partial class MainWindow_Content : IgControl
 
         UpdateMessageBoxStyle_();
 
+        PART_MainMenu.Opening += PART_MainMenu_Opening;
         PART_MainMenu.Opened += PART_MainMenu_Opened;
         PART_MainMenu.Closed += PART_MainMenu_Closed;
 
@@ -131,6 +137,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgUnloaded(fe);
 
+        PART_MainMenu.Opening += PART_MainMenu_Opening;
         PART_MainMenu.Opened -= PART_MainMenu_Opened;
         PART_MainMenu.Closed -= PART_MainMenu_Closed;
 
@@ -158,7 +165,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgLanguageChanged();
 
-        LoadMenuText_(MainMenu.Items);
+        _shouldUpdateMenuText = true;
     }
 
 
@@ -167,6 +174,11 @@ public sealed partial class MainWindow_Content : IgControl
 
 
     #region Control Events
+
+    private void PART_MainMenu_Opening(object? sender, object e)
+    {
+        UpdateMenuTextIfNeeded_();
+    }
 
     private void PART_MainMenu_Opened(object? sender, object e)
     {
@@ -249,19 +261,44 @@ public sealed partial class MainWindow_Content : IgControl
 
 
     /// <summary>
+    /// Updates the text and hotkey text of main menu if needed.
+    /// </summary>
+    private void UpdateMenuTextIfNeeded_()
+    {
+        if (!_shouldUpdateMenuText) return;
+
+        LoadMenuText_(MainMenu.Items);
+        _shouldUpdateMenuText = false;
+    }
+
+
+    /// <summary>
     /// Loads menu text.
     /// </summary>.
-    private static void LoadMenuText_(IList<MenuFlyoutItemBase> items)
+    private void LoadMenuText_(IList<MenuFlyoutItemBase> items)
     {
         foreach (var item in items)
         {
-            // only localize subitem menu because it's sealed!
+            // 1. NOTE: only localize subitem menu because it's sealed!
             if (item is MenuFlyoutSubItem submenu)
             {
                 submenu.Text = AP.Config.Lang[$"FrmMain_{submenu.Name}"];
 
                 // jump into submenu items
                 LoadMenuText_(submenu.Items);
+            }
+
+
+            // 2. update hotkey text for menu items
+            if (item is IMenuItem mnuItem)
+            {
+                if (mnuItem.LangKey is null) continue;
+
+                var hotkeys = _winMain.MenuHotkeysMap.GetValueOrDefault(mnuItem.LangKey.Value) ?? [];
+                if (hotkeys.Length == 0) continue;
+
+                var hotkeyText = ZString.Join(", ", hotkeys);
+                mnuItem.KeyboardAcceleratorTextOverride = hotkeyText;
             }
         }
     }
