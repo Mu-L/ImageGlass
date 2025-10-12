@@ -158,6 +158,24 @@ public partial class MainWindow
 
 
     /// <summary>
+    /// View the next photo.
+    /// </summary>
+    public void IG_ViewNext()
+    {
+        IG_ViewByStep(1);
+    }
+
+
+    /// <summary>
+    /// View the previous photo.
+    /// </summary>
+    public void IG_ViewPrevious()
+    {
+        IG_ViewByStep(-1);
+    }
+
+
+    /// <summary>
     /// Toggles the viewer's checkerboard mode.
     /// </summary>
     public void IG_ToggleCheckerboard(string? mode = null)

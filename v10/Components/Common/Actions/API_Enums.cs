@@ -32,6 +32,8 @@ public enum API
     IG_SaveAs,
 
     // Menu > Navigation
+    IG_ViewNext,
+    IG_ViewPrevious,
     IG_ViewByStep,
     IG_ViewByIndex,
 

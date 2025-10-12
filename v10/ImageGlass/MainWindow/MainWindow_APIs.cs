@@ -37,6 +37,8 @@ public partial class MainWindow
 
 
         // Navigation
+        { API.IG_ViewNext, IgCommands.Create(IG_ViewNext) },
+        { API.IG_ViewPrevious, IgCommands.Create(IG_ViewPrevious) },
         { API.IG_ViewByStep, IgCommands.Create(IG_ViewByStep) },
         { API.IG_ViewByIndex, IgCommands.Create(IG_ViewByIndex) },
 

@@ -38,41 +38,24 @@ public partial class HotkeySingleAction : SingleAction
     public HotkeySingleAction() : base(null) { }
 
 
-    public HotkeySingleAction(string executable, Hotkey[]? hotkeys = null)
-        : base(executable)
+    public HotkeySingleAction(LangId langKey, API api, MKeys modifiers, VirtualKey key) : base(api)
     {
-        if (hotkeys is not null) Hotkeys = hotkeys;
+        LangKey = IgLang.KeysMap[langKey];
+        Hotkeys = [new Hotkey(modifiers, key)];
     }
 
 
-    public HotkeySingleAction(string executable, string arg, Hotkey[]? hotkeys = null)
-        : base(executable, arg)
+    public HotkeySingleAction(LangId langKey, API api, VirtualKey key) : base(api)
     {
-        if (hotkeys is not null) Hotkeys = hotkeys;
-    }
-
-
-    public HotkeySingleAction(API api, Hotkey[]? hotkeys = null) : base(api)
-    {
-        if (hotkeys is not null) Hotkeys = hotkeys;
-    }
-
-
-    public HotkeySingleAction(API api, string arg, Hotkey[]? hotkeys = null) : base(api, arg)
-    {
-        if (hotkeys is not null) Hotkeys = hotkeys;
-    }
-
-
-    public HotkeySingleAction(VirtualKey key, SingleAction? action = null) : base(action)
-    {
+        LangKey = IgLang.KeysMap[langKey];
         Hotkeys = [new Hotkey(key)];
     }
 
 
-    public HotkeySingleAction(MKeys modifiers, VirtualKey key, SingleAction? action = null) : base(action)
+    public HotkeySingleAction(LangId langKey, API api, Hotkey[]? hotkeys = null) : base(api)
     {
-        Hotkeys = [new Hotkey(modifiers, key)];
+        LangKey = IgLang.KeysMap[langKey];
+        if (hotkeys is not null) Hotkeys = hotkeys;
     }
 
 

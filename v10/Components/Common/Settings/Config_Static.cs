@@ -113,35 +113,35 @@ public partial class Config
     public static ReadOnlyCollection<ToolbarItemModel> DefaultToolbarItems =>
     [
         new() {
-            Id = "Btn_MnuOpenFile",
-            Image = "OpenFile",
+            Id = $"Btn_{nameof(IgThemeIcon.OpenFile) }",
+            Image = nameof(IgThemeIcon.OpenFile),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuOpenFile],
             Alignment = ToolbarItemAlignment.Right,
-            OnClick = new(API.IG_OpenFile),
+            OnClick = new(LangId.FrmMain_MnuOpenFile, API.IG_OpenFile),
         },
 
 
 
         new() {
-            Id = "Btn_MnuViewPrevious",
-            Image = "ViewPreviousImage",
+            Id = $"Btn_{nameof(IgThemeIcon.ViewPreviousImage)}",
+            Image = nameof(IgThemeIcon.ViewPreviousImage),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuViewPrevious],
-            OnClick = new(API.IG_ViewByStep, "-1"),
+            OnClick = new(LangId.FrmMain_MnuViewPrevious, API.IG_ViewPrevious),
         },
         new() {
-            Id = "Btn_MnuViewNext",
-            Image = "ViewNextImage",
+            Id = $"Btn_{nameof(IgThemeIcon.ViewNextImage)}",
+            Image = nameof(IgThemeIcon.ViewNextImage),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuViewNext],
-            OnClick = new(API.IG_ViewByStep, "1"),
+            OnClick = new(LangId.FrmMain_MnuViewNext, API.IG_ViewNext),
         },
         ToolbarItemModel.Separator,
 
 
         new() {
-            Id = "Btn_MnuToggleCheckerboard",
-            Image = "Checkerboard",
+            Id = $"Btn_{nameof(IgThemeIcon.Checkerboard)}",
+            Image = nameof(IgThemeIcon.Checkerboard),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuToggleCheckerboard],
-            OnClick = new(API.IG_ToggleCheckerboard),
+            OnClick = new(LangId.FrmMain_MnuToggleCheckerboard, API.IG_ToggleCheckerboard),
         },
     ];
 

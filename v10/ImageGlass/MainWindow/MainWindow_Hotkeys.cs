@@ -29,18 +29,18 @@ public partial class MainWindow
 {
     private Hotkey? _lastHotkeyPressed = null;
 
+
     // default hotkeys
-    private static IReadOnlyCollection<KeyValuePair<Hotkey, SingleAction>> _defaultHotkeys = [
-        new(new(MKeys.Ctrl, VKey.O),          new(API.IG_OpenFile, null,              "FrmMain.MnuOpenFile")),
-        new(new(VKey.Right),                  new(API.IG_ViewByStep, "1",             "FrmMain.MnuViewNext")),
-        new(new(VKey.Left),                   new(API.IG_ViewByStep, "-1",            "FrmMain.MnuViewPrevious")),
-        new(new(VKey.B),                      new(API.IG_ToggleCheckerboard, null,    "FrmMain.MnuToggleCheckerboard")),
-        new(new(VKey.Escape),                 new(API.IG_Exit, null,                  "FrmMain.MnuExit")),
+    private static IReadOnlyCollection<HotkeySingleAction> _menuHotkeys => [
+        new(LangId.FrmMain_MnuOpenFile,                 API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
+        new(LangId.FrmMain_MnuViewNext,                 API.IG_ViewNext,            VKey.Right),
+        new(LangId.FrmMain_MnuViewPrevious,             API.IG_ViewPrevious,        VKey.Left),
+        new(LangId.FrmMain_MnuToggleCheckerboard,       API.IG_ToggleCheckerboard,  VKey.B),
+        new(LangId.FrmMain_MnuExit,                     API.IG_Exit,                [new(VKey.Escape), new(MKeys.Ctrl, VKey.W)]),
     ];
 
     // all runtime hotkeys
-    private static Dictionary<Hotkey, SingleAction> _hotkeys { get; set; } = new(_defaultHotkeys);
-
+    private static Dictionary<Hotkey, SingleAction> _appHotkeys { get; set; } = new();
 
 
 
@@ -58,7 +58,7 @@ public partial class MainWindow
     private async void Hotkey_Invoked(object? sender, HotkeyInvokedEventArgs e)
     {
         // 0. get hotkey action
-        var action = _hotkeys.GetValueOrDefault(e.Hotkey);
+        var action = _appHotkeys.GetValueOrDefault(e.Hotkey);
         if (action is null) return;
 
         var isPressedMultipleTimes = e.Hotkey == _lastHotkeyPressed;
@@ -89,12 +89,16 @@ public partial class MainWindow
     }
 
 
-    public void RegisterHotkeys()
+    private void RegisterHotkeys()
     {
         // 1. register the default hotkeys
-        foreach (var item in _hotkeys)
+        foreach (var item in _menuHotkeys)
         {
-            Content.KeyboardAccelerators.Add(item.Key.Data);
+            foreach (var hk in item.Hotkeys)
+            {
+                Content.KeyboardAccelerators.Add(hk.Data);
+                _appHotkeys.TryAdd(hk, item);
+            }
         }
 
 
@@ -109,13 +113,20 @@ public partial class MainWindow
                 _ = Content.KeyboardAccelerators.Remove(hk.Data);
                 Content.KeyboardAccelerators.Add(hk.Data);
 
+                // save the button text
+                if (string.IsNullOrWhiteSpace(item.OnClick.LangKey))
+                {
+                    item.OnClick.LangKey = item.Text;
+                }
+
                 // save custom hotkey to the list
-                item.OnClick.LangKey = item.Text;
-                _ = _hotkeys.Remove(hk);
-                _ = _hotkeys.TryAdd(hk, item.OnClick);
+                _ = _appHotkeys.Remove(hk);
+                _ = _appHotkeys.TryAdd(hk, item.OnClick);
             }
         }
     }
+
+
 
 
 }
