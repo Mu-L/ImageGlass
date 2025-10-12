@@ -767,6 +767,7 @@ public partial class Config : IgReactive
         }
     } = new(200, 200, 1500, 1000);
 
+
     /// <summary>
     /// Gets, sets zoom levels of the viewer
     /// </summary>
@@ -784,10 +785,12 @@ public partial class Config : IgReactive
         }
     } = [];
 
+
     ///// <summary>
     ///// Gets, sets the list of apps for edit action.
     ///// </summary>
     //public Dictionary<string, EditApp?> EditApps { get; set; } = [];
+
 
     /// <summary>
     /// Gets, sets the list of formats that only load the first frame forcefully
@@ -806,6 +809,7 @@ public partial class Config : IgReactive
         }
     } = [".avif", ".heic", ".heif", ".psd", ".jxl"];
 
+
     /// <summary>
     /// Gets, sets the list of supported image formats
     /// </summary>
@@ -823,6 +827,7 @@ public partial class Config : IgReactive
         }
     } = new HashSet<string>(DefaultFileFormats);
 
+
     /// <summary>
     /// Gets, sets the tags for displaying image info.
     /// </summary>
@@ -830,10 +835,11 @@ public partial class Config : IgReactive
     public ObservableCollection<string> ImageInfoTags { get; set; } = new(DefaultImageInfoTags);
 
 
-    ///// <summary>
-    ///// Gets, sets hotkeys list of menu
-    ///// </summary>
-    //public Dictionary<string, List<Hotkey>> MenuHotkeys { get; set; } = [];
+    /// <summary>
+    /// Gets, sets hotkeys list of menu
+    /// </summary>
+    public Dictionary<LangId, Hotkey[]> MenuHotkeys { get; set; } = [];
+
 
     ///// <summary>
     ///// Gets, sets mouse click actions

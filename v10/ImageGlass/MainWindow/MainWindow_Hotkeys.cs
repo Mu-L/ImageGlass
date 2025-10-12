@@ -96,20 +96,10 @@ public partial class MainWindow
 
     private void RegisterHotkeys_()
     {
-        // 1. register the default hotkeys
-        foreach (var item in _defaultMenuList)
-        {
-            foreach (var hk in item.Hotkeys)
-            {
-                Content.KeyboardAccelerators.Add(hk.Data);
-
-                // save to the maps
-                _hotkeyMap.TryAdd(hk, item);
-            }
-        }
+        Content.KeyboardAccelerators.Clear();
 
 
-        // 2. register hotkeys from toolbar buttons
+        // 1. register toolbar hotkeys from user-config
         foreach (var item in AP.Config.ToolbarButtons)
         {
             if (item.IsSeparator || item.OnClick is null) continue;
@@ -117,7 +107,6 @@ public partial class MainWindow
             foreach (var hk in item.OnClick.Hotkeys)
             {
                 // register custom hotkey
-                _ = Content.KeyboardAccelerators.Remove(hk.Data);
                 Content.KeyboardAccelerators.Add(hk.Data);
 
                 // save the button text
@@ -127,8 +116,30 @@ public partial class MainWindow
                 }
 
                 // save custom hotkey to the map
-                _ = _hotkeyMap.Remove(hk);
                 _ = _hotkeyMap.TryAdd(hk, item.OnClick);
+            }
+        }
+
+
+        // 2. load menu hotkeys from user-config
+        foreach (var item in AP.Config.MenuHotkeys)
+        {
+            if (_menuMap.TryGetValue(item.Key, out var action))
+            {
+                action.Hotkeys = item.Value;
+            }
+        }
+
+
+        // 3. register hotkeys of menu
+        foreach (var item in _menuMap)
+        {
+            foreach (var hk in item.Value.Hotkeys)
+            {
+                Content.KeyboardAccelerators.Add(hk.Data);
+
+                // save to the maps
+                _hotkeyMap.TryAdd(hk, item.Value);
             }
         }
     }
