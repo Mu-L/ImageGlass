@@ -33,6 +33,7 @@ public partial class MainWindow
 
     // list of all menu items & default action, hotkeys
     private static IReadOnlyCollection<HotkeySingleAction> _defaultMenuList => [
+        new(LangId.FrmMain_MnuMain,                     API.IG_OpenMainMenu,        MKeys.Alt, VKey.F),
         new(LangId.FrmMain_MnuOpenFile,                 API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
         new(LangId.FrmMain_MnuViewNext,                 API.IG_ViewNext,            VKey.Right),
         new(LangId.FrmMain_MnuViewPrevious,             API.IG_ViewPrevious,        VKey.Left),

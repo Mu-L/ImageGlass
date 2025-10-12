@@ -36,6 +36,15 @@ public partial class MainWindow
 
 
     /// <summary>
+    /// API name: <see cref="API.IG_OpenMainMenu"/>
+    /// </summary>
+    public void IG_OpenMainMenu()
+    {
+        _contentEl.ToolbarMain.OpenMainMenu();
+    }
+
+
+    /// <summary>
     /// API name: <see cref="API.IG_OpenFile"/>.
     /// </summary>
     public async Task IG_OpenFileAsync()

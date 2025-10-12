@@ -21,7 +21,7 @@ namespace ImageGlass;
 
 public enum API
 {
-    IG_MainMenu,
+    IG_OpenMainMenu,
 
     // Menu > File
     IG_OpenFile,

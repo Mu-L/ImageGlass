@@ -30,6 +30,8 @@ public partial class MainWindow
 {
     private FrozenDictionary<API, IIgCommand> _apis => new Dictionary<API, IIgCommand>()
     {
+        { API.IG_OpenMainMenu, IgCommands.Create(IG_OpenMainMenu) },
+
         // Main Menu
         { API.IG_OpenFile, IgCommands.Create(IG_OpenFileAsync) },
         { API.IG_OpenFolder, IgCommands.Create(IG_OpenFolderAsync) },
