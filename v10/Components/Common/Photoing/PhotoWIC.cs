@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageMagick;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -192,7 +193,7 @@ public static partial class PhotoWIC
         }
         catch (Exception ex)
         {
-            Log.Error(ex);
+            Debug.WriteLine($"❌❌❌ {nameof(GetWicColorProfile)}: {ex.Message}");
         }
 
         return new PhotoColorProfile();

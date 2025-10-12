@@ -269,8 +269,6 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         Items.Clear();
         _dict.Clear();
         DistinctDirs.Clear();
-
-        Log.Info($"Cleared photo list!", nameof(Clear), nameof(PhotoManagerImpl<Fs, FsOptions>));
     }
 
 }

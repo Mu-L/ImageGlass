@@ -20,6 +20,7 @@ using ImageMagick;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
@@ -560,7 +561,7 @@ public partial class Photo : DisposableImpl
         }
         catch (Exception ex)
         {
-            Log.Error(ex);
+            Debug.WriteLine($"❌❌❌ {nameof(LoadMetadataAsync)}: {ex.Message}");
         }
     }
 

@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Vortice.WIC;
@@ -66,7 +67,7 @@ public static class ShellThumbnailApi
         {
             if (ex is not COMException)
             {
-                Log.Warn(ex.Message, nameof(GetThumbnail), nameof(ShellThumbnailApi));
+                Debug.WriteLine($"⚠️⚠️⚠️ {nameof(GetThumbnail)}: {ex.Message}");
             }
         }
         finally

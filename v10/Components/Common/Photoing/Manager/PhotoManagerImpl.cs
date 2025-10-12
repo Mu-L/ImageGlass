@@ -230,12 +230,7 @@ public abstract partial class PhotoManagerImpl<Fs, FsOptions> : DisposableImpl
         while (totalCacheSizeInMb > _maxThumbnailCacheSizeInMb)
         {
             // cancel if requested
-            if (token.IsCancellationRequested)
-            {
-                Log.Info($"Cancelled {nameof(totalCacheSizeInMb)}={totalCacheSizeInMb}",
-                    nameof(ManageThumbnailsDiskCache), nameof(PhotoManagerImpl<Fs, FsOptions>));
-                break;
-            }
+            if (token.IsCancellationRequested) break;
 
             var oldestFilePath = filesDict.FirstOrDefault().Key;
 

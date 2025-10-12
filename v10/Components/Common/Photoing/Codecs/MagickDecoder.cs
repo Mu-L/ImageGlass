@@ -20,6 +20,7 @@ using ImageMagick;
 using ImageMagick.Formats;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -203,7 +204,7 @@ public class MagickDecoder
         }
         catch (Exception ex)
         {
-            Log.Error(ex);
+            Debug.WriteLine($"❌❌❌ {nameof(LoadMetadataAsync)}: {ex.Message}");
         }
         if (imgC.Count == 0) return meta;
 
