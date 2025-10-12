@@ -17,34 +17,27 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
-using Microsoft.UI.Xaml.Controls;
 
 namespace ImageGlass.UI;
 
-public partial class IgMenuItem : MenuFlyoutItem, IMenuItem
+public interface IMenuItem
 {
-    private MenuItemHelper _helper;
+    /// <summary>
+    /// Gets, sets the language key for localization.
+    /// </summary>
+    LangId? LangKey { get; set; }
 
 
-    public LangId? LangKey
-    {
-        get => _helper.LangKey;
-        set => _helper.LangKey = value;
-    }
+    /// <summary>
+    /// Gets, sets the language param for localization.
+    /// </summary>
+    object? LangParams { get; set; }
 
 
-    public object? LangParams
-    {
-        get => _helper.LangParams;
-        set => _helper.LangParams = value;
-    }
-
-
-    public IgMenuItem()
-    {
-        DefaultStyleKey = typeof(IgMenuItem);
-        _helper = new(this);
-    }
-
+    /// <summary>
+    /// Gets or sets a string that overrides the default key combination string
+    /// associated with a keyboard accelerator.
+    /// </summary>
+    string KeyboardAcceleratorTextOverride { get; set; }
 
 }

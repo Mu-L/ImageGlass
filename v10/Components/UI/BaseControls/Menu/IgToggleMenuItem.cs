@@ -21,14 +21,11 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace ImageGlass.UI;
 
-public partial class IgToggleMenuItem : ToggleMenuFlyoutItem
+public partial class IgToggleMenuItem : ToggleMenuFlyoutItem, IMenuItem
 {
     private MenuItemHelper _helper;
 
 
-    /// <summary>
-    /// Gets, sets the language key for localization.
-    /// </summary>
     public LangId? LangKey
     {
         get => _helper.LangKey;
@@ -36,9 +33,6 @@ public partial class IgToggleMenuItem : ToggleMenuFlyoutItem
     }
 
 
-    /// <summary>
-    /// Gets, sets the language param for localization.
-    /// </summary>
     public object? LangParams
     {
         get => _helper.LangParams;
