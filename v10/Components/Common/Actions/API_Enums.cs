@@ -22,6 +22,9 @@ namespace ImageGlass;
 public enum API
 {
     IG_OpenMainMenu,
+    IG_ViewByStep,
+    IG_ViewByIndex,
+
 
     // Menu > File
     IG_OpenFile,
@@ -34,8 +37,9 @@ public enum API
     // Menu > Navigation
     IG_ViewNext,
     IG_ViewPrevious,
-    IG_ViewByStep,
-    IG_ViewByIndex,
+    IG_Goto,
+    IG_GotoFirst,
+    IG_GotoLast,
 
     // Menu > Zoom
 

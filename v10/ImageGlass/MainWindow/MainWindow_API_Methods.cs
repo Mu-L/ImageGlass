@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.Storage.Pickers;
 using System;
@@ -27,7 +28,7 @@ namespace ImageGlass;
 public partial class MainWindow
 {
     /// <summary>
-    /// API name: <see cref="API.IG_Exit"/>.
+    /// Exit the app.
     /// </summary>
     public static void IG_Exit()
     {
@@ -36,7 +37,7 @@ public partial class MainWindow
 
 
     /// <summary>
-    /// API name: <see cref="API.IG_OpenMainMenu"/>
+    /// Shows main menu.
     /// </summary>
     public void IG_OpenMainMenu()
     {
@@ -45,7 +46,7 @@ public partial class MainWindow
 
 
     /// <summary>
-    /// API name: <see cref="API.IG_OpenFile"/>.
+    /// Shows file picker to open a photo.
     /// </summary>
     public async Task IG_OpenFileAsync()
     {
@@ -74,7 +75,7 @@ public partial class MainWindow
 
 
     /// <summary>
-    /// API name: <see cref="API.IG_OpenFolder"/>.
+    /// Shows folder picker to open a photo folder. 
     /// </summary>
     public async Task IG_OpenFolderAsync()
     {
@@ -86,7 +87,7 @@ public partial class MainWindow
 
 
     /// <summary>
-    /// API name: <see cref="API.IG_OpenPath"/>.
+    /// Opens photo by the given path.
     /// </summary>
     public void IG_OpenPath(string? path)
     {
@@ -185,6 +186,54 @@ public partial class MainWindow
 
 
     /// <summary>
+    /// Shows an input dialog, and opens the user-input photo.
+    /// </summary>
+    public async void IG_GoTo()
+    {
+        if (AP.Photos.Count == 0) return;
+
+        var oldIndex = AP.Photos.CurrentIndex + 1;
+        var result = await ModalWindow.ShowInputAsync(this,
+            AP.Config.Lang[LangId.FrmMain_MnuGoTo],
+            AP.Config.Lang[LangId.FrmMain_MnuGoTo_Description],
+            inputValue: oldIndex.ToString(),
+            acceptValue: TextBoxAcceptValue.UnsignedIntValueOnly);
+
+        if (result.ExitCode != DialogExitCode.OK) return;
+
+
+        if (int.TryParse(result.InputValue, out var newIndex))
+        {
+            newIndex--;
+
+            if (newIndex != AP.Photos.CurrentIndex
+                && 0 <= newIndex && newIndex < AP.Photos.Count)
+            {
+                IG_ViewByIndex(newIndex);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Views the first photo in the list.
+    /// </summary>
+    public void IG_GoToFirst()
+    {
+        IG_ViewByIndex(0);
+    }
+
+
+    /// <summary>
+    /// Views the last photo in the list.
+    /// </summary>
+    public void IG_GoToLast()
+    {
+        IG_ViewByIndex((int)AP.Photos.Count - 1);
+    }
+
+
+    /// <summary>
     /// Toggles the viewer's checkerboard mode.
     /// </summary>
     public void IG_ToggleCheckerboard(string? mode = null)
@@ -193,6 +242,7 @@ public partial class MainWindow
 
         IG_ToggleCheckerboard(isValid ? wantedMode : null);
     }
+
 
     /// <summary>
     /// Toggles the viewer's checkerboard mode.

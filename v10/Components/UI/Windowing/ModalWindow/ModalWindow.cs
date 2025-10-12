@@ -220,13 +220,6 @@ public partial class ModalWindow : DialogWindow
         SoftwareBitmap? thumbnail = null,
         TextBoxAcceptValue acceptValue = TextBoxAcceptValue.Any)
     {
-        // use stock icon as thumbnail
-        if (thumbnail is null)
-        {
-            thumbnail = await IconApi.GetSystemIconAsync(thumbnailIcon ?? StockIconId.Warning, 128);
-            thumbnailIcon = null;
-        }
-
         using var vm = new ModalWindowViewModel()
         {
             Description = description,

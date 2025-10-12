@@ -34,9 +34,18 @@ public partial class MainWindow
     // list of all menu items & default action, hotkeys
     private static IReadOnlyCollection<HotkeySingleAction> _defaultMenuList => [
         new(LangId.FrmMain_MnuMain,                     API.IG_OpenMainMenu,        MKeys.Alt, VKey.F),
+
+        // File
         new(LangId.FrmMain_MnuOpenFile,                 API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
         new(LangId.FrmMain_MnuViewNext,                 API.IG_ViewNext,            VKey.Right),
         new(LangId.FrmMain_MnuViewPrevious,             API.IG_ViewPrevious,        VKey.Left),
+
+        // Navigation
+        new(LangId.FrmMain_MnuGoTo,                     API.IG_Goto,                VKey.F),
+        new(LangId.FrmMain_MnuGoToFirst,                API.IG_GotoFirst,           VKey.Home),
+        new(LangId.FrmMain_MnuGoToLast,                 API.IG_GotoLast,            VKey.End),
+
+
         new(LangId.FrmMain_MnuToggleCheckerboard,       API.IG_ToggleCheckerboard,  VKey.B),
         new(LangId.FrmMain_MnuExit,                     API.IG_Exit,                [new(VKey.Escape), new(MKeys.Ctrl, VKey.W)]),
     ];

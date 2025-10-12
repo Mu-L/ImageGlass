@@ -41,6 +41,10 @@ public partial class MainWindow
         // Navigation
         { API.IG_ViewNext, IgCommands.Create(IG_ViewNext) },
         { API.IG_ViewPrevious, IgCommands.Create(IG_ViewPrevious) },
+        { API.IG_Goto, IgCommands.Create(IG_GoTo) },
+        { API.IG_GotoFirst, IgCommands.Create(IG_GoToFirst) },
+        { API.IG_GotoLast, IgCommands.Create(IG_GoToLast) },
+
         { API.IG_ViewByStep, IgCommands.Create(IG_ViewByStep) },
         { API.IG_ViewByIndex, IgCommands.Create(IG_ViewByIndex) },
 

@@ -185,7 +185,8 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
     /// </summary>
     public double ContentFontSize
     {
-        get; set
+        get => field < 1 ? FontSize : field;
+        set
         {
             if (field != value)
             {
@@ -203,7 +204,8 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
     /// </summary>
     public FontWeight ContentFontWeight
     {
-        get; set
+        get => field.Weight < 100 ? FontWeight : field;
+        set
         {
             if (field != value)
             {
