@@ -120,6 +120,7 @@ public sealed partial class MainWindow_Content : IgControl
         PART_MainMenu.Opening += PART_MainMenu_Opening;
         PART_MainMenu.Opened += PART_MainMenu_Opened;
         PART_MainMenu.Closed += PART_MainMenu_Closed;
+        MenuItemHelper.Clicked += MenuItem_Clicked;
 
         PART_ToolbarMain.ItemClicked += PART_ToolbarMain_ItemClicked;
         PART_Gallery.ItemClicked += PART_Gallery_ItemClicked;
@@ -137,9 +138,10 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgUnloaded(fe);
 
-        PART_MainMenu.Opening += PART_MainMenu_Opening;
+        PART_MainMenu.Opening -= PART_MainMenu_Opening;
         PART_MainMenu.Opened -= PART_MainMenu_Opened;
         PART_MainMenu.Closed -= PART_MainMenu_Closed;
+        MenuItemHelper.Clicked -= MenuItem_Clicked;
 
         PART_ToolbarMain.ItemClicked -= PART_ToolbarMain_ItemClicked;
         PART_Gallery.ItemClicked -= PART_Gallery_ItemClicked;
@@ -180,6 +182,7 @@ public sealed partial class MainWindow_Content : IgControl
         UpdateMenuTextIfNeeded_();
     }
 
+
     private void PART_MainMenu_Opened(object? sender, object e)
     {
         Hotkey.IsEnabled = false;
@@ -189,6 +192,14 @@ public sealed partial class MainWindow_Content : IgControl
     private void PART_MainMenu_Closed(object? sender, object e)
     {
         Hotkey.IsEnabled = true;
+    }
+
+
+    private void MenuItem_Clicked(MenuFlyoutItem sender, MenuItemClickedEventArgs e)
+    {
+        var action = MainWindow.GetMenuAction(e.Item.LangKey);
+
+        _ = _winMain.RunActionAsync(action, true);
     }
 
 
@@ -275,7 +286,7 @@ public sealed partial class MainWindow_Content : IgControl
     /// <summary>
     /// Loads menu text.
     /// </summary>.
-    private void LoadMenuText_(IList<MenuFlyoutItemBase> items)
+    private static void LoadMenuText_(IList<MenuFlyoutItemBase> items)
     {
         foreach (var item in items)
         {
@@ -292,12 +303,10 @@ public sealed partial class MainWindow_Content : IgControl
             // 2. update hotkey text for menu items
             if (item is IMenuItem mnuItem)
             {
-                if (mnuItem.LangKey is null) continue;
+                var action = MainWindow.GetMenuAction(mnuItem.LangKey);
+                if (action is null || action.Hotkeys.Length == 0) continue;
 
-                var hotkeys = _winMain.MenuHotkeysMap.GetValueOrDefault(mnuItem.LangKey.Value) ?? [];
-                if (hotkeys.Length == 0) continue;
-
-                var hotkeyText = ZString.Join(", ", hotkeys);
+                var hotkeyText = ZString.Join(", ", action.Hotkeys);
                 mnuItem.KeyboardAcceleratorTextOverride = hotkeyText;
             }
         }

@@ -65,7 +65,7 @@ public partial class MainWindow : IgWindow
         LoadImagesFromCmdArgs();
 
         // register hotkeys
-        RegisterHotkeys();
+        RegisterHotkeys_();
 
 
         _contentEl.ToolbarButtonClicked += Toolbar_ButtonClicked;

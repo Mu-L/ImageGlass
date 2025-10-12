@@ -21,6 +21,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using VKey = Windows.System.VirtualKey;
 
 namespace ImageGlass;
@@ -30,8 +31,8 @@ public partial class MainWindow
     private Hotkey? _lastHotkeyPressed = null;
 
 
-    // default hotkeys
-    private static IReadOnlyCollection<HotkeySingleAction> _defaultMenuHotkeys => [
+    // list of all menu items & default action, hotkeys
+    private static IReadOnlyCollection<HotkeySingleAction> _defaultMenuList => [
         new(LangId.FrmMain_MnuOpenFile,                 API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
         new(LangId.FrmMain_MnuViewNext,                 API.IG_ViewNext,            VKey.Right),
         new(LangId.FrmMain_MnuViewPrevious,             API.IG_ViewPrevious,        VKey.Left),
@@ -40,13 +41,13 @@ public partial class MainWindow
     ];
 
 
-    // all hotkeys
-    private static Dictionary<Hotkey, SingleAction> _appHotkeysMap { get; set; } = new();
+    // a map of menu and its action
+    private static Dictionary<LangId, HotkeySingleAction> _menuMap { get; set; }
+        = new(_defaultMenuList.Select(ac => new KeyValuePair<LangId, HotkeySingleAction>(
+            IgLang.GetKey(ac.LangKey)!.Value, ac)));
 
-    // a map of menu and hotkeys
-    public Dictionary<LangId, Hotkey[]> MenuHotkeysMap { get; set; } = new();
-
-
+    // a map of hotkeys and actions
+    private static Dictionary<Hotkey, SingleAction> _hotkeyMap { get; set; } = new();
 
 
 
@@ -62,7 +63,7 @@ public partial class MainWindow
     private async void Hotkey_Invoked(object? sender, HotkeyInvokedEventArgs e)
     {
         // 0. get hotkey action
-        var action = _appHotkeysMap.GetValueOrDefault(e.Hotkey);
+        var action = _hotkeyMap.GetValueOrDefault(e.Hotkey);
         if (action is null) return;
 
         var isPressedMultipleTimes = e.Hotkey == _lastHotkeyPressed;
@@ -93,18 +94,17 @@ public partial class MainWindow
     }
 
 
-    private void RegisterHotkeys()
+    private void RegisterHotkeys_()
     {
         // 1. register the default hotkeys
-        foreach (var item in _defaultMenuHotkeys)
+        foreach (var item in _defaultMenuList)
         {
             foreach (var hk in item.Hotkeys)
             {
                 Content.KeyboardAccelerators.Add(hk.Data);
 
                 // save to the maps
-                _appHotkeysMap.TryAdd(hk, item);
-                MenuHotkeysMap.TryAdd(IgLang.GetKey(item.LangKey)!.Value, item.Hotkeys);
+                _hotkeyMap.TryAdd(hk, item);
             }
         }
 
@@ -127,11 +127,26 @@ public partial class MainWindow
                 }
 
                 // save custom hotkey to the map
-                _ = _appHotkeysMap.Remove(hk);
-                _ = _appHotkeysMap.TryAdd(hk, item.OnClick);
+                _ = _hotkeyMap.Remove(hk);
+                _ = _hotkeyMap.TryAdd(hk, item.OnClick);
             }
         }
     }
+
+
+
+    /// <summary>
+    /// Gets the menu action
+    /// </summary>
+    public static HotkeySingleAction? GetMenuAction(LangId? langKey)
+    {
+        if (langKey is null) return null;
+
+        var action = _menuMap.GetValueOrDefault(langKey.Value);
+
+        return action;
+    }
+
 
 
 }

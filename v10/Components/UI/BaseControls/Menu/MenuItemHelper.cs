@@ -26,6 +26,12 @@ namespace ImageGlass.UI;
 
 public partial class MenuItemHelper : IgReactive
 {
+    /// <summary>
+    /// Occurs when menu item is clicked.
+    /// </summary>
+    public static event TEventHandler<MenuFlyoutItem, MenuItemClickedEventArgs>? Clicked;
+
+
     private MenuFlyoutItem _menuItem;
 
 
@@ -79,6 +85,7 @@ public partial class MenuItemHelper : IgReactive
         LocalizeText();
 
         _menuItem.Unloaded += MenuItem_Unloaded;
+        _menuItem.Click += MenuItem_Click;
 
         AP.LanguageChanged += AP_LanguageChanged;
     }
@@ -87,6 +94,7 @@ public partial class MenuItemHelper : IgReactive
     private void MenuItem_Unloaded(object sender, RoutedEventArgs e)
     {
         _menuItem.Unloaded -= MenuItem_Unloaded;
+        _menuItem.Click -= MenuItem_Click;
 
         AP.LanguageChanged -= AP_LanguageChanged;
     }
@@ -95,6 +103,16 @@ public partial class MenuItemHelper : IgReactive
     private void AP_LanguageChanged(object? sender, EventArgs e)
     {
         LocalizeText();
+    }
+
+
+    private void MenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        RaiseClickedEvent(new MenuItemClickedEventArgs()
+        {
+            Sender = _menuItem,
+            Item = (IMenuItem)_menuItem,
+        });
     }
 
 
@@ -109,4 +127,20 @@ public partial class MenuItemHelper : IgReactive
         _menuItem.Text = localizedText;
     }
 
+
+    /// <summary>
+    /// Raises the event <see cref="Clicked"/>.
+    /// </summary>
+    private static void RaiseClickedEvent(MenuItemClickedEventArgs e)
+    {
+        Clicked?.Invoke(e.Sender, e);
+    }
+
+}
+
+
+public class MenuItemClickedEventArgs : EventArgs
+{
+    public required MenuFlyoutItem Sender { get; init; }
+    public required IMenuItem Item { get; init; }
 }
