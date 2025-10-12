@@ -133,9 +133,6 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
         DefaultStyleKey = typeof(IgControl);
 
         Loaded += IgControl_Loaded;
-        Unloaded += IgControl_Unloaded;
-        SizeChanged += IgControl_SizeChanged;
-        DataContextChanged += IgControl_DataContextChanged;
     }
 
 
@@ -145,6 +142,10 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
     {
         OnIgLanguageChanged();
         OnIgLoaded((FrameworkElement)sender);
+
+        Unloaded += IgControl_Unloaded;
+        SizeChanged += IgControl_SizeChanged;
+        DataContextChanged += IgControl_DataContextChanged;
 
         AP.ThemeChanged += AP_ThemeChanged;
         AP.LanguageChanged += AP_LanguageChanged;
@@ -158,7 +159,6 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
         AP.ThemeChanged -= AP_ThemeChanged;
         AP.LanguageChanged -= AP_LanguageChanged;
 
-        Loaded -= IgControl_Loaded;
         Unloaded -= IgControl_Unloaded;
         SizeChanged -= IgControl_SizeChanged;
         DataContextChanged -= IgControl_DataContextChanged;

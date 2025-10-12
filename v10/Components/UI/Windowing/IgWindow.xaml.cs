@@ -299,16 +299,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
         // setup events
         _msgMonitor.MessageReceived += MsgMonitor_MessageReceived;
-
-        AP.ThemeChanged += AP_ThemeChanged;
-        AP.LanguageChanged += AP_LanguageChanged;
-        AppWindow.Closing += AppWindow_Closing;
-
         PART_WindowContent.Loaded += PART_WindowContent_Loaded;
-        Closed += IgWindow_Closed;
-        VisibilityChanged += IgWindow_VisibilityChanged;
-        Activated += IgWindow_Activated;
-        SizeChanged += IgWindow_SizeChanged;
     }
 
 
@@ -325,6 +316,17 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
         OnIgLanguageChanged();
         OnIgWindowLoaded((FrameworkElement)sender);
+
+
+        AP.ThemeChanged += AP_ThemeChanged;
+        AP.LanguageChanged += AP_LanguageChanged;
+
+        Closed += IgWindow_Closed;
+        VisibilityChanged += IgWindow_VisibilityChanged;
+        Activated += IgWindow_Activated;
+        SizeChanged += IgWindow_SizeChanged;
+
+        AppWindow.Closing += AppWindow_Closing;
     }
 
 

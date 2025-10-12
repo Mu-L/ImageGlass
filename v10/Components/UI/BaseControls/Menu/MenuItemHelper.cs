@@ -71,7 +71,6 @@ public partial class MenuItemHelper : IgReactive
         _menuItem = mnu;
 
         _menuItem.Loaded += MenuItem_Loaded;
-        _menuItem.Unloaded += MenuItem_Unloaded;
     }
 
 
@@ -79,13 +78,14 @@ public partial class MenuItemHelper : IgReactive
     {
         LocalizeText();
 
+        _menuItem.Unloaded += MenuItem_Unloaded;
+
         AP.LanguageChanged += AP_LanguageChanged;
     }
 
 
     private void MenuItem_Unloaded(object sender, RoutedEventArgs e)
     {
-        _menuItem.Loaded -= MenuItem_Loaded;
         _menuItem.Unloaded -= MenuItem_Unloaded;
 
         AP.LanguageChanged -= AP_LanguageChanged;
