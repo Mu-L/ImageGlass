@@ -42,6 +42,7 @@ public enum API
     IG_GotoLast,
 
     // Menu > Zoom
+    IG_CustomZoom,
 
     // Menu > Panning
 

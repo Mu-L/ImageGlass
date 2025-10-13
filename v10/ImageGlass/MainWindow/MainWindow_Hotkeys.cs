@@ -40,10 +40,15 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuViewNext,                 API.IG_ViewNext,            VKey.Right),
         new(LangId.FrmMain_MnuViewPrevious,             API.IG_ViewPrevious,        VKey.Left),
 
+
         // Navigation
         new(LangId.FrmMain_MnuGoTo,                     API.IG_Goto,                VKey.F),
         new(LangId.FrmMain_MnuGoToFirst,                API.IG_GotoFirst,           VKey.Home),
         new(LangId.FrmMain_MnuGoToLast,                 API.IG_GotoLast,            VKey.End),
+
+
+        // Zoom
+        new(LangId.FrmMain_MnuCustomZoom,               API.IG_CustomZoom,          VKey.Z),
 
 
         new(LangId.FrmMain_MnuToggleCheckerboard,       API.IG_ToggleCheckerboard,  VKey.B),

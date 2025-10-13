@@ -49,6 +49,10 @@ public partial class MainWindow
         { API.IG_ViewByIndex, IgCommands.Create(IG_ViewByIndex) },
 
 
+        // Zoom
+        { API.IG_CustomZoom, IgCommands.Create(IG_CustomZoom) },
+
+
         // Layout
         { API.IG_ToggleCheckerboard, IgCommands.Create(IG_ToggleCheckerboard) },
 

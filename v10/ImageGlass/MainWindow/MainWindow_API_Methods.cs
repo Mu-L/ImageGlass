@@ -21,6 +21,7 @@ using ImageGlass.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.Storage.Pickers;
 using System;
+using System.Drawing;
 using System.Threading.Tasks;
 
 namespace ImageGlass;
@@ -188,7 +189,15 @@ public partial class MainWindow
     /// <summary>
     /// Shows an input dialog, and opens the user-input photo.
     /// </summary>
-    public async void IG_GoTo()
+    public void IG_GoTo()
+    {
+        _ = IG_GoToAsync();
+    }
+
+    /// <summary>
+    /// Shows an input dialog, and opens the user-input photo.
+    /// </summary>
+    public async Task IG_GoToAsync()
     {
         if (AP.Photos.Count == 0) return;
 
@@ -274,6 +283,38 @@ public partial class MainWindow
         }
 
         Viewer.CheckerboardMode = AP.Config.CheckerboardMode = wantedMode;
+    }
+
+
+
+    /// <summary>
+    /// Shows input dialog for custom zoom.
+    /// </summary>
+    public void IG_CustomZoom()
+    {
+        _ = IG_CustomZoomAsync();
+    }
+
+    /// <summary>
+    /// Shows input dialog for custom zoom.
+    /// </summary>
+    public async Task IG_CustomZoomAsync()
+    {
+        var oldZoom = Math.Round(_contentEl.Viewer.ZoomFactor * 100f, 3);
+
+        var result = await ModalWindow.ShowInputAsync(this,
+            AP.Config.Lang[LangId.FrmMain_MnuCustomZoom],
+            AP.Config.Lang[LangId.FrmMain_MnuCustomZoom_Description],
+            inputValue: oldZoom.ToString(),
+            thumbnailIcon: StockIconId.Find,
+            acceptValue: TextBoxAcceptValue.UnsignedFloatValueOnly);
+
+        if (result.ExitCode != DialogExitCode.OK) return;
+
+        if (float.TryParse(result.InputValue.Trim(), out var newZoom))
+        {
+            _contentEl.Viewer.ZoomFactor = newZoom / 100f;
+        }
     }
 
 
