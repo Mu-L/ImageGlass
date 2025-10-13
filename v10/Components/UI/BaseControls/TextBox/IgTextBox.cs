@@ -142,7 +142,7 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
             options: RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static Regex Regex_UnsignedFloatValueOnly => new Regex(
-            pattern: $"^[{Const.SIGN_POSITIVE}{Const.SIGN_NEGATIVE}]?([0-9]+([{Const.DECIMAL_SEPARATOR}][0-9]*)?|[{Const.DECIMAL_SEPARATOR}][0-9]+)$",
+            pattern: $"^[{Const.SIGN_POSITIVE}]?([0-9]+([{Const.DECIMAL_SEPARATOR}][0-9]*)?|[{Const.DECIMAL_SEPARATOR}][0-9]+)$",
             options: RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
 

@@ -81,6 +81,13 @@ internal sealed partial class ModalWindow_Content : IgControl
     {
         base.OnIgLoaded(fe);
 
+        // set focus to textbox
+        if (VM.IsInputVisible)
+        {
+            PART_Input.Focus(FocusState.Keyboard);
+            PART_Input.SelectAll();
+        }
+
         _ = LoadThumbnailSourceAsync();
         _ = LoadThumbnailIconSourceAsync();
     }

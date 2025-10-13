@@ -27,8 +27,9 @@ using Windows.System;
 
 namespace ImageGlass.UI;
 
-public sealed partial class DialogWindow_Content : IgControl
+public partial class DialogWindow_Content : IgControl
 {
+    internal readonly int MIN_WIDTH = 400;
     internal readonly int MAX_WIDTH = 600;
 
     public event TypedEventHandler<Button, RoutedEventArgs>? Button1Click;

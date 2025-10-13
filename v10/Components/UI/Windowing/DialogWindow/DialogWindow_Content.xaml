@@ -12,6 +12,7 @@
 
     <Grid
         x:Name="PART_Root"
+        MinWidth="{x:Bind MIN_WIDTH}"
         MaxWidth="{x:Bind MAX_WIDTH}"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
