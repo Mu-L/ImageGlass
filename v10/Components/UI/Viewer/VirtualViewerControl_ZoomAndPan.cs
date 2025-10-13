@@ -156,9 +156,9 @@ public partial class VirtualViewerControl
     /// <summary>
     /// Gets the center point of the image viewport.
     /// </summary>
-    public Point ViewportCenterPoint => new(
-        _destRect.X + _destRect.Width / 2.0,
-        _destRect.Y + _destRect.Height / 2.0);
+    public Point ViewportCenterPoint => new Point(
+        (_destRect.X + _destRect.Width / 2.0) / DpiX,
+        (_destRect.Y + _destRect.Height / 2.0) / DpiX);
 
 
     #endregion // Public Properies
@@ -289,8 +289,10 @@ public partial class VirtualViewerControl
     {
         if (_zooming.Factor == zoomValue) return;
 
+        _zooming.OldFactor = _zooming.Factor;
         _zooming.Factor = Math.Min(MaxZoom, Math.Max(zoomValue, MinZoom));
         _zooming.IsManual = isManualZoom;
+        _zooming.ZoomedPoint = ViewportCenterPoint;
 
 
         // update drawing regions
