@@ -501,7 +501,7 @@ public partial class VirtualViewerControl
     public bool ZoomByDeltaToPoint(double delta, Point? point = null, bool requestRerender = true)
     {
         var newZoomFactor = _zooming.Factor;
-        var isZoomingByMouseWheel = true; // TODO: Math.Abs(delta) == SystemInformation.MouseWheelScrollDelta;
+        var isZoomingByMouseWheel = Math.Abs(delta) == SystemInfo.MouseWheelScrollDelta;
 
         // use zoom levels
         if (ZoomLevels.Length > 0 && isZoomingByMouseWheel)

@@ -36,3 +36,5 @@ SetWindowLongPtr
 SetWindowLong
 GetDpiForWindow
 SetWindowPos
+
+WHEEL_DELTA
