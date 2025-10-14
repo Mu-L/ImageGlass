@@ -458,7 +458,9 @@ public partial class VirtualViewerControl
             //    return true;
             //}
 
-            PanTo(zoomedDistance.Width, zoomedDistance.Height, location, requestRerender);
+            _ = PanTo(zoomedDistance.Width, zoomedDistance.Height, location, false);
+
+            if (requestRerender) Invalidate();
 
             // emit ZoomChanged event
             ZoomChanged?.Invoke(this, new ZoomEventArgs()

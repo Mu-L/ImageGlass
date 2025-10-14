@@ -59,5 +59,13 @@ public partial class HotkeySingleAction : SingleAction
     }
 
 
+    public HotkeySingleAction(LangId langKey, API api, string? argument, Hotkey[]? hotkeys = null)
+        : base(api, argument)
+    {
+        LangKey = IgLang.KeysMap[langKey];
+        if (hotkeys is not null) Hotkeys = hotkeys;
+    }
+
+
 }
 

@@ -318,4 +318,31 @@ public partial class MainWindow
     }
 
 
+    /// <summary>
+    /// Zoom to the current cursor location by the given factor.
+    /// </summary>
+    public void IG_SetZoom(string? factorStr)
+    {
+        if (!float.TryParse(factorStr, out var factor))
+        {
+            throw new ArgumentException($"""
+                Zoom factor '{factorStr}' is not a valid float.
+                
+                ----------
+                👉🏼 Method: {nameof(IG_SetZoom)}
+                """,
+                nameof(factorStr));
+        }
+
+        IG_SetZoom(factor);
+    }
+
+    /// <summary>
+    /// Zoom to the current cursor location by the given factor.
+    /// </summary>
+    public void IG_SetZoom(float factor)
+    {
+        _ = _contentEl.Viewer.ZoomToPoint(factor);
+    }
+
 }

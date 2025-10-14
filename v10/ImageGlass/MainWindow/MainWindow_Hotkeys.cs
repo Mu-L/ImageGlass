@@ -49,6 +49,7 @@ public partial class MainWindow
 
         // Zoom
         new(LangId.FrmMain_MnuCustomZoom,               API.IG_CustomZoom,          VKey.Z),
+        new(LangId.FrmMain_MnuActualSize,               API.IG_SetZoom, "1",        [new(VKey.Number0), new(VKey.NumberPad0)]),
 
 
         new(LangId.FrmMain_MnuToggleCheckerboard,       API.IG_ToggleCheckerboard,  VKey.B),
