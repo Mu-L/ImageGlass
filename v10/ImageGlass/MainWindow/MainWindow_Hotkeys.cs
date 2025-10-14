@@ -54,6 +54,13 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuZoomOut,              API.IG_ZoomOut,             VKey.Subtract),
 
 
+        // Panning
+        new(LangId.FrmMain_MnuPanLeft,              API.IG_PanLeft,             [new(MKeys.Alt, VKey.Left)]),
+        new(LangId.FrmMain_MnuPanRight,             API.IG_PanRight,            [new(MKeys.Alt, VKey.Right)]),
+        new(LangId.FrmMain_MnuPanUp,                API.IG_PanUp,               [new(MKeys.Alt, VKey.Up)]),
+        new(LangId.FrmMain_MnuPanDown,              API.IG_PanDown,             [new(MKeys.Alt, VKey.Down)]),
+
+
         new(LangId.FrmMain_MnuToggleCheckerboard,   API.IG_ToggleCheckerboard,  VKey.B),
         new(LangId.FrmMain_MnuExit,                 API.IG_Exit,                [new(VKey.Escape), new(MKeys.Ctrl, VKey.W)]),
     ];

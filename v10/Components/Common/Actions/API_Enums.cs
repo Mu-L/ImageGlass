@@ -48,6 +48,10 @@ public enum API
     IG_ZoomOut,
 
     // Menu > Panning
+    IG_PanLeft,
+    IG_PanRight,
+    IG_PanUp,
+    IG_PanDown,
 
     // Menu > Image
 

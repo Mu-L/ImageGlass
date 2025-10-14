@@ -56,6 +56,13 @@ public partial class MainWindow
         { API.IG_ZoomOut, IgCommands.Create(IG_ZoomOut) },
 
 
+        // Panning
+        { API.IG_PanLeft, IgCommands.Create(IG_PanLeft) },
+        { API.IG_PanRight, IgCommands.Create(IG_PanRight) },
+        { API.IG_PanUp, IgCommands.Create(IG_PanUp) },
+        { API.IG_PanDown, IgCommands.Create(IG_PanDown) },
+
+
         // Layout
         { API.IG_ToggleCheckerboard, IgCommands.Create(IG_ToggleCheckerboard) },
 

@@ -347,6 +347,23 @@ public partial class MainWindow
 
 
     /// <summary>
+    /// Start drawing animation.
+    /// </summary>
+    public void IG_Animate(AnimationSources source, int durationMs = 100)
+    {
+        _contentEl.Viewer.StartDrawingAnimation(source);
+
+        BHelper.Debounce(durationMs, () =>
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                _contentEl.Viewer.StopDrawingAnimation(source);
+            });
+        });
+    }
+
+
+    /// <summary>
     /// Zooms into the image.
     /// </summary>
     public void IG_ZoomIn()
@@ -358,14 +375,7 @@ public partial class MainWindow
         }
 
         // smooth zooming
-        _contentEl.Viewer.StartDrawingAnimation(AnimationSources.ZoomIn);
-        BHelper.Debounce(100, () =>
-        {
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                _contentEl.Viewer.StopDrawingAnimation(AnimationSources.ZoomIn);
-            });
-        });
+        IG_Animate(AnimationSources.ZoomIn);
     }
 
 
@@ -381,14 +391,47 @@ public partial class MainWindow
         }
 
         // smooth zooming
-        _contentEl.Viewer.StartDrawingAnimation(AnimationSources.ZoomOut);
-        BHelper.Debounce(100, () =>
-        {
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                _contentEl.Viewer.StopDrawingAnimation(AnimationSources.ZoomOut);
-            });
-        });
+        IG_Animate(AnimationSources.ZoomOut);
+    }
+
+
+    /// <summary>
+    /// Pans the viewing image to left.
+    /// </summary>
+    public void IG_PanLeft()
+    {
+        // smooth zooming
+        IG_Animate(AnimationSources.PanLeft);
+    }
+
+
+    /// <summary>
+    /// Pans the viewing image to right.
+    /// </summary>
+    public void IG_PanRight()
+    {
+        // smooth zooming
+        IG_Animate(AnimationSources.PanRight);
+    }
+
+
+    /// <summary>
+    /// Pans the viewing image to top.
+    /// </summary>
+    public void IG_PanUp()
+    {
+        // smooth zooming
+        IG_Animate(AnimationSources.PanUp);
+    }
+
+
+    /// <summary>
+    /// Pans the viewing image to bottom.
+    /// </summary>
+    public void IG_PanDown()
+    {
+        // smooth zooming
+        IG_Animate(AnimationSources.PanDown);
     }
 
 }
