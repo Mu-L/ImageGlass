@@ -397,6 +397,44 @@ public partial class VirtualViewerControl
 
 
     /// <summary>
+    /// Zooms into the image.
+    /// </summary>
+    /// <param name="point">
+    /// Client's cursor location to zoom into.
+    /// <c><see cref="ViewportCenterPoint"/></c> is the default value.
+    /// </param>
+    /// <returns>
+    ///   <list type="table">
+    ///     <item><c>true</c> if the viewport is changed.</item>
+    ///     <item><c>false</c> if the viewport is unchanged.</item>
+    ///   </list>
+    /// </returns>
+    public bool ZoomIn(Point? point = null, bool requestRerender = true)
+    {
+        return ZoomByDeltaToPoint(SystemInfo.MouseWheelScrollDelta, point, requestRerender);
+    }
+
+
+    /// <summary>
+    /// Zooms out of the image.
+    /// </summary>
+    /// <param name="point">
+    /// Client's cursor location to zoom out.
+    /// <c><see cref="ViewportCenterPoint"/></c> is the default value.
+    /// </param>
+    /// <returns>
+    ///   <list type="table">
+    ///     <item><c>true</c> if the viewport is changed.</item>
+    ///     <item><c>false</c> if the viewport is unchanged.</item>
+    ///   </list>
+    /// </returns>
+    public bool ZoomOut(Point? point = null, bool requestRerender = true)
+    {
+        return ZoomByDeltaToPoint(-SystemInfo.MouseWheelScrollDelta, point, requestRerender);
+    }
+
+
+    /// <summary>
     /// Scales the image using factor value.
     /// </summary>
     /// <param name="factor">Zoom factor (<c>1.0f = 100%</c>).</param>

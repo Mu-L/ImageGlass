@@ -399,25 +399,19 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     protected override void OnRender(SwapChainCanvasRenderEventArgs e)
     {
-        // draw checkerboard
-        DrawCheckerboardLayer(e);
-
-
-        // draw image
-        DrawImageLayer(e);
-
-
-        // Draw selection layer
-        OnSelectionDrawing(e);
-
-
+        DrawCheckerboardLayer(e);       // draw checkerboard
+        DrawImageLayer(e);              // draw image
+        OnSelectionDrawing(e);          // Draw selection layer
         base.OnRender(e);
+
+        DrawAnimationSource();          // draw animation source
 
 
         // debug
         if (!EnableDebug) return;
         e.DrawText(
             $"""
+            FPS = {FPS}
             Control Size = {ActualWidth} x {ActualHeight}
             DrawingArea = {DrawingArea}
             Image size = {BitmapSize}
@@ -445,6 +439,41 @@ public partial class VirtualViewerControl : SwapChainCanvas
         //e.DrawRectangle(_destRect, 0, Colors.Cyan);
     }
 
+
+    protected virtual void DrawAnimationSource()
+    {
+        //if (UseWebview2) return;
+
+        // Panning
+        if (AnimationSource.HasFlag(AnimationSources.PanLeft))
+        {
+            PanLeft(requestRerender: false);
+        }
+        else if (AnimationSource.HasFlag(AnimationSources.PanRight))
+        {
+            PanRight(requestRerender: false);
+        }
+
+        if (AnimationSource.HasFlag(AnimationSources.PanUp))
+        {
+            PanUp(requestRerender: false);
+        }
+        else if (AnimationSource.HasFlag(AnimationSources.PanDown))
+        {
+            PanDown(requestRerender: false);
+        }
+
+
+        // Zooming
+        if (AnimationSource.HasFlag(AnimationSources.ZoomIn))
+        {
+            _ = ZoomByDeltaToPoint(20, null, requestRerender: false);
+        }
+        else if (AnimationSource.HasFlag(AnimationSources.ZoomOut))
+        {
+            _ = ZoomByDeltaToPoint(-20, null, requestRerender: false);
+        }
+    }
 
     protected virtual void DrawImageLayer(SwapChainCanvasRenderEventArgs e)
     {
@@ -555,7 +584,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         _photo?.CancelLoading();
         _photo?.Unload();
 
-        // reset selection
+        // reset
+        AnimationSource = AnimationSources.None;
         _enablePanningVelocity = false;
         SetSourceSelection(Rect.Empty, false);
         SetBitmapSize(0, 0, false);
