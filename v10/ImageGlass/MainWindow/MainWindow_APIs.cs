@@ -52,6 +52,8 @@ public partial class MainWindow
         // Zoom
         { API.IG_CustomZoom, IgCommands.Create(IG_CustomZoom) },
         { API.IG_SetZoom, IgCommands.Create(IG_SetZoom) },
+        { API.IG_ZoomIn, IgCommands.Create(IG_ZoomIn) },
+        { API.IG_ZoomOut, IgCommands.Create(IG_ZoomOut) },
 
 
         // Layout

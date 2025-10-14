@@ -345,4 +345,50 @@ public partial class MainWindow
         _ = _contentEl.Viewer.ZoomToPoint(factor);
     }
 
+
+    /// <summary>
+    /// Zooms into the image.
+    /// </summary>
+    public void IG_ZoomIn()
+    {
+        if (_contentEl.Viewer.ZoomLevels.Length > 0)
+        {
+            _contentEl.Viewer.ZoomIn();
+            return;
+        }
+
+        // smooth zooming
+        _contentEl.Viewer.StartDrawingAnimation(AnimationSources.ZoomIn);
+        BHelper.Debounce(100, () =>
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                _contentEl.Viewer.StopDrawingAnimation(AnimationSources.ZoomIn);
+            });
+        });
+    }
+
+
+    /// <summary>
+    /// Zooms out of the image.
+    /// </summary>
+    public void IG_ZoomOut()
+    {
+        if (_contentEl.Viewer.ZoomLevels.Length > 0)
+        {
+            _contentEl.Viewer.ZoomOut();
+            return;
+        }
+
+        // smooth zooming
+        _contentEl.Viewer.StartDrawingAnimation(AnimationSources.ZoomOut);
+        BHelper.Debounce(100, () =>
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                _contentEl.Viewer.StopDrawingAnimation(AnimationSources.ZoomOut);
+            });
+        });
+    }
+
 }

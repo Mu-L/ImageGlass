@@ -44,6 +44,8 @@ public enum API
     // Menu > Zoom
     IG_CustomZoom,
     IG_SetZoom,
+    IG_ZoomIn,
+    IG_ZoomOut,
 
     // Menu > Panning
 
