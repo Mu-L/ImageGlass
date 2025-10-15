@@ -347,6 +347,34 @@ public partial class MainWindow
 
 
     /// <summary>
+    /// Sets the zoom mode value.
+    /// </summary>
+    public void IG_SetZoomMode(string? modeStr)
+    {
+        if (!Enum.TryParse<ZoomMode>(modeStr, out var mode))
+        {
+            throw new ArgumentException($"""
+                '{modeStr}' is not a valid zoom mode.
+                
+                ----------
+                👉🏼 Method: {nameof(IG_SetZoomMode)}
+                """,
+                nameof(modeStr));
+        }
+
+        IG_SetZoomMode(mode);
+    }
+
+    /// <summary>
+    /// Sets the zoom mode value.
+    /// </summary>
+    public void IG_SetZoomMode(ZoomMode mode)
+    {
+        _contentEl.Viewer.ZoomMode = AP.Config.ZoomMode = mode;
+    }
+
+
+    /// <summary>
     /// Start drawing animation.
     /// </summary>
     public void IG_Animate(AnimationSources source, int durationMs = 100)

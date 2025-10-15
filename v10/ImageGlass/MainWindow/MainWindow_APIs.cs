@@ -54,6 +54,7 @@ public partial class MainWindow
         { API.IG_SetZoom, IgCommands.Create(IG_SetZoom) },
         { API.IG_ZoomIn, IgCommands.Create(IG_ZoomIn) },
         { API.IG_ZoomOut, IgCommands.Create(IG_ZoomOut) },
+        { API.IG_SetZoomMode, IgCommands.Create(IG_SetZoomMode) },
 
 
         // Panning

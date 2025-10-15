@@ -138,27 +138,32 @@
                         <MenuFlyoutSeparator />
 
                         <ui:IgRadioMenuItem
+                            x:Name="MnuAutoZoom"
                             GroupName="ZoomMode"
-                            IsChecked="True"
                             LangKey="FrmMain_MnuAutoZoom"
                             Text="[Auto zoom]" />
                         <ui:IgRadioMenuItem
+                            x:Name="MnuLockZoom"
                             GroupName="ZoomMode"
                             LangKey="FrmMain_MnuLockZoom"
                             Text="[Lock zoom ratio]" />
                         <ui:IgRadioMenuItem
+                            x:Name="MnuScaleToWidth"
                             GroupName="ZoomMode"
                             LangKey="FrmMain_MnuScaleToWidth"
                             Text="[Scale to width]" />
                         <ui:IgRadioMenuItem
+                            x:Name="MnuScaleToHeight"
                             GroupName="ZoomMode"
                             LangKey="FrmMain_MnuScaleToHeight"
                             Text="[Scale to height]" />
                         <ui:IgRadioMenuItem
+                            x:Name="MnuScaleToFit"
                             GroupName="ZoomMode"
                             LangKey="FrmMain_MnuScaleToFit"
                             Text="[Scale to fit]" />
                         <ui:IgRadioMenuItem
+                            x:Name="MnuScaleToFill"
                             GroupName="ZoomMode"
                             LangKey="FrmMain_MnuScaleToFill"
                             Text="[Scale to fill]" />

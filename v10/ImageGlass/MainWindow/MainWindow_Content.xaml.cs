@@ -25,6 +25,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -116,6 +117,10 @@ public sealed partial class MainWindow_Content : IgControl
         base.OnIgLoaded(fe);
 
         UpdateMessageBoxStyle_();
+        UpdateZoomModeMenuGroup_();
+
+
+        AP.Config.PropertyChanged += Config_PropertyChanged;
 
         PART_MainMenu.Opening += PART_MainMenu_Opening;
         PART_MainMenu.Opened += PART_MainMenu_Opened;
@@ -131,12 +136,15 @@ public sealed partial class MainWindow_Content : IgControl
         PART_Viewer.Panning += PART_Viewer_Panning;
         PART_Viewer.SelectionChanged += PART_Viewer_SelectionChanged;
         PART_Viewer.PhotoLoading += PART_Viewer_PhotoLoading;
+
     }
 
 
     protected override void OnIgUnloaded(FrameworkElement fe)
     {
         base.OnIgUnloaded(fe);
+
+        AP.Config.PropertyChanged -= Config_PropertyChanged;
 
         PART_MainMenu.Opening -= PART_MainMenu_Opening;
         PART_MainMenu.Opened -= PART_MainMenu_Opened;
@@ -168,6 +176,17 @@ public sealed partial class MainWindow_Content : IgControl
         base.OnIgLanguageChanged();
 
         _shouldUpdateMenuText = true;
+    }
+
+
+    private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Zoom mode is changed
+        if (nameof(Config.ZoomMode).Equals(e.PropertyName, StringComparison.Ordinal))
+        {
+            // update menu items state
+            UpdateZoomModeMenuGroup_();
+        }
     }
 
 
@@ -263,11 +282,25 @@ public sealed partial class MainWindow_Content : IgControl
 
 
     /// <summary>
-    /// Update message box style according to current theme.
+    /// Updates message box style according to current theme.
     /// </summary>
     private void UpdateMessageBoxStyle_()
     {
         PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor.WithAlpha(200).ToBrush();
+    }
+
+
+    /// <summary>
+    /// Updates the check state for zoom mode menu group.
+    /// </summary>
+    private void UpdateZoomModeMenuGroup_()
+    {
+        MnuAutoZoom.IsChecked = AP.Config.ZoomMode == Common.ZoomMode.AutoZoom;
+        MnuLockZoom.IsChecked = AP.Config.ZoomMode == Common.ZoomMode.LockZoom;
+        MnuScaleToWidth.IsChecked = AP.Config.ZoomMode == Common.ZoomMode.ScaleToWidth;
+        MnuScaleToHeight.IsChecked = AP.Config.ZoomMode == Common.ZoomMode.ScaleToHeight;
+        MnuScaleToFill.IsChecked = AP.Config.ZoomMode == Common.ZoomMode.ScaleToFill;
+        MnuScaleToFit.IsChecked = AP.Config.ZoomMode == Common.ZoomMode.ScaleToFit;
     }
 
 

@@ -33,36 +33,42 @@ public partial class MainWindow
 
     // list of all menu items & default action, hotkeys
     private static IReadOnlyCollection<HotkeySingleAction> _defaultMenuList => [
-        new(LangId.FrmMain_MnuMain,                 API.IG_OpenMainMenu,        MKeys.Alt, VKey.F),
+        new(LangId.FrmMain_MnuMain,             API.IG_OpenMainMenu,        MKeys.Alt, VKey.F),
 
         // File
-        new(LangId.FrmMain_MnuOpenFile,             API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
-        new(LangId.FrmMain_MnuViewNext,             API.IG_ViewNext,            VKey.Right),
-        new(LangId.FrmMain_MnuViewPrevious,         API.IG_ViewPrevious,        VKey.Left),
+        new(LangId.FrmMain_MnuOpenFile,         API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
+        new(LangId.FrmMain_MnuViewNext,         API.IG_ViewNext,            VKey.Right),
+        new(LangId.FrmMain_MnuViewPrevious,     API.IG_ViewPrevious,        VKey.Left),
 
 
         // Navigation
-        new(LangId.FrmMain_MnuGoTo,                 API.IG_Goto,                VKey.F),
-        new(LangId.FrmMain_MnuGoToFirst,            API.IG_GotoFirst,           VKey.Home),
-        new(LangId.FrmMain_MnuGoToLast,             API.IG_GotoLast,            VKey.End),
+        new(LangId.FrmMain_MnuGoTo,             API.IG_Goto,                VKey.F),
+        new(LangId.FrmMain_MnuGoToFirst,        API.IG_GotoFirst,           VKey.Home),
+        new(LangId.FrmMain_MnuGoToLast,         API.IG_GotoLast,            VKey.End),
 
 
         // Zoom
-        new(LangId.FrmMain_MnuCustomZoom,           API.IG_CustomZoom,          VKey.Z),
-        new(LangId.FrmMain_MnuActualSize,           API.IG_SetZoom, "1",        [new(VKey.Number0), new(VKey.NumberPad0)]),
-        new(LangId.FrmMain_MnuZoomIn,               API.IG_ZoomIn,              VKey.Add),
-        new(LangId.FrmMain_MnuZoomOut,              API.IG_ZoomOut,             VKey.Subtract),
+        new(LangId.FrmMain_MnuCustomZoom,       API.IG_CustomZoom,          VKey.Z),
+        new(LangId.FrmMain_MnuActualSize,       API.IG_SetZoom, "1",        [new(VKey.Number0), new(VKey.NumberPad0)]),
+        new(LangId.FrmMain_MnuZoomIn,           API.IG_ZoomIn,              VKey.Add),
+        new(LangId.FrmMain_MnuZoomOut,          API.IG_ZoomOut,             VKey.Subtract),
+        new(LangId.FrmMain_MnuAutoZoom,         API.IG_SetZoomMode, nameof(ZoomMode.AutoZoom),      [new(VKey.Number1), new(VKey.NumberPad1)]),
+        new(LangId.FrmMain_MnuLockZoom,         API.IG_SetZoomMode, nameof(ZoomMode.LockZoom),      [new(VKey.Number2), new(VKey.NumberPad2)]),
+        new(LangId.FrmMain_MnuScaleToWidth,     API.IG_SetZoomMode, nameof(ZoomMode.ScaleToWidth),  [new(VKey.Number3), new(VKey.NumberPad3)]),
+        new(LangId.FrmMain_MnuScaleToHeight,    API.IG_SetZoomMode, nameof(ZoomMode.ScaleToHeight), [new(VKey.Number4), new(VKey.NumberPad4)]),
+        new(LangId.FrmMain_MnuScaleToFit,       API.IG_SetZoomMode, nameof(ZoomMode.ScaleToFit),    [new(VKey.Number5), new(VKey.NumberPad5)]),
+        new(LangId.FrmMain_MnuScaleToFill,      API.IG_SetZoomMode, nameof(ZoomMode.ScaleToFill),   [new(VKey.Number6), new(VKey.NumberPad6)]),
 
 
         // Panning
-        new(LangId.FrmMain_MnuPanLeft,              API.IG_PanLeft,             [new(MKeys.Alt, VKey.Left)]),
-        new(LangId.FrmMain_MnuPanRight,             API.IG_PanRight,            [new(MKeys.Alt, VKey.Right)]),
-        new(LangId.FrmMain_MnuPanUp,                API.IG_PanUp,               [new(MKeys.Alt, VKey.Up)]),
-        new(LangId.FrmMain_MnuPanDown,              API.IG_PanDown,             [new(MKeys.Alt, VKey.Down)]),
+        new(LangId.FrmMain_MnuPanLeft,          API.IG_PanLeft,             [new(MKeys.Alt, VKey.Left)]),
+        new(LangId.FrmMain_MnuPanRight,         API.IG_PanRight,            [new(MKeys.Alt, VKey.Right)]),
+        new(LangId.FrmMain_MnuPanUp,            API.IG_PanUp,               [new(MKeys.Alt, VKey.Up)]),
+        new(LangId.FrmMain_MnuPanDown,          API.IG_PanDown,             [new(MKeys.Alt, VKey.Down)]),
 
 
         new(LangId.FrmMain_MnuToggleCheckerboard,   API.IG_ToggleCheckerboard,  VKey.B),
-        new(LangId.FrmMain_MnuExit,                 API.IG_Exit,                [new(VKey.Escape), new(MKeys.Ctrl, VKey.W)]),
+        new(LangId.FrmMain_MnuExit,             API.IG_Exit,                [new(VKey.Escape), new(MKeys.Ctrl, VKey.W)]),
     ];
 
 
