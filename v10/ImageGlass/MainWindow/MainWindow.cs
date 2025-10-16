@@ -24,6 +24,7 @@ using ImageGlass.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
@@ -162,7 +163,8 @@ public partial class MainWindow : IgWindow
         // 2. load multiple paths
         if (paths.Length > 1)
         {
-            PrepareLoadPhoto(paths, true);
+            PrepareLoadPhotoList(paths,
+                currentFilePath: null, disposeForegroundShell: true, loadInitPhoto: true);
             return;
         }
 
@@ -171,7 +173,8 @@ public partial class MainWindow : IgWindow
         var path = BHelper.ResolvePath(paths[0]);
         if (BHelper.CheckPath(path) == PathType.Dir)
         {
-            PrepareLoadPhoto([path], true);
+            PrepareLoadPhotoList([path],
+                currentFilePath: null, disposeForegroundShell: true, loadInitPhoto: true);
             return;
         }
 
@@ -269,11 +272,13 @@ public partial class MainWindow : IgWindow
         if (!File.Exists(pathToLoad)) return;
 
         // start loading path with the foreground shell
-        PrepareLoadPhoto([pathToLoad], false);
+        PrepareLoadPhotoList([pathToLoad],
+            currentFilePath: null, disposeForegroundShell: false, loadInitPhoto: true);
     }
 
 
-    private void PrepareLoadPhoto(string[] inputPaths, bool disposeForegroundShell)
+    private void PrepareLoadPhotoList(ICollection<string> inputPaths, string? currentFilePath,
+        bool disposeForegroundShell, bool loadInitPhoto)
     {
         // dispose the foreground shell if requested
         if (disposeForegroundShell) AP.ForegroundShell = null;
@@ -287,20 +292,24 @@ public partial class MainWindow : IgWindow
 
 
         // start loading files
-        var initPhoto = AP.Photos.StartLoadingFiles(inputPaths, new FileShellSearchOptions()
+        var initPhoto = AP.Photos.StartLoadingFiles(inputPaths, currentFilePath,
+            new FileShellSearchOptions()
+            {
+                AllowedExtensions = AP.Config.FileFormats,
+                UseExplorerSortOrder = AP.Config.ShouldUseExplorerSortOrder,
+                ForegroundShell = foregroundShell,
+                SearchSubDirectories = AP.Config.EnableRecursiveLoading,
+                GroupByDir = AP.Config.ShouldGroupImagesByDirectory,
+                IncludeHidden = AP.Config.ShouldLoadHiddenImages,
+                OrderBy = AP.Config.ImageLoadingOrder,
+                OrderType = AP.Config.ImageLoadingOrderType,
+            }, _searchProgress);
+
+
+        if (loadInitPhoto)
         {
-            AllowedExtensions = AP.Config.FileFormats,
-            UseExplorerSortOrder = AP.Config.ShouldUseExplorerSortOrder,
-            ForegroundShell = foregroundShell,
-            SearchSubDirectories = AP.Config.EnableRecursiveLoading,
-            GroupByDir = AP.Config.ShouldGroupImagesByDirectory,
-            IncludeHidden = AP.Config.ShouldLoadHiddenImages,
-            OrderBy = AP.Config.ImageLoadingOrder,
-            OrderType = AP.Config.ImageLoadingOrderType,
-        }, _searchProgress);
-
-
-        ViewPhoto(initPhoto);
+            ViewPhoto(initPhoto);
+        }
     }
 
 

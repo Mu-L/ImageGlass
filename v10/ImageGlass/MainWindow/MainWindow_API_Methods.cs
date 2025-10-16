@@ -100,7 +100,8 @@ public partial class MainWindow
         // 2.1 The file is located another folder, load the entire folder
         if (imageIndex == -1 || AP.CanUseForegroundShell())
         {
-            PrepareLoadPhoto([path], false);
+            PrepareLoadPhotoList([path],
+                currentFilePath: null, disposeForegroundShell: false, loadInitPhoto: true);
         }
         // 2.2 The file is in current folder AND it is the viewing image
         else if (AP.Photos.CurrentIndex == imageIndex)

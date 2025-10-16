@@ -58,30 +58,36 @@ public partial class PhotoManager : PhotoManagerImpl<FileSearcher, FileShellSear
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public override Photo? StartLoadingFiles(string[] paths, FileShellSearchOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
+    public override Photo? StartLoadingFiles(ICollection<string> paths, string? currentFilePath,
+        FileShellSearchOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
     {
         // 1. stop any ongoing search
         _fileSearcher.CancelSearching();
-
-        // reset the photo list
-        Clear();
-        InitPhoto = null;
-
 
         // 2. get distinct dir paths for searching
         var inputPaths = BHelper.GetDistinctDirsFromPaths(paths);
 
 
-        // 3. create init photo
-        var initFilePath = inputPaths.FilePaths.FirstOrDefault() ?? "";
+        // 3. reset the list, MUST be after getting distinct dirs
+        Clear();
+        DistinctDirs = inputPaths.DirPaths;
+
+
+        // 4. create init photo
+        var initFilePath = currentFilePath;
+        if (string.IsNullOrWhiteSpace(initFilePath))
+        {
+            initFilePath = inputPaths.FilePaths.FirstOrDefault() ?? "";
+        }
+
         if (!string.IsNullOrWhiteSpace(initFilePath))
         {
             InitPhoto = CreatePhotoItem(initFilePath);
         }
 
 
-        // 4. start searching files in a new thread
-        _ = _fileSearcher.SearchAsync(inputPaths.DirPaths, searchOptions, progress);
+        // 5. start searching files in a new thread
+        _ = _fileSearcher.SearchAsync(DistinctDirs, searchOptions, progress);
 
         return InitPhoto;
     }

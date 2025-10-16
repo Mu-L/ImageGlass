@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.FileSystem;
 using System;
+using System.Collections.Generic;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -78,7 +79,8 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
     /// <param name="path">Full path of file or directory</param>
-    public virtual Photo? StartLoadingFiles(string[] paths, FsOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
+    public virtual Photo? StartLoadingFiles(ICollection<string> paths, string? currentFilePath,
+        FsOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
     {
         throw new NotImplementedException();
     }
