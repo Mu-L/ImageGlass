@@ -545,4 +545,14 @@ public partial class MainWindow
         ViewPhoto(photo, useCache: false);
     }
 
+
+    /// <summary>
+    /// Reloads images list
+    /// </summary>
+    public void IG_ReloadList()
+    {
+        PrepareLoadPhotoList(AP.Photos.DistinctDirs,
+            AP.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
+    }
+
 }

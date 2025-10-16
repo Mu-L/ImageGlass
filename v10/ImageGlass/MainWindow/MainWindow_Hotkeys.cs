@@ -41,6 +41,7 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuViewPrevious,     API.IG_ViewPrevious,        VKey.Left),
         new(LangId.FrmMain_MnuRefresh,          API.IG_Refresh,             VKey.R),
         new(LangId.FrmMain_MnuReload,           API.IG_Reload,              MKeys.Ctrl, VKey.R),
+        new(LangId.FrmMain_MnuReloadImageList,  API.IG_ReloadList,          MKeys.Ctrl | MKeys.Shift, VKey.R),
 
 
         // Navigation
