@@ -304,7 +304,7 @@ public partial class MainWindow : IgWindow
     }
 
 
-    private void ViewPhoto(Photo? photo)
+    private void ViewPhoto(Photo? photo, bool useCache = true)
     {
         // clear the current in-app message
         _ = _contentEl.ShowMessageAsync(null);
@@ -322,7 +322,7 @@ public partial class MainWindow : IgWindow
 
 
         // set photo to the viewer
-        Viewer.SetPhoto(photo);
+        Viewer.SetPhoto(photo, useCache);
         Gallery.ScrollToItem(AP.Photos.CurrentIndex);
     }
 

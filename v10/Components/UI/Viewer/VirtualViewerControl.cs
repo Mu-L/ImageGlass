@@ -85,7 +85,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 if (value is true)
                 {
                     // load full resolution, skip loading event
-                    _ = LoadPhotoAsync(_photo, true);
+                    _ = LoadPhotoAsync(_photo, true, true);
                 }
             }
         }
@@ -610,7 +610,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     /// <summary>
     /// Sets a photo to render.
     /// </summary>
-    public void SetPhoto(Photo? inputPhoto)
+    public void SetPhoto(Photo? inputPhoto, bool useCache)
     {
         // unload current photo resources
         UnloadPhoto();
@@ -624,7 +624,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
         // photo is cached
-        if (inputPhoto.IsDone)
+        if (inputPhoto.IsDone && useCache)
         {
             var token = inputPhoto.CancelToken ?? default;
             _ = HandlePhotoLoadedAsync(new PhotoLoadingEventArgs(true, inputPhoto, token));
@@ -632,7 +632,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         // photo is not cached
         else
         {
-            _ = LoadPhotoAsync(inputPhoto);
+            _ = LoadPhotoAsync(inputPhoto, useCache, false);
         }
 
         _enablePanningVelocity = true;
@@ -640,12 +640,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    private async Task LoadPhotoAsync(Photo? inputPhoto, bool skipLoadingEvent = false)
+    private async Task LoadPhotoAsync(Photo? inputPhoto, bool useCache, bool skipLoadingEvent)
     {
         if (inputPhoto is null) return;
 
         var loadingProgress = new Progress<PhotoLoadingEventArgs>(Photo_Loading);
-        await inputPhoto.LoadAsync(true, null, loadingProgress, skipLoadingEvent);
+        await inputPhoto.LoadAsync(useCache, null, loadingProgress, skipLoadingEvent);
     }
 
 
