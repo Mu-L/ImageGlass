@@ -33,6 +33,8 @@ public enum API
     IG_NewWindow,
     IG_Save,
     IG_SaveAs,
+    IG_Refresh,
+    IG_Reload,
 
     // Menu > Navigation
     IG_ViewNext,

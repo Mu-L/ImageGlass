@@ -526,6 +526,22 @@ public partial class MainWindow
     }
 
 
+    /// <summary>
+    /// Refreshes image viewport.
+    /// </summary>
+    public void IG_Refresh()
+    {
+        Viewer.Refresh(true, false, AP.Config.EnableWindowFit);
+    }
 
+
+    /// <summary>
+    /// Reloads image file.
+    /// </summary>
+    public void IG_Reload()
+    {
+        var photo = AP.Photos.Get(AP.Photos.CurrentIndex);
+        ViewPhoto(photo, useCache: false);
+    }
 
 }

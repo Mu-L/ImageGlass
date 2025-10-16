@@ -36,6 +36,8 @@ public partial class MainWindow
         { API.IG_OpenFile, IgCommands.Create(IG_OpenFileAsync) },
         { API.IG_OpenFolder, IgCommands.Create(IG_OpenFolderAsync) },
         { API.IG_OpenPath, IgCommands.Create(IG_OpenPath) },
+        { API.IG_Refresh, IgCommands.Create(IG_Refresh) },
+        { API.IG_Reload, IgCommands.Create(IG_Reload) },
 
 
         // Navigation

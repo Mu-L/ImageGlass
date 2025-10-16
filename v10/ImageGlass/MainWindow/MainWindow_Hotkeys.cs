@@ -39,6 +39,8 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuOpenFile,         API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
         new(LangId.FrmMain_MnuViewNext,         API.IG_ViewNext,            VKey.Right),
         new(LangId.FrmMain_MnuViewPrevious,     API.IG_ViewPrevious,        VKey.Left),
+        new(LangId.FrmMain_MnuRefresh,          API.IG_Refresh,             VKey.R),
+        new(LangId.FrmMain_MnuReload,           API.IG_Reload,              MKeys.Ctrl, VKey.R),
 
 
         // Navigation

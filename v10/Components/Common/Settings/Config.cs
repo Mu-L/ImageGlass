@@ -302,10 +302,23 @@ public partial class Config : IgReactive
         }
     } = false;
 
-    ///// <summary>
-    ///// Gets, sets value specifying that Window Fit mode is on
-    ///// </summary>
-    //public bool EnableWindowFit { get; set; } = false;
+
+    /// <summary>
+    /// Gets, sets value specifying that Window Fit mode is on
+    /// </summary>
+    public bool EnableWindowFit
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = false;
+
 
     ///// <summary>
     ///// Gets, sets value indicates the window should be always center in Window Fit mode
