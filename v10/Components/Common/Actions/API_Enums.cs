@@ -53,6 +53,10 @@ public enum API
     IG_PanRight,
     IG_PanUp,
     IG_PanDown,
+    IG_PanToLeft,
+    IG_PanToRight,
+    IG_PanToTop,
+    IG_PanToBottom,
 
     // Menu > Image
 

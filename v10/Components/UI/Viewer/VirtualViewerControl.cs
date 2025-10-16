@@ -103,6 +103,18 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
     /// <summary>
+    /// Gets rectangle of the viewport.
+    /// </summary>
+    public Rect DrawingDestRect => _destRect;
+
+
+    /// <summary>
+    /// Gets the rectangle of the source image region being drawn.
+    /// </summary>
+    public Rect DrawingSrcRect => _srcRect;
+
+
+    /// <summary>
     /// Gets the size of the bitmap.
     /// Use <c><see cref="SetBitmapSize(Size, bool)"/></c> to set the value.
     /// </summary>

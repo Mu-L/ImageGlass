@@ -300,7 +300,7 @@ public partial class MainWindow
     /// </summary>
     public async Task IG_CustomZoomAsync()
     {
-        var oldZoom = Math.Round(_contentEl.Viewer.ZoomFactor * 100f, 3);
+        var oldZoom = Math.Round(Viewer.ZoomFactor * 100f, 3);
 
         var result = await ModalWindow.ShowInputAsync(this,
             AP.Config.Lang[LangId.FrmMain_MnuCustomZoom],
@@ -313,7 +313,7 @@ public partial class MainWindow
 
         if (float.TryParse(result.InputValue.Trim(), out var newZoom))
         {
-            _contentEl.Viewer.ZoomFactor = newZoom / 100f;
+            Viewer.ZoomFactor = newZoom / 100f;
         }
     }
 
@@ -342,7 +342,7 @@ public partial class MainWindow
     /// </summary>
     public void IG_SetZoom(float factor)
     {
-        _ = _contentEl.Viewer.ZoomToPoint(factor);
+        _ = Viewer.ZoomToPoint(factor);
     }
 
 
@@ -370,22 +370,23 @@ public partial class MainWindow
     /// </summary>
     public void IG_SetZoomMode(ZoomMode mode)
     {
-        _contentEl.Viewer.ZoomMode = AP.Config.ZoomMode = mode;
+        Viewer.ZoomMode = AP.Config.ZoomMode = mode;
     }
 
 
     /// <summary>
     /// Start drawing animation.
     /// </summary>
-    public void IG_Animate(AnimationSources source, int durationMs = 100)
+    public void IG_Animate(AnimationSources source, int durationMs = 100, Action? callbackFn = null)
     {
-        _contentEl.Viewer.StartDrawingAnimation(source);
+        Viewer.StartDrawingAnimation(source);
 
         BHelper.Debounce(durationMs, () =>
         {
             DispatcherQueue.TryEnqueue(() =>
             {
-                _contentEl.Viewer.StopDrawingAnimation(source);
+                Viewer.StopDrawingAnimation(source);
+                callbackFn?.Invoke();
             });
         });
     }
@@ -396,9 +397,9 @@ public partial class MainWindow
     /// </summary>
     public void IG_ZoomIn()
     {
-        if (_contentEl.Viewer.ZoomLevels.Length > 0)
+        if (Viewer.ZoomLevels.Length > 0)
         {
-            _contentEl.Viewer.ZoomIn();
+            Viewer.ZoomIn();
             return;
         }
 
@@ -412,9 +413,9 @@ public partial class MainWindow
     /// </summary>
     public void IG_ZoomOut()
     {
-        if (_contentEl.Viewer.ZoomLevels.Length > 0)
+        if (Viewer.ZoomLevels.Length > 0)
         {
-            _contentEl.Viewer.ZoomOut();
+            Viewer.ZoomOut();
             return;
         }
 
@@ -461,5 +462,70 @@ public partial class MainWindow
         // smooth zooming
         IG_Animate(AnimationSources.PanDown);
     }
+
+
+    /// <summary>
+    /// Pans the viewing image to left side.
+    /// </summary>
+    public void IG_PanToLeft()
+    {
+        var distanceX = Viewer.DrawingSrcRect.X;
+        Viewer.PanSpeed = distanceX * Viewer.ZoomFactor / 10;
+
+        IG_Animate(AnimationSources.PanLeft, 200, () =>
+        {
+            Viewer.PanSpeed = AP.Config.PanSpeed;
+        });
+    }
+
+
+    /// <summary>
+    /// Pans the viewing image to right side.
+    /// </summary>
+    public void IG_PanToRight()
+    {
+        var x = Viewer.BitmapSize.Width - Viewer.DrawingSrcRect.Width;
+        var distanceX = x + Viewer.DrawingSrcRect.X;
+        Viewer.PanSpeed = distanceX * Viewer.ZoomFactor / 10;
+
+        IG_Animate(AnimationSources.PanRight, 200, () =>
+        {
+            Viewer.PanSpeed = AP.Config.PanSpeed;
+        });
+    }
+
+
+    /// <summary>
+    /// Pans the viewing image to top.
+    /// </summary>
+    public void IG_PanToTop()
+    {
+        var distanceY = Viewer.DrawingSrcRect.Y;
+        Viewer.PanSpeed = distanceY * Viewer.ZoomFactor / 10;
+
+        IG_Animate(AnimationSources.PanUp, 200, () =>
+        {
+            Viewer.PanSpeed = AP.Config.PanSpeed;
+        });
+    }
+
+
+    /// <summary>
+    /// Pans the viewing image to bottom.
+    /// </summary>
+    public void IG_PanToBottom()
+    {
+        var y = Viewer.BitmapSize.Height - Viewer.DrawingSrcRect.Height;
+        var distanceY = y + Viewer.DrawingSrcRect.Y;
+        Viewer.PanSpeed = distanceY * Viewer.ZoomFactor / 10;
+
+        IG_Animate(AnimationSources.PanDown, 200, () =>
+        {
+            Viewer.PanSpeed = AP.Config.PanSpeed;
+        });
+    }
+
+
+
 
 }

@@ -62,6 +62,10 @@ public partial class MainWindow
         { API.IG_PanRight, IgCommands.Create(IG_PanRight) },
         { API.IG_PanUp, IgCommands.Create(IG_PanUp) },
         { API.IG_PanDown, IgCommands.Create(IG_PanDown) },
+        { API.IG_PanToLeft, IgCommands.Create(IG_PanToLeft) },
+        { API.IG_PanToRight, IgCommands.Create(IG_PanToRight) },
+        { API.IG_PanToTop, IgCommands.Create(IG_PanToTop) },
+        { API.IG_PanToBottom, IgCommands.Create(IG_PanToBottom) },
 
 
         // Layout

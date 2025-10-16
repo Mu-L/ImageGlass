@@ -65,6 +65,10 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuPanRight,         API.IG_PanRight,            [new(MKeys.Alt, VKey.Right)]),
         new(LangId.FrmMain_MnuPanUp,            API.IG_PanUp,               [new(MKeys.Alt, VKey.Up)]),
         new(LangId.FrmMain_MnuPanDown,          API.IG_PanDown,             [new(MKeys.Alt, VKey.Down)]),
+        new(LangId.FrmMain_MnuPanToLeftSide,    API.IG_PanToLeft,           [new(MKeys.Ctrl | MKeys.Alt, VKey.Left)]),
+        new(LangId.FrmMain_MnuPanToRightSide,   API.IG_PanToRight,          [new(MKeys.Ctrl | MKeys.Alt, VKey.Right)]),
+        new(LangId.FrmMain_MnuPanToTop,         API.IG_PanToTop,            [new(MKeys.Ctrl | MKeys.Alt, VKey.Up)]),
+        new(LangId.FrmMain_MnuPanToBottom,      API.IG_PanToBottom,         [new(MKeys.Ctrl | MKeys.Alt, VKey.Down)]),
 
 
         new(LangId.FrmMain_MnuToggleCheckerboard,   API.IG_ToggleCheckerboard,  VKey.B),
