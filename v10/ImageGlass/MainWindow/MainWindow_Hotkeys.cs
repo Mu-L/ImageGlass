@@ -113,9 +113,12 @@ public partial class MainWindow
         _lastHotkeyPressed = e.Hotkey;
 
         // for quick browsing, only load photo preview
-        if (executable.Equals(nameof(API.IG_ViewByStep), StringComparison.Ordinal))
+        var isQuickBrowsing = executable.Equals(nameof(API.IG_ViewByStep), StringComparison.Ordinal)
+            || executable.Equals(nameof(API.IG_ViewNext), StringComparison.Ordinal)
+            || executable.Equals(nameof(API.IG_ViewPrevious), StringComparison.Ordinal);
+        if (isQuickBrowsing && isPressedMultipleTimes)
         {
-            if (isPressedMultipleTimes) Viewer.ShouldLoadFullResolution = false;
+            Viewer.ShouldLoadFullResolution = false;
         }
 
 
