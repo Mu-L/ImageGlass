@@ -16,7 +16,7 @@
 		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-		<Version>10.0.1.1003</Version>
+		<Version>10.0.1.1017</Version>
 
 		<!-- Unpacked app -->
 		<WindowsPackageType>None</WindowsPackageType>

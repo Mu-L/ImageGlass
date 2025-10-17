@@ -519,7 +519,7 @@ public class MagickDecoder
             //}
 
             //return new ColorProfile(colorProfilePath);
-            return ColorProfile.SRGB;
+            return ColorProfiles.SRGB;
         }
         else if (File.Exists(nameOrPath))
         {
@@ -626,7 +626,7 @@ public class MagickDecoder
             if (meta.ColorSpace == ColorSpace.CMYK && meta.ColorProfileData is not null)
             {
                 var colorProfile = new ColorProfile(meta.ColorProfileData);
-                refImgM.TransformColorSpace(colorProfile, ColorProfile.SRGB);
+                refImgM.TransformColorSpace(colorProfile, ColorProfiles.SRGB);
             }
         }
 
