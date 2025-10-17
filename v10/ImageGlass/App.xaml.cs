@@ -40,7 +40,7 @@ public partial class App : Application
 {
     private MainWindow? _winMain;
     private IProgress<UIReportEventArgs> _uiReporter;
-    private static UISettings _systemUI = new UISettings();
+    public static readonly UISettings SystemUI = new UISettings();
 
 
     /// <summary>
@@ -67,7 +67,7 @@ public partial class App : Application
         AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
         CoreApplication.UnhandledErrorDetected += CoreApplication_UnhandledErrorDetected;
 
-        _systemUI.ColorValuesChanged += UiSettings_ColorValuesChanged;
+        SystemUI.ColorValuesChanged += UiSettings_ColorValuesChanged;
         AP.ThemeChanged += AP_ThemeChanged;
 
         // load initial settings
@@ -98,7 +98,6 @@ public partial class App : Application
         }
 
         _winMain = new MainWindow();
-        _winMain.Closed += MainWindow_Closed;
 
 
         // get foreground shell
@@ -113,18 +112,6 @@ public partial class App : Application
 
         // show the main window
         _winMain.Activate();
-    }
-
-
-    private async void MainWindow_Closed(object sender, WindowEventArgs args)
-    {
-        // save configs
-        await SaveConfigsOnClosing();
-
-        // dispose the global singleton
-        AP.Dispose();
-
-        _systemUI.ColorValuesChanged -= UiSettings_ColorValuesChanged;
     }
 
 
@@ -219,7 +206,7 @@ public partial class App : Application
         AP.Config = Config.Load(Config.CONFIG_USER);
 
         // get accent, color mode & load theme for the first time
-        var info = GetSystemColorInfo(_systemUI);
+        var info = GetSystemColorInfo(SystemUI);
         BHelper.RunSync(() => AP.Config.LoadCurrentThemeAsync(info.IsDarkMode, info.AccentColor, true, true, false));
 
         // set the initial app color mode
@@ -328,27 +315,6 @@ public partial class App : Application
         Application.Current.Resources["ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled"] = textDisabled.WithAlpha(180).ToBrush();
 
     }
-
-
-    public static async Task SaveConfigsOnClosing()
-    {
-        AP.Config.LastSeenImagePath = AP.Photos.CurrentFilePath;
-        //Config.ZoomLockValue = PicMain.ZoomFactor * 100f;
-
-
-        // save config to file
-        await AP.Config.SaveAsync();
-
-
-        //// cleaning
-        //try
-        //{
-        //    // delete trash
-        //    Directory.Delete(Config.ConfigDir(PathType.Dir, Dir.Temporary), true);
-        //}
-        //catch { }
-    }
-
 
 }
 

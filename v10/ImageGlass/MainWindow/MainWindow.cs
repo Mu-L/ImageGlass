@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace ImageGlass;
@@ -82,24 +83,11 @@ public partial class MainWindow : IgWindow
 
     protected override void OnIgWindowClosing(AppWindow sender, AppWindowClosingEventArgs e)
     {
-        base.OnIgWindowClosing(sender, e);
-
-        // save window maximized state
-        AP.Config.IsMainWindowMaximized = WindowState == OverlappedPresenterState.Maximized;
-
-        // save window bounds
-        if (WindowState == OverlappedPresenterState.Restored)
-        {
-            AP.Config.MainWindowBounds = GetWindowBounds();
-        }
-
-
         Viewer.UnloadPhoto();
 
         // clear hotkeys
         Content.KeyboardAccelerators.Clear();
         Hotkey.Invoked -= Hotkey_Invoked;
-
 
         _contentEl.ToolbarButtonClicked -= Toolbar_ButtonClicked;
         _contentEl.GalleryItemClicked -= Gallery_ItemClicked;
@@ -109,6 +97,17 @@ public partial class MainWindow : IgWindow
 
         _status.Changed -= Status_Changed;
         _status.Dispose();
+
+        base.OnIgWindowClosing(sender, e);
+    }
+
+
+    protected override async void OnIgWindowClosed(WindowEventArgs e)
+    {
+        // save user config
+        await SaveConfigOnClosingAsync();
+
+        base.OnIgWindowClosed(e);
     }
 
 
@@ -242,6 +241,37 @@ public partial class MainWindow : IgWindow
 
 
 
+    private async Task SaveConfigOnClosingAsync()
+    {
+        // save window maximized state
+        AP.Config.IsMainWindowMaximized = WindowState == OverlappedPresenterState.Maximized;
+
+        // save window bounds
+        if (WindowState == OverlappedPresenterState.Restored)
+        {
+            AP.Config.MainWindowBounds = GetWindowBounds();
+        }
+
+        AP.Config.LastSeenImagePath = AP.Photos.CurrentFilePath;
+        //AP.Config.ZoomLockValue = Viewer.ZoomFactor * 100f;
+
+
+        // save config to file
+        await AP.Config.SaveAsync();
+
+
+        // dispose the global singleton
+        AP.Dispose();
+
+
+        //// cleaning
+        //try
+        //{
+        //    // delete trash
+        //    Directory.Delete(Config.ConfigDir(PathType.Dir, Dir.Temporary), true);
+        //}
+        //catch { }
+    }
 
 
     private void LoadImagesFromCmdArgs()
