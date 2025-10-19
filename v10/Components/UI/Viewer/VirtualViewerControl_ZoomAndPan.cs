@@ -287,19 +287,13 @@ public partial class VirtualViewerControl
     /// </summary>
     public void SetZoomFactor(double zoomValue, bool isManualZoom)
     {
-        if (_zooming.Factor == zoomValue) return;
-
-        _zooming.OldFactor = _zooming.Factor;
         _zooming.Factor = Math.Min(MaxZoom, Math.Max(zoomValue, MinZoom));
         _zooming.IsManual = isManualZoom;
-        _zooming.ZoomedPoint = ViewportCenterPoint;
 
 
         // update drawing regions
         CalculateDrawingRegion();
-
         Invalidate();
-
 
         ZoomChanged?.Invoke(this, new ZoomEventArgs()
         {

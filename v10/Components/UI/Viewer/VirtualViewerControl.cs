@@ -664,18 +664,27 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-
     private async Task HandlePhotoPreviewAsync(PhotoLoadingEventArgs e)
     {
         if (!ShouldLoadFullResolution) e.Photo.CancelLoading();
 
+        // 1. disable preview for Lock zoom
+        if (ZoomMode == ZoomMode.LockZoom)
+        {
+            // raise event
+            _isPreviewing = false;
+            OnPhotoLoading(e);
+            return;
+        }
+
+
         IWICBitmapSource? wicThumb = null;
         ID2D1Bitmap1? previewBitmap = null;
-
         var token = _cancelPreview?.Token ?? default;
         var hasPreview = false;
 
 
+        // 2. try to get the preview bitmap
         try
         {
             var previewHeight = Math.Min(DrawingArea.Height, e.Metadata.Height) / DpiY;
@@ -713,7 +722,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 //set preview source
                 _bmpPreview = previewBitmap;
             }
-
         }
         catch
         {
@@ -726,40 +734,47 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
 
+        // 3. calculate viewport of preview
+        if (hasPreview)
+        {
+            var desiredSrcZoomFactor = CalculateZoomFactor(ZoomMode, e.Metadata.Width, e.Metadata.Height);
+            var previewZoomFactor = desiredSrcZoomFactor;
+
+            if (ZoomMode == ZoomMode.AutoZoom)
+            {
+                // if the source size is bigger than viewport,
+                // fit the thumbnail to the viewport
+                if (desiredSrcZoomFactor < 1)
+                {
+                    previewZoomFactor = CalculateZoomFactor(ZoomMode.ScaleToFit, BitmapSize.Width, BitmapSize.Height);
+                }
+                // both preview and source size are smaller than viewport
+                else
+                {
+                    previewZoomFactor = 1;
+                }
+            }
+            else
+            {
+                previewZoomFactor = CalculateZoomFactor(ZoomMode, BitmapSize.Width, BitmapSize.Height);
+            }
+
+            SetZoomFactor(previewZoomFactor, false);
+            Refresh(false);
+        }
+
+
+        // raise event
+        _isPreviewing = hasPreview;
+        OnPhotoLoading(e);
+
+
         void HandleCancelLoading()
         {
             hasPreview = false;
             previewBitmap?.Dispose();
             previewBitmap = null;
         }
-
-        // calculate viewport of preview
-        _isPreviewing = hasPreview;
-
-        if (hasPreview)
-        {
-            var desiredSrcZoomFactor = CalculateZoomFactor(ZoomMode, e.Metadata.Width, e.Metadata.Height);
-
-            // if the source size is bigger than viewport
-            if (desiredSrcZoomFactor < 1)
-            {
-                // fit the thumbnail to the viewport
-                var fitZoomFactor = CalculateZoomFactor(ZoomMode.ScaleToFit, BitmapSize.Width, BitmapSize.Height);
-
-                SetZoomFactor(fitZoomFactor, false);
-            }
-            // both preview and source size are smaller than viewport
-            else
-            {
-                SetZoomFactor(1, false);
-            }
-
-            Refresh(false);
-        }
-
-
-        // raise event
-        OnPhotoLoading(e);
     }
 
 
@@ -853,7 +868,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 }
 
 
-                if (_isPreviewing)
+                if (_isPreviewing && ZoomMode != ZoomMode.LockZoom)
                 {
                     var diffRatio = new Size(
                         prevSize.Width / BitmapSize.Width,
