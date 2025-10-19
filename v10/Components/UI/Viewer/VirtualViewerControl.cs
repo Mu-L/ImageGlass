@@ -760,7 +760,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
             }
 
             SetZoomFactor(previewZoomFactor, false);
-            Refresh(false);
         }
 
 
@@ -868,7 +867,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 }
 
 
-                if (_isPreviewing && ZoomMode != ZoomMode.LockZoom)
+                // if user zoomed and panned the preview
+                if (_isPreviewing
+                    && _zooming.IsManual
+                    && ZoomMode != ZoomMode.LockZoom)
                 {
                     var diffRatio = new Size(
                         prevSize.Width / BitmapSize.Width,
@@ -884,15 +886,15 @@ public partial class VirtualViewerControl : SwapChainCanvas
                     // update zoom source
                     _srcRect = newSrcRect.Safe();
                     _zooming.Factor *= diffRatio.Width;
+                    _zooming.ZoomedPoint = new();
 
                     // make sure all zoomed point and viewport are synced
                     // by manually applying a very small zoom factor
-                    var isManualZoom = _zooming.IsManual;
                     ZoomByDeltaToPoint(double.Epsilon, _zooming.ZoomedPoint, false);
-                    _zooming.IsManual = isManualZoom;
+                    _zooming.IsManual = false;
 
                     _isPreviewing = false;
-                    Refresh(!isManualZoom);
+                    Refresh(false);
                 }
                 else
                 {
