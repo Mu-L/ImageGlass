@@ -335,10 +335,22 @@ public partial class Config : IgReactive
     ///// </summary>
     //public bool UseEmbeddedThumbnailOtherFormats { get; set; } = false;
 
-    ///// <summary>
-    ///// Gets, sets value indicates that image preview is shown while the image is being loaded.
-    ///// </summary>
-    //public bool ShowImagePreview { get; set; } = true;
+
+    /// <summary>
+    /// Gets, sets value indicates that image preview is shown while the image is being loaded.
+    /// </summary>
+    public bool ShowImagePreview
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+            }
+        }
+    } = true;
+
 
     ///// <summary>
     ///// Gets, sets value indicates that images should be loaded asynchronously.

@@ -359,6 +359,8 @@ public partial class MainWindow : IgWindow
             };
         }
 
+        // apply user settings to the viewer
+        Viewer.EnableImagePreview = AP.Config.ShowImagePreview;
 
         // set photo to the viewer
         Viewer.SetPhoto(photo, useCache);

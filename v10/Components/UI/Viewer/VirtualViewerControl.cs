@@ -72,6 +72,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
     /// <summary>
+    /// Gets, sets value indicates whether the previewing is enabled or not.
+    /// </summary>
+    public bool EnableImagePreview { get; set; } = true;
+
+
+    /// <summary>
     /// Gets, sets value indicates whether full resolution is loaded or not.
     /// </summary>
     public bool ShouldLoadFullResolution
@@ -223,6 +229,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
             | ManipulationModes.TranslateInertia;
     }
 
+
+    #region Override Methods
 
     protected override void OnDeviceChanged(DeviceChangeReason reason)
     {
@@ -487,6 +495,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
     }
 
+
     protected virtual void DrawImageLayer(SwapChainCanvasRenderEventArgs e)
     {
         // draw preview bitmap
@@ -524,6 +533,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
+    #endregion // Override Methods
+
+
+
     /// <summary>
     /// Forces the control to reset zoom mode and invalidate itself.
     /// </summary>
@@ -545,7 +558,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         Invalidate();
     }
-
 
 
     /// <summary>
@@ -668,8 +680,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
     {
         if (!ShouldLoadFullResolution) e.Photo.CancelLoading();
 
-        // 1. disable preview for Lock zoom
-        if (ZoomMode == ZoomMode.LockZoom)
+        // 1. skip the preview if it's not enable or in zoom lock mode
+        if (!EnableImagePreview || ZoomMode == ZoomMode.LockZoom)
         {
             // raise event
             _isPreviewing = false;
