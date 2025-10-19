@@ -551,12 +551,15 @@ public partial class VirtualViewerControl : SwapChainCanvas
     /// </summary>
     public void Refresh(bool resetZoom = true, bool isManualZoom = false, bool zoomedByResizing = false)
     {
-        if (resetZoom)
+        DispatcherQueue.TryEnqueue(() =>
         {
-            SetZoomMode(null, isManualZoom, zoomedByResizing);
-        }
+            if (resetZoom)
+            {
+                SetZoomMode(null, isManualZoom, zoomedByResizing);
+            }
 
-        Invalidate();
+            Invalidate();
+        });
     }
 
 
@@ -622,7 +625,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     /// <summary>
     /// Sets a photo to render.
     /// </summary>
-    public void SetPhoto(Photo? inputPhoto, bool useCache)
+    public async Task SetPhotoAsync(Photo? inputPhoto, bool useCache)
     {
         // unload current photo resources
         UnloadPhoto();
@@ -635,20 +638,21 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
 
+        _enablePanningVelocity = true;
+        _photo = inputPhoto;
+
+
         // photo is cached
         if (inputPhoto.IsDone && useCache)
         {
             var token = inputPhoto.CancelToken ?? default;
-            _ = HandlePhotoLoadedAsync(new PhotoLoadingEventArgs(true, inputPhoto, token));
+            await HandlePhotoLoadedAsync(new PhotoLoadingEventArgs(true, inputPhoto, token));
         }
         // photo is not cached
         else
         {
-            _ = LoadPhotoAsync(inputPhoto, useCache, false);
+            await LoadPhotoAsync(inputPhoto, useCache, false);
         }
-
-        _enablePanningVelocity = true;
-        _photo = inputPhoto;
     }
 
 

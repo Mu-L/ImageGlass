@@ -223,7 +223,7 @@ public partial class MainWindow : IgWindow
         else
         {
             AP.Photos.InitPhoto = AP.Photos.Select(0);
-            ViewPhoto(AP.Photos.InitPhoto);
+            _ = ViewPhotoAsync(AP.Photos.InitPhoto);
         }
 
 
@@ -338,12 +338,12 @@ public partial class MainWindow : IgWindow
 
         if (loadInitPhoto)
         {
-            ViewPhoto(initPhoto);
+            _ = ViewPhotoAsync(initPhoto);
         }
     }
 
 
-    private void ViewPhoto(Photo? photo, bool useCache = true)
+    private async Task ViewPhotoAsync(Photo? photo, bool useCache = true)
     {
         // clear the current in-app message
         _ = _contentEl.ShowMessageAsync(null);
@@ -362,9 +362,15 @@ public partial class MainWindow : IgWindow
         // apply user settings to the viewer
         Viewer.EnableImagePreview = AP.Config.ShowImagePreview;
 
-        // set photo to the viewer
-        Viewer.SetPhoto(photo, useCache);
-        Gallery.ScrollToItem(AP.Photos.CurrentIndex);
+
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            // set photo to the viewer
+            Gallery.ScrollToItem(AP.Photos.CurrentIndex);
+        });
+
+
+        await Viewer.SetPhotoAsync(photo, useCache);
     }
 
 

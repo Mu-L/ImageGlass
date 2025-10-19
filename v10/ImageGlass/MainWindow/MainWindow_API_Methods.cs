@@ -165,7 +165,7 @@ public partial class MainWindow
     public void IG_ViewByStep(int step)
     {
         var photo = AP.Photos.GetByStep(step, true);
-        ViewPhoto(photo);
+        _ = ViewPhotoAsync(photo);
     }
 
 
@@ -542,7 +542,7 @@ public partial class MainWindow
     public void IG_Reload()
     {
         var photo = AP.Photos.Get(AP.Photos.CurrentIndex);
-        ViewPhoto(photo, useCache: false);
+        _ = ViewPhotoAsync(photo, useCache: false);
     }
 
 

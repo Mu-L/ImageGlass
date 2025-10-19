@@ -37,14 +37,14 @@ public partial class MainWindow
 
         // File
         new(LangId.FrmMain_MnuOpenFile,         API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
-        new(LangId.FrmMain_MnuViewNext,         API.IG_ViewNext,            VKey.Right),
-        new(LangId.FrmMain_MnuViewPrevious,     API.IG_ViewPrevious,        VKey.Left),
         new(LangId.FrmMain_MnuRefresh,          API.IG_Refresh,             VKey.R),
         new(LangId.FrmMain_MnuReload,           API.IG_Reload,              MKeys.Ctrl, VKey.R),
         new(LangId.FrmMain_MnuReloadImageList,  API.IG_ReloadList,          MKeys.Ctrl | MKeys.Shift, VKey.R),
 
 
         // Navigation
+        new(LangId.FrmMain_MnuViewNext,         API.IG_ViewNext,            VKey.Right),
+        new(LangId.FrmMain_MnuViewPrevious,     API.IG_ViewPrevious,        VKey.Left),
         new(LangId.FrmMain_MnuGoTo,             API.IG_Goto,                VKey.F),
         new(LangId.FrmMain_MnuGoToFirst,        API.IG_GotoFirst,           VKey.Home),
         new(LangId.FrmMain_MnuGoToLast,         API.IG_GotoLast,            VKey.End),

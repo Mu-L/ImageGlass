@@ -269,7 +269,7 @@ public partial class DialogWindow : IgWindow
         if (DialogResult == DialogExitCode.None) DialogResult = DialogExitCode.Abort;
 
         // set the result to complete the task
-        _taskSourceExitCode.SetResult(DialogResult);
+        _ = _taskSourceExitCode.TrySetResult(DialogResult);
 
         // reactivate the owner window
         _owner?.Activate();
@@ -299,7 +299,7 @@ public partial class DialogWindow : IgWindow
         ResizeAndMoveCenterParent(clientWidth, clientHeight, true);
 
         // done resizing
-        _taskSourceResized.TrySetResult(true);
+        _ = _taskSourceResized.TrySetResult(true);
     }
 
 
