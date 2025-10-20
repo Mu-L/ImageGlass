@@ -633,7 +633,7 @@ public partial class Photo : DisposableImpl
             {
                 if (srcBmp.IsDisposed()) return null;
 
-                var d2Bmp = await srcBmp.ToD2BitmapAsync(d3Device, d2Context);
+                var d2Bmp = await srcBmp.ToD2BitmapAsync(d2Context, d3Device);
                 return d2Bmp;
             }
 
@@ -643,7 +643,7 @@ public partial class Photo : DisposableImpl
                 if (decoder.IsDisposed()) return null;
 
                 using var frameBmp = decoder.GetFrame(frameIndex);
-                var d2Bmp = await frameBmp.ToD2BitmapAsync(d3Device, d2Context);
+                var d2Bmp = await frameBmp.ToD2BitmapAsync(d2Context, d3Device);
 
                 return d2Bmp;
             }

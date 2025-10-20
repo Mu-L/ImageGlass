@@ -186,8 +186,8 @@ public partial class WicAnimator : AnimatorImpl
         else if (prevDisposal == GifDisposeMethod.Previous && _backupSurface != null)
         {
             var backupRect = new Vortice.Mathematics.Rect(
-                    _backupSurface.PixelSize.Width,
-                    _backupSurface.PixelSize.Height);
+                _backupSurface.PixelSize.Width,
+                _backupSurface.PixelSize.Height);
 
             surface.DrawBitmap(_backupSurface, 1.0f, Vortice.Direct2D1.BitmapInterpolationMode.Linear, backupRect);
         }
@@ -271,7 +271,7 @@ public partial class WicAnimator : AnimatorImpl
         using var frameBmp = _decoder?.GetFrame((uint)frameIndex);
         if (!_dc.IsDisposed())
         {
-            _decodedFrames[frameIndex] = PhotoWIC.CreateD2dBitmap(frameBmp, _dc);
+            _decodedFrames[frameIndex] = frameBmp.ToD2Bitmap(_dc);
         }
 
         return _decodedFrames[frameIndex];

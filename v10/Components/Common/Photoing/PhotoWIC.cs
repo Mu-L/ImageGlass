@@ -34,28 +34,6 @@ public static partial class PhotoWIC
 {
 
     /// <summary>
-    /// Creates a Direct2D bitmap from the given WIC bitmap.
-    /// </summary>
-    /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
-    public static ID2D1Bitmap1? CreateD2dBitmap(IWICBitmapSource? srcBmp, ID2D1DeviceContext dc)
-    {
-        if (dc.IsDisposed()) return null;
-
-        srcBmp?.To32bppPBGRA();
-        if (srcBmp is null) return null;
-
-        var bmpProps = new BitmapProperties1(new Vortice.DCommon.PixelFormat()
-        {
-            Format = Vortice.DXGI.Format.B8G8R8A8_UNorm,
-            AlphaMode = Vortice.DCommon.AlphaMode.Premultiplied,
-        });
-
-        return dc.CreateBitmapFromWicBitmap(srcBmp, bmpProps);
-    }
-
-
-
-    /// <summary>
     /// Creates a new <see cref="ID2D1Bitmap1"/> instance from <see cref="ID2D1Bitmap"/>.
     /// </summary>
     /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>

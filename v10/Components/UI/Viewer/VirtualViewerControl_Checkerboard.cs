@@ -177,7 +177,7 @@ public partial class VirtualViewerControl
 
 
         // 4. create D2DBitmap from WICBitmapSource
-        using var tileD2 = PhotoWIC.CreateD2dBitmap(tileBmp, D2dContext);
+        using var tileD2 = tileBmp.ToD2Bitmap(D2dContext);
         var bmpProps = new BitmapBrushProperties1()
         {
             ExtendModeX = ExtendMode.Wrap,

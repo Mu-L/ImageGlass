@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using ImageGlass.Common.Photoing;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -190,10 +191,32 @@ public static class IWICBitmapSource_Exts
 
 
     /// <summary>
-    /// Converts WIC bitmap to Direct2D bitmap off-thread.
+    /// Converts WIC bitmap to Direct2D bitmap by copying pixel data
+    /// from the WIC bitmap into the new Direct2D bitmap.
+    /// </summary>
+    public static ID2D1Bitmap1? ToD2Bitmap(this IWICBitmapSource? srcBmp, ID2D1DeviceContext d2Context)
+    {
+        if (srcBmp is null) return null;
+
+        // make sure the bitmap is in correct format
+        srcBmp.To32bppPBGRA();
+
+        var bmpProps = new BitmapProperties1(new Vortice.DCommon.PixelFormat()
+        {
+            Format = Vortice.DXGI.Format.B8G8R8A8_UNorm,
+            AlphaMode = Vortice.DCommon.AlphaMode.Premultiplied,
+        });
+
+        return d2Context.CreateBitmapFromWicBitmap(srcBmp, bmpProps);
+    }
+
+
+    /// <summary>
+    /// Converts WIC bitmap to Direct2D bitmap by directly using
+    /// shared resource with a Direct3D surface.
     /// </summary>
     public static async Task<ID2D1Bitmap1?> ToD2BitmapAsync(this IWICBitmapSource? srcBmp,
-        ID3D11Device d3Device, ID2D1DeviceContext d2Context)
+        ID2D1DeviceContext d2Context, ID3D11Device d3Device)
     {
         if (srcBmp is null) return null;
 

@@ -726,7 +726,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
                 // create new native bitmap for previewing off-thread
-                previewBitmap = await wicThumb.ToD2BitmapAsync(_d3dDevice!, D2dContext);
+                previewBitmap = await wicThumb.ToD2BitmapAsync(D2dContext, _d3dDevice!);
 
                 // cancel if requested
                 if (token.IsCancellationRequested)
@@ -953,7 +953,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         DisposeNativePhotoResources();
 
         // update the frame bitmap
-        _bmpSource = (sender as WicAnimator)!.GetRenderedFrameBitmap1();
+        _bmpSource = sender.GetRenderedFrameBitmap<ID2D1Bitmap1>();
         Invalidate();
     }
 
