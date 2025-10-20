@@ -145,6 +145,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     protected nint _windowIconHandle = IntPtr.Zero;
     protected BackdropStyle _actualBackdropStyle = BackdropStyle.None;
     protected OverlappedPresenterState _windowState = OverlappedPresenterState.Restored;
+    protected bool _isClosed = false;
     private Rect _boundsBeforeStateChanged = new();
 
 
@@ -210,6 +211,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         get => Title;
         set
         {
+            if (_isClosed) return;
             if (value != Title)
             {
                 Title = value;
@@ -309,6 +311,8 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
     private void PART_WindowContent_Loaded(object sender, RoutedEventArgs e)
     {
+        _isClosed = false;
+
         UpdateTitleBarSize();
         UpdateWindowColorMode();
         UpdateWindowIcon();
@@ -340,7 +344,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     {
         OnIgWindowClosed(e);
 
-
+        _isClosed = true;
         CleanUpPropertyChangedEvents();
 
         AP.ThemeChanged -= AP_ThemeChanged;
