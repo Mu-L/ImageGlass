@@ -66,6 +66,8 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
             var item = Items[i];
             _dict.AddOrUpdate(item.FilePath, i, (fIndex, oldValue) => i);
         }
+
+        _ = OnPropertyChanged(nameof(Count));
     }
 
 
@@ -248,6 +250,8 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         // remove from the lists
         _dict.Remove(filePath, out var _);
         Items.RemoveAt(index);
+
+        _ = OnPropertyChanged(nameof(Count));
     }
 
 
@@ -269,6 +273,8 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         Items.Clear();
         _dict.Clear();
         DistinctDirs.Clear();
+
+        _ = OnPropertyChanged(nameof(Count));
     }
 
 }

@@ -91,7 +91,8 @@
         HorizontalScrollBarVisibility="Auto"
         HorizontalScrollMode="Enabled"
         VerticalScrollBarVisibility="Auto"
-        VerticalScrollMode="Disabled">
+        VerticalScrollMode="Disabled"
+        Visibility="{x:Bind GalleryVisibility}">
         <ItemsRepeater
             x:Name="GalleryItemRepeater"
             HorizontalAlignment="Center"

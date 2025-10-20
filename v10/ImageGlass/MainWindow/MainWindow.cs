@@ -200,7 +200,7 @@ public partial class MainWindow : IgWindow
     }
 
 
-    private void Files_Searched(FileSearchingEventArgs e)
+    private async void Files_Searched(FileSearchingEventArgs e)
     {
         var isEmptyList = AP.Photos.Count == 0;
         AP.Photos.Add(e.Results);
@@ -223,16 +223,20 @@ public partial class MainWindow : IgWindow
         else
         {
             AP.Photos.InitPhoto = AP.Photos.Select(0);
-            _ = ViewPhotoAsync(AP.Photos.InitPhoto);
+            _ = ViewPhotoAsync(AP.Photos.InitPhoto, true, false);
         }
 
 
         // Gallery: scroll to the selected item
         if (isEmptyList)
         {
-            // make sure gallery is rendered
-            Gallery.UpdateLayout();
-            Gallery.ScrollToItem(AP.Photos.CurrentIndex);
+            // wait for gallery is ready
+            await Task.Delay(200);
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                // set photo to the viewer
+                Gallery.ScrollToItem(AP.Photos.CurrentIndex, false);
+            });
         }
     }
 
@@ -343,7 +347,7 @@ public partial class MainWindow : IgWindow
     }
 
 
-    private async Task ViewPhotoAsync(Photo? photo, bool useCache = true)
+    private async Task ViewPhotoAsync(Photo? photo, bool useCache = true, bool scrollToThumbnail = true)
     {
         // clear the current in-app message
         _ = _contentEl.ShowMessageAsync(null);
@@ -363,11 +367,14 @@ public partial class MainWindow : IgWindow
         Viewer.EnableImagePreview = AP.Config.ShowImagePreview;
 
 
-        DispatcherQueue.TryEnqueue(() =>
+        if (scrollToThumbnail)
         {
-            // set photo to the viewer
-            Gallery.ScrollToItem(AP.Photos.CurrentIndex);
-        });
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                // set photo to the viewer
+                Gallery.ScrollToItem(AP.Photos.CurrentIndex);
+            });
+        }
 
 
         await Viewer.SetPhotoAsync(photo, useCache);

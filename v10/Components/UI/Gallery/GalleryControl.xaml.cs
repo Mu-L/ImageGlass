@@ -45,11 +45,29 @@ public sealed partial class GalleryControl : IgControl
         {
             if (field != value)
             {
+                field.PropertyChanged -= VM_PropertyChanged;
                 field = value;
+                field.PropertyChanged += VM_PropertyChanged;
+
                 _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(GalleryVisibility));
             }
         }
     } = new();
+    private void VM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (nameof(VM.Count).Equals(e.PropertyName, StringComparison.Ordinal))
+        {
+            _ = OnPropertyChanged(nameof(GalleryVisibility));
+        }
+    }
+
+
+    /// <summary>
+    /// Gets the visibility of gallery list.
+    /// </summary>
+    public Visibility GalleryVisibility => VM.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+
 
     #endregion // Public Properties
 
@@ -63,10 +81,22 @@ public sealed partial class GalleryControl : IgControl
     }
 
 
+    protected override void OnIgUnloaded(FrameworkElement fe)
+    {
+        VM.PropertyChanged -= VM_PropertyChanged;
+        base.OnIgUnloaded(fe);
+    }
+
+
     protected override void OnIgSizeChanged(FrameworkElement fe, SizeChangedEventArgs e)
     {
         base.OnIgSizeChanged(fe, e);
+        UpdateControlSize();
+    }
 
+
+    private void UpdateControlSize()
+    {
         if (GalleryScrollViewer.ComputedHorizontalScrollBarVisibility == Visibility.Visible)
         {
             var padding = GalleryScrollViewer.Padding;
