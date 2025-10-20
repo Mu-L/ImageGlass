@@ -81,6 +81,8 @@ public sealed partial class GalleryControl : IgControl
     }
 
 
+    #region Control Events
+
     protected override void OnIgUnloaded(FrameworkElement fe)
     {
         VM.PropertyChanged -= VM_PropertyChanged;
@@ -91,34 +93,11 @@ public sealed partial class GalleryControl : IgControl
     protected override void OnIgSizeChanged(FrameworkElement fe, SizeChangedEventArgs e)
     {
         base.OnIgSizeChanged(fe, e);
-        UpdateControlSize();
+        UpdateControlPadding();
     }
 
 
-    private void UpdateControlSize()
-    {
-        if (GalleryScrollViewer.ComputedHorizontalScrollBarVisibility == Visibility.Visible)
-        {
-            var padding = GalleryScrollViewer.Padding;
-
-            GalleryScrollViewer.Padding = new Thickness(padding.Left, padding.Top, padding.Right, padding.Bottom)
-            {
-                Bottom = padding.Top * 2.5,
-            };
-        }
-        else
-        {
-            var padding = GalleryScrollViewer.Padding;
-
-            GalleryScrollViewer.Padding = new Thickness(padding.Left, padding.Top, padding.Right, padding.Bottom)
-            {
-                Bottom = padding.Top,
-            };
-        }
-    }
-
-
-    private void GalleryItemRepeater_ElementPrepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs e)
+    private void PART_ItemRepeater_ElementPrepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs e)
     {
         if (e.Element is not IgGalleryItem item) return;
 
@@ -156,8 +135,8 @@ public sealed partial class GalleryControl : IgControl
 
 
         // scroll the clicked item into the view
-        if (GalleryScrollViewer.ComputedHorizontalScrollBarVisibility == Visibility.Visible
-            || GalleryScrollViewer.ComputedVerticalScrollBarVisibility == Visibility.Visible)
+        if (PART_ScrollViewer.ComputedHorizontalScrollBarVisibility == Visibility.Visible
+            || PART_ScrollViewer.ComputedVerticalScrollBarVisibility == Visibility.Visible)
         {
             btnItem.StartBringIntoView(new BringIntoViewOptions()
             {
@@ -168,6 +147,35 @@ public sealed partial class GalleryControl : IgControl
         }
 
         ItemClicked?.Invoke(btnItem, EventArgs.Empty);
+    }
+
+    #endregion // Control Events
+
+
+
+    /// <summary>
+    /// Update the padding of gallery according to scrollbar visibility.
+    /// </summary>
+    private void UpdateControlPadding()
+    {
+        if (PART_ScrollViewer.ComputedHorizontalScrollBarVisibility == Visibility.Visible)
+        {
+            var padding = PART_ScrollViewer.Padding;
+
+            PART_ScrollViewer.Padding = new Thickness(padding.Left, padding.Top, padding.Right, padding.Bottom)
+            {
+                Bottom = padding.Top * 2.5,
+            };
+        }
+        else
+        {
+            var padding = PART_ScrollViewer.Padding;
+
+            PART_ScrollViewer.Padding = new Thickness(padding.Left, padding.Top, padding.Right, padding.Bottom)
+            {
+                Bottom = padding.Top,
+            };
+        }
     }
 
 
@@ -181,15 +189,12 @@ public sealed partial class GalleryControl : IgControl
         var centerItemIndex = index + 1;
         var itemCenterX = (AP.Config.ThumbnailSize * centerItemIndex)
             + (ItemSpacing * centerItemIndex)
-            - (GalleryScrollViewer.ViewportWidth / 2)
+            - (PART_ScrollViewer.ViewportWidth / 2)
             - (AP.Config.ThumbnailSize / 2);
 
-        GalleryScrollViewer.ChangeView(itemCenterX, null, null, disableAnimation);
+        PART_ScrollViewer.ChangeView(itemCenterX, null, null, disableAnimation);
     }
 
 
 }
-
-
-
 

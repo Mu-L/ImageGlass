@@ -85,7 +85,7 @@
 
 
     <ScrollViewer
-        x:Name="GalleryScrollViewer"
+        x:Name="PART_ScrollViewer"
         Padding="5"
         Background="{x:Bind cm:AP.Config.Theme.ComputedColors.GalleryBgColor, Converter={StaticResource ColorToBrushConverter}}"
         HorizontalScrollBarVisibility="Auto"
@@ -94,9 +94,9 @@
         VerticalScrollMode="Disabled"
         Visibility="{x:Bind GalleryVisibility}">
         <ItemsRepeater
-            x:Name="GalleryItemRepeater"
+            x:Name="PART_GalleryItemRepeater"
             HorizontalAlignment="Center"
-            ElementPrepared="GalleryItemRepeater_ElementPrepared"
+            ElementPrepared="PART_ItemRepeater_ElementPrepared"
             ItemTemplate="{StaticResource GalleryItemTemplate}"
             ItemsSource="{x:Bind VM.Items}">
             <ItemsRepeater.Layout>
