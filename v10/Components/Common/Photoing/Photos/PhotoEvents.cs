@@ -23,12 +23,20 @@ using Windows.Graphics.Imaging;
 namespace ImageGlass.Common.Photoing;
 
 
-public class PhotoLoadingEventArgs(bool isLoaded, Photo photo, CancellationToken token) : EventArgs
+public enum PhotoLoadingState
+{
+    None,
+    Loading,
+    Loaded,
+}
+
+
+public class PhotoLoadingEventArgs(PhotoLoadingState state, Photo photo, CancellationToken token) : EventArgs
 {
     /// <summary>
     /// Checks if the event is fired when photo is loaded.
     /// </summary>
-    public bool IsLoaded => isLoaded;
+    public PhotoLoadingState State => state;
 
     /// <summary>
     /// Gets the current photo instance.

@@ -642,13 +642,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
         _photo = inputPhoto;
 
 
-        // photo is cached
-        if (inputPhoto.IsDone && useCache)
+        // photo is loaded
+        if (useCache && inputPhoto.State == PhotoLoadingState.Loaded)
         {
             var token = inputPhoto.CancelToken ?? default;
-            await HandlePhotoLoadedAsync(new PhotoLoadingEventArgs(true, inputPhoto, token));
+            await HandlePhotoLoadedAsync(new(PhotoLoadingState.Loaded, inputPhoto, token));
         }
-        // photo is not cached
         else
         {
             await LoadPhotoAsync(inputPhoto, useCache, false);
@@ -668,7 +667,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     private void Photo_Loading(PhotoLoadingEventArgs e)
     {
         // previewing
-        if (!e.IsLoaded)
+        if (e.State == PhotoLoadingState.Loading)
         {
             _ = HandlePhotoPreviewAsync(e);
         }
@@ -735,7 +734,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
                     return;
                 }
 
-                //set preview source
+                // set preview source
                 _bmpPreview = previewBitmap;
             }
         }
@@ -841,9 +840,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
                 // native bitmap is a single-frame bitmap
                 else
                 {
-                    // convert WIC bitmap to D2 bitmap off-thread
+                    // create GPU bitmap
                     bitmap = await e.Photo.GetD2BitmapAsync(_d3dDevice!, D2dContext);
                     hasSource = bitmap != null;
+
+                    // release CPU bitmap
+                    e.Photo.UnloadBitmap();
                 }
             }
 
@@ -920,15 +922,16 @@ public partial class VirtualViewerControl : SwapChainCanvas
             }
 
 
-            // raise event
-            OnPhotoLoading(e);
-
             BHelper.GcCollect();
         }
         catch (Exception ex)
         {
             e.Photo.Error = ex; // the rendering error
             HandleCancelLoaded(false);
+        }
+        finally
+        {
+            // raise event
             OnPhotoLoading(e);
         }
 

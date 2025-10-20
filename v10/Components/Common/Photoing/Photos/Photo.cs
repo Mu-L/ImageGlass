@@ -62,24 +62,24 @@ public partial class Photo : DisposableImpl
     public IDisposable? Bitmap => _bitmap;
 
     /// <summary>
-    /// Gets the size of the <c><see cref="Bitmap"/></c>.
+    /// Gets the size of the photo.
     /// </summary>
     public Vector2 Size => new Vector2(_width, _height);
 
     /// <summary>
-    /// Gets the width of the <c><see cref="Bitmap"/></c>.
+    /// Gets the width of the photo.
     /// </summary>
     public uint Width => (uint)Size.X;
 
     /// <summary>
-    /// Gets the height of the <c><see cref="Bitmap"/></c>.
+    /// Gets the height of the photo.
     /// </summary>
     public uint Height => (uint)Size.Y;
 
     /// <summary>
-    /// Indicates whether the <see cref="Bitmap"/> is currently loaded.
+    /// Gets the loading state of the photo.
     /// </summary>
-    public bool IsDone { get; set; } = false;
+    public PhotoLoadingState State { get; set; } = PhotoLoadingState.None;
 
 
 
@@ -259,9 +259,7 @@ public partial class Photo : DisposableImpl
     private async Task OnDisposing(bool disposeEverything)
     {
         CancelLoading();
-
-        _bitmap?.Dispose();
-        _bitmap = null;
+        UnloadBitmap();
 
         // dispose everything
         if (disposeEverything)
@@ -421,7 +419,7 @@ public partial class Photo : DisposableImpl
     #region Public Functions
 
     /// <summary>
-    /// Disposes the <c><see cref="Bitmap"/></c> and resets the relevant info.
+    /// Disposes the <c><see cref="Bitmap"/></c> and resets the relevant data.
     /// This method keeps the <c><see cref="Metadata"/></c> and neccessary resources.
     /// </summary>
     public async void Unload()
@@ -433,11 +431,21 @@ public partial class Photo : DisposableImpl
         }
 
         // reset info
-        IsDone = false;
+        State = PhotoLoadingState.None;
         Error = null;
 
         // unload image
         await OnDisposing(false);
+    }
+
+
+    /// <summary>
+    /// Disposes the bitmap only and keeps other relevent data.
+    /// </summary>
+    public void UnloadBitmap()
+    {
+        _bitmap?.Dispose();
+        _bitmap = null;
     }
 
 
@@ -453,7 +461,7 @@ public partial class Photo : DisposableImpl
 
 
     /// <summary>
-    /// Loads <c><see cref="Bitmap"/></c> from file.
+    /// Loads photo from file.
     /// </summary>
     public virtual async Task LoadAsync(bool useCache,
         PhotoReadOptions? newOptions = null,
@@ -461,7 +469,7 @@ public partial class Photo : DisposableImpl
         bool skipLoadingEvent = false)
     {
         // use cached data
-        if (useCache && IsDone) return;
+        if (useCache && State != PhotoLoadingState.None) return;
 
         CancelLoading();
         var token = _cancelPhotoLoading.Token;
@@ -470,7 +478,7 @@ public partial class Photo : DisposableImpl
         {
             // reset dispose status
             IsDisposed = false;
-            IsDone = false;
+            State = PhotoLoadingState.None;
             Error = null;
             ReadOptions = newOptions ?? ReadOptions;
 
@@ -485,7 +493,7 @@ public partial class Photo : DisposableImpl
 
             if (!skipLoadingEvent)
             {
-                progress?.Report(new PhotoLoadingEventArgs(false, this, token));
+                progress?.Report(new PhotoLoadingEventArgs(PhotoLoadingState.Loading, this, token));
             }
 
 
@@ -510,15 +518,15 @@ public partial class Photo : DisposableImpl
             // cancel if requested
             if (token.IsCancellationRequested) return;
 
-            // done loading
-            IsDone = true;
 
-            progress?.Report(new PhotoLoadingEventArgs(true, this, token));
+            // done loading
+            State = PhotoLoadingState.Loaded;
+            progress?.Report(new PhotoLoadingEventArgs(PhotoLoadingState.Loaded, this, token));
         }
         catch (Exception ex)
         {
             Error = ex;
-            IsDone = true;
+            State = PhotoLoadingState.Loaded;
         }
         finally
         {

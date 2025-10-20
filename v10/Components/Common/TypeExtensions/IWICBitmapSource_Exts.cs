@@ -259,23 +259,3 @@ public static class IWICBitmapSource_Exts
 }
 
 
-public partial class PhotoPixelInfo : DisposableImpl
-{
-    public uint Width { get; internal set; }
-    public uint Height { get; internal set; }
-    public uint BitsPerPixel { get; internal set; }
-    public uint Stride { get; internal set; }
-    public uint BufferSize => Stride * Height;
-    public uint ChannelCount { get; internal set; }
-    public PixelFormatNumericRepresentation NumericRepresentation { get; internal set; }
-    public IWICColorContext? ColorContext { get; internal set; }
-
-
-    protected override void OnDisposing()
-    {
-        base.OnDisposing();
-
-        ColorContext?.Dispose();
-        ColorContext = null;
-    }
-}

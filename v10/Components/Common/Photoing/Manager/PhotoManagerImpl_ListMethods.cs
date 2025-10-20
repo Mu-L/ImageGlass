@@ -201,7 +201,7 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
     public bool IsCached(int index)
     {
         var photo = Get(index);
-        return photo?.IsDone ?? false;
+        return photo?.State == PhotoLoadingState.Loaded;
     }
 
 

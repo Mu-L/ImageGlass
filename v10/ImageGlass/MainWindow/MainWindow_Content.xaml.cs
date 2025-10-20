@@ -351,6 +351,8 @@ public sealed partial class MainWindow_Content : IgControl
     /// </summary>
     private void HandlePhotoLoading_(VirtualViewerControl sender, PhotoLoadingEventArgs e)
     {
+        // Note: events are not fired in order
+
         // 1. handle loading error first
         if (e.Photo.Error is not null)
         {
@@ -363,14 +365,14 @@ public sealed partial class MainWindow_Content : IgControl
         }
 
         // 2. handle photo loading
-        else if (!e.IsLoaded)
+        else if (e.State == PhotoLoadingState.Loading)
         {
             // show loading message after 2s
             _ = ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_Loading], delayMs: 2000);
         }
 
         // 3. handle photo loaded
-        else if (e.IsLoaded)
+        else if (e.State == PhotoLoadingState.Loaded)
         {
             // clear in-app message
             _ = ShowMessageAsync(null);

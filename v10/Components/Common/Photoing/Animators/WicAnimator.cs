@@ -44,6 +44,8 @@ public partial class WicAnimator : AnimatorImpl
     private Lock _lockDc = new Lock();
 
 
+
+
     /// <summary>
     /// Initializes a new instance of the <see cref="WicAnimator"/> class.
     /// </summary>
@@ -125,7 +127,7 @@ public partial class WicAnimator : AnimatorImpl
         var bmp = GetRenderedFrameBitmap1();
         if (bmp is null) return default;
 
-        return GetRenderedFrameBitmap1().As<T>();
+        return bmp.As<T>();
     }
 
 
