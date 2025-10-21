@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
-using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -314,7 +313,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
 
     protected virtual Color GetColorForText()
     {
-        return Colors.Black;
+        return AP.Config.Theme.ComputedColors.ToolbarTextColor;
     }
 
     protected virtual Color GetColorForDefault()

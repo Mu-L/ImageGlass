@@ -16,7 +16,7 @@
     mc:Ignorable="d">
 
     <local:IgButton
-        Name="PART_Button"
+        x:Name="PART_Button"
         Padding="{x:Bind local:IgToolbarButton.ItemPadding}"
         x:DefaultBindMode="OneWay"
         AutomationProperties.Name="{x:Bind VM.DisplayText}"
@@ -30,14 +30,14 @@
         ToolTipService.ToolTip="{x:Bind VM.DisplayText}">
         <StackPanel Orientation="Horizontal" Spacing="{x:Bind local:IgToolbarButton.InnerSpacing}">
             <ImageIcon
-                Name="PART_ButtonIcon"
+                x:Name="PART_ButtonIcon"
                 Width="{x:Bind cm:AP.Config.ToolbarIconHeight}"
                 Height="{x:Bind cm:AP.Config.ToolbarIconHeight}" />
 
             <TextBlock
-                Name="PART_ButtonText"
+                x:Name="PART_ButtonText"
                 VerticalAlignment="Center"
-                Foreground="{x:Bind cm:AP.Config.Theme.ComputedColors.ToolbarTextColor, Converter={StaticResource ColorToBrushConverter}}"
+                Foreground="{x:Bind PART_Button.Foreground}"
                 IsColorFontEnabled="True"
                 Text="{x:Bind VM.DisplayText}"
                 Visibility="{x:Bind VM.IsTextVisible, Converter={StaticResource BoolToVisibilityConverter}}" />

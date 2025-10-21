@@ -38,7 +38,6 @@ public partial class IgThemeComputedColors : IgReactive
     // Gallery
     public Color GalleryBgColor { get; set; } = new();
     public Color GalleryTextColor { get; set; } = new();
-    public Color GalleryTextHoverColor { get; set; } = new();
     public Color GalleryItemHoverColor { get; set; } = new();
     public Color GalleryItemActiveColor { get; set; } = new();
     public Color GalleryItemSelectedColor { get; set; } = new();
@@ -136,12 +135,6 @@ public partial class IgThemeComputedColors : IgReactive
         {
             GalleryTextColor = color;
             OnPropertyChanged(nameof(GalleryTextColor));
-        }
-        color = BHelper.ColorFromHex(colors.GalleryTextHoverColor, accentColor);
-        if (GalleryTextHoverColor != color)
-        {
-            GalleryTextHoverColor = color;
-            OnPropertyChanged(nameof(GalleryTextHoverColor));
         }
         color = BHelper.ColorFromHex(colors.GalleryItemHoverColor, accentColor);
         if (GalleryItemHoverColor != color)
