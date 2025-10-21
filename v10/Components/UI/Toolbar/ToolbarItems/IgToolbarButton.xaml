@@ -27,7 +27,7 @@
         IsToggle="{x:Bind VM.IsToggle}"
         Style="{StaticResource IgButtonStyle}"
         Text="{x:Bind VM.DisplayText}"
-        ToolTipService.ToolTip="{x:Bind VM.DisplayText}">
+        ToolTipService.ToolTip="{x:Bind VM.Tooltip}">
         <StackPanel Orientation="Horizontal" Spacing="{x:Bind local:IgToolbarButton.InnerSpacing}">
             <ImageIcon
                 x:Name="PART_ButtonIcon"

@@ -145,16 +145,39 @@ public partial class MainWindow
         {
             if (item.IsSeparator || item.OnClick is null) continue;
 
+            // 1.1 save the button text
+            if (string.IsNullOrWhiteSpace(item.OnClick.LangKey))
+            {
+                item.OnClick.LangKey = item.Text;
+            }
+
+
+            // 1.2 get hotkey text
+            var hotkeyTextList = item.OnClick.Hotkeys.Select(hk => hk.KeyString) ?? [];
+            if (!hotkeyTextList.Any())
+            {
+                var langKey = IgLang.GetKey(item.OnClick.LangKey);
+                if (langKey is not null)
+                {
+                    // try get menu hotkeys from user-config
+                    var menuHotkeys = AP.Config.MenuHotkeys.GetValueOrDefault(langKey.Value) ?? [];
+                    if (menuHotkeys.Length == 0)
+                    {
+                        // try get default menu hotkeys
+                        var menuAction = _menuMap.GetValueOrDefault(langKey.Value);
+                        menuHotkeys = menuAction?.Hotkeys ?? [];
+                    }
+
+                    hotkeyTextList = menuHotkeys.Select(hk => hk.KeyString) ?? [];
+                }
+            }
+            item.HotkeyText = string.Join(", ", hotkeyTextList);
+
+
+            // 1.3 register custom hotkey
             foreach (var hk in item.OnClick.Hotkeys)
             {
-                // register custom hotkey
                 Content.KeyboardAccelerators.Add(hk.Data);
-
-                // save the button text
-                if (string.IsNullOrWhiteSpace(item.OnClick.LangKey))
-                {
-                    item.OnClick.LangKey = item.Text;
-                }
 
                 // save custom hotkey to the map
                 _ = _hotkeyMap.TryAdd(hk, item.OnClick);

@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Cysharp.Text;
 using System;
 using System.Text.Json.Serialization;
 
@@ -89,6 +90,7 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
                 _ = OnPropertyChanged();
                 _ = OnPropertyChanged(nameof(DisplayText));
                 _ = OnPropertyChanged(nameof(IsTextVisible));
+                _ = OnPropertyChanged(nameof(Tooltip));
             }
         }
     } = "";
@@ -242,6 +244,39 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     /// </summary>
     [JsonIgnore]
     public bool IsTextVisible => ShowText && !string.IsNullOrWhiteSpace(Text);
+
+
+    /// <summary>
+    /// Gets, sets the hotkey string for toolbar item.
+    /// </summary>
+    [JsonIgnore]
+    public string HotkeyText
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+                _ = OnPropertyChanged();
+                _ = OnPropertyChanged(nameof(Tooltip));
+            }
+        }
+    } = string.Empty;
+
+
+    /// <summary>
+    /// Gets the tooltip of toolbar item.
+    /// </summary>
+    public string Tooltip
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(HotkeyText))
+                return DisplayText;
+
+            return ZString.Concat(DisplayText, $" ({HotkeyText})");
+        }
+    }
 
     #endregion // Non-JSON Properties
 
