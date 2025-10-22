@@ -22,11 +22,10 @@
             x:Name="PART_Titlebar"
             Grid.Row="0"
             Padding="{x:Bind TitleBarPadding}"
-            BackgroundColor="{x:Bind cm:AP.Config.Theme.ComputedColors.ToolbarBgColor}"
             Canvas.ZIndex="100"
             IsTabStop="False"
             Text="{x:Bind WindowTitle}"
-            TextColor="{x:Bind cm:AP.Config.Theme.ComputedColors.ToolbarTextColor}" />
+            TextColor="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor}" />
 
 
         <!--  Window Content  -->

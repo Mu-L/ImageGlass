@@ -23,6 +23,7 @@ using ImageGlass.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -116,7 +117,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgLoaded(fe);
 
-        UpdateMessageBoxStyle_();
+        UpdateStyle_();
         UpdateZoomModeMenuGroup_();
 
 
@@ -167,7 +168,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgThemeChanged(e);
 
-        UpdateMessageBoxStyle_();
+        UpdateStyle_();
     }
 
 
@@ -282,11 +283,30 @@ public sealed partial class MainWindow_Content : IgControl
 
 
     /// <summary>
-    /// Updates message box style according to current theme.
+    /// Updates style according to current theme.
     /// </summary>
-    private void UpdateMessageBoxStyle_()
+    private void UpdateStyle_()
     {
-        PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor.WithAlpha(200).ToBrush();
+        if (AP.Config.Theme.IsFullTransparent)
+        {
+            PART_ContentRoot.Shadow = null;
+            PART_ContentRoot.BorderThickness = new(0);
+            PART_ContentRoot.Margin = new(0);
+        }
+        else
+        {
+            PART_ContentRoot.Shadow = new ThemeShadow();
+            PART_ContentRoot.BorderThickness = new(1);
+            PART_ContentRoot.Margin = new(4, 1, 4, 4);
+        }
+
+        PART_ContentRoot.BorderBrush = AP.Config.Theme.InvertedBaseColor
+            .WithAlpha(10)
+            .ToBrush();
+
+        PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor
+            .WithAlpha(200)
+            .ToBrush();
     }
 
 

@@ -40,6 +40,11 @@ public static class Const
     public const string MS_APPSTORE_ID = "9N33VZK3C7TH";
     public const int MAX_IMAGE_DIMENSION = 16_384;
     public static readonly CornerRadius BORDER_RADIUS = new(6);
+    public static readonly CornerRadius WIN_BORDER_RADIUS = new(
+        BORDER_RADIUS.TopLeft * 2.25f,
+        BORDER_RADIUS.TopRight * 2.25f,
+        BORDER_RADIUS.BottomRight,
+        BORDER_RADIUS.BottomLeft);
 
     public static readonly string SIGN_POSITIVE = NumberFormatInfo.CurrentInfo.PositiveSign;
     public static readonly string SIGN_NEGATIVE = NumberFormatInfo.CurrentInfo.NegativeSign;

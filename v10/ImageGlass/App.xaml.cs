@@ -262,8 +262,7 @@ public partial class App : Application
         var textHover = AP.Config.Theme.ComputedColors.MenuTextHoverColor;
         var textPressed = textHover;
         var textDisabled = textNormal.Blend(AP.Config.Theme.BaseColor, 0.5f, textNormal.A);
-        // theme: added transparent titlebar and window border
-        Application.Current.Resources["ControlCornerRadius"] = Const.BORDER_RADIUS;
+
 
         // 1. menu dropdown
         Application.Current.Resources["MenuFlyoutPresenterBackground"] = AP.Config.Theme.ComputedColors.MenuBgColor.ToBrush();
@@ -315,6 +314,9 @@ public partial class App : Application
         Application.Current.Resources["ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPressed"] = textPressed.WithAlpha(180).ToBrush();
         Application.Current.Resources["ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled"] = textDisabled.WithAlpha(180).ToBrush();
 
+
+        // 6. other styles
+        Application.Current.Resources["ControlCornerRadius"] = Const.BORDER_RADIUS;
     }
 
 }

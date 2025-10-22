@@ -112,6 +112,13 @@ public partial class IgTheme : IgReactive
         ? Microsoft.UI.Colors.White
         : Microsoft.UI.Colors.Black;
 
+    /// <summary>
+    /// Checks if the theme pack colors are fully transparent.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsFullTransparent => ComputedColors.BgColor.A == 0
+        && ComputedColors.ToolbarBgColor.A == 0
+        && ComputedColors.GalleryBgColor.A == 0;
     #endregion // Instance Properties
 
 

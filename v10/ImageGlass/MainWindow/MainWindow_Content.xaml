@@ -13,12 +13,21 @@
     IsTabStop="False"
     mc:Ignorable="d">
 
-    <Grid IsTabStop="True" TabFocusNavigation="Local">
+    <Grid
+        x:Name="PART_ContentRoot"
+        CornerRadius="{x:Bind cm:Const.WIN_BORDER_RADIUS}"
+        IsTabStop="True"
+        TabFocusNavigation="Local"
+        Translation="0,0,20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+
+        <Grid.Shadow>
+            <ThemeShadow />
+        </Grid.Shadow>
 
 
         <!--  Toolbar  -->

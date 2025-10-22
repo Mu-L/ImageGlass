@@ -48,6 +48,7 @@ public partial class MainWindow : IgWindow
     public MainWindow()
     {
         WindowContent = _contentEl = new(this);
+        UseBackdropForTransparentWindowOnly = false;
         _searchProgress = new(Files_Searched);
         _status = new(_contentEl.Viewer);
 
