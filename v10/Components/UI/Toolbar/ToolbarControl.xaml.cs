@@ -24,6 +24,7 @@ using Microsoft.UI.Xaml.Media;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Windows.Foundation;
 
 namespace ImageGlass.UI;
@@ -58,10 +59,13 @@ public partial class ToolbarControl : IgControl
         set => SetValue(ItemsSourceProperty, value);
     }
     public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(ToolbarControl), new PropertyMetadata(null, OnItemsSourceChanged));
-    private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    private static async void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not ToolbarControl toolbar) return;
         toolbar.UpdateLayoutItems();
+
+        await Task.Delay(200); // wait for layout updated
+        toolbar.HandleOverflow_();
     }
     #endregion // ItemsSource
 
