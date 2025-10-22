@@ -240,6 +240,20 @@ public class IgLang
         return value;
     }
 
+
+    /// <summary>
+    /// Gets the formatted language string. If not exist, returns the key.
+    /// </summary>
+    /// <param name="key">The key to get the language string</param>
+    public string Get(string? key) => Get(key, []);
+
+
+    /// <summary>
+    /// Gets the formatted language string. If not exist, returns empty string.
+    /// </summary>
+    /// <param name="key">The key to get the language string</param>
+    public string Get(LangId? key) => Get(key, []);
+
     #endregion // Public Methods
 
 
@@ -412,6 +426,7 @@ public class IgLang
         #region Main Window > General
         new(LangId.FrmMain_PicMain_ErrorText, "Could not load this image"), // v2.0 beta, updated 4.0, 9.0, 10.0
         new(LangId.FrmMain_MnuMain, "Main menu"), // v3.0
+        new(LangId.FrmMain_MnuToolbarOverflow, "View more buttons"), // v10.0
 
         new(LangId.FrmMain_OpenFileDialog, "All supported files"),
         new(LangId.FrmMain_Loading, "Loading…"), // v3.0

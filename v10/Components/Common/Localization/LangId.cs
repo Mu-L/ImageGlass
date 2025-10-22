@@ -158,6 +158,7 @@ public enum LangId
 
     #region Main Window > General
     FrmMain_MnuMain,
+    FrmMain_MnuToolbarOverflow,
     FrmMain_PicMain_ErrorText,
 
     FrmMain_OpenFileDialog,

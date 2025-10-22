@@ -98,7 +98,7 @@
                 VerticalAlignment="Stretch"
                 VerticalContentAlignment="Bottom"
                 Style="{StaticResource IgButtonStyle}"
-                ToolTipService.ToolTip="[View more buttons]"
+                ToolTipService.ToolTip="{x:Bind cm:AP.Config.Lang.Get(cm:LangId.FrmMain_MnuToolbarOverflow)}"
                 Visibility="Collapsed">
                 <StackPanel VerticalAlignment="Stretch" Orientation="Horizontal">
                     <Viewbox
