@@ -213,6 +213,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
     public IgButton()
     {
         DefaultStyleKey = typeof(IgButton);
+        CornerRadius = Const.BORDER_RADIUS;
 
         _tokenIsPointerOverChanged = RegisterPropertyChangedCallback(ButtonBase.IsPointerOverProperty, IgButton_StateChanged);
         _tokenIsPressedChanged = RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, IgButton_StateChanged);

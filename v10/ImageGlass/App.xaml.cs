@@ -262,7 +262,8 @@ public partial class App : Application
         var textHover = AP.Config.Theme.ComputedColors.MenuTextHoverColor;
         var textPressed = textHover;
         var textDisabled = textNormal.Blend(AP.Config.Theme.BaseColor, 0.5f, textNormal.A);
-
+        // theme: added transparent titlebar and window border
+        Application.Current.Resources["ControlCornerRadius"] = Const.BORDER_RADIUS;
 
         // 1. menu dropdown
         Application.Current.Resources["MenuFlyoutPresenterBackground"] = AP.Config.Theme.ComputedColors.MenuBgColor.ToBrush();
