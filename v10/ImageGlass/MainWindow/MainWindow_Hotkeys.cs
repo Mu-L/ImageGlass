@@ -140,6 +140,19 @@ public partial class MainWindow
         Content.KeyboardAccelerators.Clear();
 
 
+        // 0. load main menu button hotkey text
+        var mainMenuHotkeys = AP.Config.MenuHotkeys.GetValueOrDefault(LangId.FrmMain_MnuMain)
+            ?? _menuMap.GetValueOrDefault(LangId.FrmMain_MnuMain)?.Hotkeys
+            ?? [];
+        var mainMenuHotkeyText = string.Join(", ", mainMenuHotkeys.Select(hk => hk.KeyString));
+        _contentEl.MainMenuButton.VM = new()
+        {
+            Image = nameof(IgThemeIcon.MainMenu),
+            Text = nameof(LangId.FrmMain_MnuMain),
+            HotkeyText = mainMenuHotkeyText,
+        };
+
+
         // 1. register toolbar hotkeys from user-config
         foreach (var item in AP.Config.ToolbarButtons)
         {

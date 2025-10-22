@@ -35,7 +35,6 @@ public partial class ToolbarControl : IgControl
     public static string _PART_ItemSeparator => "PART_ItemSeparator";
     public static double OverflowIconHeight => AP.Config.ToolbarIconHeight / 1.5f; // 16
     public static double ItemSpacing => AP.Config.ToolbarIconHeight / 6f; // 4
-    public static string MainMenuIconName => nameof(IgThemeIcon.MainMenu);
 
 
     // events
@@ -84,6 +83,13 @@ public partial class ToolbarControl : IgControl
             }
         }
     }
+
+
+    /// <summary>
+    /// Gets the main menu button.
+    /// </summary>
+    public IgToolbarButton MainMenuButton => BtnMainMenu;
+
 
     #endregion // Public Properties
 

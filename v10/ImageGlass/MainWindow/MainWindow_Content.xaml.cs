@@ -57,6 +57,7 @@ public sealed partial class MainWindow_Content : IgControl
     public GalleryControl Gallery => PART_Gallery;
     public VirtualViewerControl Viewer => PART_Viewer;
     public MenuFlyout MainMenu => PART_MainMenu;
+    public IgToolbarButton MainMenuButton => PART_ToolbarMain.MainMenuButton;
 
 
     private string? MessageHeading

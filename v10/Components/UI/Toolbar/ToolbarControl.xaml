@@ -98,7 +98,7 @@
                 VerticalAlignment="Stretch"
                 VerticalContentAlignment="Bottom"
                 Style="{StaticResource IgButtonStyle}"
-                ToolTipService.ToolTip="View more buttons"
+                ToolTipService.ToolTip="[View more buttons]"
                 Visibility="Collapsed">
                 <StackPanel VerticalAlignment="Stretch" Orientation="Horizontal">
                     <Viewbox
@@ -139,11 +139,7 @@
                 x:Name="BtnMainMenu"
                 Flyout="{x:Bind MainMenu}"
                 IsTabStop="False"
-                OpenFlyoutOnClick="True">
-                <local:IgToolbarButton.VM>
-                    <cm:ToolbarItemModel Image="{x:Bind local:ToolbarControl.MainMenuIconName}" Text="FrmMain_MnuMain" />
-                </local:IgToolbarButton.VM>
-            </local:IgToolbarButton>
+                OpenFlyoutOnClick="True" />
 
 
         </StackPanel>
