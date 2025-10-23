@@ -288,21 +288,27 @@ public sealed partial class MainWindow_Content : IgControl
     /// </summary>
     private void UpdateStyle_()
     {
-        if (AP.Config.Theme.IsFullTransparent)
+        var isToolbarTransparent = AP.Config.Theme.ComputedColors.ToolbarBgColor.A == 0;
+        var isGalleryTransparent = AP.Config.Theme.ComputedColors.GalleryBgColor.A == 0;
+
+        // both Toolbar & Gallery are not transparent
+        if (!isToolbarTransparent && !isGalleryTransparent)
         {
-            PART_ContentRoot.Shadow = null;
-            PART_ContentRoot.BorderThickness = new(0);
-            PART_ContentRoot.Margin = new(0);
+            PART_ContentRoot.Margin = new(4, 1, 4, 4);
+            PART_ContentRoot.Shadow = new ThemeShadow();
+            PART_ContentRoot.BorderThickness = new(1);
+            PART_ContentRoot.CornerRadius = Const.WIN_BORDER_RADIUS;
         }
         else
         {
-            PART_ContentRoot.Shadow = new ThemeShadow();
-            PART_ContentRoot.BorderThickness = new(1);
-            PART_ContentRoot.Margin = new(4, 1, 4, 4);
+            PART_ContentRoot.Margin = new(0);
+            PART_ContentRoot.Shadow = null;
+            PART_ContentRoot.BorderThickness = new(0);
+            PART_ContentRoot.CornerRadius = new();
         }
 
         PART_ContentRoot.BorderBrush = AP.Config.Theme.InvertedBaseColor
-            .WithAlpha(10)
+            .WithAlpha(15)
             .ToBrush();
 
         PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor

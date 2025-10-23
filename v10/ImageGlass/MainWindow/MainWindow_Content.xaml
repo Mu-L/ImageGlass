@@ -15,7 +15,6 @@
 
     <Grid
         x:Name="PART_ContentRoot"
-        CornerRadius="{x:Bind cm:Const.WIN_BORDER_RADIUS}"
         IsTabStop="True"
         TabFocusNavigation="Local"
         Translation="0,0,20">
@@ -527,7 +526,6 @@
                         TextWrapping="Wrap" />
                 </ScrollViewer>
             </Grid>
-
 
         </ui:VirtualViewerControl>
 
