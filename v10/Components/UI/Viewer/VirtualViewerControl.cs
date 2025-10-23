@@ -99,16 +99,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
     /// <summary>
-    /// Gets the drawing area.
-    /// </summary>
-    public Rect DrawingArea => new(
-        Padding.Left,
-        Padding.Top,
-        Math.Max(0, Bounds_Dpi.Width - Padding.Left - Padding.Right),
-        Math.Max(0, Bounds_Dpi.Height - Padding.Top - Padding.Bottom));
-
-
-    /// <summary>
     /// Gets rectangle of the viewport.
     /// </summary>
     public Rect DrawingDestRect => _destRect;
@@ -423,7 +413,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
         DrawImageLayer(e);              // draw image
         OnSelectionDrawing(e);          // Draw selection layer
         base.OnRender(e);
-
         DrawAnimationSource();          // draw animation source
 
 
@@ -457,6 +446,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         //// draw dest rect
         //e.DrawRectangle(_destRect, 0, Colors.Cyan);
+
+
     }
 
 

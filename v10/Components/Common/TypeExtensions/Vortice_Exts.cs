@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using SharpGen.Runtime;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Vortice;
 
 namespace ImageGlass.Common;
 
@@ -33,6 +34,19 @@ public static class Vortice_Exts
     public static bool IsDisposed([NotNullWhen(false)] this CppObject? self)
     {
         return self == null || self?.NativePointer == IntPtr.Zero;
+    }
+
+
+    /// <summary>
+    /// Converts to <see cref="Windows.Foundation.Rect"/>.
+    /// </summary>
+    public static Windows.Foundation.Rect ToRect(this RawRectF self)
+    {
+        return new Windows.Foundation.Rect(
+            self.Left,
+            self.Top,
+            self.Right - self.Left,
+            self.Bottom - self.Top);
     }
 
 }
