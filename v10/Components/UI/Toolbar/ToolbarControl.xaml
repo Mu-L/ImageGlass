@@ -58,7 +58,10 @@
         Padding="{x:Bind local:IgToolbarButton.ItemPadding}"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
-        Background="{x:Bind cm:AP.Config.Theme.Colors.ToolbarBgColor, Converter={StaticResource HexStringToBrushConverter}}">
+        Background="{x:Bind cm:AP.Config.Theme.Colors.ToolbarBgColor, Converter={StaticResource HexStringToBrushConverter}}"
+        BorderBrush="{x:Bind BorderBrush}"
+        BorderThickness="{x:Bind BorderThickness}"
+        CornerRadius="{x:Bind CornerRadius}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
