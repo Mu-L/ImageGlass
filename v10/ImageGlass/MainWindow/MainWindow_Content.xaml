@@ -34,6 +34,7 @@
             x:Name="PART_ToolbarMain"
             Grid.Row="0"
             Canvas.ZIndex="90"
+            IsContentVisible="True"
             IsTabStop="False"
             ItemsSource="{x:Bind cm:AP.Config.ToolbarButtons}">
 
@@ -536,6 +537,7 @@
             Grid.Row="2"
             Grid.Column="1"
             Canvas.ZIndex="80"
+            IsContentVisible="True"
             IsTabStop="False"
             VM="{x:Bind cm:AP.Photos, Mode=OneWay}" />
 

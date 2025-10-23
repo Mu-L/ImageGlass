@@ -298,6 +298,20 @@ public sealed partial class MainWindow_Content : IgControl
             PART_ContentRoot.Shadow = new ThemeShadow();
             PART_ContentRoot.BorderThickness = new(1);
             PART_ContentRoot.CornerRadius = Const.WIN_BORDER_RADIUS;
+
+            // Viewer control: set border radius
+            var viewerRadius = new CornerRadius();
+            if (!PART_ToolbarMain.IsContentVisible)
+            {
+                viewerRadius.TopLeft = Const.WIN_BORDER_RADIUS.TopLeft;
+                viewerRadius.TopRight = Const.WIN_BORDER_RADIUS.TopRight;
+            }
+            if (!PART_Gallery.IsContentVisible)
+            {
+                viewerRadius.BottomRight = Const.WIN_BORDER_RADIUS.BottomRight;
+                viewerRadius.BottomLeft = Const.WIN_BORDER_RADIUS.BottomLeft;
+            }
+            PART_Viewer.CornerRadius = viewerRadius;
         }
         else
         {

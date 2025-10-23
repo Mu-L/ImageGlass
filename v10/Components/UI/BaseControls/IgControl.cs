@@ -128,6 +128,27 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
     #endregion // INotifyPropertyChanged Implementation
 
 
+    /// <summary>
+    /// Gets, sets the visibility of the content of this control.
+    /// </summary>
+    public bool IsContentVisible
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field = value;
+
+                if (Content is FrameworkElement fe)
+                {
+                    fe.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                }
+                _ = OnPropertyChanged();
+            }
+        }
+    } = true;
+
+
     public IgControl()
     {
         DefaultStyleKey = typeof(IgControl);

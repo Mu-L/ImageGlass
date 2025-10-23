@@ -66,7 +66,9 @@ public sealed partial class GalleryControl : IgControl
     /// <summary>
     /// Gets the visibility of gallery list.
     /// </summary>
-    public Visibility GalleryVisibility => VM.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility GalleryVisibility => VM.Count > 0 && IsContentVisible
+        ? Visibility.Visible
+        : Visibility.Collapsed;
 
 
     #endregion // Public Properties
