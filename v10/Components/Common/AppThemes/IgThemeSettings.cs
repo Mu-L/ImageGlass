@@ -30,6 +30,11 @@ public record IgThemeSettings
     public bool IsDarkMode { get; set; } = true;
 
     /// <summary>
+    /// Gets or sets the thickness of the window frame
+    /// </summary>
+    public double FrameThickness { get; set; } = 0;
+
+    /// <summary>
     /// Gets, sets the navigation left arrow
     /// </summary>
     public string NavButtonLeft { get; set; } = string.Empty;

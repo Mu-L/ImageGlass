@@ -21,9 +21,9 @@ using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -36,7 +36,7 @@ namespace ImageGlass;
 
 public sealed partial class MainWindow_Content : IgControl
 {
-    private readonly MainWindow _winMain;
+    private readonly MainWindow _owner;
     private readonly MenuFlyout _mnuMain = new();
     private bool _shouldUpdateMenuText = false;
 
@@ -107,7 +107,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         InitializeComponent();
 
-        _winMain = mainWindow;
+        _owner = mainWindow;
     }
 
 
@@ -130,7 +130,9 @@ public sealed partial class MainWindow_Content : IgControl
         MenuItemHelper.Clicked += MenuItem_Clicked;
 
         PART_ToolbarMain.ItemClicked += PART_ToolbarMain_ItemClicked;
+        PART_ToolbarMain.PropertyChanged += PART_ToolbarMain_PropertyChanged;
         PART_Gallery.ItemClicked += PART_Gallery_ItemClicked;
+        PART_Gallery.PropertyChanged += PART_Gallery_PropertyChanged;
 
         PART_Viewer.DragOver += PART_Viewer_DragOver;
         PART_Viewer.Drop += PART_Viewer_Drop;
@@ -139,6 +141,7 @@ public sealed partial class MainWindow_Content : IgControl
         PART_Viewer.SelectionChanged += PART_Viewer_SelectionChanged;
         PART_Viewer.PhotoLoading += PART_Viewer_PhotoLoading;
 
+        _owner.IgWindowStateChanged += Owner_IgWindowStateChanged;
     }
 
 
@@ -154,7 +157,9 @@ public sealed partial class MainWindow_Content : IgControl
         MenuItemHelper.Clicked -= MenuItem_Clicked;
 
         PART_ToolbarMain.ItemClicked -= PART_ToolbarMain_ItemClicked;
+        PART_ToolbarMain.PropertyChanged -= PART_ToolbarMain_PropertyChanged;
         PART_Gallery.ItemClicked -= PART_Gallery_ItemClicked;
+        PART_Gallery.PropertyChanged -= PART_Gallery_PropertyChanged;
 
         PART_Viewer.DragOver -= PART_Viewer_DragOver;
         PART_Viewer.Drop -= PART_Viewer_Drop;
@@ -162,6 +167,8 @@ public sealed partial class MainWindow_Content : IgControl
         PART_Viewer.Panning -= PART_Viewer_Panning;
         PART_Viewer.SelectionChanged -= PART_Viewer_SelectionChanged;
         PART_Viewer.PhotoLoading -= PART_Viewer_PhotoLoading;
+
+        _owner.IgWindowStateChanged -= Owner_IgWindowStateChanged;
     }
 
 
@@ -198,6 +205,13 @@ public sealed partial class MainWindow_Content : IgControl
 
     #region Control Events
 
+    private void Owner_IgWindowStateChanged(IgWindow sender, WindowStateChangedEventArgs e)
+    {
+        if (e.State == OverlappedPresenterState.Minimized) return;
+        UpdateStyle_();
+    }
+
+
     private void PART_MainMenu_Opening(object? sender, object e)
     {
         UpdateMenuTextIfNeeded_();
@@ -220,13 +234,31 @@ public sealed partial class MainWindow_Content : IgControl
     {
         var action = MainWindow.GetMenuAction(e.Item.LangKey);
 
-        _ = _winMain.RunActionAsync(action, true);
+        _ = _owner.RunActionAsync(action, true);
+    }
+
+
+    private void PART_ToolbarMain_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (nameof(ToolbarMain.IsContentVisible).Equals(e.PropertyName))
+        {
+            UpdateStyle_();
+        }
     }
 
 
     private void PART_ToolbarMain_ItemClicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
     {
         ToolbarButtonClicked?.Invoke(sender, e);
+    }
+
+
+    private void PART_Gallery_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (nameof(Gallery.IsContentVisible).Equals(e.PropertyName))
+        {
+            UpdateStyle_();
+        }
     }
 
 
@@ -288,16 +320,60 @@ public sealed partial class MainWindow_Content : IgControl
     /// </summary>
     private void UpdateStyle_()
     {
-        var isToolbarTransparent = AP.Config.Theme.ComputedColors.ToolbarBgColor.A == 0;
-        var isGalleryTransparent = AP.Config.Theme.ComputedColors.GalleryBgColor.A == 0;
+        // 1. style for in-app message
+        PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor
+            .WithAlpha(200)
+            .ToBrush();
 
-        // both Toolbar & Gallery are not transparent
-        if (!isToolbarTransparent && !isGalleryTransparent)
+
+        // 2. window style: no custom frame
+        var frameSize = AP.Config.Theme.Settings.FrameThickness;
+        if (frameSize <= 0)
         {
-            PART_ContentRoot.Margin = new(4, 1, 4, 4);
-            PART_ContentRoot.Shadow = new ThemeShadow();
+            PART_ContentRoot.Margin = new(0);
+            PART_ContentRoot.BorderThickness = new(0, 1, 0, 0);
+            PART_Viewer.CornerRadius = new(0);
+            return;
+        }
+
+
+        // 3. window style: with custom frame
+        var isMaximized = _owner.WindowState == OverlappedPresenterState.Maximized;
+        PART_ContentRoot.BorderBrush = AP.Config.Theme.InvertedBaseColor
+            .WithAlpha(15)
+            .ToBrush();
+
+        // 3.1 maximize state
+        if (isMaximized)
+        {
+            PART_ContentRoot.Margin = new(0);
+            PART_Viewer.CornerRadius = new(0);
+
+            if (PART_ToolbarMain.IsContentVisible)
+            {
+                PART_ContentRoot.BorderThickness = new(0, 1, 0, 0);
+                PART_ContentRoot.CornerRadius = new(0)
+                {
+                    TopLeft = Const.WIN_BORDER_RADIUS.TopLeft,
+                    TopRight = Const.WIN_BORDER_RADIUS.TopRight,
+                };
+            }
+            else
+            {
+                PART_ContentRoot.BorderThickness = new(0, 0, 0, 0);
+                PART_ContentRoot.CornerRadius = new(0);
+            }
+        }
+        // 3.2 normal state
+        else
+        {
+            PART_ContentRoot.Margin = new(
+                frameSize,
+                Math.Clamp(frameSize, 1, frameSize - 4),
+                frameSize,
+                frameSize);
             PART_ContentRoot.BorderThickness = new(1);
-            PART_ContentRoot.CornerRadius = Const.WIN_BORDER_RADIUS;
+
 
             // Viewer control: set border radius
             var viewerRadius = new CornerRadius();
@@ -311,23 +387,10 @@ public sealed partial class MainWindow_Content : IgControl
                 viewerRadius.BottomRight = Const.WIN_BORDER_RADIUS.BottomRight;
                 viewerRadius.BottomLeft = Const.WIN_BORDER_RADIUS.BottomLeft;
             }
+
             PART_Viewer.CornerRadius = viewerRadius;
+            PART_ContentRoot.CornerRadius = Const.WIN_BORDER_RADIUS;
         }
-        else
-        {
-            PART_ContentRoot.Margin = new(0);
-            PART_ContentRoot.Shadow = null;
-            PART_ContentRoot.BorderThickness = new(0);
-            PART_ContentRoot.CornerRadius = new();
-        }
-
-        PART_ContentRoot.BorderBrush = AP.Config.Theme.InvertedBaseColor
-            .WithAlpha(15)
-            .ToBrush();
-
-        PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor
-            .WithAlpha(200)
-            .ToBrush();
     }
 
 
