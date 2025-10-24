@@ -148,6 +148,11 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     protected bool _isClosed = false;
     private Rect _boundsBeforeStateChanged = new();
 
+    /// <summary>
+    /// Occurs when window state is changed.
+    /// </summary>
+    public event TEventHandler<IgWindow, WindowStateChangedEventArgs>? IgWindowStateChanged;
+
 
     #region Control Properties
 
@@ -510,7 +515,10 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Occurs when window state is changed.
     /// </summary>
-    protected virtual void OnIgWindowStateChanged(WindowStateChangedEventArgs e) { }
+    protected virtual void OnIgWindowStateChanged(WindowStateChangedEventArgs e)
+    {
+        IgWindowStateChanged?.Invoke(this, e);
+    }
 
 
     /// <summary>

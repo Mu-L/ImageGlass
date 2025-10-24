@@ -232,7 +232,7 @@ public partial class MainWindow : IgWindow
         if (isEmptyList)
         {
             // wait for gallery is ready
-            await Task.Delay(200);
+            await Task.Delay(300);
             DispatcherQueue.TryEnqueue(() =>
             {
                 // set photo to the viewer
