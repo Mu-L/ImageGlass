@@ -80,7 +80,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
     /// </summary>
     public bool OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-        return OnPropertyChanged(propertyName, null, null);
+        return OnPropertyChanged(null, null, propertyName);
     }
 
 

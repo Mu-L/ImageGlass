@@ -81,7 +81,7 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
     /// </summary>
     public bool OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-        return OnPropertyChanged(propertyName, null, null);
+        return OnPropertyChanged(null, null, propertyName);
     }
 
 
