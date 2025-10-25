@@ -78,6 +78,7 @@ public partial class MainWindow
 
 
         // Clipboard
+        new(LangId.FrmMain_MnuPasteImage,       API.IG_PasteImage,          MKeys.Ctrl, VKey.V),
         new(LangId.FrmMain_MnuCopyFile,         API.IG_CopyFiles,           MKeys.Ctrl, VKey.C),
         new(LangId.FrmMain_MnuCutFile,          API.IG_CutFiles,            MKeys.Ctrl, VKey.X),
         new(LangId.FrmMain_MnuCopyPath,         API.IG_CopyImagePath,       MKeys.Ctrl, VKey.L),

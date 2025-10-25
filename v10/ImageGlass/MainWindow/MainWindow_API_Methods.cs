@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.Storage.Pickers;
@@ -551,12 +552,106 @@ public partial class MainWindow
 
 
     /// <summary>
-    /// Reloads images list
+    /// Reloads images list.
     /// </summary>
     public void IG_ReloadList()
     {
         PrepareLoadPhotoList(AP.Photos.DistinctDirs,
             AP.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
+    }
+
+
+    /// <summary>
+    /// Opens image from clipboard.
+    /// </summary>
+    public void IG_PasteImage()
+    {
+        _ = IG_PasteImageAsync();
+    }
+
+    private async Task IG_PasteImageAsync()
+    {
+        var data = Clipboard.GetContent();
+
+        // 1. if clipboard contains a file
+        if (data.Contains(StandardDataFormats.StorageItems))
+        {
+            var fileItems = await data.GetStorageItemsAsync();
+            var filePath = fileItems[0].Path;
+
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                PrepareLoadPhotoList([filePath],
+                    currentFilePath: filePath, disposeForegroundShell: true, loadInitPhoto: true);
+            }
+            return;
+        }
+
+
+        // 2. if clipboard contains image pixels
+        if (data.Contains(StandardDataFormats.Bitmap))
+        {
+            var formats = data.AvailableFormats.ToList();
+            byte[]? bytes = null;
+
+            // TODO: read PNG format
+            var streamRef = await data.GetBitmapAsync();
+            using var stream = await streamRef.OpenReadAsync();
+            using var ms = new MemoryStream();
+            await stream.AsStreamForRead().CopyToAsync(ms);
+            bytes = ms.ToArray();
+
+
+            if (bytes is null || bytes.Length == 0) return;
+
+            var wicDecoder = PhotoWIC.ConvertFromBytesToDecoder(bytes);
+            if (wicDecoder is not null)
+            {
+                var meta = await MagickDecoder.LoadMetadataAsync(bytes);
+                var photo = new Photo(wicDecoder, meta);
+
+                await LoadClipboardPhotoAsync(photo);
+            }
+            return;
+        }
+
+
+        // 3. if clipboard contains file path
+        if (data.Contains(StandardDataFormats.Text))
+        {
+            var text = await data.GetTextAsync();
+            var path = BHelper.ResolvePath(text);
+
+            // 3.1 try to get absolute path
+            if (File.Exists(path) || Directory.Exists(path))
+            {
+                PrepareLoadPhotoList([path],
+                    currentFilePath: null, disposeForegroundShell: true, loadInitPhoto: true);
+                return;
+            }
+
+
+            // 3.2 get photo from base64 string 
+            var photo = await MagickDecoder.DecodeBase64Async(text);
+            if (photo is not null)
+            {
+                await LoadClipboardPhotoAsync(photo);
+            }
+        }
+
+    }
+
+
+    private async Task LoadClipboardPhotoAsync(Photo? photo)
+    {
+        // cancel the current loading image
+        AP.Photos.Current?.CancelLoading();
+
+
+        AP.DisposeClipboardPhoto();
+        AP.ClipboardImage = photo;
+
+        await ViewPhotoAsync(photo, true, false);
     }
 
 

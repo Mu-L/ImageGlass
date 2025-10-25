@@ -95,11 +95,27 @@ public static class AP
     public static WindowColorProfileProvider ColorProfileService => _colorProfileService.Value;
 
 
-
     /// <summary>
     /// Gets, sets copied filename collection (multi-copy).
     /// </summary>
     public static HashSet<string> StringClipboard { get; set; } = [];
+
+
+    /// <summary>
+    /// Gets, sets the clipboard photo.
+    /// </summary>
+    public static Photo? ClipboardImage { get; set; }
+
+
+    /// <summary>
+    /// Gets, sets the path of the temporary image
+    /// (clipboard image, temp image for printing, background,...)
+    /// </summary>
+    public static string? TempImagePath { get; set; }
+
+
+
+
 
     #endregion // Public Properties
 
@@ -160,6 +176,17 @@ public static class AP
         }
 
         _inputImagePathFromArgs = pathToLoad;
+    }
+
+
+    /// <summary>
+    /// Disposes the clipboard photo.
+    /// </summary>
+    public static void DisposeClipboardPhoto()
+    {
+        AP.ClipboardImage?.Dispose();
+        AP.ClipboardImage = null;
+        AP.TempImagePath = null;
     }
 
 

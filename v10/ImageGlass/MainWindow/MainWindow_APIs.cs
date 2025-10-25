@@ -75,6 +75,7 @@ public partial class MainWindow
 
 
         // Clipboard
+        { API.IG_PasteImage,            IgCommands.Create(IG_PasteImage) },
         { API.IG_CopyFiles,             IgCommands.Create(IG_CopyFiles) },
         { API.IG_CutFiles,              IgCommands.Create(IG_CutFiles) },
         { API.IG_CopyImagePath,         IgCommands.Create(IG_CopyImagePath) },
