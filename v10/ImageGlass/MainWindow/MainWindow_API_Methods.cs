@@ -591,24 +591,16 @@ public partial class MainWindow
         // 2. if clipboard contains image pixels
         if (data.Contains(StandardDataFormats.Bitmap))
         {
-            var formats = data.AvailableFormats.ToList();
-            byte[]? bytes = null;
-
-            // TODO: read PNG format
-            var streamRef = await data.GetBitmapAsync();
-            using var stream = await streamRef.OpenReadAsync();
-            using var ms = new MemoryStream();
-            await stream.AsStreamForRead().CopyToAsync(ms);
-            bytes = ms.ToArray();
-
-
-            if (bytes is null || bytes.Length == 0) return;
-
-            var wicDecoder = PhotoWIC.ConvertFromBytesToDecoder(bytes);
-            if (wicDecoder is not null)
+            var wicBmp = await BHelper.GetClipboardImageAsync();
+            if (wicBmp is not null)
             {
-                var meta = await MagickDecoder.LoadMetadataAsync(bytes);
-                var photo = new Photo(wicDecoder, meta);
+                //var meta = await MagickDecoder.LoadMetadataAsync();
+                var photo = new Photo(wicBmp, new PhotoMetadata()
+                {
+                    Width = (uint)wicBmp.Size.Width,
+                    Height = (uint)wicBmp.Size.Height,
+                    FrameCount = 1,
+                });
 
                 await LoadClipboardPhotoAsync(photo);
             }

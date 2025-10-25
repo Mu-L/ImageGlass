@@ -353,6 +353,7 @@ public partial class MainWindow : IgWindow
         // clear the current in-app message
         _ = _contentEl.ShowMessageAsync(null);
 
+        //Local.ImageTransform.Clear();
 
         // set read options for photo
         if (photo is not null)
