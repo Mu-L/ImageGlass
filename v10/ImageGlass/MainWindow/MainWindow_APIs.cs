@@ -71,6 +71,14 @@ public partial class MainWindow
         { API.IG_PanToBottom, IgCommands.Create(IG_PanToBottom) },
 
 
+        // Image
+
+
+        // Clipboard
+        { API.IG_CopyImagePath, IgCommands.Create(IG_CopyImagePath) },
+        { API.IG_ClearClipboard, IgCommands.Create(IG_ClearClipboard) },
+
+
         // Layout
         { API.IG_ToggleCheckerboard, IgCommands.Create(IG_ToggleCheckerboard) },
 

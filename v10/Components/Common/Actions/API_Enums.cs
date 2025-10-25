@@ -64,6 +64,8 @@ public enum API
     // Menu > Image
 
     // Menu > Clipboard
+    IG_CopyImagePath,
+    IG_ClearClipboard,
 
     // Menu > Window Fit
     // Menu > Frameless

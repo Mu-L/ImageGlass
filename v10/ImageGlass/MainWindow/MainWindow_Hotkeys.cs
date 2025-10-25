@@ -74,6 +74,14 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuPanToBottom,      API.IG_PanToBottom,         [new(MKeys.Ctrl | MKeys.Alt, VKey.Down)]),
 
 
+        // Image
+
+
+        // Clipboard
+        new(LangId.FrmMain_MnuCopyPath,         API.IG_CopyImagePath,       MKeys.Ctrl, VKey.L),
+        //new(LangId.FrmMain_MnuClearClipboard,   API.IG_ClearClipboard       ), // TODO: hotkey
+
+
         new(LangId.FrmMain_MnuToggleCheckerboard,   API.IG_ToggleCheckerboard,  VKey.B),
         new(LangId.FrmMain_MnuExit,             API.IG_Exit,                [new(VKey.Escape), new(MKeys.Ctrl, VKey.W)]),
     ];

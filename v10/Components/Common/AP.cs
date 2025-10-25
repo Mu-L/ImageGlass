@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using D2Phap;
 using ImageGlass.Common.Photoing;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -63,7 +64,7 @@ public static class AP
 
 
     /// <summary>
-    /// Gets the Shell object of foreground window
+    /// Gets the Shell object of foreground window.
     /// </summary>
     public static ExplorerView? ForegroundShell
     {
@@ -92,6 +93,13 @@ public static class AP
     /// Provides a singleton instance of the <see cref="WindowColorProfileProvider"/> class.
     /// </summary>
     public static WindowColorProfileProvider ColorProfileService => _colorProfileService.Value;
+
+
+
+    /// <summary>
+    /// Gets, sets copied filename collection (multi-copy).
+    /// </summary>
+    public static List<string> StringClipboard { get; set; } = [];
 
     #endregion // Public Properties
 

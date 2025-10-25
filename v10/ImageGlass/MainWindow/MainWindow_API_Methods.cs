@@ -23,6 +23,7 @@ using Microsoft.Windows.Storage.Pickers;
 using System;
 using System.Drawing;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace ImageGlass;
 
@@ -554,5 +555,44 @@ public partial class MainWindow
         PrepareLoadPhotoList(AP.Photos.DistinctDirs,
             AP.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
     }
+
+
+
+
+    /// <summary>
+    /// Copy the current image path.
+    /// </summary>
+    public void IG_CopyImagePath()
+    {
+        if (string.IsNullOrWhiteSpace(AP.Photos.CurrentFilePath)) return;
+
+        try
+        {
+            var data = new DataPackage();
+            data.SetText(AP.Photos.CurrentFilePath);
+
+            Clipboard.SetContent(data);
+
+            // show message
+            _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuCopyPath_Success]);
+        }
+        catch { }
+    }
+
+
+    /// <summary>
+    /// Clears clipboard.
+    /// </summary>
+    public void IG_ClearClipboard()
+    {
+        if (AP.StringClipboard.Count == 0) return;
+
+        AP.StringClipboard.Clear();
+        Clipboard.Clear();
+
+        // show message
+        _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuClearClipboard_Success]);
+    }
+
 
 }
