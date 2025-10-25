@@ -30,62 +30,64 @@ public partial class MainWindow
 {
     private FrozenDictionary<API, IIgCommand> _apis => new Dictionary<API, IIgCommand>()
     {
-        { API.IG_OpenMainMenu, IgCommands.Create(IG_OpenMainMenu) },
+        { API.IG_OpenMainMenu,          IgCommands.Create(IG_OpenMainMenu) },
 
         // Main Menu
-        { API.IG_OpenFile, IgCommands.Create(IG_OpenFileAsync) },
-        { API.IG_OpenFolder, IgCommands.Create(IG_OpenFolderAsync) },
-        { API.IG_OpenPath, IgCommands.Create(IG_OpenPath) },
-        { API.IG_Refresh, IgCommands.Create(IG_Refresh) },
-        { API.IG_Reload, IgCommands.Create(IG_Reload) },
-        { API.IG_ReloadList, IgCommands.Create(IG_ReloadList) },
+        { API.IG_OpenFile,              IgCommands.Create(IG_OpenFileAsync) },
+        { API.IG_OpenFolder,            IgCommands.Create(IG_OpenFolderAsync) },
+        { API.IG_OpenPath,              IgCommands.Create(IG_OpenPath) },
+        { API.IG_Refresh,               IgCommands.Create(IG_Refresh) },
+        { API.IG_Reload,                IgCommands.Create(IG_Reload) },
+        { API.IG_ReloadList,            IgCommands.Create(IG_ReloadList) },
 
 
         // Navigation
-        { API.IG_ViewNext, IgCommands.Create(IG_ViewNext) },
-        { API.IG_ViewPrevious, IgCommands.Create(IG_ViewPrevious) },
-        { API.IG_Goto, IgCommands.Create(IG_GoTo) },
-        { API.IG_GotoFirst, IgCommands.Create(IG_GoToFirst) },
-        { API.IG_GotoLast, IgCommands.Create(IG_GoToLast) },
+        { API.IG_ViewNext,              IgCommands.Create(IG_ViewNext) },
+        { API.IG_ViewPrevious,          IgCommands.Create(IG_ViewPrevious) },
+        { API.IG_Goto,                  IgCommands.Create(IG_GoTo) },
+        { API.IG_GotoFirst,             IgCommands.Create(IG_GoToFirst) },
+        { API.IG_GotoLast,              IgCommands.Create(IG_GoToLast) },
 
-        { API.IG_ViewByStep, IgCommands.Create(IG_ViewByStep) },
-        { API.IG_ViewByIndex, IgCommands.Create(IG_ViewByIndex) },
+        { API.IG_ViewByStep,            IgCommands.Create(IG_ViewByStep) },
+        { API.IG_ViewByIndex,           IgCommands.Create(IG_ViewByIndex) },
 
 
         // Zoom
-        { API.IG_CustomZoom, IgCommands.Create(IG_CustomZoom) },
-        { API.IG_SetZoom, IgCommands.Create(IG_SetZoom) },
-        { API.IG_ZoomIn, IgCommands.Create(IG_ZoomIn) },
-        { API.IG_ZoomOut, IgCommands.Create(IG_ZoomOut) },
-        { API.IG_SetZoomMode, IgCommands.Create(IG_SetZoomMode) },
+        { API.IG_CustomZoom,            IgCommands.Create(IG_CustomZoom) },
+        { API.IG_SetZoom,               IgCommands.Create(IG_SetZoom) },
+        { API.IG_ZoomIn,                IgCommands.Create(IG_ZoomIn) },
+        { API.IG_ZoomOut,               IgCommands.Create(IG_ZoomOut) },
+        { API.IG_SetZoomMode,           IgCommands.Create(IG_SetZoomMode) },
 
 
         // Panning
-        { API.IG_PanLeft, IgCommands.Create(IG_PanLeft) },
-        { API.IG_PanRight, IgCommands.Create(IG_PanRight) },
-        { API.IG_PanUp, IgCommands.Create(IG_PanUp) },
-        { API.IG_PanDown, IgCommands.Create(IG_PanDown) },
-        { API.IG_PanToLeft, IgCommands.Create(IG_PanToLeft) },
-        { API.IG_PanToRight, IgCommands.Create(IG_PanToRight) },
-        { API.IG_PanToTop, IgCommands.Create(IG_PanToTop) },
-        { API.IG_PanToBottom, IgCommands.Create(IG_PanToBottom) },
+        { API.IG_PanLeft,               IgCommands.Create(IG_PanLeft) },
+        { API.IG_PanRight,              IgCommands.Create(IG_PanRight) },
+        { API.IG_PanUp,                 IgCommands.Create(IG_PanUp) },
+        { API.IG_PanDown,               IgCommands.Create(IG_PanDown) },
+        { API.IG_PanToLeft,             IgCommands.Create(IG_PanToLeft) },
+        { API.IG_PanToRight,            IgCommands.Create(IG_PanToRight) },
+        { API.IG_PanToTop,              IgCommands.Create(IG_PanToTop) },
+        { API.IG_PanToBottom,           IgCommands.Create(IG_PanToBottom) },
 
 
         // Image
 
 
         // Clipboard
-        { API.IG_CopyFiles, IgCommands.Create(IG_CopyFiles) },
-        { API.IG_CopyImagePath, IgCommands.Create(IG_CopyImagePath) },
-        { API.IG_ClearClipboard, IgCommands.Create(IG_ClearClipboard) },
+        { API.IG_CopyFiles,             IgCommands.Create(IG_CopyFiles) },
+        { API.IG_CutFiles,              IgCommands.Create(IG_CutFiles) },
+        { API.IG_CopyImagePath,         IgCommands.Create(IG_CopyImagePath) },
+        { API.IG_ClearClipboard,        IgCommands.Create(IG_ClearClipboard) },
 
 
         // Layout
-        { API.IG_ToggleCheckerboard, IgCommands.Create(IG_ToggleCheckerboard) },
+        { API.IG_ToggleCheckerboard,    IgCommands.Create(IG_ToggleCheckerboard) },
 
 
         // Exit
-        { API.IG_Exit, IgCommands.Create(IG_Exit) },
+        { API.IG_Exit,                  IgCommands.Create(IG_Exit) },
+
     }.ToFrozenDictionary();
 
 

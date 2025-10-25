@@ -589,21 +589,39 @@ public partial class MainWindow
     /// </summary>
     public void IG_CopyFiles()
     {
-        _ = IG_CopyFilesAsync();
+        _ = SetFileToClipboardAsync(AP.Photos.CurrentFilePath, false);
+    }
+
+
+    /// <summary>
+    /// Cuts the current photo file.
+    /// </summary>
+    public void IG_CutFiles()
+    {
+        _ = SetFileToClipboardAsync(AP.Photos.CurrentFilePath, true);
     }
 
     /// <summary>
-    /// Copies the current photo file.
+    /// Sets file to clipboard
     /// </summary>
-    public async Task IG_CopyFilesAsync()
+    public async Task SetFileToClipboardAsync(string? filePath, bool isCut)
     {
-        var filePath = AP.Photos.Current?.FilePath;
         if (!File.Exists(filePath)) return;
 
-        // 1. copy single file
-        if (!AP.Config.EnableCopyMultipleFiles)
+        // 1. cut/copy single file
+        if (isCut)
         {
-            AP.StringClipboard.Clear();
+            if (!AP.Config.EnableCutMultipleFiles)
+            {
+                AP.StringClipboard.Clear();
+            }
+        }
+        else
+        {
+            if (!AP.Config.EnableCopyMultipleFiles)
+            {
+                AP.StringClipboard.Clear();
+            }
         }
 
 
@@ -616,14 +634,25 @@ public partial class MainWindow
         var fileItems = await Task.WhenAll(fileItemTasks);
 
 
-        // 4. copy to clipboard
-        var data = new DataPackage();
+        // 4. set files to clipboard
+        var data = new DataPackage()
+        {
+            RequestedOperation = isCut
+                ? DataPackageOperation.Move
+                : DataPackageOperation.Copy,
+        };
         data.SetStorageItems(fileItems, true);
 
         Clipboard.Clear();
         Clipboard.SetContent(data);
 
-        await _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuCopyFile_Success, fileItems.Length]);
+
+        // 5. show message
+        await _contentEl.ShowMessageAsync(
+            AP.Config.Lang[isCut
+                ? LangId.FrmMain_MnuCutFile_Success
+                : LangId.FrmMain_MnuCopyFile_Success,
+            fileItems.Length]);
     }
 
 

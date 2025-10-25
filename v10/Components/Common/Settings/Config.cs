@@ -362,10 +362,10 @@ public partial class Config : IgReactive
     /// </summary>
     public bool EnableCopyMultipleFiles { get; set; } = true;
 
-    ///// <summary>
-    ///// Enables / Disables cut multiple files.
-    ///// </summary>
-    //public bool EnableCutMultipleFiles { get; set; } = true;
+    /// <summary>
+    /// Enables / Disables cut multiple files.
+    /// </summary>
+    public bool EnableCutMultipleFiles { get; set; } = true;
 
     ///// <summary>
     ///// Enables / Disables the file system watcher.
