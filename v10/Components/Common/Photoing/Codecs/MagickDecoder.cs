@@ -23,14 +23,19 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Photoing;
 
 
-public class MagickDecoder
+public static partial class MagickDecoder
 {
+    [GeneratedRegex(@"(^data\:(?<type>image\/[a-z\+\-]*);base64,)?(?<data>[a-zA-Z0-9\+\/\=]+)$", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Compiled, "en-US")]
+    private static partial Regex Base64DataUriRegex();
+
+
     /// <summary>
     /// Indicates whether <see cref="MagickDecoder"/> is initialized or not.
     /// </summary>
@@ -58,7 +63,7 @@ public class MagickDecoder
 
 
     /// <summary>
-    /// Parse <see cref="PhotoReadOptions"/> to <see cref="MagickReadSettings"/>
+    /// Parse <see cref="PhotoReadOptions"/> to <see cref="MagickReadSettings"/>.
     /// </summary>
     public static MagickReadSettings ParseSettings(PhotoReadOptions? options, bool writePurpose, string filePath = "")
     {
@@ -179,25 +184,25 @@ public class MagickDecoder
 
 
     /// <summary>
-    /// Loads metadata from file.
+    /// Loads photo metadata from file path.
     /// </summary>
-    /// <param name="filePath">Full path of the file</param>
-    public static async Task<PhotoMetadata> LoadMetadataAsync(
-        string? filePath,
+    public static async Task<PhotoMetadata> LoadMetadataAsync(string? filePath,
         PhotoReadOptions? options = null,
         MagickReadSettings? readSettings = null,
         CancellationToken token = default)
     {
         filePath ??= string.Empty;
-        var meta = new PhotoMetadata() { FilePath = filePath };
+        var meta = new PhotoMetadata();
 
         // 0. get file info
         meta.SetFilePath(filePath);
-        if (string.IsNullOrWhiteSpace(meta.FilePath)) return meta;
+        if (string.IsNullOrWhiteSpace(filePath)) return meta;
 
+        // 1. parse Magick settings
         var settings = readSettings ?? ParseSettings(options, false, filePath);
         using var imgC = new MagickImageCollection();
 
+        // 2. ping data
         try
         {
             imgC.Ping(filePath, settings);
@@ -206,6 +211,56 @@ public class MagickDecoder
         {
             Debug.WriteLine($"❌❌❌ {nameof(LoadMetadataAsync)}: {ex.Message}");
         }
+
+        // 3. load metadata
+        meta = await LoadMetadataAsync(imgC, options, readSettings, token);
+        meta.SetFilePath(filePath);
+
+        return meta;
+    }
+
+
+    /// <summary>
+    /// Loads photo metadata from byte array.
+    /// </summary>
+    public static async Task<PhotoMetadata> LoadMetadataAsync(byte[]? bytes,
+        PhotoReadOptions? options = null,
+        MagickReadSettings? readSettings = null,
+        CancellationToken token = default)
+    {
+        var meta = new PhotoMetadata();
+        if (bytes is null || bytes.Length == 0) return meta;
+
+        // 1. parse Magick settings
+        var settings = readSettings ?? ParseSettings(options, false);
+        using var imgC = new MagickImageCollection();
+
+        // 2. ping data
+        try
+        {
+            imgC.Ping(bytes, settings);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"❌❌❌ {nameof(LoadMetadataAsync)}: {ex.Message}");
+        }
+
+        // 3. load metadata
+        meta = await LoadMetadataAsync(imgC, options, readSettings, token);
+
+        return meta;
+    }
+
+
+    /// <summary>
+    /// Loads photo metadata from Magick instance.
+    /// </summary>
+    public static async Task<PhotoMetadata> LoadMetadataAsync(MagickImageCollection imgC,
+        PhotoReadOptions? options = null,
+        MagickReadSettings? readSettings = null,
+        CancellationToken token = default)
+    {
+        var meta = new PhotoMetadata();
         if (imgC.Count == 0) return meta;
 
 
@@ -267,7 +322,7 @@ public class MagickDecoder
                 // image color
                 meta.HasAlpha = imgC.Any(i => i.HasAlpha);
                 meta.ColorSpace = imgC[frameIndex].ColorSpace;
-                meta.CanAnimate = CheckAnimatedFormat(imgC, meta.FileExtension);
+                meta.CanAnimate = CheckAnimatedFormat_(imgC, meta.FileExtension);
 
                 // get RAW thumbnail
                 meta.RawThumbnail = imgC[frameIndex].GetProfile("dng:thumbnail");
@@ -287,34 +342,34 @@ public class MagickDecoder
                     meta.ExifProfile = exifProfile;
 
                     // ExifRatingPercent
-                    meta.ExifRatingPercent = GetExifValue(exifProfile, ExifTag.RatingPercent);
+                    meta.ExifRatingPercent = GetExifValue_(exifProfile, ExifTag.RatingPercent);
 
                     // ExifDateTimeOriginal
-                    var dt = GetExifValue(exifProfile, ExifTag.DateTimeOriginal);
+                    var dt = GetExifValue_(exifProfile, ExifTag.DateTimeOriginal);
                     meta.ExifDateTimeOriginal = BHelper.ConvertDateTime(dt);
 
                     // ExifDateTime
-                    dt = GetExifValue(exifProfile, ExifTag.DateTime);
+                    dt = GetExifValue_(exifProfile, ExifTag.DateTime);
                     meta.ExifDateTime = BHelper.ConvertDateTime(dt);
 
-                    meta.ExifArtist = GetExifValue(exifProfile, ExifTag.Artist);
-                    meta.ExifCopyright = GetExifValue(exifProfile, ExifTag.Copyright);
-                    meta.ExifSoftware = GetExifValue(exifProfile, ExifTag.Software);
-                    meta.ExifImageDescription = GetExifValue(exifProfile, ExifTag.ImageDescription);
-                    meta.ExifModel = GetExifValue(exifProfile, ExifTag.Model);
-                    meta.ExifISOSpeed = (int?)GetExifValue(exifProfile, ExifTag.ISOSpeed);
+                    meta.ExifArtist = GetExifValue_(exifProfile, ExifTag.Artist);
+                    meta.ExifCopyright = GetExifValue_(exifProfile, ExifTag.Copyright);
+                    meta.ExifSoftware = GetExifValue_(exifProfile, ExifTag.Software);
+                    meta.ExifImageDescription = GetExifValue_(exifProfile, ExifTag.ImageDescription);
+                    meta.ExifModel = GetExifValue_(exifProfile, ExifTag.Model);
+                    meta.ExifISOSpeed = (int?)GetExifValue_(exifProfile, ExifTag.ISOSpeed);
 
-                    var rational = GetExifValue(exifProfile, ExifTag.ExposureTime);
+                    var rational = GetExifValue_(exifProfile, ExifTag.ExposureTime);
                     meta.ExifExposureTime = rational.Denominator == 0
                         ? null
                         : rational.Numerator / rational.Denominator;
 
-                    rational = GetExifValue(exifProfile, ExifTag.FNumber);
+                    rational = GetExifValue_(exifProfile, ExifTag.FNumber);
                     meta.ExifFNumber = rational.Denominator == 0
                         ? null
                         : rational.Numerator / rational.Denominator;
 
-                    rational = GetExifValue(exifProfile, ExifTag.FocalLength);
+                    rational = GetExifValue_(exifProfile, ExifTag.FocalLength);
                     meta.ExifFocalLength = rational.Denominator == 0
                         ? null
                         : rational.Numerator / rational.Denominator;
@@ -352,13 +407,13 @@ public class MagickDecoder
     /// <summary>
     /// Reads and processes image file with Magick.NET.
     /// </summary>
-    public static async Task<IgMagickReadData> DecodeImageAsync(
+    public static async Task<MagickDecoderOutput> DecodeImageAsync(
         PhotoMetadata meta,
         PhotoReadOptions options, MagickReadSettings? settings,
         ImgTransform? transform, CancellationToken cancelToken)
     {
         settings ??= ParseSettings(options, false, meta.FilePath);
-        var result = new IgMagickReadData();
+        var result = new MagickDecoderOutput();
 
         // 1. standardize first frame reading option
         bool readFirstFrameOnly;
@@ -381,18 +436,18 @@ public class MagickDecoder
             var i = 0;
             foreach (var imgFrameM in imgColl)
             {
-                ProcessMagickImage((MagickImage)imgFrameM, options, meta, false);
+                ProcessMagickImage_((MagickImage)imgFrameM, options, meta, false);
 
                 // apply transformation
                 if (i == transform?.FrameIndex || transform?.FrameIndex == -1)
                 {
-                    TransformImage(imgFrameM, transform);
+                    TransformImage_(imgFrameM, transform);
                 }
 
                 i++;
             }
 
-            result.MultiFrameImage = imgColl;
+            result.MultiFrames = imgColl;
             return result;
         }
 
@@ -436,13 +491,13 @@ public class MagickDecoder
 
 
         // 3.3 process image
-        var thumbM = ProcessMagickImage(imgM, options, meta, true);
+        var thumbM = ProcessMagickImage_(imgM, options, meta, true);
         if (thumbM != null) imgM = thumbM;
 
 
         // 3.4 apply final changes
-        TransformImage(imgM, transform);
-        result.SingleFrameImage = imgM;
+        TransformImage_(imgM, transform);
+        result.SingleFrame = imgM;
 
         return result;
     }
@@ -498,6 +553,109 @@ public class MagickDecoder
     }
 
 
+    /// <summary>
+    /// Decodes photo from base64 string.
+    /// </summary>
+    public static async Task<Photo?> DecodeBase64Async(string base64)
+    {
+        // 1. convert base64 string to bytes
+        var (MimeType, ByteData) = ConvertBase64ToBytes(base64);
+        if (string.IsNullOrEmpty(MimeType)) return null;
+
+
+        // 2. convert Mime type to Magick format
+        // supported MIME types:
+        // https://www.iana.org/assignments/media-types/media-types.xhtml#image
+        var format = ConvertMimeTypeToMagickFormat_(MimeType);
+
+
+        // 3. create settings
+        IDisposable? bmpSrc = null;
+        var readSettings = new MagickReadSettings { Format = format };
+        if (readSettings.Format == MagickFormat.Rsvg)
+        {
+            readSettings.BackgroundColor = MagickColors.Transparent;
+        }
+
+
+        // 4. load bitmap from bytes
+        switch (format)
+        {
+            // 4.1 use WIC for multiple-frame formats
+            case MagickFormat.Gif:
+            case MagickFormat.Gif87:
+            case MagickFormat.Tif:
+            case MagickFormat.Tiff64:
+            case MagickFormat.Tiff:
+            case MagickFormat.Ico:
+            case MagickFormat.Icon:
+                bmpSrc = PhotoWIC.ConvertFromBytesToDecoder(ByteData);
+                break;
+
+            // 4.2 use Magick for the rest
+            default:
+                using (var imgM = new MagickImage(ByteData, readSettings))
+                {
+                    bmpSrc = PhotoWIC.ConvertFromMagick(imgM);
+                }
+                break;
+        }
+
+
+        // 4. wrap the bitmap as photo object.
+        var meta = await LoadMetadataAsync(ByteData, null, readSettings);
+        var photo = new Photo(bmpSrc, meta);
+
+        return photo;
+    }
+
+
+    /// <summary>
+    /// Converts base64 string to byte array, returns MIME type and raw data in byte array.
+    /// </summary>
+    public static (string MimeType, byte[] ByteData) ConvertBase64ToBytes(string? content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
+
+        // data:image/svg-xml;base64,xxxxxxxx
+        // type is optional
+        var base64DataUri = Base64DataUriRegex();
+
+        var match = base64DataUri.Match(content);
+        if (!match.Success)
+        {
+            throw new FormatException("The base64 content is invalid.");
+        }
+
+
+        var base64Data = match.Groups["data"].Value;
+        var byteData = Convert.FromBase64String(base64Data);
+        var mimeType = match.Groups["type"].Value.ToLowerInvariant();
+
+        if (mimeType.Length == 0)
+        {
+            // use default PNG MIME type
+            mimeType = "image/png";
+        }
+
+        return (mimeType, byteData);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /// <summary>
     /// Get color profile
@@ -548,13 +706,10 @@ public class MagickDecoder
     }
 
 
-
-
-
     /// <summary>
     /// Get EXIF value.
     /// </summary>
-    private static T? GetExifValue<T>(IExifProfile? profile, ExifTag<T> tag, T? defaultValue = default)
+    private static T? GetExifValue_<T>(IExifProfile? profile, ExifTag<T> tag, T? defaultValue = default)
     {
         if (profile == null) return default;
 
@@ -570,7 +725,7 @@ public class MagickDecoder
     /// </summary>
     /// <param name="imgC"></param>
     /// <param name="ext">File extension, e.g: <c>.gif</c></param>
-    private static bool CheckAnimatedFormat(MagickImageCollection imgC, string? ext)
+    private static bool CheckAnimatedFormat_(MagickImageCollection imgC, string? ext)
     {
         var isAnimatedExtension = ext == ".GIF" || ext == ".GIFV" || ext == ".WEBP" || ext == ".JXL";
 
@@ -586,7 +741,7 @@ public class MagickDecoder
     /// Returns thumbnail image if requested.
     /// </summary>
     /// <param name="refImgM">Input Magick image to process</param>
-    private static MagickImage? ProcessMagickImage(MagickImage refImgM, PhotoReadOptions options, PhotoMetadata meta, bool requestThumbnail)
+    private static MagickImage? ProcessMagickImage_(MagickImage refImgM, PhotoReadOptions options, PhotoMetadata meta, bool requestThumbnail)
     {
         IMagickImage? thumbM = null;
 
@@ -602,7 +757,7 @@ public class MagickDecoder
             {
                 if (options.CorrectRotation) thumbM.AutoOrient();
 
-                ApplySizeSettings(thumbM, options);
+                ApplySizeSettings_(thumbM, options);
             }
             else
             {
@@ -615,7 +770,7 @@ public class MagickDecoder
         if (!requestThumbnail || thumbM == null)
         {
             // resize the image
-            ApplySizeSettings(refImgM, options);
+            ApplySizeSettings_(refImgM, options);
 
             // for HEIC/HEIF, PreserveOrientation must be false
             // see https://github.com/d2phap/ImageGlass/issues/1928
@@ -638,7 +793,7 @@ public class MagickDecoder
     /// <summary>
     /// Applies the size settings
     /// </summary>
-    private static void ApplySizeSettings(IMagickImage imgM, PhotoReadOptions options)
+    private static void ApplySizeSettings_(IMagickImage imgM, PhotoReadOptions options)
     {
         if (options.Width > 0 && options.Height > 0)
         {
@@ -653,7 +808,7 @@ public class MagickDecoder
     /// <summary>
     /// Applies changes from <see cref="ImgTransform"/>.
     /// </summary>
-    private static void TransformImage(IMagickImage imgM, ImgTransform? transform = null)
+    private static void TransformImage_(IMagickImage imgM, ImgTransform? transform = null)
     {
         if (transform == null) return;
 
@@ -680,34 +835,32 @@ public class MagickDecoder
         }
     }
 
-}
-
-
-
-
-
-/// <summary>
-/// Contains Magick.NET data after the image file loaded.
-/// </summary>
-public class IgMagickReadData : DisposableImpl
-{
-    public MagickImageCollection? MultiFrameImage { get; set; } = null;
-    public MagickImage? SingleFrameImage { get; set; } = null;
-
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets <see cref="MagickFormat"/> from mime type.
     /// </summary>
-    protected override void OnDisposing()
+    private static MagickFormat ConvertMimeTypeToMagickFormat_(string? mimeType)
     {
-        base.OnDisposing();
-
-        MultiFrameImage?.Dispose();
-        MultiFrameImage = null;
-
-        SingleFrameImage?.Dispose();
-        SingleFrameImage = null;
+        return mimeType switch
+        {
+            "image/avif" => MagickFormat.Avif,
+            "image/bmp" => MagickFormat.Bmp,
+            "image/gif" => MagickFormat.Gif,
+            "image/tiff" => MagickFormat.Tiff,
+            "image/jpeg" => MagickFormat.Jpeg,
+            "image/svg+xml" => MagickFormat.Rsvg,
+            "image/x-icon" => MagickFormat.Ico,
+            "image/x-portable-anymap" => MagickFormat.Pnm,
+            "image/x-portable-bitmap" => MagickFormat.Pbm,
+            "image/x-portable-graymap" => MagickFormat.Pgm,
+            "image/x-portable-pixmap" => MagickFormat.Ppm,
+            "image/x-xbitmap" => MagickFormat.Xbm,
+            "image/x-xpixmap" => MagickFormat.Xpm,
+            "image/x-cmu-raster" => MagickFormat.Ras,
+            _ => MagickFormat.Png,
+        };
     }
+
 
 }
 

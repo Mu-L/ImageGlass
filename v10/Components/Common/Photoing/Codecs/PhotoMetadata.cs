@@ -133,6 +133,7 @@ public partial class PhotoMetadata : DisposableImpl
     /// </summary>
     public void SetFilePath(string? filePath)
     {
+        FilePath = filePath ?? string.Empty;
         if (string.IsNullOrWhiteSpace(filePath)) return;
 
         try

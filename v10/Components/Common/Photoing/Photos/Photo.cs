@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Cysharp.Text;
 using ImageMagick;
 using Microsoft.UI.Xaml.Media;
 using System;
@@ -112,6 +113,7 @@ public partial class Photo : DisposableImpl
                 _filePath = value;
                 OnPropertyChanged(nameof(FilePath));
 
+                OnPropertyChanged(nameof(IsClipboard));
                 OnPropertyChanged(nameof(Extension));
                 OnPropertyChanged(nameof(FileTitle));
                 OnPropertyChanged(nameof(GalleryFileTitle));
@@ -119,6 +121,11 @@ public partial class Photo : DisposableImpl
             }
         }
     }
+
+    /// <summary>
+    /// Checks if this photo is a clipboard photo.
+    /// </summary>
+    public bool IsClipboard => string.IsNullOrEmpty(FilePath);
 
     /// <summary>
     /// Gets original file extension. E.g: <c>".png"</c>.
@@ -133,7 +140,7 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Gets the file name without extension and including a trailing dot. E.g. <c>"My photo."</c>.
     /// </summary>
-    public string GalleryFileTitle => FileTitle + ".";
+    public string GalleryFileTitle => ZString.Concat(FileTitle, '.');
 
     /// <summary>
     /// Gets file extension without dot. E.g. <c>"png"</c>.
@@ -222,14 +229,16 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Initializes a new instance using a bitmap source for rendering.
     /// </summary>
-    public Photo(IWICBitmapSource wicSrc)
+    public Photo(IDisposable? bmp, PhotoMetadata? meta, PhotoLoadingState state = PhotoLoadingState.Loaded)
     {
-        _bitmap = wicSrc;
-        _width = (uint)wicSrc.Size.Width;
-        _height = (uint)wicSrc.Size.Height;
-
         _metadata?.Dispose();
-        _metadata = new PhotoMetadata();
+        _metadata = meta ?? new();
+
+        _bitmap = bmp;
+        _width = (uint)_metadata.Width;
+        _height = (uint)_metadata.Height;
+
+        State = state;
     }
 
     #endregion // Instance Initilization
@@ -371,7 +380,7 @@ public partial class Photo : DisposableImpl
         using var data = await MagickDecoder.DecodeImageAsync(meta, ReadOptions, ReadSettings, null, token);
 
         // multi-frame
-        if (data.MultiFrameImage != null)
+        if (data.MultiFrames != null)
         {
             _width = meta.Width;
             _height = meta.Width;
@@ -395,7 +404,7 @@ public partial class Photo : DisposableImpl
             // multi-frame formats
             else
             {
-                var bytes = data.MultiFrameImage.ToByteArray(MagickFormat.Tiff);
+                var bytes = data.MultiFrames.ToByteArray(MagickFormat.Tiff);
                 _bitmap = PhotoWIC.ConvertFromBytesToDecoder(bytes);
             }
         }
@@ -403,7 +412,7 @@ public partial class Photo : DisposableImpl
         // single-frame formats
         else
         {
-            var wicBmp = PhotoWIC.ConvertFromMagick(data.SingleFrameImage);
+            var wicBmp = PhotoWIC.ConvertFromMagick(data.SingleFrame);
 
             _bitmap = wicBmp;
             _width = (uint)(wicBmp?.Size.Width ?? 0);

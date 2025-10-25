@@ -302,13 +302,21 @@ public static partial class PhotoWIC
     {
         var ms = new MemoryStream(bytes) { Position = 0 };
 
-        using var wicFactory = new IWICImagingFactory2();
-        var decoder = wicFactory.CreateDecoderFromStream(ms);
-
-        return decoder;
+        return ConvertFromStreamToDecoder(ms);
     }
 
 
+    /// <summary>
+    /// Converts a stream to <see cref="IWICBitmapDecoder"/> object.
+    /// </summary>
+    /// <exception cref="Exception"></exception>
+    public static IWICBitmapDecoder? ConvertFromStreamToDecoder(Stream stream)
+    {
+        using var wicFactory = new IWICImagingFactory2();
+        var decoder = wicFactory.CreateDecoderFromStream(stream);
+
+        return decoder;
+    }
 
 }
 
