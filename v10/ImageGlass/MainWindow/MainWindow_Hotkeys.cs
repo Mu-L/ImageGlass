@@ -78,6 +78,7 @@ public partial class MainWindow
 
 
         // Clipboard
+        new(LangId.FrmMain_MnuCopyFile,         API.IG_CopyFiles,           MKeys.Ctrl, VKey.C),
         new(LangId.FrmMain_MnuCopyPath,         API.IG_CopyImagePath,       MKeys.Ctrl, VKey.L),
         //new(LangId.FrmMain_MnuClearClipboard,   API.IG_ClearClipboard       ), // TODO: hotkey
 

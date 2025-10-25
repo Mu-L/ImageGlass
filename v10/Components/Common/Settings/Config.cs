@@ -357,10 +357,10 @@ public partial class Config : IgReactive
     ///// </summary>
     //public bool EnableImageAsyncLoading { get; set; } = true;
 
-    ///// <summary>
-    ///// Enables / Disables copy multiple files.
-    ///// </summary>
-    //public bool EnableCopyMultipleFiles { get; set; } = true;
+    /// <summary>
+    /// Enables / Disables copy multiple files.
+    /// </summary>
+    public bool EnableCopyMultipleFiles { get; set; } = true;
 
     ///// <summary>
     ///// Enables / Disables cut multiple files.

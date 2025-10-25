@@ -99,7 +99,7 @@ public static class AP
     /// <summary>
     /// Gets, sets copied filename collection (multi-copy).
     /// </summary>
-    public static List<string> StringClipboard { get; set; } = [];
+    public static HashSet<string> StringClipboard { get; set; } = [];
 
     #endregion // Public Properties
 

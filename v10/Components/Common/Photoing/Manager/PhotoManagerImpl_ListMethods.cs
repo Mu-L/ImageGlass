@@ -122,6 +122,7 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         Items[index].IsCurrent = true;
         _currentIndex = index;
 
+        OnPropertyChanged(nameof(Current));
         OnPropertyChanged(nameof(CurrentIndex));
         OnPropertyChanged(nameof(CurrentFilePath));
         OnPropertyChanged(nameof(CurrentMetadata));

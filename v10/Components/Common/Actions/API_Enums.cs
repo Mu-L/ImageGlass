@@ -65,6 +65,7 @@ public enum API
 
     // Menu > Clipboard
     IG_CopyImagePath,
+    IG_CopyFiles,
     IG_ClearClipboard,
 
     // Menu > Window Fit

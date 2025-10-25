@@ -50,6 +50,12 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
 
 
     /// <summary>
+    /// Gets current photo.
+    /// </summary>
+    public Photo? Current => Get(CurrentIndex);
+
+
+    /// <summary>
     /// The initial photo,
     /// can be the photo from the initial file path or the first photo of the directory.
     /// </summary>

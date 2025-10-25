@@ -22,8 +22,11 @@ using Microsoft.UI.Xaml;
 using Microsoft.Windows.Storage.Pickers;
 using System;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
 
 namespace ImageGlass;
 
@@ -559,6 +562,7 @@ public partial class MainWindow
 
 
 
+
     /// <summary>
     /// Copy the current image path.
     /// </summary>
@@ -578,6 +582,50 @@ public partial class MainWindow
         }
         catch { }
     }
+
+
+    /// <summary>
+    /// Copies the current photo file.
+    /// </summary>
+    public void IG_CopyFiles()
+    {
+        _ = IG_CopyFilesAsync();
+    }
+
+    /// <summary>
+    /// Copies the current photo file.
+    /// </summary>
+    public async Task IG_CopyFilesAsync()
+    {
+        var filePath = AP.Photos.Current?.FilePath;
+        if (!File.Exists(filePath)) return;
+
+        // 1. copy single file
+        if (!AP.Config.EnableCopyMultipleFiles)
+        {
+            AP.StringClipboard.Clear();
+        }
+
+
+        // 2. try adding current photo path to clipboard paths
+        _ = AP.StringClipboard.Add(filePath);
+
+
+        // 3. get file items from clipboard paths
+        var fileItemTasks = AP.StringClipboard.Select(path => StorageFile.GetFileFromPathAsync(path).AsTask());
+        var fileItems = await Task.WhenAll(fileItemTasks);
+
+
+        // 4. copy to clipboard
+        var data = new DataPackage();
+        data.SetStorageItems(fileItems, true);
+
+        Clipboard.Clear();
+        Clipboard.SetContent(data);
+
+        await _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuCopyFile_Success, fileItems.Length]);
+    }
+
 
 
     /// <summary>
