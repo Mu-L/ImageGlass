@@ -639,11 +639,9 @@ public partial class MainWindow
         // cancel the current loading image
         AP.Photos.Current?.CancelLoading();
 
-
-        AP.DisposeClipboardPhoto();
-        AP.ClipboardImage = photo;
-
         await ViewPhotoAsync(photo, true, false);
+
+        AP.ClipboardImage = photo;
     }
 
 

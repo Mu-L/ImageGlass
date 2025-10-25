@@ -133,6 +133,7 @@ public static class AP
         ForegroundShell = null;
         Photos.Dispose();
         ColorProfileService.Dispose();
+        DisposeClipboardPhoto();
     }
 
 

@@ -51,6 +51,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if (AP.Config.ImageInfoTags.Contains(nameof(Name)))
             {
                 return System.IO.Path.GetFileName(_filePath);
@@ -65,6 +68,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if (AP.Config.ImageInfoTags.Contains(nameof(Path)))
             {
                 return _filePath;
@@ -79,6 +85,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if (AP.Config.ImageInfoTags.Contains(nameof(FileSize))
                 && AP.Photos.CurrentMetadata != null)
             {
@@ -94,6 +103,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if ((AP.Config.ImageInfoTags.Contains(nameof(ModifiedDateTime))
                 || AP.Config.ImageInfoTags.Contains(nameof(DateTimeAuto)))
                 && AP.Photos.CurrentMetadata != null)
@@ -125,6 +137,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if (AP.Config.ImageInfoTags.Contains(nameof(FrameCount))
                 && AP.Photos.CurrentMetadata != null
                 && AP.Photos.CurrentMetadata.FrameCount > 1)
@@ -146,6 +161,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if (AP.Config.ImageInfoTags.Contains(nameof(ListCount))
                 && AP.Photos.Count > 0)
             {
@@ -180,6 +198,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if (AP.Config.ImageInfoTags.Contains(nameof(ExifRating))
                 && AP.Photos.CurrentMetadata != null)
             {
@@ -195,6 +216,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if ((AP.Config.ImageInfoTags.Contains(nameof(ExifDateTime))
                 || AP.Config.ImageInfoTags.Contains(nameof(DateTimeAuto)))
                 && AP.Photos.CurrentMetadata != null
@@ -212,6 +236,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if ((AP.Config.ImageInfoTags.Contains(nameof(ExifDateTimeOriginal))
                 || AP.Config.ImageInfoTags.Contains(nameof(DateTimeAuto)))
                 && AP.Photos.CurrentMetadata != null
@@ -229,6 +256,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if (AP.Config.ImageInfoTags.Contains(nameof(DateTimeAuto))
                 && AP.Photos.CurrentMetadata != null)
             {
@@ -254,6 +284,9 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
+            // skip for clipboard image
+            if (AP.ClipboardImage is not null) return null;
+
             if (AP.Config.ImageInfoTags.Contains(nameof(ColorSpace))
                 && AP.Photos.CurrentMetadata != null
                 && AP.Photos.CurrentMetadata.ColorSpace != ImageMagick.ColorSpace.Undefined)
@@ -288,6 +321,12 @@ public partial class AppStatusInfo : DisposableImpl
         {
             using var strBuilder = ZString.CreateStringBuilder();
             int count = 0;
+
+            if (AP.ClipboardImage is not null)
+            {
+                strBuilder.Append(AP.Config.Lang[LangId.FrmMain_ClipboardImage]);
+                count++;
+            }
 
             foreach (var tag in AP.Config.ImageInfoTags)
             {

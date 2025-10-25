@@ -85,6 +85,7 @@ public partial class MainWindow : IgWindow
     protected override void OnIgWindowClosing(AppWindow sender, AppWindowClosingEventArgs e)
     {
         Viewer.UnloadPhoto();
+        AP.DisposeClipboardPhoto();
 
         // clear hotkeys
         Content.KeyboardAccelerators.Clear();
@@ -353,6 +354,7 @@ public partial class MainWindow : IgWindow
         // clear the current in-app message
         _ = _contentEl.ShowMessageAsync(null);
 
+        AP.DisposeClipboardPhoto();
         //Local.ImageTransform.Clear();
 
         // set read options for photo
