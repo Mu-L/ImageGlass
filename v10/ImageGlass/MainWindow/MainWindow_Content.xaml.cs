@@ -465,14 +465,14 @@ public sealed partial class MainWindow_Content : IgControl
             var err = BHelper.GetInAppError(e.Photo.Error);
 
             // show error message
-            _ = ShowMessageAsync(err.DebugInfo, heading, err.Details);
+            _ = ShowMessageAsync(err.DebugInfo, heading, err.Details, 0);
         }
 
         // 2. handle photo loading
         else if (e.State == PhotoLoadingState.Loading)
         {
             // show loading message after 2s
-            _ = ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_Loading], delayMs: 2000);
+            _ = ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_Loading], durationMs: 0, delayMs: 2000);
         }
 
         // 3. handle photo loaded
@@ -508,7 +508,7 @@ public sealed partial class MainWindow_Content : IgControl
     /// <param name="message"></param>
     /// <param name="heading"></param>
     /// <param name="details"></param>
-    /// <param name="durationMs">The duration to display (ms). <c>null</c> = permanent.</param>
+    /// <param name="durationMs">The duration to display (ms). <c>0</c> = permanent.</param>
     /// <param name="delayMs">The delay time before showing (ms). Default = <c>0</c>.</param>
     public async Task ShowMessageAsync(
         string? message,
@@ -558,10 +558,15 @@ public sealed partial class MainWindow_Content : IgControl
 
 
             // clear text after duration
-            if (durationMs.HasValue && durationMs > 0)
+            if (!string.IsNullOrWhiteSpace(message))
             {
-                await Task.Delay(durationMs.Value, token);
-                SetMessage_(null);
+                durationMs ??= AP.Config.InAppMessageDuration;
+
+                if (durationMs > 0)
+                {
+                    await Task.Delay(durationMs.Value, token);
+                    SetMessage_(null);
+                }
             }
         }
         catch { }

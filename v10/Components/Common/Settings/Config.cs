@@ -526,10 +526,10 @@ public partial class Config : IgReactive
     ///// </summary>
     //public uint ImageEditQuality { get; set; } = 80;
 
-    ///// <summary>
-    ///// Gets, sets value of duration to display the in-app message
-    ///// </summary>
-    //public int InAppMessageDuration { get; set; } = 2000;
+    /// <summary>
+    /// Gets, sets value of duration to display the in-app message
+    /// </summary>
+    public int InAppMessageDuration { get; set; } = 2000;
 
     ///// <summary>
     ///// Gets, sets the minimum width of the embedded thumbnail to use for displaying
