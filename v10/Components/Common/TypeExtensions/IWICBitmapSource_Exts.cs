@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Common.Photoing;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Vortice.Direct2D1;
 using Vortice.Direct3D11;
@@ -32,6 +33,8 @@ namespace ImageGlass.Common;
 
 public static class IWICBitmapSource_Exts
 {
+    private static Lock _lockD2Device = new();
+
 
     /// <summary>
     /// Gets pixel info of the current bitmap.
@@ -251,10 +254,19 @@ public static class IWICBitmapSource_Exts
 
         // get bitmap from GPU
         using var dxgiSurface = texture.QueryInterface<Vortice.DXGI.IDXGISurface>();
-        var wicBmp = d2Context.CreateBitmapFromDxgiSurface(dxgiSurface);
 
-        return wicBmp;
+        if (!d2Context.IsDisposed())
+        {
+            lock (_lockD2Device)
+            {
+                var wicBmp = d2Context.CreateBitmapFromDxgiSurface(dxgiSurface);
+                return wicBmp;
+            }
+        }
+
+        return null;
     }
+
 
 }
 
