@@ -32,14 +32,8 @@ namespace ImageGlass;
 
 public partial class MainWindow
 {
-    /// <summary>
-    /// Exit the app.
-    /// </summary>
-    public static void IG_Exit()
-    {
-        Application.Current.Exit();
-    }
 
+    #region Main Menu APIs
 
     /// <summary>
     /// Shows main menu.
@@ -49,6 +43,20 @@ public partial class MainWindow
         _contentEl.ToolbarMain.OpenMainMenu();
     }
 
+
+    /// <summary>
+    /// Exit the app.
+    /// </summary>
+    public static void IG_Exit()
+    {
+        Application.Current.Exit();
+    }
+
+    #endregion // Main Menu APIs
+
+
+
+    #region File APIs
 
     /// <summary>
     /// Shows file picker to open a photo.
@@ -154,7 +162,11 @@ public partial class MainWindow
             AP.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
     }
 
+    #endregion // File APIs
 
+
+
+    #region Navigation APIs
 
     /// <summary>
     /// View a photo in the list by the given index.
@@ -282,51 +294,11 @@ public partial class MainWindow
         IG_ViewByIndex((int)AP.Photos.Count - 1);
     }
 
-
-    /// <summary>
-    /// Toggles the viewer's checkerboard mode.
-    /// </summary>
-    public void IG_ToggleCheckerboard(string? mode = null)
-    {
-        var isValid = Enum.TryParse<CheckerboardMode>(mode, out var wantedMode);
-
-        IG_ToggleCheckerboard(isValid ? wantedMode : null);
-    }
+    #endregion // Navigation APIs
 
 
-    /// <summary>
-    /// Toggles the viewer's checkerboard mode.
-    /// </summary>
-    public void IG_ToggleCheckerboard(CheckerboardMode? mode = null)
-    {
-        var wantedMode = AP.Config.CheckerboardMode;
 
-        if (mode is not null)
-        {
-            wantedMode = mode.Value;
-        }
-        else
-        {
-            switch (wantedMode)
-            {
-                case CheckerboardMode.None:
-                    wantedMode = CheckerboardMode.Client;
-                    break;
-                case CheckerboardMode.Client:
-                    wantedMode = CheckerboardMode.Image;
-                    break;
-                case CheckerboardMode.Image:
-                    wantedMode = CheckerboardMode.None;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        Viewer.CheckerboardMode = AP.Config.CheckerboardMode = wantedMode;
-    }
-
-
+    #region Zoom APIs
 
     /// <summary>
     /// Shows input dialog for custom zoom.
@@ -463,6 +435,8 @@ public partial class MainWindow
         // smooth zooming
         IG_Animate(AnimationSources.ZoomOut);
     }
+
+    #endregion // Zoom APIs
 
 
 
@@ -780,6 +754,56 @@ public partial class MainWindow
     }
 
     #endregion // Clipboard APIs
+
+
+
+    #region Layout APIs
+
+    /// <summary>
+    /// Toggles the viewer's checkerboard mode.
+    /// </summary>
+    public void IG_ToggleCheckerboard(string? mode = null)
+    {
+        var isValid = Enum.TryParse<CheckerboardMode>(mode, out var wantedMode);
+
+        IG_ToggleCheckerboard(isValid ? wantedMode : null);
+    }
+
+
+    /// <summary>
+    /// Toggles the viewer's checkerboard mode.
+    /// </summary>
+    public void IG_ToggleCheckerboard(CheckerboardMode? mode = null)
+    {
+        var wantedMode = AP.Config.CheckerboardMode;
+
+        if (mode is not null)
+        {
+            wantedMode = mode.Value;
+        }
+        else
+        {
+            switch (wantedMode)
+            {
+                case CheckerboardMode.None:
+                    wantedMode = CheckerboardMode.Client;
+                    break;
+                case CheckerboardMode.Client:
+                    wantedMode = CheckerboardMode.Image;
+                    break;
+                case CheckerboardMode.Image:
+                    wantedMode = CheckerboardMode.None;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        Viewer.CheckerboardMode = AP.Config.CheckerboardMode = wantedMode;
+    }
+
+    #endregion // Layout APIs
+
 
 
 
