@@ -72,6 +72,21 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
     /// <summary>
+    /// Gets the photo source for renderer.
+    /// </summary>
+    public PhotoSource SourceKind
+    {
+        get; private set
+        {
+            if (field != value)
+            {
+                field = value;
+            }
+        }
+    } = PhotoSource.None;
+
+
+    /// <summary>
     /// Gets, sets value indicates whether the previewing is enabled or not.
     /// </summary>
     public bool EnableImagePreview { get; set; } = true;
@@ -420,7 +435,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (!EnableDebug) return;
         e.DrawText(
             $"""
-            FPS = {FPS}
+            Source={SourceKind}, FPS = {FPS}
             Control Size = {ActualWidth} x {ActualHeight}
             DrawingArea = {DrawingArea}
             Image size = {BitmapSize}
@@ -446,7 +461,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
         //// draw dest rect
         //e.DrawRectangle(_destRect, 0, Colors.Cyan);
-
 
     }
 
@@ -599,6 +613,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     public void UnloadPhoto()
     {
         CancelPreview();
+        SourceKind = PhotoSource.None;
         _photo?.CancelLoading();
         _photo?.Unload();
 
@@ -629,6 +644,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
 
 
+        SourceKind = PhotoSource.Native;
         _enablePanningVelocity = true;
         _photo = inputPhoto;
 
@@ -922,6 +938,8 @@ public partial class VirtualViewerControl : SwapChainCanvas
         }
         finally
         {
+            SourceKind = hasSource ? PhotoSource.Native : PhotoSource.None;
+
             // raise event
             OnPhotoLoading(e);
         }
@@ -947,7 +965,9 @@ public partial class VirtualViewerControl : SwapChainCanvas
         DisposeNativePhotoResources();
 
         // update the frame bitmap
+        SourceKind = PhotoSource.Native;
         _bmpSource = sender.GetRenderedFrameBitmap<ID2D1Bitmap1>();
+
         Invalidate();
     }
 
