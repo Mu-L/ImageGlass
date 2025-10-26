@@ -38,3 +38,7 @@ GetDpiForWindow
 SetWindowPos
 
 WHEEL_DELTA
+
+IFolderView2
+IPersistFolder2
+
