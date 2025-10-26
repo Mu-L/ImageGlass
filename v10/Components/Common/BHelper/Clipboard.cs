@@ -20,6 +20,7 @@ using Clowd.Clipboard;
 using ImageGlass.Common.Photoing;
 using System.Threading.Tasks;
 using Vortice.WIC;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace ImageGlass.Common;
 
@@ -44,7 +45,7 @@ public partial class BHelper
 
 
     /// <summary>
-    /// Sets the given image to clipboard.
+    /// Copies the given image to clipboard.
     /// </summary>
     public static async Task<bool> SetClipboardImageAsync(IWICBitmapSource? wicBmp)
     {
@@ -61,5 +62,43 @@ public partial class BHelper
 
         return false;
     }
+
+
+    /// <summary>
+    /// Copies files to clipboard.
+    /// </summary>
+    public static async Task<bool> SetClipboardFilesAsync(string[] filePaths, bool forCutting)
+    {
+        try
+        {
+            using var cb = await ClipboardGdi.OpenAsync();
+
+            if (forCutting)
+            {
+                cb.SetFormat(ClipboardFormat.DropEffect, (byte)DataPackageOperation.Move);
+            }
+
+            cb.SetFileDropList(filePaths);
+
+            return true;
+        }
+        catch { }
+
+        return false;
+    }
+
+
+    /// <summary>
+    /// Clears clipboard.
+    /// </summary>
+    public static async Task ClearClipboardAsync()
+    {
+        try
+        {
+            await ClipboardGdi.EmptyAsync();
+        }
+        catch { }
+    }
+
 
 }
