@@ -41,4 +41,6 @@ WHEEL_DELTA
 
 IFolderView2
 IPersistFolder2
+SHELLEXECUTEINFOW
+ShellExecuteEx
 

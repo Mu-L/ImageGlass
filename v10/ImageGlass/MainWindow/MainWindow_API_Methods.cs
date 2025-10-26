@@ -549,9 +549,21 @@ public partial class MainWindow
 
     #region Image APIs
 
+    /// <summary>
+    /// Opens photo file location.
+    /// </summary>
     public void IG_OpenLocation()
     {
         BHelper.OpenFilePath(AP.Photos.CurrentFilePath);
+    }
+
+
+    /// <summary>
+    /// Opens photo's Properties dialog.
+    /// </summary>
+    public void IG_OpenProperties()
+    {
+        ExplorerApi.DisplayFileProperties(AP.Photos.CurrentFilePath, this.Handle);
     }
 
     #endregion // Image APIs

@@ -63,6 +63,7 @@ public enum API
 
     // Menu > Image
     IG_OpenLocation,
+    IG_OpenProperties,
 
     // Menu > Clipboard
     IG_PasteImage,

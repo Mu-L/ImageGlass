@@ -22,6 +22,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 using Windows.Win32.UI.Shell;
 using Windows.Win32.UI.Shell.Common;
 
@@ -134,6 +136,35 @@ public static class ExplorerApi
     }
 
 
+    /// <summary>
+    /// Show file property dialog.
+    /// </summary>
+    /// <param name="filePath">Full file path</param>
+    /// <param name="windowHandle">Window handle</param>
+    public static unsafe void DisplayFileProperties(string filePath, nint windowHandle)
+    {
+        const int SEE_MASK_INVOKEIDLIST = 0xc;
+        const int SW_SHOW = 5;
+        var shInfo = new SHELLEXECUTEINFOW();
 
+        fixed (char* pFilePath = filePath)
+        {
+            fixed (char* pVerb = "properties")
+            {
+                fixed (char* pParams = "Details")
+                {
+                    shInfo.cbSize = (uint)Marshal.SizeOf(shInfo);
+                    shInfo.lpFile = pFilePath;
+                    shInfo.nShow = SW_SHOW;
+                    shInfo.fMask = SEE_MASK_INVOKEIDLIST;
+                    shInfo.lpVerb = pVerb;
+                    shInfo.lpParameters = pParams;
+                    shInfo.hwnd = new HWND(windowHandle);
+                }
+            }
+        }
+
+        _ = PInvoke.ShellExecuteEx(ref shInfo);
+    }
 
 }
