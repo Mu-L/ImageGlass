@@ -32,8 +32,8 @@ public partial class BHelper
     {
         try
         {
-            var img = await ClipboardWpf.GetImageAsync();
-            var wicBmp = PhotoWIC.ConvertFromWpfBitmap(img);
+            var img = await ClipboardGdi.GetImageAsync();
+            var wicBmp = PhotoWIC.ConvertFromGdiBitmap(img);
 
             return wicBmp;
         }
@@ -42,5 +42,24 @@ public partial class BHelper
         return null;
     }
 
+
+    /// <summary>
+    /// Sets the given image to clipboard.
+    /// </summary>
+    public static async Task<bool> SetClipboardImageAsync(IWICBitmapSource? wicBmp)
+    {
+        try
+        {
+            var gdiBmp = wicBmp?.ToGdiBitmap();
+            if (gdiBmp is null) return false;
+
+            await ClipboardGdi.SetImageAsync(gdiBmp);
+
+            return true;
+        }
+        catch { }
+
+        return false;
+    }
 
 }

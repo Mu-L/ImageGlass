@@ -268,6 +268,35 @@ public static class IWICBitmapSource_Exts
     }
 
 
+    /// <summary>
+    /// Converts WIC bitmap to GDI bitmap.
+    /// </summary>
+    public static System.Drawing.Bitmap? ToGdiBitmap(this IWICBitmapSource? wicBmp)
+    {
+        if (wicBmp.IsDisposed()) return null;
+
+        // 1. create empty GDI bitmap
+        var gdiBmp = new System.Drawing.Bitmap(
+          wicBmp.Size.Width,
+          wicBmp.Size.Height,
+          System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+
+        // 2. lock GDI bitmap
+        var bmpData = gdiBmp.LockBits(
+          new System.Drawing.Rectangle(0, 0, gdiBmp.Width, gdiBmp.Height),
+          System.Drawing.Imaging.ImageLockMode.WriteOnly,
+          System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+
+        // 3. copy WIC bitmap to GDI bitmap
+        var buffSize = (uint)(bmpData.Height * bmpData.Stride);
+        wicBmp.CopyPixels((uint)bmpData.Stride, buffSize, bmpData.Scan0);
+        gdiBmp.UnlockBits(bmpData);
+
+        return gdiBmp;
+    }
+
+
+
 }
 
 
