@@ -72,6 +72,7 @@ public partial class MainWindow
 
 
         // Image
+        { API.IG_OpenLocation,          IgCommands.Create(IG_OpenLocation) },
 
 
         // Clipboard

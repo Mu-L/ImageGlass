@@ -547,6 +547,17 @@ public partial class MainWindow
 
 
 
+    #region Image APIs
+
+    public void IG_OpenLocation()
+    {
+        BHelper.OpenFilePath(AP.Photos.CurrentFilePath);
+    }
+
+    #endregion // Image APIs
+
+
+
     #region Clipboard APIs
 
     /// <summary>

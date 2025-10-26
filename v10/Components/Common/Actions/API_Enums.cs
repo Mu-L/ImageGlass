@@ -62,6 +62,7 @@ public enum API
     IG_PanToBottom,
 
     // Menu > Image
+    IG_OpenLocation,
 
     // Menu > Clipboard
     IG_PasteImage,

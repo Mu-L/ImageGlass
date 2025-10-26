@@ -288,8 +288,7 @@ public partial class BHelper
 
         try
         {
-            // TODO:
-            //ExplorerApi.OpenFolderAndSelectItem(filePath);
+            ExplorerApi.SelectFileFromExplorer(filePath);
         }
         catch
         {

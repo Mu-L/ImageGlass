@@ -75,6 +75,7 @@ public partial class MainWindow
 
 
         // Image
+        new(LangId.FrmMain_MnuOpenLocation,     API.IG_OpenLocation,        VKey.L),
 
 
         // Clipboard
