@@ -65,6 +65,7 @@ public enum API
 
     // Menu > Clipboard
     IG_PasteImage,
+    IG_CopyImagePixels,
     IG_CopyImagePath,
     IG_CopyFiles,
     IG_CutFiles,

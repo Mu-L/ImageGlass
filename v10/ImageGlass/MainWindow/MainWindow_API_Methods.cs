@@ -564,11 +564,6 @@ public partial class MainWindow
     /// <summary>
     /// Opens image from clipboard.
     /// </summary>
-    public void IG_PasteImage()
-    {
-        _ = IG_PasteImageAsync();
-    }
-
     private async Task IG_PasteImageAsync()
     {
         var data = Clipboard.GetContent();
@@ -645,7 +640,34 @@ public partial class MainWindow
     }
 
 
+    /// <summary>
+    /// Copies image pixels.
+    /// </summary>
+    public async Task IG_CopyImagePixelsAsync()
+    {
+        if (Viewer.SourceKind == PhotoSource.None) return;
 
+        // 1. get rendered bitmap
+        var wicBmp = Viewer.GetRenderedBitmap();
+        if (wicBmp.IsDisposed()) return;
+
+        // 2. show message
+        await _contentEl.ShowMessageAsync(null);
+        _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuCopyImageData_Copying], delayMs: 1000);
+
+        // 3. copy the selected area
+        if (!Viewer.SourceSelection.IsEmpty())
+        {
+            // TODO:
+        }
+
+        // 4. copy to clipboard
+        var success = await Task.Run(async () => await BHelper.SetClipboardImageAsync(wicBmp));
+        if (success)
+        {
+            _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuCopyImageData_Success]);
+        }
+    }
 
 
     /// <summary>
@@ -672,24 +694,25 @@ public partial class MainWindow
     /// <summary>
     /// Copies the current photo file.
     /// </summary>
-    public void IG_CopyFiles()
+    public async Task IG_CopyFilesAsync()
     {
-        _ = SetFileToClipboardAsync(AP.Photos.CurrentFilePath, false);
+        await SetFileToClipboardAsync(AP.Photos.CurrentFilePath, false);
     }
 
 
     /// <summary>
     /// Cuts the current photo file.
     /// </summary>
-    public void IG_CutFiles()
+    public async Task IG_CutFilesAsync()
     {
-        _ = SetFileToClipboardAsync(AP.Photos.CurrentFilePath, true);
+        await SetFileToClipboardAsync(AP.Photos.CurrentFilePath, true);
     }
+
 
     /// <summary>
     /// Sets file to clipboard
     /// </summary>
-    public async Task SetFileToClipboardAsync(string? filePath, bool isCut)
+    private async Task SetFileToClipboardAsync(string? filePath, bool isCut)
     {
         if (!File.Exists(filePath)) return;
 
@@ -739,7 +762,6 @@ public partial class MainWindow
                 : LangId.FrmMain_MnuCopyFile_Success,
             fileItems.Length]);
     }
-
 
 
     /// <summary>
