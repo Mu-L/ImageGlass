@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using ImageGlass.Common;
 using System;
+using Vortice.WIC;
 using Windows.Foundation;
 
 namespace ImageGlass.UI;
@@ -72,7 +73,6 @@ public partial class VirtualViewerControl
     }
 
     #endregion // DPI Scaling
-
 
 
 
@@ -164,6 +164,24 @@ public partial class VirtualViewerControl
     #endregion // Coordinate converters
 
 
-}
 
+    // Bitmap Utils
+    #region Bitmap Utils
+
+    /// <summary>
+    /// Gets the rendered bitmap.
+    /// </summary>
+    public IWICBitmapSource? GetRenderedBitmap()
+    {
+        lock (_lockSource)
+        {
+            var wicBmp = _bmpSource?.ToWICBitmapSource(D2dContext);
+            return wicBmp;
+        }
+    }
+
+    #endregion // Bitmap Utils
+
+
+}
 
