@@ -27,7 +27,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Storage;
 
 namespace ImageGlass;
 
@@ -430,6 +429,8 @@ public partial class MainWindow
     }
 
 
+    #region Panning APIs
+
     /// <summary>
     /// Pans the viewing image to left.
     /// </summary>
@@ -531,6 +532,8 @@ public partial class MainWindow
         });
     }
 
+    #endregion // Panning APIs
+
 
     /// <summary>
     /// Refreshes image viewport.
@@ -560,6 +563,8 @@ public partial class MainWindow
             AP.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
     }
 
+
+    #region Clipboard APIs
 
     /// <summary>
     /// Opens image from clipboard.
@@ -653,7 +658,7 @@ public partial class MainWindow
 
         // 2. show message
         await _contentEl.ShowMessageAsync(null);
-        _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuCopyImageData_Copying], delayMs: 1000);
+        _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuCopyImagePixels_Copying], delayMs: 1000);
 
         // 3. copy the selected area
         if (!Viewer.SourceSelection.IsEmpty())
@@ -665,7 +670,7 @@ public partial class MainWindow
         var success = await Task.Run(async () => await BHelper.SetClipboardImageAsync(wicBmp));
         if (success)
         {
-            _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuCopyImageData_Success]);
+            _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuCopyImagePixels_Success]);
         }
     }
 
@@ -712,12 +717,12 @@ public partial class MainWindow
     /// <summary>
     /// Sets file to clipboard
     /// </summary>
-    private async Task SetFileToClipboardAsync(string? filePath, bool isCut)
+    private async Task SetFileToClipboardAsync(string? filePath, bool forCutting)
     {
         if (!File.Exists(filePath)) return;
 
         // 1. cut/copy single file
-        if (isCut)
+        if (forCutting)
         {
             if (!AP.Config.EnableCutMultipleFiles)
             {
@@ -737,46 +742,38 @@ public partial class MainWindow
         _ = AP.StringClipboard.Add(filePath);
 
 
-        // 3. get file items from clipboard paths
-        var fileItemTasks = AP.StringClipboard.Select(path => StorageFile.GetFileFromPathAsync(path).AsTask());
-        var fileItems = await Task.WhenAll(fileItemTasks);
+        // 3. set files to clipboard
+        var success = await BHelper.SetClipboardFilesAsync(AP.StringClipboard.ToArray(), forCutting);
 
 
-        // 4. set files to clipboard
-        var data = new DataPackage()
+        // 4. show message
+        if (success)
         {
-            RequestedOperation = isCut
-                ? DataPackageOperation.Move
-                : DataPackageOperation.Copy,
-        };
-        data.SetStorageItems(fileItems, true);
+            _ = _contentEl.ShowMessageAsync(
+                AP.Config.Lang[forCutting
+                    ? LangId.FrmMain_MnuCutFile_Success
+                    : LangId.FrmMain_MnuCopyFile_Success,
+                AP.StringClipboard.Count]);
+        }
 
-        Clipboard.Clear();
-        Clipboard.SetContent(data);
-
-
-        // 5. show message
-        await _contentEl.ShowMessageAsync(
-            AP.Config.Lang[isCut
-                ? LangId.FrmMain_MnuCutFile_Success
-                : LangId.FrmMain_MnuCopyFile_Success,
-            fileItems.Length]);
     }
 
 
     /// <summary>
     /// Clears clipboard.
     /// </summary>
-    public void IG_ClearClipboard()
+    public async Task IG_ClearClipboardAsync()
     {
-        if (AP.StringClipboard.Count == 0) return;
-
+        // clear clipboard
         AP.StringClipboard.Clear();
-        Clipboard.Clear();
+        await BHelper.ClearClipboardAsync();
 
         // show message
         _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuClearClipboard_Success]);
     }
+
+    #endregion // Clipboard APIs
+
 
 
 }

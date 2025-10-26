@@ -79,11 +79,11 @@ public partial class MainWindow
 
         // Clipboard
         new(LangId.FrmMain_MnuPasteImage,       API.IG_PasteImage,          MKeys.Ctrl, VKey.V),
-        new(LangId.FrmMain_MnuCopyImageData,    API.IG_CopyImagePixels,     MKeys.Ctrl | MKeys.Shift, VKey.C),
+        new(LangId.FrmMain_MnuCopyImagePixels,  API.IG_CopyImagePixels,     MKeys.Ctrl | MKeys.Shift, VKey.C),
         new(LangId.FrmMain_MnuCopyFile,         API.IG_CopyFiles,           MKeys.Ctrl, VKey.C),
         new(LangId.FrmMain_MnuCutFile,          API.IG_CutFiles,            MKeys.Ctrl, VKey.X),
         new(LangId.FrmMain_MnuCopyPath,         API.IG_CopyImagePath,       MKeys.Ctrl, VKey.L),
-        //new(LangId.FrmMain_MnuClearClipboard,   API.IG_ClearClipboard       ), // TODO: hotkey
+        new(LangId.FrmMain_MnuClearClipboard,   API.IG_ClearClipboard), // TODO: hotkey
 
 
         new(LangId.FrmMain_MnuToggleCheckerboard,   API.IG_ToggleCheckerboard,  VKey.B),

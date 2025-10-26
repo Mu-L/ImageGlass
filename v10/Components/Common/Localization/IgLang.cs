@@ -542,24 +542,24 @@ public class IgLang
         #region Main Menu > Clipboard
         new(LangId.FrmMain_MnuClipboard, "Clipboard"), //v3.0
         new(LangId.FrmMain_MnuCopyFile, "Copy file"), //v3.0
-        new(LangId.FrmMain_MnuCopyFile_Success, "Copied {0} file(s)."), // v2.0 final
-        new(LangId.FrmMain_MnuCopyImageData, "Copy image data"), //v5.0
-        new(LangId.FrmMain_MnuCopyImageData_Copying, "Copying the image data. It's going to take a while…"), // v9.0
-        new(LangId.FrmMain_MnuCopyImageData_Success, "Copied the current image data."), // v5.0
+        new(LangId.FrmMain_MnuCopyFile_Success, "Copied {0} file(s)"), // v2.0 final
+        new(LangId.FrmMain_MnuCopyImagePixels, "Copy image pixels"), //v5.0
+        new(LangId.FrmMain_MnuCopyImagePixels_Copying, "Copying the image pixels. It's going to take a while…"), // v9.0
+        new(LangId.FrmMain_MnuCopyImagePixels_Success, "Copied the current image pixels"), // v5.0
         new(LangId.FrmMain_MnuCutFile, "Cut file"), //v3.0
-        new(LangId.FrmMain_MnuCutFile_Success, "Cut {0} file(s)."), // v2.0 final
+        new(LangId.FrmMain_MnuCutFile_Success, "Cut {0} file(s)"), // v2.0 final
         new(LangId.FrmMain_MnuCopyPath, "Copy image path"), //v3.0
-        new(LangId.FrmMain_MnuCopyPath_Success, "Copied the current image path."), // v9.0
+        new(LangId.FrmMain_MnuCopyPath_Success, "Copied the current image path"), // v9.0
         new(LangId.FrmMain_MnuPasteImage, "Paste image"), //v3.0
         new(LangId.FrmMain_MnuPasteImage_Error, "Could not find image data in the Clipboard"), // v8.0
         new(LangId.FrmMain_MnuClearClipboard, "Clear clipboard"), //v3.0
-        new(LangId.FrmMain_MnuClearClipboard_Success, "Cleared clipboard."), // v2.0 final
+        new(LangId.FrmMain_MnuClearClipboard_Success, "Cleared clipboard"), // v2.0 final
         #endregion // Main Menu > Clipboard
 
         new(LangId.FrmMain_MnuWindowFit, "Window Fit"), //v7.5
         new(LangId.FrmMain_MnuFullScreen, "Full Screen"), //v3.0
         new(LangId.FrmMain_MnuFrameless, "Frameless"), //v7.5
-        new(LangId.FrmMain_MnuFrameless_EnableDescription, "Hold Shift key to move the window."), // v7.5
+        new(LangId.FrmMain_MnuFrameless_EnableDescription, "Hold Shift key to move the window"), // v7.5
         new(LangId.FrmMain_MnuSlideshow, "Slideshow"), //v3.0
 
         #region Main Menu > Layout

@@ -80,7 +80,7 @@ public partial class MainWindow
         { API.IG_CopyFiles,             IgCommands.Create(IG_CopyFilesAsync) },
         { API.IG_CutFiles,              IgCommands.Create(IG_CutFilesAsync) },
         { API.IG_CopyImagePath,         IgCommands.Create(IG_CopyImagePath) },
-        { API.IG_ClearClipboard,        IgCommands.Create(IG_ClearClipboard) },
+        { API.IG_ClearClipboard,        IgCommands.Create(IG_ClearClipboardAsync) },
 
 
         // Layout

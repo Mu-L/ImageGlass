@@ -362,7 +362,7 @@
                             Text="[Paste image]" />
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem LangKey="FrmMain_MnuCopyImageData" Text="[Copy image data]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuCopyImagePixels" Text="[Copy image pixels]" />
                         <ui:IgMenuItem LangKey="FrmMain_MnuCopyPath" Text="[Copy image path]" />
                         <ui:IgMenuItem
                             Icon="Copy"
