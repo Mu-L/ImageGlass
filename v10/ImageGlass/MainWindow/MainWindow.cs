@@ -170,29 +170,17 @@ public partial class MainWindow : IgWindow
         }
 
 
-        // 3. load single directory path
-        var path = BHelper.ResolvePath(paths[0]);
-        if (BHelper.CheckPath(path) == PathType.Dir)
-        {
-            PrepareLoadPhotoList([path],
-                currentFilePath: null, disposeForegroundShell: true, loadInitPhoto: true);
-            return;
-        }
-
-
-        // 4. load single file path
-        // 4.1 get foreground shell
+        // 3. load single file path
+        // 3.1 get foreground shell
         if (AP.Config.ShouldUseExplorerSortOrder)
         {
             using var shell = new EggShell();
             AP.ForegroundShell = shell.GetForegroundWindowView();
         }
+        AP.UpdateInitImagePath(paths[0]);
 
-        // 4.2 save init input path
-        AP.UpdateInputImagePath(path);
-
-        // 4.3 open the path
-        IG_OpenPath(path);
+        // 3.2 open the path
+        IG_OpenPath(paths[0]);
     }
 
 

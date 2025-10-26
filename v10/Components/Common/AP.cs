@@ -33,7 +33,7 @@ public static class AP
 
     private static ExplorerView? _foregroundShell;
     private static string _foregroundShellPath = "";
-    private static string _inputImagePathFromArgs = "";
+    private static string _initImagePathFromArgs = "";
     private static readonly Lazy<WindowColorProfileProvider> _colorProfileService = new(() => new WindowColorProfileProvider(), LazyThreadSafetyMode.ExecutionAndPublication);
 
 
@@ -60,7 +60,7 @@ public static class AP
     /// <summary>
     /// Gets the path of the image file from the arguments.
     /// </summary>
-    public static string InputImagePathFromArgs => _inputImagePathFromArgs;
+    public static string InputImagePathFromArgs => _initImagePathFromArgs;
 
 
     /// <summary>
@@ -77,7 +77,7 @@ public static class AP
             try
             {
                 _foregroundShellPath = _foregroundShell?.GetTabViewPath() ?? "";
-                UpdateInputImagePath();
+                UpdateInitImagePath();
             }
             catch
             {
@@ -159,7 +159,7 @@ public static class AP
     /// <summary>
     /// Update input path from arguments.
     /// </summary>
-    public static void UpdateInputImagePath(string? path = null)
+    public static void UpdateInitImagePath(string? path = null)
     {
         var pathToLoad = path ?? string.Empty;
 
@@ -176,7 +176,7 @@ public static class AP
             }
         }
 
-        _inputImagePathFromArgs = pathToLoad;
+        _initImagePathFromArgs = pathToLoad;
     }
 
 

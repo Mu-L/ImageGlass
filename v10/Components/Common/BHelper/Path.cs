@@ -227,14 +227,12 @@ public partial class BHelper
 
 
     /// <summary>
-    /// Resolves a relative/protocol/link path to absolute path
+    /// Resolves a relative/protocol/link path to absolute path.
     /// </summary>
-    /// <param name="inputPath">A path</param>
-    /// <returns></returns>
     public static string ResolvePath(string? inputPath)
     {
         if (string.IsNullOrEmpty(inputPath))
-            return inputPath ?? "";
+            return inputPath ?? string.Empty;
 
         var path = inputPath;
         const string protocol = Const.APP_PROTOCOL + ":";

@@ -92,19 +92,25 @@ public partial class MainWindow
 
 
     /// <summary>
-    /// Opens photo by the given path.
+    /// Opens photo by the given path, shortcut for method <see cref="PrepareLoadPhotoList"/> with params:
+    /// <list type="bullet">
+    ///   <item><c>currentFilePath</c> = <c>null</c></item>
+    ///   <item><c>disposeForegroundShell</c> = <c>false</c></item>
+    ///   <item><c>loadInitPhoto</c> = <c>true</c></item>
+    /// </list>
     /// </summary>
     public void IG_OpenPath(string? path)
     {
-        if (string.IsNullOrWhiteSpace(path)) return;
+        var fullPath = BHelper.ResolvePath(path);
+        if (string.IsNullOrWhiteSpace(fullPath)) return;
 
         // 1. check if the path is being opened
-        var imageIndex = AP.Photos.IndexOf(path);
+        var imageIndex = AP.Photos.IndexOf(fullPath);
 
         // 2.1 The file is located another folder, load the entire folder
         if (imageIndex == -1 || AP.CanUseForegroundShell())
         {
-            PrepareLoadPhotoList([path],
+            PrepareLoadPhotoList([fullPath],
                 currentFilePath: null, disposeForegroundShell: false, loadInitPhoto: true);
         }
         // 2.2 The file is in current folder AND it is the viewing image
@@ -118,6 +124,36 @@ public partial class MainWindow
             IG_ViewByIndex(imageIndex);
         }
     }
+
+
+    /// <summary>
+    /// Refreshes image viewport.
+    /// </summary>
+    public void IG_Refresh()
+    {
+        Viewer.Refresh(true, false, AP.Config.EnableWindowFit);
+    }
+
+
+    /// <summary>
+    /// Reloads image file.
+    /// </summary>
+    public void IG_Reload()
+    {
+        var photo = AP.Photos.Get(AP.Photos.CurrentIndex);
+        _ = ViewPhotoAsync(photo, useCache: false);
+    }
+
+
+    /// <summary>
+    /// Reloads images list.
+    /// </summary>
+    public void IG_ReloadList()
+    {
+        PrepareLoadPhotoList(AP.Photos.DistinctDirs,
+            AP.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
+    }
+
 
 
     /// <summary>
@@ -429,6 +465,7 @@ public partial class MainWindow
     }
 
 
+
     #region Panning APIs
 
     /// <summary>
@@ -535,34 +572,6 @@ public partial class MainWindow
     #endregion // Panning APIs
 
 
-    /// <summary>
-    /// Refreshes image viewport.
-    /// </summary>
-    public void IG_Refresh()
-    {
-        Viewer.Refresh(true, false, AP.Config.EnableWindowFit);
-    }
-
-
-    /// <summary>
-    /// Reloads image file.
-    /// </summary>
-    public void IG_Reload()
-    {
-        var photo = AP.Photos.Get(AP.Photos.CurrentIndex);
-        _ = ViewPhotoAsync(photo, useCache: false);
-    }
-
-
-    /// <summary>
-    /// Reloads images list.
-    /// </summary>
-    public void IG_ReloadList()
-    {
-        PrepareLoadPhotoList(AP.Photos.DistinctDirs,
-            AP.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
-    }
-
 
     #region Clipboard APIs
 
@@ -581,8 +590,7 @@ public partial class MainWindow
 
             if (!string.IsNullOrWhiteSpace(filePath))
             {
-                PrepareLoadPhotoList([filePath],
-                    currentFilePath: filePath, disposeForegroundShell: true, loadInitPhoto: true);
+                IG_OpenPath(filePath);
             }
             return;
         }
@@ -617,8 +625,7 @@ public partial class MainWindow
             // 3.1 try to get absolute path
             if (File.Exists(path) || Directory.Exists(path))
             {
-                PrepareLoadPhotoList([path],
-                    currentFilePath: null, disposeForegroundShell: true, loadInitPhoto: true);
+                IG_OpenPath(path);
                 return;
             }
 
