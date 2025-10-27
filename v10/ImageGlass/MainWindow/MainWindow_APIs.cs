@@ -72,6 +72,7 @@ public partial class MainWindow
 
 
         // Image
+        { API.IG_Rename,                IgCommands.Create(IG_RenameAsync) },
         { API.IG_OpenLocation,          IgCommands.Create(IG_OpenLocation) },
         { API.IG_OpenProperties,        IgCommands.Create(IG_OpenProperties) },
 

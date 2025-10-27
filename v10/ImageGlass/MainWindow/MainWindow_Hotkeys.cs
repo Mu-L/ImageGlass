@@ -75,6 +75,7 @@ public partial class MainWindow
 
 
         // Image
+        new(LangId.FrmMain_MnuRename,           API.IG_Rename,              VKey.F2),
         new(LangId.FrmMain_MnuOpenLocation,     API.IG_OpenLocation,        VKey.L),
         new(LangId.FrmMain_MnuImageProperties,  API.IG_OpenProperties,      MKeys.Alt, VKey.Enter),
 

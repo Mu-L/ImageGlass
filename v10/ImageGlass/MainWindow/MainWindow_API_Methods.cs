@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Cysharp.Text;
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
@@ -548,6 +549,74 @@ public partial class MainWindow
 
 
     #region Image APIs
+
+    /// <summary>
+    /// Opens a popup to rename the current photo.
+    /// </summary>
+    public async Task IG_RenameAsync()
+    {
+        var oldFilePath = AP.Photos.CurrentFilePath;
+        if (!File.Exists(oldFilePath)) return;
+
+        var currentFolder = Path.GetDirectoryName(oldFilePath) ?? string.Empty;
+        var ext = Path.GetExtension(oldFilePath);
+        var newName = Path.GetFileNameWithoutExtension(oldFilePath);
+        var title = AP.Config.Lang[LangId.FrmMain_MnuRename];
+
+        // 2. show popup
+        var result = await ModalWindow.ShowInputAsync(this,
+            title,
+            description: $"""
+            {oldFilePath}
+            {AP.Config.Lang[LangId.FrmMain_MnuRename_Description]}
+            """,
+            heading: null,
+            inputValue: newName,
+            thumbnail: null,
+            thumbnailIcon: StockIconId.Rename,
+            acceptValue: TextBoxAcceptValue.FileNameValueOnly);
+
+        if (result.ExitCode != DialogExitCode.OK || string.IsNullOrWhiteSpace(result.InputValue)) return;
+
+        // 3. get new photo name
+        newName = ZString.Concat(result.InputValue.Trim(), ext);
+        var newFilePath = Path.Combine(currentFolder, newName);
+
+
+        // 4. perform renaming
+        try
+        {
+            // Issue 73: Windows ignores case-only changes
+            if (string.Equals(oldFilePath, newFilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                // user changing only the case of the filename. Need to perform a trick.
+                File.Move(oldFilePath, oldFilePath + "_temp");
+                File.Move(oldFilePath + "_temp", newFilePath);
+            }
+            else
+            {
+                File.Move(oldFilePath, newFilePath);
+            }
+
+
+            // TODO:
+            AP.Photos.SetFilePath(AP.Photos.CurrentIndex, newFilePath);
+
+            //// manually update the change if FileWatcher is not enabled
+            //if (!AP.Config.EnableRealTimeFileUpdate)
+            //{
+            //    AP.Photos.SetFileName(AP.Photos.CurrentIndex, newFilePath);
+
+            //    Gallery.Items[Local.CurrentIndex].Rename(newFilePath);
+            //    LoadImageInfo(ImageInfoUpdateTypes.Name | ImageInfoUpdateTypes.Path);
+            //}
+        }
+        catch (Exception ex)
+        {
+            _ = await ModalWindow.ShowErrorAsync(this, title, ex.Message);
+        }
+    }
+
 
     /// <summary>
     /// Opens photo file location.
