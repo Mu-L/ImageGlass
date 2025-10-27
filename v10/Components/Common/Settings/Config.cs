@@ -110,10 +110,21 @@ public partial class Config : IgReactive
     ///// </summary>
     //public bool HideGalleryInFullscreen { get; set; } = false;
 
-    ///// <summary>
-    ///// Gets, sets value of gallery visibility
-    ///// </summary>
-    //public bool ShowGallery { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value of gallery visibility
+    /// </summary>
+    public bool ShowGallery
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = true;
 
     ///// <summary>
     ///// Gets, sets value whether gallery scrollbars visible
@@ -141,10 +152,21 @@ public partial class Config : IgReactive
         }
     } = true;
 
-    ///// <summary>
-    ///// Gets, sets value of visibility of toolbar on start up
-    ///// </summary>
-    //public bool ShowToolbar { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value of visibility of toolbar on start up
+    /// </summary>
+    public bool ShowToolbar
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = true;
 
     ///// <summary>
     ///// Gets, sets value of visibility of Frame Navigation tool on startup

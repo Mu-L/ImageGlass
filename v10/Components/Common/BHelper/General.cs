@@ -141,6 +141,32 @@ public partial class BHelper
 
 
     /// <summary>
+    /// Converts string to nullable boolean (ignore case).
+    /// <list type="bullet">
+    ///   <item><c>"true"</c> => <c>true</c></item>
+    ///   <item><c>"false"</c> => <c>false</c></item>
+    ///   <item>Other values, returns <c>null</c></item>
+    /// </list>
+    /// </summary>
+    public static bool? ConvertStringToBool(string? value)
+    {
+        var strValue = value ?? string.Empty;
+        bool? boolValue = null;
+
+        if (strValue.Equals("true", StringComparison.OrdinalIgnoreCase))
+        {
+            boolValue = true;
+        }
+        else if (strValue.Equals("false", StringComparison.OrdinalIgnoreCase))
+        {
+            boolValue = false;
+        }
+
+        return boolValue;
+    }
+
+
+    /// <summary>
     /// Checks if the given Windows version is matched.
     /// </summary>
     public static bool IsOS(WindowsOS ver)

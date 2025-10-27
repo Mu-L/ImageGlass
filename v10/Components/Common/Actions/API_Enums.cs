@@ -79,6 +79,8 @@ public enum API
     // Menu > Slideshow
 
     // Menu > Layout
+    IG_ToggleToolbar,
+    IG_ToggleGallery,
     IG_ToggleCheckerboard,
 
     // Menu > Tools

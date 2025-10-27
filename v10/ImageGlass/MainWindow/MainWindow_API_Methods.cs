@@ -552,7 +552,7 @@ public partial class MainWindow
     /// <summary>
     /// Opens photo file location.
     /// </summary>
-    public void IG_OpenLocation()
+    public static void IG_OpenLocation()
     {
         BHelper.OpenFilePath(AP.Photos.CurrentFilePath);
     }
@@ -781,6 +781,51 @@ public partial class MainWindow
 
 
     #region Layout APIs
+
+    /// <summary>
+    /// Toggles visibility of toolbar.
+    /// </summary>
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public static void IG_ToggleToolbar(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleToolbar(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggles visibility of toolbar.
+    /// </summary>
+    public static void IG_ToggleToolbar(bool? enabled = null)
+    {
+        enabled ??= !AP.Config.ShowToolbar;
+        AP.Config.ShowToolbar = enabled.Value;
+
+        // TODO: update window fit
+    }
+
+
+    /// <summary>
+    /// Toggles visibility of gallery.
+    /// </summary>
+    public static void IG_ToggleGallery(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleGallery(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggles visibility of gallery
+    /// </summary>
+    public static void IG_ToggleGallery(bool? enabled = null)
+    {
+        enabled ??= !AP.Config.ShowGallery;
+        AP.Config.ShowGallery = enabled.Value;
+
+        // TODO: update window fit
+    }
+
 
     /// <summary>
     /// Toggles the viewer's checkerboard mode.
