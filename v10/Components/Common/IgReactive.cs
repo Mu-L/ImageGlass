@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace ImageGlass.Common;
 
@@ -65,6 +66,7 @@ public partial class IgReactive : INotifyPropertyChanged
     /// <summary>
     /// Suspends the <see cref="PropertyChanged"/> event.
     /// </summary>
+    [JsonIgnore]
     public bool SuspendReactivity { get; set; } = false;
 
     #endregion // IgReactive > Properties & Events

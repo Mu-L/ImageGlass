@@ -50,7 +50,7 @@ public partial class BHelper
             // ignoring policy
             IgnoreReadOnlyProperties = true,
             IgnoreReadOnlyFields = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         };
     }
 

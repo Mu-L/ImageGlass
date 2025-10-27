@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 using Windows.UI;
 
 namespace ImageGlass.UI;
@@ -67,6 +68,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
     /// <summary>
     /// Suspends the <see cref="PropertyChanged"/> event.
     /// </summary>
+    [JsonIgnore]
     public bool SuspendReactivity { get; set; } = false;
 
     #endregion // IgReactive > Properties & Events

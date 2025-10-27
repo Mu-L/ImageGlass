@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Windows.Foundation;
 using Windows.System;
@@ -71,6 +72,7 @@ public partial class IgTextBox : TextBox, INotifyPropertyChanged
     /// <summary>
     /// Suspends the <see cref="PropertyChanged"/> event.
     /// </summary>
+    [JsonIgnore]
     public bool SuspendReactivity { get; set; } = false;
 
     #endregion // IgReactive > Properties & Events
