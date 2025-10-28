@@ -1001,13 +1001,17 @@ internal class ThumbnailCacheManager : IDisposable
             var fi = new FileInfo(filePath.ToString());
             var diskCacheKey = adaptor.GetUniqueIdentifier(filePath, thumbSize, useEmbeddedThumbnails, autoRotate);
 
-            // Check the disk cache
-            using var stream = _diskCache.Read(diskCacheKey);
-
-            if (stream.Length > 0)
+            try
             {
-                return new Bitmap(stream);
+                // Check the disk cache
+                using var stream = _diskCache.Read(diskCacheKey);
+
+                if (stream.Length > 0)
+                {
+                    return new Bitmap(stream);
+                }
             }
+            catch { }
 
             return null;
         }

@@ -3492,7 +3492,7 @@ public partial class FrmMain
 
 
         // apply color channels filter
-        if (PicMain.FilterColorChannels(channels, true))
+        if (PicMain.FilterColorChannels(channels, false))
         {
             Local.ImageChannels = channels;
 
@@ -3501,6 +3501,14 @@ public partial class FrmMain
             MnuViewChannelGreen.Checked = channels.HasFlag(ColorChannels.G);
             MnuViewChannelBlue.Checked = channels.HasFlag(ColorChannels.B);
             MnuViewChannelAlpha.Checked = channels.HasFlag(ColorChannels.A);
+
+            if (Local.ImageTransform.HasChanges)
+            {
+                _ = PicMain.RotateImage(Local.ImageTransform.Rotation, false);
+                _ = PicMain.FlipImage(Local.ImageTransform.Flips, false);
+            }
+
+            PicMain.Refresh(resetZoom: false);
         }
         else
         {

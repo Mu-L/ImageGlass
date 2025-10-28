@@ -3386,10 +3386,16 @@ public partial class ViewerCanvas : DXCanvas
         _d2dImage = effect.GetD2D1Bitmap1(Device, ignoreAlpha);
 
 
+        // update new source size
+        var newSize = _d2dImage.GetSize();
+        var isSizeChanged = newSize.width != SourceWidth || newSize.height != SourceHeight;
+        SourceWidth = newSize.width;
+        SourceHeight = newSize.height;
+
         // render the transformation
         if (requestRerender)
         {
-            Refresh(resetZoom: false);
+            Refresh(resetZoom: isSizeChanged);
         }
 
         return true;

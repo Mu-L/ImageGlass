@@ -25,7 +25,6 @@ namespace ImageGlass.UI;
 
 public class ModernNumericUpDown : NumericUpDown
 {
-    private bool _mouseDown = false;
     private bool _mouseHover = false;
     private bool _darkMode = false;
     private IColors ColorPalatte => BHelper.GetThemeColorPalatte(_darkMode);
@@ -159,13 +158,11 @@ public class ModernNumericUpDown : NumericUpDown
 
     protected override void OnMouseDown(MouseEventArgs e)
     {
-        _mouseDown = true;
         Invalidate();
     }
 
     protected override void OnMouseUp(MouseEventArgs mevent)
     {
-        _mouseDown = false;
         Invalidate();
     }
 

@@ -502,7 +502,7 @@ public partial class BHelper
 
             if (string.IsNullOrEmpty(colorProfilePath))
             {
-                return ColorProfile.SRGB;
+                return ColorProfiles.SRGB;
             }
 
             return new ColorProfile(colorProfilePath);

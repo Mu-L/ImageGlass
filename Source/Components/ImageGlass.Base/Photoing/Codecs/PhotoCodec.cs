@@ -24,7 +24,6 @@ using PhotoSauce.MagicScaler;
 using System.Runtime.CompilerServices;
 using System.Text;
 using WicNet;
-using ColorProfile = ImageMagick.ColorProfile;
 
 namespace ImageGlass.Base.Photoing.Codecs;
 
@@ -888,7 +887,20 @@ public static class PhotoCodec
                 try
                 {
                     // Note: Using WIC is much faster than using MagickImageCollection
-                    result.Source = WicBitmapDecoder.Load(filePath);
+                    if (result.CanAnimate)
+                    {
+                        result.Source = BHelper.ToGdiPlusBitmap(filePath);
+                    }
+                    // multiple frame
+                    else if (result.FrameCount > 0)
+                    {
+                        result.Source = WicBitmapDecoder.Load(filePath);
+                    }
+                    // single frame
+                    else
+                    {
+                        result.Image = WicBitmapSource.Load(filePath);
+                    }
                 }
                 catch
                 {
@@ -1346,7 +1358,7 @@ public static class PhotoCodec
                 {
                     refImgM.TransformColorSpace(
                         //set default color profile to sRGB
-                        colorProfile ?? ColorProfile.SRGB,
+                        colorProfile ?? ColorProfiles.SRGB,
                         imgColor);
                 }
             }

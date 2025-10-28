@@ -235,7 +235,7 @@ public class ModernButton : Button
                  ControlStyles.ResizeRedraw |
                  ControlStyles.UserPaint, true);
 
-        base.UseVisualStyleBackColor = true;
+        base.UseVisualStyleBackColor = false;
         base.UseCompatibleTextRendering = false;
 
         SetButtonState(ModernControlState.Normal);
@@ -260,6 +260,14 @@ public class ModernButton : Button
         Image?.Dispose();
         Image = null;
     }
+
+
+    protected override void OnBackColorChanged(EventArgs e)
+    {
+        // disable system style
+        //base.OnBackColorChanged(e);
+    }
+
 
     protected override void OnPaint(PaintEventArgs e)
     {
