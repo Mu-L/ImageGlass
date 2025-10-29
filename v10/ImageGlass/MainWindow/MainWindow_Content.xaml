@@ -400,7 +400,10 @@
                         <ui:IgMenuItem LangKey="FrmMain_MnuToggleCheckerboard" Text="[Checkerboard background]" />
                         <MenuFlyoutSeparator />
 
-                        <ui:IgToggleMenuItem LangKey="FrmMain_MnuToggleTopMost" Text="[Keep window always on top]" />
+                        <ui:IgToggleMenuItem
+                            IsChecked="{x:Bind cm:AP.Config.EnableWindowTopMost}"
+                            LangKey="FrmMain_MnuToggleTopMost"
+                            Text="[Keep window always on top]" />
                         <ui:IgMenuItem LangKey="FrmMain_MnuChangeBackgroundColor" Text="[Change background color...]" />
                     </MenuFlyoutSubItem>
 

@@ -93,6 +93,7 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuToggleToolbar,        API.IG_ToggleToolbar,       VKey.T),
         new(LangId.FrmMain_MnuToggleGallery,        API.IG_ToggleGallery,       VKey.G),
         new(LangId.FrmMain_MnuToggleCheckerboard,   API.IG_ToggleCheckerboard,  VKey.B),
+        new(LangId.FrmMain_MnuToggleTopMost,        API.IG_ToggleWindowTopMost),
 
 
         new(LangId.FrmMain_MnuExit,             API.IG_Exit,                [new(VKey.Escape), new(MKeys.Ctrl, VKey.W)]),

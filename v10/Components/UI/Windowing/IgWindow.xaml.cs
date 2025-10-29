@@ -324,6 +324,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         UpdateWindowColorMode();
         UpdateWindowIcon();
         UpdateWindowBackdrop();
+        UpdateWindowTopMost();
 
         OnIgLanguageChanged();
         OnIgWindowLoaded((FrameworkElement)sender);
@@ -331,6 +332,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
         AP.ThemeChanged += AP_ThemeChanged;
         AP.LanguageChanged += AP_LanguageChanged;
+        AP.Config.PropertyChanged += Config_PropertyChanged;
 
         Closed += IgWindow_Closed;
         VisibilityChanged += IgWindow_VisibilityChanged;
@@ -339,7 +341,6 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
         AppWindow.Closing += AppWindow_Closing;
     }
-
 
     private void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs e)
     {
@@ -356,6 +357,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
         AP.ThemeChanged -= AP_ThemeChanged;
         AP.LanguageChanged -= AP_LanguageChanged;
+        AP.Config.PropertyChanged -= Config_PropertyChanged;
         AppWindow.Closing -= AppWindow_Closing;
 
         PART_WindowContent.Loaded -= PART_WindowContent_Loaded;
@@ -425,6 +427,16 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     private void AP_LanguageChanged(object? sender, EventArgs e)
     {
         OnIgLanguageChanged();
+    }
+
+
+    private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // EnableWindowTopMost
+        if (nameof(Config.EnableWindowTopMost).Equals(e.PropertyName, StringComparison.Ordinal))
+        {
+            UpdateWindowTopMost();
+        }
     }
 
 
@@ -721,6 +733,14 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         SystemBackdrop = backdrop;
     }
 
+
+    /// <summary>
+    /// Updates window top most according to user config.
+    /// </summary>
+    protected void UpdateWindowTopMost()
+    {
+        Presenter.IsAlwaysOnTop = AP.Config.EnableWindowTopMost;
+    }
 
     #endregion // Internal Methods
 

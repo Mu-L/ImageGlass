@@ -199,10 +199,21 @@ public partial class Config : IgReactive
     ///// </summary>
     //public bool EnableMultiInstances { get; set; } = true;
 
-    ///// <summary>
-    ///// Gets, sets value indicating that FrmMain is always on top or not.
-    ///// </summary>
-    //public bool EnableWindowTopMost { get; set; } = false;
+    /// <summary>
+    /// Gets, sets value indicating that FrmMain is always on top or not.
+    /// </summary>
+    public bool EnableWindowTopMost
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = false;
 
     ///// <summary>
     ///// Gets, sets value indicates that Confirmation dialog is displayed when deleting image

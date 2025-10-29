@@ -83,6 +83,7 @@ public enum API
     IG_ToggleToolbar,
     IG_ToggleGallery,
     IG_ToggleCheckerboard,
+    IG_ToggleWindowTopMost,
 
     // Menu > Tools
 

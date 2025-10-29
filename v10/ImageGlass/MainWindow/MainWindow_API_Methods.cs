@@ -939,6 +939,32 @@ public partial class MainWindow
         Viewer.CheckerboardMode = AP.Config.CheckerboardMode = wantedMode;
     }
 
+
+    /// <summary>
+    /// Toggles window top most.
+    /// </summary>
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public void IG_ToggleWindowTopMost(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleWindowTopMost(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggles window top most.
+    /// </summary>
+    public void IG_ToggleWindowTopMost(bool? enabled = null)
+    {
+        enabled ??= !AP.Config.EnableWindowTopMost;
+        AP.Config.EnableWindowTopMost = enabled.Value;
+
+        _ = _contentEl.ShowMessageAsync(AP.Config.Lang[enabled.Value
+            ? LangId.FrmMain_MnuToggleTopMost_Enable
+            : LangId.FrmMain_MnuToggleTopMost_Disable]);
+    }
+
+
     #endregion // Layout APIs
 
 
