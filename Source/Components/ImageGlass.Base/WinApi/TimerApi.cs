@@ -22,9 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * THANKS [Meowski] FOR THIS CONTRIBUTION
 *******************************************/
 
-using System.Runtime.InteropServices;
 using Windows.Win32;
-using Windows.Win32.Media;
 
 namespace ImageGlass.Base.WinApi;
 
@@ -45,8 +43,7 @@ public static class TimerApi
 
     static TimerApi()
     {
-        var tc = new TIMECAPS();
-        PInvoke.timeGetDevCaps(out tc, (uint)Marshal.SizeOf(tc));
+        PInvoke.timeGetDevCaps(out var tc);
 
         _minPeriod = tc.wPeriodMin;
         _maxPeriod = tc.wPeriodMax;
