@@ -237,14 +237,20 @@ public partial class BHelper
         var path = inputPath;
         const string protocol = Const.APP_PROTOCOL + ":";
 
-        // If inputPath is URI Scheme
+        // if inputPath is URI Scheme
         if (path.StartsWith(protocol))
         {
             // Retrieve the real path
             path = Uri.UnescapeDataString(path).Remove(0, protocol.Length);
         }
 
-        // Parse environment vars to absolute path
+        // if path is wrapped by quotes
+        if (path.Length > 2 && path.StartsWith('"') && path.EndsWith('"'))
+        {
+            path = path.Substring(1, path.Length - 2);
+        }
+
+        // parse environment vars to absolute path
         path = Environment.ExpandEnvironmentVariables(path);
 
         if (string.Equals(Path.GetExtension(inputPath), ".lnk", StringComparison.OrdinalIgnoreCase))
