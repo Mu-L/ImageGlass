@@ -367,11 +367,10 @@ public sealed partial class MainWindow_Content : IgControl
         // 3.2 normal state
         else
         {
-            PART_ContentRoot.Margin = new(
-                frameSize,
-                Math.Clamp(frameSize, 1, frameSize - 4),
-                frameSize,
-                frameSize);
+            var titleBarHeight = _owner.TitleBar.DesiredSize.Height;
+            var frameTop = Math.Max(0, frameSize - titleBarHeight);
+
+            PART_ContentRoot.Margin = new(frameSize, frameTop, frameSize, frameSize);
             PART_ContentRoot.BorderThickness = new(1);
 
 
