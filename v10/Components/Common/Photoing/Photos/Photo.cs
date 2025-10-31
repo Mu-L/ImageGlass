@@ -180,6 +180,22 @@ public partial class Photo : DisposableImpl
     public string HashKey => BHelper.CreateUniqueFileKey(FilePath, new Vector2(Width, Height));
 
 
+    /// <summary>
+    /// Gets, sets the thumbnail of photo.
+    /// </summary>
+    public SoftwareBitmap? ThumbnailBitmap
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                field?.Dispose();
+                field = value;
+                _ = OnPropertyChanged();
+            }
+        }
+    }
+
 
     /// <summary>
     /// Gets, sets the image source for gallery thumbnail.
@@ -280,6 +296,7 @@ public partial class Photo : DisposableImpl
 
             _metadata?.Dispose();
             _metadata = null;
+            ThumbnailBitmap = null;
 
             _cancelPhotoLoading?.Dispose();
             _cancelPhotoLoading = null;

@@ -155,7 +155,7 @@ public partial class ModalWindow : DialogWindow
             thumbnailIcon = null;
         }
 
-        using var vm = new ModalWindowViewModel()
+        var vm = new ModalWindowViewModel()
         {
             Description = description,
             Heading = heading,
@@ -220,7 +220,7 @@ public partial class ModalWindow : DialogWindow
         SoftwareBitmap? thumbnail = null,
         TextBoxAcceptValue acceptValue = TextBoxAcceptValue.Any)
     {
-        using var vm = new ModalWindowViewModel()
+        var vm = new ModalWindowViewModel()
         {
             Description = description,
             Heading = heading,
@@ -232,7 +232,6 @@ public partial class ModalWindow : DialogWindow
         };
 
         return await ShowAsync(owner, title, buttons, vm, DialogFocus.Default);
-
     }
 
 

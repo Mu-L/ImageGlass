@@ -104,7 +104,8 @@ public sealed partial class GalleryControl : IgControl
         if (e.Element is not IgGalleryItem item) return;
 
         // start loading thumbnail
-        _ = item.VM.StartLoadingGalleryThumbnail(AP.Config.ThumbnailSize, _progressThumbnailLoader);
+        var thumbSize = AP.Config.ThumbnailSize * DpiScale;
+        _ = item.VM.StartLoadingGalleryThumbnail(thumbSize, _progressThumbnailLoader);
     }
 
 
@@ -112,12 +113,15 @@ public sealed partial class GalleryControl : IgControl
     {
         if (e.Bitmap == null)
         {
+            e.Sender.ThumbnailBitmap = null;
             e.Sender.GalleryThumbnail = null;
             return;
         }
 
         try
         {
+            e.Sender.ThumbnailBitmap = e.Bitmap;
+
             // load bitmap source to the UI
             var bmpSource = new SoftwareBitmapSource();
             await bmpSource.SetBitmapAsync(e.Bitmap);
@@ -126,6 +130,7 @@ public sealed partial class GalleryControl : IgControl
         }
         catch
         {
+            e.Sender.ThumbnailBitmap = null;
             e.Sender.GalleryThumbnail = null;
         }
     }

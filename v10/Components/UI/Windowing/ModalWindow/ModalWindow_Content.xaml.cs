@@ -121,8 +121,7 @@ internal sealed partial class ModalWindow_Content : IgControl
         if (PART_Thumbnail.Source is not null) return;
 
         // get the max size after DPI
-        var dpiScale = XamlRoot.RasterizationScale;
-        var maxSize = THUMBNAIL_SIZE * dpiScale;
+        var maxSize = THUMBNAIL_SIZE * DpiScale;
 
         var imgWidth = VM.Thumbnail.PixelWidth;
         var imgHeight = VM.Thumbnail.PixelHeight;
@@ -131,8 +130,8 @@ internal sealed partial class ModalWindow_Content : IgControl
         if (imgWidth < maxSize || imgHeight < maxSize)
         {
             // render as original size
-            PART_Thumbnail.Width = imgWidth / dpiScale;
-            PART_Thumbnail.Height = imgHeight / dpiScale;
+            PART_Thumbnail.Width = imgWidth / DpiScale;
+            PART_Thumbnail.Height = imgHeight / DpiScale;
 
             PART_ThumbnailViewbox.Stretch = Stretch.None;
         }
@@ -154,10 +153,8 @@ internal sealed partial class ModalWindow_Content : IgControl
     {
         if (PART_ThumbnailIcon.Source is not null) return;
 
-
         // get system icon
-        var dpiScale = XamlRoot.RasterizationScale;
-        using var sb = await IconApi.GetSystemIconAsync(VM.ThumbnailIcon, (int)(40 * dpiScale));
+        using var sb = await IconApi.GetSystemIconAsync(VM.ThumbnailIcon, (int)(40 * DpiScale));
         if (sb is null) return;
 
         // create software bitmap source

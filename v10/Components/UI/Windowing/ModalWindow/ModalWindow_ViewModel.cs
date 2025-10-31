@@ -24,7 +24,7 @@ using Windows.Graphics.Imaging;
 namespace ImageGlass.UI;
 
 
-public partial class ModalWindowViewModel : DisposableImpl
+public partial class ModalWindowViewModel : IgReactive
 {
     public string? Heading
     {
@@ -163,15 +163,6 @@ public partial class ModalWindowViewModel : DisposableImpl
         }
     } = TextBoxAcceptValue.Any;
 
-
-
-    protected override void OnDisposing()
-    {
-        base.OnDisposing();
-
-        Thumbnail?.Dispose();
-        Thumbnail = null;
-    }
 
 }
 

@@ -151,6 +151,12 @@ public partial class IgControl : ContentControl, INotifyPropertyChanged
     } = true;
 
 
+    /// <summary>
+    /// Gets DPI scaling.
+    /// </summary>
+    public double DpiScale => this.XamlRoot.RasterizationScale;
+
+
     public IgControl()
     {
         DefaultStyleKey = typeof(IgControl);

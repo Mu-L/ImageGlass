@@ -573,7 +573,7 @@ public partial class MainWindow
             """,
             heading: null,
             inputValue: newName,
-            thumbnail: null,
+            thumbnail: AP.Photos.Current?.ThumbnailBitmap,
             thumbnailIcon: StockIconId.Rename,
             acceptValue: TextBoxAcceptValue.FileNameValueOnly);
 
