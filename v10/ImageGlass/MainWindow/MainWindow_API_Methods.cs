@@ -568,6 +568,7 @@ public partial class MainWindow
             title,
             description: $"""
             {oldFilePath}
+            
             {AP.Config.Lang[LangId.FrmMain_MnuRename_Description]}
             """,
             heading: null,

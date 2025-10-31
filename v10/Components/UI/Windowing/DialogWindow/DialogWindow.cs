@@ -434,9 +434,6 @@ public partial class DialogWindow : IgWindow
                 _owner.AppWindow.Size.Height);
         }
 
-        // get title bar height
-        var titlebarHeight = (int)TitleBar.DesiredSize.Height - 1;
-
         // set dialog position to center the owner
         var posX = parentBounds.X + parentBounds.Width / 2 - clientWidth / 2;
         var posY = parentBounds.Y + parentBounds.Height / 2 - clientHeight / 2;
@@ -464,7 +461,7 @@ public partial class DialogWindow : IgWindow
 
 
         // update the size of dialog window
-        AppWindow.ResizeClient(new(clientWidth, clientHeight - titlebarHeight));
+        AppWindow.ResizeClient(new(clientWidth, clientHeight));
 
         // update position of dialog window
         AppWindow.Move(new((int)posX, (int)posY));
