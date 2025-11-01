@@ -317,22 +317,41 @@ public static partial class PhotoWIC
 
 
     /// <summary>
-    /// Converts a byte array to <see cref="IWICBitmapDecoder"/> object.
+    /// Creates WIC Decoder from file path.
     /// </summary>
     /// <exception cref="Exception"></exception>
-    public static IWICBitmapDecoder? ConvertFromBytesToDecoder(byte[] bytes)
+    public static IWICBitmapDecoder? CreateDecoder(string filePath)
     {
-        var ms = new MemoryStream(bytes) { Position = 0 };
+        using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
-        return ConvertFromStreamToDecoder(ms);
+        // copy to memory stream to release file access
+        var ms = new MemoryStream();
+        fs.CopyTo(ms);
+        ms.Position = 0;
+
+        var decoder = CreateDecoder(ms);
+
+        return decoder;
     }
 
 
     /// <summary>
-    /// Converts a stream to <see cref="IWICBitmapDecoder"/> object.
+    /// Creates WIC Decoder from byte array.
     /// </summary>
     /// <exception cref="Exception"></exception>
-    public static IWICBitmapDecoder? ConvertFromStreamToDecoder(Stream stream)
+    public static IWICBitmapDecoder? CreateDecoder(byte[] bytes)
+    {
+        var ms = new MemoryStream(bytes) { Position = 0 };
+
+        return CreateDecoder(ms);
+    }
+
+
+    /// <summary>
+    /// Creates WIC Decoder from stream.
+    /// </summary>
+    /// <exception cref="Exception"></exception>
+    public static IWICBitmapDecoder? CreateDecoder(Stream stream)
     {
         using var wicFactory = new IWICImagingFactory2();
         var decoder = wicFactory.CreateDecoderFromStream(stream);

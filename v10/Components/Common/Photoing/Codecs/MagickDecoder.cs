@@ -589,7 +589,7 @@ public static partial class MagickDecoder
             case MagickFormat.Tiff:
             case MagickFormat.Ico:
             case MagickFormat.Icon:
-                bmpSrc = PhotoWIC.ConvertFromBytesToDecoder(ByteData);
+                bmpSrc = PhotoWIC.CreateDecoder(ByteData);
                 break;
 
             // 4.2 use Magick for the rest

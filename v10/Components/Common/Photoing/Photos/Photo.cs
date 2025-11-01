@@ -337,10 +337,11 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task LoadWithWICAsync(PhotoMetadata meta, CancellationToken token)
     {
-        _bitmap = await Task.Run<IDisposable>(() =>
+        _bitmap = await Task.Run<IDisposable?>(() =>
         {
-            using var wicFactory = new IWICImagingFactory2();
-            var decoder = wicFactory.CreateDecoderFromFileName(meta.FilePath);
+            var decoder = PhotoWIC.CreateDecoder(meta.FilePath);
+            if (decoder.IsDisposed()) return null;
+
 
             // 1. read animated formats
             if (meta.CanAnimate)
@@ -422,7 +423,7 @@ public partial class Photo : DisposableImpl
             else
             {
                 var bytes = data.MultiFrames.ToByteArray(MagickFormat.Tiff);
-                _bitmap = PhotoWIC.ConvertFromBytesToDecoder(bytes);
+                _bitmap = PhotoWIC.CreateDecoder(bytes);
             }
         }
 
