@@ -37,6 +37,30 @@ public static class IWICBitmapSource_Exts
 
 
     /// <summary>
+    /// Applies bitmap transformation.
+    /// </summary>
+    public static void ApplyTransform(this IWICBitmapSource? srcBmp, BitmapTransformOptions transform)
+    {
+        if (srcBmp.IsDisposed()) return;
+
+        try
+        {
+            // transform the bitmap
+            using var fac = new IWICImagingFactory2();
+            using var transformedBmp = fac.CreateBitmapFlipRotator();
+            transformedBmp.Initialize(srcBmp, transform);
+
+            // dispose the old bitmap
+            srcBmp.Dispose();
+
+            // save the new bitmap to the old one
+            srcBmp.NativePointer = transformedBmp.NativePointer;
+        }
+        catch { }
+    }
+
+
+    /// <summary>
     /// Gets pixel info of the current bitmap.
     /// </summary>
     public static PhotoPixelInfo? GetPixelInfo(this IWICBitmapSource? wicBmp)
@@ -158,8 +182,6 @@ public static class IWICBitmapSource_Exts
             srcBmp.NativePointer = newBmp.NativePointer;
         }
         catch { }
-
-        return;
     }
 
 

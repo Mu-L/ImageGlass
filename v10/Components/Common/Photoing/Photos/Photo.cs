@@ -330,59 +330,15 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task LoadWithWICAsync(PhotoMetadata meta, CancellationToken token)
     {
-        Bitmap = await Task.Run<IDisposable?>(() =>
-        {
-            var decoder = PhotoWIC.CreateDecoder(meta.FilePath);
-            if (decoder.IsDisposed()) return null;
+        var result = await WicDecoder.LoadAsync(meta, token);
 
+        _width = (uint)result.Size.Width;
+        _height = (uint)result.Size.Height;
 
-            // 1. read animated formats
-            if (meta.CanAnimate)
-            {
-                _width = meta.Width;
-                _height = meta.Height;
-
-                // .GIF
-                if (meta.IsOneOfExtensions(".GIF", ".GIFV"))
-                {
-                    return new GifAnimator(decoder, meta);
-                }
-                // .WEBP
-                else if (meta.IsOneOfExtensions(".WEBP"))
-                {
-                    return new WebpAnimator(decoder, meta);
-                }
-                // use default WIC animator
-                else
-                {
-                    return new WicAnimator(decoder, meta);
-                }
-            }
-
-            // 2. read non-animated multi-frame formats
-            if (meta.FrameCount > 1)
-            {
-                _width = meta.Width;
-                _height = meta.Height;
-
-                return decoder;
-            }
-
-
-            // 3. read single-frame formats
-            using var frameBmp = decoder.GetFrame(meta.FrameIndex);
-
-            using var fac = new IWICImagingFactory2();
-            var wicBmp = fac.CreateBitmapFromSource(frameBmp, BitmapCreateCacheOption.CacheOnLoad);
-
-            _width = (uint)frameBmp.Size.Width;
-            _height = (uint)frameBmp.Size.Height;
-
-            decoder.Dispose();
-            decoder = null;
-
-            return wicBmp;
-        }, token).ConfigureAwait(false);
+        if (result.Animator is not null) Bitmap = result.Animator;
+        else if (!result.MultiFrames.IsDisposed()) Bitmap = result.MultiFrames;
+        else if (!result.SingleFrame.IsDisposed()) Bitmap = result.SingleFrame;
+        else Bitmap = null;
     }
 
 
