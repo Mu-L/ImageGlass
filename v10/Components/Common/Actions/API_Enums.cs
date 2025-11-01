@@ -22,17 +22,18 @@ namespace ImageGlass;
 public enum API
 {
     IG_OpenMainMenu,
+    IG_OpenFolder,
+    IG_OpenPath,
     IG_ViewByStep,
     IG_ViewByIndex,
 
 
     // Menu > File
     IG_OpenFile,
-    IG_OpenFolder,
-    IG_OpenPath,
     IG_NewWindow,
     IG_Save,
     IG_SaveAs,
+    IG_OpenWith,
     IG_Refresh,
     IG_Reload,
     IG_ReloadList,

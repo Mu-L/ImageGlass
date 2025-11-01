@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Common;
 
@@ -189,6 +190,50 @@ public static class AP
         AP.ClipboardImage?.Dispose();
         AP.ClipboardImage = null;
         AP.TempImagePath = null;
+    }
+
+
+    /// <summary>
+    /// Quickly save the viewing photo as a temporary file.
+    /// </summary>
+    public static async Task<string?> SavePhotoAsTempFileAsync(string ext = ".png")
+    {
+        // 1. check if we can use the current clipboard image path
+        if (File.Exists(AP.TempImagePath))
+        {
+            var extension = Path.GetExtension(AP.TempImagePath);
+
+            if (extension.Equals(ext, StringComparison.OrdinalIgnoreCase))
+            {
+                return AP.TempImagePath;
+            }
+        }
+
+
+        // 2. create temp file path
+        var tempDir = BHelper.ConfigDir(Dir.Temporary);
+        Directory.CreateDirectory(tempDir);
+        var tempFilePath = Path.Combine(tempDir, $"ig_temp_{DateTime.UtcNow:yyyy-MM-dd-hh-mm-ss}{ext}");
+
+
+        // 3. save the photo to file
+        var photo = AP.ClipboardImage ?? AP.Photos.Current;
+        if (photo is not null)
+        {
+            try
+            {
+                //TODO: save photo as file
+                //await PhotoCodec.SaveAsync(img.ImgData.Image, tempFilePath, Local.ImageTransform);
+
+                AP.TempImagePath = tempFilePath;
+            }
+            catch
+            {
+                AP.TempImagePath = null;
+            }
+        }
+
+        return AP.TempImagePath;
     }
 
 

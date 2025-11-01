@@ -23,6 +23,7 @@ using ImageGlass.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.Storage.Pickers;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -136,6 +137,55 @@ public partial class MainWindow
 
 
     /// <summary>
+    /// Shows Open With window.
+    /// </summary>
+    public async Task IG_OpenWithAsync()
+    {
+        string? filePath = null;
+        var isClipboardPhoto = AP.ClipboardImage is not null;
+
+
+        if (isClipboardPhoto)
+        {
+            _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId._CreatingFile], delayMs: 500);
+
+            // save clipboard photo as temp PNG file
+            filePath = await AP.SavePhotoAsTempFileAsync(".png");
+        }
+        else
+        {
+            filePath = AP.Photos.CurrentFilePath;
+        }
+
+
+        await _contentEl.ShowMessageAsync(null);
+        if (!File.Exists(filePath))
+        {
+            _ = await ModalWindow.ShowErrorAsync(this,
+                AP.Config.Lang[LangId.FrmMain_MnuOpenWith],
+                AP.Config.Lang[LangId._CreatingFileError]);
+        }
+        else
+        {
+            using var p = new Process();
+            p.StartInfo.FileName = "openwith";
+
+            // Build the arguments
+            p.StartInfo.Arguments = $"\"{filePath}\"";
+
+            // show error dialog
+            p.StartInfo.ErrorDialog = true;
+
+            try
+            {
+                p.Start();
+            }
+            catch { }
+        }
+    }
+
+
+    /// <summary>
     /// Refreshes image viewport.
     /// </summary>
     public void IG_Refresh()
@@ -192,7 +242,6 @@ public partial class MainWindow
             // cancel loading the current image
             AP.Photos.Current?.CancelLoading();
 
-            await _contentEl.ShowMessageAsync(null);
             await ViewPhotoAsync(null, false);
             AP.Photos.Current?.Unload();
         }
