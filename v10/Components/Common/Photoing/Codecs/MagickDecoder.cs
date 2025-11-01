@@ -19,13 +19,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageMagick;
 using ImageMagick.Formats;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Foundation;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -645,10 +648,111 @@ public static partial class MagickDecoder
     }
 
 
+    /// <summary>
+    /// Checks if the format can be written.
+    /// </summary>
+    public static bool CanWrite(string destFilePath)
+    {
+        return MagickFormatInfo.Create(destFilePath)?.SupportsWriting ?? false;
+    }
 
 
+    /// <summary>
+    /// Save the photo to file.
+    /// </summary>
+    /// <param name="meta">Source metadata</param>
+    /// <param name="destFilePath">Destination filename</param>
+    /// <param name="options">Options for reading image file</param>
+    /// <param name="transform">Changes for writing image file</param>
+    /// <param name="quality">Quality</param>
+    /// <exception cref="InvalidDataException"></exception>
+    public static async Task SaveAsync(PhotoMetadata meta, string destFilePath, PhotoReadOptions options, ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
+    {
+        var ext = Path.GetExtension(destFilePath);
+
+        try
+        {
+            // 1. check if format is supported
+            if (!CanWrite(destFilePath))
+            {
+                throw new InvalidDataException("IGE_001: Unsupported image format.");
+            }
 
 
+            // 2. read the photo
+            var settings = ParseSettings(options, true, meta.FilePath);
+            using var result = await DecodeImageAsync(meta, options with
+            {
+                // Magick.NET auto-corrects the rotation when saving,
+                // so we don't need to correct it manually.
+                CorrectRotation = false,
+            }, settings, transform, token);
+
+
+            // 3. save the photo to file
+            if (result.MultiFrames is not null)
+            {
+                await result.MultiFrames.WriteAsync(destFilePath, token);
+            }
+            else if (result.SingleFrame is not null)
+            {
+                result.SingleFrame.Quality = quality;
+
+                // resize ICO file if it's larger than 256
+                if (ext.Equals(".ICO", StringComparison.OrdinalIgnoreCase))
+                {
+                    var imgW = result.SingleFrame.Width;
+                    var imgH = result.SingleFrame.Height;
+                    const int MAX_ICON_SIZE = 256;
+
+                    if (imgW > MAX_ICON_SIZE || imgH > MAX_ICON_SIZE)
+                    {
+                        var iconSize = GetMaxImageRenderSize_(imgW, imgH, MAX_ICON_SIZE);
+                        result.SingleFrame.Scale((uint)iconSize.Width, (uint)iconSize.Height);
+                    }
+                }
+
+                await result.SingleFrame.WriteAsync(destFilePath, token);
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+
+    /// <summary>
+    /// Exports image frames to files, using Magick.NET
+    /// </summary>
+    /// <param name="srcFilePath">The full path of source file</param>
+    /// <param name="destFolder">The destination folder to save to</param>
+    public static async IAsyncEnumerable<(int FrameNumber, string FileName)> SaveFramesAsync(string srcFilePath, string destFolder, [EnumeratorCancellation] CancellationToken token = default)
+    {
+        // create dirs unless it does not exist
+        Directory.CreateDirectory(destFolder);
+
+        using var imgColl = new MagickImageCollection(srcFilePath);
+        var index = 0;
+
+        foreach (var imgM in imgColl)
+        {
+            index++;
+            imgM.Quality = 100;
+            var newFilename = string.Empty;
+
+            try
+            {
+                newFilename = Path.GetFileNameWithoutExtension(srcFilePath)
+                    + " - " + index.ToString($"D{imgColl.Count.ToString().Length}")
+                    + ".png";
+                var destFilePath = Path.Combine(destFolder, newFilename);
+
+                await imgM.WriteAsync(destFilePath, MagickFormat.Png, token);
+            }
+            catch (OperationCanceledException) { break; }
+            catch { }
+
+            yield return (index, newFilename);
+        }
+    }
 
 
 
@@ -806,7 +910,7 @@ public static partial class MagickDecoder
 
 
     /// <summary>
-    /// Applies changes from <see cref="ImgTransform"/>.
+    /// Applies changes from <paramref name="transform"/>.
     /// </summary>
     private static void TransformImage_(IMagickImage imgM, ImgTransform? transform = null)
     {
@@ -833,6 +937,32 @@ public static partial class MagickDecoder
         {
             imgM.Negate(Channels.RGB);
         }
+    }
+
+
+    /// <summary>
+    /// Gets maximum image dimention.
+    /// </summary>
+    private static Size GetMaxImageRenderSize_(uint srcWidth, uint srcHeight, uint maxSize = Const.MAX_IMAGE_DIMENSION)
+    {
+        var widthScale = 1f;
+        var heightScale = 1f;
+
+        if (srcWidth > maxSize)
+        {
+            widthScale = 1f * maxSize / srcWidth;
+        }
+
+        if (srcHeight > maxSize)
+        {
+            heightScale = 1f * maxSize / srcHeight;
+        }
+
+        var scale = Math.Min(widthScale, heightScale);
+        var newW = srcWidth * scale;
+        var newH = srcHeight * scale;
+
+        return new Size(newW, newH);
     }
 
 
