@@ -232,6 +232,7 @@ public static class IWICBitmapSource_Exts
         // get raw pixels
         var buffer = await srcBmp.GetPixelsAsync();
         if (buffer is null) return null;
+        var buffSpan = buffer.AsSpan();
 
 
         var texDesc = new Texture2DDescription
@@ -250,7 +251,9 @@ public static class IWICBitmapSource_Exts
 
         // upload pixel buffer to GPU
         using var texture = d3Device.CreateTexture2D(texDesc);
-        d3Device.ImmediateContext.UpdateSubresource(buffer, texture, 0, info.Stride, 0);
+        d3Device.ImmediateContext.UpdateSubresource(buffSpan, texture, 0, info.Stride, 0);
+        buffSpan.Clear();
+        buffer = null;
 
         // get bitmap from GPU
         using var dxgiSurface = texture.QueryInterface<Vortice.DXGI.IDXGISurface>();

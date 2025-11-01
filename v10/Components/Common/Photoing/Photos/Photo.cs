@@ -370,7 +370,10 @@ public partial class Photo : DisposableImpl
 
 
             // 3. read single-frame formats
-            var frameBmp = decoder.GetFrame(meta.FrameIndex);
+            using var frameBmp = decoder.GetFrame(meta.FrameIndex);
+
+            using var fac = new IWICImagingFactory2();
+            var wicBmp = fac.CreateBitmapFromSource(frameBmp, BitmapCreateCacheOption.CacheOnLoad);
 
             _width = (uint)frameBmp.Size.Width;
             _height = (uint)frameBmp.Size.Height;
@@ -378,7 +381,7 @@ public partial class Photo : DisposableImpl
             decoder.Dispose();
             decoder = null;
 
-            return frameBmp;
+            return wicBmp;
         }, token).ConfigureAwait(false);
     }
 
