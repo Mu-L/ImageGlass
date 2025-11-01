@@ -850,9 +850,6 @@ public partial class VirtualViewerControl : SwapChainCanvas
                     // create GPU bitmap
                     bitmap = await e.Photo.GetD2BitmapAsync(_d3dDevice!, D2dContext);
                     hasSource = bitmap != null;
-
-                    // release CPU bitmap
-                    e.Photo.UnloadBitmap();
                 }
             }
 
