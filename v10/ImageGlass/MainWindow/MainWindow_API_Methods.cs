@@ -163,6 +163,45 @@ public partial class MainWindow
             AP.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
     }
 
+
+    /// <summary>
+    /// Unloads the current photo.
+    /// </summary>
+    public async Task IG_UnloadAsync()
+    {
+        var args = new PhotoUnloadedEventArgs()
+        {
+            IsClipboardPhoto = AP.ClipboardImage is not null,
+            Index = AP.Photos.CurrentIndex,
+            FilePath = AP.Photos.CurrentFilePath,
+        };
+
+
+        // 1. unload clipboard photo
+        if (args.IsClipboardPhoto)
+        {
+            await LoadClipboardPhotoAsync(null);
+
+            // show the current photo in the list
+            await ViewPhotoAsync(AP.Photos.Current);
+        }
+
+        // 2. unload photo from the list
+        else
+        {
+            // cancel loading the current image
+            AP.Photos.Current?.CancelLoading();
+
+            await _contentEl.ShowMessageAsync(null);
+            await ViewPhotoAsync(null, false);
+            AP.Photos.Current?.Unload();
+        }
+
+        // raise unloaded event
+        AP.OnPhotoUnloaded(args);
+    }
+
+
     #endregion // File APIs
 
 

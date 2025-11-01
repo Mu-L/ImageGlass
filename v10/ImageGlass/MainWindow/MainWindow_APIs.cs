@@ -39,6 +39,7 @@ public partial class MainWindow
         { API.IG_Refresh,               IgCommands.Create(IG_Refresh) },
         { API.IG_Reload,                IgCommands.Create(IG_Reload) },
         { API.IG_ReloadList,            IgCommands.Create(IG_ReloadList) },
+        { API.IG_Unload,                IgCommands.Create(IG_UnloadAsync) },              
 
 
         // Navigation

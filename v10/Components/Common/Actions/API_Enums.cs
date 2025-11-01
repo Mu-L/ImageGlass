@@ -36,6 +36,7 @@ public enum API
     IG_Refresh,
     IG_Reload,
     IG_ReloadList,
+    IG_Unload,
 
     // Menu > Navigation
     IG_ViewNext,

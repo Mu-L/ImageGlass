@@ -30,6 +30,7 @@ public static class AP
 {
     public static event EventHandler<ThemePackChangedEventArgs>? ThemeChanged;
     public static event EventHandler? LanguageChanged;
+    public static EventHandler<PhotoUnloadedEventArgs>? PhotoUnloaded;
 
     private static ExplorerView? _foregroundShell;
     private static string _foregroundShellPath = "";
@@ -192,20 +193,29 @@ public static class AP
 
 
     /// <summary>
-    /// Triggers event <see cref="ThemeChanged"/>.
+    /// Raises <see cref="ThemeChanged"/> event.
     /// </summary>
-    public static void RaiseThemeChangedEvent(string propName = "")
+    public static void OnThemeChanged(string propName = "")
     {
         ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
     }
 
 
     /// <summary>
-    /// Triggers event <see cref="ThemeChanged"/>.
+    /// Raises <see cref="ThemeChanged"/> event.
     /// </summary>
-    public static void RaiseLanguageChangedEvent()
+    public static void OnLanguageChanged()
     {
         LanguageChanged?.Invoke(null, new());
+    }
+
+
+    /// <summary>
+    /// Raises <see cref="PhotoUnloadedEventArgs"/> event.
+    /// </summary>
+    public static void OnPhotoUnloaded(PhotoUnloadedEventArgs e)
+    {
+        PhotoUnloaded?.Invoke(null, e);
     }
 
     #endregion // Public Methods
@@ -223,3 +233,10 @@ public class ThemePackChangedEventArgs(string propName = "") : EventArgs
     public string PropertyName => propName;
 }
 
+
+public class PhotoUnloadedEventArgs : EventArgs
+{
+    public bool IsClipboardPhoto { get; set; } = false;
+    public int Index { get; set; } = -1;
+    public string FilePath { get; set; } = string.Empty;
+}
