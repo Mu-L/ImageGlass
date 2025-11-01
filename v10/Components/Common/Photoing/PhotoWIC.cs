@@ -272,6 +272,7 @@ public static partial class PhotoWIC
         {
             Marshal.Copy(buffer, 0, bmpLock.Data.DataPointer, buffer.Length);
             Array.Clear(buffer);
+            buffer = null;
         }
 
         return wicBitmap;

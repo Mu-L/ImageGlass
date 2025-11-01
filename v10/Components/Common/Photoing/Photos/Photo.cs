@@ -37,7 +37,6 @@ namespace ImageGlass.Common.Photoing;
 public partial class Photo : DisposableImpl
 {
     // private properties
-    private IDisposable? _bitmap;
     private PhotoMetadata? _metadata;
     private uint _width = 0;
     private uint _height = 0;
@@ -60,7 +59,7 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Gets the native bitmap.
     /// </summary>
-    public IDisposable? Bitmap => _bitmap;
+    public IDisposable? Bitmap { get; private set; } = null;
 
     /// <summary>
     /// Gets the size of the photo.
@@ -175,12 +174,6 @@ public partial class Photo : DisposableImpl
     public CancellationToken? CancelToken => _cancelPhotoLoading?.Token;
 
     /// <summary>
-    /// Gets the hash key of the image.
-    /// </summary>
-    public string HashKey => BHelper.CreateUniqueFileKey(FilePath, new Vector2(Width, Height));
-
-
-    /// <summary>
     /// Gets, sets the thumbnail of photo.
     /// </summary>
     public SoftwareBitmap? ThumbnailBitmap
@@ -250,7 +243,7 @@ public partial class Photo : DisposableImpl
         _metadata?.Dispose();
         _metadata = meta ?? new();
 
-        _bitmap = bmp;
+        Bitmap = bmp;
         _width = (uint)_metadata.Width;
         _height = (uint)_metadata.Height;
 
@@ -279,7 +272,7 @@ public partial class Photo : DisposableImpl
     /// Handles the disposal of resources when an object is being disposed.
     /// </summary>
     /// <param name="disposeEverything">
-    /// Option to dispose everything or only the <see cref="Bitmap"/> object.
+    /// Option to dispose everything or only the Bitmap object.
     /// </param>
     private async Task OnDisposing(bool disposeEverything)
     {
@@ -337,7 +330,7 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task LoadWithWICAsync(PhotoMetadata meta, CancellationToken token)
     {
-        _bitmap = await Task.Run<IDisposable?>(() =>
+        Bitmap = await Task.Run<IDisposable?>(() =>
         {
             var decoder = PhotoWIC.CreateDecoder(meta.FilePath);
             if (decoder.IsDisposed()) return null;
@@ -423,7 +416,7 @@ public partial class Photo : DisposableImpl
             else
             {
                 var bytes = data.MultiFrames.ToByteArray(MagickFormat.Tiff);
-                _bitmap = PhotoWIC.CreateDecoder(bytes);
+                Bitmap = PhotoWIC.CreateDecoder(bytes);
             }
         }
 
@@ -432,7 +425,7 @@ public partial class Photo : DisposableImpl
         {
             var wicBmp = PhotoWIC.ConvertFromMagick(data.SingleFrame);
 
-            _bitmap = wicBmp;
+            Bitmap = wicBmp;
             _width = (uint)(wicBmp?.Size.Width ?? 0);
             _height = (uint)(wicBmp?.Size.Height ?? 0);
         }
@@ -446,8 +439,8 @@ public partial class Photo : DisposableImpl
     #region Public Functions
 
     /// <summary>
-    /// Disposes the <c><see cref="Bitmap"/></c> and resets the relevant data.
-    /// This method keeps the <c><see cref="Metadata"/></c> and neccessary resources.
+    /// Disposes the Bitmap and resets the relevant data.
+    /// This method keeps the Metadata and neccessary resources.
     /// </summary>
     public async void Unload()
     {
@@ -471,8 +464,8 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public void UnloadBitmap()
     {
-        _bitmap?.Dispose();
-        _bitmap = null;
+        Bitmap?.Dispose();
+        Bitmap = null;
     }
 
 
@@ -664,7 +657,7 @@ public partial class Photo : DisposableImpl
         try
         {
             // native bitmap is a single-frame bitmap
-            if (_bitmap is IWICBitmapSource srcBmp)
+            if (Bitmap is IWICBitmapSource srcBmp)
             {
                 if (srcBmp.IsDisposed()) return null;
 
@@ -673,7 +666,7 @@ public partial class Photo : DisposableImpl
             }
 
             // native bitmap is a multi-frame bitmap
-            if (_bitmap is IWICBitmapDecoder decoder)
+            if (Bitmap is IWICBitmapDecoder decoder)
             {
                 if (decoder.IsDisposed()) return null;
 
@@ -691,6 +684,57 @@ public partial class Photo : DisposableImpl
             _ = _taskRefs.TryRemove(taskId, out _);
         }
     }
+
+
+    /// <summary>
+    /// Saves the photo to file.
+    /// </summary>
+    /// <exception cref="Exception"></exception>
+    public async Task SaveAsAsync(string destFilePath, ImgTransform transforms, int quality)
+    {
+        var taskId = Guid.NewGuid();
+        _ = _taskRefs.TryAdd(taskId, true);
+
+
+        try
+        {
+            // 1. save from file to file
+            if (!IsClipboard && File.Exists(FilePath))
+            {
+                await MagickDecoder.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, (uint)quality);
+            }
+
+
+            // 2. save from bitmap to file
+            else
+            {
+                // native bitmap is a single-frame bitmap
+                if (Bitmap is IWICBitmapSource wicBmp)
+                {
+                    wicBmp.SaveAs(destFilePath);
+                }
+
+
+                // native bitmap is a multi-frame bitmap
+                else if (Bitmap is IWICBitmapDecoder decoder)
+                {
+                    // TODO: ?
+                }
+
+
+                // native bitmap is an animator
+                else if (Bitmap is WicAnimator animator)
+                {
+                    // TODO: ?
+                }
+            }
+        }
+        finally
+        {
+            _ = _taskRefs.TryRemove(taskId, out _);
+        }
+    }
+
 
     #endregion // Public Functions
 

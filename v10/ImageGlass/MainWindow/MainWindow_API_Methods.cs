@@ -150,7 +150,7 @@ public partial class MainWindow
             _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId._CreatingFile], delayMs: 500);
 
             // save clipboard photo as temp PNG file
-            filePath = await AP.SavePhotoAsTempFileAsync(".png");
+            filePath = await AP.SavePhotoAsTempFileAsync();
         }
         else
         {

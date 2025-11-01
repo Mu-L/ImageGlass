@@ -98,6 +98,12 @@ public static class AP
 
 
     /// <summary>
+    /// Gets, sets the changes of the current viewing image.
+    /// </summary>
+    public static ImgTransform ImageTransform { get; set; } = new();
+
+
+    /// <summary>
     /// Gets, sets copied filename collection (multi-copy).
     /// </summary>
     public static HashSet<string> StringClipboard { get; set; } = [];
@@ -114,9 +120,6 @@ public static class AP
     /// (clipboard image, temp image for printing, background,...)
     /// </summary>
     public static string? TempImagePath { get; set; }
-
-
-
 
 
     #endregion // Public Properties
@@ -222,8 +225,8 @@ public static class AP
         {
             try
             {
-                //TODO: save photo as file
-                //await PhotoCodec.SaveAsync(img.ImgData.Image, tempFilePath, Local.ImageTransform);
+                // save photo as file
+                await photo.SaveAsAsync(tempFilePath, AP.ImageTransform, 85);
 
                 AP.TempImagePath = tempFilePath;
             }
