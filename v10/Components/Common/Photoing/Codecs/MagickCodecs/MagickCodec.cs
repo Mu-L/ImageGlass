@@ -33,14 +33,14 @@ using Windows.Foundation;
 namespace ImageGlass.Common.Photoing;
 
 
-public static partial class MagickDecoder
+public static partial class MagickCodec
 {
     [GeneratedRegex(@"(^data\:(?<type>image\/[a-z\+\-]*);base64,)?(?<data>[a-zA-Z0-9\+\/\=]+)$", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Compiled, "en-US")]
     private static partial Regex Base64DataUriRegex();
 
 
     /// <summary>
-    /// Indicates whether <see cref="MagickDecoder"/> is initialized or not.
+    /// Indicates whether <see cref="MagickCodec"/> is initialized or not.
     /// </summary>
     public static bool IsInitialized { get; private set; } = false;
 

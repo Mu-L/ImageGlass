@@ -786,7 +786,7 @@ public partial class MainWindow
 
 
             // 3.2 get photo from base64 string 
-            var photo = await MagickDecoder.DecodeBase64Async(text);
+            var photo = await MagickCodec.DecodeBase64Async(text);
             if (photo is not null)
             {
                 await LoadClipboardPhotoAsync(photo);

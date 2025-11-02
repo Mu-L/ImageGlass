@@ -227,7 +227,7 @@ public partial class App : Application
         _ = AP.ColorProfileService.InitializeAsync(_winMain!.AppWindow.Id);
 
         // initialize Magick decoder
-        MagickDecoder.Initialize();
+        MagickCodec.Initialize();
     }
 
 

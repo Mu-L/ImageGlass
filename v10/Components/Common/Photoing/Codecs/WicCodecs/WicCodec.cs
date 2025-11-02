@@ -165,6 +165,7 @@ public static partial class WicCodec
     #endregion // Methods for WIC Components
 
 
+
     /// <summary>
     /// Disposes all static native resources.
     /// </summary>

@@ -670,7 +670,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         var size = (int)DpiScale * 32;
         _ = Task.Run(async () =>
         {
-            var bytes = await MagickDecoder.QuickDecodeAsync(iconPath, MagickFormat.Bgra, size, size);
+            var bytes = await MagickCodec.QuickDecodeAsync(iconPath, MagickFormat.Bgra, size, size);
             _uiReporter.Report(new WindowIconChangedEventArgs(bytes, size));
         });
     }

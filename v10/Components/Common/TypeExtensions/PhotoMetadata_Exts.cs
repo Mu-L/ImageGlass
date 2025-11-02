@@ -71,7 +71,7 @@ public static class PhotoMetadata_Exts
 
 
         // 2. use ImageMagick to decode the unsupported formats, skip for those larger than 3000px
-        using var imgM = await MagickDecoder.QuickDecodeAsync(meta.FilePath, 0, 0, 0, 3000, token);
+        using var imgM = await MagickCodec.QuickDecodeAsync(meta.FilePath, 0, 0, 0, 3000, token);
         wicBmp = PhotoWIC.ConvertFromMagick(imgM);
 
         return wicBmp;

@@ -159,7 +159,7 @@ public partial class Photo : DisposableImpl
     public PhotoReadOptions ReadOptions { get; set; } = new();
 
     /// <summary>
-    /// Gets, sets the settings for reading Metadata and photo with <see cref="MagickDecoder"/>.
+    /// Gets, sets the settings for reading Metadata and photo with <see cref="MagickCodec"/>.
     /// </summary>
     public MagickReadSettings? ReadSettings { get; set; } = null;
 
@@ -347,7 +347,7 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task LoadWithMagickAsync(PhotoMetadata meta, CancellationToken token)
     {
-        using var data = await MagickDecoder.DecodeImageAsync(meta, ReadOptions, ReadSettings, null, token);
+        using var data = await MagickCodec.DecodeImageAsync(meta, ReadOptions, ReadSettings, null, token);
 
         // multi-frame
         if (data.MultiFrames != null)
@@ -523,7 +523,7 @@ public partial class Photo : DisposableImpl
         try
         {
             ReadOptions = newOptions ?? ReadOptions;
-            ReadSettings ??= MagickDecoder.ParseSettings(ReadOptions, false, FilePath);
+            ReadSettings ??= MagickCodec.ParseSettings(ReadOptions, false, FilePath);
 
             // if already started loading, wait for the task completes
             if (_taskMetadata is not null
@@ -542,7 +542,7 @@ public partial class Photo : DisposableImpl
             // load the metadata if it's outdated
             if (hasOutdatedCache)
             {
-                _taskMetadata = MagickDecoder.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings);
+                _taskMetadata = MagickCodec.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings);
                 _metadata = await _taskMetadata;
             }
         }
@@ -660,7 +660,7 @@ public partial class Photo : DisposableImpl
             // 1. save from file to file
             if (!IsClipboard && File.Exists(FilePath))
             {
-                await MagickDecoder.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, (uint)quality);
+                await MagickCodec.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, (uint)quality);
             }
 
 
