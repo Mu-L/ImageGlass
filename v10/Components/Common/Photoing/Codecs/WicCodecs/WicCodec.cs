@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using SharpGen.Runtime;
-using SharpGen.Runtime.Win32;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -36,134 +35,22 @@ namespace ImageGlass.Common.Photoing;
 
 public static partial class WicCodec
 {
+    /// <summary>
+    /// Gets all WIC encoders and decoders.
+    /// </summary>
     public static ImmutableArray<WicCodecInfo> AllCodecs => _allCodecs.Value.Values;
+
+
+    /// <summary>
+    /// Gets the supported extensions for decoding.
+    /// </summary>
     public static FrozenSet<string> DecoderExtensions => _decoderExtensions.Value;
+
+
+    /// <summary>
+    /// Gets the supported extensions for encoding.
+    /// </summary>
     public static FrozenSet<string> EncoderExtensions => _encoderExtensions.Value;
-
-
-    #region Methods for WIC Components
-
-    private static readonly Lazy<FrozenDictionary<Guid, WicCodecInfo>> _allCodecs = new(GetWicCodecList_, isThreadSafe: true);
-    private static readonly Lazy<FrozenSet<string>> _encoderExtensions = new(GetEncoderExtensions_, isThreadSafe: true);
-    private static readonly Lazy<FrozenSet<string>> _decoderExtensions = new(GetDecoderExtensions_, isThreadSafe: true);
-
-
-    private static FrozenDictionary<Guid, WicCodecInfo> GetWicCodecList_()
-    {
-        var dict = new Dictionary<Guid, WicCodecInfo>();
-        var components = GetWICComponents_(ComponentType.Decoder);
-
-        foreach (var item in components)
-        {
-            if (item is not IWICBitmapDecoderInfo info) continue;
-
-            var codec = WicCodecInfo.FromWICComponent(info);
-            if (!dict.TryAdd(codec.CLSID, codec))
-            {
-                item.Dispose();
-            }
-        }
-
-        return dict.ToFrozenDictionary();
-    }
-
-
-    private static List<IWICComponentInfo> GetWICComponents_(ComponentType types)
-    {
-        var list = new List<IWICComponentInfo>();
-        IEnumUnknown? enumerator = null;
-
-        try
-        {
-            enumerator = CreateComponentEnumerator_(types, ComponentEnumerateOptions.Default);
-        }
-        catch { }
-        if (enumerator is null) return list;
-
-
-        while (true)
-        {
-            var buffer = new IUnknown[1];
-            var fetched = enumerator.Next(buffer);
-            if (fetched != 1) break;
-
-            using var unknown = buffer[0];
-            if (unknown is not ComObject comObj) continue;
-
-            // convert IUnknown → IWICComponentInfo
-            IWICComponentInfo? compInfo = null;
-            try
-            {
-                compInfo = comObj.QueryInterfaceOrNull<IWICComponentInfo>();
-            }
-            catch { continue; }
-
-            if (compInfo is not null)
-            {
-                IWICComponentInfo item = compInfo.ComponentType switch
-                {
-                    ComponentType.PixelFormat => new IWICPixelFormatInfo2(compInfo.NativePointer),
-                    ComponentType.Decoder => new IWICBitmapDecoderInfo(compInfo.NativePointer),
-                    ComponentType.Encoder => new IWICBitmapEncoderInfo(compInfo.NativePointer),
-                    _ => new IWICComponentInfo(compInfo.NativePointer),
-                };
-
-                list.Add(item);
-            }
-
-            comObj.Dispose();
-        }
-
-        return list;
-    }
-
-
-    private static unsafe IEnumUnknown? CreateComponentEnumerator_(ComponentType type, ComponentEnumerateOptions options)
-    {
-        using var fac = new IWICImagingFactory2();
-
-        var vtbl = (*(void***)fac.NativePointer)[23];
-        var method = (delegate* unmanaged[Stdcall]<nint, uint, uint, nint*, int>)vtbl;
-        nint zero = IntPtr.Zero;
-
-        Result result = method(fac.NativePointer, (uint)type, (uint)options, &zero);
-        var result2 = (zero != IntPtr.Zero) ? new IEnumUnknown(zero) : null;
-
-        result.CheckError();
-        return result2;
-    }
-
-
-    private static FrozenSet<string> GetDecoderExtensions_()
-    {
-        return GetCodecExtensions(ComponentType.Decoder);
-    }
-
-
-    private static FrozenSet<string> GetEncoderExtensions_()
-    {
-        return GetCodecExtensions(ComponentType.Encoder);
-    }
-
-
-    private static FrozenSet<string> GetCodecExtensions(ComponentType type)
-    {
-        var hashSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var item in _allCodecs.Value)
-        {
-            if (item.Value.ComponentType != type) continue;
-            foreach (string exts in item.Value.Extensions)
-            {
-                hashSet.Add(exts);
-            }
-        }
-
-        return hashSet.ToFrozenSet();
-    }
-
-    #endregion // Methods for WIC Components
-
 
 
     /// <summary>
@@ -350,6 +237,9 @@ public static partial class WicCodec
 
         return codec;
     }
+
+
+
 
 }
 
