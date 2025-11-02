@@ -25,20 +25,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Foundation;
 
 namespace ImageGlass.Common.Photoing;
 
-
 public static partial class MagickCodec
 {
-    [GeneratedRegex(@"(^data\:(?<type>image\/[a-z\+\-]*);base64,)?(?<data>[a-zA-Z0-9\+\/\=]+)$", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Compiled, "en-US")]
-    private static partial Regex Base64DataUriRegex();
-
-
     /// <summary>
     /// Indicates whether <see cref="MagickCodec"/> is initialized or not.
     /// </summary>
@@ -68,7 +61,8 @@ public static partial class MagickCodec
     /// <summary>
     /// Parse <see cref="PhotoReadOptions"/> to <see cref="MagickReadSettings"/>.
     /// </summary>
-    public static MagickReadSettings ParseSettings(PhotoReadOptions? options, bool writePurpose, string filePath = "")
+    public static MagickReadSettings ParseSettings(PhotoReadOptions? options,
+        bool writePurpose, string filePath = "")
     {
         options ??= new();
 
@@ -325,7 +319,7 @@ public static partial class MagickCodec
                 // image color
                 meta.HasAlpha = imgC.Any(i => i.HasAlpha);
                 meta.ColorSpace = imgC[frameIndex].ColorSpace;
-                meta.CanAnimate = CheckAnimatedFormat_(imgC, meta.FileExtension);
+                meta.CanAnimate = CheckAnimatedFormat__(imgC, meta.FileExtension);
 
                 // get RAW thumbnail
                 meta.RawThumbnail = imgC[frameIndex].GetProfile("dng:thumbnail");
@@ -345,34 +339,34 @@ public static partial class MagickCodec
                     meta.ExifProfile = exifProfile;
 
                     // ExifRatingPercent
-                    meta.ExifRatingPercent = GetExifValue_(exifProfile, ExifTag.RatingPercent);
+                    meta.ExifRatingPercent = GetExifValue__(exifProfile, ExifTag.RatingPercent);
 
                     // ExifDateTimeOriginal
-                    var dt = GetExifValue_(exifProfile, ExifTag.DateTimeOriginal);
+                    var dt = GetExifValue__(exifProfile, ExifTag.DateTimeOriginal);
                     meta.ExifDateTimeOriginal = BHelper.ConvertDateTime(dt);
 
                     // ExifDateTime
-                    dt = GetExifValue_(exifProfile, ExifTag.DateTime);
+                    dt = GetExifValue__(exifProfile, ExifTag.DateTime);
                     meta.ExifDateTime = BHelper.ConvertDateTime(dt);
 
-                    meta.ExifArtist = GetExifValue_(exifProfile, ExifTag.Artist);
-                    meta.ExifCopyright = GetExifValue_(exifProfile, ExifTag.Copyright);
-                    meta.ExifSoftware = GetExifValue_(exifProfile, ExifTag.Software);
-                    meta.ExifImageDescription = GetExifValue_(exifProfile, ExifTag.ImageDescription);
-                    meta.ExifModel = GetExifValue_(exifProfile, ExifTag.Model);
-                    meta.ExifISOSpeed = (int?)GetExifValue_(exifProfile, ExifTag.ISOSpeed);
+                    meta.ExifArtist = GetExifValue__(exifProfile, ExifTag.Artist);
+                    meta.ExifCopyright = GetExifValue__(exifProfile, ExifTag.Copyright);
+                    meta.ExifSoftware = GetExifValue__(exifProfile, ExifTag.Software);
+                    meta.ExifImageDescription = GetExifValue__(exifProfile, ExifTag.ImageDescription);
+                    meta.ExifModel = GetExifValue__(exifProfile, ExifTag.Model);
+                    meta.ExifISOSpeed = (int?)GetExifValue__(exifProfile, ExifTag.ISOSpeed);
 
-                    var rational = GetExifValue_(exifProfile, ExifTag.ExposureTime);
+                    var rational = GetExifValue__(exifProfile, ExifTag.ExposureTime);
                     meta.ExifExposureTime = rational.Denominator == 0
                         ? null
                         : rational.Numerator / rational.Denominator;
 
-                    rational = GetExifValue_(exifProfile, ExifTag.FNumber);
+                    rational = GetExifValue__(exifProfile, ExifTag.FNumber);
                     meta.ExifFNumber = rational.Denominator == 0
                         ? null
                         : rational.Numerator / rational.Denominator;
 
-                    rational = GetExifValue_(exifProfile, ExifTag.FocalLength);
+                    rational = GetExifValue__(exifProfile, ExifTag.FocalLength);
                     meta.ExifFocalLength = rational.Denominator == 0
                         ? null
                         : rational.Numerator / rational.Denominator;
@@ -439,12 +433,12 @@ public static partial class MagickCodec
             var i = 0;
             foreach (var imgFrameM in imgColl)
             {
-                ProcessMagickImage_((MagickImage)imgFrameM, options, meta, false);
+                ProcessMagickImage__((MagickImage)imgFrameM, options, meta, false);
 
                 // apply transformation
                 if (i == transform?.FrameIndex || transform?.FrameIndex == -1)
                 {
-                    TransformImage_(imgFrameM, transform);
+                    TransformImage__(imgFrameM, transform);
                 }
 
                 i++;
@@ -494,12 +488,12 @@ public static partial class MagickCodec
 
 
         // 3.3 process image
-        var thumbM = ProcessMagickImage_(imgM, options, meta, true);
+        var thumbM = ProcessMagickImage__(imgM, options, meta, true);
         if (thumbM != null) imgM = thumbM;
 
 
         // 3.4 apply final changes
-        TransformImage_(imgM, transform);
+        TransformImage__(imgM, transform);
         result.SingleFrame = imgM;
 
         return result;
@@ -569,7 +563,7 @@ public static partial class MagickCodec
         // 2. convert Mime type to Magick format
         // supported MIME types:
         // https://www.iana.org/assignments/media-types/media-types.xhtml#image
-        var format = ConvertMimeTypeToMagickFormat_(MimeType);
+        var format = ConvertMimeTypeToMagickFormat__(MimeType);
 
 
         // 3. create settings
@@ -625,9 +619,9 @@ public static partial class MagickCodec
 
         // data:image/svg-xml;base64,xxxxxxxx
         // type is optional
-        var base64DataUri = Base64DataUriRegex();
+        var base64DataUriRegex = CreateBase64DataUriRegex__();
+        var match = base64DataUriRegex.Match(content);
 
-        var match = base64DataUri.Match(content);
         if (!match.Success)
         {
             throw new FormatException("The base64 content is invalid.");
@@ -666,7 +660,8 @@ public static partial class MagickCodec
     /// <param name="transform">Changes for writing image file</param>
     /// <param name="quality">Quality</param>
     /// <exception cref="InvalidDataException"></exception>
-    public static async Task SaveAsync(PhotoMetadata meta, string destFilePath, PhotoReadOptions options, ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
+    public static async Task SaveAsync(PhotoMetadata meta, string destFilePath, PhotoReadOptions options,
+        ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
     {
         var ext = Path.GetExtension(destFilePath);
 
@@ -707,7 +702,7 @@ public static partial class MagickCodec
 
                     if (imgW > MAX_ICON_SIZE || imgH > MAX_ICON_SIZE)
                     {
-                        var iconSize = GetMaxImageRenderSize_(imgW, imgH, MAX_ICON_SIZE);
+                        var iconSize = GetMaxImageRenderSize__(imgW, imgH, MAX_ICON_SIZE);
                         result.SingleFrame.Scale((uint)iconSize.Width, (uint)iconSize.Height);
                     }
                 }
@@ -724,7 +719,8 @@ public static partial class MagickCodec
     /// </summary>
     /// <param name="srcFilePath">The full path of source file</param>
     /// <param name="destFolder">The destination folder to save to</param>
-    public static async IAsyncEnumerable<(int FrameNumber, string FileName)> SaveFramesAsync(string srcFilePath, string destFolder, [EnumeratorCancellation] CancellationToken token = default)
+    public static async IAsyncEnumerable<(int FrameNumber, string FileName)> SaveFramesAsync(string srcFilePath,
+        string destFolder, [EnumeratorCancellation] CancellationToken token = default)
     {
         // create dirs unless it does not exist
         Directory.CreateDirectory(destFolder);
@@ -809,187 +805,6 @@ public static partial class MagickCodec
         return null;
     }
 
-
-    /// <summary>
-    /// Get EXIF value.
-    /// </summary>
-    private static T? GetExifValue_<T>(IExifProfile? profile, ExifTag<T> tag, T? defaultValue = default)
-    {
-        if (profile == null) return default;
-
-        var exifValue = profile.GetValue(tag);
-        if (exifValue == null) return defaultValue;
-
-        return exifValue.Value;
-    }
-
-
-    /// <summary>
-    /// Checks if the image data is animated format.
-    /// </summary>
-    /// <param name="imgC"></param>
-    /// <param name="ext">File extension, e.g: <c>.gif</c></param>
-    private static bool CheckAnimatedFormat_(MagickImageCollection imgC, string? ext)
-    {
-        var isAnimatedExtension = ext == ".GIF" || ext == ".GIFV" || ext == ".WEBP" || ext == ".JXL";
-
-        var canAnimate = imgC.Count > 1
-            && (isAnimatedExtension || imgC.Any(i => i.AnimationDelay > 0));
-
-        return canAnimate;
-    }
-
-
-    /// <summary>
-    /// Processes single-frame Magick image.
-    /// Returns thumbnail image if requested.
-    /// </summary>
-    /// <param name="refImgM">Input Magick image to process</param>
-    private static MagickImage? ProcessMagickImage_(MagickImage refImgM, PhotoReadOptions options, PhotoMetadata meta, bool requestThumbnail)
-    {
-        IMagickImage? thumbM = null;
-
-
-        // Use embedded thumbnails if specified
-        if (requestThumbnail && meta.ExifProfile != null && options.UseEmbeddedThumbnailOtherFormats)
-        {
-            // Fetch the embedded thumbnail
-            thumbM = meta.ExifProfile.CreateThumbnail();
-            if (thumbM != null
-                && thumbM.Width > options.EmbeddedThumbnailMinWidth
-                && thumbM.Height > options.EmbeddedThumbnailMinHeight)
-            {
-                if (options.CorrectRotation) thumbM.AutoOrient();
-
-                ApplySizeSettings_(thumbM, options);
-            }
-            else
-            {
-                thumbM?.Dispose();
-                thumbM = null;
-            }
-        }
-
-        // Revert to source image if an embedded thumbnail with required size was not found.
-        if (!requestThumbnail || thumbM == null)
-        {
-            // resize the image
-            ApplySizeSettings_(refImgM, options);
-
-            // for HEIC/HEIF, PreserveOrientation must be false
-            // see https://github.com/d2phap/ImageGlass/issues/1928
-            if (options.CorrectRotation) refImgM.AutoOrient();
-
-
-            // make sure the output color space is not CMYK
-            if (meta.ColorSpace == ColorSpace.CMYK && meta.ColorProfileData is not null)
-            {
-                var colorProfile = new ColorProfile(meta.ColorProfileData);
-                refImgM.TransformColorSpace(colorProfile, ColorProfiles.SRGB);
-            }
-        }
-
-
-        return (MagickImage?)thumbM;
-    }
-
-
-    /// <summary>
-    /// Applies the size settings
-    /// </summary>
-    private static void ApplySizeSettings_(IMagickImage imgM, PhotoReadOptions options)
-    {
-        if (options.Width > 0 && options.Height > 0)
-        {
-            if (imgM.BaseWidth > options.Width || imgM.BaseHeight > options.Height)
-            {
-                imgM.Thumbnail(options.Width, options.Height);
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// Applies changes from <paramref name="transform"/>.
-    /// </summary>
-    private static void TransformImage_(IMagickImage imgM, ImgTransform? transform = null)
-    {
-        if (transform == null) return;
-
-        // rotate
-        if (transform.Rotation != 0)
-        {
-            imgM.Rotate(transform.Rotation);
-        }
-
-        // flip
-        if (transform.Flips.HasFlag(FlipOptions.Horizontal))
-        {
-            imgM.Flop();
-        }
-        if (transform.Flips.HasFlag(FlipOptions.Vertical))
-        {
-            imgM.Flip();
-        }
-
-        // invert color
-        if (transform.IsColorInverted)
-        {
-            imgM.Negate(Channels.RGB);
-        }
-    }
-
-
-    /// <summary>
-    /// Gets maximum image dimention.
-    /// </summary>
-    private static Size GetMaxImageRenderSize_(uint srcWidth, uint srcHeight, uint maxSize = Const.MAX_IMAGE_DIMENSION)
-    {
-        var widthScale = 1f;
-        var heightScale = 1f;
-
-        if (srcWidth > maxSize)
-        {
-            widthScale = 1f * maxSize / srcWidth;
-        }
-
-        if (srcHeight > maxSize)
-        {
-            heightScale = 1f * maxSize / srcHeight;
-        }
-
-        var scale = Math.Min(widthScale, heightScale);
-        var newW = srcWidth * scale;
-        var newH = srcHeight * scale;
-
-        return new Size(newW, newH);
-    }
-
-
-    /// <summary>
-    /// Gets <see cref="MagickFormat"/> from mime type.
-    /// </summary>
-    private static MagickFormat ConvertMimeTypeToMagickFormat_(string? mimeType)
-    {
-        return mimeType switch
-        {
-            "image/avif" => MagickFormat.Avif,
-            "image/bmp" => MagickFormat.Bmp,
-            "image/gif" => MagickFormat.Gif,
-            "image/tiff" => MagickFormat.Tiff,
-            "image/jpeg" => MagickFormat.Jpeg,
-            "image/svg+xml" => MagickFormat.Rsvg,
-            "image/x-icon" => MagickFormat.Ico,
-            "image/x-portable-anymap" => MagickFormat.Pnm,
-            "image/x-portable-bitmap" => MagickFormat.Pbm,
-            "image/x-portable-graymap" => MagickFormat.Pgm,
-            "image/x-portable-pixmap" => MagickFormat.Ppm,
-            "image/x-xbitmap" => MagickFormat.Xbm,
-            "image/x-xpixmap" => MagickFormat.Xpm,
-            "image/x-cmu-raster" => MagickFormat.Ras,
-            _ => MagickFormat.Png,
-        };
-    }
 
 
 }
