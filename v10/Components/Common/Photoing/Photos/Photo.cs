@@ -330,7 +330,7 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task LoadWithWICAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var result = await WicDecoder.LoadAsync(meta, token);
+        var result = await WicCodec.LoadAsync(meta, token);
 
         _width = (uint)result.Size.Width;
         _height = (uint)result.Size.Height;

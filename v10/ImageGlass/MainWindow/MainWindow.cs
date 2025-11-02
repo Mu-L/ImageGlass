@@ -86,6 +86,7 @@ public partial class MainWindow : IgWindow
     {
         Viewer.UnloadPhoto();
         AP.DisposeClipboardPhoto();
+        WicCodec.DisposeResources();
 
         // clear hotkeys
         Content.KeyboardAccelerators.Clear();
