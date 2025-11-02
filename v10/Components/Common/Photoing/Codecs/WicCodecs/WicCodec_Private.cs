@@ -94,15 +94,18 @@ public static partial class WicCodec
 
             if (compInfo is not null)
             {
-                IWICComponentInfo item = compInfo.ComponentType switch
+                IWICComponentInfo? item = compInfo.ComponentType switch
                 {
-                    ComponentType.PixelFormat => new IWICPixelFormatInfo2(compInfo.NativePointer),
-                    ComponentType.Decoder => new IWICBitmapDecoderInfo(compInfo.NativePointer),
-                    ComponentType.Encoder => new IWICBitmapEncoderInfo(compInfo.NativePointer),
-                    _ => new IWICComponentInfo(compInfo.NativePointer),
+                    ComponentType.PixelFormat => compInfo.QueryInterfaceOrNull<IWICPixelFormatInfo2>(),
+                    ComponentType.Decoder => compInfo.QueryInterfaceOrNull<IWICBitmapDecoderInfo>(),
+                    ComponentType.Encoder => compInfo.QueryInterfaceOrNull<IWICBitmapEncoderInfo>(),
+                    _ => compInfo,
                 };
 
-                list.Add(item);
+                if (item is not null)
+                {
+                    list.Add(item);
+                }
             }
 
             comObj.Dispose();
