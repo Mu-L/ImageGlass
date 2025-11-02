@@ -309,15 +309,15 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var wicExts = new string[] { ".GIF", ".GIFV", ".WEBP", ".FAX", ".JXR", ".APNG" };
+        var useWicCodec = WicCodec.CanRead(meta);
 
-        // use WIC decoders
-        if (meta.ColorSpace != ImageMagick.ColorSpace.CMYK && meta.IsOneOfExtensions(wicExts))
+        // use WIC codec
+        if (useWicCodec)
         {
             await LoadWithWICAsync(meta, token);
         }
 
-        // use default decoders
+        // use Magick codec
         else
         {
             await LoadWithMagickAsync(meta, token);

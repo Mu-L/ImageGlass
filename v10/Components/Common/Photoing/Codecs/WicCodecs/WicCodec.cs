@@ -35,6 +35,11 @@ namespace ImageGlass.Common.Photoing;
 
 public static partial class WicCodec
 {
+    public static FrozenSet<string> TopEncoderExts => new HashSet<string>(
+        [".gif", ".gifv", ".fax", ".jxr", ".apng"]
+    ).ToFrozenSet();
+
+
     /// <summary>
     /// Gets all WIC encoders and decoders.
     /// </summary>
@@ -125,16 +130,57 @@ public static partial class WicCodec
 
         // 3. read single-frame formats
         using var frameBmp = decoder.GetFrame(meta.FrameIndex);
-        decoder.Dispose();
-        decoder = null;
-
         using var fac = new IWICImagingFactory2();
         var wicBmp = fac.CreateBitmapFromSource(frameBmp, BitmapCreateCacheOption.CacheOnLoad);
 
-        result.Size = new Size((int)meta.Width, meta.Height);
+        result.Size = new Size(meta.Width, meta.Height);
         result.SingleFrame = wicBmp;
 
+        decoder.Dispose();
+        decoder = null;
+
         return result;
+    }
+
+
+    /// <summary>
+    /// Checks if the photo can be decoded.
+    /// </summary>
+    public static bool CanRead(PhotoMetadata meta)
+    {
+        // not for CMYK
+        if (meta.ColorSpace == ImageMagick.ColorSpace.CMYK) return false;
+
+        // predefined extension to read with WIC
+        if (meta.IsOneOfExtensions(WicCodec.TopEncoderExts.ToArray())) return true;
+
+        var codec = GetCodecFromExtension(meta.FilePath, ComponentType.Decoder);
+        if (codec is null) return false;
+
+        // multiple frames
+        var isMultiFrames = meta.FrameCount > 1;
+        if (isMultiFrames) return codec.SupportsMultiframes;
+
+        return true;
+    }
+
+
+    /// <summary>
+    /// Checks if the photo can be encoded.
+    /// </summary>
+    public static bool CanWrite(PhotoMetadata meta)
+    {
+        // not for CMYK
+        if (meta.ColorSpace == ImageMagick.ColorSpace.CMYK) return false;
+
+        var codec = GetCodecFromExtension(meta.FilePath, ComponentType.Encoder);
+        if (codec is null) return false;
+
+        // multiple frames
+        var isMultiFrames = meta.FrameCount > 1;
+        if (isMultiFrames) return codec.SupportsMultiframes;
+
+        return true;
     }
 
 
@@ -219,10 +265,10 @@ public static partial class WicCodec
 
 
     /// <summary>
-    /// Gets WIC Encoder from file extension.
+    /// Gets WIC codec from file extension.
     /// E.g. <c>".png"</c>, <c>"C:\photo.png"</c>
     /// </summary>
-    public static WicCodecInfo? GetCodecFromExtension(string extOrPath)
+    public static WicCodecInfo? GetCodecFromExtension(string extOrPath, ComponentType type)
     {
         if (string.IsNullOrWhiteSpace(extOrPath)) return null;
 
@@ -232,7 +278,7 @@ public static partial class WicCodec
             ext = Path.GetExtension(extOrPath);
         }
 
-        var codec = AllCodecs.FirstOrDefault(i => i.ComponentType == ComponentType.Encoder
+        var codec = AllCodecs.FirstOrDefault(i => i.ComponentType == type
             && i.Extensions.Contains(ext, StringComparer.OrdinalIgnoreCase));
 
         return codec;
