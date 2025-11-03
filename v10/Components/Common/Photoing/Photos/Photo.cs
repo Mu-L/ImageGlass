@@ -635,7 +635,6 @@ public partial class Photo : DisposableImpl
                 return d2Bmp;
             }
 
-
             return null;
         }
         finally
@@ -649,45 +648,26 @@ public partial class Photo : DisposableImpl
     /// Saves the photo to file.
     /// </summary>
     /// <exception cref="Exception"></exception>
-    public async Task SaveAsAsync(string destFilePath, ImgTransform transforms, int quality)
+    public async Task SaveAsAsync(string destFilePath, ImgTransform transforms, int quality, CancellationToken token = default)
     {
         var taskId = Guid.NewGuid();
         _ = _taskRefs.TryAdd(taskId, true);
 
-
         try
         {
-            // 1. save from file to file
-            if (!IsClipboard && File.Exists(FilePath))
+            // 1. save clipboard photo to file
+            if (IsClipboard && Bitmap is IWICBitmapSource wicBmp)
             {
-                await MagickCodec.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, (uint)quality);
+                await WicCodec.SaveAsync(wicBmp, destFilePath, transforms, (uint)quality, token);
             }
 
-
-            // 2. save from bitmap to file
+            // 2. save photo file to file
             else
             {
-                // native bitmap is a single-frame bitmap
-                if (Bitmap is IWICBitmapSource wicBmp)
-                {
-                    wicBmp.SaveAs(destFilePath);
-                }
-
-
-                // native bitmap is a multi-frame bitmap
-                else if (Bitmap is IWICBitmapDecoder decoder)
-                {
-                    // TODO: ?
-                }
-
-
-                // native bitmap is an animator
-                else if (Bitmap is WicAnimator animator)
-                {
-                    // TODO: ?
-                }
+                await MagickCodec.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, (uint)quality, token);
             }
         }
+        catch (OperationCanceledException) { }
         finally
         {
             _ = _taskRefs.TryRemove(taskId, out _);
