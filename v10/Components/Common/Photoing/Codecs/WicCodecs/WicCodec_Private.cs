@@ -42,13 +42,21 @@ public static partial class WicCodec
     private static FrozenDictionary<Guid, WicCodecInfo> GetWicCodecList__()
     {
         var dict = new Dictionary<Guid, WicCodecInfo>();
-        var components = GetWICComponents__(ComponentType.Decoder);
+        var components = GetWICComponents__(ComponentType.Decoder | ComponentType.Encoder);
 
         foreach (var item in components)
         {
-            if (item is not IWICBitmapDecoderInfo info) continue;
+            WicCodecInfo? codec = null;
+            if (item is IWICBitmapDecoderInfo decoder)
+            {
+                codec = WicCodecInfo.FromWICComponent(decoder);
+            }
+            else if (item is IWICBitmapEncoderInfo encoder)
+            {
+                codec = WicCodecInfo.FromWICComponent(encoder);
+            }
+            if (codec is null) continue;
 
-            var codec = WicCodecInfo.FromWICComponent(info);
             if (!dict.TryAdd(codec.CLSID, codec))
             {
                 item.Dispose();

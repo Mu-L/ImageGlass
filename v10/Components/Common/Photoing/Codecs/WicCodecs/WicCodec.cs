@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageMagick;
 using SharpGen.Runtime;
 using System;
 using System.Collections.Frozen;
@@ -140,6 +141,65 @@ public static partial class WicCodec
         decoder = null;
 
         return result;
+    }
+
+
+    /// <summary>
+    /// Saves photo to file, fallbacks to Magick codec for unsupported formats.
+    /// </summary>
+    /// <returns><c>true</c> if file is saved.</returns>
+    /// <exception cref="Exception"></exception>
+    public static async Task SaveAsync(IWICBitmapSource? srcBmp, string destFilePath,
+        ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
+    {
+        if (srcBmp.IsDisposed()) return;
+
+        try
+        {
+            // 1. apply transforms
+            srcBmp = TransformImage(srcBmp, transform);
+            if (srcBmp.IsDisposed() || token.IsCancellationRequested) return;
+
+            using var meta = new PhotoMetadata()
+            {
+                FilePath = destFilePath,
+                FrameCount = 1,
+            };
+
+
+            // 2. use WIC to save
+            if (WicCodec.CanWrite(meta))
+            {
+                srcBmp?.SaveAs(destFilePath);
+            }
+
+            // 3. use Magick to save
+            else
+            {
+                // convert to pixels
+                var pixels = await srcBmp.GetPixelsAsync();
+                if (pixels is null) return;
+                if (token.IsCancellationRequested) return;
+
+                // convert to MagickImage
+                using var imgM = new MagickImage();
+                var settings = new MagickReadSettings()
+                {
+                    Format = MagickFormat.Bgra,
+                    Width = (uint)srcBmp.Size.Width,
+                    Height = (uint)srcBmp.Size.Height,
+                };
+                await Task.Run(() =>
+                {
+                    imgM.Read(pixels.AsSpan(), settings);
+                    imgM.Quality = quality;
+                }, token);
+
+                // write image data to file
+                await imgM.WriteAsync(destFilePath, token);
+            }
+        }
+        catch (OperationCanceledException) { }
     }
 
 

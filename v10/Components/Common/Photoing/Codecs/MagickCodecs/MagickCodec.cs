@@ -659,7 +659,7 @@ public static partial class MagickCodec
     /// <param name="options">Options for reading image file</param>
     /// <param name="transform">Changes for writing image file</param>
     /// <param name="quality">Quality</param>
-    /// <exception cref="InvalidDataException"></exception>
+    /// <exception cref="Exception"></exception>
     public static async Task SaveAsync(PhotoMetadata meta, string destFilePath, PhotoReadOptions options,
         ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
     {
@@ -670,7 +670,7 @@ public static partial class MagickCodec
             // 1. check if format is supported
             if (!CanWrite(destFilePath))
             {
-                throw new InvalidDataException("IGE_001: Unsupported image format.");
+                throw new FormatException("IGE_001: Unsupported image format.");
             }
 
 
