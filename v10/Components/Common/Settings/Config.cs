@@ -220,20 +220,20 @@ public partial class Config : IgReactive
     ///// </summary>
     //public bool ShowDeleteConfirmation { get; set; } = true;
 
-    ///// <summary>
-    ///// Gets, sets value indicates that Confirmation dialog is displayed when overriding the viewing image
-    ///// </summary>
-    //public bool ShowSaveOverrideConfirmation { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value indicates that Confirmation dialog is displayed when overriding the viewing image
+    /// </summary>
+    public bool ShowSaveOverrideConfirmation { get; set; } = true;
 
     ///// <summary>
     ///// Gets, sets the setting to control whether the image's original modified date value is preserved on save
     ///// </summary>
     //public bool ShouldPreserveModifiedDate { get; set; } = false;
 
-    ///// <summary>
-    ///// Gets, sets value indicates that Save dialog should use the current image folder as initial directory
-    ///// </summary>
-    //public bool OpenSaveAsDialogInTheCurrentImageDir { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value indicates that Save dialog should use the current image folder as initial directory
+    /// </summary>
+    public bool OpenSaveAsDialogInTheCurrentImageDir { get; set; } = true;
 
     ///// <summary>
     ///// Gets, sets the value indicates that there is a new version

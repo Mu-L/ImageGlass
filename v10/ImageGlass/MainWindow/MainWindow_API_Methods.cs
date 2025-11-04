@@ -23,6 +23,7 @@ using ImageGlass.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.Storage.Pickers;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -133,6 +134,98 @@ public partial class MainWindow
         {
             IG_ViewByIndex(imageIndex);
         }
+    }
+
+
+    /// <summary>
+    /// Shows save file dialog to save photo to file.
+    /// </summary>
+    public async Task IG_SaveAsAsync()
+    {
+        var srcFilePath = string.Empty;
+        var srcExt = ".png";
+        var initSaveDirPath = string.Empty;
+
+
+        // 1. get dest file name
+        if (AP.ClipboardImage is null)
+        {
+            srcFilePath = AP.Photos.CurrentFilePath;
+            srcExt = AP.Photos.Current?.Extension?.ToLowerInvariant() ?? srcExt;
+
+
+            if (AP.Config.OpenSaveAsDialogInTheCurrentImageDir)
+            {
+                initSaveDirPath = Path.GetDirectoryName(srcFilePath);
+            }
+        }
+
+        var destFileName = string.IsNullOrEmpty(srcFilePath)
+            ? $"untitle{srcExt}"
+            : Path.GetFileNameWithoutExtension(srcFilePath);
+
+
+        // 2. create file save picker
+        var saveDialog = new FileSavePicker(this.AppWindow.Id)
+        {
+            DefaultFileExtension = srcExt,
+            SuggestedFileName = destFileName,
+            SuggestedFolder = initSaveDirPath,
+        };
+
+
+        // 3. load file extensions for saving
+        // use the last-selected file extension, if available.
+        var extDesc = SavingExts.ExtensionsMap.GetValueOrDefault(SavingExts.LastSavedExtension);
+        if (!string.IsNullOrEmpty(extDesc))
+        {
+            _ = saveDialog.FileTypeChoices.TryAdd(extDesc, [SavingExts.LastSavedExtension]);
+        }
+
+        foreach (var ext in SavingExts.ExtensionsMap.Keys)
+        {
+            _ = saveDialog.FileTypeChoices.TryAdd(SavingExts.ExtensionsMap[ext], [ext]);
+        }
+
+
+        // 4. open save file dialog
+        var picker = await saveDialog.PickSaveFileAsync();
+        if (string.IsNullOrWhiteSpace(picker?.Path)) return;
+
+        var destFilePath = picker.Path;
+        var destExt = Path.GetExtension(destFilePath).ToLowerInvariant();
+        SavingExts.LastSavedExtension = destExt;
+
+
+        // show override warning
+        if (File.Exists(destFilePath) && AP.Config.ShowSaveOverrideConfirmation)
+        {
+            var fi = new FileInfo(destFilePath);
+
+            // show confirm dialog
+            var result = await ModalWindow.ShowWarningAsync(this,
+                title: AP.Config.Lang[LangId.FrmMain_MnuSaveAs],
+                description: $"""
+                {destFilePath}
+                {BHelper.FormatSize(fi.Length)}
+                """,
+                heading: AP.Config.Lang[LangId.FrmMain_MnuSave_Confirm],
+                note: AP.Config.Lang[LangId.FrmMain_MnuSave_ConfirmDescription],
+                buttons: ModalWindowButton.Yes_No,
+                showRememberOption: true);
+
+
+            // update ShowSaveOverrideConfirmation setting
+            AP.Config.ShowSaveOverrideConfirmation = !result.IsRememberOptionChecked;
+
+            if (result.ExitCode != DialogExitCode.OK) return;
+        }
+
+
+        // save file
+        // TODO:
+
+
     }
 
 
