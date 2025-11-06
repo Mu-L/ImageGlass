@@ -171,11 +171,11 @@ public partial class VirtualViewerControl
     /// <summary>
     /// Gets the rendered bitmap.
     /// </summary>
-    public IWICBitmapSource? GetRenderedBitmap()
+    public IWICBitmapSource? GetRenderedBitmap(bool selectionOnly = false)
     {
         lock (_lockSource)
         {
-            var wicBmp = _bmpSource?.ToWICBitmapSource(D2dContext);
+            var wicBmp = _bmpSource?.ToWICBitmapSource(D2dContext, selectionOnly ? SourceSelection : null);
             return wicBmp;
         }
     }

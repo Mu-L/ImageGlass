@@ -22,6 +22,7 @@ using System.Runtime.InteropServices;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
 using Vortice.WIC;
+using Windows.Foundation;
 using Windows.UI;
 
 namespace ImageGlass.Common;
@@ -43,9 +44,10 @@ public static class ID2D1Bitmap_Exts
     /// <summary>
     /// Converts <see cref="ID2D1Bitmap1"/> to <see cref="IWICBitmapSource"/>
     /// </summary>
-    public static IWICBitmapSource? ToWICBitmapSource(this ID2D1Bitmap1? srcBmp1, ID2D1DeviceContext6? dc)
+    public static IWICBitmapSource? ToWICBitmapSource(this ID2D1Bitmap1? srcBmp1,
+        ID2D1DeviceContext6? dc, Rect? area = null)
     {
-        var data = srcBmp1.GetBitmapData(dc);
+        var data = srcBmp1.GetBitmapData(dc, area);
         if (data.Pixels.Length == 0) return null;
 
         using var wicFactory = new IWICImagingFactory2();
@@ -83,24 +85,30 @@ public static class ID2D1Bitmap_Exts
     /// <summary>
     /// Gets pixel data of <see cref="ID2D1Bitmap1"/> bitmap.
     /// </summary>
-    public static Direct2DBitmapData GetBitmapData(this ID2D1Bitmap1? srcBmp1, ID2D1DeviceContext6? dc)
+    public static Direct2DBitmapData GetBitmapData(this ID2D1Bitmap1? srcBmp1,
+        ID2D1DeviceContext6? dc, Rect? area = null)
     {
         var bmpData = new Direct2DBitmapData();
         if (srcBmp1.IsDisposed() || dc.IsDisposed()) return bmpData;
 
+        area ??= new();
+
         // create CPU-read bitmap
-        bmpData.Size = srcBmp1.Size.ToSizeI();
+        bmpData.Size = area.Value.IsEmpty()
+            ? srcBmp1.Size.ToSizeI()
+            : new((int)area.Value.Width, (int)area.Value.Height);
         using var bitmapCpu = srcBmp1.CreateCpuReadBitmap(dc);
         if (bitmapCpu.IsDisposed()) return bmpData;
 
 
         // 2. copy all raw pixel data
         var map = bitmapCpu.Map(MapOptions.Read);
+        var startIndex = area.Value.IsEmpty() ? 0 : ((int)area.Value.Y * map.Pitch) + ((int)area.Value.X * 4);
         bmpData.Stripe = map.Pitch;
         var totalDataSize = bmpData.Size.Height * (int)bmpData.Stripe;
 
         var bytes = new byte[totalDataSize];
-        Marshal.Copy(map.Bits, bytes, 0, totalDataSize);
+        Marshal.Copy((nint)(map.Bits + startIndex), bytes, 0, totalDataSize);
         bitmapCpu.Unmap();
 
 
