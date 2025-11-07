@@ -223,10 +223,137 @@ public partial class MainWindow
 
 
         // save file
-        // TODO:
-
-
+        await SaveImageAsync(destFilePath);
     }
+
+
+    /// <summary>
+    /// Save the viewing image to file.
+    ///   <para>
+    ///     The source image is checked by this order:
+    ///     <list type="number">
+    ///       <item>Selected image area.</item>
+    ///       <item><see cref="AP.ClipboardImage"/>.</item>
+    ///       <item>Source <paramref name="srcFilePath"/> file.</item>
+    ///     </list>
+    ///   </para>
+    /// </summary>
+    /// <param name="destFilePath">Destination file path</param>
+    /// <param name="srcFilePath">
+    ///   Source file path.
+    ///   <para>
+    ///     <c>Note:**</c>
+    ///     If it's empty, ImageGlass will check for the selection and clipboard image.
+    ///   </para>
+    /// </param>
+    public async Task<bool> SaveImageAsync(string destFilePath)
+    {
+        var saveSource = ImageSaveSource.Undefined;
+        var hasSrcPath = !string.IsNullOrEmpty(AP.Photos.CurrentFilePath);
+        Exception? error = null;
+
+        _ = _contentEl.ShowMessageAsync(destFilePath, AP.Config.Lang[LangId.FrmMain_MnuSave_Saving]);
+
+
+        // 1. save photo
+        // 1.1 save the selection
+        var hasSelection = Viewer.EnableSelection && !Viewer.SourceSelection.IsEmpty();
+        if (hasSelection)
+        {
+            try
+            {
+                var selectedBmp = Viewer.GetRenderedBitmap(true)!;
+                using var photo = new Photo(selectedBmp, selectedBmp.Size.Width, selectedBmp.Size.Height);
+
+                await photo.SaveAsAsync(destFilePath, new ImgTransform(), AP.Config.ImageEditQuality);
+                saveSource = ImageSaveSource.SelectedArea;
+            }
+            catch (Exception ex) { error = ex; }
+        }
+
+        // 1.2 save the clipboard image
+        else if (AP.ClipboardImage is not null)
+        {
+            try
+            {
+                await AP.ClipboardImage.SaveAsAsync(destFilePath, AP.ImageTransform, AP.Config.ImageEditQuality);
+                saveSource = ImageSaveSource.Clipboard;
+            }
+            catch (Exception ex) { error = ex; }
+        }
+
+        // 1.3 save the image in the list
+        else if (AP.Photos.Current is not null)
+        {
+            try
+            {
+                await AP.Photos.Current.SaveAsAsync(destFilePath, AP.ImageTransform, AP.Config.ImageEditQuality);
+                saveSource = ImageSaveSource.CurrentFile;
+            }
+            catch (Exception ex) { error = ex; }
+        }
+
+        // 1.4 image is empty
+        else
+        {
+            return false;
+        }
+
+
+        // 2. check for error
+        if (error is not null)
+        {
+            await _contentEl.ShowMessageAsync(null);
+
+            _ = await ModalWindow.ShowErrorAsync(this,
+                title: AP.Config.Lang[LangId.FrmMain_MnuSave],
+                description: $"""
+                {error.Source}:
+                {error.Message}
+
+                {destFilePath}
+                """,
+                heading: AP.Config.Lang[LangId.FrmMain_MnuSave_Error]);
+
+            return false;
+        }
+
+
+        // 3. check for success
+        if (saveSource == ImageSaveSource.SelectedArea)
+        {
+            // reload to view the updated image
+            IG_Reload();
+        }
+        else if (saveSource == ImageSaveSource.Clipboard)
+        {
+            // clear the clipboard image
+            await LoadClipboardPhotoAsync(null);
+
+            // reload to view the updated image
+            IG_Reload();
+        }
+        _ = _contentEl.ShowMessageAsync(destFilePath, AP.Config.Lang[LangId.FrmMain_MnuSave_Success]);
+
+
+        // file was overriden
+        if (destFilePath.Equals(AP.Photos.CurrentFilePath, StringComparison.OrdinalIgnoreCase))
+        {
+            // update cache of the modified item
+            AP.Photos.Current?.DisposeThumbnail();
+            // TODO: reload metadata, thumbnail
+        }
+
+
+        //// emits ImageSaved event
+        //AP.RaiseImageSavedEvent(new ImageSaveEventArgs(srcFilePath, destFilePath, saveSource));
+
+        return true;
+    }
+
+
+
+
 
 
     /// <summary>
@@ -850,14 +977,7 @@ public partial class MainWindow
             var wicBmp = await BHelper.GetClipboardImageAsync();
             if (wicBmp is not null)
             {
-                //var meta = await MagickDecoder.LoadMetadataAsync();
-                var photo = new Photo(wicBmp, new PhotoMetadata()
-                {
-                    Width = (uint)wicBmp.Size.Width,
-                    Height = (uint)wicBmp.Size.Height,
-                    FrameCount = 1,
-                });
-
+                var photo = new Photo(wicBmp, wicBmp.Size.Width, wicBmp.Size.Height);
                 await LoadClipboardPhotoAsync(photo);
             }
             return;

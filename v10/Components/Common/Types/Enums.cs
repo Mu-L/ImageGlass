@@ -65,3 +65,16 @@ public enum WindowsOS
     Win10,
     Win10OrLater,
 }
+
+
+/// <summary>
+/// Options indicate what source of image is saved.
+/// </summary>
+public enum ImageSaveSource
+{
+    Undefined,
+    SelectedArea,
+    Clipboard,
+    CurrentFile,
+}
+

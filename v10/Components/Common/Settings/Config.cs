@@ -554,10 +554,10 @@ public partial class Config : IgReactive
         }
     } = Const.TOOLBAR_ICON_HEIGHT;
 
-    ///// <summary>
-    ///// Gets, sets value of image quality for editting
-    ///// </summary>
-    //public uint ImageEditQuality { get; set; } = 80;
+    /// <summary>
+    /// Gets, sets value of image quality for editting
+    /// </summary>
+    public uint ImageEditQuality { get; set; } = 80;
 
     /// <summary>
     /// Gets, sets value of duration to display the in-app message

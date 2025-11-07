@@ -43,8 +43,6 @@ public partial class Photo : DisposableImpl
     private string _filePath = "";
     private bool _isCurrent = false;
 
-    private ImageSource? _galleryThumbnail;
-
     private Task? _taskThumbnail;
     private Task<PhotoMetadata>? _taskMetadata;
     private CancellationTokenSource? _cancelPhotoLoading;
@@ -195,12 +193,11 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public ImageSource? GalleryThumbnail
     {
-        get => _galleryThumbnail;
-        set
+        get; set
         {
-            if (_galleryThumbnail != value)
+            if (field != value)
             {
-                _galleryThumbnail = value;
+                field = value;
                 _ = OnPropertyChanged();
                 _ = OnPropertyChanged(nameof(IsGalleryThumbnailLoaded));
                 _ = OnPropertyChanged(nameof(IsGalleryThumbnailLoading));
@@ -236,7 +233,28 @@ public partial class Photo : DisposableImpl
 
 
     /// <summary>
-    /// Initializes a new instance using a bitmap source for rendering.
+    /// Initializes a new single-frame photo using a bitmap source for rendering.
+    /// </summary>
+    public Photo(IDisposable? bmp, int width, int height, PhotoLoadingState state = PhotoLoadingState.Loaded)
+    {
+        _metadata?.Dispose();
+        _metadata = new()
+        {
+            Width = (uint)width,
+            Height = (uint)height,
+            FrameCount = 1,
+        };
+
+        Bitmap = bmp;
+        _width = (uint)_metadata.Width;
+        _height = (uint)_metadata.Height;
+
+        State = state;
+    }
+
+
+    /// <summary>
+    /// Initializes a new single-frame using a bitmap source for rendering.
     /// </summary>
     public Photo(IDisposable? bmp, PhotoMetadata? meta, PhotoLoadingState state = PhotoLoadingState.Loaded)
     {
@@ -289,7 +307,8 @@ public partial class Photo : DisposableImpl
 
             _metadata?.Dispose();
             _metadata = null;
-            ThumbnailBitmap = null;
+
+            DisposeThumbnail();
 
             _cancelPhotoLoading?.Dispose();
             _cancelPhotoLoading = null;
@@ -554,6 +573,16 @@ public partial class Photo : DisposableImpl
 
 
     /// <summary>
+    /// Dispose the thumbnail of photo.
+    /// </summary>
+    public void DisposeThumbnail()
+    {
+        ThumbnailBitmap = null;
+        GalleryThumbnail = null;
+    }
+
+
+    /// <summary>
     /// Starts loading thumbnail off-thread.
     /// </summary>
     public async Task StartLoadingGalleryThumbnail(double size,
@@ -648,7 +677,7 @@ public partial class Photo : DisposableImpl
     /// Saves the photo to file.
     /// </summary>
     /// <exception cref="Exception"></exception>
-    public async Task SaveAsAsync(string destFilePath, ImgTransform transforms, int quality, CancellationToken token = default)
+    public async Task SaveAsAsync(string destFilePath, ImgTransform transforms, uint quality, CancellationToken token = default)
     {
         var taskId = Guid.NewGuid();
         _ = _taskRefs.TryAdd(taskId, true);
@@ -658,13 +687,18 @@ public partial class Photo : DisposableImpl
             // 1. save clipboard photo to file
             if (IsClipboard && Bitmap is IWICBitmapSource wicBmp)
             {
-                await WicCodec.SaveAsync(wicBmp, destFilePath, transforms, (uint)quality, token);
+                await WicCodec.SaveAsync(wicBmp, destFilePath, transforms, quality, token);
             }
 
             // 2. save photo file to file
             else
             {
-                await MagickCodec.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, (uint)quality, token);
+                // TODO: use WIC to save these src formats:
+                // ".JXR"
+                // ".HDP"
+                // ".WDP"
+
+                await MagickCodec.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, quality, token);
             }
         }
         catch (OperationCanceledException) { }
