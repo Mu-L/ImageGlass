@@ -37,6 +37,7 @@ public partial class MainWindow
 
         // File
         new(LangId.FrmMain_MnuOpenFile,         API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
+        new(LangId.FrmMain_MnuSave,             API.IG_Save,                MKeys.Ctrl, VKey.S),
         new(LangId.FrmMain_MnuSaveAs,           API.IG_SaveAs,              MKeys.Ctrl | MKeys.Shift, VKey.S),
         new(LangId.FrmMain_MnuOpenWith,         API.IG_OpenWith,            VKey.D),
         new(LangId.FrmMain_MnuRefresh,          API.IG_Refresh,             VKey.R),

@@ -138,6 +138,44 @@ public partial class MainWindow
 
 
     /// <summary>
+    /// Saves and overrides the current photo.
+    /// </summary>
+    public async Task IG_SaveAsync()
+    {
+        var srcFilePath = AP.Photos.CurrentFilePath;
+        var isOpeningImageList = AP.Photos.CurrentIndex > -1;
+
+        // use Save As if no image is opened
+        if (!isOpeningImageList && AP.ClipboardImage is not null)
+        {
+            await IG_SaveAsAsync();
+            return;
+        }
+
+
+        // show override warning
+        if (AP.Config.ShowSaveOverrideConfirmation)
+        {
+            var modal = await ModalWindow.ShowWarningAsync(this,
+                title: AP.Config.Lang[LangId.FrmMain_MnuSave],
+                description: srcFilePath,
+                heading: AP.Config.Lang[LangId.FrmMain_MnuSave_Confirm],
+                note: AP.Config.Lang[LangId.FrmMain_MnuSave_ConfirmDescription],
+                buttons: ModalWindowButton.Yes_No,
+                thumbnail: AP.Photos.Current?.ThumbnailBitmap,
+                showRememberOption: true);
+
+            // update ShowSaveOverrideConfirmation setting
+            AP.Config.ShowSaveOverrideConfirmation = !modal.IsRememberOptionChecked;
+
+            if (modal.ExitCode != DialogExitCode.OK) return;
+        }
+
+        await SaveImageAsync(srcFilePath);
+    }
+
+
+    /// <summary>
     /// Shows save file dialog to save photo to file.
     /// </summary>
     public async Task IG_SaveAsAsync()
@@ -203,7 +241,7 @@ public partial class MainWindow
             var fi = new FileInfo(destFilePath);
 
             // show confirm dialog
-            var result = await ModalWindow.ShowWarningAsync(this,
+            var modal = await ModalWindow.ShowWarningAsync(this,
                 title: AP.Config.Lang[LangId.FrmMain_MnuSaveAs],
                 description: $"""
                 {destFilePath}
@@ -216,9 +254,9 @@ public partial class MainWindow
 
 
             // update ShowSaveOverrideConfirmation setting
-            AP.Config.ShowSaveOverrideConfirmation = !result.IsRememberOptionChecked;
+            AP.Config.ShowSaveOverrideConfirmation = !modal.IsRememberOptionChecked;
 
-            if (result.ExitCode != DialogExitCode.OK) return;
+            if (modal.ExitCode != DialogExitCode.OK) return;
         }
 
 

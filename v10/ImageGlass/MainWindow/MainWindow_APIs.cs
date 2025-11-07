@@ -38,6 +38,7 @@ public partial class MainWindow
 
         // Main Menu
         { API.IG_OpenFile,              IgCommands.Create(IG_OpenFileAsync) },
+        { API.IG_Save,                  IgCommands.Create(IG_SaveAsync) },
         { API.IG_SaveAs,                IgCommands.Create(IG_SaveAsAsync) },
         { API.IG_OpenWith,              IgCommands.Create(IG_OpenWithAsync) },
         { API.IG_Refresh,               IgCommands.Create(IG_Refresh) },
