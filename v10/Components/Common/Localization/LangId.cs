@@ -177,6 +177,7 @@ public enum LangId
     FrmMain_MnuOpenFile,
     FrmMain_MnuNewWindow,
     FrmMain_MnuNewWindow_Error,
+
     FrmMain_MnuSave,
     FrmMain_MnuSave_Confirm,
     FrmMain_MnuSave_ConfirmDescription,
@@ -184,10 +185,8 @@ public enum LangId
     FrmMain_MnuSave_Success,
     FrmMain_MnuSave_Error,
     FrmMain_MnuSaveAs,
-    FrmMain_MnuRefresh,
-    FrmMain_MnuReload,
-    FrmMain_MnuReloadImageList,
-    FrmMain_MnuUnload,
+    FrmMain_MnuExportFrames,
+
     FrmMain_MnuOpenWith,
     FrmMain_MnuEdit,
     FrmMain_MnuEdit_AppNotFound,
@@ -195,6 +194,15 @@ public enum LangId
     FrmMain_MnuPrint_Error,
     FrmMain_MnuShare,
     FrmMain_MnuShare_Error,
+    FrmMain_MnuOpenLocation,
+
+    FrmMain_MnuRename,
+    FrmMain_MnuRename_Description,
+    FrmMain_MnuMoveToRecycleBin,
+    FrmMain_MnuMoveToRecycleBin_Description,
+    FrmMain_MnuDeleteFromHardDisk,
+    FrmMain_MnuDeleteFromHardDisk_Description,
+
     #endregion // Main Menu > File
 
 
@@ -249,29 +257,29 @@ public enum LangId
     #region Main Menu > Image
     FrmMain_MnuImage,
 
+    FrmMain_MnuRefresh,
+    FrmMain_MnuReload,
+    FrmMain_MnuReloadImageList,
+    FrmMain_MnuUnload,
+
     FrmMain_MnuViewChannels,
     FrmMain_MnuLoadingOrders,
 
     FrmMain_MnuInvertColors,
+    FrmMain_MnuToggleImageAnimation,
+
     FrmMain_MnuRotateLeft,
     FrmMain_MnuRotateRight,
     FrmMain_MnuFlipHorizontal,
     FrmMain_MnuFlipVertical,
-    FrmMain_MnuRename,
-    FrmMain_MnuRename_Description,
-    FrmMain_MnuMoveToRecycleBin,
-    FrmMain_MnuMoveToRecycleBin_Description,
-    FrmMain_MnuDeleteFromHardDisk,
-    FrmMain_MnuDeleteFromHardDisk_Description,
-    FrmMain_MnuExportFrames,
-    FrmMain_MnuToggleImageAnimation,
+
     FrmMain_MnuSetDesktopBackground,
     FrmMain_MnuSetDesktopBackground_Error,
     FrmMain_MnuSetDesktopBackground_Success,
     FrmMain_MnuSetLockScreen,
     FrmMain_MnuSetLockScreen_Error,
     FrmMain_MnuSetLockScreen_Success,
-    FrmMain_MnuOpenLocation,
+
     FrmMain_MnuImageProperties,
     #endregion // Main Menu > Image
 

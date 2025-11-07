@@ -390,10 +390,6 @@ public partial class MainWindow
     }
 
 
-
-
-
-
     /// <summary>
     /// Shows Open With window.
     /// </summary>
@@ -444,70 +440,90 @@ public partial class MainWindow
 
 
     /// <summary>
-    /// Refreshes image viewport.
+    /// Opens photo file location.
     /// </summary>
-    public void IG_Refresh()
+    public static void IG_OpenLocation()
     {
-        Viewer.Refresh(true, false, AP.Config.EnableWindowFit);
+        BHelper.OpenFilePath(AP.Photos.CurrentFilePath);
     }
 
 
     /// <summary>
-    /// Reloads image file.
+    /// Opens a popup to rename the current photo.
     /// </summary>
-    public void IG_Reload()
+    public async Task IG_RenameAsync()
     {
-        var photo = AP.Photos.Get(AP.Photos.CurrentIndex);
-        _ = ViewPhotoAsync(photo, useCache: false);
-    }
+        var oldFilePath = AP.Photos.CurrentFilePath;
+        if (!File.Exists(oldFilePath)) return;
+
+        var currentFolder = Path.GetDirectoryName(oldFilePath) ?? string.Empty;
+        var ext = Path.GetExtension(oldFilePath);
+        var newName = Path.GetFileNameWithoutExtension(oldFilePath);
+        var title = AP.Config.Lang[LangId.FrmMain_MnuRename];
+
+        // 2. show popup
+        var result = await ModalWindow.ShowInputAsync(this,
+            title,
+            description: $"""
+            {oldFilePath}
+            
+            {AP.Config.Lang[LangId.FrmMain_MnuRename_Description]}
+            """,
+            heading: null,
+            inputValue: newName,
+            thumbnail: AP.Photos.Current?.ThumbnailBitmap,
+            thumbnailIcon: StockIconId.Rename,
+            acceptValue: TextBoxAcceptValue.FileNameValueOnly);
+
+        if (result.ExitCode != DialogExitCode.OK || string.IsNullOrWhiteSpace(result.InputValue)) return;
+
+        // 3. get new photo name
+        newName = ZString.Concat(result.InputValue.Trim(), ext);
+        var newFilePath = Path.Combine(currentFolder, newName);
 
 
-    /// <summary>
-    /// Reloads images list.
-    /// </summary>
-    public void IG_ReloadList()
-    {
-        PrepareLoadPhotoList(AP.Photos.DistinctDirs,
-            AP.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
-    }
-
-
-    /// <summary>
-    /// Unloads the current photo.
-    /// </summary>
-    public async Task IG_UnloadAsync()
-    {
-        var args = new PhotoUnloadedEventArgs()
+        // 4. perform renaming
+        try
         {
-            IsClipboardPhoto = AP.ClipboardImage is not null,
-            Index = AP.Photos.CurrentIndex,
-            FilePath = AP.Photos.CurrentFilePath,
-        };
+            // Issue 73: Windows ignores case-only changes
+            if (string.Equals(oldFilePath, newFilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                // user changing only the case of the filename. Need to perform a trick.
+                File.Move(oldFilePath, oldFilePath + "_temp");
+                File.Move(oldFilePath + "_temp", newFilePath);
+            }
+            else
+            {
+                File.Move(oldFilePath, newFilePath);
+            }
 
 
-        // 1. unload clipboard photo
-        if (args.IsClipboardPhoto)
-        {
-            await LoadClipboardPhotoAsync(null);
+            // TODO:
+            AP.Photos.SetFilePath(AP.Photos.CurrentIndex, newFilePath);
 
-            // show the current photo in the list
-            await ViewPhotoAsync(AP.Photos.Current);
+            //// manually update the change if FileWatcher is not enabled
+            //if (!AP.Config.EnableRealTimeFileUpdate)
+            //{
+            //    AP.Photos.SetFileName(AP.Photos.CurrentIndex, newFilePath);
+
+            //    Gallery.Items[Local.CurrentIndex].Rename(newFilePath);
+            //    LoadImageInfo(ImageInfoUpdateTypes.Name | ImageInfoUpdateTypes.Path);
+            //}
         }
-
-        // 2. unload photo from the list
-        else
+        catch (Exception ex)
         {
-            // cancel loading the current image
-            AP.Photos.Current?.CancelLoading();
-
-            await ViewPhotoAsync(null, false);
-            AP.Photos.Current?.Unload();
+            _ = await ModalWindow.ShowErrorAsync(this, title, ex.Message);
         }
-
-        // raise unloaded event
-        AP.OnPhotoUnloaded(args);
     }
 
+
+    /// <summary>
+    /// Opens photo's Properties dialog.
+    /// </summary>
+    public void IG_OpenProperties()
+    {
+        ExplorerApi.DisplayFileProperties(AP.Photos.CurrentFilePath, this.Handle);
+    }
 
     #endregion // File APIs
 
@@ -897,89 +913,68 @@ public partial class MainWindow
     #region Image APIs
 
     /// <summary>
-    /// Opens a popup to rename the current photo.
+    /// Refreshes image viewport.
     /// </summary>
-    public async Task IG_RenameAsync()
+    public void IG_Refresh()
     {
-        var oldFilePath = AP.Photos.CurrentFilePath;
-        if (!File.Exists(oldFilePath)) return;
-
-        var currentFolder = Path.GetDirectoryName(oldFilePath) ?? string.Empty;
-        var ext = Path.GetExtension(oldFilePath);
-        var newName = Path.GetFileNameWithoutExtension(oldFilePath);
-        var title = AP.Config.Lang[LangId.FrmMain_MnuRename];
-
-        // 2. show popup
-        var result = await ModalWindow.ShowInputAsync(this,
-            title,
-            description: $"""
-            {oldFilePath}
-            
-            {AP.Config.Lang[LangId.FrmMain_MnuRename_Description]}
-            """,
-            heading: null,
-            inputValue: newName,
-            thumbnail: AP.Photos.Current?.ThumbnailBitmap,
-            thumbnailIcon: StockIconId.Rename,
-            acceptValue: TextBoxAcceptValue.FileNameValueOnly);
-
-        if (result.ExitCode != DialogExitCode.OK || string.IsNullOrWhiteSpace(result.InputValue)) return;
-
-        // 3. get new photo name
-        newName = ZString.Concat(result.InputValue.Trim(), ext);
-        var newFilePath = Path.Combine(currentFolder, newName);
-
-
-        // 4. perform renaming
-        try
-        {
-            // Issue 73: Windows ignores case-only changes
-            if (string.Equals(oldFilePath, newFilePath, StringComparison.OrdinalIgnoreCase))
-            {
-                // user changing only the case of the filename. Need to perform a trick.
-                File.Move(oldFilePath, oldFilePath + "_temp");
-                File.Move(oldFilePath + "_temp", newFilePath);
-            }
-            else
-            {
-                File.Move(oldFilePath, newFilePath);
-            }
-
-
-            // TODO:
-            AP.Photos.SetFilePath(AP.Photos.CurrentIndex, newFilePath);
-
-            //// manually update the change if FileWatcher is not enabled
-            //if (!AP.Config.EnableRealTimeFileUpdate)
-            //{
-            //    AP.Photos.SetFileName(AP.Photos.CurrentIndex, newFilePath);
-
-            //    Gallery.Items[Local.CurrentIndex].Rename(newFilePath);
-            //    LoadImageInfo(ImageInfoUpdateTypes.Name | ImageInfoUpdateTypes.Path);
-            //}
-        }
-        catch (Exception ex)
-        {
-            _ = await ModalWindow.ShowErrorAsync(this, title, ex.Message);
-        }
+        Viewer.Refresh(true, false, AP.Config.EnableWindowFit);
     }
 
 
     /// <summary>
-    /// Opens photo file location.
+    /// Reloads image file.
     /// </summary>
-    public static void IG_OpenLocation()
+    public void IG_Reload()
     {
-        BHelper.OpenFilePath(AP.Photos.CurrentFilePath);
+        var photo = AP.Photos.Get(AP.Photos.CurrentIndex);
+        _ = ViewPhotoAsync(photo, useCache: false);
     }
 
 
     /// <summary>
-    /// Opens photo's Properties dialog.
+    /// Reloads images list.
     /// </summary>
-    public void IG_OpenProperties()
+    public void IG_ReloadList()
     {
-        ExplorerApi.DisplayFileProperties(AP.Photos.CurrentFilePath, this.Handle);
+        PrepareLoadPhotoList(AP.Photos.DistinctDirs,
+            AP.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
+    }
+
+
+    /// <summary>
+    /// Unloads the current photo.
+    /// </summary>
+    public async Task IG_UnloadAsync()
+    {
+        var args = new PhotoUnloadedEventArgs()
+        {
+            IsClipboardPhoto = AP.ClipboardImage is not null,
+            Index = AP.Photos.CurrentIndex,
+            FilePath = AP.Photos.CurrentFilePath,
+        };
+
+
+        // 1. unload clipboard photo
+        if (args.IsClipboardPhoto)
+        {
+            await LoadClipboardPhotoAsync(null);
+
+            // show the current photo in the list
+            await ViewPhotoAsync(AP.Photos.Current);
+        }
+
+        // 2. unload photo from the list
+        else
+        {
+            // cancel loading the current image
+            AP.Photos.Current?.CancelLoading();
+
+            await ViewPhotoAsync(null, false);
+            AP.Photos.Current?.Unload();
+        }
+
+        // raise unloaded event
+        AP.OnPhotoUnloaded(args);
     }
 
     #endregion // Image APIs

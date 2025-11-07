@@ -43,63 +43,42 @@
 
                     <!--  File  -->
                     <MenuFlyoutSubItem x:Name="MnuFile" Text="[File]">
-                        <ui:IgMenuItem
-                            LangKey="FrmMain_MnuOpenFile"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
-                            Text="[Open file...]" />
-                        <ui:IgMenuItem
-                            LangKey="FrmMain_MnuNewWindow"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
-                            Text="[Open new window]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuOpenFile" Text="[Open file...]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuNewWindow" Text="[Open new window]" />
                         <ui:IgMenuItem
                             Icon="Save"
                             LangKey="FrmMain_MnuSave"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Save]" />
-                        <ui:IgMenuItem
-                            LangKey="FrmMain_MnuSaveAs"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
-                            Text="[Save as...]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuSaveAs" Text="[Save as...]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuExportFrames" Text="[Export image frames...]" />
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem
-                            Icon="OpenWith"
-                            LangKey="FrmMain_MnuOpenWith"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
-                            Text="[Open with...]" />
                         <ui:IgMenuItem
                             Icon="Edit"
                             LangKey="FrmMain_MnuEdit"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
                             Text="[Edit image]" />
-                        <ui:IgMenuItem
-                            Icon="Print"
-                            LangKey="FrmMain_MnuPrint"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
-                            Text="[Print...]" />
-                        <ui:IgMenuItem
-                            Icon="Share"
-                            LangKey="FrmMain_MnuShare"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
-                            Text="[Share...]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuOpenWith" Text="[Open with...]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuPrint" Text="[Print...]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuShare" Text="[Share...]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuOpenLocation" Text="[Open image location]" />
                         <MenuFlyoutSeparator />
 
                         <ui:IgMenuItem
-                            LangKey="FrmMain_MnuRefresh"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
-                            Text="[Refresh]" />
+                            Icon="Rename"
+                            LangKey="FrmMain_MnuRename"
+                            Text="[Rename image]" />
                         <ui:IgMenuItem
-                            LangKey="FrmMain_MnuReload"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
-                            Text="[Reload image]" />
+                            Icon="Delete"
+                            LangKey="FrmMain_MnuMoveToRecycleBin"
+                            Text="[Move to Recycle Bin]" />
                         <ui:IgMenuItem
-                            LangKey="FrmMain_MnuReloadImageList"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
-                            Text="[Reload list]" />
-                        <ui:IgMenuItem
-                            LangKey="FrmMain_MnuUnload"
-                            Style="{StaticResource DefaultMenuFlyoutItemStyle}"
-                            Text="[Unload]" />
+                            Icon="Clear"
+                            LangKey="FrmMain_MnuDeleteFromHardDisk"
+                            Text="[Delete permanently]" />
+                        <MenuFlyoutSeparator />
+
+                        <ui:IgMenuItem LangKey="FrmMain_MnuImageProperties" Text="[Image properties]" />
+
                     </MenuFlyoutSubItem>
 
 
@@ -212,6 +191,12 @@
 
                     <!--  Image  -->
                     <MenuFlyoutSubItem x:Name="MnuImage" Text="[Image]">
+                        <ui:IgMenuItem LangKey="FrmMain_MnuRefresh" Text="[Refresh]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuReload" Text="[Reload image]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuReloadImageList" Text="[Reload list]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuUnload" Text="[Unload]" />
+                        <MenuFlyoutSeparator />
+
                         <MenuFlyoutSubItem
                             x:Name="MnuLoadingOrders"
                             Icon="Sort"
@@ -316,7 +301,10 @@
                             <ui:IgMenuItem x:Name="MnuViewChannel_BA" Text="B + A" />
                             <ui:IgMenuItem x:Name="MnuViewChannel_A" Text="A" />
                         </MenuFlyoutSubItem>
+                        <MenuFlyoutSeparator />
+
                         <ui:IgMenuItem LangKey="FrmMain_MnuInvertColors" Text="[Invert colors]" />
+                        <ui:IgMenuItem LangKey="FrmMain_MnuToggleImageAnimation" Text="[Start / stop animating image]" />
                         <MenuFlyoutSeparator />
 
                         <ui:IgMenuItem LangKey="FrmMain_MnuRotateLeft" Text="[Rotate left]" />
@@ -325,32 +313,9 @@
                         <ui:IgMenuItem LangKey="FrmMain_MnuFlipVertical" Text="[Flip vertical]" />
                         <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem
-                            Icon="Rename"
-                            LangKey="FrmMain_MnuRename"
-                            Text="[Rename image]" />
-                        <ui:IgMenuItem
-                            Icon="Delete"
-                            LangKey="FrmMain_MnuMoveToRecycleBin"
-                            Text="[Move to Recycle Bin]" />
-                        <ui:IgMenuItem
-                            Icon="Clear"
-                            LangKey="FrmMain_MnuDeleteFromHardDisk"
-                            Text="[Delete permanently]" />
-                        <MenuFlyoutSeparator />
-
-                        <ui:IgMenuItem LangKey="FrmMain_MnuToggleImageAnimation" Text="[Start / stop animating image]" />
-                        <ui:IgMenuItem LangKey="FrmMain_MnuExportFrames" Text="[Export image frames...]" />
                         <ui:IgMenuItem LangKey="FrmMain_MnuSetDesktopBackground" Text="[Set as Desktop background]" />
                         <ui:IgMenuItem LangKey="FrmMain_MnuSetLockScreen" Text="[Set as Lock screen image]" />
-                        <ui:IgMenuItem LangKey="FrmMain_MnuOpenLocation" Text="[Open image location]">
-                            <ui:IgMenuItem.Icon>
-                                <FontIcon Glyph="&#xE838;" />
-                            </ui:IgMenuItem.Icon>
-                        </ui:IgMenuItem>
-                        <MenuFlyoutSeparator />
 
-                        <ui:IgMenuItem LangKey="FrmMain_MnuImageProperties" Text="[Image properties]" />
                     </MenuFlyoutSubItem>
 
 

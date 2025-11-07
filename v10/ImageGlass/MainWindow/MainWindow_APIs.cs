@@ -41,10 +41,9 @@ public partial class MainWindow
         { API.IG_Save,                  IgCommands.Create(IG_SaveAsync) },
         { API.IG_SaveAs,                IgCommands.Create(IG_SaveAsAsync) },
         { API.IG_OpenWith,              IgCommands.Create(IG_OpenWithAsync) },
-        { API.IG_Refresh,               IgCommands.Create(IG_Refresh) },
-        { API.IG_Reload,                IgCommands.Create(IG_Reload) },
-        { API.IG_ReloadList,            IgCommands.Create(IG_ReloadList) },
-        { API.IG_Unload,                IgCommands.Create(IG_UnloadAsync) },              
+        { API.IG_OpenLocation,          IgCommands.Create(IG_OpenLocation) },
+        { API.IG_Rename,                IgCommands.Create(IG_RenameAsync) },
+        { API.IG_OpenProperties,        IgCommands.Create(IG_OpenProperties) },
 
 
         // Navigation
@@ -78,9 +77,10 @@ public partial class MainWindow
 
 
         // Image
-        { API.IG_Rename,                IgCommands.Create(IG_RenameAsync) },
-        { API.IG_OpenLocation,          IgCommands.Create(IG_OpenLocation) },
-        { API.IG_OpenProperties,        IgCommands.Create(IG_OpenProperties) },
+        { API.IG_Refresh,               IgCommands.Create(IG_Refresh) },
+        { API.IG_Reload,                IgCommands.Create(IG_Reload) },
+        { API.IG_ReloadList,            IgCommands.Create(IG_ReloadList) },
+        { API.IG_Unload,                IgCommands.Create(IG_UnloadAsync) },
 
 
         // Clipboard

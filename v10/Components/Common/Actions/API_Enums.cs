@@ -34,10 +34,10 @@ public enum API
     IG_Save,
     IG_SaveAs,
     IG_OpenWith,
-    IG_Refresh,
-    IG_Reload,
-    IG_ReloadList,
-    IG_Unload,
+    IG_OpenLocation,
+    IG_Rename,
+    IG_OpenProperties,
+
 
     // Menu > Navigation
     IG_ViewNext,
@@ -64,9 +64,10 @@ public enum API
     IG_PanToBottom,
 
     // Menu > Image
-    IG_Rename,
-    IG_OpenLocation,
-    IG_OpenProperties,
+    IG_Refresh,
+    IG_Reload,
+    IG_ReloadList,
+    IG_Unload,
 
     // Menu > Clipboard
     IG_PasteImage,

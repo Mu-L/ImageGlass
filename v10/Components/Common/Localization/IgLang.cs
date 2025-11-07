@@ -452,10 +452,8 @@ public class IgLang
         new(LangId.FrmMain_MnuSave_Success, "Image is saved"), //v9.0
         new(LangId.FrmMain_MnuSave_Error, "Could not save the image"), //v9.0
         new(LangId.FrmMain_MnuSaveAs, "Save as…"), //v3.0
-        new(LangId.FrmMain_MnuRefresh, "Refresh"), //v3.0
-        new(LangId.FrmMain_MnuReload, "Reload image"), //v5.5
-        new(LangId.FrmMain_MnuReloadImageList, "Reload image list"), //v7.0
-        new(LangId.FrmMain_MnuUnload, "Unload image"), //v9.0
+        new(LangId.FrmMain_MnuExportFrames, "Export image frames…"), //v7.5
+
         new(LangId.FrmMain_MnuOpenWith, "Open with…"), //v7.6
         new(LangId.FrmMain_MnuEdit, "Edit image {0}…"), //v3.0,
         new(LangId.FrmMain_MnuEdit_AppNotFound, "Could not find the associated app for editing. You can assign an app for editing this format in ImageGlass Settings > Edit."), //v9.0
@@ -463,6 +461,14 @@ public class IgLang
         new(LangId.FrmMain_MnuPrint_Error, "Could not print the viewing image"), //v9.0
         new(LangId.FrmMain_MnuShare, "Share…"), //v8.6
         new(LangId.FrmMain_MnuShare_Error, "Could not open Share dialog."), //v9.0
+        new(LangId.FrmMain_MnuOpenLocation, "Open image location"), //v3.0
+
+        new(LangId.FrmMain_MnuRename, "Rename image…"), //v3.0
+        new(LangId.FrmMain_MnuRename_Description, "Enter a new filename:"), // v9.0
+        new(LangId.FrmMain_MnuMoveToRecycleBin, "Move to the Recycle Bin"), //v3.0
+        new(LangId.FrmMain_MnuMoveToRecycleBin_Description, "Do you want to move this file to the Recycle bin?"), //v3.0
+        new(LangId.FrmMain_MnuDeleteFromHardDisk, "Delete permanently"), //v3.0
+        new(LangId.FrmMain_MnuDeleteFromHardDisk_Description, "Are you sure you want to permanently delete this file?"), //v3.0
         #endregion // Main Menu > File
 
         #region Main Menu > Navigation
@@ -513,29 +519,28 @@ public class IgLang
         #region Main Menu > Image
         new(LangId.FrmMain_MnuImage, "Image"), //v7.0
 
+        new(LangId.FrmMain_MnuRefresh, "Refresh"), //v3.0
+        new(LangId.FrmMain_MnuReload, "Reload image"), //v5.5
+        new(LangId.FrmMain_MnuReloadImageList, "Reload image list"), //v7.0
+        new(LangId.FrmMain_MnuUnload, "Unload image"), //v9.0
+
         new(LangId.FrmMain_MnuViewChannels, "View channels"), //v7.0
         new(LangId.FrmMain_MnuLoadingOrders, "Loading orders"), //v8.0
-
         new(LangId.FrmMain_MnuInvertColors, "Invert colors"), // v9.3
+        new(LangId.FrmMain_MnuToggleImageAnimation, "Start / stop animating image"), //v3.0
+
         new(LangId.FrmMain_MnuRotateLeft, "Rotate left"), //v7.5
         new(LangId.FrmMain_MnuRotateRight, "Rotate right"), //v7.5
         new(LangId.FrmMain_MnuFlipHorizontal, "Flip Horizontal"), // V6.0
         new(LangId.FrmMain_MnuFlipVertical, "Flip Vertical"), // V6.0
-        new(LangId.FrmMain_MnuRename, "Rename image…"), //v3.0
-        new(LangId.FrmMain_MnuRename_Description, "Enter a new filename:"), // v9.0
-        new(LangId.FrmMain_MnuMoveToRecycleBin, "Move to the Recycle Bin"), //v3.0
-        new(LangId.FrmMain_MnuMoveToRecycleBin_Description, "Do you want to move this file to the Recycle bin?"), //v3.0
-        new(LangId.FrmMain_MnuDeleteFromHardDisk, "Delete permanently"), //v3.0
-        new(LangId.FrmMain_MnuDeleteFromHardDisk_Description, "Are you sure you want to permanently delete this file?"), //v3.0
-        new(LangId.FrmMain_MnuExportFrames, "Export image frames…"), //v7.5
-        new(LangId.FrmMain_MnuToggleImageAnimation, "Start / stop animating image"), //v3.0
+        
         new(LangId.FrmMain_MnuSetDesktopBackground, "Set as Desktop background"), //v3.0
         new(LangId.FrmMain_MnuSetDesktopBackground_Error, "Could not set the viewing image as desktop background"), // v6.0
         new(LangId.FrmMain_MnuSetDesktopBackground_Success, "Desktop background is updated"), // v6.0
         new(LangId.FrmMain_MnuSetLockScreen, "Set as Lock screen image"), // V6.0
         new(LangId.FrmMain_MnuSetLockScreen_Error, "Could not set the viewing image as lock screen image"), // v6.0
         new(LangId.FrmMain_MnuSetLockScreen_Success, "Lock screen image is updated"), // v6.0
-        new(LangId.FrmMain_MnuOpenLocation, "Open image location"), //v3.0
+
         new(LangId.FrmMain_MnuImageProperties, "Image properties"), //v3.0
         #endregion // Main Menu > Image
 

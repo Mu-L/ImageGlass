@@ -40,10 +40,9 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuSave,             API.IG_Save,                MKeys.Ctrl, VKey.S),
         new(LangId.FrmMain_MnuSaveAs,           API.IG_SaveAs,              MKeys.Ctrl | MKeys.Shift, VKey.S),
         new(LangId.FrmMain_MnuOpenWith,         API.IG_OpenWith,            VKey.D),
-        new(LangId.FrmMain_MnuRefresh,          API.IG_Refresh,             VKey.R),
-        new(LangId.FrmMain_MnuReload,           API.IG_Reload,              MKeys.Ctrl, VKey.R),
-        new(LangId.FrmMain_MnuReloadImageList,  API.IG_ReloadList,          MKeys.Ctrl | MKeys.Shift, VKey.R),
-        new(LangId.FrmMain_MnuUnload,           API.IG_Unload,              VKey.U),
+        new(LangId.FrmMain_MnuOpenLocation,     API.IG_OpenLocation,        VKey.L),
+        new(LangId.FrmMain_MnuRename,           API.IG_Rename,              VKey.F2),
+        new(LangId.FrmMain_MnuImageProperties,  API.IG_OpenProperties,      MKeys.Alt, VKey.Enter),
 
 
         // Navigation
@@ -79,9 +78,10 @@ public partial class MainWindow
 
 
         // Image
-        new(LangId.FrmMain_MnuRename,           API.IG_Rename,              VKey.F2),
-        new(LangId.FrmMain_MnuOpenLocation,     API.IG_OpenLocation,        VKey.L),
-        new(LangId.FrmMain_MnuImageProperties,  API.IG_OpenProperties,      MKeys.Alt, VKey.Enter),
+        new(LangId.FrmMain_MnuRefresh,          API.IG_Refresh,             VKey.R),
+        new(LangId.FrmMain_MnuReload,           API.IG_Reload,              MKeys.Ctrl, VKey.R),
+        new(LangId.FrmMain_MnuReloadImageList,  API.IG_ReloadList,          MKeys.Ctrl | MKeys.Shift, VKey.R),
+        new(LangId.FrmMain_MnuUnload,           API.IG_Unload,              VKey.U),
 
 
         // Clipboard
