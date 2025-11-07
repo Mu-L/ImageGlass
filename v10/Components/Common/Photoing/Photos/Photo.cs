@@ -701,8 +701,11 @@ public partial class Photo : DisposableImpl
 
         try
         {
+            var destExt = Path.GetExtension(destFilePath).ToLowerInvariant();
+            var mustUseWic = IsClipboard || WicCodec.TopWriteExts.Contains(destExt);
+
             // 1. save clipboard photo to file
-            if (IsClipboard && Bitmap is IWICBitmapSource wicBmp)
+            if (mustUseWic && Bitmap is IWICBitmapSource wicBmp)
             {
                 await WicCodec.SaveAsync(wicBmp, destFilePath, transforms, quality, token);
             }
@@ -710,11 +713,6 @@ public partial class Photo : DisposableImpl
             // 2. save photo file to file
             else
             {
-                // TODO: use WIC to save these src formats:
-                // ".JXR"
-                // ".HDP"
-                // ".WDP"
-
                 await MagickCodec.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, quality, token);
             }
         }

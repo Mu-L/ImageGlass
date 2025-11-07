@@ -36,8 +36,18 @@ namespace ImageGlass.Common.Photoing;
 
 public static partial class WicCodec
 {
-    public static FrozenSet<string> TopEncoderExts => new HashSet<string>(
-        [".gif", ".gifv", ".fax", ".jxr", ".apng"]
+    /// <summary>
+    /// List of extensions to always decode with WIC.
+    /// </summary>
+    public static FrozenSet<string> TopReadExts => new HashSet<string>(
+        [".gif", ".gifv", ".fax", ".jxr", ".apng", ".jxr", ".hdp", ".wdp"]
+    ).ToFrozenSet();
+
+    /// <summary>
+    /// List of extensions to always encode with WIC.
+    /// </summary>
+    public static FrozenSet<string> TopWriteExts => new HashSet<string>(
+        [".jxr", ".hdp", ".wdp"]
     ).ToFrozenSet();
 
 
@@ -94,6 +104,9 @@ public static partial class WicCodec
         var decoder = PhotoWIC.CreateDecoder(meta.FilePath);
         if (decoder.IsDisposed()) return result;
 
+        // update metadata
+        if (meta.FrameCount == 0) meta.FrameCount = decoder.FrameCount;
+
 
         // 1. read animated formats
         if (meta.CanAnimate)
@@ -134,8 +147,12 @@ public static partial class WicCodec
         using var fac = new IWICImagingFactory2();
         var wicBmp = fac.CreateBitmapFromSource(frameBmp, BitmapCreateCacheOption.CacheOnLoad);
 
-        result.Size = new Size(meta.Width, meta.Height);
+        result.Size = new Size(wicBmp.Size.Width, wicBmp.Size.Height);
         result.SingleFrame = wicBmp;
+
+        // update metadata
+        meta.Width = (uint)wicBmp.Size.Width;
+        meta.Height = (uint)wicBmp.Size.Height;
 
         decoder.Dispose();
         decoder = null;
@@ -212,7 +229,7 @@ public static partial class WicCodec
         if (meta.ColorSpace == ImageMagick.ColorSpace.CMYK) return false;
 
         // predefined extension to read with WIC
-        if (meta.IsOneOfExtensions(WicCodec.TopEncoderExts.ToArray())) return true;
+        if (meta.IsOneOfExtensions(WicCodec.TopReadExts.ToArray())) return true;
 
         var codec = GetCodecFromExtension(meta.FilePath, ComponentType.Decoder);
         if (codec is null) return false;
