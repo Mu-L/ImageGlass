@@ -21,6 +21,9 @@ using SharpGen.Runtime.Win32;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 using Vortice.WIC;
 
 namespace ImageGlass.Common.Photoing;
@@ -183,6 +186,119 @@ public static partial class WicCodec
     }
 
     #endregion // Methods for WIC Components Listing
+
+
+
+
+    /// <summary>
+    /// Gets WIC color profile.
+    /// </summary>
+    private static PhotoColorProfile GetWicColorProfile__(IWICBitmapFrameDecode? frame, IWICImagingFactory2 fac)
+    {
+        if (frame.IsDisposed()) return new PhotoColorProfile();
+
+        try
+        {
+            var contexts = frame.TryGetColorContexts(fac) ?? [];
+            var bestContext = FindBestWicColorProfile__(contexts);
+            byte[]? profileBytes = null;
+
+
+            // get color profile
+            if (bestContext?.Profile is not null)
+            {
+                using var ms = new MemoryStream();
+                bestContext.Profile.CopyTo(ms);
+                profileBytes = ms.ToArray();
+            }
+
+
+            // get color space
+            var exitColorSpace = bestContext?.ExifColorSpace;
+            var colorSpace = PhotoColorSpace.None;
+
+            if (exitColorSpace == 1)
+            {
+                colorSpace = PhotoColorSpace.sRGB;
+            }
+            else if (exitColorSpace == 2
+                || (profileBytes != null && Encoding.ASCII.GetString(profileBytes).Contains("Adobe RGB")))
+            {
+                colorSpace = PhotoColorSpace.AdobeRGB;
+            }
+            else if (exitColorSpace == 0xFFFF)
+            {
+                colorSpace = PhotoColorSpace.Uncalibrated;
+            }
+            else if (exitColorSpace != null)
+            {
+                colorSpace = PhotoColorSpace.Unknown;
+            }
+
+
+            var colorContext = new PhotoColorProfile(colorSpace, profileBytes, bestContext);
+
+            // dispose native color contexts
+            foreach (var ctx in contexts)
+            {
+                if (ctx.NativePointer != bestContext?.NativePointer)
+                {
+                    ctx.Dispose();
+                }
+            }
+
+            return colorContext;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"❌❌❌ {nameof(GetWicColorProfile__)}: {ex.Message}");
+        }
+
+        return new PhotoColorProfile();
+    }
+
+
+    /// <summary>
+    /// Finds the best color profile.
+    /// </summary>
+    private static IWICColorContext? FindBestWicColorProfile__(IWICColorContext[]? contexts)
+    {
+        IWICColorContext? bestProfile = null;
+        if (contexts == null) return bestProfile;
+
+        // get the last non-uncalibrated color context
+        // https://stackoverflow.com/a/70215280/403671
+        for (var i = contexts.Length - 1; i >= 0; i--)
+        {
+            var ctx = contexts[i];
+
+            // Uncalibrated
+            if (ctx.ExifColorSpace == 0xFFFF)
+                continue;
+
+            if (ctx.Type == Vortice.WIC.ColorContextType.Profile)
+            {
+                bestProfile = ctx;
+            }
+        }
+
+
+        return bestProfile;
+    }
+
+
+    /// <summary>
+    /// Loads pixel format information for a bitmap.
+    /// </summary>
+    private static IWICPixelFormatInfo2 LoadWicPixelInfo__(IWICBitmapSource? wicBmp)
+    {
+        if (wicBmp is null) return new IWICPixelFormatInfo2(IntPtr.Zero);
+
+        using var wicFactory = new IWICImagingFactory2();
+
+        var comInfo = wicFactory.CreateComponentInfo(wicBmp.PixelFormat);
+        return comInfo.As<IWICPixelFormatInfo2>();
+    }
 
 
 }

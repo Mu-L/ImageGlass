@@ -568,7 +568,15 @@ public partial class Photo : DisposableImpl
             // load the metadata if it's outdated
             if (hasOutdatedCache)
             {
-                _taskMetadata = MagickCodec.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings);
+                if (WicCodec.TopMetadataExts.Contains(Extension))
+                {
+                    _taskMetadata = WicCodec.LoadMetadataAsync(FilePath, ReadOptions);
+                }
+                else
+                {
+                    _taskMetadata = MagickCodec.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings);
+                }
+
                 _metadata = await _taskMetadata;
             }
         }

@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Vortice.Direct2D1;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -24,16 +23,33 @@ namespace ImageGlass.Common.Photoing;
 public static class PhotoColorSpace_Exts
 {
     /// <summary>
-    /// Converts a <see cref="PhotoColorSpace"/> value
-    /// to its corresponding <see cref="ColorSpace"/> representation.
+    /// Converts a color space value
+    /// to its corresponding <see cref="Vortice.Direct2D1.ColorSpace"/> representation.
     /// </summary>
-    public static ColorSpace ToNativeColorSpace(this PhotoColorSpace self)
+    public static Vortice.Direct2D1.ColorSpace ToNativeColorSpace(this PhotoColorSpace self)
     {
         return self switch
         {
-            PhotoColorSpace.sRGB => ColorSpace.Srgb,
-            _ => ColorSpace.Custom,
+            PhotoColorSpace.sRGB => Vortice.Direct2D1.ColorSpace.Srgb,
+            _ => Vortice.Direct2D1.ColorSpace.Custom,
         };
     }
+
+
+    /// <summary>
+    /// Converts a color space valut
+    /// to its corresponding <see cref="ImageMagick.ColorSpace"/> representation.
+    /// </summary>
+    public static ImageMagick.ColorSpace ToMagickColorSpace(this PhotoColorSpace self)
+    {
+        return self switch
+        {
+            PhotoColorSpace.sRGB => ImageMagick.ColorSpace.sRGB,
+            PhotoColorSpace.AdobeRGB => ImageMagick.ColorSpace.Adobe98,
+            _ => ImageMagick.ColorSpace.Undefined,
+        };
+    }
+
+
 }
 

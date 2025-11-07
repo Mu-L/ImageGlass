@@ -269,6 +269,7 @@ public static partial class MagickCodec
         else if (frameIndex < 0) frameIndex = imgC.Count - 1;
 
         meta.FrameIndex = (uint)frameIndex;
+        meta.FrameCount = (uint)imgC.Count;
 
 
         var readingTask = Task.Run(() =>
@@ -276,8 +277,6 @@ public static partial class MagickCodec
             // 2. read metadata of all frames
             try
             {
-                meta.FrameIndex = 0;
-                meta.FrameCount = (uint)imgC.Count;
                 meta.AnimationLoop = imgC[0].AnimationIterations;
                 meta.Frames = imgC.Select(item => new FrameMetadata()
                 {

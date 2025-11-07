@@ -43,12 +43,22 @@ public static partial class WicCodec
         [".gif", ".gifv", ".fax", ".jxr", ".apng", ".jxr", ".hdp", ".wdp"]
     ).ToFrozenSet();
 
+
     /// <summary>
     /// List of extensions to always encode with WIC.
     /// </summary>
     public static FrozenSet<string> TopWriteExts => new HashSet<string>(
         [".jxr", ".hdp", ".wdp"]
     ).ToFrozenSet();
+
+
+    /// <summary>
+    /// List of extensions to always use WIC to read metadata.
+    /// </summary>
+    public static FrozenSet<string> TopMetadataExts => new HashSet<string>(
+        [".jxr", ".hdp", ".wdp"]
+    ).ToFrozenSet();
+
 
 
     /// <summary>
@@ -69,6 +79,8 @@ public static partial class WicCodec
     public static FrozenSet<string> EncoderExtensions => _encoderExtensions.Value;
 
 
+
+
     /// <summary>
     /// Disposes all static native resources.
     /// </summary>
@@ -81,8 +93,80 @@ public static partial class WicCodec
                 item.Dispose();
             }
         }
-
     }
+
+
+    /// <summary>
+    /// Loads photo metadata from file path.
+    /// </summary>
+    public static async Task<PhotoMetadata> LoadMetadataAsync(string? filePath,
+        PhotoReadOptions? options = null, CancellationToken token = default)
+    {
+        filePath ??= string.Empty;
+        var meta = new PhotoMetadata();
+
+        // 0. get file info
+        meta.SetFilePath(filePath);
+        if (string.IsNullOrWhiteSpace(filePath)) return meta;
+
+        // create WIC decoder
+        using var fac = new IWICImagingFactory2();
+        using var decoder = fac.CreateDecoderFromFileName(filePath, FileAccess.Read, DecodeOptions.CacheOnDemand);
+        if (decoder.IsDisposed()) return meta;
+
+
+        // 1. calculate the specific frame index
+        var frameIndex = options?.FrameIndex ?? 0;
+
+        // make sure frame index is within range
+        if (frameIndex >= decoder.FrameCount) frameIndex = 0;
+        else if (frameIndex < 0) frameIndex = (int)decoder.FrameCount - 1;
+
+        meta.FrameIndex = (uint)frameIndex;
+        meta.FrameCount = decoder.FrameCount;
+        using var frame = decoder.GetFrame(0);
+        if (token.IsCancellationRequested) return meta;
+
+
+        // 2. read metadata of first frame only
+        var readingTask = Task.Run(() =>
+        {
+            try
+            {
+                // image size
+                meta.OriginalWidth = meta.Width = (uint)frame.Size.Width;
+                meta.OriginalHeight = meta.Height = (uint)frame.Size.Height;
+
+                // check alpha
+                using var compInfo = fac.CreateComponentInfo(frame.PixelFormat);
+                using var pixelInfo = compInfo.QueryInterfaceOrNull<IWICPixelFormatInfo2>();
+                if (pixelInfo is not null)
+                {
+                    meta.HasAlpha = pixelInfo.SupportsTransparency();
+                }
+            }
+            catch { }
+            if (token.IsCancellationRequested) return;
+
+
+            // get WIC color profile
+            try
+            {
+                var colorProfile = GetWicColorProfile__(frame, fac);
+
+                meta.ColorSpace = colorProfile.ColorSpace.ToMagickColorSpace();
+                meta.ColorProfileName = colorProfile.GetIccDescription();
+                meta.ColorProfileData = colorProfile.ProfileData;
+            }
+            catch { }
+        }, token).ConfigureAwait(false);
+
+
+        await readingTask;
+
+        return meta;
+    }
+
 
 
     /// <summary>
@@ -103,9 +187,6 @@ public static partial class WicCodec
 
         var decoder = PhotoWIC.CreateDecoder(meta.FilePath);
         if (decoder.IsDisposed()) return result;
-
-        // update metadata
-        if (meta.FrameCount == 0) meta.FrameCount = decoder.FrameCount;
 
 
         // 1. read animated formats
@@ -149,10 +230,6 @@ public static partial class WicCodec
 
         result.Size = new Size(wicBmp.Size.Width, wicBmp.Size.Height);
         result.SingleFrame = wicBmp;
-
-        // update metadata
-        meta.Width = (uint)wicBmp.Size.Width;
-        meta.Height = (uint)wicBmp.Size.Height;
 
         decoder.Dispose();
         decoder = null;
