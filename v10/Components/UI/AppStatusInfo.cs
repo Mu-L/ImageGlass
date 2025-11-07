@@ -122,10 +122,16 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
-            if (AP.Config.ImageInfoTags.Contains(nameof(Dimension))
-                && AP.Photos.CurrentMetadata != null)
+            if (AP.Config.ImageInfoTags.Contains(nameof(Dimension)))
             {
-                return $"{AP.Photos.CurrentMetadata.Width:n0}×{AP.Photos.CurrentMetadata.Height:n0}";
+                if (AP.ClipboardImage is not null)
+                {
+                    return $"{AP.ClipboardImage.Width:n0}×{AP.ClipboardImage.Height:n0}";
+                }
+                else if (AP.Photos.CurrentMetadata is not null)
+                {
+                    return $"{AP.Photos.CurrentMetadata.Width:n0}×{AP.Photos.CurrentMetadata.Height:n0}";
+                }
             }
 
             return null;

@@ -336,17 +336,17 @@ public partial class MainWindow
         _ = _contentEl.ShowMessageAsync(destFilePath, AP.Config.Lang[LangId.FrmMain_MnuSave_Success]);
 
 
-        // file was overriden
-        if (destFilePath.Equals(AP.Photos.CurrentFilePath, StringComparison.OrdinalIgnoreCase))
+        // 4. update thumbnail & metadata if file in the list was overriden
+        var destPhoto = AP.Photos.Get(destFilePath);
+        if (destPhoto is not null)
         {
-            // update cache of the modified item
-            AP.Photos.Current?.DisposeThumbnail();
-            // TODO: reload metadata, thumbnail
+            // reload thumbnail
+            Gallery.LoadThumbnail(AP.Photos.CurrentIndex, false);
         }
 
 
-        //// emits ImageSaved event
-        //AP.RaiseImageSavedEvent(new ImageSaveEventArgs(srcFilePath, destFilePath, saveSource));
+        // 5. emits saved event
+        AP.OnPhotoSaved(new(AP.Photos.CurrentFilePath, destFilePath, saveSource));
 
         return true;
     }

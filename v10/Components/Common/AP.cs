@@ -31,7 +31,8 @@ public static class AP
 {
     public static event EventHandler<ThemePackChangedEventArgs>? ThemeChanged;
     public static event EventHandler? LanguageChanged;
-    public static EventHandler<PhotoUnloadedEventArgs>? PhotoUnloaded;
+    public static event EventHandler<PhotoUnloadedEventArgs>? PhotoUnloaded;
+    public static event EventHandler<PhotoSaveEventArgs>? PhotoSaved;
 
     private static ExplorerView? _foregroundShell;
     private static string _foregroundShellPath = "";
@@ -266,6 +267,15 @@ public static class AP
         PhotoUnloaded?.Invoke(null, e);
     }
 
+
+    /// <summary>
+    /// Raises <see cref="PhotoSaved"/> event.
+    /// </summary>
+    public static void OnPhotoSaved(PhotoSaveEventArgs e)
+    {
+        PhotoSaved?.Invoke(null, e);
+    }
+
     #endregion // Public Methods
 
 
@@ -288,3 +298,13 @@ public class PhotoUnloadedEventArgs : EventArgs
     public int Index { get; set; } = -1;
     public string FilePath { get; set; } = string.Empty;
 }
+
+
+public class PhotoSaveEventArgs(string srcFilePath, string destFilePath, ImageSaveSource saveSource) : EventArgs
+{
+    public string SrcFilePath { get; init; } = srcFilePath;
+    public string DestFilePath { get; init; } = destFilePath;
+    public bool IsSaveAsNewFile => !SrcFilePath.Equals(DestFilePath, StringComparison.OrdinalIgnoreCase);
+    public ImageSaveSource SaveSource { get; init; } = saveSource;
+}
+

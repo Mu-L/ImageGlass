@@ -101,11 +101,7 @@ public sealed partial class GalleryControl : IgControl
 
     private void PART_ItemRepeater_ElementPrepared(ItemsRepeater sender, ItemsRepeaterElementPreparedEventArgs e)
     {
-        if (e.Element is not IgGalleryItem item) return;
-
-        // start loading thumbnail
-        var thumbSize = AP.Config.ThumbnailSize * DpiScale;
-        _ = item.VM.StartLoadingGalleryThumbnail(thumbSize, _progressThumbnailLoader);
+        LoadThumbnail(e.Index, true);
     }
 
 
@@ -202,6 +198,19 @@ public sealed partial class GalleryControl : IgControl
         PART_ScrollViewer.ChangeView(itemCenterX, null, null, disableAnimation);
     }
 
+
+    /// <summary>
+    /// Loads the thumbnail.
+    /// </summary>
+    public void LoadThumbnail(int index, bool useCache)
+    {
+        var el = PART_GalleryItemRepeater.TryGetElement(index);
+        if (el is not IgGalleryItem item) return;
+
+        // start loading thumbnail
+        var thumbSize = AP.Config.ThumbnailSize * DpiScale;
+        _ = item.VM.StartLoadingGalleryThumbnail(thumbSize, useCache, _progressThumbnailLoader);
+    }
 
 }
 

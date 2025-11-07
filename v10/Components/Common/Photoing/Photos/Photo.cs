@@ -145,7 +145,6 @@ public partial class Photo : DisposableImpl
     public string GalleryFileExtension => Extension.Length > 1 ? Extension.Substring(1) : string.Empty;
 
 
-
     /// <summary>
     /// Gets the error details.
     /// </summary>
@@ -486,7 +485,7 @@ public partial class Photo : DisposableImpl
             if (token.IsCancellationRequested) return;
 
             // load metadata off-thread
-            await Task.Run(() => LoadMetadataAsync(), token);
+            await Task.Run(() => LoadMetadataAsync(useCache), token);
             ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
 
             if (!skipLoadingEvent)
@@ -537,7 +536,7 @@ public partial class Photo : DisposableImpl
     /// Loads <c><see cref="Metadata"/></c> for the photo.
     /// Returns the cached metadata if it's not null and up-to-date.
     /// </summary>
-    public async Task LoadMetadataAsync(PhotoReadOptions? newOptions = null)
+    public async Task LoadMetadataAsync(bool useCache, PhotoReadOptions? newOptions = null)
     {
         try
         {
@@ -545,17 +544,25 @@ public partial class Photo : DisposableImpl
             ReadSettings ??= MagickCodec.ParseSettings(ReadOptions, false, FilePath);
 
             // if already started loading, wait for the task completes
-            if (_taskMetadata is not null
-                && _taskMetadata.Status != TaskStatus.Canceled
-                && _taskMetadata.Status != TaskStatus.Faulted)
+            if (useCache)
             {
-                _metadata = await _taskMetadata;
-                return;
+                if (_taskMetadata is not null
+                    && _taskMetadata.Status != TaskStatus.Canceled
+                    && _taskMetadata.Status != TaskStatus.Faulted)
+                {
+                    _metadata = await _taskMetadata;
+                    return;
+                }
+            }
+            else
+            {
+                _taskMetadata?.Dispose();
+                _taskMetadata = null;
             }
 
 
             // check if the current Metadata is outdated or not
-            var hasOutdatedCache = _metadata?.IsOutdated() ?? true;
+            var hasOutdatedCache = !useCache || (_metadata?.IsOutdated() ?? true);
 
 
             // load the metadata if it's outdated
@@ -579,25 +586,35 @@ public partial class Photo : DisposableImpl
     {
         ThumbnailBitmap = null;
         GalleryThumbnail = null;
+
+        _taskThumbnail?.Dispose();
+        _taskThumbnail = null;
     }
 
 
     /// <summary>
     /// Starts loading thumbnail off-thread.
     /// </summary>
-    public async Task StartLoadingGalleryThumbnail(double size,
+    public async Task StartLoadingGalleryThumbnail(double size, bool useCache,
         IProgress<ThumbnailLoadedEventArgs> progress)
     {
-        if (GalleryThumbnail is not null) return;
-
-
-        // if already started loading, wait for the task completes
-        if (_taskThumbnail is not null
-            && _taskThumbnail.Status != TaskStatus.Canceled
-            && _taskThumbnail.Status != TaskStatus.Faulted)
+        if (useCache)
         {
-            await _taskThumbnail;
-            return;
+
+            if (GalleryThumbnail is not null) return;
+
+            // if already started loading, wait for the task completes
+            if (_taskThumbnail is not null
+                && _taskThumbnail.Status != TaskStatus.Canceled
+                && _taskThumbnail.Status != TaskStatus.Faulted)
+            {
+                await _taskThumbnail;
+                return;
+            }
+        }
+        else
+        {
+            DisposeThumbnail();
         }
 
 
@@ -611,7 +628,7 @@ public partial class Photo : DisposableImpl
             try
             {
                 // ensure metadata is loaded
-                await LoadMetadataAsync();
+                await LoadMetadataAsync(true);
 
                 // load thumbnail
                 using var wicBmp = await Metadata.GetThumbnailAsync(size);

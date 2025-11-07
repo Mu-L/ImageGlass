@@ -344,7 +344,7 @@ public partial class MainWindow : IgWindow
         _ = _contentEl.ShowMessageAsync(null);
 
         AP.DisposeClipboardPhoto();
-        //Local.ImageTransform.Clear();
+        AP.ImageTransform.Clear();
 
         // set read options for photo
         if (photo is not null)
