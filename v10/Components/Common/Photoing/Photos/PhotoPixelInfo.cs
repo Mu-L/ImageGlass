@@ -29,6 +29,7 @@ public partial class PhotoPixelInfo : DisposableImpl
     public uint Stride { get; internal set; }
     public uint BufferSize => Stride * Height;
     public uint ChannelCount { get; internal set; }
+    public bool SupportAlpha { get; internal set; }
     public PixelFormatNumericRepresentation NumericRepresentation { get; internal set; }
     public IWICColorContext? ColorContext { get; internal set; }
 

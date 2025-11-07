@@ -138,12 +138,8 @@ public static partial class WicCodec
                 meta.OriginalHeight = meta.Height = (uint)frame.Size.Height;
 
                 // check alpha
-                using var compInfo = fac.CreateComponentInfo(frame.PixelFormat);
-                using var pixelInfo = compInfo.QueryInterfaceOrNull<IWICPixelFormatInfo2>();
-                if (pixelInfo is not null)
-                {
-                    meta.HasAlpha = pixelInfo.SupportsTransparency();
-                }
+                using var pixelInfo = frame.GetPixelInfo();
+                meta.HasAlpha = pixelInfo?.SupportAlpha ?? false;
             }
             catch { }
             if (token.IsCancellationRequested) return;

@@ -47,7 +47,6 @@
 		<PackageReference Include="System.Drawing.Common" Version="10.0.0-rc.2.25502.107" />
 		<PackageReference Include="Vortice.Direct2D1" Version="3.7.6-beta" />
 		<PackageReference Include="Vortice.Direct3D11" Version="3.7.6-beta" />
-		<PackageReference Include="Vortice.Win32.Graphics.Imaging" Version="2.3.0" />
 		<PackageReference Include="ZString" Version="2.6.0" />
 	</ItemGroup>
 

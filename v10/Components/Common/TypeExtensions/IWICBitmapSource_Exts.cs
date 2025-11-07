@@ -86,6 +86,7 @@ public static class IWICBitmapSource_Exts
             ChannelCount = info.ChannelCount,
             Stride = stride,
             NumericRepresentation = info.NumericRepresentation,
+            SupportAlpha = info.SupportsTransparency(),
             ColorContext = info.ColorContext,
         };
     }
@@ -150,7 +151,7 @@ public static class IWICBitmapSource_Exts
             frameEncode.Initialize();
 
             frameEncode.SetSize((uint)size.Value.Width, (uint)size.Value.Height);
-            frameEncode.SetPixelFormat(Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA);
+            frameEncode.SetPixelFormat(PixelFormat.Format32bppPBGRA);
 
             frameEncode.WriteSource(srcBmp);
             frameEncode.Commit();
@@ -162,13 +163,13 @@ public static class IWICBitmapSource_Exts
 
 
     /// <summary>
-    /// Converts the current bitmap to GUID_WICPixelFormat32bppPBGRA format.
+    /// Converts the current bitmap to <see cref="PixelFormat.Format32bppPBGRA"/> format.
     /// </summary>
     public static void To32bppPBGRA(this IWICBitmapSource? srcBmp)
     {
         if (srcBmp.IsDisposed()) return;
 
-        var pxFormat = Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA;
+        var pxFormat = PixelFormat.Format32bppPBGRA;
         if (srcBmp.PixelFormat == pxFormat) return;
 
         try

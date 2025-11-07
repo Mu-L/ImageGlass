@@ -24,6 +24,7 @@ using Vortice.Direct2D1;
 using Vortice.WIC;
 using Windows.Foundation;
 using Windows.UI;
+using PixelFormat = Vortice.WIC.PixelFormat;
 
 namespace ImageGlass.Common;
 
@@ -52,7 +53,7 @@ public static class ID2D1Bitmap_Exts
 
         using var wicFactory = new IWICImagingFactory2();
         var bmp = wicFactory.CreateBitmapFromMemory((uint)data.Size.Width, (uint)data.Size.Height,
-            Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA,
+            PixelFormat.Format32bppPBGRA,
             data.Pixels, data.Stripe);
 
         return bmp;

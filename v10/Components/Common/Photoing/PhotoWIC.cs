@@ -19,11 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageMagick;
 using Microsoft.Win32.SafeHandles;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using Vortice.Direct2D1;
 using Vortice.WIC;
 using WinRT;
@@ -109,136 +107,15 @@ public static partial class PhotoWIC
 
 
     /// <summary>
-    /// Gets color profile of the photo.
-    /// </summary>
-    private static PhotoColorProfile GetWicColorProfile(IWICBitmapSource? wicBmp)
-    {
-        if (wicBmp is null) return new();
-
-        using var wicFactory = new IWICImagingFactory2();
-        var frame = wicBmp.As<IWICBitmapFrameDecode>();
-
-        try
-        {
-            var contexts = frame.TryGetColorContexts(wicFactory) ?? [];
-            var bestProfile = FindBestWicColorProfile(contexts);
-            byte[]? profileBytes = null;
-
-
-            // get color profile
-            if (bestProfile?.Profile is not null)
-            {
-                using var ms = new MemoryStream();
-                bestProfile.Profile.CopyTo(ms);
-                profileBytes = ms.ToArray();
-            }
-
-
-            // get color space
-            var exitColorSpace = bestProfile?.ExifColorSpace;
-            var colorSpace = PhotoColorSpace.None;
-
-            if (exitColorSpace == 1)
-            {
-                colorSpace = PhotoColorSpace.sRGB;
-            }
-            else if (exitColorSpace == 2
-                || (profileBytes != null && Encoding.ASCII.GetString(profileBytes).Contains("Adobe RGB")))
-            {
-                colorSpace = PhotoColorSpace.AdobeRGB;
-            }
-            else if (exitColorSpace == 0xFFFF)
-            {
-                colorSpace = PhotoColorSpace.Uncalibrated;
-            }
-            else if (exitColorSpace != null)
-            {
-                colorSpace = PhotoColorSpace.Unknown;
-            }
-
-
-            var colorContext = new PhotoColorProfile(colorSpace, profileBytes, bestProfile);
-
-
-            // dispose native color contexts
-            foreach (var ctx in contexts)
-            {
-                if (ctx.NativePointer != bestProfile?.NativePointer)
-                {
-                    ctx.Dispose();
-                }
-            }
-
-            return colorContext;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"❌❌❌ {nameof(GetWicColorProfile)}: {ex.Message}");
-        }
-
-        return new PhotoColorProfile();
-    }
-
-
-
-    /// <summary>
-    /// Finds the best color profile.
-    /// </summary>
-    private static IWICColorContext? FindBestWicColorProfile(IWICColorContext[]? contexts)
-    {
-        IWICColorContext? bestProfile = null;
-        if (contexts == null) return bestProfile;
-
-        // get the last non-uncalibrated color context
-        // https://stackoverflow.com/a/70215280/403671
-        for (var i = contexts.Length - 1; i >= 0; i--)
-        {
-            var ctx = contexts[i];
-
-            // Uncalibrated
-            if (ctx.ExifColorSpace == 0xFFFF)
-                continue;
-
-            if (ctx.Type == Vortice.WIC.ColorContextType.Profile)
-            {
-                bestProfile = ctx;
-            }
-        }
-
-
-        return bestProfile;
-    }
-
-
-
-    /// <summary>
-    /// Loads pixel format information for a bitmap.
-    /// </summary>
-    private static IWICPixelFormatInfo2 LoadWicPixelInfo(IWICBitmapSource? wicBmp)
-    {
-        if (wicBmp is null) return new IWICPixelFormatInfo2(IntPtr.Zero);
-
-        using var wicFactory = new IWICImagingFactory2();
-
-        var comInfo = wicFactory.CreateComponentInfo(wicBmp.PixelFormat);
-        return comInfo.As<IWICPixelFormatInfo2>();
-    }
-
-
-
-
-
-
-    /// <summary>
     /// Creates a WIC bitmap image with specified dimensions and pixel format.
     /// </summary>
     /// <param name="width">Bitmap width</param>
     /// <param name="height">Bitmap height</param>
-    /// <param name="pixelFormat">By default, use <c><see cref="Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA"/></c></param>
+    /// <param name="pixelFormat">By default, use <c><see cref="PixelFormat.Format32bppPBGRA"/></c></param>
     /// <exception cref="SharpGen.Runtime.SharpGenException"></exception>
     public static IWICBitmapSource? CreateWicBitmapSource(double width, double height, Guid? pixelFormat = null)
     {
-        pixelFormat ??= Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppPBGRA;
+        pixelFormat ??= PixelFormat.Format32bppPBGRA;
 
         using var wicFactory = new IWICImagingFactory2();
         var wicBmp = wicFactory.CreateBitmap((uint)width, (uint)height,
@@ -265,7 +142,7 @@ public static partial class PhotoWIC
 
         // create empty WIC bitmap
         using var fac = new IWICImagingFactory2();
-        var wicBitmap = fac.CreateBitmap(imgM.Width, imgM.Height, Win32.Graphics.Imaging.Apis.GUID_WICPixelFormat32bppBGRA);
+        var wicBitmap = fac.CreateBitmap(imgM.Width, imgM.Height, PixelFormat.Format32bppBGRA);
 
         // copy Magick's raw pixels directly into WIC buffer
         using (var bmpLock = wicBitmap.Lock(BitmapLockFlags.Write))
