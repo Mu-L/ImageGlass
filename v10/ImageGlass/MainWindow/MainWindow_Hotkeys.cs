@@ -84,6 +84,7 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuReload,           API.IG_Reload,              MKeys.Ctrl, VKey.R),
         new(LangId.FrmMain_MnuReloadImageList,  API.IG_ReloadList,          MKeys.Ctrl | MKeys.Shift, VKey.R),
         new(LangId.FrmMain_MnuUnload,           API.IG_Unload,              VKey.U),
+        new(LangId.FrmMain_MnuSetLockScreen,    API.IG_SetLockScreenImage),
 
 
         // Clipboard

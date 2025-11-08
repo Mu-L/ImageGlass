@@ -82,6 +82,7 @@ public partial class MainWindow
         { API.IG_Reload,                IgCommands.Create(IG_Reload) },
         { API.IG_ReloadList,            IgCommands.Create(IG_ReloadList) },
         { API.IG_Unload,                IgCommands.Create(IG_UnloadAsync) },
+        { API.IG_SetLockScreenImage,    IgCommands.Create(IG_SetLockScreenImageAsync) },
 
 
         // Clipboard

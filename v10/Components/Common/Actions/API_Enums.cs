@@ -69,6 +69,7 @@ public enum API
     IG_Reload,
     IG_ReloadList,
     IG_Unload,
+    IG_SetLockScreenImage,
 
     // Menu > Clipboard
     IG_PasteImage,

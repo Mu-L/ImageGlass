@@ -23,6 +23,7 @@ using ImageGlass.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.Storage.Pickers;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -30,11 +31,15 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.System.UserProfile;
 
 namespace ImageGlass;
 
 public partial class MainWindow
 {
+    private static FrozenSet<string> _desktopNativeFormats => [".bmp", ".jpg", ".jpeg", ".png", ".gif"];
+
 
     #region Main Menu APIs
 
@@ -1054,6 +1059,59 @@ public partial class MainWindow
         // raise unloaded event
         AP.OnPhotoUnloaded(args);
     }
+
+
+    /// <summary>
+    /// Sets the viewing image as lock screen image.
+    /// </summary>
+    public async Task IG_SetLockScreenImageAsync()
+    {
+        if (Viewer.SourceKind == PhotoSource.None) return;
+
+        var filePath = AP.Photos.CurrentFilePath;
+        var ext = AP.Photos.Current?.Extension.ToLowerInvariant() ?? string.Empty;
+        _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId._CreatingFile], delayMs: 500);
+
+
+        // 1. create temp image if needed
+        if (AP.ClipboardImage is not null || !_desktopNativeFormats.Contains(ext))
+        {
+            // save image to temp file
+            filePath = await AP.SavePhotoAsTempFileAsync(".jpg");
+        }
+        await _contentEl.ShowMessageAsync(null);
+
+
+        // 2. check if file path is valid
+        if (!File.Exists(filePath))
+        {
+            _ = await ModalWindow.ShowErrorAsync(this,
+                title: AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen],
+                description: AP.Config.Lang[LangId._CreatingFileError]);
+
+            return;
+        }
+
+
+        // 3. set lock screen image
+        try
+        {
+            var sFile = await StorageFile.GetFileFromPathAsync(filePath);
+            await LockScreen.SetImageFileAsync(sFile);
+
+            _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen_Success]);
+        }
+        catch (Exception ex)
+        {
+            _ = await ModalWindow.ShowErrorAsync(this,
+                title: AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen],
+                description: ex.Message,
+                heading: AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen_Error]);
+        }
+
+    }
+
+
 
     #endregion // Image APIs
 
