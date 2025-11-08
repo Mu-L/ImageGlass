@@ -61,6 +61,12 @@ public static class AP
 
 
     /// <summary>
+    /// Gets, sets app busy state.
+    /// </summary>
+    public static bool IsBusy { get; set; } = false;
+
+
+    /// <summary>
     /// Gets the path of the image file from the arguments.
     /// </summary>
     public static string InputImagePathFromArgs => _initImagePathFromArgs;

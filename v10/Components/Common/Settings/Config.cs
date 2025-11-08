@@ -215,10 +215,10 @@ public partial class Config : IgReactive
         }
     } = false;
 
-    ///// <summary>
-    ///// Gets, sets value indicates that Confirmation dialog is displayed when deleting image
-    ///// </summary>
-    //public bool ShowDeleteConfirmation { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value indicates that Confirmation dialog is displayed when deleting image
+    /// </summary>
+    public bool ShowDeleteConfirmation { get; set; } = true;
 
     /// <summary>
     /// Gets, sets value indicates that Confirmation dialog is displayed when overriding the viewing image

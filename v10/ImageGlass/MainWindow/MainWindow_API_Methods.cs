@@ -518,6 +518,84 @@ public partial class MainWindow
 
 
     /// <summary>
+    /// Sends or permenantly deletes the current image.
+    /// </summary>
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public async Task IG_DeleteAsync(string? moveToRecycleBinStr = "true")
+    {
+        var moveToRecycleBin = BHelper.ConvertStringToBool(moveToRecycleBinStr) ?? true;
+        await IG_DeleteAsync(moveToRecycleBin);
+    }
+
+
+    /// <summary>
+    /// Sends or permenantly deletes the current image.
+    /// </summary>
+    public async Task IG_DeleteAsync(bool moveToRecycleBin = true)
+    {
+        var filePath = AP.Photos.CurrentFilePath;
+        if (!File.Exists(filePath)) return;
+
+        var canDelete = true;
+        var title = moveToRecycleBin
+            ? AP.Config.Lang[LangId.FrmMain_MnuMoveToRecycleBin]
+            : AP.Config.Lang[LangId.FrmMain_MnuDeleteFromHardDisk];
+
+
+        // 1. show confirm dialog
+        if (AP.Config.ShowDeleteConfirmation)
+        {
+            var heading = moveToRecycleBin
+                ? AP.Config.Lang[LangId.FrmMain_MnuMoveToRecycleBin_Description]
+                : AP.Config.Lang[LangId.FrmMain_MnuDeleteFromHardDisk_Description];
+            var thumbnailIcon = moveToRecycleBin
+                ? StockIconId.Recycler
+                : StockIconId.Delete;
+
+            var modal = await ModalWindow.ShowWarningAsync(this,
+                title: title,
+                description: $"""
+                {filePath}
+                {AP.Photos.Current?.Metadata.FileSizeFormated}
+                """,
+                heading: heading,
+                buttons: ModalWindowButton.Yes_No,
+                thumbnailIcon: thumbnailIcon,
+                thumbnail: AP.Photos.Current?.ThumbnailBitmap,
+                showRememberOption: true);
+
+            // update remember confirm setting
+            AP.Config.ShowDeleteConfirmation = !modal.IsRememberOptionChecked;
+
+            canDelete = modal.ExitCode == DialogExitCode.OK;
+        }
+
+
+        // 2. delete photo
+        if (!canDelete) return;
+        AP.IsBusy = true;
+
+        try
+        {
+            await IG_UnloadAsync();
+            BHelper.DeleteFile(filePath, moveToRecycleBin);
+
+            // manually update the change because FileWatcher is disabled when IsBusy = true
+            AP.Photos.Remove(AP.Photos.CurrentFilePath);
+            var nextIndex = (int)Math.Min(AP.Photos.Count - 1, AP.Photos.CurrentIndex);
+            var nextPhoto = AP.Photos.Select(nextIndex);
+            _ = ViewPhotoAsync(nextPhoto);
+        }
+        catch (Exception ex)
+        {
+            await ModalWindow.ShowErrorAsync(this, title, ex.Message);
+        }
+
+        AP.IsBusy = false;
+    }
+
+
+    /// <summary>
     /// Opens photo's Properties dialog.
     /// </summary>
     public void IG_OpenProperties()

@@ -36,13 +36,15 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuMain,             API.IG_OpenMainMenu,        MKeys.Alt, VKey.F),
 
         // File
-        new(LangId.FrmMain_MnuOpenFile,         API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
-        new(LangId.FrmMain_MnuSave,             API.IG_Save,                MKeys.Ctrl, VKey.S),
-        new(LangId.FrmMain_MnuSaveAs,           API.IG_SaveAs,              MKeys.Ctrl | MKeys.Shift, VKey.S),
-        new(LangId.FrmMain_MnuOpenWith,         API.IG_OpenWith,            VKey.D),
-        new(LangId.FrmMain_MnuOpenLocation,     API.IG_OpenLocation,        VKey.L),
-        new(LangId.FrmMain_MnuRename,           API.IG_Rename,              VKey.F2),
-        new(LangId.FrmMain_MnuImageProperties,  API.IG_OpenProperties,      MKeys.Alt, VKey.Enter),
+        new(LangId.FrmMain_MnuOpenFile,             API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
+        new(LangId.FrmMain_MnuSave,                 API.IG_Save,                MKeys.Ctrl, VKey.S),
+        new(LangId.FrmMain_MnuSaveAs,               API.IG_SaveAs,              MKeys.Ctrl | MKeys.Shift, VKey.S),
+        new(LangId.FrmMain_MnuOpenWith,             API.IG_OpenWith,            VKey.D),
+        new(LangId.FrmMain_MnuOpenLocation,         API.IG_OpenLocation,        VKey.L),
+        new(LangId.FrmMain_MnuRename,               API.IG_Rename,              VKey.F2),
+        new(LangId.FrmMain_MnuMoveToRecycleBin,     API.IG_Delete, "true",      [new(VKey.Delete)]),
+        new(LangId.FrmMain_MnuDeleteFromHardDisk,   API.IG_Delete, "false",     [new(MKeys.Shift, VKey.Delete)]),
+        new(LangId.FrmMain_MnuImageProperties,      API.IG_OpenProperties,      MKeys.Alt, VKey.Enter),
 
 
         // Navigation

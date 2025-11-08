@@ -36,6 +36,7 @@ public enum API
     IG_OpenWith,
     IG_OpenLocation,
     IG_Rename,
+    IG_Delete,
     IG_OpenProperties,
 
 
