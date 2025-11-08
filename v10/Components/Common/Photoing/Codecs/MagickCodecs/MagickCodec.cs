@@ -669,7 +669,7 @@ public static partial class MagickCodec
             // 1. check if format is supported
             if (!CanWrite(destFilePath))
             {
-                throw new FormatException("IGE_001: Unsupported image format.");
+                throw new FormatException("IGE: Unsupported image format.");
             }
 
 

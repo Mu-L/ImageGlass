@@ -264,7 +264,7 @@ public static partial class WicCodec
             }
 
             // 3. use Magick to save
-            else
+            else if (MagickCodec.CanWrite(destFilePath))
             {
                 // convert to pixels
                 var pixels = await srcBmp.GetPixelsAsync();
@@ -287,6 +287,10 @@ public static partial class WicCodec
 
                 // write image data to file
                 await imgM.WriteAsync(destFilePath, token);
+            }
+            else
+            {
+                throw new FormatException("IGE: Unsupported image format.");
             }
         }
         catch (OperationCanceledException) { }
