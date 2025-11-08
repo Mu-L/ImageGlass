@@ -122,10 +122,10 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         Items[index].IsCurrent = true;
         _currentIndex = index;
 
-        OnPropertyChanged(nameof(Current));
-        OnPropertyChanged(nameof(CurrentIndex));
-        OnPropertyChanged(nameof(CurrentFilePath));
-        OnPropertyChanged(nameof(CurrentMetadata));
+        _ = OnPropertyChanged(nameof(Current));
+        _ = OnPropertyChanged(nameof(CurrentIndex));
+        _ = OnPropertyChanged(nameof(CurrentFilePath));
+        _ = OnPropertyChanged(nameof(CurrentMetadata));
 
         return Get(index);
     }
@@ -174,10 +174,11 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         _dict.Remove(filePath, out _);
         _dict.AddOrUpdate(filePath, index, (fIndex, oldValue) => index);
 
-        if (index == _currentIndex)
+        if (index == CurrentIndex)
         {
-            OnPropertyChanged(nameof(CurrentFilePath));
-            OnPropertyChanged(nameof(CurrentMetadata));
+            _ = OnPropertyChanged(nameof(Current));
+            _ = OnPropertyChanged(nameof(CurrentFilePath));
+            _ = OnPropertyChanged(nameof(CurrentMetadata));
         }
     }
 
@@ -237,12 +238,14 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         var index = IndexOf(filePath);
         if (index < 0) return;
 
+        var isCurrentPhoto = CurrentIndex == index;
 
         // update index of affected items
-        for (int i = index; i < Count; i++)
+        for (int i = index + 1; i < Count; i++)
         {
+            var newIndex = i - 1;
             var itemPath = GetFilePath(i);
-            _dict[itemPath] = i;
+            _dict[itemPath] = newIndex;
         }
 
         // dispose removed item
@@ -253,6 +256,13 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         Items.RemoveAt(index);
 
         _ = OnPropertyChanged(nameof(Count));
+
+        if (isCurrentPhoto)
+        {
+            _ = OnPropertyChanged(nameof(Current));
+            _ = OnPropertyChanged(nameof(CurrentFilePath));
+            _ = OnPropertyChanged(nameof(CurrentMetadata));
+        }
     }
 
 
@@ -276,6 +286,10 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         DistinctDirs.Clear();
 
         _ = OnPropertyChanged(nameof(Count));
+        _ = OnPropertyChanged(nameof(Current));
+        _ = OnPropertyChanged(nameof(CurrentIndex));
+        _ = OnPropertyChanged(nameof(CurrentFilePath));
+        _ = OnPropertyChanged(nameof(CurrentMetadata));
     }
 
 }
