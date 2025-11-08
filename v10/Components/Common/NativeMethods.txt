@@ -44,3 +44,4 @@ IPersistFolder2
 SHELLEXECUTEINFOW
 ShellExecuteEx
 
+SystemParametersInfo

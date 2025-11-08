@@ -1062,15 +1062,42 @@ public partial class MainWindow
 
 
     /// <summary>
-    /// Sets the viewing image as lock screen image.
+    /// Sets the viewing photo as desktop wallpaper.
+    /// </summary>
+    public async Task IG_SetDesktopBackgroundAsync()
+    {
+        await SetSystemBackgroundAsync__(false, WallpaperStyle.Current);
+    }
+
+
+    /// <summary>
+    /// Sets the viewing photo as lock screen image.
     /// </summary>
     public async Task IG_SetLockScreenImageAsync()
+    {
+        await SetSystemBackgroundAsync__(true);
+    }
+
+
+    /// <summary>
+    /// Sets the current photo as system background.
+    /// </summary>
+    /// <param name="forLockScreen">
+    /// <c>true</c>: For lock screen image, <c>false</c>: for desktop wallpaper
+    /// </param>
+    /// <param name="style">Desktop wallpaper style</param>
+    private async Task SetSystemBackgroundAsync__(bool forLockScreen, WallpaperStyle style = WallpaperStyle.Current)
     {
         if (Viewer.SourceKind == PhotoSource.None) return;
 
         var filePath = AP.Photos.CurrentFilePath;
         var ext = AP.Photos.Current?.Extension.ToLowerInvariant() ?? string.Empty;
         _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId._CreatingFile], delayMs: 500);
+
+        var title = forLockScreen
+            ? AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen]
+            : AP.Config.Lang[LangId.FrmMain_MnuSetDesktopBackground];
+
 
 
         // 1. create temp image if needed
@@ -1086,31 +1113,45 @@ public partial class MainWindow
         if (!File.Exists(filePath))
         {
             _ = await ModalWindow.ShowErrorAsync(this,
-                title: AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen],
+                title: title,
                 description: AP.Config.Lang[LangId._CreatingFileError]);
 
             return;
         }
 
 
-        // 3. set lock screen image
+        // 3. set background
         try
         {
-            var sFile = await StorageFile.GetFileFromPathAsync(filePath);
-            await LockScreen.SetImageFileAsync(sFile);
+            if (forLockScreen)
+            {
+                var sFile = await StorageFile.GetFileFromPathAsync(filePath);
+                await LockScreen.SetImageFileAsync(sFile);
+            }
+            else
+            {
+                DesktopApi.SetWallpaper(filePath, style);
+            }
 
-            _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen_Success]);
+
+            var successMsg = forLockScreen
+                ? AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen_Success]
+                : AP.Config.Lang[LangId.FrmMain_MnuSetDesktopBackground_Success];
+
+            _ = _contentEl.ShowMessageAsync(successMsg);
         }
         catch (Exception ex)
         {
+            var heading = forLockScreen
+                ? AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen_Error]
+                : AP.Config.Lang[LangId.FrmMain_MnuSetDesktopBackground_Error];
+
             _ = await ModalWindow.ShowErrorAsync(this,
-                title: AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen],
+                title: title,
                 description: ex.Message,
-                heading: AP.Config.Lang[LangId.FrmMain_MnuSetLockScreen_Error]);
+                heading: heading);
         }
-
     }
-
 
 
     #endregion // Image APIs
