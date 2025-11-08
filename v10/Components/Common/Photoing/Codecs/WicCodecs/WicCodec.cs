@@ -298,6 +298,30 @@ public static partial class WicCodec
 
 
     /// <summary>
+    /// Checks if the photo can be pinged to get metadata.
+    /// </summary>
+    public static bool CanPing(string srcFilePath)
+    {
+        var ext = Path.GetExtension(srcFilePath).ToLowerInvariant();
+        return WicCodec.TopMetadataExts.Contains(ext);
+    }
+
+
+    /// <summary>
+    /// Checks if the photo can be decoded.
+    /// </summary>
+    public static bool CanRead(string srcFilePath)
+    {
+        using var meta = new PhotoMetadata()
+        {
+            FilePath = srcFilePath,
+        };
+
+        return CanRead(meta);
+    }
+
+
+    /// <summary>
     /// Checks if the photo can be decoded.
     /// </summary>
     public static bool CanRead(PhotoMetadata meta)

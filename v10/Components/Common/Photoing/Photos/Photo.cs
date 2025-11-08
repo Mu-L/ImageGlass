@@ -568,13 +568,23 @@ public partial class Photo : DisposableImpl
             // load the metadata if it's outdated
             if (hasOutdatedCache)
             {
-                if (WicCodec.TopMetadataExts.Contains(Extension))
+                if (MagickCodec.CanRead(FilePath))
+                {
+                    _taskMetadata = MagickCodec.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings);
+                }
+                else if (WicCodec.CanPing(FilePath))
                 {
                     _taskMetadata = WicCodec.LoadMetadataAsync(FilePath, ReadOptions);
                 }
                 else
                 {
-                    _taskMetadata = MagickCodec.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings);
+                    _taskMetadata = Task.Run(() =>
+                    {
+                        var meta = new PhotoMetadata();
+                        meta.SetFilePath(FilePath);
+
+                        return meta;
+                    });
                 }
 
                 _metadata = await _taskMetadata;

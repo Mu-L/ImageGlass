@@ -642,6 +642,15 @@ public static partial class MagickCodec
 
 
     /// <summary>
+    /// Checks if the format can be read.
+    /// </summary>
+    public static bool CanRead(string srcFilePath)
+    {
+        return MagickFormatInfo.Create(srcFilePath)?.SupportsReading ?? false;
+    }
+
+
+    /// <summary>
     /// Checks if the format can be written.
     /// </summary>
     public static bool CanWrite(string destFilePath)
