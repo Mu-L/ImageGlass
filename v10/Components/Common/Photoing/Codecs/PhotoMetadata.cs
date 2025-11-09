@@ -27,6 +27,7 @@ namespace ImageGlass.Common.Photoing;
 
 public partial class PhotoMetadata : DisposableImpl
 {
+
     // File metadata
     public string FilePath
     {
@@ -409,6 +410,7 @@ public partial class PhotoMetadata : DisposableImpl
 
         RawThumbnail = null;
         ExifProfile = null;
+        FrameCount = 0;
         Frames.Clear();
     }
 
@@ -462,8 +464,10 @@ public partial class PhotoMetadata : DisposableImpl
     /// </summary>
     public bool IsOutdated()
     {
+        if (FrameCount == 0) return true;
+
         // check if the current Metadata is outdated or not
-        var hasOutdatedCache = false;
+        var hasOutdatedCache = true;
 
         try
         {

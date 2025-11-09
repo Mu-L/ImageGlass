@@ -107,6 +107,9 @@ public sealed partial class GalleryControl : IgControl
 
     private async void GalleryItemThumbnail_Loaded(ThumbnailLoadedEventArgs e)
     {
+        // make sure the Metadata is updated
+        e.Sender.OnPropertyChanged(nameof(e.Sender.Metadata));
+
         if (e.Bitmap == null)
         {
             e.Sender.ThumbnailBitmap = null;
@@ -211,6 +214,7 @@ public sealed partial class GalleryControl : IgControl
         var thumbSize = AP.Config.ThumbnailSize * DpiScale;
         _ = item.VM.StartLoadingGalleryThumbnail(thumbSize, useCache, _progressThumbnailLoader);
     }
+
 
 }
 

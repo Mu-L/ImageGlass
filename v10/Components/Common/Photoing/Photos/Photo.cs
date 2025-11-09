@@ -37,10 +37,8 @@ namespace ImageGlass.Common.Photoing;
 public partial class Photo : DisposableImpl
 {
     // private properties
-    private PhotoMetadata? _metadata;
     private uint _width = 0;
     private uint _height = 0;
-    private string _filePath = "";
     private bool _isCurrent = false;
 
     private Task? _taskThumbnail;
@@ -102,13 +100,14 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public string FilePath
     {
-        get => _filePath;
-        set
+        get => Metadata.FilePath; set
         {
-            if (!_filePath.Equals(value, StringComparison.Ordinal))
+            if (!Metadata.FilePath.Equals(value, StringComparison.Ordinal))
             {
-                _filePath = value;
+                Metadata.FilePath = value;
+
                 OnPropertyChanged(nameof(FilePath));
+                OnPropertyChanged(nameof(Metadata));
 
                 OnPropertyChanged(nameof(IsClipboard));
                 OnPropertyChanged(nameof(Extension));
@@ -147,8 +146,6 @@ public partial class Photo : DisposableImpl
 
 
 
-
-
     /// <summary>
     /// Gets the error details.
     /// </summary>
@@ -167,7 +164,15 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Gets image metadata.
     /// </summary>
-    public PhotoMetadata Metadata => _metadata!;
+    public PhotoMetadata Metadata
+    {
+        get; private set
+        {
+            if (field == value) return;
+            field = value;
+            _ = OnPropertyChanged();
+        }
+    } = new();
 
     /// <summary>
     /// Gets photo loading cancellation token source.
@@ -240,8 +245,8 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public Photo(IDisposable? bmp, int width, int height, PhotoLoadingState state = PhotoLoadingState.Loaded)
     {
-        _metadata?.Dispose();
-        _metadata = new()
+        Metadata.Dispose();
+        Metadata = new()
         {
             Width = (uint)width,
             Height = (uint)height,
@@ -249,8 +254,8 @@ public partial class Photo : DisposableImpl
         };
 
         Bitmap = bmp;
-        _width = (uint)_metadata.Width;
-        _height = (uint)_metadata.Height;
+        _width = (uint)Metadata.Width;
+        _height = (uint)Metadata.Height;
 
         State = state;
     }
@@ -261,12 +266,12 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public Photo(IDisposable? bmp, PhotoMetadata? meta, PhotoLoadingState state = PhotoLoadingState.Loaded)
     {
-        _metadata?.Dispose();
-        _metadata = meta ?? new();
+        Metadata.Dispose();
+        Metadata = meta ?? new();
 
         Bitmap = bmp;
-        _width = (uint)_metadata.Width;
-        _height = (uint)_metadata.Height;
+        _width = (uint)Metadata.Width;
+        _height = (uint)Metadata.Height;
 
         State = state;
     }
@@ -279,7 +284,7 @@ public partial class Photo : DisposableImpl
 
     /// <summary>
     /// <inheritdoc/>
-    /// Calling this function also disposes <see cref="Metadata"/> object.
+    /// Calling this function also disposes Metadata object.
     /// </summary>
     protected override async void OnDisposing()
     {
@@ -308,8 +313,8 @@ public partial class Photo : DisposableImpl
                 await _taskMetadata;
             }
 
-            _metadata?.Dispose();
-            _metadata = null;
+            Metadata.Dispose();
+            Metadata = new();
 
             DisposeThumbnail();
 
@@ -554,7 +559,7 @@ public partial class Photo : DisposableImpl
                     && _taskMetadata.Status != TaskStatus.Canceled
                     && _taskMetadata.Status != TaskStatus.Faulted)
                 {
-                    _metadata = await _taskMetadata;
+                    Metadata = await _taskMetadata;
                     return;
                 }
             }
@@ -566,7 +571,7 @@ public partial class Photo : DisposableImpl
 
 
             // check if the current Metadata is outdated or not
-            var hasOutdatedCache = !useCache || (_metadata?.IsOutdated() ?? true);
+            var hasOutdatedCache = !useCache || Metadata.IsOutdated();
 
 
             // load the metadata if it's outdated
@@ -585,7 +590,7 @@ public partial class Photo : DisposableImpl
                     _taskMetadata = Task.Run(() => new PhotoMetadata(FilePath));
                 }
 
-                _metadata = await _taskMetadata;
+                Metadata = await _taskMetadata;
             }
         }
         catch (Exception ex)
@@ -616,7 +621,6 @@ public partial class Photo : DisposableImpl
     {
         if (useCache)
         {
-
             if (GalleryThumbnail is not null) return;
 
             // if already started loading, wait for the task completes
