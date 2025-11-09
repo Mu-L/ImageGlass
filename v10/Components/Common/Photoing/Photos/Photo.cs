@@ -162,13 +162,16 @@ public partial class Photo : DisposableImpl
     public MagickReadSettings? ReadSettings { get; set; } = null;
 
     /// <summary>
-    /// Gets image metadata.
+    /// Gets image metadata. <c>MUST</c> assign on UI thread due to reactivity.
     /// </summary>
     public PhotoMetadata Metadata
     {
         get; private set
         {
             if (field == value) return;
+
+            DisposeThumbnail();
+            field.Dispose();
             field = value;
             _ = OnPropertyChanged();
         }
@@ -493,8 +496,8 @@ public partial class Photo : DisposableImpl
             // cancel if requested
             if (token.IsCancellationRequested) return;
 
-            // load metadata off-thread
-            await Task.Run(() => LoadMetadataAsync(useCache), token);
+            // load metadata
+            await LoadMetadataAsync(useCache);
             ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
 
             if (!skipLoadingEvent)
@@ -547,6 +550,15 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public async Task LoadMetadataAsync(bool useCache, PhotoReadOptions? newOptions = null)
     {
+        var meta = await Task.Run(() => LoadMetadataAsync__(useCache, newOptions));
+
+        if (meta is not null)
+        {
+            Metadata = meta;
+        }
+    }
+    private async Task<PhotoMetadata?> LoadMetadataAsync__(bool useCache, PhotoReadOptions? newOptions = null)
+    {
         try
         {
             ReadOptions = newOptions ?? ReadOptions;
@@ -559,13 +571,11 @@ public partial class Photo : DisposableImpl
                     && _taskMetadata.Status != TaskStatus.Canceled
                     && _taskMetadata.Status != TaskStatus.Faulted)
                 {
-                    Metadata = await _taskMetadata;
-                    return;
+                    return await _taskMetadata;
                 }
             }
             else
             {
-                _taskMetadata?.Dispose();
                 _taskMetadata = null;
             }
 
@@ -573,30 +583,33 @@ public partial class Photo : DisposableImpl
             // check if the current Metadata is outdated or not
             var hasOutdatedCache = !useCache || Metadata.IsOutdated();
 
-
             // load the metadata if it's outdated
             if (hasOutdatedCache)
             {
+                // load metadata off-thread
                 if (MagickCodec.CanRead(FilePath))
                 {
-                    _taskMetadata = MagickCodec.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings);
+                    _taskMetadata = Task.Run(() => MagickCodec.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings));
                 }
                 else if (WicCodec.CanPing(FilePath))
                 {
-                    _taskMetadata = WicCodec.LoadMetadataAsync(FilePath, ReadOptions);
+                    _taskMetadata = Task.Run(() => WicCodec.LoadMetadataAsync(FilePath, ReadOptions));
                 }
                 else
                 {
                     _taskMetadata = Task.Run(() => new PhotoMetadata(FilePath));
                 }
 
-                Metadata = await _taskMetadata;
+                // must assign on UI thread
+                return await _taskMetadata;
             }
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"❌❌❌ {nameof(LoadMetadataAsync)}: {ex.Message}");
         }
+
+        return null;
     }
 
 
@@ -608,7 +621,6 @@ public partial class Photo : DisposableImpl
         ThumbnailBitmap = null;
         GalleryThumbnail = null;
 
-        _taskThumbnail?.Dispose();
         _taskThumbnail = null;
     }
 
@@ -637,7 +649,11 @@ public partial class Photo : DisposableImpl
             DisposeThumbnail();
         }
 
+        // ensure metadata is loaded
+        await LoadMetadataAsync(true);
 
+
+        // load thumbnail off-thread
         _taskThumbnail = Task.Run(async () =>
         {
             var taskId = Guid.NewGuid();
@@ -647,14 +663,14 @@ public partial class Photo : DisposableImpl
 
             try
             {
-                // ensure metadata is loaded
-                await LoadMetadataAsync(true);
-
                 // load thumbnail
                 using var wicBmp = await Metadata.GetThumbnailAsync(size);
 
                 // convert to software bitmap
-                softwareBmp = await wicBmp.ToSoftwareBitmapAsync();
+                if (wicBmp is not null)
+                {
+                    softwareBmp = await wicBmp.ToSoftwareBitmapAsync();
+                }
             }
             catch
             {

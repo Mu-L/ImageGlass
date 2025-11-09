@@ -363,19 +363,24 @@ public partial class MainWindow
 
 
         // 3. check for success
-        if (saveSource == ImageSaveSource.SelectedArea)
+        var newPhotoIndex = AP.Photos.IndexOf(destFilePath);
+        if (newPhotoIndex == AP.Photos.CurrentIndex)
         {
-            // reload to view the updated image
-            IG_Reload();
-        }
-        else if (saveSource == ImageSaveSource.Clipboard)
-        {
-            // clear the clipboard image
-            await LoadClipboardPhotoAsync(null);
+            if (saveSource == ImageSaveSource.SelectedArea)
+            {
+                // reload to view the updated image
+                IG_Reload();
+            }
+            else if (saveSource == ImageSaveSource.Clipboard)
+            {
+                // clear the clipboard image
+                await LoadClipboardPhotoAsync(null);
 
-            // reload to view the updated image
-            IG_Reload();
+                // reload to view the updated image
+                IG_Reload();
+            }
         }
+
         _ = _contentEl.ShowMessageAsync(destFilePath, AP.Config.Lang[LangId.FrmMain_MnuSave_Success]);
 
 
@@ -384,7 +389,7 @@ public partial class MainWindow
         if (destPhoto is not null)
         {
             // reload thumbnail
-            Gallery.LoadThumbnail(AP.Photos.CurrentIndex, false);
+            Gallery.LoadThumbnail(newPhotoIndex, false);
         }
 
 
@@ -1009,8 +1014,10 @@ public partial class MainWindow
     /// </summary>
     public void IG_Reload()
     {
-        var photo = AP.Photos.Get(AP.Photos.CurrentIndex);
-        _ = ViewPhotoAsync(photo, useCache: false);
+        _ = ViewPhotoAsync(AP.Photos.Current, useCache: false);
+
+        // reload thumbnail
+        Gallery.LoadThumbnail(AP.Photos.CurrentIndex, false);
     }
 
 
