@@ -28,10 +28,34 @@ namespace ImageGlass.Common.Photoing;
 public partial class PhotoMetadata : DisposableImpl
 {
     // File metadata
-    public string FilePath { get; set; } = string.Empty;
+    public string FilePath
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+
+            SetFilePath__(value);
+            _ = OnPropertyChanged(value, oldValue);
+            _ = OnPropertyChanged(nameof(FileName));
+            _ = OnPropertyChanged(nameof(FileExtension));
+            _ = OnPropertyChanged(nameof(FolderPath));
+            _ = OnPropertyChanged(nameof(FolderName));
+            _ = OnPropertyChanged(nameof(FileSizeInBytes));
+            _ = OnPropertyChanged(nameof(FileSizeFormated));
+            _ = OnPropertyChanged(nameof(FileCreationTimeUtc));
+            _ = OnPropertyChanged(nameof(FileLastAccessTimeUtc));
+            _ = OnPropertyChanged(nameof(FileLastWriteTimeUtc));
+            _ = OnPropertyChanged(nameof(FileCreationTimeFormated));
+            _ = OnPropertyChanged(nameof(FileLastAccessTimeFormated));
+            _ = OnPropertyChanged(nameof(FileLastWriteTimeFormated));
+        }
+    } = string.Empty;
+
     public string FileName { get; private set; } = string.Empty;
     /// <summary>
-    /// Getss file extension in uppercase. E.g. <c>.PNG</c>
+    /// Getss file extension in lowercase. E.g. <c>.png</c>
     /// </summary>
     public string FileExtension { get; private set; } = string.Empty;
     public string FolderPath { get; private set; } = string.Empty;
@@ -54,58 +78,320 @@ public partial class PhotoMetadata : DisposableImpl
     /// <summary>
     /// Gets the original width before processing orientation.
     /// </summary>
-    public uint OriginalWidth { get; set; } = 0;
+    public uint OriginalWidth
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = 0;
 
     /// <summary>
     /// Gets the original height before processing orientation.
     /// </summary>
-    public uint OriginalHeight { get; set; } = 0;
+    public uint OriginalHeight
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = 0;
 
     /// <summary>
     /// Gets the desired width after processing orientation.
     /// </summary>
-    public uint Width { get; set; } = 0;
+    public uint Width
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = 0;
 
     /// <summary>
     /// Gets the desired height after processing orientation.
     /// </summary>
-    public uint Height { get; set; } = 0;
+    public uint Height
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = 0;
 
     /// <summary>
     /// Gets the frame index of this metadata.
     /// </summary>
-    public uint FrameIndex { get; set; } = 0;
-    public uint FrameCount { get; set; } = 0;
-    public uint AnimationLoop { get; set; } = 0;
-    public IImmutableList<FrameMetadata> Frames { get; set; } = [];
-    public bool HasAlpha { get; set; } = false;
-    public bool CanAnimate { get; set; } = false;
-    public OrientationType Orientation { get; set; } = OrientationType.Undefined;
+    public uint FrameIndex
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = 0;
+    public uint FrameCount
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = 0;
+    public uint AnimationLoop
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = 0;
+    public IImmutableList<FrameMetadata> Frames
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = [];
+    public bool HasAlpha
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = false;
+    public bool CanAnimate
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = false;
+    public OrientationType Orientation
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = OrientationType.Undefined;
 
 
 
-    public ColorSpace ColorSpace { get; set; } = ColorSpace.Undefined;
-    public string ColorProfileName { get; set; } = string.Empty;
+    public ColorSpace ColorSpace
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = ColorSpace.Undefined;
+    public string ColorProfileName
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = string.Empty;
 
-    public byte[]? ColorProfileData { get; set; } = null;
+    public byte[]? ColorProfileData
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
 
-    public IImageProfile? RawThumbnail { get; set; } = null;
+    public IImageProfile? RawThumbnail
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
 
 
     // EXIF metadata
-    public IExifProfile? ExifProfile { get; set; } = null;
-    public int ExifRatingPercent { get; set; } = 0;
-    public DateTime? ExifDateTimeOriginal { get; set; } = null; // local time
-    public DateTime? ExifDateTime { get; set; } = null; // local time
-    public string? ExifImageDescription { get; set; } = null;
-    public string? ExifModel { get; set; } = null;
-    public string? ExifArtist { get; set; } = null;
-    public string? ExifCopyright { get; set; } = null;
-    public string? ExifSoftware { get; set; } = null;
-    public float? ExifExposureTime { get; set; } = null;
-    public float? ExifFNumber { get; set; } = null;
-    public int? ExifISOSpeed { get; set; } = null;
-    public float? ExifFocalLength { get; set; } = null;
+    public IExifProfile? ExifProfile
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
+    public int ExifRatingPercent
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = 0;
+    public DateTime? ExifDateTimeOriginal
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null; // local time
+    public DateTime? ExifDateTime
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null; // local time
+    public string? ExifImageDescription
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
+    public string? ExifModel
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
+    public string? ExifArtist
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
+    public string? ExifCopyright
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
+    public string? ExifSoftware
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
+    public float? ExifExposureTime
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
+    public float? ExifFNumber
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
+    public int? ExifISOSpeed
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
+    public float? ExifFocalLength
+    {
+        get; set
+        {
+            if (field == value) return;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = null;
+
+
+
+    public PhotoMetadata() { }
+
+    public PhotoMetadata(string? filePath)
+    {
+        FilePath = filePath ?? string.Empty;
+    }
+
 
 
     /// <summary>
@@ -127,21 +413,17 @@ public partial class PhotoMetadata : DisposableImpl
     }
 
 
-
     /// <summary>
     /// Sets the file path and extracts file-related metadata.
     /// </summary>
-    public void SetFilePath(string? filePath)
+    private void SetFilePath__(string? filePath)
     {
-        FilePath = filePath ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(filePath)) return;
-
         try
         {
-            var fi = new FileInfo(filePath);
+            var fi = new FileInfo(filePath!);
 
             FileName = fi.Name;
-            FileExtension = fi.Extension.ToUpperInvariant();
+            FileExtension = fi.Extension.ToLowerInvariant();
             FolderPath = fi.DirectoryName ?? string.Empty;
             FolderName = fi.Directory?.Name ?? string.Empty;
 
@@ -150,7 +432,18 @@ public partial class PhotoMetadata : DisposableImpl
             FileLastWriteTimeUtc = fi.LastWriteTimeUtc;
             FileLastAccessTimeUtc = fi.LastAccessTimeUtc;
         }
-        catch { }
+        catch
+        {
+            FileName = string.Empty;
+            FileExtension = string.Empty;
+            FolderPath = string.Empty;
+            FolderName = string.Empty;
+
+            FileSizeInBytes = 0;
+            FileCreationTimeUtc = DateTime.MinValue;
+            FileLastWriteTimeUtc = DateTime.MinValue;
+            FileLastAccessTimeUtc = DateTime.MinValue;
+        }
     }
 
 

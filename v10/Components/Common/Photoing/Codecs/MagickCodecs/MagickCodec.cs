@@ -189,10 +189,9 @@ public static partial class MagickCodec
         CancellationToken token = default)
     {
         filePath ??= string.Empty;
-        var meta = new PhotoMetadata();
+        var meta = new PhotoMetadata(filePath);
 
         // 0. get file info
-        meta.SetFilePath(filePath);
         if (string.IsNullOrWhiteSpace(filePath)) return meta;
 
         // 1. parse Magick settings
@@ -210,8 +209,7 @@ public static partial class MagickCodec
         }
 
         // 3. load metadata
-        meta = await LoadMetadataAsync(imgC, options, readSettings, token);
-        meta.SetFilePath(filePath);
+        meta = await LoadMetadataAsync(meta, imgC, options, readSettings, token);
 
         return meta;
     }
@@ -243,7 +241,7 @@ public static partial class MagickCodec
         }
 
         // 3. load metadata
-        meta = await LoadMetadataAsync(imgC, options, readSettings, token);
+        meta = await LoadMetadataAsync(meta, imgC, options, readSettings, token);
 
         return meta;
     }
@@ -252,12 +250,12 @@ public static partial class MagickCodec
     /// <summary>
     /// Loads photo metadata from Magick instance.
     /// </summary>
-    public static async Task<PhotoMetadata> LoadMetadataAsync(MagickImageCollection imgC,
+    public static async Task<PhotoMetadata> LoadMetadataAsync(PhotoMetadata meta,
+        MagickImageCollection imgC,
         PhotoReadOptions? options = null,
         MagickReadSettings? readSettings = null,
         CancellationToken token = default)
     {
-        var meta = new PhotoMetadata();
         if (imgC.Count == 0) return meta;
 
 

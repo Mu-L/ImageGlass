@@ -145,6 +145,10 @@ public partial class Photo : DisposableImpl
     public string GalleryFileExtension => Extension.Length > 1 ? Extension.Substring(1) : string.Empty;
 
 
+
+
+
+
     /// <summary>
     /// Gets the error details.
     /// </summary>
@@ -578,13 +582,7 @@ public partial class Photo : DisposableImpl
                 }
                 else
                 {
-                    _taskMetadata = Task.Run(() =>
-                    {
-                        var meta = new PhotoMetadata();
-                        meta.SetFilePath(FilePath);
-
-                        return meta;
-                    });
+                    _taskMetadata = Task.Run(() => new PhotoMetadata(FilePath));
                 }
 
                 _metadata = await _taskMetadata;

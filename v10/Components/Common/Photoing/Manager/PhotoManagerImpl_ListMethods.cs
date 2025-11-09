@@ -169,7 +169,6 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         if (photo is null) return;
 
         photo.FilePath = filePath;
-        photo.Metadata.SetFilePath(filePath);
 
         _dict.Remove(filePath, out _);
         _dict.AddOrUpdate(filePath, index, (fIndex, oldValue) => index);

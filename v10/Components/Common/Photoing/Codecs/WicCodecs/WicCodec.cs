@@ -103,10 +103,9 @@ public static partial class WicCodec
         PhotoReadOptions? options = null, CancellationToken token = default)
     {
         filePath ??= string.Empty;
-        var meta = new PhotoMetadata();
+        var meta = new PhotoMetadata(filePath);
 
         // 0. get file info
-        meta.SetFilePath(filePath);
         if (string.IsNullOrWhiteSpace(filePath)) return meta;
 
         // create WIC decoder

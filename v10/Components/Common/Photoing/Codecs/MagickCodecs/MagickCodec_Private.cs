@@ -205,7 +205,7 @@ public static partial class MagickCodec
     /// <param name="ext">File extension, e.g: <c>.gif</c></param>
     private static bool CheckAnimatedFormat__(MagickImageCollection imgC, string? ext)
     {
-        var isAnimatedExtension = ext == ".GIF" || ext == ".GIFV" || ext == ".WEBP" || ext == ".JXL";
+        var isAnimatedExtension = ext == ".gif" || ext == ".gifv" || ext == ".webp" || ext == ".jxl";
 
         var canAnimate = imgC.Count > 1
             && (isAnimatedExtension || imgC.Any(i => i.AnimationDelay > 0));
