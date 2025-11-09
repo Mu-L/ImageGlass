@@ -28,7 +28,9 @@ namespace ImageGlass.Common.Photoing;
 public partial class PhotoMetadata : DisposableImpl
 {
 
-    // File metadata
+    #region Public Properties
+
+    #region File metadata
     public string FilePath
     {
         get; set
@@ -44,13 +46,13 @@ public partial class PhotoMetadata : DisposableImpl
             _ = OnPropertyChanged(nameof(FolderPath));
             _ = OnPropertyChanged(nameof(FolderName));
             _ = OnPropertyChanged(nameof(FileSizeInBytes));
-            _ = OnPropertyChanged(nameof(FileSizeFormated));
+            _ = OnPropertyChanged(nameof(FileSizeFormatted));
             _ = OnPropertyChanged(nameof(FileCreationTimeUtc));
             _ = OnPropertyChanged(nameof(FileLastAccessTimeUtc));
             _ = OnPropertyChanged(nameof(FileLastWriteTimeUtc));
-            _ = OnPropertyChanged(nameof(FileCreationTimeFormated));
-            _ = OnPropertyChanged(nameof(FileLastAccessTimeFormated));
-            _ = OnPropertyChanged(nameof(FileLastWriteTimeFormated));
+            _ = OnPropertyChanged(nameof(FileCreationTimeFormatted));
+            _ = OnPropertyChanged(nameof(FileLastAccessTimeFormatted));
+            _ = OnPropertyChanged(nameof(FileLastWriteTimeFormatted));
         }
     } = string.Empty;
 
@@ -66,15 +68,19 @@ public partial class PhotoMetadata : DisposableImpl
     /// <summary>
     /// The formated file size. E.g. <c>32.09 MB</c>.
     /// </summary>
-    public string FileSizeFormated => BHelper.FormatSize(FileSizeInBytes);
+    public string FileSizeFormatted => BHelper.FormatSize(FileSizeInBytes);
 
     public DateTime FileCreationTimeUtc { get; private set; }
     public DateTime FileLastAccessTimeUtc { get; private set; }
     public DateTime FileLastWriteTimeUtc { get; private set; }
-    public string FileCreationTimeFormated => BHelper.FormatDateTime(FileCreationTimeUtc.ToLocalTime());
-    public string FileLastAccessTimeFormated => BHelper.FormatDateTime(FileLastAccessTimeUtc.ToLocalTime());
-    public string FileLastWriteTimeFormated => BHelper.FormatDateTime(FileLastWriteTimeUtc.ToLocalTime());
+    public string FileCreationTimeFormatted => BHelper.FormatDateTime(FileCreationTimeUtc.ToLocalTime());
+    public string FileLastAccessTimeFormatted => BHelper.FormatDateTime(FileLastAccessTimeUtc.ToLocalTime());
+    public string FileLastWriteTimeFormatted => BHelper.FormatDateTime(FileLastWriteTimeUtc.ToLocalTime());
 
+    #endregion // File metadata
+
+
+    #region Bitmap information
 
     /// <summary>
     /// Gets the original width before processing orientation.
@@ -153,8 +159,10 @@ public partial class PhotoMetadata : DisposableImpl
             var oldValue = field;
             field = value;
             _ = OnPropertyChanged(value, oldValue);
+            _ = OnPropertyChanged(nameof(FrameCountFormatted));
         }
     } = 0;
+    public string FrameCountFormatted => FrameCount > 1 ? FrameCount.ToString() : string.Empty;
     public uint AnimationLoop
     {
         get; set
@@ -206,7 +214,10 @@ public partial class PhotoMetadata : DisposableImpl
         }
     } = OrientationType.Undefined;
 
+    #endregion // Bitmap information
 
+
+    #region Color information
 
     public ColorSpace ColorSpace
     {
@@ -251,8 +262,11 @@ public partial class PhotoMetadata : DisposableImpl
         }
     } = null;
 
+    #endregion // Color information
 
-    // EXIF metadata
+
+    #region EXIF metadata
+
     public IExifProfile? ExifProfile
     {
         get; set
@@ -271,8 +285,10 @@ public partial class PhotoMetadata : DisposableImpl
             var oldValue = field;
             field = value;
             _ = OnPropertyChanged(value, oldValue);
+            _ = OnPropertyChanged(nameof(ExifRatingFormatted));
         }
     } = 0;
+    public string ExifRatingFormatted => BHelper.FormatStarRatingText(ExifRatingPercent);
     public DateTime? ExifDateTimeOriginal
     {
         get; set
@@ -281,6 +297,7 @@ public partial class PhotoMetadata : DisposableImpl
             var oldValue = field;
             field = value;
             _ = OnPropertyChanged(value, oldValue);
+            _ = OnPropertyChanged(nameof(ExifDateTimeOriginalFormatted));
         }
     } = null; // local time
     public DateTime? ExifDateTime
@@ -291,8 +308,13 @@ public partial class PhotoMetadata : DisposableImpl
             var oldValue = field;
             field = value;
             _ = OnPropertyChanged(value, oldValue);
+            _ = OnPropertyChanged(nameof(ExifDateTimeFormatted));
         }
     } = null; // local time
+
+    public string ExifDateTimeOriginalFormatted => BHelper.FormatDateTime(ExifDateTimeOriginal?.ToLocalTime());
+    public string ExifDateTimeFormatted => BHelper.FormatDateTime(ExifDateTime?.ToLocalTime());
+
     public string? ExifImageDescription
     {
         get; set
@@ -384,6 +406,10 @@ public partial class PhotoMetadata : DisposableImpl
         }
     } = null;
 
+    #endregion // EXIF metadata
+
+    #endregion // Public Properties
+
 
 
     public PhotoMetadata() { }
@@ -394,6 +420,8 @@ public partial class PhotoMetadata : DisposableImpl
     }
 
 
+
+    #region Methods
 
     /// <summary>
     /// <inheritdoc/>
@@ -513,6 +541,9 @@ public partial class PhotoMetadata : DisposableImpl
 
         return thumbM;
     }
+
+    #endregion // Methods
+
 
 
 }

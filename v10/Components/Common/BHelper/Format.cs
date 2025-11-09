@@ -118,7 +118,7 @@ public partial class BHelper
     {
         var star = FormatStarRating(rating);
         var ratingText = star > 0
-            ? "".PadRight(star, '⭐').PadRight(5, '✰').Replace("✰", " ✰")
+            ? string.Empty.PadRight(star, '⭐').PadRight(5, '✰').Replace("✰", " ✰")
             : string.Empty;
 
         return ratingText;

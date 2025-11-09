@@ -91,7 +91,7 @@ public partial class AppStatusInfo : DisposableImpl
             if (AP.Config.ImageInfoTags.Contains(nameof(FileSize))
                 && AP.Photos.CurrentMetadata != null)
             {
-                return AP.Photos.CurrentMetadata.FileSizeFormated;
+                return AP.Photos.CurrentMetadata.FileSizeFormatted;
             }
 
             return null;
@@ -110,7 +110,7 @@ public partial class AppStatusInfo : DisposableImpl
                 || AP.Config.ImageInfoTags.Contains(nameof(DateTimeAuto)))
                 && AP.Photos.CurrentMetadata != null)
             {
-                return AP.Photos.CurrentMetadata.FileLastWriteTimeFormated + " (m)";
+                return AP.Photos.CurrentMetadata.FileLastWriteTimeFormatted + " (m)";
             }
 
             return null;
@@ -210,7 +210,7 @@ public partial class AppStatusInfo : DisposableImpl
             if (AP.Config.ImageInfoTags.Contains(nameof(ExifRating))
                 && AP.Photos.CurrentMetadata != null)
             {
-                return BHelper.FormatStarRatingText(AP.Photos.CurrentMetadata.ExifRatingPercent);
+                return AP.Photos.CurrentMetadata.ExifRatingFormatted;
             }
 
             return null;

@@ -138,7 +138,7 @@ public sealed partial class GalleryControl : IgControl
     private void GalleryItem_Clicked(object sender, RoutedEventArgs e)
     {
         if (sender is not IgGalleryItem btnItem) return;
-
+        if (btnItem.VM.IsCurrent) return;
 
         // scroll the clicked item into the view
         if (PART_ScrollViewer.ComputedHorizontalScrollBarVisibility == Visibility.Visible

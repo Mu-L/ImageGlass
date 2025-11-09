@@ -561,7 +561,7 @@ public partial class MainWindow
                 title: title,
                 description: $"""
                 {filePath}
-                {AP.Photos.Current?.Metadata.FileSizeFormated}
+                {AP.Photos.Current?.Metadata.FileSizeFormatted}
                 """,
                 heading: heading,
                 buttons: ModalWindowButton.Yes_No,

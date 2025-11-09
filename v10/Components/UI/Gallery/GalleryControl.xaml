@@ -77,6 +77,110 @@
                             Visibility="Visible" />
                     </Grid>
                 </Grid>
+
+
+                <!--  Gallery Item: Tooltip  -->
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        MaxWidth="500"
+                        Padding="5"
+                        Placement="Top">
+                        <StackPanel>
+                            <!--  File Name (Size)  -->
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock
+                                    Margin="0,0,2,0"
+                                    FontWeight="SemiBold"
+                                    Foreground="{ThemeResource AccentTextFillColorTertiaryBrush}"
+                                    IsColorFontEnabled="True"
+                                    Text="{x:Bind Metadata.FileName}"
+                                    TextWrapping="WrapWholeWords" />
+
+                                <TextBlock FontWeight="SemiBold" Text="(" />
+                                <TextBlock FontWeight="SemiBold" Text="{x:Bind Metadata.OriginalWidth}" />
+                                <TextBlock FontWeight="SemiBold" Text="×" />
+                                <TextBlock FontWeight="SemiBold" Text="{x:Bind Metadata.OriginalHeight}" />
+                                <TextBlock FontWeight="SemiBold" Text=")" />
+                            </StackPanel>
+
+                            <!--  File Path  -->
+                            <TextBlock
+                                Margin="0,0,0,5"
+                                IsColorFontEnabled="True"
+                                Text="{x:Bind FilePath}"
+                                TextWrapping="WrapWholeWords" />
+
+
+                            <!--  Metadata  -->
+                            <StackPanel Orientation="Horizontal" Spacing="24">
+                                <!--  Left column  -->
+                                <StackPanel>
+                                    <!--  File Size  -->
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_FileSize)}" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{x:Bind Metadata.FileSizeFormatted}" />
+                                    </StackPanel>
+
+                                    <!--  Date Modified  -->
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_FileLastWriteTime)}" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{x:Bind Metadata.FileLastWriteTimeFormatted}" />
+                                    </StackPanel>
+
+                                    <!--  Frame Count  -->
+                                    <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.FrameCountFormatted, Converter={StaticResource StringToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_FrameCount)}" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{x:Bind Metadata.FrameCountFormatted}" />
+                                    </StackPanel>
+
+                                    <!--  EXIF: Rating  -->
+                                    <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.ExifRatingFormatted, Converter={StaticResource StringToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_ExifRatingPercent)}" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{x:Bind Metadata.ExifRatingFormatted}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+
+                                <!--  Right column  -->
+                                <StackPanel>
+                                    <!--  Color Space  -->
+                                    <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.ColorSpace, Converter={StaticResource StringToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_ColorSpace)}" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{x:Bind Metadata.ColorSpace}" />
+                                    </StackPanel>
+
+                                    <!--  Color Profile  -->
+                                    <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.ColorProfileName, Converter={StaticResource StringToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_ColorProfile)}" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{x:Bind Metadata.ColorProfileName}" />
+                                    </StackPanel>
+
+                                    <!--  EXIF: DateTimeOriginal  -->
+                                    <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.ExifDateTimeOriginalFormatted, Converter={StaticResource StringToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_ExifDateTimeOriginal)}" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{x:Bind Metadata.ExifDateTimeOriginalFormatted}" />
+                                    </StackPanel>
+
+                                    <!--  EXIF: DateTime  -->
+                                    <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.ExifDateTimeFormatted, Converter={StaticResource StringToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_ExifDateTime)}" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{x:Bind Metadata.ExifDateTimeFormatted}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ToolTip>
+                </ToolTipService.ToolTip>
+
             </local:IgGalleryItem>
         </DataTemplate>
 
