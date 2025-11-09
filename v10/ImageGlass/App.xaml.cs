@@ -255,8 +255,10 @@ public partial class App : Application
     /// </summary>
     private static void ApplyMenuTheme()
     {
+        var bgNormal = AP.Config.Theme.ComputedColors.MenuBgColor;
         var bgHover = AP.Config.Theme.ComputedColors.MenuBgHoverColor;
         var bgPressed = AP.Config.Theme.ComputedColors.MenuBgActiveColor;
+        var border = AP.Config.Theme.InvertedBaseColor.WithAlpha(30);
 
         var textNormal = AP.Config.Theme.ComputedColors.MenuTextColor;
         var textHover = AP.Config.Theme.ComputedColors.MenuTextHoverColor;
@@ -265,7 +267,8 @@ public partial class App : Application
 
 
         // 1. menu dropdown
-        Application.Current.Resources["MenuFlyoutPresenterBackground"] = AP.Config.Theme.ComputedColors.MenuBgColor.ToBrush();
+        Application.Current.Resources["MenuFlyoutPresenterBackground"] = bgNormal.ToBrush();
+        Application.Current.Resources["MenuFlyoutPresenterBorderBrush"] = border.ToBrush();
 
 
         // 2. menu separator
@@ -315,7 +318,13 @@ public partial class App : Application
         Application.Current.Resources["ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled"] = textDisabled.WithAlpha(180).ToBrush();
 
 
-        // 6. other styles
+        // 6. tooltip
+        Application.Current.Resources["ToolTipBackgroundBrush"] = bgNormal.NoAlpha().ToBrush();
+        Application.Current.Resources["ToolTipForegroundBrush"] = textNormal.ToBrush();
+        Application.Current.Resources["ToolTipBorderBrush"] = border.ToBrush();
+
+
+        // 7. other styles
         Application.Current.Resources["ControlCornerRadius"] = Const.BORDER_RADIUS;
     }
 
