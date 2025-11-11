@@ -283,12 +283,6 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         Items.Clear();
         _dict.Clear();
         DistinctDirs.Clear();
-
-        _ = OnPropertyChanged(nameof(Count));
-        _ = OnPropertyChanged(nameof(Current));
-        _ = OnPropertyChanged(nameof(CurrentIndex));
-        _ = OnPropertyChanged(nameof(CurrentFilePath));
-        _ = OnPropertyChanged(nameof(CurrentMetadata));
     }
 
 }
