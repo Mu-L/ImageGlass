@@ -6,9 +6,9 @@
         <UseWindowsForms>true</UseWindowsForms>
         <ImplicitUsings>enable</ImplicitUsings>
         <Platforms>x64;ARM64</Platforms>
-        <Version>9.3.2.904</Version>
+        <Version>9.4.0.1120</Version>
         <FileVersion>$(Version)</FileVersion>
-        <Copyright>Copyright © 2010 - 2025 Duong Dieu Phap</Copyright>
+        <Copyright>Copyright © 2010 - 2026 Duong Dieu Phap</Copyright>
         <Configurations>Debug;Release;Publish_Release</Configurations>
         <LangVersion>latest</LangVersion>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>

@@ -7,9 +7,9 @@
         <Nullable>enable</Nullable>
         <Configurations>Debug;Release;Publish_Release</Configurations>
         <Platforms>x64;ARM64</Platforms>
-        <Version>1.5.0</Version>
+        <Version>1.6.0</Version>
         <FileVersion>$(Version)</FileVersion>
-        <Copyright>Copyright © 2010 - 2025 Duong Dieu Phap</Copyright>
+        <Copyright>Copyright © 2010 - 2026 Duong Dieu Phap</Copyright>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 

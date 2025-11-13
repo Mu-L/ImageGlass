@@ -1,6 +1,6 @@
 ﻿/*
 ImageGlass Project - Image viewer for Windows
-Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
 
 This program is free software: you can redistribute it and/or modify
@@ -433,7 +433,7 @@ public static class Config
     /// <summary>
     /// Gets, sets the minimum image dimension to use WIC decoder if the format is supported.
     /// </summary>
-    public static int MinDimensionToUseWIC { get; set; } = 10_000;
+    public static int MinDimensionToUseWIC { get; set; } = 16_000;
 
     /// <summary>
     /// Gets, sets the number of images cached by <see cref="Base.Services.ImageBooster"/>.

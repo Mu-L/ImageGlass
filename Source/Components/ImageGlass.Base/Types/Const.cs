@@ -1,6 +1,6 @@
 ﻿/*
 ImageGlass Project - Image viewer for Windows
-Copyright (C) 2010 - 2025 DUONG DIEU PHAP
+Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
 
 This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ public static class Const
     public const string DATETIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
     public const string DATE_FORMAT = "yyyy/MM/dd";
     public const string APP_PROTOCOL = "imageglass";
-    public const string APP_CODE = "1️⃣5️⃣🎂";
+    public const string APP_CODE = "2026";
     public const string MS_APPSTORE_ID = "9N33VZK3C7TH";
     public const int MAX_IMAGE_DIMENSION = 16_384;
 
