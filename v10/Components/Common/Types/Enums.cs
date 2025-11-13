@@ -78,3 +78,11 @@ public enum ImageSaveSource
     CurrentFile,
 }
 
+
+public enum PhotoCodec
+{
+    None,
+    Magick,
+    WIC,
+}
+

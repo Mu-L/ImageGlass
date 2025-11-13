@@ -869,6 +869,24 @@ public partial class Config : IgReactive
 
 
     /// <summary>
+    /// Gets, sets the list of formats that always use WIC to decode.
+    /// </summary>
+    [JsonConverter(typeof(JsonHashSetToStringConverter))]
+    public HashSet<string> WICReadFormats
+    {
+        get; set
+        {
+            if (field != value)
+            {
+                var oldValue = field;
+                field = value;
+                _ = OnPropertyChanged(value, oldValue);
+            }
+        }
+    } = [".gif", ".gifv", ".webp", ".fax", ".apng", ".jxr", ".hdp", ".wdp"];
+
+
+    /// <summary>
     /// Gets, sets the list of supported image formats
     /// </summary>
     [JsonConverter(typeof(JsonHashSetToStringConverter))]

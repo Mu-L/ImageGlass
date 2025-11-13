@@ -24,6 +24,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,7 +40,6 @@ public partial class Photo : DisposableImpl
     // private properties
     private uint _width = 0;
     private uint _height = 0;
-    private bool _isCurrent = false;
 
     private Task? _taskThumbnail;
     private Task<PhotoMetadata>? _taskMetadata;
@@ -77,6 +77,18 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public PhotoLoadingState State { get; set; } = PhotoLoadingState.None;
 
+    /// <summary>
+    /// Gets the codec used to decode the photo.
+    /// </summary>
+    public PhotoCodec ReadCodec
+    {
+        get; private set
+        {
+            if (field == value) return;
+            field = value;
+            _ = OnPropertyChanged();
+        }
+    } = PhotoCodec.None;
 
 
     /// <summary>
@@ -84,14 +96,11 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public bool IsCurrent
     {
-        get => _isCurrent;
-        set
+        get; set
         {
-            if (_isCurrent != value)
-            {
-                _isCurrent = value;
-                OnPropertyChanged(nameof(IsCurrent));
-            }
+            if (field == value) return;
+            field = value;
+            _ = OnPropertyChanged();
         }
     }
 
@@ -339,7 +348,8 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var useWicCodec = WicCodec.CanRead(meta);
+        var useWicCodec = meta.IsOneOfExtensions(AP.Config.WICReadFormats.ToArray())
+            && WicCodec.CanRead(meta);
 
         // use WIC codec
         if (useWicCodec)
@@ -360,6 +370,7 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task LoadWithWICAsync(PhotoMetadata meta, CancellationToken token)
     {
+        ReadCodec = PhotoCodec.WIC;
         var result = await WicCodec.LoadAsync(meta, token);
 
         _width = (uint)result.Size.Width;
@@ -377,6 +388,7 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task LoadWithMagickAsync(PhotoMetadata meta, CancellationToken token)
     {
+        ReadCodec = PhotoCodec.Magick;
         using var data = await MagickCodec.DecodeImageAsync(meta, ReadOptions, ReadSettings, null, token);
 
         // multi-frame
@@ -650,11 +662,11 @@ public partial class Photo : DisposableImpl
         }
 
         // ensure metadata is loaded
-        await LoadMetadataAsync(true);
+        var taskMetadata = LoadMetadataAsync(true);
 
 
         // load thumbnail off-thread
-        _taskThumbnail = Task.Run(async () =>
+        var taskThumb = Task.Run(async () =>
         {
             var taskId = Guid.NewGuid();
             _ = _taskRefs.TryAdd(taskId, true);
@@ -683,6 +695,9 @@ public partial class Photo : DisposableImpl
                 _ = _taskRefs.TryRemove(taskId, out _);
             }
         });
+
+
+        _taskThumbnail = await taskMetadata.ContinueWith(_ => taskThumb);
     }
 
 
