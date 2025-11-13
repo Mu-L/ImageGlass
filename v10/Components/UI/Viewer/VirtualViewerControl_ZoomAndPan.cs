@@ -307,7 +307,7 @@ public partial class VirtualViewerControl
             ZoomFactor = _zooming.Factor,
             IsManualZoom = _zooming.IsManual,
             IsZoomModeChange = false,
-            IsPreviewingImage = _isPreviewing,
+            IsPreviewingImage = _isPreviewing.Value,
             ChangeSource = ZoomChangeSource.Unknown,
         });
     }
@@ -333,7 +333,7 @@ public partial class VirtualViewerControl
             ZoomFactor = _zooming.Factor,
             IsManualZoom = _zooming.IsManual,
             IsZoomModeChange = mode != _zooming.Mode,
-            IsPreviewingImage = _isPreviewing,
+            IsPreviewingImage = _isPreviewing.Value,
             ChangeSource = zoomedByResizing ? ZoomChangeSource.SizeChanged : ZoomChangeSource.ZoomMode,
         });
     }
@@ -507,7 +507,7 @@ public partial class VirtualViewerControl
                 ZoomFactor = _zooming.Factor,
                 IsManualZoom = _zooming.IsManual,
                 IsZoomModeChange = false,
-                IsPreviewingImage = _isPreviewing,
+                IsPreviewingImage = _isPreviewing.Value,
                 ChangeSource = ZoomChangeSource.Unknown,
             });
 
@@ -615,7 +615,7 @@ public partial class VirtualViewerControl
             ZoomFactor = _zooming.Factor,
             IsManualZoom = _zooming.IsManual,
             IsZoomModeChange = false,
-            IsPreviewingImage = _isPreviewing,
+            IsPreviewingImage = _isPreviewing.Value,
             ChangeSource = ZoomChangeSource.Unknown,
         });
 

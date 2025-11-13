@@ -31,7 +31,7 @@ public sealed partial class GalleryControl : IgControl
     public static double ItemSpacing => 1;
     public event TypedEventHandler<IgGalleryItem, EventArgs>? ItemClicked;
 
-    private bool _isLoadingFirstItem = false;
+    private InterlockedBool _isLoadingFirstItem = new();
     private Progress<ThumbnailLoadedEventArgs> _progressThumbnailLoader;
 
 
@@ -60,7 +60,7 @@ public sealed partial class GalleryControl : IgControl
     {
         if (nameof(VM.Count).Equals(e.PropertyName, StringComparison.Ordinal))
         {
-            _isLoadingFirstItem = false;
+            _isLoadingFirstItem.Clear();
             _ = OnPropertyChanged(nameof(GalleryVisibility));
         }
     }
@@ -211,8 +211,8 @@ public sealed partial class GalleryControl : IgControl
         if (el is not IgGalleryItem item) return;
 
         // HACK: to make sure the ItemsRepeater does not load the index-0 item twice!
-        if (index == 0 && _isLoadingFirstItem) return;
-        _isLoadingFirstItem = true;
+        if (index == 0 && _isLoadingFirstItem.Value) return;
+        _isLoadingFirstItem.Set();
 
         // start loading thumbnail
         var thumbSize = AP.Config.ThumbnailSize * DpiScale;

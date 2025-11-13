@@ -55,7 +55,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
     // loading
     private CancellationTokenSource? _cancelPreview;
-    private bool _isPreviewing = false;
+    private InterlockedBool _isPreviewing = new();
 
     // control
     private Color _accentColor = Colors.Blue;
@@ -443,7 +443,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
             _destRect = {_destRect}
             _zoomFactor = {_zooming.Factor}
             _zoomedPoint = {_zooming.ZoomedPoint}
-            _isPreviewing = {_isPreviewing}
+            _isPreviewing = {_isPreviewing.Value}
             ERROR = {_photo?.Error?.ToString()}
             """,
             "Consolas", FontSize_Dpi, DrawingArea, Colors.Magenta);
@@ -694,7 +694,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
         if (!EnableImagePreview || ZoomMode == ZoomMode.LockZoom)
         {
             // raise event
-            _isPreviewing = false;
+            _isPreviewing.Clear();
             OnPhotoLoading(e);
             return;
         }
@@ -786,7 +786,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
         // raise event
-        _isPreviewing = hasPreview;
+        _isPreviewing.Value = hasPreview;
         OnPhotoLoading(e);
 
 
@@ -890,7 +890,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
 
 
                 // if user zoomed and panned the preview
-                if (_isPreviewing
+                if (_isPreviewing.Value
                     && _zooming.IsManual
                     && ZoomMode != ZoomMode.LockZoom)
                 {
@@ -915,12 +915,12 @@ public partial class VirtualViewerControl : SwapChainCanvas
                     ZoomByDeltaToPoint(double.Epsilon, _zooming.ZoomedPoint, false);
                     _zooming.IsManual = false;
 
-                    _isPreviewing = false;
+                    _isPreviewing.Clear();
                     Refresh(false);
                 }
                 else
                 {
-                    _isPreviewing = false;
+                    _isPreviewing.Clear();
                     Refresh(true);
                 }
             }
