@@ -76,7 +76,6 @@ public static partial class MagickCodec
 
         if (ext.Equals(".SVG", StringComparison.OrdinalIgnoreCase))
         {
-            settings.SetDefine("svg:xml-parse-huge", "true");
             settings.Format = MagickFormat.Rsvg;
             settings.BackgroundColor = MagickColors.Transparent;
         }
@@ -529,7 +528,7 @@ public static partial class MagickCodec
         try
         {
             var imgM = new MagickImage();
-            imgM.Ping(filePath);
+            imgM.Ping(filePath, settings);
 
             // check the dimention constraint
             if (imgM.Width < minSize
