@@ -447,10 +447,10 @@ public class IgLang
         new(LangId.FrmMain_MnuNewWindow_Error, "Cannot open new window because only one instance is allowed"), //v7.0
         new(LangId.FrmMain_MnuSave, "Save"), //v8.1
         new(LangId.FrmMain_MnuSave_Confirm, "Are you sure you want to override this image?"), //v9.0
-        new(LangId.FrmMain_MnuSave_ConfirmDescription, "ImageGlass is not a professional photo editor, please be aware of losing the quality, metadata, layers,… when saving your image."), //v9.0
+        new(LangId.FrmMain_MnuSave_ConfirmDescription, "ImageGlass is not a professional photo editor, please be aware of losing quality, metadata, layers,… when saving your image."), //v9.0
         new(LangId.FrmMain_MnuSave_Saving, "Saving image…"), //v9.0
         new(LangId.FrmMain_MnuSave_Success, "Image is saved"), //v9.0
-        new(LangId.FrmMain_MnuSave_Error, "Could not save the image"), //v9.0
+        new(LangId.FrmMain_MnuSave_Error, "Could not save image"), //v9.0
         new(LangId.FrmMain_MnuSaveAs, "Save as…"), //v3.0
         new(LangId.FrmMain_MnuExportFrames, "Export image frames…"), //v7.5
 
@@ -458,15 +458,15 @@ public class IgLang
         new(LangId.FrmMain_MnuEdit, "Edit image {0}…"), //v3.0,
         new(LangId.FrmMain_MnuEdit_AppNotFound, "Could not find the associated app for editing. You can assign an app for editing this format in ImageGlass Settings > Edit."), //v9.0
         new(LangId.FrmMain_MnuPrint, "Print…"), //v3.0
-        new(LangId.FrmMain_MnuPrint_Error, "Could not print the viewing image"), //v9.0
+        new(LangId.FrmMain_MnuPrint_Error, "Could not print image"), //v9.0
         new(LangId.FrmMain_MnuShare, "Share…"), //v8.6
         new(LangId.FrmMain_MnuShare_Error, "Could not open Share dialog."), //v9.0
         new(LangId.FrmMain_MnuOpenLocation, "Open image location"), //v3.0
 
         new(LangId.FrmMain_MnuRename, "Rename image…"), //v3.0
         new(LangId.FrmMain_MnuRename_Description, "Enter a new filename:"), // v9.0
-        new(LangId.FrmMain_MnuMoveToRecycleBin, "Move to the Recycle Bin"), //v3.0
-        new(LangId.FrmMain_MnuMoveToRecycleBin_Description, "Do you want to move this file to the Recycle bin?"), //v3.0
+        new(LangId.FrmMain_MnuMoveToRecycleBin, "Move to Recycle Bin"), //v3.0
+        new(LangId.FrmMain_MnuMoveToRecycleBin_Description, "Do you want to move this file to Recycle bin?"), //v3.0
         new(LangId.FrmMain_MnuDeleteFromHardDisk, "Delete permanently"), //v3.0
         new(LangId.FrmMain_MnuDeleteFromHardDisk_Description, "Are you sure you want to permanently delete this file?"), //v3.0
         #endregion // Main Menu > File
@@ -477,7 +477,7 @@ public class IgLang
         new(LangId.FrmMain_MnuViewPrevious, "View previous image"), //v3.0
 
         new(LangId.FrmMain_MnuGoTo, "Go to…"), //v3.0
-        new(LangId.FrmMain_MnuGoTo_Description, "Enter the image index to view, and then press ENTER"),
+        new(LangId.FrmMain_MnuGoTo_Description, "Type image number to view, and then press ENTER"),
         new(LangId.FrmMain_MnuGoToFirst, "Go to first image"), //v3.0
         new(LangId.FrmMain_MnuGoToLast, "Go to last image"), //v3.0
 
@@ -535,10 +535,10 @@ public class IgLang
         new(LangId.FrmMain_MnuFlipVertical, "Flip Vertical"), // V6.0
         
         new(LangId.FrmMain_MnuSetDesktopBackground, "Set as Desktop background"), //v3.0
-        new(LangId.FrmMain_MnuSetDesktopBackground_Error, "Could not set the viewing image as desktop background"), // v6.0
+        new(LangId.FrmMain_MnuSetDesktopBackground_Error, "Could not set image as desktop background"), // v6.0
         new(LangId.FrmMain_MnuSetDesktopBackground_Success, "Desktop background is updated"), // v6.0
         new(LangId.FrmMain_MnuSetLockScreen, "Set as Lock screen image"), // V6.0
-        new(LangId.FrmMain_MnuSetLockScreen_Error, "Could not set the viewing image as lock screen image"), // v6.0
+        new(LangId.FrmMain_MnuSetLockScreen_Error, "Could not set image as lock screen image"), // v6.0
         new(LangId.FrmMain_MnuSetLockScreen_Success, "Lock screen image is updated"), // v6.0
 
         new(LangId.FrmMain_MnuImageProperties, "Image properties"), //v3.0
@@ -549,14 +549,14 @@ public class IgLang
         new(LangId.FrmMain_MnuCopyFile, "Copy file"), //v3.0
         new(LangId.FrmMain_MnuCopyFile_Success, "Copied {0} file(s)"), // v2.0 final
         new(LangId.FrmMain_MnuCopyImagePixels, "Copy image pixels"), //v5.0
-        new(LangId.FrmMain_MnuCopyImagePixels_Copying, "Copying the image pixels. It's going to take a while…"), // v9.0
-        new(LangId.FrmMain_MnuCopyImagePixels_Success, "Copied the current image pixels"), // v5.0
+        new(LangId.FrmMain_MnuCopyImagePixels_Copying, "Copying image pixels. It's going to take a while…"), // v9.0
+        new(LangId.FrmMain_MnuCopyImagePixels_Success, "Copied image pixels"), // v5.0
         new(LangId.FrmMain_MnuCutFile, "Cut file"), //v3.0
         new(LangId.FrmMain_MnuCutFile_Success, "Cut {0} file(s)"), // v2.0 final
         new(LangId.FrmMain_MnuCopyPath, "Copy image path"), //v3.0
-        new(LangId.FrmMain_MnuCopyPath_Success, "Copied the current image path"), // v9.0
+        new(LangId.FrmMain_MnuCopyPath_Success, "Copied image path"), // v9.0
         new(LangId.FrmMain_MnuPasteImage, "Paste image"), //v3.0
-        new(LangId.FrmMain_MnuPasteImage_Error, "Could not find image data in the Clipboard"), // v8.0
+        new(LangId.FrmMain_MnuPasteImage_Error, "Could not find image data in Clipboard"), // v8.0
         new(LangId.FrmMain_MnuClearClipboard, "Clear clipboard"), //v3.0
         new(LangId.FrmMain_MnuClearClipboard_Success, "Cleared clipboard"), // v2.0 final
         #endregion // Main Menu > Clipboard
@@ -925,9 +925,9 @@ public class IgLang
         new(LangId.FrmCrop_BtnSaveAs, "Save as…"), //v9.0
         new(LangId.FrmCrop_BtnSaveAs_Tooltip, "Save as a copy…"), //v9.0
         new(LangId.FrmCrop_BtnCrop, "Crop"), //v9.0
-        new(LangId.FrmCrop_BtnCrop_Tooltip, "Crop the image only"), //v9.0
+        new(LangId.FrmCrop_BtnCrop_Tooltip, "Crop image only"), //v9.0
         new(LangId.FrmCrop_BtnCopy, "Copy"), //v9.0
-        new(LangId.FrmCrop_BtnCopy_Tooltip, "Copy the selection to clipboard"), //v9.0
+        new(LangId.FrmCrop_BtnCopy_Tooltip, "Copy selection to clipboard"), //v9.0
 
         // Crop settings
         new(LangId.FrmCropSettings_Title, "Crop settings"), //v9.0
@@ -986,7 +986,7 @@ public class IgLang
         #region igcmd.exe
 
         new(LangId._IgCommandExe_DefaultError_Heading, "Invalid commands" ), //v9.0
-        new(LangId._IgCommandExe_DefaultError_Description, "Make sure you pass the correct commands!\r\nThis executable file contains command-line functions for ImageGlass software.\r\n\r\nTo explore all command lines, please visit:\r\n{0}" ), //v9.0
+        new(LangId._IgCommandExe_DefaultError_Description, "Make sure you pass correct commands!\r\nThis executable file contains command-line functions for ImageGlass software.\r\n\r\nTo explore all command lines, please visit:\r\n{0}" ), //v9.0
 
 
         #region FrmSlideshow
@@ -1040,7 +1040,7 @@ public class IgLang
         new(LangId.FrmQuickSetup_SetDefaultViewer, "Do you want to set ImageGlass as the default photo viewer?" ), //v9.0
         new(LangId.FrmQuickSetup_SetDefaultViewer_Description, "You can reset it in the app settings > File type associations tab." ), //v9.0
 
-        new(LangId.FrmQuickSetup_ConfirmCloseProcess, "Before applying the new settings, it's essential to close all ImageGlass processes. Are you ready to proceed?" ), //v7.5
+        new(LangId.FrmQuickSetup_ConfirmCloseProcess, "Before applying new settings, it's essential to close all ImageGlass processes. Are you ready to proceed?" ), //v7.5
 
         #endregion // FrmQuickSetup
 
