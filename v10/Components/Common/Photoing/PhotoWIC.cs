@@ -17,10 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageMagick;
-using Microsoft.Win32.SafeHandles;
 using System;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using Vortice.Direct2D1;
 using Vortice.WIC;
@@ -173,25 +171,25 @@ public static partial class PhotoWIC
     }
 
 
-    /// <summary>
-    /// Convert WPF bitmap source to IWICBitmapSource object.
-    /// </summary>
-    public static IWICBitmapSource? ConvertFromWpfBitmap(object? bmp)
-    {
-        if (bmp == null) return null;
+    ///// <summary>
+    ///// Convert WPF bitmap source to IWICBitmapSource object.
+    ///// </summary>
+    //public static IWICBitmapSource? ConvertFromWpfBitmap(object? bmp)
+    //{
+    //    if (bmp == null) return null;
 
-        var prop = bmp.GetType().GetProperty("WicSourceHandle",
-            BindingFlags.NonPublic | BindingFlags.Instance);
+    //    var prop = bmp.GetType().GetProperty("WicSourceHandle",
+    //        BindingFlags.NonPublic | BindingFlags.Instance);
 
-        var srcHandle = (SafeHandleZeroOrMinusOneIsInvalid?)prop?.GetValue(bmp);
-        if (srcHandle == null) return null;
+    //    var srcHandle = (SafeHandleZeroOrMinusOneIsInvalid?)prop?.GetValue(bmp);
+    //    if (srcHandle == null) return null;
 
-        var handle = srcHandle.DangerousGetHandle();
-        var wicSrc = new IWICBitmapSource(handle);
-        wicSrc?.To32bppPBGRA();
+    //    var handle = srcHandle.DangerousGetHandle();
+    //    var wicSrc = new IWICBitmapSource(handle);
+    //    wicSrc?.To32bppPBGRA();
 
-        return wicSrc;
-    }
+    //    return wicSrc;
+    //}
 
 
     /// <summary>

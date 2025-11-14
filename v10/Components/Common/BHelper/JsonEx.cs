@@ -43,7 +43,6 @@ public partial class BHelper
 
             Converters =
             {
-                new JsonStringEnumConverter(), // Write enum value as string
                 new JsonDateTimeConverter(),
             },
 
@@ -52,39 +51,6 @@ public partial class BHelper
             IgnoreReadOnlyFields = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         };
-    }
-
-
-    /// <summary>
-    /// Parse JSON string to object
-    /// </summary>
-    public static T? ParseJson<T>(string? json)
-    {
-        if (json == null) return default(T);
-
-        var jsonOptions = CreateJsonOptions();
-
-        return JsonSerializer.Deserialize<T>(json, jsonOptions);
-    }
-
-
-    /// <summary>
-    /// Parse object to JSON string
-    /// </summary>
-    public static string ToJson<T>(T obj)
-    {
-        var jsonOptions = CreateJsonOptions();
-        return JsonSerializer.Serialize<T>(obj, jsonOptions);
-    }
-
-
-    /// <summary>
-    /// Parse JSON from a stream
-    /// </summary>
-    public static async Task<T?> ParseJson<T>(Stream stream)
-    {
-        var jsonOptions = CreateJsonOptions();
-        return await JsonSerializer.DeserializeAsync<T>(stream, jsonOptions);
     }
 
 

@@ -689,6 +689,7 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets checkerboard mode of the viewer.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<CheckerboardMode>))]
     public CheckerboardMode CheckerboardMode
     {
         get; set
@@ -705,6 +706,7 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets image loading order
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<ImageOrderBy>))]
     public ImageOrderBy ImageLoadingOrder
     {
         get; set
@@ -721,6 +723,7 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets image loading order type
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<ImageOrderType>))]
     public ImageOrderType ImageLoadingOrderType
     {
         get; set
@@ -737,6 +740,7 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets zoom mode value
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<ZoomMode>))]
     public ZoomMode ZoomMode
     {
         get; set
@@ -751,8 +755,10 @@ public partial class Config : IgReactive
     } = ZoomMode.AutoZoom;
 
     /// <summary>
-    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>less than or equals 100%</c>.
+    /// Gets, sets the interpolation mode to render the viewing image
+    /// when the zoom factor is <c>less than or equals 100%</c>.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleDown
     {
         get; set
@@ -767,8 +773,10 @@ public partial class Config : IgReactive
     } = ImageInterpolation.MultiSampleLinear;
 
     /// <summary>
-    /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
+    /// Gets, sets the interpolation mode to render the viewing image
+    /// when the zoom factor is <c>greater than 100%</c>.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleUp
     {
         get; set
@@ -790,6 +798,7 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<BackdropStyle>))]
     public BackdropStyle WindowBackdrop
     {
         get; set

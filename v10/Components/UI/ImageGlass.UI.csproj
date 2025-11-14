@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
@@ -11,6 +11,9 @@
     <Nullable>enable</Nullable>
     <LangVersion>Preview</LangVersion>
     <Platforms>x64;ARM64</Platforms>
+
+		<IsTrimmable>True</IsTrimmable>
+		<IsAotCompatible>True</IsAotCompatible>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="BaseControls\IgTextBox_Description.xaml" />
@@ -61,6 +64,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\D2Phap.Canvas2D\Source\D2Phap.Canvas2D\D2Phap.Canvas2D\D2Phap.Canvas2D.csproj" />
     <ProjectReference Include="..\Common\ImageGlass.Common.csproj" />
+
+		<TrimmerRootAssembly Include="D2Phap.Canvas2D" />
+		<TrimmerRootAssembly Include="ImageGlass.Common" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Windowing\DialogWindow\DialogWindow_Content.xaml">

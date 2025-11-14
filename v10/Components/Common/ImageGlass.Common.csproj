@@ -10,10 +10,13 @@
 
 		<Nullable>enable</Nullable>
 		<LangVersion>Preview</LangVersion>
-		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<Platforms>x64;ARM64</Platforms>
+
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+		<IsTrimmable>True</IsTrimmable>
+		<IsAotCompatible>True</IsAotCompatible>
 	</PropertyGroup>
 	<ItemGroup>
 		<AdditionalFiles Remove="NativeMethods.json" />

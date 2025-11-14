@@ -139,6 +139,7 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     /// <summary>
     /// Gets, sets the alignment of toolbar item.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<ToolbarItemAlignment>))]
     public ToolbarItemAlignment Alignment
     {
         get; set

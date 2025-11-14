@@ -16,11 +16,15 @@
 		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-		<Version>10.0.1.1027</Version>
+		<Version>10.0.1.1114</Version>
 
 		<!-- Unpacked app -->
 		<WindowsPackageType>None</WindowsPackageType>
+
+		<IsTrimmable>True</IsTrimmable>
+		<IsAotCompatible>True</IsAotCompatible>
 	</PropertyGroup>
+	
 	<ItemGroup>
 		<None Remove="MainWindow_Content.xaml" />
 	</ItemGroup>
@@ -57,6 +61,9 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Components\Common\ImageGlass.Common.csproj" />
 	  <ProjectReference Include="..\Components\UI\ImageGlass.UI.csproj" />
+
+		<TrimmerRootAssembly Include="ImageGlass.Common" />
+		<TrimmerRootAssembly Include="ImageGlass.UI" />
 	</ItemGroup>
 	<ItemGroup>
 		<Page Update="MainWindow_Content.xaml">
