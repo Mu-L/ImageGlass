@@ -221,12 +221,13 @@ public partial class MainWindow : IgWindow
         // Gallery: scroll to the selected item
         if (isEmptyList)
         {
-            // wait for gallery is ready
-            await Task.Delay(300);
             DispatcherQueue.TryEnqueue(() =>
             {
+                // ensure gallery is ready
+                Gallery.UpdateLayout();
+
                 // set photo to the viewer
-                Gallery.ScrollToItem(AP.Photos.CurrentIndex, false);
+                Gallery.ScrollToItem(AP.Photos.CurrentIndex);
             });
         }
     }

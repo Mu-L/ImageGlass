@@ -40,19 +40,6 @@ public partial class PhotoMetadata : DisposableImpl
             field = value;
 
             SetFilePath__(value);
-            _ = OnPropertyChanged(value, oldValue);
-            _ = OnPropertyChanged(nameof(FileName));
-            _ = OnPropertyChanged(nameof(FileExtension));
-            _ = OnPropertyChanged(nameof(FolderPath));
-            _ = OnPropertyChanged(nameof(FolderName));
-            _ = OnPropertyChanged(nameof(FileSizeInBytes));
-            _ = OnPropertyChanged(nameof(FileSizeFormatted));
-            _ = OnPropertyChanged(nameof(FileCreationTimeUtc));
-            _ = OnPropertyChanged(nameof(FileLastAccessTimeUtc));
-            _ = OnPropertyChanged(nameof(FileLastWriteTimeUtc));
-            _ = OnPropertyChanged(nameof(FileCreationTimeFormatted));
-            _ = OnPropertyChanged(nameof(FileLastAccessTimeFormatted));
-            _ = OnPropertyChanged(nameof(FileLastWriteTimeFormatted));
         }
     } = string.Empty;
 
@@ -85,326 +72,70 @@ public partial class PhotoMetadata : DisposableImpl
     /// <summary>
     /// Gets the original width before processing orientation.
     /// </summary>
-    public uint OriginalWidth
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = 0;
+    public uint OriginalWidth { get; set; } = 0;
 
     /// <summary>
     /// Gets the original height before processing orientation.
     /// </summary>
-    public uint OriginalHeight
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = 0;
+    public uint OriginalHeight { get; set; } = 0;
 
     /// <summary>
     /// Gets the desired width after processing orientation.
     /// </summary>
-    public uint Width
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = 0;
+    public uint Width { get; set; } = 0;
 
     /// <summary>
     /// Gets the desired height after processing orientation.
     /// </summary>
-    public uint Height
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = 0;
+    public uint Height { get; set; } = 0;
 
     /// <summary>
     /// Gets the frame index of this metadata.
     /// </summary>
-    public uint FrameIndex
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = 0;
-    public uint FrameCount
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-            _ = OnPropertyChanged(nameof(FrameCountFormatted));
-        }
-    } = 0;
+    public uint FrameIndex { get; set; } = 0;
+    public uint FrameCount { get; set; } = 0;
     public string FrameCountFormatted => FrameCount > 1 ? FrameCount.ToString() : string.Empty;
-    public uint AnimationLoop
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = 0;
-    public IImmutableList<FrameMetadata> Frames
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = [];
-    public bool HasAlpha
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
-    public bool CanAnimate
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
-    public OrientationType Orientation
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = OrientationType.Undefined;
+    public uint AnimationLoop { get; set; } = 0;
+    public IImmutableList<FrameMetadata> Frames { get; set; } = [];
+    public bool HasAlpha { get; set; } = false;
+    public bool CanAnimate { get; set; } = false;
+    public OrientationType Orientation { get; set; } = OrientationType.Undefined;
 
     #endregion // Bitmap information
 
 
     #region Color information
 
-    public ColorSpace ColorSpace
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = ColorSpace.Undefined;
-    public string ColorProfileName
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = string.Empty;
+    public ColorSpace ColorSpace { get; set; } = ColorSpace.Undefined;
+    public string ColorProfileName { get; set; } = string.Empty;
 
-    public byte[]? ColorProfileData
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
+    public byte[]? ColorProfileData { get; set; } = null;
 
-    public IImageProfile? RawThumbnail
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
+    public IImageProfile? RawThumbnail { get; set; } = null;
 
     #endregion // Color information
 
 
     #region EXIF metadata
 
-    public IExifProfile? ExifProfile
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
-    public int ExifRatingPercent
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-            _ = OnPropertyChanged(nameof(ExifRatingFormatted));
-        }
-    } = 0;
+    public IExifProfile? ExifProfile { get; set; } = null;
+    public int ExifRatingPercent { get; set; } = 0;
     public string ExifRatingFormatted => BHelper.FormatStarRatingText(ExifRatingPercent);
-    public DateTime? ExifDateTimeOriginal
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-            _ = OnPropertyChanged(nameof(ExifDateTimeOriginalFormatted));
-        }
-    } = null; // local time
-    public DateTime? ExifDateTime
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-            _ = OnPropertyChanged(nameof(ExifDateTimeFormatted));
-        }
-    } = null; // local time
+    public DateTime? ExifDateTimeOriginal { get; set; } = null; // local time
+    public DateTime? ExifDateTime { get; set; } = null; // local time
 
     public string ExifDateTimeOriginalFormatted => BHelper.FormatDateTime(ExifDateTimeOriginal?.ToLocalTime());
     public string ExifDateTimeFormatted => BHelper.FormatDateTime(ExifDateTime?.ToLocalTime());
 
-    public string? ExifImageDescription
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
-    public string? ExifModel
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
-    public string? ExifArtist
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
-    public string? ExifCopyright
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
-    public string? ExifSoftware
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
-    public float? ExifExposureTime
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
-    public float? ExifFNumber
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
-    public int? ExifISOSpeed
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
-    public float? ExifFocalLength
-    {
-        get; set
-        {
-            if (field == value) return;
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = null;
+    public string? ExifImageDescription { get; set; } = null;
+    public string? ExifModel { get; set; } = null;
+    public string? ExifArtist { get; set; } = null;
+    public string? ExifCopyright { get; set; } = null;
+    public string? ExifSoftware { get; set; } = null;
+    public float? ExifExposureTime { get; set; } = null;
+    public float? ExifFNumber { get; set; } = null;
+    public int? ExifISOSpeed { get; set; } = null;
+    public float? ExifFocalLength { get; set; } = null;
 
     #endregion // EXIF metadata
 
