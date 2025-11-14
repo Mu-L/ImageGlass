@@ -16,12 +16,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Catel.Collections;
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
+using System.Threading.Tasks;
 using Windows.Foundation;
 
 namespace ImageGlass.UI;
@@ -35,41 +38,33 @@ public sealed partial class GalleryControl : IgControl
     private Progress<ThumbnailLoadedEventArgs> _progressThumbnailLoader;
 
 
-    // Public Properties
     #region Public Properties
 
     /// <summary>
-    /// Gets, sets view model for this control.
+    /// Gets the <see cref="ItemsRepeater"/> element of gallery control.
     /// </summary>
-    public PhotoManager VM
-    {
-        get; set
-        {
-            if (field != value)
-            {
-                field.PropertyChanged -= VM_PropertyChanged;
-                field = value;
-                field.PropertyChanged += VM_PropertyChanged;
+    public ItemsRepeater ListEl => PART_GalleryItemRepeater;
 
-                _ = OnPropertyChanged();
-                _ = OnPropertyChanged(nameof(GalleryVisibility));
-            }
-        }
-    } = new();
-    private void VM_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+
+    /// <summary>
+    /// Gets the items source.
+    /// </summary>
+    public FastObservableCollection<Photo> Items
     {
-        if (nameof(VM.Count).Equals(e.PropertyName, StringComparison.Ordinal))
+        get; private set
         {
-            _isLoadingFirstItem.Clear();
+            if (field == value) return;
+            field = value;
+            _ = OnPropertyChanged();
             _ = OnPropertyChanged(nameof(GalleryVisibility));
         }
-    }
+    } = [];
 
 
     /// <summary>
     /// Gets the visibility of gallery list.
     /// </summary>
-    public Visibility GalleryVisibility => VM.Count > 0 && IsContentVisible
+    public Visibility GalleryVisibility => Items.Count > 0 && IsContentVisible
         ? Visibility.Visible
         : Visibility.Collapsed;
 
@@ -86,14 +81,8 @@ public sealed partial class GalleryControl : IgControl
     }
 
 
+
     #region Control Events
-
-    protected override void OnIgUnloaded(FrameworkElement fe)
-    {
-        VM.PropertyChanged -= VM_PropertyChanged;
-        base.OnIgUnloaded(fe);
-    }
-
 
     protected override void OnIgSizeChanged(FrameworkElement fe, SizeChangedEventArgs e)
     {
@@ -159,6 +148,56 @@ public sealed partial class GalleryControl : IgControl
 
 
 
+    #region Public Methods
+
+    /// <summary>
+    /// Removes the source binding.
+    /// </summary>
+    public async Task ClearSourceAsync()
+    {
+        PART_GalleryItemRepeater.ClearValue(ItemsRepeater.ItemsSourceProperty);
+        Items = [];
+        _isLoadingFirstItem.Clear();
+
+        await WaitForLayoutAsync();
+    }
+
+
+    /// <summary>
+    /// Sets source binding.
+    /// </summary>
+    public async Task SetSourceAsync(FastObservableCollection<Photo> items)
+    {
+        Items = items;
+
+        PART_GalleryItemRepeater.SetBinding(ItemsRepeater.ItemsSourceProperty, new Binding()
+        {
+            Source = Items,
+            Mode = BindingMode.OneWay,
+        });
+
+        await WaitForLayoutAsync();
+    }
+
+
+    /// <summary>
+    /// Waits for layout updated.
+    /// </summary>
+    public Task WaitForLayoutAsync()
+    {
+        var tcs = new TaskCompletionSource();
+
+        void handler(object? s, object e)
+        {
+            ListEl.LayoutUpdated -= handler;
+            tcs.TrySetResult();
+        }
+
+        ListEl.LayoutUpdated += handler;
+        return tcs.Task;
+    }
+
+
     /// <summary>
     /// Update the padding of gallery according to scrollbar visibility.
     /// </summary>
@@ -190,7 +229,7 @@ public sealed partial class GalleryControl : IgControl
     /// </summary>
     public void ScrollToItem(int index, bool disableAnimation = true)
     {
-        if (index < 0 || index >= VM.Count) return;
+        if (index < 0 || index >= Items.Count) return;
 
         var centerItemIndex = index + 1;
         var itemCenterX = (AP.Config.ThumbnailSize * centerItemIndex)
@@ -218,6 +257,9 @@ public sealed partial class GalleryControl : IgControl
         var thumbSize = AP.Config.ThumbnailSize * DpiScale;
         _ = item.VM.StartLoadingGalleryThumbnail(thumbSize, useCache, _progressThumbnailLoader);
     }
+
+
+    #endregion // Public Methods
 
 
 }

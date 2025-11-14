@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Catel.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -276,10 +277,11 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
         _currentIndex = -1;
 
         // dispose photos in the list
-        foreach (var item in Items)
+        Parallel.ForEach(Items, item =>
         {
-            item?.Dispose();
-        }
+            item.WithNoReactive(() => item.Dispose());
+        });
+
         Items.Clear();
         _dict.Clear();
         DistinctDirs.Clear();

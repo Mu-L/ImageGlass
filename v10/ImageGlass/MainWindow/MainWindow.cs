@@ -221,13 +221,13 @@ public partial class MainWindow : IgWindow
         // Gallery: scroll to the selected item
         if (isEmptyList)
         {
-            DispatcherQueue.TryEnqueue(() =>
+            DispatcherQueue.TryEnqueue(async () =>
             {
-                // ensure gallery is ready
-                Gallery.UpdateLayout();
+                // set gallery items source
+                await Gallery.SetSourceAsync(AP.Photos.Items);
 
                 // set photo to the viewer
-                Gallery.ScrollToItem(AP.Photos.CurrentIndex);
+                Gallery.ScrollToItem(AP.Photos.CurrentIndex, AP.Photos.Count > 1000);
             });
         }
     }
@@ -317,25 +317,31 @@ public partial class MainWindow : IgWindow
             : null;
 
 
-        // start loading files
-        var initPhoto = AP.Photos.StartLoadingFiles(inputPaths, currentFilePath,
-            new FileShellSearchOptions()
-            {
-                AllowedExtensions = AP.Config.FileFormats,
-                UseExplorerSortOrder = AP.Config.ShouldUseExplorerSortOrder,
-                ForegroundShell = foregroundShell,
-                SearchSubDirectories = AP.Config.EnableRecursiveLoading,
-                GroupByDir = AP.Config.ShouldGroupImagesByDirectory,
-                IncludeHidden = AP.Config.ShouldLoadHiddenImages,
-                OrderBy = AP.Config.ImageLoadingOrder,
-                OrderType = AP.Config.ImageLoadingOrderType,
-            }, _searchProgress);
-
-
-        if (loadInitPhoto)
+        DispatcherQueue.TryEnqueue(async () =>
         {
-            _ = ViewPhotoAsync(initPhoto);
-        }
+            // clear gallery
+            await Gallery.ClearSourceAsync();
+
+            // start loading files
+            var initPhoto = AP.Photos.StartLoadingFiles(inputPaths, currentFilePath,
+                new FileShellSearchOptions()
+                {
+                    AllowedExtensions = AP.Config.FileFormats,
+                    UseExplorerSortOrder = AP.Config.ShouldUseExplorerSortOrder,
+                    ForegroundShell = foregroundShell,
+                    SearchSubDirectories = AP.Config.EnableRecursiveLoading,
+                    GroupByDir = AP.Config.ShouldGroupImagesByDirectory,
+                    IncludeHidden = AP.Config.ShouldLoadHiddenImages,
+                    OrderBy = AP.Config.ImageLoadingOrder,
+                    OrderType = AP.Config.ImageLoadingOrderType,
+                }, _searchProgress);
+
+
+            if (loadInitPhoto)
+            {
+                _ = ViewPhotoAsync(initPhoto);
+            }
+        });
     }
 
 

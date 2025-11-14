@@ -204,8 +204,7 @@
             x:Name="PART_GalleryItemRepeater"
             HorizontalAlignment="Center"
             ElementPrepared="PART_ItemRepeater_ElementPrepared"
-            ItemTemplate="{StaticResource GalleryItemTemplate}"
-            ItemsSource="{x:Bind VM.Items}">
+            ItemTemplate="{StaticResource GalleryItemTemplate}">
             <ItemsRepeater.Layout>
                 <StackLayout Orientation="Horizontal" Spacing="{x:Bind local:GalleryControl.ItemSpacing, Mode=OneTime}" />
             </ItemsRepeater.Layout>

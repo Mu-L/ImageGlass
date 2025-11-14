@@ -178,11 +178,17 @@ public partial class Photo : DisposableImpl
         get; private set
         {
             if (field == value) return;
-
-            DisposeThumbnail();
-            field.Dispose();
-            field = value;
-            _ = OnPropertyChanged();
+            try
+            {
+                DisposeThumbnail();
+                field.Dispose();
+                field = value;
+                _ = OnPropertyChanged();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌❌❌: Metadata setter: {ex.Message}");
+            }
         }
     } = new();
 
@@ -198,11 +204,15 @@ public partial class Photo : DisposableImpl
     {
         get; set
         {
-            if (field != value)
+            if (field == value) return;
+            try
             {
-                field?.Dispose();
                 field = value;
                 _ = OnPropertyChanged();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌❌❌: ThumbnailBitmap setter: {ex.Message}");
             }
         }
     }
@@ -215,12 +225,18 @@ public partial class Photo : DisposableImpl
     {
         get; set
         {
-            if (field != value)
+            if (field == value) return;
+
+            try
             {
                 field = value;
                 _ = OnPropertyChanged();
                 _ = OnPropertyChanged(nameof(IsGalleryThumbnailLoaded));
                 _ = OnPropertyChanged(nameof(IsGalleryThumbnailLoading));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌❌❌: GalleryThumbnail setter: {ex.Message}");
             }
         }
     }
