@@ -129,24 +129,6 @@
                                         <TextBlock Text="{x:Bind Metadata.FileLastWriteTimeFormatted}" />
                                     </StackPanel>
 
-                                    <!--  Frame Count  -->
-                                    <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.FrameCountFormatted, Converter={StaticResource StringToVisibilityConverter}}">
-                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_FrameCount)}" />
-                                        <TextBlock Margin="0,0,2,0" Text=":" />
-                                        <TextBlock Text="{x:Bind Metadata.FrameCountFormatted}" />
-                                    </StackPanel>
-
-                                    <!--  EXIF: Rating  -->
-                                    <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.ExifRatingFormatted, Converter={StaticResource StringToVisibilityConverter}}">
-                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_ExifRatingPercent)}" />
-                                        <TextBlock Margin="0,0,2,0" Text=":" />
-                                        <TextBlock Text="{x:Bind Metadata.ExifRatingFormatted}" />
-                                    </StackPanel>
-                                </StackPanel>
-
-
-                                <!--  Right column  -->
-                                <StackPanel>
                                     <!--  Color Space  -->
                                     <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.ColorSpace, Converter={StaticResource StringToVisibilityConverter}}">
                                         <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_ColorSpace)}" />
@@ -159,6 +141,24 @@
                                         <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_ColorProfile)}" />
                                         <TextBlock Margin="0,0,2,0" Text=":" />
                                         <TextBlock Text="{x:Bind Metadata.ColorProfileName}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+
+                                <!--  Right column  -->
+                                <StackPanel>
+                                    <!--  Frame Count  -->
+                                    <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.FrameCountFormatted, Converter={StaticResource StringToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_FrameCount)}" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{x:Bind Metadata.FrameCountFormatted}" />
+                                    </StackPanel>
+
+                                    <!--  EXIF: Rating  -->
+                                    <StackPanel Orientation="Horizontal" Visibility="{x:Bind Metadata.ExifRatingFormatted, Converter={StaticResource StringToVisibilityConverter}}">
+                                        <TextBlock Text="{x:Bind cm:AP.Config.Lang.Get(cm:LangId._Metadata_ExifRatingPercent)}" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{x:Bind Metadata.ExifRatingFormatted}" />
                                     </StackPanel>
 
                                     <!--  EXIF: DateTimeOriginal  -->
