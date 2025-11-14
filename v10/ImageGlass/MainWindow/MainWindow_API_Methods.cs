@@ -1396,20 +1396,26 @@ public partial class MainWindow
     /// <summary>
     /// Toggles visibility of gallery.
     /// </summary>
-    public static void IG_ToggleGallery(string? boolStr = null)
+    public async Task IG_ToggleGalleryAsync(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
-        IG_ToggleGallery(enabled);
+        await IG_ToggleGalleryAsync(enabled);
     }
 
 
     /// <summary>
     /// Toggles visibility of gallery
     /// </summary>
-    public static void IG_ToggleGallery(bool? enabled = null)
+    public async Task IG_ToggleGalleryAsync(bool? enabled = null)
     {
         enabled ??= !AP.Config.ShowGallery;
         AP.Config.ShowGallery = enabled.Value;
+
+        if (enabled.Value)
+        {
+            await Gallery.WaitForLayoutAsync();
+            Gallery.ScrollToItem(AP.Photos.CurrentIndex);
+        }
 
         // TODO: update window fit
     }

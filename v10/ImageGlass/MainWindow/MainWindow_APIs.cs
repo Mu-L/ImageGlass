@@ -97,7 +97,7 @@ public partial class MainWindow
 
         // Layout
         { API.IG_ToggleToolbar,         IgCommands.Create(IG_ToggleToolbar) },
-        { API.IG_ToggleGallery,         IgCommands.Create(IG_ToggleGallery) },
+        { API.IG_ToggleGallery,         IgCommands.Create(IG_ToggleGalleryAsync) },
         { API.IG_ToggleCheckerboard,    IgCommands.Create(IG_ToggleCheckerboard) },
         { API.IG_ToggleWindowTopMost,   IgCommands.Create(IG_ToggleWindowTopMost) },
 
