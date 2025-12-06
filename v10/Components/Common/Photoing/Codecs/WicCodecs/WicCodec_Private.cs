@@ -80,7 +80,8 @@ public static partial class WicCodec
 
         try
         {
-            enumerator = CreateComponentEnumerator__(types, ComponentEnumerateOptions.Default);
+            using var fac = new IWICImagingFactory2();
+            enumerator = fac.CreateComponentEnumerator(types, ComponentEnumerateOptions.Default);
         }
         catch { }
         if (enumerator is null) return list;
@@ -123,28 +124,6 @@ public static partial class WicCodec
         }
 
         return list;
-    }
-
-
-    /// <summary>
-    /// Implements API for <c>IWICImagingFactory2.CreateComponentEnumerator();</c>.
-    /// <para>
-    /// See: <see href="https://learn.microsoft.com/en-us/windows/win32/api/wincodec/nf-wincodec-iwicimagingfactory-createcomponentenumerator"/>
-    /// </para>
-    /// </summary>
-    private static unsafe IEnumUnknown? CreateComponentEnumerator__(ComponentType type, ComponentEnumerateOptions options)
-    {
-        using var fac = new IWICImagingFactory2();
-
-        var vtbl = (*(void***)fac.NativePointer)[23];
-        var method = (delegate* unmanaged[Stdcall]<nint, uint, uint, nint*, int>)vtbl;
-        nint zero = IntPtr.Zero;
-
-        Result result = method(fac.NativePointer, (uint)type, (uint)options, &zero);
-        var result2 = (zero != IntPtr.Zero) ? new IEnumUnknown(zero) : null;
-
-        result.CheckError();
-        return result2;
     }
 
 
