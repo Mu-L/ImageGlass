@@ -227,7 +227,7 @@ public partial class MainWindow : IgWindow
                 await Gallery.SetSourceAsync(AP.Photos.Items);
 
                 // set photo to the viewer
-                Gallery.ScrollToItem(AP.Photos.CurrentIndex, AP.Photos.Count > 1000);
+                Gallery.ScrollToItem(AP.Photos.CurrentIndex, AP.Photos.Count > 100);
             });
         }
     }

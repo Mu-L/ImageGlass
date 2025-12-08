@@ -154,6 +154,8 @@ public sealed partial class GalleryControl : IgControl
     /// </summary>
     public async Task ClearSourceAsync()
     {
+        if (Items.Count == 0) return;
+
         PART_GalleryItemRepeater.ClearValue(ItemsRepeater.ItemsSourceProperty);
         Items = [];
 
