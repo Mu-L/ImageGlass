@@ -77,11 +77,12 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
 
         // 2. get files from the given directories
         var fvMap = new ConcurrentDictionary<string, ExplorerFolderView?>();
+        var dirList = dirs.ToList();
 
         if (options.UseExplorerSortOrder)
         {
             // find and save all shell folder view
-            foreach (var dirPath in dirs)
+            foreach (var dirPath in dirList)
             {
                 var fv = GetShellFolderView(dirPath, null).View;
                 _ = fvMap.TryAdd(dirPath, fv);
@@ -92,7 +93,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
         // 3. start searching in a separate thread
         await Task.Run(() =>
         {
-            foreach (var dirPath in dirs)
+            foreach (var dirPath in dirList)
             {
                 var folderShellView = fvMap.GetValueOrDefault(dirPath);
 
