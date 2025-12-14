@@ -13,7 +13,6 @@
                                      IsDesignTimeCreatable=True}"
     x:DefaultBindMode="OneWay"
     AutomationProperties.AutomationControlType="ToolBar"
-    IsTabStop="False"
     mc:Ignorable="d">
 
     <local:IgControl.Resources>
@@ -100,6 +99,7 @@
                 Padding="{x:Bind local:IgToolbarButton.ItemPadding}"
                 VerticalAlignment="Stretch"
                 VerticalContentAlignment="Bottom"
+                IsTabStop="False"
                 Style="{StaticResource IgButtonStyle}"
                 ToolTipService.ToolTip="{x:Bind cm:AP.Config.Lang.Get(cm:LangId.FrmMain_MnuToolbarOverflow)}"
                 Visibility="Collapsed">

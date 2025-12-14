@@ -12,7 +12,6 @@
     x:DefaultBindMode="OneWay"
     AutomationProperties.AutomationControlType="Button"
     DataContext="{x:Bind VM, Mode=OneWay}"
-    IsTabStop="False"
     mc:Ignorable="d">
 
     <local:IgButton
@@ -24,6 +23,7 @@
         Flyout="{x:Bind Flyout}"
         Id="{x:Bind VM.Id}"
         IsChecked="{x:Bind VM.IsChecked}"
+        IsTabStop="{x:Bind IsTabStop}"
         IsToggle="{x:Bind VM.IsToggle}"
         Style="{StaticResource IgButtonStyle}"
         Text="{x:Bind VM.DisplayText}"
