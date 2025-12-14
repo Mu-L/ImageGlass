@@ -51,19 +51,28 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = false;
 
-    ///// <summary>
-    ///// Gets, sets value indicating whether the slideshow mode is enabled or not.
-    ///// </summary>
-    //public bool EnableSlideshow { get; set; } = false;
+    /// <summary>
+    /// Gets, sets value indicating whether the slideshow mode is enabled or not.
+    /// </summary>
+    public bool EnableSlideshow
+    {
+        get; set
+        {
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = false;
 
     ///// <summary>
     ///// Gets, sets value indicating whether the FrmMain should be hidden when <see cref="EnableSlideshow"/> is on.
@@ -90,15 +99,35 @@ public partial class Config : IgReactive
     ///// </summary>
     //public bool EnableFullscreenSlideshow { get; set; } = true;
 
-    ///// <summary>
-    ///// Gets, sets value of FrmMain's frameless mode.
-    ///// </summary>
-    //public bool EnableFrameless { get; set; } = false;
+    /// <summary>
+    /// Gets, sets value of FrmMain's frameless mode.
+    /// </summary>
+    public bool EnableFrameless
+    {
+        get; set
+        {
+            if (field == value) return;
 
-    ///// <summary>
-    ///// Gets, sets value indicating whether the full screen mode is enabled or not.
-    ///// </summary>
-    //public bool EnableFullScreen { get; set; } = false;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = false;
+
+    /// <summary>
+    /// Gets, sets value indicating whether the full screen mode is enabled or not.
+    /// </summary>
+    public bool EnableFullScreen
+    {
+        get; set
+        {
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = false;
 
     ///// <summary>
     ///// Gets, sets value indicates that the toolbar should be hidden in Full screen mode
@@ -117,12 +146,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = true;
 
@@ -143,12 +171,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = true;
 
@@ -159,12 +186,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = true;
 
@@ -180,12 +206,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = true;
 
@@ -206,12 +231,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = false;
 
@@ -252,12 +276,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = true;
 
@@ -278,12 +301,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = false;
 
@@ -294,12 +316,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = true;
 
@@ -310,12 +331,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = false;
 
@@ -326,12 +346,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = false;
 
@@ -343,12 +362,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = false;
 
@@ -422,12 +440,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = false;
 
@@ -449,12 +466,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = 20f;
 
@@ -466,12 +482,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = 0f;
 
@@ -497,12 +512,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = 70;
 
@@ -545,12 +559,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = Const.TOOLBAR_ICON_HEIGHT;
 
@@ -598,12 +611,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = "";
 
@@ -619,12 +631,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = "#00000000";
 
@@ -640,12 +651,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = Const.DEFAULT_THEME;
 
@@ -656,12 +666,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = "Kobe-Light";
 
@@ -672,12 +681,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = "English";
 
@@ -694,12 +702,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = CheckerboardMode.None;
 
@@ -711,12 +718,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = ImageOrderBy.Name;
 
@@ -728,12 +734,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = ImageOrderType.Asc;
 
@@ -745,12 +750,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = ZoomMode.AutoZoom;
 
@@ -763,12 +767,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = ImageInterpolation.MultiSampleLinear;
 
@@ -781,12 +784,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = ImageInterpolation.NearestNeighbor;
 
@@ -803,12 +805,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = BackdropStyle.Mica;
 
@@ -825,12 +826,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = new(200, 200, 1500, 1000);
 
@@ -843,12 +843,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = [];
 
@@ -867,12 +866,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = [".avif", ".heic", ".heif", ".psd", ".jxl"];
 
@@ -885,12 +883,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = [".gif", ".gifv", ".webp", ".fax", ".apng", ".jxr", ".hdp", ".wdp"];
 
@@ -903,12 +900,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = new HashSet<string>(DefaultFileFormats);
 
@@ -969,12 +965,11 @@ public partial class Config : IgReactive
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
-                _ = OnPropertyChanged(value, oldValue);
-            }
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
         }
     } = new(DefaultToolbarItems);
 

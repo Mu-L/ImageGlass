@@ -345,10 +345,22 @@
 
                     <!--  Window modes  -->
                     <MenuFlyoutSeparator />
-                    <ui:IgToggleMenuItem LangKey="FrmMain_MnuWindowFit" Text="[WindowFit]" />
-                    <ui:IgToggleMenuItem LangKey="FrmMain_MnuFrameless" Text="[Frameless]" />
-                    <ui:IgToggleMenuItem LangKey="FrmMain_MnuFullScreen" Text="[Fullscreen]" />
-                    <ui:IgToggleMenuItem LangKey="FrmMain_MnuSlideshow" Text="[Slideshow]" />
+                    <ui:IgToggleMenuItem
+                        IsChecked="{x:Bind cm:AP.Config.EnableWindowFit}"
+                        LangKey="FrmMain_MnuWindowFit"
+                        Text="[WindowFit]" />
+                    <ui:IgToggleMenuItem
+                        IsChecked="{x:Bind cm:AP.Config.EnableFrameless}"
+                        LangKey="FrmMain_MnuFrameless"
+                        Text="[Frameless]" />
+                    <ui:IgToggleMenuItem
+                        IsChecked="{x:Bind cm:AP.Config.EnableFullScreen}"
+                        LangKey="FrmMain_MnuFullScreen"
+                        Text="[Fullscreen]" />
+                    <ui:IgToggleMenuItem
+                        IsChecked="{x:Bind cm:AP.Config.EnableSlideshow}"
+                        LangKey="FrmMain_MnuSlideshow"
+                        Text="[Slideshow]" />
                     <MenuFlyoutSeparator />
 
 

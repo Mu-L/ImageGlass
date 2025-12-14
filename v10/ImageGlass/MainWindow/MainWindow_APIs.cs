@@ -95,6 +95,13 @@ public partial class MainWindow
         { API.IG_ClearClipboard,        IgCommands.Create(IG_ClearClipboardAsync) },
 
 
+        // Window modes
+        { API.IG_ToggleWindowFit,       IgCommands.Create(IG_ToggleWindowFit) },
+        { API.IG_ToggleFrameless,       IgCommands.Create(IG_ToggleFrameless) },
+        { API.IG_ToggleFullScreen,      IgCommands.Create(IG_ToggleFullScreen) },
+        { API.IG_ToggleSlideshow,       IgCommands.Create(IG_ToggleSlideshow) },
+
+
         // Layout
         { API.IG_ToggleToolbar,         IgCommands.Create(IG_ToggleToolbar) },
         { API.IG_ToggleGallery,         IgCommands.Create(IG_ToggleGalleryAsync) },

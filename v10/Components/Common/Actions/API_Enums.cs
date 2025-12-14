@@ -81,9 +81,10 @@ public enum API
     IG_ClearClipboard,
 
     // Menu > Window Fit
-    // Menu > Frameless
-    // Menu > Fullscreen
-    // Menu > Slideshow
+    IG_ToggleWindowFit,
+    IG_ToggleFrameless,
+    IG_ToggleFullScreen,
+    IG_ToggleSlideshow,
 
     // Menu > Layout
     IG_ToggleToolbar,

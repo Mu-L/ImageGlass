@@ -33,7 +33,7 @@ public partial class MainWindow
 
     // list of all menu items & default action, hotkeys
     private static IReadOnlyCollection<HotkeySingleAction> _defaultMenuList => [
-        new(LangId.FrmMain_MnuMain,             API.IG_OpenMainMenu,        MKeys.Alt, VKey.F),
+        new(LangId.FrmMain_MnuMain,                 API.IG_OpenMainMenu,        MKeys.Alt, VKey.F),
 
         // File
         new(LangId.FrmMain_MnuOpenFile,             API.IG_OpenFile,            MKeys.Ctrl, VKey.O),
@@ -95,6 +95,13 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuCutFile,          API.IG_CutFiles,            MKeys.Ctrl, VKey.X),
         new(LangId.FrmMain_MnuCopyPath,         API.IG_CopyImagePath,       MKeys.Ctrl, VKey.L),
         new(LangId.FrmMain_MnuClearClipboard,   API.IG_ClearClipboard), // TODO: hotkey
+
+
+        // Window modes
+        new(LangId.FrmMain_MnuWindowFit,        API.IG_ToggleWindowFit,     VKey.F9),
+        new(LangId.FrmMain_MnuFrameless,        API.IG_ToggleFrameless,     VKey.F10),
+        new(LangId.FrmMain_MnuFullScreen,       API.IG_ToggleFullScreen,    VKey.F11),
+        new(LangId.FrmMain_MnuSlideshow,        API.IG_ToggleSlideshow,     VKey.F12),
 
 
         // Layout

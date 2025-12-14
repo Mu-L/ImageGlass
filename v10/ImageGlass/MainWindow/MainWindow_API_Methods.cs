@@ -1368,6 +1368,104 @@ public partial class MainWindow
 
 
 
+    #region Window Mode APIs
+
+    /// <summary>
+    /// Toggles window fit mode.
+    /// </summary>
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public static void IG_ToggleWindowFit(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleWindowFit(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggles window fit mode.
+    /// </summary>
+    public static void IG_ToggleWindowFit(bool? enabled = null)
+    {
+        enabled ??= !AP.Config.EnableWindowFit;
+        AP.Config.EnableWindowFit = enabled.Value;
+
+        // TODO:
+    }
+
+
+    /// <summary>
+    /// Toggles frameless mode.
+    /// </summary>
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public static void IG_ToggleFrameless(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleFrameless(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggles frameless mode.
+    /// </summary>
+    public static void IG_ToggleFrameless(bool? enabled = null)
+    {
+        enabled ??= !AP.Config.EnableFrameless;
+        AP.Config.EnableFrameless = enabled.Value;
+
+        // TODO:
+    }
+
+
+    /// <summary>
+    /// Toggles fullscreen mode.
+    /// </summary>
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public static void IG_ToggleFullScreen(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleFullScreen(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggles fullscreen mode.
+    /// </summary>
+    public static void IG_ToggleFullScreen(bool? enabled = null)
+    {
+        enabled ??= !AP.Config.EnableFullScreen;
+        AP.Config.EnableFullScreen = enabled.Value;
+
+        // TODO: update window fit
+    }
+
+
+    /// <summary>
+    /// Toggles slideshow mode.
+    /// </summary>
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public static void IG_ToggleSlideshow(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleSlideshow(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggles slideshow mode.
+    /// </summary>
+    public static void IG_ToggleSlideshow(bool? enabled = null)
+    {
+        enabled ??= !AP.Config.EnableSlideshow;
+        AP.Config.EnableSlideshow = enabled.Value;
+
+        // TODO:
+    }
+
+
+    #endregion // Window Modes APIs
+
+
+
     #region Layout APIs
 
     /// <summary>
