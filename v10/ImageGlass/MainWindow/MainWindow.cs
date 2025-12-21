@@ -68,7 +68,7 @@ public partial class MainWindow : IgWindow
         LoadImagesFromCmdArgs();
 
         // load window mode
-        if (AP.Config.EnableFrameless) IG_ToggleFrameless(true);
+        if (AP.Config.EnableFrameless) SetFramelessMode__(true, false);
 
         // register hotkeys
         RegisterHotkeys_();

@@ -564,7 +564,7 @@ public class IgLang
         new(LangId.FrmMain_MnuWindowFit, "Window Fit"), //v7.5
         new(LangId.FrmMain_MnuFullScreen, "Full Screen"), //v3.0
         new(LangId.FrmMain_MnuFrameless, "Frameless"), //v7.5
-        new(LangId.FrmMain_MnuFrameless_EnableDescription, "Hold Shift key to move the window"), // v7.5
+        new(LangId.FrmMain_MnuFrameless_EnableDescription, "Drag the top area to move the window"), // v7.5
         new(LangId.FrmMain_MnuSlideshow, "Slideshow"), //v3.0
 
         #region Main Menu > Layout

@@ -1416,7 +1416,15 @@ public partial class MainWindow
 
 
         // set frameless mode
-        if (isEnabled)
+        SetFramelessMode__(isEnabled, true);
+    }
+    private void SetFramelessMode__(bool enabled, bool showMessage)
+    {
+        var dragAreaHeight = _framelessDragAreaHeight;
+
+
+        // set frameless mode
+        if (enabled)
         {
             // exit full screen
             if (AP.Config.EnableFullScreen) IG_ToggleFullScreen(false);
@@ -1436,6 +1444,14 @@ public partial class MainWindow
 
         // update drag area
         AppWindow.TitleBar.SetDragRectangles([new(0, 0, AppWindow.Size.Width, dragAreaHeight)]);
+
+        // show message
+        if (showMessage && enabled)
+        {
+            _ = _contentEl.ShowMessageAsync(
+                AP.Config.Lang[LangId.FrmMain_MnuFrameless_EnableDescription],
+                AP.Config.Lang[LangId.FrmMain_MnuFrameless]);
+        }
     }
 
 
