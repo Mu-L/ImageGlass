@@ -439,6 +439,7 @@
         <ui:VirtualViewerControl
             x:Name="PART_Viewer"
             Grid.Row="1"
+            Margin="0,-1,0,0"
             AllowDrop="True"
             BackgroundColor="{x:Bind cm:AP.Config.Theme.ComputedColors.BgColor}"
             CheckerboardMode="{x:Bind cm:AP.Config.CheckerboardMode}"

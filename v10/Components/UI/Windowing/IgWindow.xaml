@@ -23,6 +23,7 @@
             Grid.Row="0"
             Padding="{x:Bind TitleBarPadding}"
             Canvas.ZIndex="100"
+            IsContentVisible="{x:Bind IsTitlebarVisible}"
             IsTabStop="False"
             Text="{x:Bind WindowTitle}"
             TextColor="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor}" />

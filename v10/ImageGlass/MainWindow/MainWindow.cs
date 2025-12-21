@@ -67,6 +67,9 @@ public partial class MainWindow : IgWindow
         // load image from command line arguments
         LoadImagesFromCmdArgs();
 
+        // load window mode
+        if (AP.Config.EnableFrameless) IG_ToggleFrameless(true);
+
         // register hotkeys
         RegisterHotkeys_();
 
@@ -117,6 +120,16 @@ public partial class MainWindow : IgWindow
     protected override void OnIgWindowStateChanged(WindowStateChangedEventArgs e)
     {
         base.OnIgWindowStateChanged(e);
+
+        // update drag area for frameless mode
+        if (e.State == OverlappedPresenterState.Maximized)
+        {
+            if (AP.Config.EnableFrameless)
+            {
+                // update drag area
+                AppWindow.TitleBar.SetDragRectangles([new(0, 0, AppWindow.Size.Width, _framelessDragAreaHeight)]);
+            }
+        }
 
         // save window bounds
         if (e.State == OverlappedPresenterState.Restored)

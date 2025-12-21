@@ -39,6 +39,7 @@ namespace ImageGlass;
 public partial class MainWindow
 {
     private static FrozenSet<string> _desktopNativeFormats => [".bmp", ".jpg", ".jpeg", ".png", ".gif"];
+    private int _framelessDragAreaHeight => (int)(DpiScale * 15);
 
 
     #region Main Menu APIs
@@ -1397,7 +1398,7 @@ public partial class MainWindow
     /// Toggles frameless mode.
     /// </summary>
     /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
-    public static void IG_ToggleFrameless(string? boolStr = null)
+    public void IG_ToggleFrameless(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
         IG_ToggleFrameless(enabled);
@@ -1407,12 +1408,34 @@ public partial class MainWindow
     /// <summary>
     /// Toggles frameless mode.
     /// </summary>
-    public static void IG_ToggleFrameless(bool? enabled = null)
+    public void IG_ToggleFrameless(bool? enabled = null)
     {
         enabled ??= !AP.Config.EnableFrameless;
-        AP.Config.EnableFrameless = enabled.Value;
+        var isEnabled = AP.Config.EnableFrameless = enabled.Value;
+        var dragAreaHeight = _framelessDragAreaHeight;
 
-        // TODO:
+
+        // set frameless mode
+        if (isEnabled)
+        {
+            // exit full screen
+            if (AP.Config.EnableFullScreen) IG_ToggleFullScreen(false);
+
+            IsTitlebarVisible = false;
+            AppWindow.TitleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Collapsed;
+        }
+
+        // restore frame
+        else
+        {
+            IsTitlebarVisible = true;
+            TitleBar.UpdateLayout(); // to get the actual size of titlebar
+            dragAreaHeight = (int)(TitleBar.ActualHeight * DpiScale);
+            AppWindow.TitleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Standard;
+        }
+
+        // update drag area
+        AppWindow.TitleBar.SetDragRectangles([new(0, 0, AppWindow.Size.Width, dragAreaHeight)]);
     }
 
 

@@ -259,6 +259,20 @@ public partial class IgWindow : Window, INotifyPropertyChanged
 
 
     /// <summary>
+    /// Gets, sets the visibility of title bar.
+    /// </summary>
+    public bool IsTitlebarVisible
+    {
+        get; set
+        {
+            if (field == value) return;
+            field = value;
+            _ = OnPropertyChanged();
+        }
+    } = true;
+
+
+    /// <summary>
     /// Gets, sets the value indicates that the window backdrop
     /// should be used only if the window background color has transparency.
     /// </summary>
