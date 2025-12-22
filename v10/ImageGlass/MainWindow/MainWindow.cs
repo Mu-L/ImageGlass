@@ -55,6 +55,9 @@ public partial class MainWindow : IgWindow
 
         // load window bounds from settings
         SetWindowBounds(AP.Config.MainWindowBounds, AP.Config.IsMainWindowMaximized);
+
+        // disable lagging animation when entering fullscreen
+        if (AP.Config.EnableFullScreen) WindowApi.SetOpacity(Handle, 0);
     }
 
 
@@ -68,7 +71,12 @@ public partial class MainWindow : IgWindow
         LoadImagesFromCmdArgs();
 
         // load window mode
-        if (AP.Config.EnableFrameless) SetFramelessMode__(true, false);
+        if (AP.Config.EnableFullScreen)
+        {
+            IG_ToggleFullScreen(true);
+            WindowApi.SetOpacity(Handle, 1); // restore window opacity
+        }
+        else if (AP.Config.EnableFrameless) SetFramelessMode__(true, false);
 
         // register hotkeys
         RegisterHotkeys_();
@@ -256,10 +264,19 @@ public partial class MainWindow : IgWindow
         AP.Config.IsMainWindowMaximized = WindowState == OverlappedPresenterState.Maximized;
 
         // save window bounds
-        if (WindowState == OverlappedPresenterState.Restored)
+        if (!AP.Config.EnableFullScreen && WindowState == OverlappedPresenterState.Restored)
         {
             AP.Config.MainWindowBounds = GetWindowBounds();
         }
+
+
+        // fullscreen mode: use the backup value
+        if (AP.Config.EnableFullScreen)
+        {
+            AP.Config.ShowToolbar = _showToolbar;
+            AP.Config.ShowGallery = _showGallery;
+        }
+
 
         AP.Config.LastSeenImagePath = AP.Photos.CurrentFilePath;
         //AP.Config.ZoomLockValue = Viewer.ZoomFactor * 100f;

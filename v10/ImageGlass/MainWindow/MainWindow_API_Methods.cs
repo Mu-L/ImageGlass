@@ -20,17 +20,18 @@ using Cysharp.Text;
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.Storage.Pickers;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
 using Windows.Storage;
 using Windows.System.UserProfile;
 
@@ -40,6 +41,14 @@ public partial class MainWindow
 {
     private static FrozenSet<string> _desktopNativeFormats => [".bmp", ".jpg", ".jpeg", ".png", ".gif"];
     private int _framelessDragAreaHeight => (int)(DpiScale * 15);
+
+    // variable to back up / restore window layout when changing window mode
+    private bool _isFramelessBeforeFullscreen;
+    private bool _isWindowFitBeforeFullscreen;
+    private bool _showToolbar = true;
+    private bool _showGallery = true;
+    private Rect _windowBound;
+    private bool _windowMaximized = false;
 
 
     #region Main Menu APIs
@@ -483,7 +492,7 @@ public partial class MainWindow
             heading: null,
             inputValue: newName,
             thumbnail: AP.Photos.Current?.ThumbnailBitmap,
-            thumbnailIcon: StockIconId.Rename,
+            thumbnailIcon: System.Drawing.StockIconId.Rename,
             acceptValue: TextBoxAcceptValue.FileNameValueOnly);
 
         if (result.ExitCode != DialogExitCode.OK || string.IsNullOrWhiteSpace(result.InputValue)) return;
@@ -560,8 +569,8 @@ public partial class MainWindow
                 ? AP.Config.Lang[LangId.FrmMain_MnuMoveToRecycleBin_Description]
                 : AP.Config.Lang[LangId.FrmMain_MnuDeleteFromHardDisk_Description];
             var thumbnailIcon = moveToRecycleBin
-                ? StockIconId.Recycler
-                : StockIconId.Delete;
+                ? System.Drawing.StockIconId.Recycler
+                : System.Drawing.StockIconId.Delete;
 
             var modal = await ModalWindow.ShowWarningAsync(this,
                 title: title,
@@ -771,7 +780,7 @@ public partial class MainWindow
             AP.Config.Lang[LangId.FrmMain_MnuCustomZoom],
             AP.Config.Lang[LangId.FrmMain_MnuCustomZoom_Description],
             inputValue: oldZoom.ToString(),
-            thumbnailIcon: StockIconId.Find,
+            thumbnailIcon: System.Drawing.StockIconId.Find,
             acceptValue: TextBoxAcceptValue.UnsignedFloatValueOnly);
 
         if (result.ExitCode != DialogExitCode.OK) return;
@@ -1411,15 +1420,13 @@ public partial class MainWindow
     public void IG_ToggleFrameless(bool? enabled = null)
     {
         enabled ??= !AP.Config.EnableFrameless;
-        var isEnabled = AP.Config.EnableFrameless = enabled.Value;
-        var dragAreaHeight = _framelessDragAreaHeight;
-
 
         // set frameless mode
-        SetFramelessMode__(isEnabled, true);
+        SetFramelessMode__(enabled.Value, true);
     }
     private void SetFramelessMode__(bool enabled, bool showMessage)
     {
+        AP.Config.EnableFrameless = enabled;
         var dragAreaHeight = _framelessDragAreaHeight;
 
 
@@ -1430,7 +1437,7 @@ public partial class MainWindow
             if (AP.Config.EnableFullScreen) IG_ToggleFullScreen(false);
 
             IsTitlebarVisible = false;
-            AppWindow.TitleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Collapsed;
+            AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Collapsed;
         }
 
         // restore frame
@@ -1439,11 +1446,11 @@ public partial class MainWindow
             IsTitlebarVisible = true;
             TitleBar.UpdateLayout(); // to get the actual size of titlebar
             dragAreaHeight = (int)(TitleBar.ActualHeight * DpiScale);
-            AppWindow.TitleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Standard;
+            AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Standard;
         }
 
         // update drag area
-        AppWindow.TitleBar.SetDragRectangles([new(0, 0, AppWindow.Size.Width, dragAreaHeight)]);
+        AppWindow.TitleBar.SetDragRectangles([new(0, 0, (int)(AppWindow.Size.Width * DpiScale), dragAreaHeight)]);
 
         // show message
         if (showMessage && enabled)
@@ -1459,7 +1466,7 @@ public partial class MainWindow
     /// Toggles fullscreen mode.
     /// </summary>
     /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
-    public static void IG_ToggleFullScreen(string? boolStr = null)
+    public void IG_ToggleFullScreen(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
         IG_ToggleFullScreen(enabled);
@@ -1469,12 +1476,95 @@ public partial class MainWindow
     /// <summary>
     /// Toggles fullscreen mode.
     /// </summary>
-    public static void IG_ToggleFullScreen(bool? enabled = null)
+    public void IG_ToggleFullScreen(bool? enabled = null)
     {
         enabled ??= !AP.Config.EnableFullScreen;
-        AP.Config.EnableFullScreen = enabled.Value;
+        SetFullScreenMode__(enabled.Value, AP.Config.HideToolbarInFullscreen, AP.Config.HideGalleryInFullscreen);
+    }
+    private void SetFullScreenMode__(bool enabled,
+        bool hideToolbar = false,
+        bool hideThumbnails = false)
+    {
+        DisableWindowStateChangedEvent = true;
+        AP.Config.EnableFullScreen = enabled;
 
-        // TODO: update window fit
+
+        var workarea = DisplayArea
+            .GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest)
+            .WorkArea
+            .ToRect();
+
+        // enable full screen mode
+        if (enabled)
+        {
+            // exit window fit
+            if (AP.Config.EnableWindowFit)
+            {
+                _isWindowFitBeforeFullscreen = true;
+                IG_ToggleWindowFit(false);
+            }
+
+            // exit frameless
+            if (AP.Config.EnableFrameless)
+            {
+                _isFramelessBeforeFullscreen = true;
+                SetFramelessMode__(false, false);
+            }
+
+            // back up layout & window state
+            _windowBound = GetWindowBounds();
+            _windowMaximized = WindowState == OverlappedPresenterState.Maximized;
+            _showToolbar = AP.Config.ShowToolbar;
+            _showGallery = AP.Config.ShowGallery;
+
+
+            IsTitlebarVisible = false;
+            AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Collapsed;
+            AppWindow.TitleBar.SetDragRectangles([new(0, 0, 0, 0)]);
+
+
+            // resize window to fullscreen
+            SetWindowBounds(workarea, false, false);
+            WindowApi.SetBorder(Handle, false);
+            AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+            AppWindow.Show();
+
+
+            // hide toolbar & gallery
+            if (hideToolbar) IG_ToggleToolbar(false);
+            if (hideThumbnails) _ = IG_ToggleGalleryAsync(false);
+        }
+
+        // disable full screen mode
+        else
+        {
+            AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+            SetWindowBounds(workarea, false, false);
+
+            // restore layout
+            IG_ToggleToolbar(_showToolbar);
+            _ = IG_ToggleGalleryAsync(_showGallery);
+
+
+            // restore window state, size, position
+            AP.Config.IsMainWindowMaximized = _windowMaximized;
+            if (!_windowMaximized) SetWindowBounds(_windowBound, false, false);
+
+            IsTitlebarVisible = true;
+            TitleBar.UpdateLayout(); // to get the actual size of titlebar
+            AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Standard;
+
+            WindowApi.SetBorder(Handle, true);
+
+
+            // restore frameless, window fit mode when exiting full screen
+            if (_isFramelessBeforeFullscreen) SetFramelessMode__(true, false);
+            if (_isWindowFitBeforeFullscreen) IG_ToggleWindowFit(true);
+        }
+
+
+        DisableWindowStateChangedEvent = false;
+        UpdateWindowIcon();
     }
 
 

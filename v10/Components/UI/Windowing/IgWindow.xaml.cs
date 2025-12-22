@@ -167,7 +167,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Gets DPI scale of the window.
     /// </summary>
-    public double DpiScale => WindowApi.GetDpiScaleForWindow(Handle);
+    public double DpiScale => WindowApi.GetDpiScale(Handle);
 
 
     /// <summary>
@@ -306,6 +306,8 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         }
     } = AP.Config.WindowBackdrop;
 
+
+    public bool DisableWindowStateChangedEvent { get; set; } = false;
 
     #endregion // Control Properties
 
@@ -459,7 +461,10 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         if (e.MessageType == (uint)NativeValues.WindowMessage.WM_MOVING
             || e.MessageType == (uint)NativeValues.WindowMessage.WM_SIZING)
         {
-            _boundsBeforeStateChanged = GetWindowBounds();
+            if (!DisableWindowStateChangedEvent)
+            {
+                _boundsBeforeStateChanged = GetWindowBounds();
+            }
         }
 
         // monitor window state changes
@@ -484,12 +489,12 @@ public partial class IgWindow : Window, INotifyPropertyChanged
             // update state without invoking presenter
             if (winState is not null)
             {
-                if (_boundsBeforeStateChanged.IsEmpty())
+                if (_boundsBeforeStateChanged.IsEmpty() && !DisableWindowStateChangedEvent)
                 {
                     _boundsBeforeStateChanged = GetWindowBounds();
                 }
 
-                SetWindowState(winState.Value, false);
+                SetWindowState(winState.Value, false, !DisableWindowStateChangedEvent);
             }
         }
 
@@ -774,7 +779,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Sets window size and position.
     /// </summary>
-    public void SetWindowBounds(Rect bounds, bool isMaximized)
+    public void SetWindowBounds(Rect bounds, bool isMaximized, bool triggerStateChanged = true)
     {
         // 1. get workarea of current window
         var workarea = DisplayArea
@@ -813,7 +818,7 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         // 5. maximize window if requested
         if (isMaximized)
         {
-            SetWindowState(OverlappedPresenterState.Maximized);
+            SetWindowState(OverlappedPresenterState.Maximized, true, triggerStateChanged);
         }
     }
 
@@ -821,7 +826,9 @@ public partial class IgWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Sets window state.
     /// </summary>
-    public void SetWindowState(OverlappedPresenterState state, bool invokePresenter = true)
+    public void SetWindowState(OverlappedPresenterState state,
+        bool invokePresenter = true,
+        bool triggerStateChanged = true)
     {
         if (_windowState == state) return;
 
@@ -847,16 +854,28 @@ public partial class IgWindow : Window, INotifyPropertyChanged
         _windowState = state;
         var newBounds = GetWindowBounds();
 
-        OnPropertyChanged(nameof(WindowState));
-        OnIgWindowStateChanged(new WindowStateChangedEventArgs()
+        if (triggerStateChanged)
         {
-            State = state,
-            Bounds = newBounds,
-            OldState = oldState,
-            OldBounds = oldBounds,
-        });
+            OnPropertyChanged(nameof(WindowState));
+            OnIgWindowStateChanged(new WindowStateChangedEventArgs()
+            {
+                State = state,
+                Bounds = newBounds,
+                OldState = oldState,
+                OldBounds = oldBounds,
+            });
+        }
     }
 
+
+    /// <summary>
+    /// Loads invisible window in background.
+    /// </summary>
+    public void ShowHidden()
+    {
+        // load the window in background
+        WindowApi.ShowHidden(Handle);
+    }
 
     #endregion // Public Methods
 

@@ -129,15 +129,35 @@ public partial class Config : IgReactive
         }
     } = false;
 
-    ///// <summary>
-    ///// Gets, sets value indicates that the toolbar should be hidden in Full screen mode
-    ///// </summary>
-    //public bool HideToolbarInFullscreen { get; set; } = false;
+    /// <summary>
+    /// Gets, sets value indicates that the toolbar should be hidden in Full screen mode
+    /// </summary>
+    public bool HideToolbarInFullscreen
+    {
+        get; set
+        {
+            if (field == value) return;
 
-    ///// <summary>
-    ///// Gets, sets value indicates that the gallery should be hidden in Full screen mode
-    ///// </summary>
-    //public bool HideGalleryInFullscreen { get; set; } = false;
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = false;
+
+    /// <summary>
+    /// Gets, sets value indicates that the gallery should be hidden in Full screen mode
+    /// </summary>
+    public bool HideGalleryInFullscreen
+    {
+        get; set
+        {
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            _ = OnPropertyChanged(value, oldValue);
+        }
+    } = false;
 
     /// <summary>
     /// Gets, sets value of gallery visibility

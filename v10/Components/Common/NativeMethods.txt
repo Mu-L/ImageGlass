@@ -34,9 +34,12 @@ FillRect
 
 SetWindowLongPtr
 SetWindowLong
+GetWindowLong
 GetDpiForWindow
 SetWindowPos
-
+SetLayeredWindowAttributes
+WINDOW_STYLE
+WINDOW_EX_STYLE
 WHEEL_DELTA
 
 IFolderView2

@@ -477,7 +477,7 @@ public partial class DialogWindow : IgWindow
         if (owner is null) return;
 
         var ownerHandle = WindowNative.GetWindowHandle(owner);
-        WindowApi.SetWindowOwner(Handle, ownerHandle);
+        WindowApi.SetOwner(Handle, ownerHandle);
     }
 
 
@@ -502,7 +502,7 @@ public partial class DialogWindow : IgWindow
 
 
         // load the window in background
-        WindowApi.ShowWindowHidden(Handle);
+        ShowHidden();
 
         // wait for the window size updated
         await _taskSourceResized.Task;

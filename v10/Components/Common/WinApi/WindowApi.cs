@@ -27,7 +27,7 @@ public static class WindowApi
     /// <summary>
     /// Sets window owner.
     /// </summary>
-    public static void SetWindowOwner(nint thisWindowHandle, nint ownerWindowHandle)
+    public static void SetOwner(nint thisWindowHandle, nint ownerWindowHandle)
     {
         _ = PInvoke.SetWindowLongPtr(new HWND(thisWindowHandle),
             WINDOW_LONG_PTR_INDEX.GWLP_HWNDPARENT, ownerWindowHandle);
@@ -37,7 +37,7 @@ public static class WindowApi
     /// <summary>
     /// Return DPI scale of the given window.
     /// </summary>
-    public static double GetDpiScaleForWindow(nint windowHandle)
+    public static double GetDpiScale(nint windowHandle)
     {
         var dpi = PInvoke.GetDpiForWindow(new HWND(windowHandle));
         var dpiScale = dpi / 96d;
@@ -49,7 +49,7 @@ public static class WindowApi
     /// <summary>
     /// Loads window in the background but don't visually show it.
     /// </summary>
-    public static void ShowWindowHidden(nint windowHandle)
+    public static void ShowHidden(nint windowHandle)
     {
         _ = PInvoke.SetWindowPos(new HWND(windowHandle), new HWND(),
             0, 0, 0, 0,
@@ -61,5 +61,57 @@ public static class WindowApi
             | SET_WINDOW_POS_FLAGS.SWP_HIDEWINDOW);
     }
 
+
+    /// <summary>
+    /// Sets window border.
+    /// </summary>
+    public static void SetBorder(nint windowHandle, bool enabled)
+    {
+        var hwnd = new HWND(windowHandle);
+        var style = (WINDOW_STYLE)PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE);
+
+        if (enabled)
+        {
+            style |= WINDOW_STYLE.WS_CAPTION | WINDOW_STYLE.WS_THICKFRAME | WINDOW_STYLE.WS_BORDER;
+        }
+        else
+        {
+            style &= ~(WINDOW_STYLE.WS_CAPTION | WINDOW_STYLE.WS_THICKFRAME | WINDOW_STYLE.WS_BORDER);
+        }
+
+        _ = PInvoke.SetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE, (int)style);
+        _ = PInvoke.SetWindowPos(
+            hwnd,
+            HWND.Null,
+            0, 0, 0, 0,
+            SET_WINDOW_POS_FLAGS.SWP_NOMOVE |
+            SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
+            SET_WINDOW_POS_FLAGS.SWP_NOZORDER |
+            SET_WINDOW_POS_FLAGS.SWP_FRAMECHANGED
+        );
+
+    }
+
+
+    /// <summary>
+    /// Sets window opacity.
+    /// </summary>
+    public static void SetOpacity(nint windowHandle, double opacity)
+    {
+        var hwnd = new HWND(windowHandle);
+        var exStyle = (WINDOW_EX_STYLE)PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+        exStyle |= WINDOW_EX_STYLE.WS_EX_LAYERED;
+
+        // enable opacity
+        _ = PInvoke.SetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, (int)exStyle);
+
+        var opacityByte = (byte)(opacity * 255);
+
+        // update opacity
+        _ = PInvoke.SetLayeredWindowAttributes(
+            hwnd, new COLORREF(0), opacityByte,
+            LAYERED_WINDOW_ATTRIBUTES_FLAGS.LWA_ALPHA
+        );
+    }
 
 }
