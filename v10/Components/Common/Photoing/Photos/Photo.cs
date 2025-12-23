@@ -718,9 +718,42 @@ public partial class Photo : DisposableImpl
 
 
     /// <summary>
+    /// Tries to get Direct2D bitmap, attempt to retry if Direct2D context is null.
+    /// </summary>
+    public async Task<ID2D1Bitmap1?> TryGetD2BitmapAsync(
+        ID3D11Device d3Device,
+        Func<ID2D1DeviceContext> getD2ContextFn,
+        uint frameIndex = 0,
+        uint maxAttemptCount = 2)
+    {
+        var attemptCount = 0;
+        var hasSource = false;
+        ID2D1Bitmap1? bitmap = null;
+
+        do
+        {
+            var d2Ctx = getD2ContextFn();
+
+            // create GPU bitmap
+            bitmap = await GetD2BitmapAsync(d3Device, d2Ctx);
+            hasSource = bitmap != null;
+            attemptCount++;
+
+            if (!hasSource && attemptCount < maxAttemptCount)
+            {
+                await Task.Delay(100);
+            }
+        }
+        while (!hasSource && attemptCount < maxAttemptCount);
+
+        return bitmap;
+    }
+
+
+    /// <summary>
     /// Gets Direct2D bitmap.
     /// </summary>
-    public async Task<ID2D1Bitmap1?> GetD2BitmapAsync(
+    private async Task<ID2D1Bitmap1?> GetD2BitmapAsync(
         ID3D11Device d3Device, ID2D1DeviceContext d2Context, uint frameIndex = 0)
     {
         var taskId = Guid.NewGuid();
@@ -747,13 +780,13 @@ public partial class Photo : DisposableImpl
 
                 return d2Bmp;
             }
-
-            return null;
         }
         finally
         {
             _ = _taskRefs.TryRemove(taskId, out _);
         }
+
+        return null;
     }
 
 
