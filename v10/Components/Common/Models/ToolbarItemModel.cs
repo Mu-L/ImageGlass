@@ -49,12 +49,11 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     {
         get; set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-                _ = OnPropertyChanged(nameof(IsSeparator));
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
+            _ = OnPropertyChanged(nameof(IsSeparator));
         }
     } = "";
 
@@ -68,11 +67,10 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     {
         get; set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
         }
     } = "";
 
@@ -84,14 +82,13 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     {
         get; set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-                _ = OnPropertyChanged(nameof(DisplayText));
-                _ = OnPropertyChanged(nameof(IsTextVisible));
-                _ = OnPropertyChanged(nameof(Tooltip));
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
+            _ = OnPropertyChanged(nameof(DisplayText));
+            _ = OnPropertyChanged(nameof(IsTextVisible));
+            _ = OnPropertyChanged(nameof(Tooltip));
         }
     } = "";
 
@@ -109,12 +106,11 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     {
         get; set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-                _ = OnPropertyChanged(nameof(IsTextVisible));
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
+            _ = OnPropertyChanged(nameof(IsTextVisible));
         }
     } = false;
 
@@ -126,12 +122,26 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     {
         get; set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-                _ = OnPropertyChanged(nameof(IsToggle));
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
+            _ = OnPropertyChanged(nameof(IsToggle));
+        }
+    } = string.Empty;
+
+
+    /// <summary>
+    /// Gets, sets the config value for toggle binding.
+    /// </summary>
+    public string ConfigBindingValue
+    {
+        get; set
+        {
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
         }
     } = string.Empty;
 
@@ -144,11 +154,10 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     {
         get; set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
         }
     } = ToolbarItemAlignment.Left;
 
@@ -161,11 +170,10 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
         get => field;
         set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
         }
     } = null;
 
@@ -190,11 +198,10 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     {
         get; set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged(nameof(IsChecked));
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
         }
     } = false;
 
@@ -207,11 +214,10 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     {
         get; set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
         }
     } = -1;
 
@@ -224,11 +230,10 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     {
         get; set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
         }
     } = false;
 
@@ -255,12 +260,11 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     {
         get; set
         {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-                _ = OnPropertyChanged(nameof(Tooltip));
-            }
+            if (field == value) return;
+            field = value;
+
+            _ = OnPropertyChanged();
+            _ = OnPropertyChanged(nameof(Tooltip));
         }
     } = string.Empty;
 

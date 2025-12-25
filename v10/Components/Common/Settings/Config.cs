@@ -813,12 +813,34 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets setting value.
     /// </summary>
+    public T Get<T>(string configName, T defaultValue)
+    {
+        if (!Enum.TryParse<ConfigId>(configName, out var configId)) return defaultValue;
+
+        return Get<T>(configId, defaultValue);
+    }
+
+
+    /// <summary>
+    /// Gets setting value as string.
+    /// </summary>
+    public string GetAsString(string configName)
+    {
+        if (!Enum.TryParse<ConfigId>(configName, out var configId)) return string.Empty;
+
+        var value = _values.GetValueOrDefault(configId)?.ToString() ?? string.Empty;
+        return value;
+    }
+
+
+    /// <summary>
+    /// Gets setting value.
+    /// </summary>
     public T Get<T>(ConfigId configName, T defaultValue)
     {
         var value = _values.GetValueOrDefault(configName) ?? defaultValue;
         return (T)value!;
     }
-
 
 }
 

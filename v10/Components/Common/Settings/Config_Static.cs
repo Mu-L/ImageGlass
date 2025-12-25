@@ -146,6 +146,7 @@ public partial class Config
             Image = nameof(IgThemeIcon.AutoZoom),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuAutoZoom],
             ConfigBinding = nameof(Config.ZoomMode),
+            ConfigBindingValue = ZoomMode.AutoZoom.ToString(),
             OnClick = new(LangId.FrmMain_MnuAutoZoom, API.IG_SetZoomMode, nameof(ZoomMode.AutoZoom)),
         },
         // lock zoom
@@ -154,6 +155,7 @@ public partial class Config
             Image = nameof(IgThemeIcon.LockZoom),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuLockZoom],
             ConfigBinding = nameof(Config.ZoomMode),
+            ConfigBindingValue = ZoomMode.LockZoom.ToString(),
             OnClick = new(LangId.FrmMain_MnuLockZoom, API.IG_SetZoomMode, nameof(ZoomMode.LockZoom)),
         },
         // scale to width
@@ -162,6 +164,7 @@ public partial class Config
             Image = nameof(IgThemeIcon.ScaleToWidth),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuScaleToWidth],
             ConfigBinding = nameof(Config.ZoomMode),
+            ConfigBindingValue = ZoomMode.ScaleToWidth.ToString(),
             OnClick = new(LangId.FrmMain_MnuScaleToWidth, API.IG_SetZoomMode, nameof(ZoomMode.ScaleToWidth)),
         },
         // scale to height
@@ -170,6 +173,7 @@ public partial class Config
             Image = nameof(IgThemeIcon.ScaleToHeight),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuScaleToHeight],
             ConfigBinding = nameof(Config.ZoomMode),
+            ConfigBindingValue = ZoomMode.ScaleToHeight.ToString(),
             OnClick = new(LangId.FrmMain_MnuScaleToHeight, API.IG_SetZoomMode, nameof(ZoomMode.ScaleToHeight)),
         },
         // scale to fit
@@ -178,6 +182,7 @@ public partial class Config
             Image = nameof(IgThemeIcon.ScaleToFit),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuScaleToFit],
             ConfigBinding = nameof(Config.ZoomMode),
+            ConfigBindingValue = ZoomMode.ScaleToFit.ToString(),
             OnClick = new(LangId.FrmMain_MnuScaleToFit, API.IG_SetZoomMode, nameof(ZoomMode.ScaleToFit)),
         },
         // scale to fill
@@ -186,6 +191,7 @@ public partial class Config
             Image = nameof(IgThemeIcon.ScaleToFill),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuScaleToFill],
             ConfigBinding = nameof(Config.ZoomMode),
+            ConfigBindingValue = ZoomMode.ScaleToFill.ToString(),
             OnClick = new(LangId.FrmMain_MnuScaleToFill, API.IG_SetZoomMode, nameof(ZoomMode.ScaleToFill)),
         },
         ToolbarItemModel.Separator,
@@ -204,6 +210,7 @@ public partial class Config
             Image = nameof(IgThemeIcon.Gallery),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuToggleGallery],
             ConfigBinding = nameof(Config.ShowGallery),
+            ConfigBindingValue = "True",
             OnClick = new(LangId.FrmMain_MnuToggleGallery, API.IG_ToggleGallery),
         },
         // toggle checkerboard
@@ -211,7 +218,6 @@ public partial class Config
             Id = $"Btn_{nameof(IgThemeIcon.Checkerboard)}",
             Image = nameof(IgThemeIcon.Checkerboard),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuToggleCheckerboard],
-            ConfigBinding = nameof(Config.CheckerboardMode),
             OnClick = new(LangId.FrmMain_MnuToggleCheckerboard, API.IG_ToggleCheckerboard),
         },
         // toggle fullscreen
@@ -220,6 +226,7 @@ public partial class Config
             Image = nameof(IgThemeIcon.FullScreen),
             Text = IgLang.KeysMap[LangId.FrmMain_MnuFullScreen],
             ConfigBinding = nameof(Config.EnableFullScreen),
+            ConfigBindingValue = "True",
             OnClick = new(LangId.FrmMain_MnuFullScreen, API.IG_ToggleFullScreen),
         },
         ToolbarItemModel.Separator,

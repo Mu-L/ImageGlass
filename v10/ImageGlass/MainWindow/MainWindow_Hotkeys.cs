@@ -171,7 +171,7 @@ public partial class MainWindow
     }
 
 
-    private void RegisterHotkeys_()
+    private void RegisterHotkeys__()
     {
         Content.KeyboardAccelerators.Clear();
 

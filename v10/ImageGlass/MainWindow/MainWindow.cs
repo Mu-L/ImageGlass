@@ -79,7 +79,7 @@ public partial class MainWindow : IgWindow
         else if (AP.Config.EnableFrameless) SetFramelessMode__(true, false);
 
         // register hotkeys
-        RegisterHotkeys_();
+        RegisterHotkeys__();
 
 
         _contentEl.ToolbarButtonClicked += Toolbar_ButtonClicked;

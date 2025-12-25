@@ -21,9 +21,11 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.Foundation;
 
@@ -40,7 +42,8 @@ public partial class ToolbarControl : IgControl
     // events
     public event TypedEventHandler<IgToolbarButton, ToolbarItemClickedEventArgs>? ItemClicked;
 
-    private readonly Dictionary<int, ToolbarItemMetadata> _itemsMetadata = [];
+    private readonly Dictionary<int, ToolbarItemMetadata> _metadataMap = [];
+    private readonly Dictionary<string, List<int>> _configBindingsMap = [];
     public readonly ObservableCollection<ToolbarItemModel> PrimaryItems = [];
     public readonly ObservableCollection<ToolbarItemModel> PrimaryItemsOverflow = [];
     public readonly ObservableCollection<ToolbarItemModel> SecondaryItems = [];
@@ -64,7 +67,7 @@ public partial class ToolbarControl : IgControl
         toolbar.UpdateLayoutItems();
 
         await Task.Delay(200); // wait for layout updated
-        toolbar.HandleOverflow_();
+        toolbar.HandleOverflow__();
     }
     #endregion // ItemsSource
 
@@ -98,13 +101,22 @@ public partial class ToolbarControl : IgControl
     public ToolbarControl()
     {
         InitializeComponent();
+
+        AP.Config.PropertyChanged += Config_PropertyChanged;
+    }
+
+
+    protected override void OnIgUnloaded(FrameworkElement fe)
+    {
+        base.OnIgUnloaded(fe);
+        AP.Config.PropertyChanged += Config_PropertyChanged;
     }
 
 
     protected override void OnIgSizeChanged(FrameworkElement fe, SizeChangedEventArgs e)
     {
         base.OnIgSizeChanged(fe, e);
-        HandleOverflow_();
+        HandleOverflow__();
     }
 
 
@@ -114,7 +126,7 @@ public partial class ToolbarControl : IgControl
         if (sender is not FrameworkElement fe) return;
 
         // save toolbar item width
-        if (_itemsMetadata.TryGetValue(item.VM.SourceIndex, out var meta))
+        if (_metadataMap.TryGetValue(item.VM.SourceIndex, out var meta))
         {
             meta.RenderedWidth = fe.ActualWidth;
         }
@@ -133,6 +145,12 @@ public partial class ToolbarControl : IgControl
     protected virtual void OnItemClicked(IgToolbarButton sender, ToolbarItemClickedEventArgs e)
     {
         ItemClicked?.Invoke(sender, e);
+    }
+
+
+    private void Config_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        UpdateButtonCheckState__(e.PropertyName);
     }
 
 
@@ -157,7 +175,7 @@ public partial class ToolbarControl : IgControl
 
             // 2. Button item
             // get toolbar item metadata
-            if (!_itemsMetadata.TryGetValue(item.SourceIndex, out var meta)) continue;
+            if (!_metadataMap.TryGetValue(item.SourceIndex, out var meta)) continue;
             if (RepeaterPrimaryItems.TryGetElement(meta.PrimaryItemIndex) is not FrameworkElement fe) continue;
             if (fe.FindName(_PART_ItemButton) is not IgToolbarButton btnEl) continue;
 
@@ -211,12 +229,9 @@ public partial class ToolbarControl : IgControl
     }
 
 
-    private void HandleOverflow_()
+    private void HandleOverflow__()
     {
-        if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
-
         PrimaryItemsOverflow.Clear();
-
 
         // 1. calculate how much space can I safely use for center toolbar items
         // before they hit the right-side panel
@@ -254,7 +269,7 @@ public partial class ToolbarControl : IgControl
         // 3.2 check if we should hide the item
         foreach (var item in PrimaryItems)
         {
-            if (!_itemsMetadata.TryGetValue(item.SourceIndex, out var meta)) continue;
+            if (!_metadataMap.TryGetValue(item.SourceIndex, out var meta)) continue;
             usedWidth += meta.RenderedWidth;
 
             // check if the item has enough space to show
@@ -267,7 +282,6 @@ public partial class ToolbarControl : IgControl
             {
                 PrimaryItemsOverflow.Add(item);
             }
-
         }
 
         // 4. show the overflow button if there are hidden icons
@@ -277,12 +291,31 @@ public partial class ToolbarControl : IgControl
     }
 
 
+    private void UpdateButtonCheckState__(string? configName)
+    {
+        if (string.IsNullOrWhiteSpace(configName)) return;
+        if (_configBindingsMap.GetValueOrDefault(configName) is not List<int> itemIndice) return;
+        if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
+
+        var items = allItems.ToArray();
+        foreach (var srcIndex in itemIndice)
+        {
+            var configValue = AP.Config.GetAsString(configName);
+            var isChecked = configValue.Equals(items[srcIndex].ConfigBindingValue, StringComparison.Ordinal);
+
+            items[srcIndex].IsChecked = isChecked;
+        }
+    }
+
+
     /// <summary>
     /// Updates layout of items
     /// </summary>
     public void UpdateLayoutItems()
     {
-        _itemsMetadata.Clear();
+        _metadataMap.Clear();
+        _configBindingsMap.Clear();
+
         PrimaryItems.Clear();
         PrimaryItemsOverflow.Clear();
         SecondaryItems.Clear();
@@ -313,13 +346,30 @@ public partial class ToolbarControl : IgControl
             }
 
             // save item metadata
-            _itemsMetadata.TryAdd(srcIndex, new ToolbarItemMetadata()
+            _metadataMap.TryAdd(srcIndex, new ToolbarItemMetadata()
             {
                 SourceIndex = srcIndex,
                 PrimaryItemIndex = primaryIndex,
                 SecondaryItemIndex = secondaryIndex,
                 RenderedWidth = 0,
             });
+
+            // save binding map
+            var bindingIndice = _configBindingsMap.GetValueOrDefault(item.ConfigBinding) ?? [];
+            if (!string.IsNullOrWhiteSpace(item.ConfigBinding))
+            {
+                bindingIndice.Add(srcIndex);
+                _configBindingsMap[item.ConfigBinding] = bindingIndice;
+            }
+
+
+            // set item check state
+            if (!string.IsNullOrWhiteSpace(item.ConfigBinding))
+            {
+                var configValue = AP.Config.GetAsString(item.ConfigBinding);
+                var isChecked = configValue.Equals(item.ConfigBindingValue, StringComparison.Ordinal);
+                item.IsChecked = isChecked;
+            }
         }
     }
 
