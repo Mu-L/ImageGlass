@@ -23,3 +23,143 @@ public record ConfigMetadata
     public string Description { get; set; } = "ImageGlass Configuration File";
     public float Version { get; set; } = 10.0f;
 }
+
+
+
+public enum ConfigId
+{
+
+    #region Boolean settings
+
+    IsMainWindowMaximized,
+    EnableSlideshow,
+    // HideMainWindowInSlideshow,
+    // ShowSlideshowCountdown,
+    // UseRandomIntervalForSlideshow,
+    // EnableLoopSlideshow,
+    // EnableFullscreenSlideshow,
+    EnableFrameless,
+    EnableFullScreen,
+    HideToolbarInFullscreen,
+    HideGalleryInFullscreen,
+    ShowGallery,
+    // ShowGalleryScrollbars,
+    // ShowGalleryFileName,
+    ShowWelcomeImage,
+    ShowToolbar,
+    // ShowFrameNavTool,
+    ShowAppIcon,
+    // EnableLoopBackNavigation,
+    // EnableMultiInstances,
+    EnableWindowTopMost,
+    ShowDeleteConfirmation,
+    ShowSaveOverrideConfirmation,
+    // ShouldPreserveModifiedDate,
+    OpenSaveAsDialogInTheCurrentImageDir,
+    // ShowNewVersionIndicator,
+    // EnableCenterToolbar,
+    ShouldOpenLastSeenImage,
+    // ShouldUseColorProfileForAll,
+    // EnableNavigationButtons,
+    EnableRecursiveLoading,
+    ShouldUseExplorerSortOrder,
+    ShouldGroupImagesByDirectory,
+    ShouldLoadHiddenImages,
+    EnableWindowFit,
+    // CenterWindowFit,
+    // UseEmbeddedThumbnailRawFormats,
+    // UseEmbeddedThumbnailOtherFormats,
+    ShowImagePreview,
+    // EnableImageAsyncLoading,
+    EnableCopyMultipleFiles,
+    EnableCutMultipleFiles,
+    // EnableRealTimeFileUpdate,
+    // ShouldAutoOpenNewAddedImage,
+    // UseWebview2ForSvg,
+    EnableDebug,
+
+    #endregion // Boolean settings
+
+
+    #region Number settings
+
+    // QuickSetupVersion,
+    PanSpeed,
+    ZoomSpeed,
+    // SlideshowInterval,
+    // SlideshowIntervalTo,
+    // SlideshowImagesToNotifySound,
+    ThumbnailSize,
+    // GalleryCacheSizeInMb,
+    // GalleryColumns,
+    // ImageBoosterCacheCount,
+    // ImageBoosterCacheMaxDimension,
+    // ImageBoosterCacheMaxFileSizeInMb,
+    // ZoomLockValue,
+    ToolbarIconHeight,
+    ImageEditQuality,
+    InAppMessageDuration,
+    // EmbeddedThumbnailMinWidth,
+    // EmbeddedThumbnailMinHeight,
+
+    #endregion // Number settings
+
+
+    #region String settings
+
+    // ColorProfile,
+    // AutoUpdate,
+    LastSeenImagePath,
+    // LastOpenedSetting,
+    BackgroundColor,
+    // SlideshowBackgroundColor,
+    DarkTheme,
+    LightTheme,
+    Language,
+
+    #endregion // String settings
+
+
+    #region Enum settings,
+
+    CheckerboardMode,
+    ImageLoadingOrder,
+    ImageLoadingOrderType,
+    ZoomMode,
+    ImageInterpolationScaleDown,
+    ImageInterpolationScaleUp,
+    // AfterEditingAction,
+    WindowBackdrop,
+
+    #endregion // Enum settings
+
+
+    #region Array settings
+
+    MainWindowBounds,
+    ZoomLevels,
+    // EditApps,
+    SingleFrameFormats,
+    WICReadFormats,
+    FileFormats,
+    ImageInfoTags,
+    MenuHotkeys,
+    // MouseClickActions,
+    // MouseWheelActions,
+    // Layout,
+    // Tools,
+    // DisabledMenus,
+    ToolbarButtons,
+
+    #endregion // Array settings
+
+
+    #region ExpandoObject settings
+
+    ToolSettings,
+
+    #endregion // ExpandoObject settings
+
+}
+
+

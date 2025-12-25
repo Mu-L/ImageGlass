@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.FileSystem;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
@@ -31,7 +32,11 @@ public partial class ConfigJsonContext : JsonSerializerContext { }
 
 public partial class Config : IgReactive
 {
+    [JsonIgnore]
+    private readonly Dictionary<ConfigId, object> _values = new();
+
     public ConfigMetadata _Metadata { get; set; } = new();
+
 
 
     #region Setting items
@@ -49,30 +54,18 @@ public partial class Config : IgReactive
     /// </summary>
     public bool IsMainWindowMaximized
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.IsMainWindowMaximized, false);
+        set => Set(ConfigId.IsMainWindowMaximized, value);
+    }
 
     /// <summary>
     /// Gets, sets value indicating whether the slideshow mode is enabled or not.
     /// </summary>
     public bool EnableSlideshow
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.EnableSlideshow, false);
+        set => Set(ConfigId.EnableSlideshow, value);
+    }
 
     ///// <summary>
     ///// Gets, sets value indicating whether the FrmMain should be hidden when <see cref="EnableSlideshow"/> is on.
@@ -104,75 +97,45 @@ public partial class Config : IgReactive
     /// </summary>
     public bool EnableFrameless
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.EnableFrameless, false);
+        set => Set(ConfigId.EnableFrameless, value);
+    }
 
     /// <summary>
     /// Gets, sets value indicating whether the full screen mode is enabled or not.
     /// </summary>
     public bool EnableFullScreen
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.EnableFullScreen, false);
+        set => Set(ConfigId.EnableFullScreen, value);
+    }
 
     /// <summary>
     /// Gets, sets value indicates that the toolbar should be hidden in Full screen mode
     /// </summary>
     public bool HideToolbarInFullscreen
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.HideToolbarInFullscreen, false);
+        set => Set(ConfigId.HideToolbarInFullscreen, value);
+    }
 
     /// <summary>
     /// Gets, sets value indicates that the gallery should be hidden in Full screen mode
     /// </summary>
     public bool HideGalleryInFullscreen
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.HideGalleryInFullscreen, false);
+        set => Set(ConfigId.HideGalleryInFullscreen, value);
+    }
 
     /// <summary>
     /// Gets, sets value of gallery visibility
     /// </summary>
     public bool ShowGallery
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = true;
+        get => Get(ConfigId.ShowGallery, true);
+        set => Set(ConfigId.ShowGallery, value);
+    }
 
     ///// <summary>
     ///// Gets, sets value whether gallery scrollbars visible
@@ -189,30 +152,18 @@ public partial class Config : IgReactive
     /// </summary>
     public bool ShowWelcomeImage
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = true;
+        get => Get(ConfigId.ShowWelcomeImage, true);
+        set => Set(ConfigId.ShowWelcomeImage, value);
+    }
 
     /// <summary>
     /// Gets, sets value of visibility of toolbar on start up
     /// </summary>
     public bool ShowToolbar
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = true;
+        get => Get(ConfigId.ShowToolbar, true);
+        set => Set(ConfigId.ShowToolbar, value);
+    }
 
     ///// <summary>
     ///// Gets, sets value of visibility of Frame Navigation tool on startup
@@ -224,15 +175,9 @@ public partial class Config : IgReactive
     /// </summary>
     public bool ShowAppIcon
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = true;
+        get => Get(ConfigId.ShowAppIcon, true);
+        set => Set(ConfigId.ShowAppIcon, value);
+    }
 
     ///// <summary>
     ///// Gets, sets value indicating that ImageGlass will loop back viewer to the first image when reaching the end of the list.
@@ -249,25 +194,27 @@ public partial class Config : IgReactive
     /// </summary>
     public bool EnableWindowTopMost
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.EnableWindowTopMost, false);
+        set => Set(ConfigId.EnableWindowTopMost, value);
+    }
 
     /// <summary>
     /// Gets, sets value indicates that Confirmation dialog is displayed when deleting image
     /// </summary>
-    public bool ShowDeleteConfirmation { get; set; } = true;
+    public bool ShowDeleteConfirmation
+    {
+        get => Get(ConfigId.ShowDeleteConfirmation, true);
+        set => Set(ConfigId.ShowDeleteConfirmation, value);
+    }
 
     /// <summary>
     /// Gets, sets value indicates that Confirmation dialog is displayed when overriding the viewing image
     /// </summary>
-    public bool ShowSaveOverrideConfirmation { get; set; } = true;
+    public bool ShowSaveOverrideConfirmation
+    {
+        get => Get(ConfigId.ShowSaveOverrideConfirmation, true);
+        set => Set(ConfigId.ShowSaveOverrideConfirmation, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the setting to control whether the image's original modified date value is preserved on save
@@ -277,7 +224,11 @@ public partial class Config : IgReactive
     /// <summary>
     /// Gets, sets value indicates that Save dialog should use the current image folder as initial directory
     /// </summary>
-    public bool OpenSaveAsDialogInTheCurrentImageDir { get; set; } = true;
+    public bool OpenSaveAsDialogInTheCurrentImageDir
+    {
+        get => Get(ConfigId.OpenSaveAsDialogInTheCurrentImageDir, true);
+        set => Set(ConfigId.OpenSaveAsDialogInTheCurrentImageDir, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the value indicates that there is a new version
@@ -294,15 +245,9 @@ public partial class Config : IgReactive
     /// </summary>
     public bool ShouldOpenLastSeenImage
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = true;
+        get => Get(ConfigId.ShouldOpenLastSeenImage, true);
+        set => Set(ConfigId.ShouldOpenLastSeenImage, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the value indicates that the ColorProfile will be applied for all or only the images with embedded profile
@@ -319,60 +264,36 @@ public partial class Config : IgReactive
     /// </summary>
     public bool EnableRecursiveLoading
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.EnableRecursiveLoading, false);
+        set => Set(ConfigId.EnableRecursiveLoading, value);
+    }
 
     /// <summary>
     /// Gets, sets the value indicates that Windows File Explorer sort order is used if possible
     /// </summary>
     public bool ShouldUseExplorerSortOrder
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = true;
+        get => Get(ConfigId.ShouldUseExplorerSortOrder, true);
+        set => Set(ConfigId.ShouldUseExplorerSortOrder, value);
+    }
 
     /// <summary>
     /// Gets, sets the value indicates that images order should be grouped by directory
     /// </summary>
     public bool ShouldGroupImagesByDirectory
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.ShouldGroupImagesByDirectory, false);
+        set => Set(ConfigId.ShouldGroupImagesByDirectory, value);
+    }
 
     /// <summary>
     /// Gets, sets showing/loading hidden images
     /// </summary>
     public bool ShouldLoadHiddenImages
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.ShouldLoadHiddenImages, false);
+        set => Set(ConfigId.ShouldLoadHiddenImages, value);
+    }
 
 
     /// <summary>
@@ -380,15 +301,9 @@ public partial class Config : IgReactive
     /// </summary>
     public bool EnableWindowFit
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.EnableWindowFit, false);
+        set => Set(ConfigId.EnableWindowFit, value);
+    }
 
 
     ///// <summary>
@@ -412,15 +327,9 @@ public partial class Config : IgReactive
     /// </summary>
     public bool ShowImagePreview
     {
-        get; set
-        {
-            if (field != value)
-            {
-                field = value;
-                _ = OnPropertyChanged();
-            }
-        }
-    } = true;
+        get => Get(ConfigId.ShowImagePreview, true);
+        set => Set(ConfigId.ShowImagePreview, value);
+    }
 
 
     ///// <summary>
@@ -431,12 +340,20 @@ public partial class Config : IgReactive
     /// <summary>
     /// Enables / Disables copy multiple files.
     /// </summary>
-    public bool EnableCopyMultipleFiles { get; set; } = true;
+    public bool EnableCopyMultipleFiles
+    {
+        get => Get(ConfigId.EnableCopyMultipleFiles, true);
+        set => Set(ConfigId.EnableCopyMultipleFiles, value);
+    }
 
     /// <summary>
     /// Enables / Disables cut multiple files.
     /// </summary>
-    public bool EnableCutMultipleFiles { get; set; } = true;
+    public bool EnableCutMultipleFiles
+    {
+        get => Get(ConfigId.EnableCutMultipleFiles, true);
+        set => Set(ConfigId.EnableCutMultipleFiles, value);
+    }
 
     ///// <summary>
     ///// Enables / Disables the file system watcher.
@@ -458,15 +375,9 @@ public partial class Config : IgReactive
     /// </summary>
     public bool EnableDebug
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = false;
+        get => Get(ConfigId.EnableDebug, false);
+        set => Set(ConfigId.EnableDebug, value);
+    }
 
     #endregion // Boolean items
 
@@ -484,15 +395,9 @@ public partial class Config : IgReactive
     /// </summary>
     public float PanSpeed
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = 20f;
+        get => Get(ConfigId.PanSpeed, 20f);
+        set => Set(ConfigId.PanSpeed, value);
+    }
 
     /// <summary>
     /// Gets, sets the zooming speed.
@@ -500,15 +405,9 @@ public partial class Config : IgReactive
     /// </summary>
     public float ZoomSpeed
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = 0f;
+        get => Get(ConfigId.ZoomSpeed, 0f);
+        set => Set(ConfigId.ZoomSpeed, value);
+    }
 
     ///// <summary>
     ///// Gets, sets slide show interval (minimum value if it's random)
@@ -530,15 +429,9 @@ public partial class Config : IgReactive
     /// </summary>
     public int ThumbnailSize
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = 70;
+        get => Get(ConfigId.ThumbnailSize, 70);
+        set => Set(ConfigId.ThumbnailSize, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the maximum size in MB of thumbnail persistent cache.
@@ -577,25 +470,27 @@ public partial class Config : IgReactive
     /// </summary>
     public uint ToolbarIconHeight
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = Const.TOOLBAR_ICON_HEIGHT;
+        get => Get(ConfigId.ToolbarIconHeight, (uint)Const.TOOLBAR_ICON_HEIGHT);
+        set => Set(ConfigId.ToolbarIconHeight, value);
+    }
 
     /// <summary>
     /// Gets, sets value of image quality for editting
     /// </summary>
-    public uint ImageEditQuality { get; set; } = 80;
+    public uint ImageEditQuality
+    {
+        get => Get(ConfigId.ImageEditQuality, 80u);
+        set => Set(ConfigId.ImageEditQuality, value);
+    }
 
     /// <summary>
     /// Gets, sets value of duration to display the in-app message
     /// </summary>
-    public int InAppMessageDuration { get; set; } = 2000;
+    public int InAppMessageDuration
+    {
+        get => Get(ConfigId.InAppMessageDuration, 2000);
+        set => Set(ConfigId.InAppMessageDuration, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the minimum width of the embedded thumbnail to use for displaying
@@ -629,15 +524,9 @@ public partial class Config : IgReactive
     /// </summary>
     public string LastSeenImagePath
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = "";
+        get => Get(ConfigId.LastSeenImagePath, string.Empty);
+        set => Set(ConfigId.LastSeenImagePath, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the last view of settings window.
@@ -649,15 +538,9 @@ public partial class Config : IgReactive
     /// </summary>
     public string BackgroundColor
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = "#00000000";
+        get => Get(ConfigId.BackgroundColor, "#00000000");
+        set => Set(ConfigId.BackgroundColor, value);
+    }
 
     ///// <summary>
     ///// Gets, sets background color of slideshow
@@ -669,45 +552,27 @@ public partial class Config : IgReactive
     /// </summary>
     public string DarkTheme
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = Const.DEFAULT_THEME;
+        get => Get(ConfigId.DarkTheme, Const.DEFAULT_THEME);
+        set => Set(ConfigId.DarkTheme, value);
+    }
 
     /// <summary>
     /// Gets, sets the theme name for light mode.
     /// </summary>
     public string LightTheme
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = "Kobe-Light";
+        get => Get(ConfigId.LightTheme, "Kobe-Light");
+        set => Set(ConfigId.LightTheme, value);
+    }
 
     /// <summary>
     /// Gets, sets app language.
     /// </summary>
     public string Language
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = "English";
+        get => Get(ConfigId.Language, "English");
+        set => Set(ConfigId.Language, value);
+    }
 
     #endregion
 
@@ -720,15 +585,9 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonStringEnumConverter<CheckerboardMode>))]
     public CheckerboardMode CheckerboardMode
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = CheckerboardMode.None;
+        get => Get(ConfigId.CheckerboardMode, CheckerboardMode.None);
+        set => Set(ConfigId.CheckerboardMode, value);
+    }
 
     /// <summary>
     /// Gets, sets image loading order
@@ -736,15 +595,9 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonStringEnumConverter<ImageOrderBy>))]
     public ImageOrderBy ImageLoadingOrder
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = ImageOrderBy.Name;
+        get => Get(ConfigId.ImageLoadingOrder, ImageOrderBy.Name);
+        set => Set(ConfigId.ImageLoadingOrder, value);
+    }
 
     /// <summary>
     /// Gets, sets image loading order type
@@ -752,15 +605,10 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonStringEnumConverter<ImageOrderType>))]
     public ImageOrderType ImageLoadingOrderType
     {
-        get; set
-        {
-            if (field == value) return;
+        get => Get(ConfigId.ImageLoadingOrderType, ImageOrderType.Asc);
+        set => Set(ConfigId.ImageLoadingOrderType, value);
+    }
 
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = ImageOrderType.Asc;
 
     /// <summary>
     /// Gets, sets zoom mode value
@@ -768,15 +616,10 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonStringEnumConverter<ZoomMode>))]
     public ZoomMode ZoomMode
     {
-        get; set
-        {
-            if (field == value) return;
+        get => Get(ConfigId.ZoomMode, ZoomMode.AutoZoom);
+        set => Set(ConfigId.ZoomMode, value);
+    }
 
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = ZoomMode.AutoZoom;
 
     /// <summary>
     /// Gets, sets the interpolation mode to render the viewing image
@@ -785,15 +628,9 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleDown
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = ImageInterpolation.MultiSampleLinear;
+        get => Get(ConfigId.ImageInterpolationScaleDown, ImageInterpolation.MultiSampleLinear);
+        set => Set(ConfigId.ImageInterpolationScaleDown, value);
+    }
 
     /// <summary>
     /// Gets, sets the interpolation mode to render the viewing image
@@ -802,15 +639,9 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleUp
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = ImageInterpolation.NearestNeighbor;
+        get => Get(ConfigId.ImageInterpolationScaleUp, ImageInterpolation.NearestNeighbor);
+        set => Set(ConfigId.ImageInterpolationScaleUp, value);
+    }
 
     ///// <summary>
     ///// Gets, sets value indicates what happens after clicking Edit menu
@@ -823,15 +654,9 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonStringEnumConverter<BackdropStyle>))]
     public BackdropStyle WindowBackdrop
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = BackdropStyle.Mica;
+        get => Get(ConfigId.WindowBackdrop, BackdropStyle.Mica);
+        set => Set(ConfigId.WindowBackdrop, value);
+    }
 
     #endregion // Enum items
 
@@ -844,15 +669,9 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonArrayToRectConverter))]
     public Rect MainWindowBounds
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = new(200, 200, 1500, 1000);
+        get => Get(ConfigId.MainWindowBounds, new Rect(200, 200, 1500, 1000));
+        set => Set(ConfigId.MainWindowBounds, value);
+    }
 
 
     /// <summary>
@@ -861,15 +680,9 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonArrayToZoomFactorConverter))]
     public double[] ZoomLevels
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = [];
+        get => Get(ConfigId.ZoomLevels, Array.Empty<double>());
+        set => Set(ConfigId.ZoomLevels, value);
+    }
 
 
     ///// <summary>
@@ -884,15 +697,9 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonHashSetToStringConverter))]
     public HashSet<string> SingleFrameFormats
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = [".avif", ".heic", ".heif", ".psd", ".jxl"];
+        get => Get(ConfigId.SingleFrameFormats, new HashSet<string> { ".avif", ".heic", ".heif", ".psd", ".jxl" });
+        set => Set(ConfigId.SingleFrameFormats, value);
+    }
 
 
     /// <summary>
@@ -901,15 +708,9 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonHashSetToStringConverter))]
     public HashSet<string> WICReadFormats
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = [".gif", ".gifv", ".webp", ".fax", ".apng", ".jxr", ".hdp", ".wdp"];
+        get => Get(ConfigId.WICReadFormats, new HashSet<string> { ".gif", ".gifv", ".webp", ".fax", ".apng", ".jxr", ".hdp", ".wdp" });
+        set => Set(ConfigId.WICReadFormats, value);
+    }
 
 
     /// <summary>
@@ -918,28 +719,30 @@ public partial class Config : IgReactive
     [JsonConverter(typeof(JsonHashSetToStringConverter))]
     public HashSet<string> FileFormats
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = new HashSet<string>(DefaultFileFormats);
+        get => Get(ConfigId.FileFormats, new HashSet<string>(DefaultFileFormats));
+        set => Set(ConfigId.FileFormats, value);
+    }
 
 
     /// <summary>
     /// Gets, sets the tags for displaying image info.
     /// </summary>
     [JsonConverter(typeof(JsonObservableCollectionToStringConverter))]
-    public ObservableCollection<string> ImageInfoTags { get; set; } = new(DefaultImageInfoTags);
+    public ObservableCollection<string> ImageInfoTags
+    {
+        get => Get(ConfigId.ImageInfoTags, new ObservableCollection<string>(DefaultImageInfoTags));
+        set => Set(ConfigId.ImageInfoTags, value);
+    }
 
 
     /// <summary>
     /// Gets, sets hotkeys list of menu
     /// </summary>
-    public Dictionary<LangId, Hotkey[]> MenuHotkeys { get; set; } = [];
+    public Dictionary<LangId, Hotkey[]> MenuHotkeys
+    {
+        get => Get(ConfigId.MenuHotkeys, new Dictionary<LangId, Hotkey[]>());
+        set => Set(ConfigId.MenuHotkeys, value);
+    }
 
 
     ///// <summary>
@@ -983,20 +786,38 @@ public partial class Config : IgReactive
     /// </summary>
     public ObservableCollection<ToolbarItemModel> ToolbarButtons
     {
-        get; set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-            _ = OnPropertyChanged(value, oldValue);
-        }
-    } = new(DefaultToolbarItems);
+        get => Get(ConfigId.ToolbarButtons, new ObservableCollection<ToolbarItemModel>(DefaultToolbarItems));
+        set => Set(ConfigId.ToolbarButtons, value);
+    }
 
     #endregion // Array items
 
 
     #endregion // Setting items
+
+
+
+    /// <summary>
+    /// Sets setting value.
+    /// </summary>
+    public void Set(ConfigId configName, object value)
+    {
+        var oldValue = Get<object?>(configName, null);
+        if (value == oldValue) return;
+
+        _values[configName] = value;
+        _ = OnPropertyChanged(value, oldValue, configName.ToString());
+    }
+
+
+    /// <summary>
+    /// Gets setting value.
+    /// </summary>
+    public T Get<T>(ConfigId configName, T defaultValue)
+    {
+        var value = _values.GetValueOrDefault(configName) ?? defaultValue;
+        return (T)value!;
+    }
 
 
 }
