@@ -112,14 +112,15 @@ public sealed partial class MainWindow_Content : IgControl
 
 
 
+
     #region Override methods
 
     protected override void OnIgLoaded(FrameworkElement fe)
     {
         base.OnIgLoaded(fe);
 
-        UpdateStyle_();
-        UpdateZoomModeMenuGroup_();
+        UpdateStyle__();
+        UpdateZoomModeMenuGroup__();
 
 
         AP.Config.PropertyChanged += Config_PropertyChanged;
@@ -176,7 +177,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgThemeChanged(e);
 
-        UpdateStyle_();
+        UpdateStyle__();
     }
 
 
@@ -190,11 +191,18 @@ public sealed partial class MainWindow_Content : IgControl
 
     private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (nameof(AP.Config.EnableFullScreen).Equals(e.PropertyName)
+            || nameof(AP.Config.EnableFrameless).Equals(e.PropertyName))
+        {
+            UpdateStyle__();
+        }
+
+
         // Zoom mode is changed
-        if (nameof(Config.ZoomMode).Equals(e.PropertyName, StringComparison.Ordinal))
+        if (nameof(Config.ZoomMode).Equals(e.PropertyName))
         {
             // update menu items state
-            UpdateZoomModeMenuGroup_();
+            UpdateZoomModeMenuGroup__();
         }
     }
 
@@ -208,13 +216,13 @@ public sealed partial class MainWindow_Content : IgControl
     private void Owner_IgWindowStateChanged(IgWindow sender, WindowStateChangedEventArgs e)
     {
         if (e.State == OverlappedPresenterState.Minimized) return;
-        UpdateStyle_();
+        UpdateStyle__();
     }
 
 
     private void PART_MainMenu_Opening(object? sender, object e)
     {
-        UpdateMenuTextIfNeeded_();
+        UpdateMenuTextIfNeeded__();
     }
 
 
@@ -242,7 +250,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         if (nameof(ToolbarMain.IsContentVisible).Equals(e.PropertyName))
         {
-            UpdateStyle_();
+            UpdateStyle__();
         }
     }
 
@@ -257,7 +265,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         if (nameof(Gallery.IsContentVisible).Equals(e.PropertyName))
         {
-            UpdateStyle_();
+            UpdateStyle__();
         }
     }
 
@@ -318,7 +326,7 @@ public sealed partial class MainWindow_Content : IgControl
     /// <summary>
     /// Updates style according to current theme.
     /// </summary>
-    private void UpdateStyle_()
+    private void UpdateStyle__()
     {
         // 1. style for in-app message
         PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor
@@ -331,7 +339,7 @@ public sealed partial class MainWindow_Content : IgControl
         if (frameSize <= 0)
         {
             PART_ContentRoot.Margin = new(0);
-            PART_ContentRoot.BorderThickness = new(0, 1, 0, 0);
+            PART_ContentRoot.BorderThickness = new(0);
             PART_Viewer.CornerRadius = new(0);
             return;
         }
@@ -339,17 +347,18 @@ public sealed partial class MainWindow_Content : IgControl
 
         // 3. window style: with custom frame
         var isMaximized = _owner.WindowState == OverlappedPresenterState.Maximized;
+        var isBorderless = AP.Config.EnableFullScreen || AP.Config.EnableFrameless;
         PART_ContentRoot.BorderBrush = AP.Config.Theme.InvertedBaseColor
-            .WithAlpha(15)
+            .WithAlpha(20)
             .ToBrush();
 
         // 3.1 maximize state
-        if (isMaximized)
+        if (isMaximized || isBorderless)
         {
             PART_ContentRoot.Margin = new(0);
             PART_Viewer.CornerRadius = new(0);
 
-            if (PART_ToolbarMain.IsContentVisible)
+            if (PART_ToolbarMain.IsContentVisible && !isBorderless)
             {
                 PART_ContentRoot.BorderThickness = new(0, 1, 0, 0);
                 PART_ContentRoot.CornerRadius = new(0)
@@ -396,7 +405,7 @@ public sealed partial class MainWindow_Content : IgControl
     /// <summary>
     /// Updates the check state for zoom mode menu group.
     /// </summary>
-    private void UpdateZoomModeMenuGroup_()
+    private void UpdateZoomModeMenuGroup__()
     {
         MnuAutoZoom.IsChecked = AP.Config.ZoomMode == Common.ZoomMode.AutoZoom;
         MnuLockZoom.IsChecked = AP.Config.ZoomMode == Common.ZoomMode.LockZoom;
@@ -410,7 +419,7 @@ public sealed partial class MainWindow_Content : IgControl
     /// <summary>
     /// Updates the text and hotkey text of main menu if needed.
     /// </summary>
-    private void UpdateMenuTextIfNeeded_()
+    private void UpdateMenuTextIfNeeded__()
     {
         if (!_shouldUpdateMenuText) return;
 
