@@ -41,6 +41,7 @@ public partial class MainWindow
         { API.IG_Save,                  IgCommands.Create(IG_SaveAsync) },
         { API.IG_SaveAs,                IgCommands.Create(IG_SaveAsAsync) },
         { API.IG_OpenWith,              IgCommands.Create(IG_OpenWithAsync) },
+        { API.IG_Share,                 IgCommands.Create(IG_ShareAsync) },
         { API.IG_OpenLocation,          IgCommands.Create(IG_OpenLocation) },
         { API.IG_Rename,                IgCommands.Create(IG_RenameAsync) },
         { API.IG_Delete,                IgCommands.Create(IG_DeleteAsync) },

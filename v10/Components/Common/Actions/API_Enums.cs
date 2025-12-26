@@ -34,6 +34,7 @@ public enum API
     IG_Save,
     IG_SaveAs,
     IG_OpenWith,
+    IG_Share,
     IG_OpenLocation,
     IG_Rename,
     IG_Delete,

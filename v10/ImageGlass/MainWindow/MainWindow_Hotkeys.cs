@@ -40,6 +40,7 @@ public partial class MainWindow
         new(LangId.FrmMain_MnuSave,                 API.IG_Save,                MKeys.Ctrl, VKey.S),
         new(LangId.FrmMain_MnuSaveAs,               API.IG_SaveAs,              MKeys.Ctrl | MKeys.Shift, VKey.S),
         new(LangId.FrmMain_MnuOpenWith,             API.IG_OpenWith,            VKey.D),
+        new(LangId.FrmMain_MnuShare,                API.IG_Share,               VKey.S),
         new(LangId.FrmMain_MnuOpenLocation,         API.IG_OpenLocation,        VKey.L),
         new(LangId.FrmMain_MnuRename,               API.IG_Rename,              VKey.F2),
         new(LangId.FrmMain_MnuMoveToRecycleBin,     API.IG_Delete, "true",      [new(VKey.Delete)]),

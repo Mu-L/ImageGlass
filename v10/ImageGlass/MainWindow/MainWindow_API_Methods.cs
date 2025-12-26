@@ -460,6 +460,46 @@ public partial class MainWindow
 
 
     /// <summary>
+    /// Shows Share dialog.
+    /// </summary>
+    public async Task IG_ShareAsync()
+    {
+        var filePath = AP.Photos.CurrentFilePath;
+
+        // print clipboard image
+        if (AP.ClipboardImage is not null)
+        {
+            _ = _contentEl.ShowMessageAsync(AP.Config.Lang[LangId._CreatingFile], delayMs: 500);
+
+            // save image to temp file
+            filePath = await AP.SavePhotoAsTempFileAsync();
+        }
+
+        await _contentEl.ShowMessageAsync(null);
+
+        if (!File.Exists(filePath))
+        {
+            _ = ModalWindow.ShowErrorAsync(this,
+                title: AP.Config.Lang[LangId.FrmMain_MnuShare],
+                description: AP.Config.Lang[LangId._CreatingFileError]);
+        }
+        else
+        {
+            try
+            {
+                WinShareApi.ShowShare(Handle, [filePath]);
+            }
+            catch (Exception ex)
+            {
+                _ = ModalWindow.ShowErrorAsync(this,
+                    title: AP.Config.Lang[LangId.FrmMain_MnuShare],
+                    description: ZString.Concat(AP.Config.Lang[LangId.FrmMain_MnuShare_Error], "\r\n\r\n", ex.Message));
+            }
+        }
+    }
+
+
+    /// <summary>
     /// Opens photo file location.
     /// </summary>
     public static void IG_OpenLocation()
