@@ -44,12 +44,18 @@ public partial class App : Application
 
 
     /// <summary>
+    /// Gets the main window instance.
+    /// </summary>
+    public MainWindow? WinMain => _winMain;
+
+
+    /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>
     public App()
     {
-        this.InitializeComponent();
+        InitializeComponent();
 
         // use independent culture for formatting or parsing a string
         CultureInfo.DefaultThreadCurrentCulture =
@@ -69,6 +75,7 @@ public partial class App : Application
 
         SystemUI.ColorValuesChanged += UiSettings_ColorValuesChanged;
         AP.ThemeChanged += AP_ThemeChanged;
+
 
         // load initial settings
         LoadInitAppSettings();
@@ -200,11 +207,6 @@ public partial class App : Application
     /// </summary>
     private void LoadInitAppSettings()
     {
-        AP.Args = Environment.GetCommandLineArgs();
-
-        // load app configs
-        AP.Config = Config.Load(Config.CONFIG_USER);
-
         // get accent, color mode & load theme for the first time
         var info = GetSystemColorInfo(SystemUI);
         BHelper.RunSync(() => AP.Config.LoadCurrentThemeAsync(info.IsDarkMode, info.AccentColor, true, true, false));

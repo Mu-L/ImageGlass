@@ -50,7 +50,7 @@ public enum ConfigId
     // ShowFrameNavTool,
     ShowAppIcon,
     // EnableLoopBackNavigation,
-    // EnableMultiInstances,
+    EnableMultiInstances,
     EnableWindowTopMost,
     ShowDeleteConfirmation,
     ShowSaveOverrideConfirmation,

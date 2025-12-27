@@ -184,10 +184,14 @@ public partial class Config : IgReactive
     ///// </summary>
     //public bool EnableLoopBackNavigation { get; set; } = true;
 
-    ///// <summary>
-    ///// Gets, sets value indicating that multi instances is allowed or not
-    ///// </summary>
-    //public bool EnableMultiInstances { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value indicating that multi instances is allowed or not
+    /// </summary>
+    public bool EnableMultiInstances
+    {
+        get => Get(ConfigId.EnableMultiInstances, true);
+        set => Set(ConfigId.EnableMultiInstances, value);
+    }
 
     /// <summary>
     /// Gets, sets value indicating that FrmMain is always on top or not.
