@@ -9,6 +9,7 @@
         <Platforms>x64;ARM64</Platforms>
         <ApplicationIcon>icon256.ico</ApplicationIcon>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <CetCompat>false</CetCompat>
 
         <AssemblyTitle>ImageGlass</AssemblyTitle>
         <Description>A lightweight, versatile image viewer</Description>
