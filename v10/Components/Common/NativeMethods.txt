@@ -48,3 +48,7 @@ SHELLEXECUTEINFOW
 ShellExecuteEx
 
 SystemParametersInfo
+CreateEvent
+SetEvent
+CoWaitForMultipleObjects
+SetForegroundWindow
