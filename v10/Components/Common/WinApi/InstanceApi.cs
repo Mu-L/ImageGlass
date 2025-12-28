@@ -54,4 +54,33 @@ public static class InstanceApi
         _ = PInvoke.SetForegroundWindow(new HWND(process.MainWindowHandle));
     }
 
+
+    /// <summary>
+    /// Parses a Unicode command line string and returns an array of pointers to the command line arguments.
+    /// <para>
+    ///   Example:
+    ///   <c>ImageGlass.exe "C:\My Photos\pic1.jpg"</c> => <c>["ImageGlass.exe", "C:\My Photos\pic1.jpg"]</c>
+    /// </para>
+    /// </summary>
+    public static unsafe string[] ParseCommandLineArguments(string argStr)
+    {
+        var argsPtr = PInvoke.CommandLineToArgv(argStr, out var argsCount);
+        if (argsPtr is null) return [];
+
+        try
+        {
+            var result = new string[argsCount];
+            for (int i = 0; i < argsCount; i++)
+            {
+                result[i] = argsPtr[i].ToString();
+            }
+
+            return result;
+        }
+        finally
+        {
+            PInvoke.LocalFree(new HLOCAL(argsPtr));
+        }
+    }
+
 }

@@ -52,3 +52,5 @@ CreateEvent
 SetEvent
 CoWaitForMultipleObjects
 SetForegroundWindow
+CommandLineToArgvW
+LocalFree

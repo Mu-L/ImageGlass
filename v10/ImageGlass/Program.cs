@@ -109,7 +109,7 @@ public class Program
 
         // get instance arguments
         var e = args.Data.As<Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs>();
-        var arguments = e.Arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var arguments = InstanceApi.ParseCommandLineArguments(e.Arguments);
 
         AP.Args = arguments;
         AP.UpdateInitImagePath();
