@@ -122,6 +122,12 @@ public partial class MainWindow : IgWindow
         await SaveConfigOnClosingAsync();
 
         base.OnIgWindowClosed(e);
+
+        // ensure app completely exit
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            App.Current.Exit();
+        });
     }
 
 
