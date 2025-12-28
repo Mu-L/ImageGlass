@@ -67,6 +67,12 @@ public partial class PhotoManager : PhotoManagerImpl<FileSearcher, FileShellSear
         // 2. get distinct dir paths for searching
         var inputPaths = BHelper.GetDistinctDirsFromPaths(paths);
 
+        // don't use foreground shell if no file paths
+        if (inputPaths.FilePaths.Count == 0)
+        {
+            searchOptions.UseExplorerSortOrder = false;
+        }
+
 
         // 3. reset the list, MUST be after getting distinct dirs
         Clear();
