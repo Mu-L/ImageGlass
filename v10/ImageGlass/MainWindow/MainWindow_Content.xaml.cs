@@ -60,6 +60,7 @@ public sealed partial class MainWindow_Content : IgControl
     public IgToolbarButton MainMenuButton => PART_ToolbarMain.MainMenuButton;
 
 
+    #region Properties
     private string? MessageHeading
     {
         get; set
@@ -100,7 +101,7 @@ public sealed partial class MainWindow_Content : IgControl
         || !string.IsNullOrWhiteSpace(MessageDescription)
         || !string.IsNullOrWhiteSpace(MessageDetails);
 
-
+    #endregion // Properties
 
 
     public MainWindow_Content(MainWindow mainWindow)
@@ -119,7 +120,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgLoaded(fe);
 
-        UpdateStyle__();
+        _ = UpdateStyleAsync__();
         UpdateZoomModeMenuGroup__();
 
 
@@ -177,7 +178,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         base.OnIgThemeChanged(e);
 
-        UpdateStyle__();
+        _ = UpdateStyleAsync__();
     }
 
 
@@ -194,7 +195,7 @@ public sealed partial class MainWindow_Content : IgControl
         if (nameof(AP.Config.EnableFullScreen).Equals(e.PropertyName)
             || nameof(AP.Config.EnableFrameless).Equals(e.PropertyName))
         {
-            UpdateStyle__();
+            _ = UpdateStyleAsync__();
         }
 
 
@@ -216,7 +217,7 @@ public sealed partial class MainWindow_Content : IgControl
     private void Owner_IgWindowStateChanged(IgWindow sender, WindowStateChangedEventArgs e)
     {
         if (e.State == OverlappedPresenterState.Minimized) return;
-        UpdateStyle__();
+        _ = UpdateStyleAsync__();
     }
 
 
@@ -250,7 +251,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         if (nameof(ToolbarMain.IsContentVisible).Equals(e.PropertyName))
         {
-            UpdateStyle__();
+            _ = UpdateStyleAsync__();
         }
     }
 
@@ -265,7 +266,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         if (nameof(Gallery.IsContentVisible).Equals(e.PropertyName))
         {
-            UpdateStyle__();
+            _ = UpdateStyleAsync__();
         }
     }
 
@@ -315,7 +316,7 @@ public sealed partial class MainWindow_Content : IgControl
 
     private void PART_Viewer_PhotoLoading(VirtualViewerControl sender, PhotoLoadingEventArgs e)
     {
-        HandlePhotoLoading_(sender, e);
+        HandlePhotoLoading__(sender, e);
     }
 
 
@@ -326,7 +327,7 @@ public sealed partial class MainWindow_Content : IgControl
     /// <summary>
     /// Updates style according to current theme.
     /// </summary>
-    private void UpdateStyle__()
+    private async Task UpdateStyleAsync__()
     {
         // 1. style for in-app message
         PART_ViewerMessage.Background = AP.Config.Theme.ComputedColors.BgColor
@@ -377,6 +378,12 @@ public sealed partial class MainWindow_Content : IgControl
         else
         {
             var titleBarHeight = _owner.TitleBar.DesiredSize.Height;
+            if (titleBarHeight == 0)
+            {
+                // wait for titlebar updated
+                await Task.Delay(50);
+                titleBarHeight = _owner.TitleBar.DesiredSize.Height;
+            }
             var frameTop = Math.Max(0, frameSize - titleBarHeight);
 
             PART_ContentRoot.Margin = new(frameSize, frameTop, frameSize, frameSize);
@@ -423,7 +430,7 @@ public sealed partial class MainWindow_Content : IgControl
     {
         if (!_shouldUpdateMenuText) return;
 
-        LoadMenuText_(MainMenu.Items);
+        LoadMenuText__(MainMenu.Items);
         _shouldUpdateMenuText = false;
     }
 
@@ -431,7 +438,7 @@ public sealed partial class MainWindow_Content : IgControl
     /// <summary>
     /// Loads menu text.
     /// </summary>.
-    private static void LoadMenuText_(IList<MenuFlyoutItemBase> items)
+    private static void LoadMenuText__(IList<MenuFlyoutItemBase> items)
     {
         foreach (var item in items)
         {
@@ -441,7 +448,7 @@ public sealed partial class MainWindow_Content : IgControl
                 submenu.Text = AP.Config.Lang[$"FrmMain_{submenu.Name}"];
 
                 // jump into submenu items
-                LoadMenuText_(submenu.Items);
+                LoadMenuText__(submenu.Items);
             }
 
 
@@ -461,7 +468,7 @@ public sealed partial class MainWindow_Content : IgControl
     /// <summary>
     /// Handles photo loading event.
     /// </summary>
-    private void HandlePhotoLoading_(VirtualViewerControl sender, PhotoLoadingEventArgs e)
+    private void HandlePhotoLoading__(VirtualViewerControl sender, PhotoLoadingEventArgs e)
     {
         // Note: events are not fired in order
 
@@ -499,9 +506,9 @@ public sealed partial class MainWindow_Content : IgControl
     /// <summary>
     /// Sets the in-app message.
     /// </summary>
-    private void SetMessage_(string? message, string? heading = null, string? details = null)
+    private void SetMessage__(string? message, string? heading = null, string? details = null)
     {
-        DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () =>
+        DispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
         {
             MessageHeading = heading;
             MessageDescription = message;
@@ -536,7 +543,7 @@ public sealed partial class MainWindow_Content : IgControl
                 _cancelMessage = null; // do not allocate new CTS
             }
 
-            SetMessage_(null);
+            SetMessage__(null);
             return;
         }
 
@@ -562,7 +569,7 @@ public sealed partial class MainWindow_Content : IgControl
             {
                 await Task.Delay(delayMs, token);
             }
-            SetMessage_(message, heading, details);
+            SetMessage__(message, heading, details);
 
 
             // clear text after duration
@@ -573,7 +580,7 @@ public sealed partial class MainWindow_Content : IgControl
                 if (durationMs > 0)
                 {
                     await Task.Delay(durationMs.Value, token);
-                    SetMessage_(null);
+                    SetMessage__(null);
                 }
             }
         }

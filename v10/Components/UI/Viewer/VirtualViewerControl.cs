@@ -556,7 +556,7 @@ public partial class VirtualViewerControl : SwapChainCanvas
     /// </summary>
     public void Refresh(bool resetZoom = true, bool isManualZoom = false, bool zoomedByResizing = false)
     {
-        DispatcherQueue.TryEnqueue(() =>
+        DispatcherQueue?.TryEnqueue(() =>
         {
             if (resetZoom)
             {

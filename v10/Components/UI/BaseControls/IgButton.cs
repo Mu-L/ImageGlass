@@ -170,7 +170,7 @@ public partial class IgButton : Button, INotifyPropertyChanged
             {
                 _isChecked = value;
                 OnPropertyChanged();
-                DispatcherQueue.TryEnqueue(() => UpdateStyle());
+                DispatcherQueue?.TryEnqueue(() => UpdateStyle());
             }
         }
     }

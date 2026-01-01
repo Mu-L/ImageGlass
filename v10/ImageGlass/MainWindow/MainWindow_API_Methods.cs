@@ -897,7 +897,7 @@ public partial class MainWindow
 
         BHelper.Debounce(durationMs, () =>
         {
-            DispatcherQueue.TryEnqueue(() =>
+            DispatcherQueue?.TryEnqueue(() =>
             {
                 Viewer.StopDrawingAnimation(source);
                 callbackFn?.Invoke();

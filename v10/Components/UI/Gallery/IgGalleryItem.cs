@@ -51,7 +51,7 @@ public partial class IgGalleryItem : IgButton
     {
         if (e.PropertyName == nameof(Photo.IsCurrent))
         {
-            DispatcherQueue.TryEnqueue(() => UpdateStyle());
+            DispatcherQueue?.TryEnqueue(() => UpdateStyle());
         }
     }
 

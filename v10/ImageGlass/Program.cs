@@ -121,7 +121,7 @@ public class Program
 
 
         // activate main window
-        app.WinMain?.DispatcherQueue.TryEnqueue(() =>
+        app.WinMain?.DispatcherQueue?.TryEnqueue(() =>
         {
             app.WinMain.Activate();
         });

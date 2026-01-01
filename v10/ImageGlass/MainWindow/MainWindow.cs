@@ -124,7 +124,7 @@ public partial class MainWindow : IgWindow
         base.OnIgWindowClosed(e);
 
         // ensure app completely exit
-        DispatcherQueue.TryEnqueue(() =>
+        DispatcherQueue?.TryEnqueue(() =>
         {
             App.Current.Exit();
         });
@@ -248,7 +248,7 @@ public partial class MainWindow : IgWindow
         // Gallery: scroll to the selected item
         if (isEmptyList)
         {
-            DispatcherQueue.TryEnqueue(async () =>
+            DispatcherQueue?.TryEnqueue(async () =>
             {
                 // set gallery items source
                 await Gallery.SetSourceAsync(AP.Photos.Items);
@@ -353,7 +353,7 @@ public partial class MainWindow : IgWindow
             : null;
 
 
-        DispatcherQueue.TryEnqueue(async () =>
+        DispatcherQueue?.TryEnqueue(async () =>
         {
             // clear gallery
             await Gallery.ClearSourceAsync();
@@ -405,7 +405,7 @@ public partial class MainWindow : IgWindow
 
         if (scrollToThumbnail)
         {
-            DispatcherQueue.TryEnqueue(() =>
+            DispatcherQueue?.TryEnqueue(() =>
             {
                 // set photo to the viewer
                 Gallery.ScrollToItem(AP.Photos.CurrentIndex);
