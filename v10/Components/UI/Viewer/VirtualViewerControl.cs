@@ -21,7 +21,6 @@ using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using Microsoft.UI;
 using Microsoft.UI.Input;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -280,10 +279,10 @@ public partial class VirtualViewerControl : SwapChainCanvas
     }
 
 
-    protected override void OnResized(SizeChangedEventArgs e)
+    protected override void OnResized(Size newSize)
     {
-        base.OnResized(e);
-        if (e.NewSize.IsEmpty()) return;
+        base.OnResized(newSize);
+        if (newSize.IsEmpty()) return;
 
         // update drawing regions
         CalculateDrawingRegion();
@@ -449,18 +448,18 @@ public partial class VirtualViewerControl : SwapChainCanvas
             "Consolas", FontSize_Dpi, DrawingArea, Colors.Magenta);
 
 
-        //// draw SwapChainSize
-        //e.DrawRectangle(e.Sender.Bounds, 0, Colors.Yellow, Colors.Transparent, 3f);
+        // draw SwapChainSize
+        e.DrawRectangle(e.Sender.Bounds_Dpi, 0, Colors.Red, Colors.Transparent, 5f);
 
-        //// draw DrawingArea
-        //e.DrawRectangle(DrawingArea, 0, Colors.GreenYellow, Colors.Transparent, 3f);
+        // draw DrawingArea
+        e.DrawRectangle(DrawingArea, 0, Colors.HotPink, Colors.Transparent, 2f);
 
-        //// draw zoomed point
-        //var zoomPoint = DpiScale(_zooming.ZoomedPoint);
-        //e.DrawEllipse(zoomPoint.X, zoomPoint.Y, 8f, Colors.White, Colors.Red, 3f);
+        // draw zoomed point
+        var zoomPoint = DpiScale(_zooming.ZoomedPoint);
+        e.DrawEllipse(zoomPoint.X, zoomPoint.Y, 8f, Colors.White, Colors.Red, 3f);
 
-        //// draw dest rect
-        //e.DrawRectangle(_destRect, 0, Colors.Cyan);
+        // draw dest rect
+        e.DrawRectangle(_destRect, 0, Colors.Cyan);
 
     }
 

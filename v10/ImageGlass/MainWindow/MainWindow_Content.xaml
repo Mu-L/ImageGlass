@@ -434,87 +434,93 @@
 
         </ui:ToolbarControl>
 
-
-        <!--  Viewer  -->
-        <ui:VirtualViewerControl
-            x:Name="PART_Viewer"
+        <Grid
+            x:Name="PART_ViewerWrapper"
             Grid.Row="1"
-            AllowDrop="True"
-            BackgroundColor="{x:Bind cm:AP.Config.Theme.ComputedColors.BgColor}"
-            CheckerboardMode="{x:Bind cm:AP.Config.CheckerboardMode}"
-            EnableDebug="{x:Bind cm:AP.Config.EnableDebug}"
-            IsTabStop="False"
-            PanSpeed="{x:Bind cm:AP.Config.PanSpeed}"
-            ZoomLevels="{x:Bind cm:AP.Config.ZoomLevels}"
-            ZoomMode="{x:Bind cm:AP.Config.ZoomMode}"
-            ZoomSpeed="{x:Bind cm:AP.Config.ZoomSpeed}">
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            BorderBrush="BlueViolet"
+            BorderThickness="2">
 
-            <!--  Viewer In-App Message  -->
-            <Grid
-                x:Name="PART_ViewerMessage"
-                MaxWidth="1200"
-                Margin="20"
-                Padding="10"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                CornerRadius="8"
-                Visibility="{x:Bind IsMessageVisible, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+            <!--  Viewer  -->
+            <ui:VirtualViewerControl
+                x:Name="PART_Viewer"
+                AllowDrop="True"
+                CheckerboardMode="{x:Bind cm:AP.Config.CheckerboardMode}"
+                EnableDebug="{x:Bind cm:AP.Config.EnableDebug}"
+                IsTabStop="False"
+                PanSpeed="{x:Bind cm:AP.Config.PanSpeed}"
+                ZoomLevels="{x:Bind cm:AP.Config.ZoomLevels}"
+                ZoomMode="{x:Bind cm:AP.Config.ZoomMode}"
+                ZoomSpeed="{x:Bind cm:AP.Config.ZoomSpeed}">
 
-                <StackPanel
-                    Grid.Row="0"
-                    VerticalAlignment="Top"
-                    Orientation="Vertical"
-                    Spacing="12">
-                    <!--  Heading  -->
-                    <Border Visibility="{x:Bind MessageHeading, Converter={StaticResource StringToVisibilityConverter}}">
+                <!--  Viewer In-App Message  -->
+                <Grid
+                    x:Name="PART_ViewerMessage"
+                    MaxWidth="1200"
+                    Margin="20"
+                    Padding="10"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    CornerRadius="8"
+                    Visibility="{x:Bind IsMessageVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel
+                        Grid.Row="0"
+                        VerticalAlignment="Top"
+                        Orientation="Vertical"
+                        Spacing="12">
+                        <!--  Heading  -->
+                        <Border Visibility="{x:Bind MessageHeading, Converter={StaticResource StringToVisibilityConverter}}">
+                            <TextBlock
+                                FontSize="18"
+                                Foreground="{ThemeResource AccentTextFillColorTertiaryBrush}"
+                                HorizontalTextAlignment="Center"
+                                IsColorFontEnabled="True"
+                                Text="{x:Bind MessageHeading}"
+                                TextWrapping="WrapWholeWords" />
+                        </Border>
+
+                        <!--  Description  -->
+                        <Border Visibility="{x:Bind MessageDescription, Converter={StaticResource StringToVisibilityConverter}}">
+                            <TextBlock
+                                FontSize="12"
+                                Foreground="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
+                                HorizontalTextAlignment="Center"
+                                IsColorFontEnabled="True"
+                                Text="{x:Bind MessageDescription}"
+                                TextWrapping="WrapWholeWords" />
+                        </Border>
+                    </StackPanel>
+
+                    <!--  Details  -->
+                    <ScrollViewer
+                        Grid.Row="1"
+                        Margin="0,12,0,0"
+                        Padding="5"
+                        BorderBrush="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        VerticalScrollBarVisibility="Auto"
+                        VerticalScrollMode="Auto"
+                        Visibility="{x:Bind MessageDetails, Converter={StaticResource StringToVisibilityConverter}}">
                         <TextBlock
-                            FontSize="18"
-                            Foreground="{ThemeResource AccentTextFillColorTertiaryBrush}"
-                            HorizontalTextAlignment="Center"
-                            IsColorFontEnabled="True"
-                            Text="{x:Bind MessageHeading}"
-                            TextWrapping="WrapWholeWords" />
-                    </Border>
-
-                    <!--  Description  -->
-                    <Border Visibility="{x:Bind MessageDescription, Converter={StaticResource StringToVisibilityConverter}}">
-                        <TextBlock
+                            FontFamily="Cascadia Mono, Consolas"
                             FontSize="12"
+                            FontWeight="SemiLight"
                             Foreground="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
-                            HorizontalTextAlignment="Center"
                             IsColorFontEnabled="True"
-                            Text="{x:Bind MessageDescription}"
-                            TextWrapping="WrapWholeWords" />
-                    </Border>
-                </StackPanel>
+                            Text="{x:Bind MessageDetails}"
+                            TextWrapping="Wrap" />
+                    </ScrollViewer>
+                </Grid>
 
-                <!--  Details  -->
-                <ScrollViewer
-                    Grid.Row="1"
-                    Margin="0,12,0,0"
-                    Padding="5"
-                    BorderBrush="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
-                    BorderThickness="1"
-                    CornerRadius="6"
-                    VerticalScrollBarVisibility="Auto"
-                    VerticalScrollMode="Auto"
-                    Visibility="{x:Bind MessageDetails, Converter={StaticResource StringToVisibilityConverter}}">
-                    <TextBlock
-                        FontFamily="Cascadia Mono, Consolas"
-                        FontSize="12"
-                        FontWeight="SemiLight"
-                        Foreground="{x:Bind cm:AP.Config.Theme.ComputedColors.TextColor, Converter={StaticResource ColorToBrushConverter}}"
-                        IsColorFontEnabled="True"
-                        Text="{x:Bind MessageDetails}"
-                        TextWrapping="Wrap" />
-                </ScrollViewer>
-            </Grid>
-
-        </ui:VirtualViewerControl>
+            </ui:VirtualViewerControl>
+        </Grid>
 
 
         <!--  Gallery  -->
