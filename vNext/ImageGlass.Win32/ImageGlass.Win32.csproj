@@ -25,6 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="NativeMethods.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Include="Avalonia.Diagnostics">
@@ -39,6 +43,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ImageGlass.Common\ImageGlass.Common.csproj" />
+    <Folder Include="WinAPI\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ImageGlass.Core\ImageGlass.Core.csproj" />
   </ItemGroup>
 </Project>

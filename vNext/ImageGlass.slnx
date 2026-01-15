@@ -6,10 +6,10 @@
   <Folder Name="/Solution Items/">
     <File Path="Directory.Packages.props" />
   </Folder>
-  <Project Path="ImageGlass.Win32/ImageGlass.Win32.csproj">
+  <Project Path="ImageGlass.Core/ImageGlass.Core.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
-  <Project Path="ImageGlass.Common/ImageGlass.Common.csproj">
+  <Project Path="ImageGlass.Win32/ImageGlass.Win32.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
 </Solution>
