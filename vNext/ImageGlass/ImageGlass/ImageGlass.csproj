@@ -5,11 +5,16 @@
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaXaml Remove="_Common\AppThemes\ThemeJsonConverters\**" />
+    <Compile Remove="_Common\AppThemes\ThemeJsonConverters\**" />
+    <EmbeddedResource Remove="_Common\AppThemes\ThemeJsonConverters\**" />
+    <None Remove="_Common\AppThemes\ThemeJsonConverters\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,5 +28,6 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    <PackageReference Include="Magick.NET-Q8-OpenMP-x64" Version="14.10.1" />
   </ItemGroup>
 </Project>

@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 
-namespace ImageGlass._Common.Extensions;
+namespace ImageGlass.Common.Extensions;
 
 
 public static class Rect_Exts

@@ -16,15 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+namespace ImageGlass.Common.Types;
 
-namespace ImageGlass.Common.OsApi;
 
-public static class SystemInfo
-{
+public delegate void TEventHandler<TSender, TResult>(TSender sender, TResult e);
 
-    /// <summary>
-    /// Gets the amount of the delta value of a single mouse wheel rotation increment.
-    /// </summary>
-    public static int MouseWheelScrollDelta => 120;
 
-}

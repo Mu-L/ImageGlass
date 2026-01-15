@@ -16,15 +16,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+namespace ImageGlass.Common.AppThemes;
 
-namespace ImageGlass.Common.OsApi;
 
-public static class SystemInfo
+/// <summary>
+/// Metadata for theme config file
+/// </summary>
+public record IgThemeMetadata
 {
-
     /// <summary>
-    /// Gets the amount of the delta value of a single mouse wheel rotation increment.
+    /// Config version of this theme to work with (required)
     /// </summary>
-    public static int MouseWheelScrollDelta => 120;
+    public double Version { get; set; } = 9;
 
+    public string Description { get; set; } = "ImageGlass Theme Configuration File";
+
+    public string Docs { get; set; } = "Visit https://github.com/ImageGlass/theme to learn about ImageGlass Theme";
 }

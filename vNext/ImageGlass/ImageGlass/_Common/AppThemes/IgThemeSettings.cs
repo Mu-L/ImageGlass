@@ -16,39 +16,42 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia;
-using Avalonia.Media;
-using ImageGlass.Common.Extensions;
-
-namespace ImageGlass._UI.Viewer.Checkerboard;
+namespace ImageGlass.Common.AppThemes;
 
 
 /// <summary>
-/// Holds information about a checkerboard.
+/// Theme other settings
 /// </summary>
-internal class CheckerboardInfo
+public record IgThemeSettings
 {
     /// <summary>
-    /// Represents the current mode of the checkerboard.
+    /// Default value is <c>true</c>.
     /// </summary>
-    public CheckerboardMode Mode { get; set; } = CheckerboardMode.None;
-
+    public bool IsDarkMode { get; set; } = true;
 
     /// <summary>
-    /// Represents the size of checkerboard.
+    /// Gets or sets the thickness of the window frame
     /// </summary>
-    public Size Size { get; set; } = new Size(10, 10);
-
+    public double FrameThickness { get; set; } = 0;
 
     /// <summary>
-    /// Represents the first color of the checkerboard.
+    /// Gets, sets the navigation left arrow
     /// </summary>
-    public Color Color1 { get; set; } = Colors.Black.WithAlpha(25);
-
+    public string NavButtonLeft { get; set; } = string.Empty;
 
     /// <summary>
-    /// Represents the second color of the checkerboard.
+    /// Gets, sets the navigation right arrow
     /// </summary>
-    public Color Color2 { get; set; } = Colors.White.WithAlpha(25);
+    public string NavButtonRight { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Sets, sets app logo
+    /// </summary>
+    public string AppLogo { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The preview image of the theme
+    /// </summary>
+    public string PreviewImage { get; set; } = string.Empty;
 }
+

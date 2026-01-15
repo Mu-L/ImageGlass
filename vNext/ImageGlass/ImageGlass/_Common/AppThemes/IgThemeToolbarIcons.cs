@@ -16,9 +16,54 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-namespace ImageGlass._Common.Types;
+namespace ImageGlass.Common.AppThemes;
 
 
-public delegate void TEventHandler<TSender, TResult>(TSender sender, TResult e);
+/// <summary>
+/// Theme icons
+/// </summary>
+public enum IgThemeIcon
+{
+    // settings icons
+    NavButtonLeft,
+    NavButtonRight,
+    AppLogo,
 
+    // toolbar icons
+    ActualSize,
+    AutoZoom,
+    Checkerboard,
+    ColorPicker,
+    Crop,
+    Delete,
+    Edit,
+    Exit,
+    Export,
+    FlipHorz,
+    FlipVert,
+    FullScreen,
+    Gallery,
+    LockZoom,
+    MainMenu,
+    OpenFile,
+    Pause,
+    Play,
+    Print,
+    Refresh,
+    RotateLeft,
+    RotateRight,
+    Save,
+    ScaleToFill,
+    ScaleToFit,
+    ScaleToHeight,
+    ScaleToWidth,
+    Slideshow,
+    ViewFirstImage,
+    ViewLastImage,
+    ViewNextImage,
+    ViewPreviousImage,
+    WindowFit,
+    ZoomIn,
+    ZoomOut,
+}
 

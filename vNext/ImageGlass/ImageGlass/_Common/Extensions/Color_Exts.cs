@@ -19,11 +19,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia.Media;
 using System;
 
-namespace ImageGlass._Common.Extensions;
+namespace ImageGlass.Common.Extensions;
 
 
 public static class Color_Exts
 {
+    extension(Color c)
+    {
+        public Color A(byte a) => Color.FromArgb(a, c.R, c.G, c.B);
+        public Color R(byte r) => Color.FromArgb(c.A, r, c.G, c.B);
+        public Color G(byte g) => Color.FromArgb(c.A, c.R, g, c.B);
+        public Color B(byte b) => Color.FromArgb(c.A, c.R, c.G, b);
+    }
+
+
 
     /// <summary>
     /// Checks if this color is empty (all values are <c>0</c>).

@@ -16,15 +16,26 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace ImageGlass.Common.OsApi;
+namespace ImageGlass.Common.Types.JsonTypeConverters;
 
-public static class SystemInfo
+
+/// <summary>
+/// Convert <see cref="DateTime"/> to <see cref="Const.DATETIME_FORMAT"/> format.
+/// </summary>
+public class JsonDateTimeConverter : JsonConverter<DateTime>
 {
+    public override void Write(Utf8JsonWriter writer, DateTime date, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(date.ToString(Const.DATETIME_FORMAT));
+    }
 
-    /// <summary>
-    /// Gets the amount of the delta value of a single mouse wheel rotation increment.
-    /// </summary>
-    public static int MouseWheelScrollDelta => 120;
-
+    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return DateTime.ParseExact(reader.GetString()!, Const.DATETIME_FORMAT, null);
+    }
 }
+

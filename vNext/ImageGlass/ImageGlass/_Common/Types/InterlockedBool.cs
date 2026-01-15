@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System.Threading;
 
-namespace ImageGlass._Common.Types;
+namespace ImageGlass.Common.Types;
 
 
 // Source:

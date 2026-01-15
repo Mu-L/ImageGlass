@@ -16,15 +16,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using System;
 
-namespace ImageGlass.Common.OsApi;
+namespace ImageGlass.Common.Actions;
 
-public static class SystemInfo
+
+public class ActionResult(ActionExitCode exitCode, Exception? error = null)
 {
-
-    /// <summary>
-    /// Gets the amount of the delta value of a single mouse wheel rotation increment.
-    /// </summary>
-    public static int MouseWheelScrollDelta => 120;
-
+    public ActionExitCode ExitCode { get; set; } = exitCode;
+    public Exception? Error { get; set; } = error;
 }
+
+
+public enum ActionExitCode
+{
+    Success,
+    Error,
+    Cancelled,
+    ApiNotFound,
+}
+
+
+

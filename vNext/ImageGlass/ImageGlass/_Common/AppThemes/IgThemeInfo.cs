@@ -16,15 +16,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+namespace ImageGlass.Common.AppThemes;
 
-namespace ImageGlass.Common.OsApi;
 
-public static class SystemInfo
+/// <summary>
+/// Theme information
+/// </summary>
+public record IgThemeInfo
 {
-
     /// <summary>
-    /// Gets the amount of the delta value of a single mouse wheel rotation increment.
+    /// Theme name (required)
     /// </summary>
-    public static int MouseWheelScrollDelta => 120;
-
+    public string Name { get; set; } = string.Empty;
+    public string Version { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Website { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
 }
+

@@ -16,15 +16,54 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+namespace ImageGlass.Common.Types;
 
-namespace ImageGlass.Common.OsApi;
 
-public static class SystemInfo
+/// <summary>
+/// Window backdrop effect.
+/// </summary>
+public enum BackdropStyle
 {
+    Mica,
+    MicaAlt,
+    Acrylic,
+    AcrylicThin,
+    Transparent,
 
     /// <summary>
-    /// Gets the amount of the delta value of a single mouse wheel rotation increment.
+    /// No backdrop.
     /// </summary>
-    public static int MouseWheelScrollDelta => 120;
+    None,
+}
 
+
+/// <summary>
+/// Exit codes of ImageGlass ultilities
+/// </summary>
+public enum IgExitCode
+{
+    Done = 0,
+    AdminRequired = 1,
+    Error = 2,
+    Error_FileNotFound = 3,
+}
+
+
+/// <summary>
+/// Options indicate what source of image is saved.
+/// </summary>
+public enum ImageSaveSource
+{
+    Undefined,
+    SelectedArea,
+    Clipboard,
+    CurrentFile,
+}
+
+
+public enum PhotoCodec
+{
+    None,
+    Magick,
+    WIC,
 }

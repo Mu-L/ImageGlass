@@ -21,9 +21,9 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
-using ImageGlass._Common.Extensions;
-using ImageGlass._Common.OsApi;
-using ImageGlass._Common.Types;
+using ImageGlass.Common.Extensions;
+using ImageGlass.Common.OsApi;
+using ImageGlass.Common.Types;
 using System;
 using System.Threading;
 

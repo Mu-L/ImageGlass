@@ -18,9 +18,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using Avalonia;
-using ImageGlass._Common.Extensions;
-using ImageGlass._Common.OsApi;
-using ImageGlass._Common.Types;
+using ImageGlass.Common.Extensions;
+using ImageGlass.Common.OsApi;
+using ImageGlass.Common.Types;
 using ImageGlass._UI.Viewer.ZoomAndPan;
 using System;
 using System.Linq;
