@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Avalonia;
 
-namespace ImageGlass._UI.Viewer.ZoomAndPan;
+namespace ImageGlass.UI.Viewer.ZoomAndPan;
 
 /// <summary>
 /// Holds information about zooming feature.

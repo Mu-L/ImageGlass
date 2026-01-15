@@ -16,26 +16,24 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia;
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace ImageGlass.UI.Viewer.ZoomAndPan;
+namespace ImageGlass.Common.Types.JsonTypeConverters;
 
 
-/// <summary>
-/// Panning event arguments
-/// </summary>
-public class ViewerPanEventArgs(Rect oldSrcRect, Rect newSrcRect) : EventArgs
+public class JsonStringToHotkeyConverter : JsonConverter<Hotkey>
 {
-    /// <summary>
-    /// Gets current mouse pointer location on host control
-    /// </summary>
-    public Rect OldSourceRect { get; private set; } = oldSrcRect;
+    public override void Write(Utf8JsonWriter writer, Hotkey? hotkey, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(hotkey?.ToString());
+    }
 
+    public override Hotkey? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var str = reader.GetString();
 
-    /// <summary>
-    /// Gets panning start mouse pointer location on host control
-    /// </summary>
-    public Rect NewSourceRect { get; private set; } = newSrcRect;
-
+        return Hotkey.ParseFrom(str);
+    }
 }

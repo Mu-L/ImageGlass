@@ -27,7 +27,7 @@ using ImageGlass.Common.Types;
 using System;
 using System.Threading;
 
-namespace ImageGlass._UI.Viewer;
+namespace ImageGlass.UI.Viewer;
 
 
 public partial class ViewerControl : ContentControl

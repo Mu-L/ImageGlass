@@ -18,9 +18,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using ImageGlass._UI.Viewer.ZoomAndPan;
+using ImageGlass.UI.Viewer.ZoomAndPan;
 
-namespace ImageGlass._UI.Viewer;
+namespace ImageGlass.UI.Viewer;
 
 public partial class ViewerControl
 {

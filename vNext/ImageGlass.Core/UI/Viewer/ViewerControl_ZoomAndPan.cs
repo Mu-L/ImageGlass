@@ -21,11 +21,11 @@ using Avalonia;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.OsApi;
 using ImageGlass.Common.Types;
-using ImageGlass._UI.Viewer.ZoomAndPan;
+using ImageGlass.UI.Viewer.ZoomAndPan;
 using System;
 using System.Linq;
 
-namespace ImageGlass._UI.Viewer;
+namespace ImageGlass.UI.Viewer;
 
 public partial class ViewerControl
 {

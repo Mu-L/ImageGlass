@@ -20,7 +20,7 @@ using Avalonia;
 using Avalonia.Media;
 using ImageGlass.Common.Extensions;
 
-namespace ImageGlass._UI.Viewer.Checkerboard;
+namespace ImageGlass.UI.Viewer.Checkerboard;
 
 
 /// <summary>

@@ -20,11 +20,11 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
-using ImageGlass._UI.Viewer.Checkerboard;
+using ImageGlass.UI.Viewer.Checkerboard;
 using System.Globalization;
 using System.Threading;
 
-namespace ImageGlass._UI.Viewer;
+namespace ImageGlass.UI.Viewer;
 
 
 public partial class ViewerControl

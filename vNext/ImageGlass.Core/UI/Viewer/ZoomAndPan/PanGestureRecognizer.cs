@@ -4,7 +4,7 @@ using global::Avalonia;
 using System;
 
 
-namespace ImageGlass._UI.Viewer.ZoomAndPan;
+namespace ImageGlass.UI.Viewer.ZoomAndPan;
 
 
 /// <summary>
