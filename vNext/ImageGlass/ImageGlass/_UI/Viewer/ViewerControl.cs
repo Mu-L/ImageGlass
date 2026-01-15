@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using ImageGlass._Common.Extensions;
@@ -58,15 +57,7 @@ public partial class ViewerControl : ContentControl
         // add events
         TopLevel.GetTopLevel(this)?.ScalingChanged += TopLevel_ScalingChanged;
 
-
-        // add support for gestures
-        GestureRecognizers.Add(new PinchGestureRecognizer());
-        GestureRecognizers.Add(new ScrollGestureRecognizer()
-        {
-            CanHorizontallyScroll = true,
-            CanVerticallyScroll = true,
-            IsScrollInertiaEnabled = true,
-        });
+        EnableTouchGestures__();
     }
 
 
@@ -74,6 +65,7 @@ public partial class ViewerControl : ContentControl
     {
         base.OnUnloaded(e);
 
+        DisableTouchGestures__();
         TopLevel.GetTopLevel(this)?.ScalingChanged -= TopLevel_ScalingChanged;
 
 
@@ -147,6 +139,10 @@ public partial class ViewerControl : ContentControl
         DisposeCheckerboard();
         InvalidateVisual();
     }
+
+
+
+
 
 
 
