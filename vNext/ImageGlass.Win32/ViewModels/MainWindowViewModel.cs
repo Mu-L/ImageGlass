@@ -1,4 +1,4 @@
-﻿namespace ImageGlass.ViewModels;
+﻿namespace ImageGlass.Win32.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {

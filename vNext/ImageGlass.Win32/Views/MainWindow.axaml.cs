@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace ImageGlass.Views;
+namespace ImageGlass.Win32.Views;
 
 public partial class MainWindow : Window
 {

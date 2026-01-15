@@ -1,0 +1,15 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="ImageGlass.Win32/ImageGlass.Win32.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="ImageGlass.Common/ImageGlass.Common.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+</Solution>

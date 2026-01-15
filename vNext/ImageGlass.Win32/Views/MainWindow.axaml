@@ -1,10 +1,10 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:ImageGlass.ViewModels"
+        xmlns:vm="using:ImageGlass.Win32.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="ImageGlass.Views.MainWindow"
+        x:Class="ImageGlass.Win32.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel" xmlns:local="using:ImageGlass._UI.Viewer"
         Icon="/Assets/avalonia-logo.ico"
         Title="ImageGlass">
