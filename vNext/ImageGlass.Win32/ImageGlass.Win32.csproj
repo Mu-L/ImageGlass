@@ -43,10 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="WinAPI\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ImageGlass.Core\ImageGlass.Core.csproj" />
   </ItemGroup>
 </Project>
