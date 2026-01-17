@@ -360,7 +360,7 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var useNativeCodec = meta.IsOneOfExtensions(AP.Config.NativeCodecReadFormats.ToArray())
+        var useNativeCodec = meta.IsOneOfExtensions(Core.Config.NativeCodecReadFormats.ToArray())
             && SkiaCodec.CanRead(meta);
 
         // use native codec

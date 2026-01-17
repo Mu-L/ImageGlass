@@ -97,7 +97,7 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     /// <summary>
     /// Gets the display text of toolbar button
     /// </summary>
-    public string DisplayText => AP.Config.Lang[Text];
+    public string DisplayText => Core.Config.Lang[Text];
 
 
     /// <summary>

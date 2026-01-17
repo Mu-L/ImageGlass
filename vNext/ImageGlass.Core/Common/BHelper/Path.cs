@@ -16,11 +16,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia;
+using Avalonia.Controls;
 using ImageGlass.Common.Types;
-using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -157,7 +157,8 @@ public partial class BHelper
     /// <summary>
     /// Get distinct directories list from paths list.
     /// </summary>
-    public static (List<string> DirPaths, List<string> FilePaths) GetDistinctDirsFromPaths(IEnumerable<string> pathList)
+    public static (List<string> DirPaths, List<string> FilePaths) GetDistinctDirsFromPaths(
+        IEnumerable<string> pathList, Func<string, string>? lnkExtResolverFn = null)
     {
         if (!pathList.Any()) return ([], []);
 
@@ -175,30 +176,31 @@ public partial class BHelper
             }
             else
             {
-                string dir;
+                string? dir;
 
-                // TODO: Windows only
-                //if (string.Equals(Path.GetExtension(path), ".lnk", StringComparison.OrdinalIgnoreCase))
-                //{
-                //    var shortcutPath = FileShortcutApi.GetTargetPathFromShortcut(path);
-                //    var shortcutPathType = BHelper.CheckPath(shortcutPath);
-                //    if (shortcutPathType == PathType.Unknown) continue;
+                if (string.Equals(Path.GetExtension(path), ".lnk", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (lnkExtResolverFn is null) continue;
 
-                //    // get the DIR path of shortcut target
-                //    if (shortcutPathType == PathType.Dir)
-                //    {
-                //        dir = shortcutPath;
-                //    }
-                //    else
-                //    {
-                //        hashedFilesList.Add(shortcutPath);
-                //        dir = Path.GetDirectoryName(shortcutPath) ?? "";
-                //    }
-                //}
-                //else
+                    var shortcutPath = lnkExtResolverFn(path);
+                    var shortcutPathType = BHelper.CheckPath(shortcutPath);
+                    if (shortcutPathType == PathType.Unknown) continue;
+
+                    // get the DIR path of shortcut target
+                    if (shortcutPathType == PathType.Dir)
+                    {
+                        dir = shortcutPath;
+                    }
+                    else
+                    {
+                        hashedFilesList.Add(shortcutPath);
+                        dir = Path.GetDirectoryName(shortcutPath) ?? "";
+                    }
+                }
+                else
                 {
                     hashedFilesList.Add(path);
-                    dir = Path.GetDirectoryName(path) ?? "";
+                    dir = Path.GetDirectoryName(path) ?? null;
                 }
 
 
@@ -209,6 +211,7 @@ public partial class BHelper
 
         return ([.. hashedDirsList], [.. hashedFilesList]);
     }
+
 
 
     /// <summary>
@@ -238,20 +241,15 @@ public partial class BHelper
         // parse environment vars to absolute path
         path = Environment.ExpandEnvironmentVariables(path);
 
-        // TODO: Windows only
-        //if (string.Equals(Path.GetExtension(inputPath), ".lnk", StringComparison.OrdinalIgnoreCase))
-        //{
-        //    path = FileShortcutApi.GetTargetPathFromShortcut(path);
-        //}
-
         return path;
     }
+
 
 
     /// <summary>
     /// Open URL in the default browser.
     /// </summary>
-    public static async Task OpenUrlAsync(string? url, string campaign = "from_unknown")
+    public static async Task OpenUrlAsync(Visual? visual, string? url, string campaign = "from_unknown")
     {
         if (string.IsNullOrWhiteSpace(url)) return;
 
@@ -265,53 +263,12 @@ public partial class BHelper
 
             ub.Query = queries.ToString();
 
-            var psi = new ProcessStartInfo()
+
+            var launcher = TopLevel.GetTopLevel(visual)?.Launcher;
+            if (launcher is not null)
             {
-                FileName = ub.Uri.AbsoluteUri,
-                UseShellExecute = true,
-            };
-
-            _ = Process.Start(psi);
-        }
-        catch { }
-    }
-
-
-    /// <summary>
-    /// Opens file path in Explorer and selects it.
-    /// </summary>
-    public static void OpenFilePath(string? filePath)
-    {
-        if (string.IsNullOrWhiteSpace(filePath)) return;
-
-        try
-        {
-            // TODO: Windows only
-            //ExplorerApi.SelectFileFromExplorer(filePath);
-        }
-        catch
-        {
-            using var proc = Process.Start("explorer.exe", $"/select,\"{filePath}\"");
-        }
-    }
-
-
-    /// <summary>
-    /// Opens the folder path in Explorer, creates the fodler path if not existed.
-    /// </summary>
-    public static void OpenFolderPath(string? dirPath)
-    {
-        if (string.IsNullOrWhiteSpace(dirPath)) return;
-
-        try
-        {
-            Directory.CreateDirectory(dirPath);
-        }
-        catch { }
-
-        try
-        {
-            using var proc = Process.Start("explorer.exe", $"\"{dirPath}\"");
+                await launcher.LaunchUriAsync(ub.Uri);
+            }
         }
         catch { }
     }
@@ -321,16 +278,13 @@ public partial class BHelper
     /// Delete a file.
     /// </summary>
     /// <param name="filePath">Full file path to delete</param>
-    /// <param name="moveToRecycleBin"><c>true</c>: Move to Recycle bin; <c>false</c>: Delete permanently</param>
-    public static void DeleteFile(string filePath, bool moveToRecycleBin = true)
+    public static void DeleteFile(string filePath)
     {
-        var option = moveToRecycleBin ? RecycleOption.SendToRecycleBin : RecycleOption.DeletePermanently;
-
         try
         {
-            Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, option);
+            File.Delete(filePath);
         }
-        catch (OperationCanceledException) { }
+        catch { }
     }
 
 }

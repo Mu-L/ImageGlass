@@ -1,5 +1,16 @@
 ﻿
+IFolderView2
+IPersistFolder2
+SHELLEXECUTEINFOW
+ITEMIDLIST
+ShellExecuteEx
 
+
+MonitorFromWindow
+GetMonitorInfo
+GetICMProfile
+CreateDC
+DeleteDC
 
 
 

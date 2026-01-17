@@ -71,7 +71,7 @@ public partial class Config
                 if (OnPropertyChanged(value, oldValue))
                 {
                     Theme.LoadColors(AccentColor);
-                    AP.OnThemeChanged(nameof(IgTheme.ComputedColors));
+                    Core.OnThemeChanged(nameof(IgTheme.ComputedColors));
                 }
             }
         }
@@ -93,7 +93,7 @@ public partial class Config
 
                 if (OnPropertyChanged(value, oldValue))
                 {
-                    AP.OnThemeChanged();
+                    Core.OnThemeChanged();
                 }
             }
         }
@@ -115,7 +115,7 @@ public partial class Config
 
                 if (OnPropertyChanged(value, oldValue))
                 {
-                    AP.OnLanguageChanged();
+                    Core.OnLanguageChanged();
                 }
             }
         }
