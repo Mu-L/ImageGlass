@@ -710,13 +710,13 @@ public partial class Config : IgReactive
 
 
     /// <summary>
-    /// Gets, sets the list of formats that always use WIC to decode.
+    /// Gets, sets the list of formats that always use native codec to decode.
     /// </summary>
     [JsonConverter(typeof(JsonHashSetToStringConverter))]
-    public HashSet<string> WICReadFormats
+    public HashSet<string> NativeCodecReadFormats
     {
-        get => Get(ConfigId.WICReadFormats, new HashSet<string> { ".gif", ".gifv", ".webp", ".fax", ".apng", ".jxr", ".hdp", ".wdp" });
-        set => Set(ConfigId.WICReadFormats, value);
+        get => Get(ConfigId.NativeCodecReadFormats, new HashSet<string> { ".gif", ".gifv", ".webp", ".fax", ".apng" });
+        set => Set(ConfigId.NativeCodecReadFormats, value);
     }
 
 

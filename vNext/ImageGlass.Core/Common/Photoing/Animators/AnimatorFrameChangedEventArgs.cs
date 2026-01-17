@@ -16,33 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
-
-using Avalonia;
-using ImageGlass.Common.Types;
-using SkiaSharp;
+using System;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class SkiaDecoderOutput : DisposableImpl
+
+public class AnimatorFrameChangedEventArgs : EventArgs
 {
-    public SKBitmap? SingleFrame { get; set; } = null;
-    public SKCodec? MultiFrames { get; set; } = null;
-    public SkiaAnimator? Animator { get; set; } = null;
-    public Size Size { get; set; } = new();
-
-
-    protected override void OnDisposing()
-    {
-        base.OnDisposing();
-
-        SingleFrame?.Dispose();
-        SingleFrame = null;
-
-        MultiFrames?.Dispose();
-        MultiFrames = null;
-
-        Animator?.Dispose();
-        Animator = null;
-    }
+    public required uint FrameCount { get; init; }
+    public required int CurrentFrame { get; init; }
+    public required uint LoopCount { get; init; }
+    public required int CurrentLoop { get; init; }
 }
+

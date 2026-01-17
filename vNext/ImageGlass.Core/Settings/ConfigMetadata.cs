@@ -140,7 +140,7 @@ public enum ConfigId
     ZoomLevels,
     // EditApps,
     SingleFrameFormats,
-    WICReadFormats,
+    NativeCodecReadFormats,
     FileFormats,
     ImageInfoTags,
     MenuHotkeys,

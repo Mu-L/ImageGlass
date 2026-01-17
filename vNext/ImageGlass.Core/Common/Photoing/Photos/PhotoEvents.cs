@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia.Media.Imaging;
 using System;
 using System.Threading;
 
@@ -55,11 +56,11 @@ public class PhotoLoadingEventArgs(PhotoLoadingState state, Photo photo, Cancell
 }
 
 
-public class ThumbnailLoadedEventArgs(Photo sender, SoftwareBitmap? bmp) : EventArgs
+public class ThumbnailLoadedEventArgs(Photo sender, Bitmap? bmp) : EventArgs
 {
     public Photo Sender { get; set; } = sender;
 
-    public SoftwareBitmap? Bitmap { get; set; } = bmp;
+    public Bitmap? Bitmap { get; set; } = bmp;
 }
 
 

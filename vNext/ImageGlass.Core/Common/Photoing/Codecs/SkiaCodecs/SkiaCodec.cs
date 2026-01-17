@@ -17,13 +17,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
-using ImageGlass.Common.Photoing;
+using ImageMagick;
 using SkiaSharp;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Core.Common.Photoing;
+namespace ImageGlass.Common.Photoing;
 
 public static partial class SkiaCodec
 {
@@ -72,7 +73,7 @@ public static partial class SkiaCodec
             if (token.IsCancellationRequested) return;
 
 
-            // get WIC color profile
+            // get color profile
             try
             {
                 // TODO: check null
@@ -101,39 +102,95 @@ public static partial class SkiaCodec
     }
 
 
+    /// <summary>
+    /// Loads photo.
+    /// </summary>
+    public static async Task<SkiaDecoderOutput> LoadAsync(PhotoMetadata meta, CancellationToken token)
+    {
+        return await Task.Run(() => Load(meta), token).ConfigureAwait(false);
+    }
+
+
+    /// <summary>
+    /// Loads photo.
+    /// </summary>
     public static SkiaDecoderOutput Load(PhotoMetadata meta)
     {
+        // 0. create Skia codec
+        var codec = SKCodec.Create(meta.FilePath);
         var result = new SkiaDecoderOutput();
+        result.Size = new Size(codec.Info.Width, codec.Info.Height);
 
-        // create Skia codec
-        var decoder = SKCodec.Create(meta.FilePath);
-        result.Size = new Size(decoder.Info.Width, decoder.Info.Height);
 
         // 1. read animated formats
-        if (decoder.FrameCount > 0)
+        if (codec.FrameCount > 0)
         {
-            // TODO:
-            result.Animator = decoder;
-
+            result.Animator = new SkiaAnimator(codec, meta);
             return result;
         }
 
 
         // 2. read single-frame formats
-        var bitmap = new SKBitmap(decoder.Info);
-        if (decoder.GetPixels(decoder.Info, bitmap.GetPixels(), new SKCodecOptions((int)meta.FrameIndex)) == SKCodecResult.Success)
+        var bitmap = new SKBitmap(codec.Info);
+        var codecOption = new SKCodecOptions((int)meta.FrameIndex);
+        if (codec.GetPixels(codec.Info, bitmap.GetPixels(), codecOption) == SKCodecResult.Success)
         {
             result.SingleFrame = bitmap;
         }
 
-        decoder.Dispose();
-        decoder = null;
-
+        codec.Dispose();
+        codec = null;
 
         return result;
     }
 
 
+    /// <summary>
+    /// Saves photo to file using Magick codec.
+    /// </summary>
+    /// <returns><c>true</c> if file is saved.</returns>
+    /// <exception cref="Exception"></exception>
+    public static async Task SaveAsync(SKBitmap? srcBmp, string destFilePath,
+        ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
+    {
+        if (srcBmp is null) return;
+
+        try
+        {
+            // 1. apply transforms
+            using var dstBmp = TransformImage(srcBmp, transform);
+            if (dstBmp is null || token.IsCancellationRequested) return;
+
+
+            // 2. use Magick to save
+            if (MagickCodec.CanWrite(destFilePath))
+            {
+                // convert to pixels
+                var pixels = dstBmp.GetPixelSpan();
+                if (token.IsCancellationRequested) return;
+
+                // convert to MagickImage
+                using var imgM = new MagickImage();
+                var settings = new MagickReadSettings()
+                {
+                    Format = MagickFormat.Bgra,
+                    Width = (uint)dstBmp.Width,
+                    Height = (uint)dstBmp.Height,
+                };
+                imgM.Read(pixels, settings);
+                imgM.Quality = quality;
+
+                // write image data to file
+                await imgM.WriteAsync(destFilePath, token);
+            }
+            else
+            {
+                throw new FormatException("IGE: Unsupported image format.");
+            }
+
+        }
+        catch (OperationCanceledException) { }
+    }
 
 
     /// <summary>
@@ -175,6 +232,89 @@ public static partial class SkiaCodec
         if (isMultiFrames) return codec.FrameCount > 1;
 
         return true;
+    }
+
+
+    /// <summary>
+    /// Returns the new transformed bitmap.
+    /// </summary>
+    public static SKBitmap? TransformImage(SKBitmap? bmpSrc, ImgTransform? transform)
+    {
+        if (bmpSrc is null || transform is null || !transform.HasChanges) return null;
+
+
+        var dstBmp = new SKBitmap(bmpSrc.Info);
+        using var canvas = new SKCanvas(dstBmp);
+        canvas.Clear(SKColors.Transparent);
+        canvas.Translate(dstBmp.Width * 0.5f, dstBmp.Height * 0.5f);
+
+
+        // flip
+        var isFlipX = transform.Flips.HasFlag(FlipOptions.Horizontal);
+        var isFlipY = transform.Flips.HasFlag(FlipOptions.Vertical);
+        if (transform.Flips.HasFlag(FlipOptions.Horizontal) || transform.Flips.HasFlag(FlipOptions.Vertical))
+        {
+            canvas.Scale(isFlipX ? -1 : 1, isFlipY ? -1 : 1);
+        }
+
+
+        // rotation
+        if (transform.Rotation != 0)
+        {
+            canvas.RotateDegrees(transform.Rotation);
+        }
+
+
+        canvas.Translate(-dstBmp.Width * 0.5f, -dstBmp.Height * 0.5f);
+        canvas.DrawBitmap(bmpSrc, 0, 0);
+
+
+        // invert color
+        if (transform.IsColorInverted)
+        {
+            var colorMatrix = new float[]
+            {
+                -1,  0,  0,  0, 255,
+                 0, -1,  0,  0, 255,
+                 0,  0, -1,  0, 255,
+                 0,  0,  0,  1,   0
+            };
+
+            using var paint = new SKPaint
+            {
+                ColorFilter = SKColorFilter.CreateColorMatrix(colorMatrix),
+            };
+
+            canvas.DrawBitmap(bmpSrc, 0, 0, paint);
+        }
+
+
+        return dstBmp;
+    }
+
+
+    /// <summary>
+    /// Converts Magick image to SKBitmap.
+    /// </summary>
+    public static SKBitmap? ConvertFromMagick(MagickImage? imgM)
+    {
+        if (imgM is null) return null;
+
+        var info = new SKImageInfo((int)imgM.Width, (int)imgM.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+        var bmp = new SKBitmap(info);
+
+        // force exact Skia layout
+        imgM.Format = MagickFormat.Bgra;
+        imgM.Depth = 8;
+
+        // get pointer of imgM pixels
+        using var pixels = imgM.GetPixelsUnsafe();
+        var imgMPtr = pixels.GetAreaPointer(0, 0, imgM.Width, imgM.Height);
+
+        bmp.SetPixels(imgMPtr);
+
+
+        return bmp;
     }
 
 

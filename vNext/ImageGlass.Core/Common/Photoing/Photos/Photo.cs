@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Types;
-using ImageGlass.Core.Common.Photoing;
 using ImageMagick;
 using SkiaSharp;
 using System;
@@ -361,13 +360,13 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var useWicCodec = meta.IsOneOfExtensions(AP.Config.WICReadFormats.ToArray())
-            && WicCodec.CanRead(meta);
+        var useNativeCodec = meta.IsOneOfExtensions(AP.Config.NativeCodecReadFormats.ToArray())
+            && SkiaCodec.CanRead(meta);
 
-        // use WIC codec
-        if (useWicCodec)
+        // use native codec
+        if (useNativeCodec)
         {
-            await LoadWithWICAsync(meta, token);
+            await LoadWithNativeCodecAsync(meta, token);
         }
 
         // use Magick codec
@@ -379,19 +378,19 @@ public partial class Photo : DisposableImpl
 
 
     /// <summary>
-    /// Loads an image using WIC.
+    /// Loads an image using native codec.
     /// </summary>
-    private async Task LoadWithWICAsync(PhotoMetadata meta, CancellationToken token)
+    private async Task LoadWithNativeCodecAsync(PhotoMetadata meta, CancellationToken token)
     {
-        ReadCodec = PhotoCodec.WIC;
-        var result = await WicCodec.LoadAsync(meta, token);
+        ReadCodec = PhotoCodec.Native;
+        var result = await SkiaCodec.LoadAsync(meta, token);
 
         _width = (uint)result.Size.Width;
         _height = (uint)result.Size.Height;
 
         if (result.Animator is not null) Bitmap = result.Animator;
-        else if (!result.MultiFrames.IsDisposed()) Bitmap = result.MultiFrames;
-        else if (!result.SingleFrame.IsDisposed()) Bitmap = result.SingleFrame;
+        else if (result.MultiFrames is not null) Bitmap = result.MultiFrames;
+        else if (result.SingleFrame is not null) Bitmap = result.SingleFrame;
         else Bitmap = null;
     }
 
@@ -429,19 +428,20 @@ public partial class Photo : DisposableImpl
             // multi-frame formats
             else
             {
-                var bytes = data.MultiFrames.ToByteArray(MagickFormat.Tiff);
-                Bitmap = PhotoWIC.CreateDecoder(bytes);
+                // TODO:
+                //var bytes = data.MultiFrames.ToByteArray(MagickFormat.Tiff);
+                //Bitmap = PhotoWIC.CreateDecoder(bytes);
             }
         }
 
         // single-frame formats
         else
         {
-            var wicBmp = PhotoWIC.ConvertFromMagick(data.SingleFrame);
+            var bmp = SkiaCodec.ConvertFromMagick(data.SingleFrame);
 
-            Bitmap = wicBmp;
-            _width = (uint)(wicBmp?.Size.Width ?? 0);
-            _height = (uint)(wicBmp?.Size.Height ?? 0);
+            Bitmap = bmp;
+            _width = (uint)(bmp?.Width ?? 0);
+            _height = (uint)(bmp?.Height ?? 0);
         }
     }
 
@@ -684,29 +684,30 @@ public partial class Photo : DisposableImpl
             var taskId = Guid.NewGuid();
             _ = _taskRefs.TryAdd(taskId, true);
 
-            SoftwareBitmap? softwareBmp = null;
+            // TODO:
+            //SoftwareBitmap? softwareBmp = null;
 
-            try
-            {
-                // load thumbnail
-                using var wicBmp = await Metadata.GetThumbnailAsync(size);
+            //try
+            //{
+            //    // load thumbnail
+            //    using var wicBmp = await Metadata.GetThumbnailAsync(size);
 
-                // convert to software bitmap
-                if (wicBmp is not null)
-                {
-                    softwareBmp = await wicBmp.ToSoftwareBitmapAsync();
-                }
-            }
-            catch
-            {
-                softwareBmp?.Dispose();
-                softwareBmp = null;
-            }
-            finally
-            {
-                progress.Report(new ThumbnailLoadedEventArgs(this, softwareBmp));
-                _ = _taskRefs.TryRemove(taskId, out _);
-            }
+            //    // convert to software bitmap
+            //    if (wicBmp is not null)
+            //    {
+            //        softwareBmp = await wicBmp.ToSoftwareBitmapAsync();
+            //    }
+            //}
+            //catch
+            //{
+            //    softwareBmp?.Dispose();
+            //    softwareBmp = null;
+            //}
+            //finally
+            //{
+            //    progress.Report(new ThumbnailLoadedEventArgs(this, softwareBmp));
+            //    _ = _taskRefs.TryRemove(taskId, out _);
+            //}
         });
 
 
@@ -726,12 +727,11 @@ public partial class Photo : DisposableImpl
         try
         {
             var destExt = Path.GetExtension(destFilePath).ToLowerInvariant();
-            var mustUseWic = IsClipboard || WicCodec.TopWriteExts.Contains(destExt);
 
             // 1. save clipboard photo to file
-            if (mustUseWic && Bitmap is SKBitmap wicBmp)
+            if (IsClipboard && Bitmap is SKBitmap bmp)
             {
-                await WicCodec.SaveAsync(wicBmp, destFilePath, transforms, quality, token);
+                await SkiaCodec.SaveAsync(bmp, destFilePath, transforms, quality, token);
             }
 
             // 2. save photo file to file

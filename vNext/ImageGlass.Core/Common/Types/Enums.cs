@@ -65,7 +65,7 @@ public enum PhotoCodec
 {
     None,
     Magick,
-    WIC,
+    Native,
 }
 
 
