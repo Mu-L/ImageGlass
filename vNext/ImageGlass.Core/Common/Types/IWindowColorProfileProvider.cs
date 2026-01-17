@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using Avalonia.Controls;
+using ImageGlass.Common.Types;
 using System;
 using System.Threading.Tasks;
 
@@ -32,13 +33,19 @@ public interface IWindowColorProfileProvider : IDisposable
     /// <summary>
     /// Occurs when a physical display's color profile is changed.
     /// </summary>
-    event EventHandler? Changed;
+    event TEventHandler<IWindowColorProfileProvider, ColorProfileChangedEventArgs>? Changed;
 
 
     /// <summary>
-    /// Represents color profile data in byte array format.
+    /// Gets the color profile path.
     /// </summary>
-    byte[]? Data { get; }
+    string ProfilePath { get; }
+
+
+    /// <summary>
+    /// Indicates whether the HDR is enabled.
+    /// </summary>
+    bool IsHdr { get; }
 
 
     /// <summary>
@@ -52,5 +59,25 @@ public interface IWindowColorProfileProvider : IDisposable
     /// </summary>
     Task InitializeAsync(Window window);
 
+
+    /// <summary>
+    /// Reads the color profile data.
+    /// </summary>
+    Task<byte[]?> ReadColorProfileDataAsync();
+
 }
 
+
+public class ColorProfileChangedEventArgs(string profilePath, bool isHdr) : EventArgs
+{
+    /// <summary>
+    /// Gets the color profile path.
+    /// </summary>
+    public string ProfilePath { get; set; } = profilePath;
+
+
+    /// <summary>
+    /// Indicates whether the HDR is enabled.
+    /// </summary>
+    public bool IsHdr { get; set; } = isHdr;
+}

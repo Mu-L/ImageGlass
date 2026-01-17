@@ -19,6 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using ImageGlass.Common;
+using ImageGlass.Win32.Common.Types;
 using ImageGlass.Win32.ViewModels;
 using ImageGlass.Win32.Views;
 
@@ -31,7 +33,7 @@ public partial class App : Application
         AvaloniaXamlLoader.Load(this);
     }
 
-    public override void OnFrameworkInitializationCompleted()
+    public override async void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -42,10 +44,16 @@ public partial class App : Application
             {
                 DataContext = new MainWindowViewModel(),
             };
+
+
+            Core.ColorProfileService = new Win32ColorProfileProvider();
+            await Core.ColorProfileService.InitializeAsync(desktop.MainWindow);
         }
 
         base.OnFrameworkInitializationCompleted();
     }
+
+
 
     //private void DisableAvaloniaDataAnnotationValidation()
     //{

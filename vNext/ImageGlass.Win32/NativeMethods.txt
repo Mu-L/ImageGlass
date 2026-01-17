@@ -6,11 +6,15 @@ ITEMIDLIST
 ShellExecuteEx
 
 
+MONITORINFOEXW
 MonitorFromWindow
 GetMonitorInfo
 GetICMProfile
 CreateDC
 DeleteDC
 
-
+CreateDXGIFactory1
+IDXGIFactory6
+IDXGIAdapter1
+IDXGIOutput6
 

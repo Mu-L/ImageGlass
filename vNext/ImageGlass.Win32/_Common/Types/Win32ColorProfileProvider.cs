@@ -21,10 +21,11 @@ using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.Graphics.Dxgi;
+using Windows.Win32.Graphics.Dxgi.Common;
 using Windows.Win32.Graphics.Gdi;
 
 namespace ImageGlass.Win32.Common.Types;
@@ -34,24 +35,34 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
 {
     private Window? _window;
     private nint _windowHandle;
+    private nint _currentMonitor;
+
+    const int WM_COLORSPACECHANGED = 0x0320;
+    const int WM_DISPLAYCHANGE = 0x007E;
 
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public event EventHandler? Changed;
+    public event TEventHandler<IWindowColorProfileProvider, ColorProfileChangedEventArgs>? Changed;
 
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public byte[]? Data { get; private set; }
+    public string ProfilePath { get; private set; } = string.Empty;
 
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public bool IsInitialized { get; private set; }
+    public bool IsHdr { get; private set; } = false;
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public bool IsInitialized { get; private set; } = false;
 
 
     /// <summary>
@@ -61,12 +72,20 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
     {
         base.OnDisposing();
 
+
+        if (TopLevel.GetTopLevel(_window) is TopLevel top)
+        {
+            Win32Properties.RemoveWndProcHookCallback(top, WndProcHook);
+        }
+
         if (_window != null)
         {
             _window.PositionChanged -= OnWindowMoved;
         }
 
-        Data = null;
+
+        ProfilePath = string.Empty;
+        IsHdr = false;
         IsInitialized = false;
     }
 
@@ -81,95 +100,127 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
     {
         if (IsInitialized) return;
 
+        IsInitialized = true;
         _window = window;
         _windowHandle = _window.TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
 
-        if (_windowHandle != IntPtr.Zero)
+        if (_windowHandle == IntPtr.Zero) return;
+
+
+        // get current monitor
+        _currentMonitor = GetMonitorFromWindow(_windowHandle);
+
+        // load profile of the monitor
+        UpdateColorProfile();
+
+        // listen to events
+        _window.PositionChanged += OnWindowMoved;
+        if (TopLevel.GetTopLevel(window) is TopLevel top)
         {
-            var profilePath = GetColorProfilePath(_windowHandle);
+            Win32Properties.AddWndProcHookCallback(top, WndProcHook);
+        }
+    }
 
-            if (!string.IsNullOrWhiteSpace(profilePath))
-            {
-                Data = await File.ReadAllBytesAsync(profilePath);
-            }
 
-            _window.PositionChanged += OnWindowMoved;
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public async Task<byte[]?> ReadColorProfileDataAsync()
+    {
+        if (string.IsNullOrEmpty(ProfilePath)) return null;
+
+        var data = await File.ReadAllBytesAsync(ProfilePath);
+        return data;
+    }
+
+
+
+    private IntPtr WndProcHook(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg == WM_COLORSPACECHANGED || msg == WM_DISPLAYCHANGE)
+        {
+            // update profile of the monitor
+            UpdateColorProfile();
+
+            handled = true;
         }
 
-        IsInitialized = true;
-        Changed?.Invoke(this, EventArgs.Empty);
-        return;
+        return IntPtr.Zero;
     }
+
+
+
+    private void UpdateColorProfile()
+    {
+        // get profile of the monitor
+        ProfilePath = GetColorProfilePath(_currentMonitor);
+        IsHdr = IsHdrEnabled(_currentMonitor);
+
+        Changed?.Invoke(this, new ColorProfileChangedEventArgs(ProfilePath, IsHdr));
+    }
+
 
 
     private async void OnWindowMoved(object? sender, PixelPointEventArgs e)
     {
-        if (_windowHandle == 0) return;
+        if (_windowHandle == IntPtr.Zero) return;
 
-        // get the color profile data of the current monitor
-        var newData = await GetColorProfileDataAsync(_windowHandle);
-
-        // update color profile
-        if (newData is not null && !AreEqual(Data, newData))
-        {
-            Data = newData;
-            Changed?.Invoke(this, EventArgs.Empty);
-        }
-    }
+        // check the current monitor of window
+        var monitor = GetMonitorFromWindow(_windowHandle);
+        if (monitor == _currentMonitor) return;
+        _currentMonitor = monitor;
 
 
-    private static bool AreEqual(byte[]? a, byte[]? b)
-    {
-        if (a == null || b == null) return a == b;
-        if (a.Length != b.Length) return false;
-        return a.AsSpan().SequenceEqual(b);
+        // get the color profile of the current monitor
+        UpdateColorProfile();
     }
 
 
 
     /// <summary>
-    /// Gets color profile data of the current monitor where the window is at.
+    /// Gets the monitor from window.
     /// </summary>
-    public static async Task<byte[]?> GetColorProfileDataAsync(nint windowHandle)
+    public static nint GetMonitorFromWindow(nint windowHandle)
     {
-        var profilePath = GetColorProfilePath(windowHandle);
-        if (string.IsNullOrEmpty(profilePath)) return null;
+        var monitor = PInvoke.MonitorFromWindow(new HWND(windowHandle),
+            MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
 
-        var data = await File.ReadAllBytesAsync(profilePath);
-        return data;
+        return monitor;
     }
+
 
 
     /// <summary>
     /// Gets color profile path of current monitor where the window is at.
     /// </summary>
-    public static string? GetColorProfilePath(nint windowHandle)
+    public static unsafe string GetColorProfilePath(nint hMonitor)
     {
         try
         {
-            // get monitor from window
-            var hMonitor = PInvoke.MonitorFromWindow(new HWND(windowHandle), MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
-
             // get the monitor info
-            var mi = new MONITORINFO();
-            mi.cbSize = (uint)Marshal.SizeOf(mi);
-            if (!PInvoke.GetMonitorInfo(hMonitor, ref mi)) return null;
+            var mi = new MONITORINFOEXW();
+            mi.monitorInfo.cbSize = (uint)sizeof(MONITORINFOEXW);
+            if (!PInvoke.GetMonitorInfo((HMONITOR)hMonitor, (MONITORINFO*)(void*)&mi)) return string.Empty;
 
-            var dc = PInvoke.CreateDCW("DISPLAY");
+            // get monitor name
+            var deviceName = new string(mi.szDevice.AsSpan());
+            var dc = PInvoke.CreateDCW(string.Empty, deviceName);
+            if (dc.IsNull) return string.Empty;
+
 
             try
             {
                 // get the length of profile path
                 uint size = 0;
-                if (!PInvoke.GetICMProfile(dc, ref size, null)) return null;
+                _ = PInvoke.GetICMProfile(dc, ref size, null);
 
                 // get the profile buffer
                 var buffer = new char[size];
-                if (!PInvoke.GetICMProfile(dc, ref size, buffer)) return null;
+                _ = PInvoke.GetICMProfile(dc, ref size, buffer);
 
                 // get the profile path
                 var profilePath = new string(buffer, 0, (int)size - 1);
-                if (!File.Exists(profilePath)) return null;
+                if (!File.Exists(profilePath)) return string.Empty;
 
                 return profilePath;
             }
@@ -183,4 +234,39 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
         return null;
     }
 
+
+
+    /// <summary>
+    /// Checks if HDR is enabled.
+    /// </summary>
+    public static bool IsHdrEnabled(nint hMonitor)
+    {
+        var iidFactory6 = typeof(IDXGIFactory6).GUID;
+
+        PInvoke.CreateDXGIFactory1(iidFactory6, out var factoryObj).ThrowOnFailure();
+        if (factoryObj is not IDXGIFactory6 factory) return false;
+
+        for (uint i = 0; factory.EnumAdapters1(i, out IDXGIAdapter1 adapter).Succeeded; i++)
+        {
+            for (uint j = 0; adapter.EnumOutputs(j, out IDXGIOutput output).Succeeded; j++)
+            {
+                if (output is not IDXGIOutput6 output6) continue;
+
+                // find the monitor
+                var desc = output6.GetDesc1();
+                if (desc.Monitor != hMonitor) continue;
+
+                // check HDR
+                var isHdr = desc.ColorSpace == DXGI_COLOR_SPACE_TYPE.DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
+                return isHdr;
+            }
+        }
+
+        return false;
+    }
+
 }
+
+
+
+
