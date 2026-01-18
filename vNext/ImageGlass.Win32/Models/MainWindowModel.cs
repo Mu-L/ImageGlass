@@ -1,4 +1,4 @@
-/*
+﻿/*
 ImageGlass Project - Image viewer for Windows
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
@@ -16,32 +16,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml;
-using ImageGlass.Win32.Models;
-using ImageGlass.Win32.Views;
+using ImageGlass.Common.Types;
 
-namespace ImageGlass.Win32;
+namespace ImageGlass.Win32.Models;
 
-public partial class App : Application
+public class MainWindowModel : IgReactive
 {
-    public override void Initialize()
+    public string Title
     {
-        AvaloniaXamlLoader.Load(this);
-    }
-
-    public override async void OnFrameworkInitializationCompleted()
-    {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        get; set
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowModel(),
-            };
-        }
+            if (field.Equals(value)) return;
 
-        base.OnFrameworkInitializationCompleted();
-    }
+            field = value;
+            OnPropertyChanged();
+        }
+    } = "ImageGlass";
 
 }

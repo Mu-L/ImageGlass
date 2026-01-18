@@ -13,8 +13,10 @@ GetICMProfile
 CreateDC
 DeleteDC
 
-CreateDXGIFactory1
-IDXGIFactory6
-IDXGIAdapter1
-IDXGIOutput6
+
+DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO
+DISPLAYCONFIG_SOURCE_DEVICE_NAME
+GetDisplayConfigBufferSizes
+QueryDisplayConfig
+DisplayConfigGetDeviceInfo
 

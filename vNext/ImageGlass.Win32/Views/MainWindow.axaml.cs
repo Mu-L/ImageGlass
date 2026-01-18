@@ -18,16 +18,36 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using ImageGlass.Common;
+using ImageGlass.Win32.Common.Types;
+using ImageGlass.Win32.Models;
 
 namespace ImageGlass.Win32.Views;
 
 public partial class MainWindow : Window
 {
+    public MainWindowModel VM => (MainWindowModel)DataContext!;
+
     public MainWindow()
     {
         InitializeComponent();
     }
 
+
+    protected override async void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
+        Core.ColorProfileService = new Win32ColorProfileProvider();
+        Core.ColorProfileService.Changed += ColorProfileService_Changed;
+        await Core.ColorProfileService.InitializeAsync(this);
+    }
+
+    private void ColorProfileService_Changed(IWindowColorProfileProvider sender, ColorProfileChangedEventArgs e)
+    {
+        VM.Title = $"{e.IsHdr} | {e.ProfilePath}";
+    }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {

@@ -23,9 +23,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Win32;
+using Windows.Win32.Devices.Display;
 using Windows.Win32.Foundation;
-using Windows.Win32.Graphics.Dxgi;
-using Windows.Win32.Graphics.Dxgi.Common;
 using Windows.Win32.Graphics.Gdi;
 
 namespace ImageGlass.Win32.Common.Types;
@@ -231,7 +230,7 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
         }
         catch { }
 
-        return null;
+        return string.Empty;
     }
 
 
@@ -239,31 +238,85 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
     /// <summary>
     /// Checks if HDR is enabled.
     /// </summary>
-    public static bool IsHdrEnabled(nint hMonitor)
+    public static unsafe bool IsHdrEnabled(nint hMonitor)
     {
-        var iidFactory6 = typeof(IDXGIFactory6).GUID;
+        // get the monitor info
+        var monitorInfo = new MONITORINFOEXW();
+        monitorInfo.monitorInfo.cbSize = (uint)sizeof(MONITORINFOEXW);
+        if (!PInvoke.GetMonitorInfo((HMONITOR)hMonitor, (MONITORINFO*)(void*)&monitorInfo)) return false;
 
-        PInvoke.CreateDXGIFactory1(iidFactory6, out var factoryObj).ThrowOnFailure();
-        if (factoryObj is not IDXGIFactory6 factory) return false;
+        // get input monitor name
+        var inputDeviceName = new string(monitorInfo.szDevice.AsSpan());
 
-        for (uint i = 0; factory.EnumAdapters1(i, out IDXGIAdapter1 adapter).Succeeded; i++)
+
+        uint pathCount, modeCount;
+        if (PInvoke.GetDisplayConfigBufferSizes(QUERY_DISPLAY_CONFIG_FLAGS.QDC_ONLY_ACTIVE_PATHS,
+            &pathCount, &modeCount) != 0)
+            return false;
+
+        var paths = new DISPLAYCONFIG_PATH_INFO[pathCount];
+        var modes = new DISPLAYCONFIG_MODE_INFO[modeCount];
+
+        fixed (DISPLAYCONFIG_PATH_INFO* pPaths = paths)
+        fixed (DISPLAYCONFIG_MODE_INFO* pModes = modes)
         {
-            for (uint j = 0; adapter.EnumOutputs(j, out IDXGIOutput output).Succeeded; j++)
+            // query all monitor devices
+            if (PInvoke.QueryDisplayConfig(QUERY_DISPLAY_CONFIG_FLAGS.QDC_ONLY_ACTIVE_PATHS,
+                &pathCount, pPaths, &modeCount, pModes, null) != 0)
+                return false;
+
+
+            for (uint i = 0; i < pathCount; i++)
             {
-                if (output is not IDXGIOutput6 output6) continue;
+                var sourceName = new DISPLAYCONFIG_SOURCE_DEVICE_NAME
+                {
+                    header = new DISPLAYCONFIG_DEVICE_INFO_HEADER
+                    {
+                        type = DISPLAYCONFIG_DEVICE_INFO_TYPE.DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
+                        size = (uint)sizeof(DISPLAYCONFIG_SOURCE_DEVICE_NAME),
+                        adapterId = paths[i].sourceInfo.adapterId,
+                        id = paths[i].sourceInfo.id
+                    }
+                };
 
-                // find the monitor
-                var desc = output6.GetDesc1();
-                if (desc.Monitor != hMonitor) continue;
+                // get monitor device info
+                if (PInvoke.DisplayConfigGetDeviceInfo(ref sourceName.header) != 0)
+                    continue;
 
-                // check HDR
-                var isHdr = desc.ColorSpace == DXGI_COLOR_SPACE_TYPE.DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
-                return isHdr;
+
+                // get monitor device name
+                var viewGdiDeviceName = new string(sourceName.viewGdiDeviceName.AsSpan());
+
+                // check if this is the input monitor
+                if (!viewGdiDeviceName.Equals(inputDeviceName, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+
+                // get the advanced color info
+                var advancedColorInfo = new DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO
+                {
+                    header = new DISPLAYCONFIG_DEVICE_INFO_HEADER
+                    {
+                        type = DISPLAYCONFIG_DEVICE_INFO_TYPE.DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO,
+                        size = (uint)sizeof(DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO),
+                        adapterId = paths[i].targetInfo.adapterId,
+                        id = paths[i].targetInfo.id
+                    }
+                };
+
+                if (PInvoke.DisplayConfigGetDeviceInfo(ref advancedColorInfo.header) == 0)
+                {
+                    // check if HDR is enabled for this monitor
+                    var isEnabled = advancedColorInfo.Anonymous.Anonymous.advancedColorEnabled;
+
+                    return isEnabled;
+                }
             }
         }
 
         return false;
     }
+
 
 }
 

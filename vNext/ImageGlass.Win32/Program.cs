@@ -35,6 +35,7 @@ sealed class Program
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
 #if DEBUG
         .LogToTrace()
+        .WithDeveloperTools()
 #endif
         .UseWin32()
         .UseSkia()
