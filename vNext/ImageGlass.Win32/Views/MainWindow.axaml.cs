@@ -22,12 +22,15 @@ using Avalonia.Interactivity;
 using ImageGlass.Common;
 using ImageGlass.Win32.Common.Types;
 using ImageGlass.Win32.Models;
+using System;
 
 namespace ImageGlass.Win32.Views;
 
 public partial class MainWindow : Window
 {
     public MainWindowModel VM => (MainWindowModel)DataContext!;
+    public nint Handle => GetTopLevel(this)?.TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
+
 
     public MainWindow()
     {
@@ -44,10 +47,12 @@ public partial class MainWindow : Window
         await Core.ColorProfileService.InitializeAsync(this);
     }
 
+
     private void ColorProfileService_Changed(IWindowColorProfileProvider sender, ColorProfileChangedEventArgs e)
     {
         VM.Title = $"{e.IsHdr} | {e.ProfilePath}";
     }
+
 
     protected override void OnKeyDown(KeyEventArgs e)
     {

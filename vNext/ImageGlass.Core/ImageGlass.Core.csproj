@@ -20,4 +20,8 @@
     </PackageReference>
     <PackageReference Include="Magick.NET-Q8-OpenMP-x64" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UI\BaseControls\" />
+  </ItemGroup>
 </Project>
