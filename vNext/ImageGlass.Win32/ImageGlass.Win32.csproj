@@ -56,7 +56,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ImageGlass.Core\ImageGlass.Core.csproj" />
+    <ProjectReference Include="..\ImageGlass.Lib\ImageGlass.Lib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
