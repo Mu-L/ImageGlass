@@ -39,16 +39,15 @@ public partial class Config
         get => field;
         set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
+            if (field == value) return;
 
-                if (OnPropertyChanged(value, oldValue))
-                {
-                    // load theme
-                    _ = LoadCurrentThemeAsync(field, AccentColor, true, true, false);
-                }
+            var oldValue = field;
+            field = value;
+
+            if (OnPropertyChanged(value, oldValue))
+            {
+                // load theme
+                _ = LoadCurrentThemeAsync(field, AccentColor, true, true, false);
             }
         }
     } = true;
@@ -63,16 +62,15 @@ public partial class Config
         get => field;
         set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
+            if (field == value) return;
 
-                if (OnPropertyChanged(value, oldValue))
-                {
-                    Theme.LoadColors(AccentColor);
-                    Core.OnThemeChanged(nameof(IgTheme.ComputedColors));
-                }
+            var oldValue = field;
+            field = value;
+
+            if (OnPropertyChanged(value, oldValue))
+            {
+                Theme.LoadColors(AccentColor);
+                Core.OnThemeChanged(nameof(IgTheme.ComputedColors));
             }
         }
     }
@@ -86,15 +84,14 @@ public partial class Config
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
+            if (field == value) return;
 
-                if (OnPropertyChanged(value, oldValue))
-                {
-                    Core.OnThemeChanged();
-                }
+            var oldValue = field;
+            field = value;
+
+            if (OnPropertyChanged(value, oldValue))
+            {
+                Core.OnThemeChanged();
             }
         }
     } = new();
@@ -108,15 +105,14 @@ public partial class Config
     {
         get; set
         {
-            if (field != value)
-            {
-                var oldValue = field;
-                field = value;
+            if (field == value) return;
 
-                if (OnPropertyChanged(value, oldValue))
-                {
-                    Core.OnLanguageChanged();
-                }
+            var oldValue = field;
+            field = value;
+
+            if (OnPropertyChanged(value, oldValue))
+            {
+                Core.OnLanguageChanged();
             }
         }
     } = new();

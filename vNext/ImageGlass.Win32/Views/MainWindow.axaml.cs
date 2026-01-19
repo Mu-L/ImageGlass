@@ -35,6 +35,29 @@ public partial class MainWindow : Win32Window
     {
         InitializeComponent();
         CloseWindowHotkeys = [new(Key.Escape)];
+
+        Core.AppInstance.InstanceInvoked += AppInstance_InstanceInvoked;
+    }
+
+
+    private void AppInstance_InstanceInvoked(Lib.Common.Types.AppInstance sender, Lib.Common.Types.InstanceInvokedEventArgs e)
+    {
+        if (WindowState == Avalonia.Controls.WindowState.Minimized)
+        {
+            WindowState = Avalonia.Controls.WindowState.Normal;
+        }
+
+        Activate();
+        Topmost = true;
+        Topmost = Core.Config.EnableWindowTopMost;
+
+        VM.Title = e.Command + "\r\n" + string.Join("\r\n", e.Arguments);
+
+        if (e.Command.Equals("toggle-frameless"))
+        {
+            _ = bool.TryParse(e.Arguments[0], out var isFrameless);
+            IsFrameless = isFrameless;
+        }
     }
 
 
@@ -59,9 +82,7 @@ public partial class MainWindow : Win32Window
         base.OnKeyDown(e);
 
         IsFrameless = !IsFrameless;
-
-
-
+        Core.AppInstance.SendArgsToExistingInstances($"toggle-frameless", IsFrameless.ToString());
     }
 
 

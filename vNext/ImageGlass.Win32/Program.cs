@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using ImageGlass.Common;
+using ImageGlass.Common.Types;
 using System;
 
 namespace ImageGlass.Win32;
@@ -27,8 +29,26 @@ sealed class Program
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
+    public static int Main(string[] args)
+    {
+        // load app configs
+        Core.Args = Environment.GetCommandLineArgs();
+        Core.Config = Config.Load(Config.CONFIG_USER);
+
+
+        // handle single instance
+        if (!Core.Config.EnableMultiInstances)
+        {
+            if (!Core.AppInstance.IsFirstInstance)
+            {
+                Core.AppInstance.SendArgsToExistingInstances(IgExeParams.SINGLE_INSTANCE, args);
+                return 0;
+            }
+        }
+
+        return BuildAvaloniaApp()
+            .StartWithClassicDesktopLifetime(args);
+    }
 
 
     // Avalonia configuration, don't remove; also used by visual designer.

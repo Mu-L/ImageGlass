@@ -21,6 +21,9 @@ namespace ImageGlass.Common.Types;
 
 public static class IgExeParams
 {
+    public static string SINGLE_INSTANCE => "single-instance";
+
+
     // UI result options
     public static string SHOW_UI => "--ui";
     public static string HIDE_ADMIN_REQUIRED_ERROR_UI => "--hide-admin-error-ui";

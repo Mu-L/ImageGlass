@@ -19,7 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
+using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using System;
 
@@ -88,7 +90,37 @@ public partial class IgWindow : Window
 
 
 
-    #region Override methods
+    #region Events & Override methods
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
+        Core.ThemeChanged += Core_ThemeChanged;
+        Core.LanguageChanged += Core_LanguageChanged;
+    }
+
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+
+        Core.ThemeChanged -= Core_ThemeChanged;
+        Core.LanguageChanged -= Core_LanguageChanged;
+    }
+
+
+    private void Core_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
+    {
+        OnIgThemeChanged(e);
+    }
+
+
+    private void Core_LanguageChanged(object? sender, EventArgs e)
+    {
+        OnIgLanguageChanged();
+    }
+
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {
@@ -138,13 +170,13 @@ public partial class IgWindow : Window
     }
 
 
-    #endregion // Override methods
+    #endregion // Events & Override methods
 
 
 
 
     /// <summary>
-    /// Updates backdrop style of the window.
+    /// Occurs whenthe backdrop style is changed.
     /// </summary>
     protected virtual void OnBackdropStyleChanged(BackdropStyle style)
     {
@@ -154,6 +186,10 @@ public partial class IgWindow : Window
     }
 
 
+    /// <summary>
+    /// Occurs when the frameless mode is changed.
+    /// </summary>
+    /// <param name="enable"></param>
     protected virtual void OnFramelessModeChanged(bool enable)
     {
         if (enable)
@@ -167,6 +203,18 @@ public partial class IgWindow : Window
             ExtendClientAreaToDecorationsHint = false;
         }
     }
+
+
+    /// <summary>
+    /// Occurs when the app theme is changed.
+    /// </summary>
+    protected virtual void OnIgThemeChanged(ThemePackChangedEventArgs e) { }
+
+
+    /// <summary>
+    /// Occurs when the app language is changed.
+    /// </summary>
+    protected virtual void OnIgLanguageChanged() { }
 
 
 
