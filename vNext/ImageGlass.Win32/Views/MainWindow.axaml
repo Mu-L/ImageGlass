@@ -1,18 +1,29 @@
-<Window xmlns="https://github.com/avaloniaui"
+<ui32:Win32Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:ImageGlass.Win32.Models"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui32="using:ImageGlass.Win32.UI"
+        xmlns:v="using:ImageGlass.Win32.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ImageGlass.Win32.Views.MainWindow"
         xmlns:local="using:ImageGlass.UI.Viewer"
         x:DataType="vm:MainWindowModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="{CompiledBinding Title}">
+
+    <Design.DataContext>
+        <!--
+            This only sets the DataContext for the previewer in an IDE,
+            to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs)
+        -->
+        <vm:MainWindowModel />
+    </Design.DataContext>
+
     
     <local:ViewerControl x:Name="Viewer">
 		<TextBlock Text="{CompiledBinding Title}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
     </local:ViewerControl>
     
 
-</Window>
+</ui32:Win32Window>

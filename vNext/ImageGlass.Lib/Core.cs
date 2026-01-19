@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia;
+using Avalonia.Styling;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using System;
@@ -106,6 +108,7 @@ public static class Core
 
     #region Public Methods
 
+
     /// <summary>
     /// Disposes all singletons.
     /// </summary>
@@ -117,6 +120,22 @@ public static class Core
 
         ColorProfileService?.Dispose();
         ColorProfileService = null;
+    }
+
+
+    /// <summary>
+    /// Sets dark mode.
+    /// </summary>
+    public static void SetDarkMode(bool enable)
+    {
+        if (enable)
+        {
+            Application.Current?.RequestedThemeVariant = ThemeVariant.Dark;
+        }
+        else
+        {
+            Application.Current?.RequestedThemeVariant = ThemeVariant.Light;
+        }
     }
 
 

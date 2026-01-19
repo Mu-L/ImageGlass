@@ -13,10 +13,11 @@ GetICMProfile
 CreateDC
 DeleteDC
 
-
 DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO
 DISPLAYCONFIG_SOURCE_DEVICE_NAME
 GetDisplayConfigBufferSizes
 QueryDisplayConfig
 DisplayConfigGetDeviceInfo
 
+
+DwmSetWindowAttribute

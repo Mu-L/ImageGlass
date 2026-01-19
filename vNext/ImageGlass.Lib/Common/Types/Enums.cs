@@ -27,8 +27,6 @@ public enum BackdropStyle
     Mica,
     MicaAlt,
     Acrylic,
-    AcrylicThin,
-    Transparent,
 
     /// <summary>
     /// No backdrop.

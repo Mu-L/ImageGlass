@@ -16,20 +16,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia.Controls;
+using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Styling;
 using ImageGlass.Common;
 using ImageGlass.Win32.Common.Types;
 using ImageGlass.Win32.Models;
-using System;
+using ImageGlass.Win32.UI;
 
 namespace ImageGlass.Win32.Views;
 
-public partial class MainWindow : Window
+
+public partial class MainWindow : Win32Window
 {
     public MainWindowModel VM => (MainWindowModel)DataContext!;
-    public nint Handle => GetTopLevel(this)?.TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
 
 
     public MainWindow()
@@ -57,7 +58,16 @@ public partial class MainWindow : Window
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
+
+
+        Application.Current!.RequestedThemeVariant = Application.Current!.ActualThemeVariant == ThemeVariant.Light
+            ? ThemeVariant.Dark
+            : ThemeVariant.Light;
+
     }
 
 
+
+
 }
+
