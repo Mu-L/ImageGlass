@@ -71,6 +71,19 @@ public class Hotkey
     public override string ToString() => KeyString;
 
 
+    /// <summary>
+    /// Checks if the provided hotkey is same.
+    /// </summary>
+    public bool IsSame(Key key, KeyModifiers modifiers)
+    {
+        if (Key != key) return false;
+        if (Control && !modifiers.HasFlag(KeyModifiers.Control)) return false;
+        if (Shift && !modifiers.HasFlag(KeyModifiers.Shift)) return false;
+        if (Alt && !modifiers.HasFlag(KeyModifiers.Alt)) return false;
+
+        return true;
+    }
+
 
 
     /// <summary>
