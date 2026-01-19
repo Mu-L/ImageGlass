@@ -16,10 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Styling;
 using ImageGlass.Common;
 using ImageGlass.Win32.Common.Types;
 using ImageGlass.Win32.Models;
@@ -36,6 +34,7 @@ public partial class MainWindow : Win32Window
     public MainWindow()
     {
         InitializeComponent();
+        CloseWindowHotkeys = [new(Key.Escape)];
     }
 
 
@@ -59,10 +58,9 @@ public partial class MainWindow : Win32Window
     {
         base.OnKeyDown(e);
 
+        IsFrameless = !IsFrameless;
 
-        Application.Current!.RequestedThemeVariant = Application.Current!.ActualThemeVariant == ThemeVariant.Light
-            ? ThemeVariant.Dark
-            : ThemeVariant.Light;
+
 
     }
 

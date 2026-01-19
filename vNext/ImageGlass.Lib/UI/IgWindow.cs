@@ -63,16 +63,32 @@ public partial class IgWindow : Window
         AvaloniaProperty.Register<Window, Hotkey[]>(nameof(CloseWindowHotkeys), []);
 
 
-    #endregion // Public Properties
 
+    /// <summary>
+    /// Gets, sets the frameless mode.
+    /// </summary>
+    public bool IsFrameless
+    {
+        get => GetValue(IsFramelessProperty);
+        set => SetValue(IsFramelessProperty, value);
+    }
+    public static readonly StyledProperty<bool> IsFramelessProperty =
+        AvaloniaProperty.Register<Window, bool>(nameof(IsFrameless), true);
+
+
+    #endregion // Public Properties
 
 
 
     public IgWindow()
     {
         OnBackdropStyleChanged(BackdropStyle);
+        OnFramelessModeChanged(IsFrameless);
     }
 
+
+
+    #region Override methods
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {
@@ -84,6 +100,11 @@ public partial class IgWindow : Window
             OnBackdropStyleChanged((BackdropStyle)e.NewValue!);
         }
 
+        // IsFrameless
+        else if (e.Property == IsFramelessProperty)
+        {
+            OnFramelessModeChanged((bool)e.NewValue!);
+        }
     }
 
 
@@ -104,6 +125,24 @@ public partial class IgWindow : Window
     }
 
 
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    {
+        base.OnPointerPressed(e);
+
+        // Frameless mode: enable window dragging at top border
+        if (IsFrameless)
+        {
+            var p = e.GetCurrentPoint(this);
+            if (p.Position.Y < 15) BeginMoveDrag(e);
+        }
+    }
+
+
+    #endregion // Override methods
+
+
+
+
     /// <summary>
     /// Updates backdrop style of the window.
     /// </summary>
@@ -113,5 +152,22 @@ public partial class IgWindow : Window
             ? null
             : Brushes.Transparent;
     }
+
+
+    protected virtual void OnFramelessModeChanged(bool enable)
+    {
+        if (enable)
+        {
+            ExtendClientAreaToDecorationsHint = true;
+            ExtendClientAreaTitleBarHeightHint = 100;
+            ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.NoChrome;
+        }
+        else
+        {
+            ExtendClientAreaToDecorationsHint = false;
+        }
+    }
+
+
 
 }
