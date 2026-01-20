@@ -19,8 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
-using ImageGlass.Win32.Models;
-using ImageGlass.Win32.Views;
+using ImageGlass.Win32.WindowModels;
+using ImageGlass.Win32.Windows;
 using System;
 
 namespace ImageGlass.Win32;
@@ -69,9 +69,9 @@ sealed class Program
         {
             var app = (App?)builder.Instance;
 
-            app?.CreateMainWindowIfNotExist(new MainWindow
-            {
-                DataContext = new MainWindowModel(),
-            });
+            var mainWindow = new MainWindow();
+            mainWindow.DataContext = new MainWindowModel(mainWindow);
+
+            app?.CreateMainWindowIfNotExist(mainWindow);
         });
 }

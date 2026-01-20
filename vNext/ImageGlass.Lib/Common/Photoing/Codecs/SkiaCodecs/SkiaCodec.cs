@@ -303,16 +303,9 @@ public static partial class SkiaCodec
         var info = new SKImageInfo((int)imgM.Width, (int)imgM.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
         var bmp = new SKBitmap(info);
 
-        // force exact Skia layout
-        imgM.Format = MagickFormat.Bgra;
-        imgM.Depth = 8;
-
-        // get pointer of imgM pixels
-        using var pixels = imgM.GetPixelsUnsafe();
-        var imgMPtr = pixels.GetAreaPointer(0, 0, imgM.Width, imgM.Height);
-
+        // use direct pixels from magick image
+        var imgMPtr = MagickCodec.GetPixelsPointer(imgM);
         bmp.SetPixels(imgMPtr);
-
 
         return bmp;
     }

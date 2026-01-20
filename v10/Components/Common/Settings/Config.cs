@@ -629,7 +629,7 @@ public partial class Config : IgReactive
     /// Gets, sets the interpolation mode to render the viewing image
     /// when the zoom factor is <c>less than or equals 100%</c>.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
+    //[JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleDown
     {
         get => Get(ConfigId.ImageInterpolationScaleDown, ImageInterpolation.MultiSampleLinear);
@@ -640,7 +640,7 @@ public partial class Config : IgReactive
     /// Gets, sets the interpolation mode to render the viewing image
     /// when the zoom factor is <c>greater than 100%</c>.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
+    //[JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleUp
     {
         get => Get(ConfigId.ImageInterpolationScaleUp, ImageInterpolation.NearestNeighbor);

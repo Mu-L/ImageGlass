@@ -2,23 +2,17 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:ImageGlass.Win32.Models"
+        xmlns:vm="using:ImageGlass.Win32.WindowModels"
         xmlns:ui32="using:ImageGlass.Win32.UI"
-        xmlns:v="using:ImageGlass.Win32.Views"
-        xmlns:local="using:ImageGlass.UI.Viewer"
-        xmlns:cm="clr-namespace:ImageGlass.Common.Core"
+        xmlns:views="using:ImageGlass.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="ImageGlass.Win32.Views.MainWindow" 
+        x:Class="ImageGlass.Win32.Windows.MainWindow" 
         x:DataType="vm:MainWindowModel"
-        x:CompileBindings="True"
         BackdropStyle="{CompiledBinding Config.WindowBackdrop}"
         IsFrameless="{CompiledBinding Config.EnableFrameless}"
-        Icon="/Assets/avalonia-logo.ico"
         Title="{CompiledBinding Title}">
 
-    <local:ViewerControl x:Name="Viewer">
-		<TextBlock Text="{CompiledBinding Title}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-    </local:ViewerControl>
+    <views:MainView DataContext="{CompiledBinding .}"></views:MainView>
     
 
 </ui32:Win32Window>

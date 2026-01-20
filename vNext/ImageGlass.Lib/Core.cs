@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.Lib.Common.Types;
@@ -178,38 +179,50 @@ public static class Core
 
 
     /// <summary>
-    /// Raises <see cref="ThemeChanged"/> event.
+    /// Raises <see cref="ThemeChanged"/> event on UI thread.
     /// </summary>
     public static void OnThemeChanged(string propName = "")
     {
-        ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
+        Dispatcher.UIThread.Post(() =>
+        {
+            ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
+        });
     }
 
 
     /// <summary>
-    /// Raises <see cref="ThemeChanged"/> event.
+    /// Raises <see cref="ThemeChanged"/> event on UI thread.
     /// </summary>
     public static void OnLanguageChanged()
     {
-        LanguageChanged?.Invoke(null, new());
+        Dispatcher.UIThread.Post(() =>
+        {
+            LanguageChanged?.Invoke(null, new());
+        });
     }
 
 
     /// <summary>
-    /// Raises <see cref="PhotoUnloadedEventArgs"/> event.
+    /// Raises <see cref="PhotoUnloadedEventArgs"/> event on UI thread.
     /// </summary>
     public static void OnPhotoUnloaded(PhotoUnloadedEventArgs e)
     {
-        PhotoUnloaded?.Invoke(null, e);
+        Dispatcher.UIThread.Post(() =>
+        {
+            PhotoUnloaded?.Invoke(null, e);
+        });
     }
 
 
     /// <summary>
-    /// Raises <see cref="PhotoSaved"/> event.
+    /// Raises <see cref="PhotoSaved"/> event on UI thread.
     /// </summary>
     public static void OnPhotoSaved(PhotoSaveEventArgs e)
     {
-        PhotoSaved?.Invoke(null, e);
+        Dispatcher.UIThread.Post(() =>
+        {
+            PhotoSaved?.Invoke(null, e);
+        });
     }
 
 

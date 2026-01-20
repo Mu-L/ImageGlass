@@ -22,10 +22,10 @@ using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using ImageGlass.Lib.Common.Types;
 using ImageGlass.Win32.Common.Types;
-using ImageGlass.Win32.Models;
 using ImageGlass.Win32.UI;
+using ImageGlass.Win32.WindowModels;
 
-namespace ImageGlass.Win32.Views;
+namespace ImageGlass.Win32.Windows;
 
 
 public partial class MainWindow : Win32Window
@@ -56,7 +56,6 @@ public partial class MainWindow : Win32Window
             Topmost = true;
             Topmost = Core.Config.EnableWindowTopMost;
         }
-
 
         VM.Title = e.Command + "\r\n" + string.Join("\r\n", e.Arguments);
     }

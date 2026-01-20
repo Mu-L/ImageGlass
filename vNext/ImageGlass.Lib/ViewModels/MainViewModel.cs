@@ -16,45 +16,41 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
-using ImageGlass.Win32.Common;
 
-namespace ImageGlass.Win32.UI;
+namespace ImageGlass.ViewModels;
 
-
-public partial class Win32Window : IgWindow
+public partial class MainViewModel : IgReactive
 {
-    public Win32Window()
-    {
-
-    }
-
+    public static Config Config => Core.Config;
 
 
     /// <summary>
-    /// <inheritdoc/>
+    /// Gets the owner window.
     /// </summary>
-    protected override void OnBackdropStyleChanged(BackdropStyle style)
+    public virtual IgWindow Window { get; }
+
+
+    /// <summary>
+    /// Gets, sets the window title.
+    /// </summary>
+    public string Title
     {
-        base.OnBackdropStyleChanged(style);
-
-        var type = style switch
+        get; set
         {
-            BackdropStyle.Mica => SystemBackdropType.Mica,
-            BackdropStyle.MicaAlt => SystemBackdropType.MicaAlt,
-            BackdropStyle.Acrylic => SystemBackdropType.Acrylic,
-            BackdropStyle.None => SystemBackdropType.None,
-            _ => SystemBackdropType.Auto,
-        };
+            if (field.Equals(value)) return;
 
-        WindowApi.SetWindowBackdrop(Handle, type);
+            field = value;
+            OnPropertyChanged();
+        }
+    } = "ImageGlass";
+
+
+    public MainViewModel(IgWindow window)
+    {
+        Window = window;
     }
 
 }
-
-
-
-
-
-

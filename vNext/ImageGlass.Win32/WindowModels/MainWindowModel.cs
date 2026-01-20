@@ -16,45 +16,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common.Types;
-using ImageGlass.UI;
-using ImageGlass.Win32.Common;
+using ImageGlass.ViewModels;
+using ImageGlass.Win32.Windows;
 
-namespace ImageGlass.Win32.UI;
+namespace ImageGlass.Win32.WindowModels;
 
-
-public partial class Win32Window : IgWindow
+public class MainWindowModel : MainViewModel
 {
-    public Win32Window()
-    {
-
-    }
-
-
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    protected override void OnBackdropStyleChanged(BackdropStyle style)
+    public override MainWindow Window => (MainWindow)base.Window;
+
+
+    public MainWindowModel(MainWindow window) : base(window)
     {
-        base.OnBackdropStyleChanged(style);
 
-        var type = style switch
-        {
-            BackdropStyle.Mica => SystemBackdropType.Mica,
-            BackdropStyle.MicaAlt => SystemBackdropType.MicaAlt,
-            BackdropStyle.Acrylic => SystemBackdropType.Acrylic,
-            BackdropStyle.None => SystemBackdropType.None,
-            _ => SystemBackdropType.Auto,
-        };
-
-        WindowApi.SetWindowBackdrop(Handle, type);
     }
-
 }
-
-
-
-
-
-

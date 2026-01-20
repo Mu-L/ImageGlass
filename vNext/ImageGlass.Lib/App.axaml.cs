@@ -19,7 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using ImageGlass.Lib.UI;
+using Avalonia.Platform;
+using Avalonia.Styling;
+using ImageGlass.UI;
 
 namespace ImageGlass.Common;
 
@@ -46,8 +48,11 @@ public partial class App : Application
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public override async void OnFrameworkInitializationCompleted()
+    public override void OnFrameworkInitializationCompleted()
     {
+        LoadAppTheme();
+
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = MainWindow;
@@ -65,6 +70,23 @@ public partial class App : Application
         if (_mainWindow is not null) return;
 
         _mainWindow = window;
+    }
+
+
+    private void LoadAppTheme()
+    {
+        // get accent, color mode & load theme for the first time
+        var info = PlatformSettings!.GetColorValues();
+        var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;
+
+        BHelper.RunSync(() => Core.Config.LoadCurrentThemeAsync(isSystemDarkMode, info.AccentColor1, true, true, false));
+
+        // set the initial app color mode
+        if (Core.Config.Theme.Settings.IsDarkMode)
+        {
+            RequestedThemeVariant = ThemeVariant.Dark;
+        }
+        else RequestedThemeVariant = ThemeVariant.Light;
     }
 
 }

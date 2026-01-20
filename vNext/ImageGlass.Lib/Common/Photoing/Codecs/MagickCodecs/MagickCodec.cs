@@ -505,8 +505,9 @@ public static partial class MagickCodec
         CancellationToken token = default)
     {
         using var imgM = await QuickDecodeAsync(filePath, desiredWidth, desiredHeight, minSize, maxSize, token);
+        if (imgM is null) return null;
 
-        return imgM?.ToByteArray(outputFormat);
+        return imgM.ToByteArray(outputFormat);
     }
 
 
@@ -637,6 +638,28 @@ public static partial class MagickCodec
         }
 
         return (mimeType, byteData);
+    }
+
+
+    /// <summary>
+    /// Gets pointer of Magick image pixels.
+    /// </summary>
+    public static nint GetPixelsPointer(MagickImage? imgM, MagickFormat format = MagickFormat.Bgra,
+        int x = 0, int y = 0, int? width = null, int? height = null)
+    {
+        if (imgM is null) return IntPtr.Zero;
+
+        // convert to common format
+        imgM.Format = format;
+        imgM.Depth = 8;
+
+        // get pointer of imgM pixels
+        using var pixels = imgM.GetPixelsUnsafe();
+        var w = width ?? (int)imgM.Width;
+        var h = height ?? (int)imgM.Height;
+        var imgMPtr = pixels.GetAreaPointer(x, y, (uint)w, (uint)h);
+
+        return imgMPtr;
     }
 
 

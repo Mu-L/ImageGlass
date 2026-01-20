@@ -21,11 +21,16 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Platform;
 using ImageGlass.Common;
+using ImageGlass.Common.AppThemes;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using System;
+using System.IO;
+using System.Threading.Tasks;
 
-namespace ImageGlass.Lib.UI;
+namespace ImageGlass.UI;
 
 
 public partial class IgWindow : Window
@@ -37,6 +42,12 @@ public partial class IgWindow : Window
     /// Gets the handle of this window.
     /// </summary>
     public nint Handle => GetTopLevel(this)?.TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
+
+
+    /// <summary>
+    /// Gets the DPI scale of this window.
+    /// </summary>
+    public double DpiScale => VisualRoot?.RenderScaling ?? 1.0;
 
 
 
@@ -86,18 +97,27 @@ public partial class IgWindow : Window
     {
         OnBackdropStyleChanged(BackdropStyle);
         OnFramelessModeChanged(IsFrameless);
+
+        Core.ThemeChanged += Core_ThemeChanged;
+        Core.LanguageChanged += Core_LanguageChanged;
     }
 
 
 
     #region Events & Override methods
 
+    protected override void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+
+
+    }
+
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
 
-        Core.ThemeChanged += Core_ThemeChanged;
-        Core.LanguageChanged += Core_LanguageChanged;
+
     }
 
 
@@ -112,6 +132,14 @@ public partial class IgWindow : Window
 
     private void Core_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {
+        // a new theme just loaded
+        if (string.IsNullOrEmpty(e.PropertyName))
+        {
+            // update app icon
+            _ = UpdateWindowIconAsync();
+        }
+
+
         OnIgThemeChanged(e);
     }
 
@@ -216,6 +244,46 @@ public partial class IgWindow : Window
     /// </summary>
     protected virtual void OnIgLanguageChanged() { }
 
+
+
+
+
+    #region Internal Methods
+
+    /// <summary>
+    /// Updates icon for window and taskbar.
+    /// </summary>
+    protected async Task UpdateWindowIconAsync()
+    {
+        // 1. get full path of icon
+        var iconPath = Core.Config.Theme.GetIconPath(IgThemeIcon.AppLogo);
+        var useDefaultIcon = !File.Exists(iconPath);
+
+
+        // 2. use default icon as logo
+        if (useDefaultIcon)
+        {
+            // get default logo icon if theme's app logo does not exist
+            using var stream = AssetLoader.Open(new Uri("avares://ImageGlass.Lib/Assets/icon256.ico"));
+            Icon = new WindowIcon(stream);
+
+            return;
+        }
+
+
+        // 2. use theme icon as logo
+        // decode the logo
+        var size = (int)DpiScale * 64;
+        var bytes = await MagickCodec.QuickDecodeAsync(iconPath, ImageMagick.MagickFormat.Ico, size, size);
+        if (bytes is null) return;
+
+        // update icon
+        using var ms = new MemoryStream(bytes);
+        Icon = new WindowIcon(ms);
+    }
+
+
+    #endregion // Internal Methods
 
 
 }
