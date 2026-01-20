@@ -30,7 +30,7 @@ namespace ImageGlass.Common;
 
 public static class Core
 {
-    public static AppInstance AppInstance = new AppInstance("{f2a83de1-b9ac-4461-81d0-cc4547b0b27b}");
+    public static readonly AppInstance AppInstance = new AppInstance("{f2a83de1-b9ac-4461-81d0-cc4547b0b27b}");
 
     public static event EventHandler? LanguageChanged;
     public static event EventHandler<ThemePackChangedEventArgs>? ThemeChanged;

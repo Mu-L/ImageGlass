@@ -75,7 +75,7 @@ public partial class IgWindow : Window
         set => SetValue(IsFramelessProperty, value);
     }
     public static readonly StyledProperty<bool> IsFramelessProperty =
-        AvaloniaProperty.Register<Window, bool>(nameof(IsFrameless), true);
+        AvaloniaProperty.Register<Window, bool>(nameof(IsFrameless), false);
 
 
     #endregion // Public Properties
