@@ -19,30 +19,52 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using ImageGlass.Win32.Models;
-using ImageGlass.Win32.Views;
+using ImageGlass.Lib.UI;
 
-namespace ImageGlass.Win32;
+namespace ImageGlass.Common;
 
 public partial class App : Application
 {
+    private IgWindow? _mainWindow = null;
+
+
+    /// <summary>
+    /// Gets the main window.
+    /// </summary>
+    public IgWindow MainWindow => _mainWindow!;
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
     }
 
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public override async void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowModel(),
-            };
+            desktop.MainWindow = MainWindow;
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+
+    /// <summary>
+    /// Create a new main window.
+    /// </summary>
+    public void CreateMainWindowIfNotExist(IgWindow window)
+    {
+        if (_mainWindow is not null) return;
+
+        _mainWindow = window;
     }
 
 }

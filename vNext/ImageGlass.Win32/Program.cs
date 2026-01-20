@@ -19,6 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
+using ImageGlass.Win32.Models;
+using ImageGlass.Win32.Views;
 using System;
 
 namespace ImageGlass.Win32;
@@ -62,5 +64,14 @@ sealed class Program
         .With(new SkiaOptions
         {
             MaxGpuResourceSizeBytes = long.MaxValue,
+        })
+        .AfterSetup(builder =>
+        {
+            var app = (App?)builder.Instance;
+
+            app?.CreateMainWindowIfNotExist(new MainWindow
+            {
+                DataContext = new MainWindowModel(),
+            });
         });
 }

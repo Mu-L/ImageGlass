@@ -20,6 +20,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
+using ImageGlass.Lib.Common.Types;
 using ImageGlass.Win32.Common.Types;
 using ImageGlass.Win32.Models;
 using ImageGlass.Win32.UI;
@@ -41,7 +42,7 @@ public partial class MainWindow : Win32Window
     }
 
 
-    private void AppInstance_InstanceInvoked(Lib.Common.Types.AppInstance sender, Lib.Common.Types.InstanceInvokedEventArgs e)
+    private void AppInstance_InstanceInvoked(AppInstance sender, InstanceInvokedEventArgs e)
     {
         // handle single instance command
         if (e.Command.Equals(IgExeParams.SINGLE_INSTANCE))
