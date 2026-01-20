@@ -21,6 +21,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Styling;
+using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
 
 namespace ImageGlass.Common;
@@ -50,8 +51,7 @@ public partial class App : Application
     /// </summary>
     public override void OnFrameworkInitializationCompleted()
     {
-        LoadAppTheme();
-
+        ApplyUIConfigs();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -70,6 +70,18 @@ public partial class App : Application
         if (_mainWindow is not null) return;
 
         _mainWindow = window;
+    }
+
+
+    private void ApplyUIConfigs()
+    {
+        LoadAppTheme();
+
+        // initialize Magick decoder
+        MagickCodec.Initialize();
+
+        // load app language
+        _ = Core.Config.LoadCurrentLanguageAsync();
     }
 
 

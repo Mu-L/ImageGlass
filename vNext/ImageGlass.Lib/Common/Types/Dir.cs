@@ -29,11 +29,6 @@ public static class Dir
     public static string Themes => "Themes";
 
     /// <summary>
-    /// Gets the Assets folder name
-    /// </summary>
-    public static string Assets => "Assets";
-
-    /// <summary>
     /// Gets the Icons folder name
     /// </summary>
     public static string Icons => "Icons";
