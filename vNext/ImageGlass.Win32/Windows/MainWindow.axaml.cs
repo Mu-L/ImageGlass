@@ -16,9 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using ImageGlass.Lib.Common.Types;
@@ -84,17 +84,23 @@ public partial class MainWindow : Win32Window
         base.OnKeyDown(e);
         if (e.Handled) return;
 
-        var w = new DialogWindow()
+        var w = new ModalWindow()
         {
+            Heading = "This program is distributed in the hope that it will be useful",
+            Description = "This program is free software:",
+            Details = "you can redistribute it and/or modify\r\n\r\nit under the terms of the GNU General Public License as published by\r\n\r\nthe Free Software Foundation, either version 3 of the License, or\r\n\r\n(at your option) any later version.\r\n\r\nImageGlass Project - Image viewer for Windows\r\n\r\nCopyright (C) 2010 - 2026 DUONG DIEU PHAP\r\nProject homepage: https://imageglass.org",
+            Note = "You should have received a copy",
+            InputValue = "999",
+            IsInputVisible = true,
+            IsRememberOptionVisible = true,
+            Thumbnail = new Bitmap(@"C:\Users\d2pha\Desktop\pic.jpg"),
+            ThumbnailIcon = new Bitmap(@"C:\Users\d2pha\Desktop\png\light-bulb.png"),
+
             Button1Text = "OK",
             Button2Text = "Cancel",
             Button3Text = "Apply",
             IsButton2Visible = true,
             IsButton3Visible = true,
-            DialogContent = new TextBlock
-            {
-                Text = $"Hello {e.Key}",
-            },
         };
         var res = await w.ShowAsync(this);
 

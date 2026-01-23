@@ -109,7 +109,7 @@ public partial class IgWindow : Window
     {
         base.OnOpened(e);
 
-
+        OnIgLanguageChanged();
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -198,7 +198,7 @@ public partial class IgWindow : Window
         if (IsFrameless)
         {
             var p = e.GetCurrentPoint(this);
-            if (p.Position.Y < 15) BeginMoveDrag(e);
+            if (p.Properties.IsLeftButtonPressed && p.Position.Y < 15) BeginMoveDrag(e);
         }
     }
 
