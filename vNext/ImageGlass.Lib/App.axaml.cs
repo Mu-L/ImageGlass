@@ -117,7 +117,9 @@ public partial class App : Application
     {
         // load theme for the first time
         var info = PlatformSettings!.GetColorValues();
-        PlatformSettings_ColorValuesChanged(PlatformSettings, info);
+        var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;
+        _ = Core.Config.LoadCurrentThemeAsync(isSystemDarkMode, info.AccentColor1, true, true, false);
+
 
         // initialize Magick decoder
         MagickCodec.Initialize();
