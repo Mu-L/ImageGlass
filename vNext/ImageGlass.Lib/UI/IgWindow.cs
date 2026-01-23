@@ -139,7 +139,6 @@ public partial class IgWindow : Window
             _ = UpdateWindowIconAsync();
         }
 
-
         OnIgThemeChanged(e);
     }
 

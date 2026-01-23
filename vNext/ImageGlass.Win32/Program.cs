@@ -22,6 +22,8 @@ using ImageGlass.Common.Types;
 using ImageGlass.Win32.WindowModels;
 using ImageGlass.Win32.Windows;
 using System;
+using System.Globalization;
+using System.Threading;
 
 namespace ImageGlass.Win32;
 
@@ -33,6 +35,13 @@ sealed class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        // use independent culture for formatting or parsing a string
+        CultureInfo.DefaultThreadCurrentCulture =
+            CultureInfo.DefaultThreadCurrentUICulture =
+            Thread.CurrentThread.CurrentCulture =
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+
         // load app configs
         Core.Args = Environment.GetCommandLineArgs();
         Core.Config = Config.Load(Config.CONFIG_USER);
@@ -51,6 +60,7 @@ sealed class Program
         return BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }
+
 
 
     // Avalonia configuration, don't remove; also used by visual designer.
@@ -74,4 +84,6 @@ sealed class Program
 
             app?.CreateMainWindowIfNotExist(mainWindow);
         });
+
+
 }

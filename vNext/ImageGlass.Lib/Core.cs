@@ -185,6 +185,11 @@ public static class Core
     {
         Dispatcher.UIThread.Post(() =>
         {
+            // update color mode for app level
+            Application.Current?.RequestedThemeVariant = Core.Config.Theme.Settings.IsDarkMode
+                ? ThemeVariant.Dark
+                : ThemeVariant.Light;
+
             ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
         });
     }

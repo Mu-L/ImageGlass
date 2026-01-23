@@ -20,9 +20,12 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
-using Avalonia.Styling;
+using Avalonia.Threading;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Common;
 
@@ -42,8 +45,18 @@ public partial class App : Application
     /// </summary>
     public override void Initialize()
     {
+        // App-level exception handler for non-debugger
+        if (!Debugger.IsAttached)
+        {
+            Dispatcher.UIThread.UnhandledException += UIThread_UnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        }
+
         AvaloniaXamlLoader.Load(this);
     }
+
+
 
 
     /// <summary>
@@ -52,6 +65,8 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         ApplyUIConfigs();
+
+        PlatformSettings?.ColorValuesChanged += PlatformSettings_ColorValuesChanged;
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -73,32 +88,42 @@ public partial class App : Application
     }
 
 
+
+    private static void UIThread_UnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+
+    }
+
+
+    private static void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+
+    }
+
+    private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+
+    }
+
+
+    private void PlatformSettings_ColorValuesChanged(object? sender, PlatformColorValues e)
+    {
+        Core.Config.IsSystemDarkMode = e.ThemeVariant == PlatformThemeVariant.Dark;
+        Core.Config.AccentColor = e.AccentColor1;
+    }
+
+
     private void ApplyUIConfigs()
     {
-        LoadAppTheme();
+        // load theme for the first time
+        var info = PlatformSettings!.GetColorValues();
+        PlatformSettings_ColorValuesChanged(PlatformSettings, info);
 
         // initialize Magick decoder
         MagickCodec.Initialize();
 
         // load app language
         _ = Core.Config.LoadCurrentLanguageAsync();
-    }
-
-
-    private void LoadAppTheme()
-    {
-        // get accent, color mode & load theme for the first time
-        var info = PlatformSettings!.GetColorValues();
-        var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;
-
-        BHelper.RunSync(() => Core.Config.LoadCurrentThemeAsync(isSystemDarkMode, info.AccentColor1, true, true, false));
-
-        // set the initial app color mode
-        if (Core.Config.Theme.Settings.IsDarkMode)
-        {
-            RequestedThemeVariant = ThemeVariant.Dark;
-        }
-        else RequestedThemeVariant = ThemeVariant.Light;
     }
 
 }
