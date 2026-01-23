@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Types;
-using ImageGlass.UI;
+using ImageGlass.Lib.UI.Windowing;
 using ImageGlass.Win32.Common;
 
 namespace ImageGlass.Win32.UI;
@@ -35,9 +35,9 @@ public partial class Win32Window : IgWindow
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    protected override void OnBackdropStyleChanged(BackdropStyle style)
+    protected override void OnIgBackdropStyleChanged(BackdropStyle style)
     {
-        base.OnBackdropStyleChanged(style);
+        base.OnIgBackdropStyleChanged(style);
 
         var type = style switch
         {

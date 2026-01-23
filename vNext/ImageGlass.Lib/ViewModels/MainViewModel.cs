@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
-using ImageGlass.UI;
+using ImageGlass.Lib.UI.Windowing;
 
 namespace ImageGlass.ViewModels;
 

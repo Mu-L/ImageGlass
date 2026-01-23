@@ -30,12 +30,11 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Lib.UI.Windowing;
 
 
 public partial class IgWindow : Window
 {
-
     #region Public Properties
 
     /// <summary>
@@ -95,8 +94,8 @@ public partial class IgWindow : Window
 
     public IgWindow()
     {
-        OnBackdropStyleChanged(BackdropStyle);
-        OnFramelessModeChanged(IsFrameless);
+        OnIgBackdropStyleChanged(BackdropStyle);
+        OnIgFramelessModeChanged(IsFrameless);
 
         Core.ThemeChanged += Core_ThemeChanged;
         Core.LanguageChanged += Core_LanguageChanged;
@@ -156,31 +155,38 @@ public partial class IgWindow : Window
         // BackdropStyle
         if (e.Property == BackdropStyleProperty)
         {
-            OnBackdropStyleChanged((BackdropStyle)e.NewValue!);
+            OnIgBackdropStyleChanged((BackdropStyle)e.NewValue!);
         }
 
         // IsFrameless
         else if (e.Property == IsFramelessProperty)
         {
-            OnFramelessModeChanged((bool)e.NewValue!);
+            OnIgFramelessModeChanged((bool)e.NewValue!);
         }
     }
 
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
-        base.OnKeyDown(e);
-
-
         // check if the hotkey for closing window is pressed
         foreach (var hk in CloseWindowHotkeys)
         {
             if (hk.IsSame(e.Key, e.KeyModifiers))
             {
-                Close();
+                OnIgCloseWindowHotkeyPressed(e);
+                if (!e.Handled)
+                {
+                    e.Handled = true;
+                    Close();
+                    return;
+                }
+
                 break;
             }
         }
+
+
+        base.OnKeyDown(e);
     }
 
 
@@ -200,12 +206,16 @@ public partial class IgWindow : Window
     #endregion // Events & Override methods
 
 
+    /// <summary>
+    /// Occurs when one of the hotkey for closing window is pressed.
+    /// </summary>
+    protected virtual void OnIgCloseWindowHotkeyPressed(KeyEventArgs e) { }
 
 
     /// <summary>
     /// Occurs whenthe backdrop style is changed.
     /// </summary>
-    protected virtual void OnBackdropStyleChanged(BackdropStyle style)
+    protected virtual void OnIgBackdropStyleChanged(BackdropStyle style)
     {
         Background = style == BackdropStyle.None
             ? null
@@ -217,12 +227,11 @@ public partial class IgWindow : Window
     /// Occurs when the frameless mode is changed.
     /// </summary>
     /// <param name="enable"></param>
-    protected virtual void OnFramelessModeChanged(bool enable)
+    protected virtual void OnIgFramelessModeChanged(bool enable)
     {
         if (enable)
         {
             ExtendClientAreaToDecorationsHint = true;
-            ExtendClientAreaTitleBarHeightHint = 100;
             ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.NoChrome;
         }
         else

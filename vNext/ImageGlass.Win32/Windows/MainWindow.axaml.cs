@@ -16,11 +16,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using ImageGlass.Lib.Common.Types;
+using ImageGlass.Lib.UI.Windowing;
 using ImageGlass.Win32.Common.Types;
 using ImageGlass.Win32.UI;
 using ImageGlass.Win32.WindowModels;
@@ -77,11 +79,26 @@ public partial class MainWindow : Win32Window
     }
 
 
-    protected override void OnKeyDown(KeyEventArgs e)
+    protected override async void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
+        if (e.Handled) return;
 
-        Core.Config.EnableFrameless = !Core.Config.EnableFrameless;
+        var w = new DialogWindow()
+        {
+            Button1Text = "OK",
+            Button2Text = "Cancel",
+            Button3Text = "Apply",
+            IsButton2Visible = true,
+            IsButton3Visible = true,
+            DialogContent = new TextBlock
+            {
+                Text = $"Hello {e.Key}",
+            },
+        };
+        var res = await w.ShowAsync(this);
+
+        VM.Title = $"{res}";
     }
 
 

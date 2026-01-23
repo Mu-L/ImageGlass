@@ -74,7 +74,7 @@ public class Hotkey
     /// <summary>
     /// Checks if the provided hotkey is same.
     /// </summary>
-    public bool IsSame(Key key, KeyModifiers modifiers)
+    public bool IsSame(Key key, KeyModifiers modifiers = KeyModifiers.None)
     {
         if (Key != key) return false;
         if (Control && !modifiers.HasFlag(KeyModifiers.Control)) return false;
