@@ -45,6 +45,7 @@ public static class Color_Exts
 
     /// <summary>
     /// Converts to <see cref="SolidColorBrush"/>.
+    /// <c>NOTE:</c> Must call from UI thread.
     /// </summary>
     public static SolidColorBrush ToBrush(this Color c)
     {

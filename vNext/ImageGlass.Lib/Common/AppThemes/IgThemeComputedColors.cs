@@ -24,12 +24,6 @@ namespace ImageGlass.Common.AppThemes;
 
 public partial class IgThemeComputedColors : IgReactive
 {
-    /// <summary>
-    /// The accent color parsed from theme pack.
-    /// </summary>
-    public Color AccentColor { get; private set; } = new();
-
-
     // Viewer
     public Color TextColor { get; private set; } = new();
     public Color BgColor { get; private set; } = new();
@@ -78,13 +72,9 @@ public partial class IgThemeComputedColors : IgReactive
     {
         if (colors is null) return;
 
-        // load user defined Accent color
-        var color = BHelper.ColorFromHex(colors.AccentColor);
-        if (AccentColor != color) AccentColor = color;
-
 
         // Viewer
-        color = BHelper.ColorFromHex(colors.TextColor, accent);
+        var color = BHelper.ColorFromHex(colors.TextColor, accent);
         if (TextColor != color)
         {
             TextColor = color;

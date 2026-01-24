@@ -403,11 +403,19 @@ public partial class ModalWindow : DialogWindow
 
 
         // 2. create note panel
-        var noteEl = new TextBlock
+        var noteContainer = new Border
         {
-            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-            [!TextBlock.TextProperty] = this[!NoteProperty],
-            [!TextBlock.IsVisibleProperty] = this[!IsNoteVisibleProperty],
+            ClipToBounds = true,
+            [!Border.CornerRadiusProperty] = Resx.CreateBinding(ResxId.ControlCornerRadius),
+
+            Child = new TextBlock
+            {
+                Padding = new Thickness(12),
+                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                [!TextBlock.BackgroundProperty] = Resx.CreateBinding(ResxId.IG_BackgroundDangerBrush),
+                [!TextBlock.TextProperty] = this[!NoteProperty],
+                [!TextBlock.IsVisibleProperty] = this[!IsNoteVisibleProperty],
+            }
         };
         var chkRememberOption = new CheckBox
         {
@@ -423,7 +431,7 @@ public partial class ModalWindow : DialogWindow
             Spacing = 8,
             Orientation = Avalonia.Layout.Orientation.Vertical,
         };
-        notePanel.Children.Add(noteEl);
+        notePanel.Children.Add(noteContainer);
         notePanel.Children.Add(chkRememberOption);
 
 

@@ -106,15 +106,17 @@ public partial class App : Application
     }
 
 
-    private void PlatformSettings_ColorValuesChanged(object? sender, PlatformColorValues e)
+    private async void PlatformSettings_ColorValuesChanged(object? sender, PlatformColorValues e)
     {
-        Core.Config.IsSystemDarkMode = e.ThemeVariant == PlatformThemeVariant.Dark;
+        Core.IsSystemDarkMode = e.ThemeVariant == PlatformThemeVariant.Dark;
 
-        // update accent color when there is no custom accent color 
-        if (Core.Config.Theme.UseSystemAccent)
-        {
-            Core.Config.AccentColor = e.AccentColor1;
-        }
+        // load theme
+        await Core.Config.LoadCurrentThemeAsync(Core.IsSystemDarkMode, true, true, false);
+
+        // load & compute accent colors
+        Core.AccentColor = Core.Config.Theme.UseSystemAccent
+            ? e.AccentColor1
+            : Core.Config.Theme.AccentColor;
     }
 
 
@@ -129,12 +131,12 @@ public partial class App : Application
         var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;
         _ = Task.Run(async () =>
         {
-            await Core.Config.LoadCurrentThemeAsync(isSystemDarkMode, Core.Config.AccentColor, true, true, false);
+            await Core.Config.LoadCurrentThemeAsync(isSystemDarkMode, true, true, false);
 
-            // update app accent color
-            Core.Config.AccentColor = Core.Config.Theme.UseSystemAccent
+            // load & compute accent colors
+            Core.AccentColor = Core.Config.Theme.UseSystemAccent
                 ? info.AccentColor1
-                : Core.Config.Theme.ComputedColors.AccentColor;
+                : Core.Config.Theme.AccentColor;
         });
 
 

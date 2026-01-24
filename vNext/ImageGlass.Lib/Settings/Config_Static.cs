@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia.Media;
 using ImageGlass.Common.Actions;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
@@ -370,50 +369,43 @@ public partial class Config
     /// </param>
     /// <param name="forceUpdateBackground">Force updating background according to theme value</param>
     /// <exception cref="ArgumentException"></exception>
-    public async Task LoadCurrentThemeAsync(bool darkMode, Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
+    public async Task LoadCurrentThemeAsync(bool darkMode,
+        bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
     {
-        // 2. get the theme folder name
+        // 1. get the theme folder name
         var themeFolderName = darkMode ? DarkTheme : LightTheme;
         if (string.IsNullOrEmpty(themeFolderName))
         {
             themeFolderName = Const.DEFAULT_THEME;
         }
 
-        // 3. check if theme pack is already loaded
+        // 2. check if theme pack is already loaded
         if (themeFolderName.Equals(Theme.FolderName, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        // 4. load theme pack
-        var th = await FindAndLoadThemePackAsync(themeFolderName, accent, useFallBackTheme, throwIfThemeInvalid);
+        // 3. load theme pack
+        var th = await FindAndLoadThemePackAsync(themeFolderName, useFallBackTheme, throwIfThemeInvalid);
 
-        // 5. update the name of dark/light theme
+        // 4. update the name of dark/light theme
         if (darkMode) DarkTheme = th.FolderName;
         else LightTheme = th.FolderName;
 
 
-        // 6. load background color
+        // 5. load background color
         if (BackgroundColor == Theme.Colors.BgColor || forceUpdateBackground)
         {
             BackgroundColor = th.Colors.BgColor;
         }
 
 
-        // 1. save instance settings
-        WithNoReactive(() =>
-        {
-            IsSystemDarkMode = darkMode;
-
-            var useSystemAccent = string.IsNullOrWhiteSpace(th.Colors.AccentColor);
-            if (useSystemAccent && accent is not null)
-            {
-                AccentColor = accent.Value;
-            }
-        });
-
-        // 7. set to the current theme
+        // 6. set to the current theme
         Theme = th;
+
+
+        // 7. update app colors
+        Core.UpdateAppColorResources();
     }
 
 
@@ -422,24 +414,24 @@ public partial class Config
     /// </summary>
     /// <exception cref="ArgumentException"></exception>
     private static async Task<IgTheme> FindAndLoadThemePackAsync(string themeFolderName,
-        Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid)
+        bool useFallBackTheme, bool throwIfThemeInvalid)
     {
         // 1. look for theme pack in the Config dir
         var themeConfigPath = BHelper.ConfigDir(Dir.Themes, themeFolderName);
-        var th = await new IgTheme().LoadAsync(themeConfigPath, accent);
+        var th = await new IgTheme().LoadAsync(themeConfigPath);
 
         if (!th.IsValid)
         {
             // 2. look for theme pack in the base dir
             var baseThemeConfigPath = BHelper.BaseDir(Dir.Themes, themeFolderName);
-            th = await new IgTheme().LoadAsync(baseThemeConfigPath, accent);
+            th = await new IgTheme().LoadAsync(baseThemeConfigPath);
 
             // 3. cannot find theme, use fall back theme
             if (!th.IsValid && useFallBackTheme)
             {
                 // 4. load default theme
                 baseThemeConfigPath = BHelper.BaseDir(Dir.Themes, Const.DEFAULT_THEME);
-                th = await new IgTheme().LoadAsync(baseThemeConfigPath, accent);
+                th = await new IgTheme().LoadAsync(baseThemeConfigPath);
             }
         }
 

@@ -20,6 +20,7 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
@@ -62,6 +63,32 @@ public static class Core
     /// Gets, sets app busy state.
     /// </summary>
     public static bool IsBusy { get; set; } = false;
+
+
+    /// <summary>
+    /// Gets, sets the current color mode of OS.
+    /// </summary>
+    public static bool IsSystemDarkMode { get; set; } = true;
+
+
+    /// <summary>
+    /// Gets the system accent color.
+    /// </summary>
+    public static Color AccentColor
+    {
+        get => field;
+        set
+        {
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+
+            Core.UpdateAccentColorResources();
+            Config.Theme.LoadColors(value);
+            Core.OnThemeChanged(nameof(IgTheme.ComputedColors));
+        }
+    } = new();
 
 
     /// <summary>
@@ -150,17 +177,44 @@ public static class Core
 
 
     /// <summary>
-    /// Updates the app resources according to current accent color & theme.
+    /// Updates the app resources according to current color mode.
     /// </summary>
     public static void UpdateAppColorResources()
     {
         if (Application.Current is not App app) return;
 
-
-        // 3. update app accent color
-        if (!Core.Config.Theme.UseSystemAccent)
+        Dispatcher.UIThread.Post(() =>
         {
-            var accent = Core.Config.AccentColor;
+            // update situational colors
+            if (Core.Config.Theme.Settings.IsDarkMode)
+            {
+                Resx.Set(ResxId.IG_BackgroundInfoBrush, IgTheme.BackgroundInfoDark.ToBrush());
+                Resx.Set(ResxId.IG_BackgroundSuccessBrush, IgTheme.BackgroundSuccessDark.ToBrush());
+                Resx.Set(ResxId.IG_BackgroundWarningBrush, IgTheme.BackgroundWarningDark.ToBrush());
+                Resx.Set(ResxId.IG_BackgroundDangerBrush, IgTheme.BackgroundDangerDark.ToBrush());
+            }
+            else
+            {
+                Resx.Set(ResxId.IG_BackgroundInfoBrush, IgTheme.BackgroundInfoLight.ToBrush());
+                Resx.Set(ResxId.IG_BackgroundSuccessBrush, IgTheme.BackgroundSuccessLight.ToBrush());
+                Resx.Set(ResxId.IG_BackgroundWarningBrush, IgTheme.BackgroundWarningLight.ToBrush());
+                Resx.Set(ResxId.IG_BackgroundDangerBrush, IgTheme.BackgroundDangerLight.ToBrush());
+            }
+        });
+    }
+
+
+    /// <summary>
+    /// Updates the app resources according to current accent color
+    /// </summary>
+    public static void UpdateAccentColorResources()
+    {
+        if (Application.Current is not App app) return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            // update app accent color
+            var accent = Core.AccentColor;
             var accentLight1 = accent.WithBrightness(0.2f);
             var accentLight2 = accent.WithBrightness(0.3f);
             var accentLight3 = accent.WithBrightness(0.4f);
@@ -177,8 +231,7 @@ public static class Core
             Resx.Set(ResxId.SystemAccentColorDark1, accentDark1);
             Resx.Set(ResxId.SystemAccentColorDark2, accentDark2);
             Resx.Set(ResxId.SystemAccentColorDark3, accentDark3);
-        }
-
+        });
     }
 
 

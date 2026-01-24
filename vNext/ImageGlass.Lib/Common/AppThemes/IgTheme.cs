@@ -52,14 +52,28 @@ public partial class IgTheme : IgReactive
     /// <summary>
     /// Theme specs version, to check for compatibility.
     /// </summary>
-    [JsonIgnore]
-    public static float SPEC_VERSION => 9;
+    public static float SPEC_VERSION => 10;
 
     /// <summary>
     /// Filename of theme configuration since v9.0.
     /// </summary>
-    [JsonIgnore]
     public static string CONFIG_FILE => "igtheme.json";
+
+
+    // Situational Colors
+    // Light theme
+    public static Color BackgroundInfoLight => BHelper.ColorFromHex("#C2DAEC");
+    public static Color BackgroundSuccessLight => BHelper.ColorFromHex("#DFF6DD");
+    public static Color BackgroundWarningLight => BHelper.ColorFromHex("#FFF4CE");
+    public static Color BackgroundDangerLight => BHelper.ColorFromHex("#FDE7E9");
+
+
+    // Dark theme
+    public static Color BackgroundInfoDark => BHelper.ColorFromHex("#1A3244");
+    public static Color BackgroundSuccessDark => BHelper.ColorFromHex("#393D1B");
+    public static Color BackgroundWarningDark => BHelper.ColorFromHex("#433519");
+    public static Color BackgroundDangerDark => BHelper.ColorFromHex("#442726");
+
 
     #endregion // Static Properties
 
@@ -96,6 +110,13 @@ public partial class IgTheme : IgReactive
     /// </summary>
     [JsonIgnore]
     public IgThemeComputedColors ComputedColors => _computedColors;
+
+
+    /// <summary>
+    /// Gets the accent color parsed from theme pack.
+    /// </summary>
+    [JsonIgnore]
+    public Color AccentColor => BHelper.ColorFromHex(Colors.AccentColor);
 
     /// <summary>
     /// Gets the value indicates that the theme pack accent color follow system accent color.
@@ -136,9 +157,9 @@ public partial class IgTheme : IgReactive
     /// Reads theme config file and loads the theme properties.
     /// </summary>
     /// <returns>The current instance of this theme pack.</returns>
-    public IgTheme Load(string themeFolderPath, Color? accent = null)
+    public IgTheme Load(string themeFolderPath)
     {
-        return BHelper.RunSync(() => LoadAsync(themeFolderPath, accent));
+        return BHelper.RunSync(() => LoadAsync(themeFolderPath));
     }
 
 
@@ -146,7 +167,7 @@ public partial class IgTheme : IgReactive
     /// Reads theme config file and loads the theme properties.
     /// </summary>
     /// <returns>The current instance of this theme pack.</returns>
-    public async Task<IgTheme> LoadAsync(string themeFolderPath, Color? accent = null)
+    public async Task<IgTheme> LoadAsync(string themeFolderPath)
     {
         FolderPath = themeFolderPath;
 
@@ -183,9 +204,6 @@ public partial class IgTheme : IgReactive
             ToolbarIcons = th.ToolbarIcons;
         }
 
-        // load colors
-        LoadColors(accent);
-
         return this;
     }
 
@@ -193,7 +211,7 @@ public partial class IgTheme : IgReactive
     /// <summary>
     /// Loads the theme colors.
     /// </summary>
-    public void LoadColors(Color? accent = null)
+    public void LoadColors(Color accent)
     {
         ComputedColors.Load(Colors, accent);
 

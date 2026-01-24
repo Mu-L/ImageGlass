@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia.Media;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Localization;
 using System.Text.Json.Serialization;
@@ -29,53 +28,6 @@ public partial class Config
 
     // Public Reactive properties
     #region Public Reactive properties
-
-    /// <summary>
-    /// Gets, sets the current color mode of OS.
-    /// </summary>
-    [JsonIgnore]
-    public bool IsSystemDarkMode
-    {
-        get => field;
-        set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-
-            if (OnPropertyChanged(value, oldValue))
-            {
-                // load theme
-                _ = LoadCurrentThemeAsync(field, AccentColor, true, true, false);
-            }
-        }
-    } = true;
-
-
-    /// <summary>
-    /// Gets the system accent color.
-    /// </summary>
-    [JsonIgnore]
-    public Color AccentColor
-    {
-        get => field;
-        set
-        {
-            if (field == value) return;
-
-            var oldValue = field;
-            field = value;
-
-            if (OnPropertyChanged(value, oldValue))
-            {
-                Core.UpdateAppColorResources();
-                Theme.LoadColors(AccentColor);
-                Core.OnThemeChanged(nameof(IgTheme.ComputedColors));
-            }
-        }
-    }
-
 
     /// <summary>
     /// Gets, sets the current app theme pack.

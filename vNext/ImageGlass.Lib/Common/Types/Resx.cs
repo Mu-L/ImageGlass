@@ -84,4 +84,10 @@ public enum ResxId
     ControlCornerRadius,
     ContentControlThemeFontFamily,
     TextControlBackground,
+
+    // situational backgrounds
+    IG_BackgroundInfoBrush,
+    IG_BackgroundSuccessBrush,
+    IG_BackgroundWarningBrush,
+    IG_BackgroundDangerBrush,
 }
