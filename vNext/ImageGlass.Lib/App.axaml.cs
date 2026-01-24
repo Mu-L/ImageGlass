@@ -114,9 +114,9 @@ public partial class App : Application
         await Core.Config.LoadCurrentThemeAsync(Core.IsSystemDarkMode, true, true, false);
 
         // load & compute accent colors
-        Core.AccentColor = Core.Config.Theme.UseSystemAccent
+        Core.AccentColor = Core.Theme.UseSystemAccent
             ? e.AccentColor1
-            : Core.Config.Theme.AccentColor;
+            : Core.Theme.AccentColor;
     }
 
 
@@ -134,9 +134,9 @@ public partial class App : Application
             await Core.Config.LoadCurrentThemeAsync(isSystemDarkMode, true, true, false);
 
             // load & compute accent colors
-            Core.AccentColor = Core.Config.Theme.UseSystemAccent
+            Core.AccentColor = Core.Theme.UseSystemAccent
                 ? info.AccentColor1
-                : Core.Config.Theme.AccentColor;
+                : Core.Theme.AccentColor;
         });
 
 

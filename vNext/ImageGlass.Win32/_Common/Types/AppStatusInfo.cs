@@ -159,7 +159,7 @@ public partial class AppStatusInfo : DisposableImpl
                 frameInfo.Append('/');
                 frameInfo.Append(CoreWin32.Photos.CurrentMetadata.FrameCount);
 
-                return Core.Config.Lang[LangId._ImageInfo_FrameCount, frameInfo];
+                return Core.Lang[LangId._ImageInfo_FrameCount, frameInfo];
             }
 
             return null;
@@ -182,7 +182,7 @@ public partial class AppStatusInfo : DisposableImpl
                 listInfo.Append('/');
                 listInfo.Append(CoreWin32.Photos.Count);
 
-                return Core.Config.Lang[LangId._ImageInfo_ListCount, listInfo.ToString()];
+                return Core.Lang[LangId._ImageInfo_ListCount, listInfo.ToString()];
             }
 
             return null;
@@ -334,7 +334,7 @@ public partial class AppStatusInfo : DisposableImpl
 
             if (Core.ClipboardImage is not null)
             {
-                strBuilder.Append(Core.Config.Lang[LangId.FrmMain_ClipboardImage]);
+                strBuilder.Append(Core.Lang[LangId.FrmMain_ClipboardImage]);
                 count++;
             }
 

@@ -351,7 +351,7 @@ public partial class Config
         await lang.LoadAsync();
 
         // set app language
-        Lang = lang;
+        Core.Lang = lang;
     }
 
 
@@ -380,7 +380,7 @@ public partial class Config
         }
 
         // 2. check if theme pack is already loaded
-        if (themeFolderName.Equals(Theme.FolderName, StringComparison.OrdinalIgnoreCase))
+        if (themeFolderName.Equals(Core.Theme.FolderName, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
@@ -394,14 +394,14 @@ public partial class Config
 
 
         // 5. load background color
-        if (BackgroundColor == Theme.Colors.BgColor || forceUpdateBackground)
+        if (BackgroundColor == Core.Theme.Colors.BgColor || forceUpdateBackground)
         {
             BackgroundColor = th.Colors.BgColor;
         }
 
 
         // 6. set to the current theme
-        Theme = th;
+        Core.Theme = th;
 
 
         // 7. update app colors
@@ -438,7 +438,7 @@ public partial class Config
         // 5. throw error if theme is invalid
         if (!th.IsValid && throwIfThemeInvalid)
         {
-            throw new ArgumentException($"Unable to load '{themeFolderName}' theme pack. " +
+            throw new ArgumentException($"IGE: Unable to load '{themeFolderName}' theme pack. " +
                 $"Please make sure '{themeConfigPath}' file is valid.", nameof(themeFolderName));
         }
 

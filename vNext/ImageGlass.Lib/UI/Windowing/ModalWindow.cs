@@ -288,7 +288,7 @@ public partial class ModalWindow : DialogWindow
     {
         base.OnIgLanguageChanged();
 
-        RememberOptionText = Core.Config.Lang[LangId._DoNotShowThisMessageAgain];
+        RememberOptionText = Core.Lang[LangId._DoNotShowThisMessageAgain];
     }
 
 

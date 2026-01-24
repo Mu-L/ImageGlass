@@ -264,7 +264,7 @@ public partial class IgWindow : Window
     protected async Task UpdateWindowIconAsync()
     {
         // 1. get full path of icon
-        var iconPath = Core.Config.Theme.GetIconPath(IgThemeIcon.AppLogo);
+        var iconPath = Core.Theme.GetIconPath(IgThemeIcon.AppLogo);
         var useDefaultIcon = !File.Exists(iconPath);
 
 

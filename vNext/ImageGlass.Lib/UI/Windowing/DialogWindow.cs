@@ -472,8 +472,8 @@ public partial class DialogWindow : IgWindow
     /// </summary>
     protected void ApplyTheme()
     {
-        var isDarkMode = Core.Config.Theme.Settings.IsDarkMode;
-        var bg = Core.Config.Theme.ComputedColors.BgColor.NoAlpha();
+        var isDarkMode = Core.Theme.Settings.IsDarkMode;
+        var bg = Core.Theme.ComputedColors.BgColor.NoAlpha();
 
         // content bg
         var contentAlpha = isDarkMode ? 180 : 220;
@@ -482,7 +482,7 @@ public partial class DialogWindow : IgWindow
 
         // footer bg
         var footerAlpha = isDarkMode ? 100 : 150;
-        var footerBg = bg.Blend(Core.Config.Theme.InvertedBaseColor, 0.925f, footerAlpha);
+        var footerBg = bg.Blend(Core.Theme.InvertedBaseColor, 0.925f, footerAlpha);
         _footerEl.Background = new SolidColorBrush(footerBg);
     }
 

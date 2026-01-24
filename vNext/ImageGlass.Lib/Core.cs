@@ -22,6 +22,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
+using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.Lib.Common.Types;
@@ -85,8 +86,40 @@ public static class Core
             field = value;
 
             Core.UpdateAccentColorResources();
-            Config.Theme.LoadColors(value);
+            Core.Theme.LoadColors(value);
             Core.OnThemeChanged(nameof(IgTheme.ComputedColors));
+        }
+    } = new();
+
+
+    /// <summary>
+    /// Gets, sets the current app theme pack.
+    /// </summary>
+    public static IgTheme Theme
+    {
+        get; set
+        {
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            Core.OnThemeChanged();
+        }
+    } = new();
+
+
+    /// <summary>
+    /// Gets, sets the current language.
+    /// </summary>
+    public static IgLang Lang
+    {
+        get; set
+        {
+            if (field == value) return;
+
+            var oldValue = field;
+            field = value;
+            Core.OnLanguageChanged();
         }
     } = new();
 
@@ -186,7 +219,7 @@ public static class Core
         Dispatcher.UIThread.Post(() =>
         {
             // update situational colors
-            if (Core.Config.Theme.Settings.IsDarkMode)
+            if (Core.Theme.Settings.IsDarkMode)
             {
                 Resx.Set(ResxId.IG_BackgroundInfoBrush, IgTheme.BackgroundInfoDark.ToBrush());
                 Resx.Set(ResxId.IG_BackgroundSuccessBrush, IgTheme.BackgroundSuccessDark.ToBrush());
@@ -294,7 +327,7 @@ public static class Core
         Dispatcher.UIThread.Post(() =>
         {
             // update color mode for app level
-            Core.SetDarkMode(Core.Config.Theme.Settings.IsDarkMode);
+            Core.SetDarkMode(Core.Theme.Settings.IsDarkMode);
             ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
         });
     }
