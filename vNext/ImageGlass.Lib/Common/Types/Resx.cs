@@ -80,12 +80,8 @@ public enum ResxId
     SystemAccentColorDark2,
     SystemAccentColorDark3,
 
-    // accent brushes
-    SystemAccentColorBrush,
-    SystemAccentColorLight1Brush,
-    SystemAccentColorLight2Brush,
-    SystemAccentColorLight3Brush,
-    SystemAccentColorDark1Brush,
-    SystemAccentColorDark2Brush,
-    SystemAccentColorDark3Brush,
+    // control styles
+    ControlCornerRadius,
+    ContentControlThemeFontFamily,
+    TextControlBackground,
 }

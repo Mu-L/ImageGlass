@@ -101,7 +101,10 @@ public static class Const
 
 
 
+    public const string FONT_CODE = "Cascadia Code, Consolas, SF Mono, Menlo, Monaco, Courier New, monospace";
     public const double FONT_SIZE_TITLE = 20;
     public const double FONT_SIZE_SUBTITLE = 18;
+    public const double FONT_SIZE_SMALL = 12;
+
 }
 

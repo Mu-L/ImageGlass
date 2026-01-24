@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -250,8 +251,14 @@ public partial class DialogWindow : IgWindow
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         base.OnPointerPressed(e);
+        if (e.Source is TextBox
+            or Button
+            or CheckBox
+            or SelectableTextBlock
+            or ScrollContentPresenter) return;
 
-        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        var p = e.GetCurrentPoint(this);
+        if (p.Properties.IsLeftButtonPressed)
         {
             BeginMoveDrag(e);
         }

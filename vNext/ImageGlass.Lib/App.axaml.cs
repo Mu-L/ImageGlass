@@ -120,6 +120,10 @@ public partial class App : Application
 
     private void ApplyUIConfigs()
     {
+        // update the base styles
+        Core.UpdateBaseResources();
+
+
         // load theme for the first time
         var info = PlatformSettings!.GetColorValues();
         var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;

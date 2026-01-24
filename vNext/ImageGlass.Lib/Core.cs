@@ -17,8 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.Lib.Common.Types;
@@ -128,6 +130,59 @@ public static class Core
 
 
     /// <summary>
+    /// Updates base controls resources
+    /// </summary>
+    public static void UpdateBaseResources()
+    {
+        if (Application.Current is not App app) return;
+
+        // 1. use modern Segoe UI font
+        if (FontManager.Current.DefaultFontFamily.Name.Equals("Segoe UI"))
+        {
+            var fm = FontFamily.Parse("Segoe UI Variable Text");
+            Resx.Set(ResxId.ContentControlThemeFontFamily, fm);
+        }
+
+
+        // 2. update control styles
+        Resx.Set(ResxId.ControlCornerRadius, new CornerRadius(6));
+    }
+
+
+    /// <summary>
+    /// Updates the app resources according to current accent color & theme.
+    /// </summary>
+    public static void UpdateAppColorResources()
+    {
+        if (Application.Current is not App app) return;
+
+
+        // 3. update app accent color
+        if (!Core.Config.Theme.UseSystemAccent)
+        {
+            var accent = Core.Config.AccentColor;
+            var accentLight1 = accent.WithBrightness(0.2f);
+            var accentLight2 = accent.WithBrightness(0.3f);
+            var accentLight3 = accent.WithBrightness(0.4f);
+            var accentDark1 = accent.WithBrightness(-0.2f);
+            var accentDark2 = accent.WithBrightness(-0.3f);
+            var accentDark3 = accent.WithBrightness(-0.4f);
+
+
+            // update all accent-related resources
+            Resx.Set(ResxId.SystemAccentColor, accent);
+            Resx.Set(ResxId.SystemAccentColorLight1, accentLight1);
+            Resx.Set(ResxId.SystemAccentColorLight2, accentLight2);
+            Resx.Set(ResxId.SystemAccentColorLight3, accentLight3);
+            Resx.Set(ResxId.SystemAccentColorDark1, accentDark1);
+            Resx.Set(ResxId.SystemAccentColorDark2, accentDark2);
+            Resx.Set(ResxId.SystemAccentColorDark3, accentDark3);
+        }
+
+    }
+
+
+    /// <summary>
     /// Sets dark mode.
     /// </summary>
     public static void SetDarkMode(bool enable)
@@ -186,10 +241,7 @@ public static class Core
         Dispatcher.UIThread.Post(() =>
         {
             // update color mode for app level
-            Application.Current?.RequestedThemeVariant = Core.Config.Theme.Settings.IsDarkMode
-                ? ThemeVariant.Dark
-                : ThemeVariant.Light;
-
+            Core.SetDarkMode(Core.Config.Theme.Settings.IsDarkMode);
             ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
         });
     }

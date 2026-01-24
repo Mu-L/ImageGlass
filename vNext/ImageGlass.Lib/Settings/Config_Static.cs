@@ -16,14 +16,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia;
 using Avalonia.Media;
 using ImageGlass.Common.Actions;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
-using ImageGlass.Lib.Common.Types;
 using ImageGlass.UI.Viewer;
 using System;
 using System.Collections.ObjectModel;
@@ -455,48 +453,6 @@ public partial class Config
         return th;
     }
 
-
-    /// <summary>
-    /// Updates the app resources according to current accent color & theme.
-    /// </summary>
-    private static void UpdateAppResources()
-    {
-        if (Application.Current is not App app) return;
-
-
-        // update app accent color
-        if (!Core.Config.Theme.UseSystemAccent)
-        {
-            var accent = Core.Config.AccentColor;
-            var accentLight1 = accent.WithBrightness(0.2f);
-            var accentLight2 = accent.WithBrightness(0.3f);
-            var accentLight3 = accent.WithBrightness(0.4f);
-            var accentDark1 = accent.WithBrightness(-0.2f);
-            var accentDark2 = accent.WithBrightness(-0.3f);
-            var accentDark3 = accent.WithBrightness(-0.4f);
-
-
-            // update all accent-related resources
-            Resx.Set(ResxId.SystemAccentColor, accent);
-            Resx.Set(ResxId.SystemAccentColorLight1, accentLight1);
-            Resx.Set(ResxId.SystemAccentColorLight2, accentLight2);
-            Resx.Set(ResxId.SystemAccentColorLight3, accentLight3);
-            Resx.Set(ResxId.SystemAccentColorDark1, accentDark1);
-            Resx.Set(ResxId.SystemAccentColorDark2, accentDark2);
-            Resx.Set(ResxId.SystemAccentColorDark3, accentDark3);
-
-            // update accent brushes
-            Resx.Set(ResxId.SystemAccentColorBrush, new SolidColorBrush(accent));
-            Resx.Set(ResxId.SystemAccentColorLight1Brush, new SolidColorBrush(accentLight1));
-            Resx.Set(ResxId.SystemAccentColorLight2Brush, new SolidColorBrush(accentLight2));
-            Resx.Set(ResxId.SystemAccentColorLight3Brush, new SolidColorBrush(accentLight3));
-            Resx.Set(ResxId.SystemAccentColorDark1Brush, new SolidColorBrush(accentDark1));
-            Resx.Set(ResxId.SystemAccentColorDark2Brush, new SolidColorBrush(accentDark2));
-            Resx.Set(ResxId.SystemAccentColorDark3Brush, new SolidColorBrush(accentDark3));
-        }
-
-
-    }
 
     #endregion // Public methods
 

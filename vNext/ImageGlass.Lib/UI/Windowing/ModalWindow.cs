@@ -339,47 +339,58 @@ public partial class ModalWindow : DialogWindow
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Spacing = 16,
         };
-        var lblHeading = new SelectableTextBlock
+        var lblHeading = new TextBlock
         {
             MaxHeight = 200,
             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
             IsTabStop = false,
             FontSize = Const.FONT_SIZE_TITLE,
             FontWeight = Avalonia.Media.FontWeight.Medium,
-            [!SelectableTextBlock.TextProperty] = this[!HeadingProperty],
-            [!SelectableTextBlock.IsVisibleProperty] = this[!IsHeadingVisibleProperty],
-            [!SelectableTextBlock.ForegroundProperty] = Resx.CreateBinding(ResxId.SystemAccentColor),
+            [!TextBlock.TextProperty] = this[!HeadingProperty],
+            [!TextBlock.IsVisibleProperty] = this[!IsHeadingVisibleProperty],
+            [!TextBlock.ForegroundProperty] = Resx.CreateBinding(ResxId.SystemAccentColor),
         };
-        var lblDescription = new SelectableTextBlock
+        var lblDescription = new TextBlock
         {
             MaxHeight = 200,
             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
             IsTabStop = false,
-            [!SelectableTextBlock.TextProperty] = this[!DescriptionProperty],
-            [!SelectableTextBlock.IsVisibleProperty] = this[!IsDescriptionVisibleProperty],
+            [!TextBlock.TextProperty] = this[!DescriptionProperty],
+            [!TextBlock.IsVisibleProperty] = this[!IsDescriptionVisibleProperty],
         };
         _txtInput = new TextBox
         {
             [!TextBox.TextProperty] = this[!InputValueProperty],
             [!TextBox.IsVisibleProperty] = this[!IsInputVisibleProperty],
         };
-        var txtDetails = new TextBox
+        var lblDetails = new Border
         {
-            MinHeight = 50,
-            MaxHeight = 200,
-            FontSize = 12,
-            FontFamily = "Cascadia Mono, Consolas",
-            FontWeight = Avalonia.Media.FontWeight.SemiLight,
-            AcceptsReturn = true,
-            IsReadOnly = true,
-            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-            [!SelectableTextBlock.TextProperty] = this[!DetailsProperty],
-            [!SelectableTextBlock.IsVisibleProperty] = this[!IsDetailsVisibleProperty],
+            ClipToBounds = true,
+            [!Border.CornerRadiusProperty] = Resx.CreateBinding(ResxId.ControlCornerRadius),
+
+            Child = new ScrollViewer
+            {
+                MinHeight = 50,
+                MaxHeight = 150,
+                HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
+                VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+                Content = new SelectableTextBlock
+                {
+                    Padding = new Thickness(6),
+                    FontSize = Const.FONT_SIZE_SMALL,
+                    FontFamily = Const.FONT_CODE,
+                    FontWeight = Avalonia.Media.FontWeight.SemiLight,
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                    [!SelectableTextBlock.TextProperty] = this[!DetailsProperty],
+                    [!SelectableTextBlock.IsVisibleProperty] = this[!IsDetailsVisibleProperty],
+                    [!SelectableTextBlock.BackgroundProperty] = Resx.CreateBinding(ResxId.TextControlBackground),
+                },
+            }
         };
         rightSection.Children.Add(lblHeading);
         rightSection.Children.Add(lblDescription);
         rightSection.Children.Add(_txtInput);
-        rightSection.Children.Add(txtDetails);
+        rightSection.Children.Add(lblDetails);
 
         Grid.SetColumn(leftSection, 0);
         Grid.SetColumn(rightSection, 1);
