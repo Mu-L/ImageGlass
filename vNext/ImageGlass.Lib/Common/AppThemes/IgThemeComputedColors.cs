@@ -24,31 +24,40 @@ namespace ImageGlass.Common.AppThemes;
 
 public partial class IgThemeComputedColors : IgReactive
 {
+    /// <summary>
+    /// The accent color parsed from theme pack.
+    /// </summary>
+    public Color AccentColor { get; private set; } = new();
+
+
     // Viewer
-    public Color TextColor { get; set; } = new();
-    public Color BgColor { get; set; } = new();
-    public Color NavigationButtonColor { get; set; } = new();
+    public Color TextColor { get; private set; } = new();
+    public Color BgColor { get; private set; } = new();
+    public Color NavigationButtonColor { get; private set; } = new();
+
 
     // Toolbar
-    public Color ToolbarBgColor { get; set; } = new();
-    public Color ToolbarTextColor { get; set; } = new();
-    public Color ToolbarItemHoverColor { get; set; } = new();
-    public Color ToolbarItemActiveColor { get; set; } = new();
-    public Color ToolbarItemSelectedColor { get; set; } = new();
+    public Color ToolbarBgColor { get; private set; } = new();
+    public Color ToolbarTextColor { get; private set; } = new();
+    public Color ToolbarItemHoverColor { get; private set; } = new();
+    public Color ToolbarItemActiveColor { get; private set; } = new();
+    public Color ToolbarItemSelectedColor { get; private set; } = new();
+
 
     // Gallery
-    public Color GalleryBgColor { get; set; } = new();
-    public Color GalleryTextColor { get; set; } = new();
-    public Color GalleryItemHoverColor { get; set; } = new();
-    public Color GalleryItemActiveColor { get; set; } = new();
-    public Color GalleryItemSelectedColor { get; set; } = new();
+    public Color GalleryBgColor { get; private set; } = new();
+    public Color GalleryTextColor { get; private set; } = new();
+    public Color GalleryItemHoverColor { get; private set; } = new();
+    public Color GalleryItemActiveColor { get; private set; } = new();
+    public Color GalleryItemSelectedColor { get; private set; } = new();
+
 
     // Menu
-    public Color MenuBgColor { get; set; } = new();
-    public Color MenuBgHoverColor { get; set; } = new();
-    public Color MenuBgActiveColor { get; set; } = new();
-    public Color MenuTextColor { get; set; } = new();
-    public Color MenuTextHoverColor { get; set; } = new();
+    public Color MenuBgColor { get; private set; } = new();
+    public Color MenuBgHoverColor { get; private set; } = new();
+    public Color MenuBgActiveColor { get; private set; } = new();
+    public Color MenuTextColor { get; private set; } = new();
+    public Color MenuTextHoverColor { get; private set; } = new();
 
 
 
@@ -65,25 +74,29 @@ public partial class IgThemeComputedColors : IgReactive
     /// <summary>
     /// Computes colors from the color strings.
     /// </summary>
-    public void Load(IgThemeColors? colors = null, Color? accentColor = null)
+    public void Load(IgThemeColors? colors = null, Color? accent = null)
     {
         if (colors is null) return;
 
+        // load user defined Accent color
+        var color = BHelper.ColorFromHex(colors.AccentColor);
+        if (AccentColor != color) AccentColor = color;
+
 
         // Viewer
-        var color = BHelper.ColorFromHex(colors.TextColor, accentColor);
+        color = BHelper.ColorFromHex(colors.TextColor, accent);
         if (TextColor != color)
         {
             TextColor = color;
             OnPropertyChanged(nameof(TextColor));
         }
-        color = BHelper.ColorFromHex(colors.BgColor, accentColor);
+        color = BHelper.ColorFromHex(colors.BgColor, accent);
         if (BgColor != color)
         {
             BgColor = color;
             OnPropertyChanged(nameof(BgColor));
         }
-        color = BHelper.ColorFromHex(colors.NavigationButtonColor, accentColor);
+        color = BHelper.ColorFromHex(colors.NavigationButtonColor, accent);
         if (NavigationButtonColor != color)
         {
             NavigationButtonColor = color;
@@ -92,31 +105,31 @@ public partial class IgThemeComputedColors : IgReactive
 
 
         // Toolbar
-        color = BHelper.ColorFromHex(colors.ToolbarBgColor, accentColor);
+        color = BHelper.ColorFromHex(colors.ToolbarBgColor, accent);
         if (ToolbarBgColor != color)
         {
             ToolbarBgColor = color;
             OnPropertyChanged(nameof(ToolbarBgColor));
         }
-        color = BHelper.ColorFromHex(colors.ToolbarTextColor, accentColor);
+        color = BHelper.ColorFromHex(colors.ToolbarTextColor, accent);
         if (ToolbarTextColor != color)
         {
             ToolbarTextColor = color;
             OnPropertyChanged(nameof(ToolbarTextColor));
         }
-        color = BHelper.ColorFromHex(colors.ToolbarItemHoverColor, accentColor);
+        color = BHelper.ColorFromHex(colors.ToolbarItemHoverColor, accent);
         if (ToolbarItemHoverColor != color)
         {
             ToolbarItemHoverColor = color;
             OnPropertyChanged(nameof(ToolbarItemHoverColor));
         }
-        color = BHelper.ColorFromHex(colors.ToolbarItemActiveColor, accentColor);
+        color = BHelper.ColorFromHex(colors.ToolbarItemActiveColor, accent);
         if (ToolbarItemActiveColor != color)
         {
             ToolbarItemActiveColor = color;
             OnPropertyChanged(nameof(ToolbarItemActiveColor));
         }
-        color = BHelper.ColorFromHex(colors.ToolbarItemSelectedColor, accentColor);
+        color = BHelper.ColorFromHex(colors.ToolbarItemSelectedColor, accent);
         if (ToolbarItemSelectedColor != color)
         {
             ToolbarItemSelectedColor = color;
@@ -125,31 +138,31 @@ public partial class IgThemeComputedColors : IgReactive
 
 
         // Gallery
-        color = BHelper.ColorFromHex(colors.GalleryBgColor, accentColor);
+        color = BHelper.ColorFromHex(colors.GalleryBgColor, accent);
         if (GalleryBgColor != color)
         {
             GalleryBgColor = color;
             OnPropertyChanged(nameof(GalleryBgColor));
         }
-        color = BHelper.ColorFromHex(colors.GalleryTextColor, accentColor);
+        color = BHelper.ColorFromHex(colors.GalleryTextColor, accent);
         if (GalleryTextColor != color)
         {
             GalleryTextColor = color;
             OnPropertyChanged(nameof(GalleryTextColor));
         }
-        color = BHelper.ColorFromHex(colors.GalleryItemHoverColor, accentColor);
+        color = BHelper.ColorFromHex(colors.GalleryItemHoverColor, accent);
         if (GalleryItemHoverColor != color)
         {
             GalleryItemHoverColor = color;
             OnPropertyChanged(nameof(GalleryItemHoverColor));
         }
-        color = BHelper.ColorFromHex(colors.GalleryItemActiveColor, accentColor);
+        color = BHelper.ColorFromHex(colors.GalleryItemActiveColor, accent);
         if (GalleryItemActiveColor != color)
         {
             GalleryItemActiveColor = color;
             OnPropertyChanged(nameof(GalleryItemActiveColor));
         }
-        color = BHelper.ColorFromHex(colors.GalleryItemSelectedColor, accentColor);
+        color = BHelper.ColorFromHex(colors.GalleryItemSelectedColor, accent);
         if (GalleryItemSelectedColor != color)
         {
             GalleryItemSelectedColor = color;
@@ -158,31 +171,31 @@ public partial class IgThemeComputedColors : IgReactive
 
 
         // Menu
-        color = BHelper.ColorFromHex(colors.MenuBgColor, accentColor);
+        color = BHelper.ColorFromHex(colors.MenuBgColor, accent);
         if (MenuBgColor != color)
         {
             MenuBgColor = color;
             OnPropertyChanged(nameof(MenuBgColor));
         }
-        color = BHelper.ColorFromHex(colors.MenuBgHoverColor, accentColor);
+        color = BHelper.ColorFromHex(colors.MenuBgHoverColor, accent);
         if (MenuBgHoverColor != color)
         {
             MenuBgHoverColor = color;
             OnPropertyChanged(nameof(MenuBgHoverColor));
         }
-        color = BHelper.ColorFromHex(colors.MenuBgActiveColor, accentColor);
+        color = BHelper.ColorFromHex(colors.MenuBgActiveColor, accent);
         if (MenuBgActiveColor != color)
         {
             MenuBgActiveColor = color;
             OnPropertyChanged(nameof(MenuBgActiveColor));
         }
-        color = BHelper.ColorFromHex(colors.MenuTextColor, accentColor);
+        color = BHelper.ColorFromHex(colors.MenuTextColor, accent);
         if (MenuTextColor != color)
         {
             MenuTextColor = color;
             OnPropertyChanged(nameof(MenuTextColor));
         }
-        color = BHelper.ColorFromHex(colors.MenuTextHoverColor, accentColor);
+        color = BHelper.ColorFromHex(colors.MenuTextHoverColor, accent);
         if (MenuTextHoverColor != color)
         {
             MenuTextHoverColor = color;

@@ -24,6 +24,9 @@ namespace ImageGlass.Common.AppThemes;
 /// </summary>
 public class IgThemeColors
 {
+    public string AccentColor { get; set; } = string.Empty; // use system accent color
+
+
     // Viewer
     public string TextColor { get; set; } = "#d3d3d3";
     public string BgColor { get; set; } = "#151b1f00";

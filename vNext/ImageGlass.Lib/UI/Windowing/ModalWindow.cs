@@ -19,9 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media.Imaging;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
+using ImageGlass.Common.Types;
 using System.Diagnostics.CodeAnalysis;
 
 namespace ImageGlass.Lib.UI.Windowing;
@@ -341,13 +343,18 @@ public partial class ModalWindow : DialogWindow
         {
             MaxHeight = 200,
             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+            IsTabStop = false,
+            FontSize = Const.FONT_SIZE_TITLE,
+            FontWeight = Avalonia.Media.FontWeight.Medium,
             [!SelectableTextBlock.TextProperty] = this[!HeadingProperty],
             [!SelectableTextBlock.IsVisibleProperty] = this[!IsHeadingVisibleProperty],
+            [!SelectableTextBlock.ForegroundProperty] = new DynamicResourceExtension("SystemAccentColor"),
         };
         var lblDescription = new SelectableTextBlock
         {
             MaxHeight = 200,
             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+            IsTabStop = false,
             [!SelectableTextBlock.TextProperty] = this[!DescriptionProperty],
             [!SelectableTextBlock.IsVisibleProperty] = this[!IsDescriptionVisibleProperty],
         };
@@ -373,7 +380,6 @@ public partial class ModalWindow : DialogWindow
         rightSection.Children.Add(lblDescription);
         rightSection.Children.Add(_txtInput);
         rightSection.Children.Add(txtDetails);
-
 
         Grid.SetColumn(leftSection, 0);
         Grid.SetColumn(rightSection, 1);

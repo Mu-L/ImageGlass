@@ -98,6 +98,12 @@ public partial class IgTheme : IgReactive
     public IgThemeComputedColors ComputedColors => _computedColors;
 
     /// <summary>
+    /// Gets the value indicates that the theme pack accent color follow system accent color.
+    /// </summary>
+    [JsonIgnore]
+    public bool UseSystemAccent => string.IsNullOrWhiteSpace(Colors.AccentColor);
+
+    /// <summary>
     /// Gets the base color according to <see cref="Settings.IsDarkMode"/>.
     /// </summary>
     [JsonIgnore]

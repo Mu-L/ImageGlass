@@ -16,9 +16,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia;
 using Avalonia.Media;
 using ImageGlass.Common.Actions;
 using ImageGlass.Common.AppThemes;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer;
@@ -371,13 +373,6 @@ public partial class Config
     /// <exception cref="ArgumentException"></exception>
     public async Task LoadCurrentThemeAsync(bool darkMode, Color? accent, bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
     {
-        // 1. save instance settings
-        WithNoReactive(() =>
-        {
-            IsSystemDarkMode = darkMode;
-            if (accent != null) AccentColor = accent.Value;
-        });
-
         // 2. get the theme folder name
         var themeFolderName = darkMode ? DarkTheme : LightTheme;
         if (string.IsNullOrEmpty(themeFolderName))
@@ -404,6 +399,19 @@ public partial class Config
         {
             BackgroundColor = th.Colors.BgColor;
         }
+
+
+        // 1. save instance settings
+        WithNoReactive(() =>
+        {
+            IsSystemDarkMode = darkMode;
+
+            var useSystemAccent = string.IsNullOrWhiteSpace(th.Colors.AccentColor);
+            if (useSystemAccent && accent is not null)
+            {
+                AccentColor = accent.Value;
+            }
+        });
 
         // 7. set to the current theme
         Theme = th;
@@ -446,6 +454,45 @@ public partial class Config
         return th;
     }
 
+
+    private static void UpdateAppAccentResources()
+    {
+        if (Application.Current is not App app) return;
+
+
+        // update app accent color
+        if (!Core.Config.Theme.UseSystemAccent)
+        {
+            var accent = Core.Config.AccentColor;
+            var accentLight1 = accent.WithBrightness(0.2f);
+            var accentLight2 = accent.WithBrightness(0.3f);
+            var accentLight3 = accent.WithBrightness(0.4f);
+            var accentDark1 = accent.WithBrightness(-0.2f);
+            var accentDark2 = accent.WithBrightness(-0.3f);
+            var accentDark3 = accent.WithBrightness(-0.4f);
+
+
+            // update all accent-related resources
+            app.Resources["SystemAccentColor"] = accent;
+            app.Resources["SystemAccentColorLight1"] = accentLight1;
+            app.Resources["SystemAccentColorLight2"] = accentLight2;
+            app.Resources["SystemAccentColorLight3"] = accentLight3;
+            app.Resources["SystemAccentColorDark1"] = accentDark1;
+            app.Resources["SystemAccentColorDark2"] = accentDark2;
+            app.Resources["SystemAccentColorDark3"] = accentDark3;
+
+            // update accent brushes
+            Application.Current.Resources["SystemAccentColorBrush"] = new SolidColorBrush(accent);
+            Application.Current.Resources["SystemAccentColorLight1Brush"] = new SolidColorBrush(accentLight1);
+            Application.Current.Resources["SystemAccentColorLight2Brush"] = new SolidColorBrush(accentLight2);
+            Application.Current.Resources["SystemAccentColorLight3Brush"] = new SolidColorBrush(accentLight3);
+            Application.Current.Resources["SystemAccentColorDark1Brush"] = new SolidColorBrush(accentDark1);
+            Application.Current.Resources["SystemAccentColorDark2Brush"] = new SolidColorBrush(accentDark2);
+            Application.Current.Resources["SystemAccentColorDark3Brush"] = new SolidColorBrush(accentDark3);
+        }
+
+
+    }
 
     #endregion // Public methods
 

@@ -109,7 +109,12 @@ public partial class App : Application
     private void PlatformSettings_ColorValuesChanged(object? sender, PlatformColorValues e)
     {
         Core.Config.IsSystemDarkMode = e.ThemeVariant == PlatformThemeVariant.Dark;
-        Core.Config.AccentColor = e.AccentColor1;
+
+        // update accent color when there is no custom accent color 
+        if (Core.Config.Theme.UseSystemAccent)
+        {
+            Core.Config.AccentColor = e.AccentColor1;
+        }
     }
 
 
@@ -118,7 +123,16 @@ public partial class App : Application
         // load theme for the first time
         var info = PlatformSettings!.GetColorValues();
         var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;
-        _ = Core.Config.LoadCurrentThemeAsync(isSystemDarkMode, info.AccentColor1, true, true, false);
+        _ = Task.Run(async () =>
+        {
+            await Core.Config.LoadCurrentThemeAsync(isSystemDarkMode, Core.Config.AccentColor, true, true, false);
+
+            // update app accent color
+            Core.Config.AccentColor = Core.Config.Theme.UseSystemAccent
+                ? info.AccentColor1
+                : Core.Config.Theme.ComputedColors.AccentColor;
+        });
+
 
 
         // initialize Magick decoder

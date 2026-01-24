@@ -5,6 +5,7 @@
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
+
     <Application.Styles>
         <FluentTheme />
 
@@ -19,4 +20,13 @@
             </Setter>
         </Style>
     </Application.Styles>
+
+
+
+    <Application.Resources>
+        <SolidColorBrush x:Key="TextControlSelectionHighlightColor" 
+                         Color="{DynamicResource SystemAccentColor}" 
+                         Opacity="0.4"/>
+    </Application.Resources>
+
 </Application>

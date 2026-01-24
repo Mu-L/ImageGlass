@@ -40,6 +40,9 @@ public partial class MainWindow : Win32Window
         InitializeComponent();
         CloseWindowHotkeys = [new(Key.Escape)];
 
+        Width = 600;
+        Height = 400;
+
         Core.AppInstance.InstanceInvoked += AppInstance_InstanceInvoked;
     }
 
