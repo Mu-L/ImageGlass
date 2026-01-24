@@ -23,6 +23,7 @@ using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
+using ImageGlass.Lib.Common.Types;
 using ImageGlass.UI.Viewer;
 using System;
 using System.Collections.ObjectModel;
@@ -455,7 +456,10 @@ public partial class Config
     }
 
 
-    private static void UpdateAppAccentResources()
+    /// <summary>
+    /// Updates the app resources according to current accent color & theme.
+    /// </summary>
+    private static void UpdateAppResources()
     {
         if (Application.Current is not App app) return;
 
@@ -473,22 +477,22 @@ public partial class Config
 
 
             // update all accent-related resources
-            app.Resources["SystemAccentColor"] = accent;
-            app.Resources["SystemAccentColorLight1"] = accentLight1;
-            app.Resources["SystemAccentColorLight2"] = accentLight2;
-            app.Resources["SystemAccentColorLight3"] = accentLight3;
-            app.Resources["SystemAccentColorDark1"] = accentDark1;
-            app.Resources["SystemAccentColorDark2"] = accentDark2;
-            app.Resources["SystemAccentColorDark3"] = accentDark3;
+            Resx.Set(ResxId.SystemAccentColor, accent);
+            Resx.Set(ResxId.SystemAccentColorLight1, accentLight1);
+            Resx.Set(ResxId.SystemAccentColorLight2, accentLight2);
+            Resx.Set(ResxId.SystemAccentColorLight3, accentLight3);
+            Resx.Set(ResxId.SystemAccentColorDark1, accentDark1);
+            Resx.Set(ResxId.SystemAccentColorDark2, accentDark2);
+            Resx.Set(ResxId.SystemAccentColorDark3, accentDark3);
 
             // update accent brushes
-            Application.Current.Resources["SystemAccentColorBrush"] = new SolidColorBrush(accent);
-            Application.Current.Resources["SystemAccentColorLight1Brush"] = new SolidColorBrush(accentLight1);
-            Application.Current.Resources["SystemAccentColorLight2Brush"] = new SolidColorBrush(accentLight2);
-            Application.Current.Resources["SystemAccentColorLight3Brush"] = new SolidColorBrush(accentLight3);
-            Application.Current.Resources["SystemAccentColorDark1Brush"] = new SolidColorBrush(accentDark1);
-            Application.Current.Resources["SystemAccentColorDark2Brush"] = new SolidColorBrush(accentDark2);
-            Application.Current.Resources["SystemAccentColorDark3Brush"] = new SolidColorBrush(accentDark3);
+            Resx.Set(ResxId.SystemAccentColorBrush, new SolidColorBrush(accent));
+            Resx.Set(ResxId.SystemAccentColorLight1Brush, new SolidColorBrush(accentLight1));
+            Resx.Set(ResxId.SystemAccentColorLight2Brush, new SolidColorBrush(accentLight2));
+            Resx.Set(ResxId.SystemAccentColorLight3Brush, new SolidColorBrush(accentLight3));
+            Resx.Set(ResxId.SystemAccentColorDark1Brush, new SolidColorBrush(accentDark1));
+            Resx.Set(ResxId.SystemAccentColorDark2Brush, new SolidColorBrush(accentDark2));
+            Resx.Set(ResxId.SystemAccentColorDark3Brush, new SolidColorBrush(accentDark3));
         }
 
 

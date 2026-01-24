@@ -69,7 +69,7 @@ public partial class Config
 
             if (OnPropertyChanged(value, oldValue))
             {
-                UpdateAppAccentResources();
+                UpdateAppResources();
                 Theme.LoadColors(AccentColor);
                 Core.OnThemeChanged(nameof(IgTheme.ComputedColors));
             }
