@@ -62,6 +62,18 @@ public partial class DialogWindow : IgWindow
 
 
     /// <summary>
+    /// Gets, sets the content for left section of dialog footer.
+    /// </summary>
+    public object DialogFooterLeftContent
+    {
+        get => GetValue(DialogFooterLeftContentProperty);
+        set => SetValue(DialogFooterLeftContentProperty, value);
+    }
+    public static readonly StyledProperty<object> DialogFooterLeftContentProperty =
+        AvaloniaProperty.Register<DialogWindow, object>(nameof(DialogFooterLeftContent));
+
+
+    /// <summary>
     /// Gets, sets the button 1 text.
     /// </summary>
     public string Button1Text
@@ -167,7 +179,7 @@ public partial class DialogWindow : IgWindow
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         CloseWindowHotkeys = [new(Avalonia.Input.Key.Escape)];
 
-        Content = CreateDialogContentElement();
+        Content = CreateContentElement();
     }
 
 
@@ -270,7 +282,7 @@ public partial class DialogWindow : IgWindow
     /// Creates layout and content for dialog window.
     /// </summary>
     [MemberNotNull(nameof(_titleEl), nameof(_contentEl), nameof(_footerEl), nameof(_btn1), nameof(_btn2), nameof(_btn3))]
-    protected Grid CreateDialogContentElement()
+    protected Grid CreateContentElement()
     {
         // 1. create title bar
         _titleEl = new Border
@@ -288,18 +300,25 @@ public partial class DialogWindow : IgWindow
 
 
         // 2. create content slot
-        var slot = new ContentControl
+        var dialogContentSlot = new ContentControl
         {
-            Padding = new Thickness(24, 12),
+            Padding = new Thickness(24, 14, 24, 20),
             [!ContentControl.ContentProperty] = this[!DialogContentProperty],
         };
-
         _contentEl = new Grid();
-        _contentEl.Children.Add(slot);
+        _contentEl.Children.Add(dialogContentSlot);
 
 
 
         // 3. create footer
+        // 3.1 left footer
+        var footerLeftSlot = new ContentControl
+        {
+            [!ContentControl.ContentProperty] = this[!DialogFooterLeftContentProperty],
+        };
+
+
+        // 3.2 right footer
         _btn1 = new Button
         {
             MinWidth = 80,
@@ -308,8 +327,6 @@ public partial class DialogWindow : IgWindow
             [!Button.ContentProperty] = this[!Button1TextProperty],
             [!Button.IsVisibleProperty] = this[!IsButton1VisibleProperty],
         };
-        _btn1.Click += Button1_Click;
-
         _btn2 = new Button
         {
             MinWidth = 80,
@@ -318,8 +335,6 @@ public partial class DialogWindow : IgWindow
             [!Button.ContentProperty] = this[!Button2TextProperty],
             [!Button.IsVisibleProperty] = this[!IsButton2VisibleProperty],
         };
-        _btn2.Click += Button2_Click;
-
         _btn3 = new Button
         {
             MinWidth = 80,
@@ -328,22 +343,32 @@ public partial class DialogWindow : IgWindow
             [!Button.ContentProperty] = this[!Button3TextProperty],
             [!Button.IsVisibleProperty] = this[!IsButton3VisibleProperty],
         };
+        _btn1.Click += Button1_Click;
+        _btn2.Click += Button2_Click;
         _btn3.Click += Button3_Click;
-
-        var footerContent = new StackPanel
+        var footerRightPanel = new StackPanel
         {
             Spacing = 8,
-            Margin = new Thickness(24, 19, 24, 20),
             Orientation = Avalonia.Layout.Orientation.Horizontal,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
         };
-        footerContent.KeyDown += FooterContent_KeyDown;
-        footerContent.Children.AddRange([_btn1, _btn2, _btn3]);
+        footerRightPanel.KeyDown += FooterContent_KeyDown;
+        footerRightPanel.Children.AddRange([_btn1, _btn2, _btn3]);
+
+        var footerWrapper = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("*, Auto"),
+            Margin = new Thickness(24, 19, 24, 20),
+            ColumnSpacing = 20,
+        };
+        Grid.SetColumn(footerLeftSlot, 0);
+        Grid.SetColumn(footerRightPanel, 1);
+        footerWrapper.Children.AddRange([footerLeftSlot, footerRightPanel]);
 
         _footerEl = new Border
         {
             BorderThickness = new Thickness(0, 1, 0, 0),
-            Child = footerContent,
+            Child = footerWrapper,
         };
 
 

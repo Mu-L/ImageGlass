@@ -33,6 +33,7 @@ public partial class ModalWindow : DialogWindow
     private readonly double THUMBNAIL_SIZE = 80;
 
     protected TextBox _txtInput;
+    protected Border _noteContainer;
     protected CheckBox _chkRememberOption;
 
 
@@ -93,7 +94,11 @@ public partial class ModalWindow : DialogWindow
     public InfoBarSeverity NoteStyle
     {
         get => GetValue(NoteStyleProperty);
-        set => SetValue(NoteStyleProperty, value);
+        set
+        {
+            SetValue(NoteStyleProperty, value);
+            BindNoteBackground();
+        }
     }
     public static readonly StyledProperty<InfoBarSeverity> NoteStyleProperty =
         AvaloniaProperty.Register<ModalWindow, InfoBarSeverity>(nameof(NoteStyle), InfoBarSeverity.Info);
@@ -250,7 +255,8 @@ public partial class ModalWindow : DialogWindow
 
     public ModalWindow()
     {
-        DialogContent = CreateModalWindowContentElement();
+        DialogContent = CreateDialogContentElement();
+        DialogFooterLeftContent = CreateDialogFooterLeftContentElement();
     }
 
 
@@ -298,6 +304,7 @@ public partial class ModalWindow : DialogWindow
         {
             RaisePropertyChanged(IsDetailsVisibleProperty, default, IsDetailsVisible);
         }
+
     }
 
 
@@ -318,11 +325,18 @@ public partial class ModalWindow : DialogWindow
 
 
 
-    [MemberNotNull(nameof(_txtInput), nameof(_chkRememberOption))]
-    private StackPanel CreateModalWindowContentElement()
+    [MemberNotNull(nameof(_txtInput), nameof(_noteContainer))]
+    private StackPanel CreateDialogContentElement()
     {
         // 1. create the main 2-column layout
         // 1.1 create left section
+        var leftSection = new Grid
+        {
+            Margin = new Thickness(0, 0, 24, 0),
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+            [!Grid.IsVisibleProperty] = this[!IsThumbnailSectionVisibleProperty],
+        };
         var thumbnailViewbox = new Viewbox
         {
             Width = THUMBNAIL_SIZE,
@@ -345,13 +359,6 @@ public partial class ModalWindow : DialogWindow
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom,
             [!Image.SourceProperty] = this[!ThumbnailIconProperty],
             [!Image.IsVisibleProperty] = this[!IsThumbnailIconVisibleProperty],
-        };
-        var leftSection = new Grid
-        {
-            Margin = new Thickness(0, 0, 24, 0),
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
-            [!Grid.IsVisibleProperty] = this[!IsThumbnailSectionVisibleProperty],
         };
         leftSection.Children.Add(thumbnailViewbox);
         leftSection.Children.Add(thumbnailIconImage);
@@ -411,10 +418,26 @@ public partial class ModalWindow : DialogWindow
                 },
             }
         };
+        _noteContainer = new Border
+        {
+            ClipToBounds = true,
+            BorderThickness = new Thickness(1),
+            [!Border.CornerRadiusProperty] = Resx.CreateBinding(ResxId.ControlCornerRadius),
+            [!Border.BorderBrushProperty] = Resx.CreateBinding(ResxId.IG_BorderNeutralBrush),
+            [!Border.IsVisibleProperty] = this[!IsNoteVisibleProperty],
+            Child = new TextBlock
+            {
+                Padding = new Thickness(12),
+                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                [!TextBlock.TextProperty] = this[!NoteProperty],
+            }
+        };
+
         rightSection.Children.Add(lblHeading);
         rightSection.Children.Add(lblDescription);
         rightSection.Children.Add(_txtInput);
         rightSection.Children.Add(lblDetails);
+        rightSection.Children.Add(_noteContainer);
 
         Grid.SetColumn(leftSection, 0);
         Grid.SetColumn(rightSection, 1);
@@ -426,21 +449,23 @@ public partial class ModalWindow : DialogWindow
         mainGrid.Children.Add(rightSection);
 
 
-        // 2. create note panel
-        var noteContainer = new Border
+        // 2. create root element
+        var root = new StackPanel
         {
-            ClipToBounds = true,
-            [!Border.CornerRadiusProperty] = Resx.CreateBinding(ResxId.ControlCornerRadius),
-
-            Child = new TextBlock
-            {
-                Padding = new Thickness(12),
-                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                [!TextBlock.BackgroundProperty] = Resx.CreateBinding(ResxId.IG_BackgroundDangerBrush),
-                [!TextBlock.TextProperty] = this[!NoteProperty],
-                [!TextBlock.IsVisibleProperty] = this[!IsNoteVisibleProperty],
-            }
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+            Spacing = 16,
         };
+        root.Children.Add(mainGrid);
+
+        return root;
+    }
+
+
+
+    [MemberNotNull(nameof(_chkRememberOption))]
+    private StackPanel CreateDialogFooterLeftContentElement()
+    {
         _chkRememberOption = new CheckBox
         {
             [!CheckBox.IsVisibleProperty] = this[!IsRememberOptionVisibleProperty],
@@ -450,27 +475,33 @@ public partial class ModalWindow : DialogWindow
                 [!TextBlock.TextProperty] = this[!RememberOptionTextProperty],
             },
         };
-        var notePanel = new StackPanel
-        {
-            Spacing = 8,
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-        };
-        notePanel.Children.Add(noteContainer);
-        notePanel.Children.Add(_chkRememberOption);
 
 
-
-        // 3. create root element
         var root = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
             Spacing = 16,
         };
-        root.Children.Add(mainGrid);
-        root.Children.Add(notePanel);
+        root.Children.Add(_chkRememberOption);
 
         return root;
+    }
+
+
+
+    private void BindNoteBackground()
+    {
+        if (_noteContainer is null) return;
+
+        _noteContainer[!Border.BackgroundProperty] = NoteStyle switch
+        {
+            InfoBarSeverity.Info => Resx.CreateBinding(ResxId.IG_BackgroundInfoBrush),
+            InfoBarSeverity.Success => Resx.CreateBinding(ResxId.IG_BackgroundSuccessBrush),
+            InfoBarSeverity.Warning => Resx.CreateBinding(ResxId.IG_BackgroundWarningBrush),
+            InfoBarSeverity.Danger => Resx.CreateBinding(ResxId.IG_BackgroundDangerBrush),
+            _ => Resx.CreateBinding(ResxId.IG_BackgroundNeutralBrush),
+        };
     }
 
 
@@ -504,6 +535,7 @@ public partial class ModalWindow : DialogWindow
             IsInputVisible = options.IsInputVisible,
             IsRememberOptionVisible = options.IsRememberOptionVisible,
         };
+
 
         switch (buttons)
         {

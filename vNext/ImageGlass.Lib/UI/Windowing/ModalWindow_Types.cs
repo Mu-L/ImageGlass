@@ -29,7 +29,7 @@ public enum InfoBarSeverity
     Info,
     Success,
     Warning,
-    Error,
+    Danger,
 }
 
 
@@ -77,7 +77,7 @@ public class ModalWindowOptions
     public string? Description { get; set; }
     public string? Details { get; set; }
     public string? Note { get; set; }
-    public InfoBarSeverity NoteStyle { get; set; }
+    public InfoBarSeverity NoteStyle { get; set; } = InfoBarSeverity.Info;
     public Bitmap? Thumbnail { get; set; }
     public Bitmap? ThumbnailIcon { get; set; }
     public bool IsRememberOptionVisible { get; set; }

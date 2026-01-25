@@ -98,6 +98,7 @@ public partial class MainWindow : Win32Window
             IsRememberOptionVisible = true,
             Thumbnail = new Bitmap(@"C:\Users\d2pha\Desktop\pic.jpg"),
             ThumbnailIcon = new Bitmap(@"C:\Users\d2pha\Desktop\png\light-bulb.png"),
+            NoteStyle = InfoBarSeverity.Warning,
         });
 
         VM.Title = $"""
