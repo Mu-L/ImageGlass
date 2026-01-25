@@ -17,13 +17,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform;
+using Avalonia.Styling;
 using ImageGlass.Common;
 using ImageGlass.Common.AppThemes;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using System;
@@ -35,6 +39,19 @@ namespace ImageGlass.UI.Windowing;
 
 public partial class IgWindow : Window
 {
+    protected static readonly Color InactivatedColorDark = Color.FromRgb(32, 32, 32);
+    protected static readonly Color InactivatedColorLight = Color.FromRgb(243, 243, 243);
+
+    protected static bool IsWindows10 => Environment.OSVersion.Version.Major == 10
+        && Environment.OSVersion.Version.Build < 22000;
+
+    protected static Color WindowInactivatedBackgroundColor => Application.Current
+        ?.ActualThemeVariant == ThemeVariant.Dark
+            ? InactivatedColorDark
+            : InactivatedColorLight;
+
+
+
     #region Public Properties
 
     /// <summary>
@@ -48,6 +65,11 @@ public partial class IgWindow : Window
     /// </summary>
     public double DpiScale => VisualRoot?.RenderScaling ?? 1.0;
 
+
+    /// <summary>
+    /// Gets, sets the value indicates that if this window uses a custom backdrop.
+    /// </summary>
+    public virtual bool UseCustomBackdrop { get; set; } = false;
 
 
     /// <summary>
@@ -94,7 +116,6 @@ public partial class IgWindow : Window
 
     public IgWindow()
     {
-        OnIgBackdropStyleChanged(BackdropStyle);
         OnIgFramelessModeChanged(IsFrameless);
 
         Core.ThemeChanged += Core_ThemeChanged;
@@ -108,15 +129,17 @@ public partial class IgWindow : Window
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
-
         OnIgLanguageChanged();
     }
+
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
 
-
+        ActualThemeVariantChanged += IgWindow_ActualThemeVariantChanged;
+        Activated += IgWindow_Activated;
+        Deactivated += IgWindow_Deactivated;
     }
 
 
@@ -124,8 +147,46 @@ public partial class IgWindow : Window
     {
         base.OnClosing(e);
 
+        ActualThemeVariantChanged -= IgWindow_ActualThemeVariantChanged;
+        Activated -= IgWindow_Activated;
+        Deactivated -= IgWindow_Deactivated;
+
         Core.ThemeChanged -= Core_ThemeChanged;
         Core.LanguageChanged -= Core_LanguageChanged;
+    }
+
+
+    private void IgWindow_ActualThemeVariantChanged(object? sender, EventArgs e)
+    {
+        if (UseCustomBackdrop) return;
+
+        if (IsActive) IgWindow_Activated(sender, e);
+        else IgWindow_Deactivated(sender, e);
+    }
+
+
+    private async void IgWindow_Activated(object? sender, EventArgs e)
+    {
+        OnIgActivated(e);
+
+
+        // handle built-in backdrop style
+        if (UseCustomBackdrop) return;
+        if (BackdropStyle != BackdropStyle.None && !IsWindows10)
+        {
+            await AnimateBackgroundColorAsync(WindowInactivatedBackgroundColor.A(0));
+        }
+    }
+
+
+    private async void IgWindow_Deactivated(object? sender, EventArgs e)
+    {
+        OnIgDeactivated(e);
+
+
+        // handle built-in backdrop style
+        if (UseCustomBackdrop) return;
+        await AnimateBackgroundColorAsync(WindowInactivatedBackgroundColor);
     }
 
 
@@ -206,21 +267,25 @@ public partial class IgWindow : Window
     #endregion // Events & Override methods
 
 
+
+    #region Virtual methods
+
+    /// <summary>
+    /// Occurs when the window is activated.
+    /// </summary>
+    protected virtual void OnIgActivated(EventArgs e) { }
+
+
+    /// <summary>
+    /// Occurs when the window is deactivated.
+    /// </summary>
+    protected virtual void OnIgDeactivated(EventArgs e) { }
+
+
     /// <summary>
     /// Occurs when one of the hotkey for closing window is pressed.
     /// </summary>
     protected virtual void OnIgCloseWindowHotkeyPressed(KeyEventArgs e) { }
-
-
-    /// <summary>
-    /// Occurs whenthe backdrop style is changed.
-    /// </summary>
-    protected virtual void OnIgBackdropStyleChanged(BackdropStyle style)
-    {
-        Background = style == BackdropStyle.None
-            ? null
-            : Brushes.Transparent;
-    }
 
 
     /// <summary>
@@ -253,6 +318,37 @@ public partial class IgWindow : Window
     protected virtual void OnIgLanguageChanged() { }
 
 
+    /// <summary>
+    /// Occurs whenthe backdrop style is changed.
+    /// </summary>
+    protected virtual void OnIgBackdropStyleChanged(BackdropStyle style)
+    {
+        if (style == BackdropStyle.None)
+        {
+            Background = null;
+            return;
+        }
+
+        // update background color for transparency
+        Background = WindowInactivatedBackgroundColor.A(0).ToBrush();
+
+
+        // map the built-in backdrop styles
+        if (!UseCustomBackdrop)
+        {
+            WindowTransparencyLevel[] levels = style switch
+            {
+                BackdropStyle.Mica => [WindowTransparencyLevel.Mica, WindowTransparencyLevel.None],
+                BackdropStyle.MicaAlt => [WindowTransparencyLevel.Mica, WindowTransparencyLevel.None],
+                BackdropStyle.Acrylic => [WindowTransparencyLevel.AcrylicBlur, WindowTransparencyLevel.None],
+                _ => [WindowTransparencyLevel.None],
+            };
+
+            TransparencyLevelHint = levels;
+        }
+    }
+
+    #endregion // Virtual methods
 
 
 
@@ -290,6 +386,40 @@ public partial class IgWindow : Window
         Icon = new WindowIcon(ms);
     }
 
+
+    /// <summary>
+    /// Animates the window background color.
+    /// </summary>
+    protected async Task AnimateBackgroundColorAsync(Color toColor)
+    {
+        if (Background is not SolidColorBrush fromBrush) return;
+
+        var fromColor = fromBrush.Color;
+        var toBrush = toColor.ToBrush();
+        var animation = new Animation
+        {
+            Duration = TimeSpan.FromMilliseconds(200),
+            Easing = new LinearEasing(),
+            FillMode = FillMode.Forward,
+            Children =
+            {
+                new KeyFrame
+                {
+                    Cue = new Cue(0.0),
+                    Setters = { new Setter(SolidColorBrush.ColorProperty, fromColor) }
+                },
+                new KeyFrame
+                {
+                    Cue = new Cue(1.0),
+                    Setters = { new Setter(SolidColorBrush.ColorProperty, toColor) }
+                }
+            },
+        };
+
+
+        Background = toBrush;
+        await animation.RunAsync(toBrush);
+    }
 
     #endregion // Internal Methods
 

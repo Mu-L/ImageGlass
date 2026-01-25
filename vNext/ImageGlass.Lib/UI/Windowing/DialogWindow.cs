@@ -162,9 +162,7 @@ public partial class DialogWindow : IgWindow
         ExtendClientAreaToDecorationsHint = true;
         ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.NoChrome;
         SizeToContent = SizeToContent.WidthAndHeight;
-
-        TransparencyLevelHint = [WindowTransparencyLevel.Mica, WindowTransparencyLevel.None];
-        BackdropStyle = BackdropStyle.Mica;
+        BackdropStyle = BackdropStyle.MicaAlt;
 
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         CloseWindowHotkeys = [new(Avalonia.Input.Key.Escape)];

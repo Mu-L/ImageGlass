@@ -25,6 +25,9 @@ namespace ImageGlass.Win32.UI;
 
 public partial class Win32Window : IgWindow
 {
+    public override bool UseCustomBackdrop => true; // use Win32 API for the backdrop
+
+
     public Win32Window()
     {
 
