@@ -9,10 +9,27 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Assets\Delete.png" />
+    <None Remove="Assets\Error.png" />
+    <None Remove="Assets\Find.png" />
     <None Remove="Assets\icon256.ico" />
+    <None Remove="Assets\Info.png" />
+    <None Remove="Assets\Lock.png" />
+    <None Remove="Assets\Rename.png" />
+    <None Remove="Assets\Shield.png" />
+    <None Remove="Assets\Warning.png" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Include="Assets\Delete.png" />
+    <AvaloniaResource Include="Assets\Error.png" />
+    <AvaloniaResource Include="Assets\Find.png" />
     <AvaloniaResource Include="Assets\icon256.ico" />
+    <AvaloniaResource Include="Assets\Info.png" />
+    <AvaloniaResource Include="Assets\Lock.png" />
+    <AvaloniaResource Include="Assets\RecycleBin.png" />
+    <AvaloniaResource Include="Assets\Rename.png" />
+    <AvaloniaResource Include="Assets\Shield.png" />
+    <AvaloniaResource Include="Assets\Warning.png" />
   </ItemGroup>
 
   <ItemGroup>

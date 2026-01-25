@@ -23,13 +23,13 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using Avalonia.Platform;
 using Avalonia.Styling;
 using ImageGlass.Common;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
+using ImageGlass.Lib.Common.Types;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -368,8 +368,7 @@ public partial class IgWindow : Window
         if (useDefaultIcon)
         {
             // get default logo icon if theme's app logo does not exist
-            using var stream = AssetLoader.Open(new Uri("avares://ImageGlass.Lib/Assets/icon256.ico"));
-            Icon = new WindowIcon(stream);
+            Icon = StockIcon.GetDefaultWindowIcon();
 
             return;
         }
