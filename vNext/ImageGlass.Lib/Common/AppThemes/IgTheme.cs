@@ -62,17 +62,17 @@ public partial class IgTheme : IgReactive
 
     // Situational Colors
     // Light theme
-    public static Color BackgroundInfoLight => BHelper.ColorFromHex("#C2DAEC");
-    public static Color BackgroundSuccessLight => BHelper.ColorFromHex("#DFF6DD");
-    public static Color BackgroundWarningLight => BHelper.ColorFromHex("#FFF4CE");
-    public static Color BackgroundDangerLight => BHelper.ColorFromHex("#FDE7E9");
+    public static Color BackgroundInfoLight => BHelper.ColorFromHex("#C2DAECBB");
+    public static Color BackgroundSuccessLight => BHelper.ColorFromHex("#DFF6DDBB");
+    public static Color BackgroundWarningLight => BHelper.ColorFromHex("#FFF4CEBB");
+    public static Color BackgroundDangerLight => BHelper.ColorFromHex("#FDE7E9BB");
 
 
     // Dark theme
-    public static Color BackgroundInfoDark => BHelper.ColorFromHex("#1A3244");
-    public static Color BackgroundSuccessDark => BHelper.ColorFromHex("#393D1B");
-    public static Color BackgroundWarningDark => BHelper.ColorFromHex("#433519");
-    public static Color BackgroundDangerDark => BHelper.ColorFromHex("#442726");
+    public static Color BackgroundInfoDark => BHelper.ColorFromHex("#1A3244BB");
+    public static Color BackgroundSuccessDark => BHelper.ColorFromHex("#393D1BBB");
+    public static Color BackgroundWarningDark => BHelper.ColorFromHex("#433519BB");
+    public static Color BackgroundDangerDark => BHelper.ColorFromHex("#442726BB");
 
 
     #endregion // Static Properties

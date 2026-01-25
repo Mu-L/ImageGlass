@@ -21,6 +21,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI.Windowing;
 using System;
@@ -114,9 +115,10 @@ public partial class App : Application
         await Core.Config.LoadCurrentThemeAsync(Core.IsSystemDarkMode, true, true, false);
 
         // load & compute accent colors
-        Core.AccentColor = Core.Theme.UseSystemAccent
+        var accent = Core.Theme.UseSystemAccent
             ? e.AccentColor1
             : Core.Theme.AccentColor;
+        Core.AccentColor = accent.WithBrightness(-0.125f);
     }
 
 
@@ -134,9 +136,10 @@ public partial class App : Application
             await Core.Config.LoadCurrentThemeAsync(isSystemDarkMode, true, true, false);
 
             // load & compute accent colors
-            Core.AccentColor = Core.Theme.UseSystemAccent
+            var accent = Core.Theme.UseSystemAccent
                 ? info.AccentColor1
                 : Core.Theme.AccentColor;
+            Core.AccentColor = accent.WithBrightness(-0.125f);
         });
 
 

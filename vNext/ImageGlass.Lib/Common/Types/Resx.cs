@@ -80,10 +80,28 @@ public enum ResxId
     SystemAccentColorDark2,
     SystemAccentColorDark3,
 
+
     // control styles
     ControlCornerRadius,
     ContentControlThemeFontFamily,
     TextControlBackground,
+
+
+    // text color
+    SystemControlForegroundBaseHighBrush,
+    TextControlForeground,
+    CheckBoxForegroundChecked,
+    CheckBoxForegroundCheckedPointerOver,
+    CheckBoxForegroundUnchecked,
+    CheckBoxForegroundUncheckedPointerOver,
+
+
+    // border color
+    TextControlBorderBrush,
+    TextControlBorderBrushPointerOver,
+    CheckBoxCheckBackgroundStrokeUnchecked,
+    CheckBoxCheckBackgroundStrokeUncheckedPointerOver,
+
 
     // situational backgrounds
     IG_BackgroundInfoBrush,

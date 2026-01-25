@@ -211,7 +211,7 @@ public static class Core
     /// <summary>
     /// Updates the app resources according to current color mode.
     /// </summary>
-    public static void UpdateAppColorResources()
+    public static void UpdateAppThemedColorResources()
     {
         if (Application.Current is not App app) return;
 
@@ -232,6 +232,20 @@ public static class Core
                 Resx.Set(ResxId.IG_BackgroundWarningBrush, IgTheme.BackgroundWarningLight.ToBrush());
                 Resx.Set(ResxId.IG_BackgroundDangerBrush, IgTheme.BackgroundDangerLight.ToBrush());
             }
+
+            // update text color
+            var textBrush = Theme.ComputedColors.TextColor.ToBrush();
+            Resx.Set(ResxId.SystemControlForegroundBaseHighBrush, textBrush);
+            Resx.Set(ResxId.TextControlForeground, textBrush);
+            Resx.Set(ResxId.CheckBoxForegroundChecked, textBrush);
+            Resx.Set(ResxId.CheckBoxForegroundCheckedPointerOver, textBrush);
+            Resx.Set(ResxId.CheckBoxForegroundUnchecked, textBrush);
+            Resx.Set(ResxId.CheckBoxForegroundUncheckedPointerOver, textBrush);
+
+            // update border color
+            var borderBrush = Theme.ComputedColors.TextColor.A(180).ToBrush();
+            Resx.Set(ResxId.TextControlBorderBrush, borderBrush);
+            Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUnchecked, borderBrush);
         });
     }
 
@@ -263,6 +277,11 @@ public static class Core
             Resx.Set(ResxId.SystemAccentColorDark1, accentDark1);
             Resx.Set(ResxId.SystemAccentColorDark2, accentDark2);
             Resx.Set(ResxId.SystemAccentColorDark3, accentDark3);
+
+
+            var borderHoverBrush = accent.ToBrush();
+            Resx.Set(ResxId.TextControlBorderBrushPointerOver, borderHoverBrush);
+            Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUncheckedPointerOver, borderHoverBrush);
         });
     }
 

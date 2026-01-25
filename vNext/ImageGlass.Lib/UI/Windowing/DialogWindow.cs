@@ -37,8 +37,9 @@ public partial class DialogWindow : IgWindow
     internal readonly int MIN_WIDTH = 400;
     internal readonly int MAX_WIDTH = 600;
 
+    protected Border _titleEl;
     protected Grid _contentEl;
-    protected StackPanel _footerEl;
+    protected Border _footerEl;
     protected Button _btn1;
     protected Button _btn2;
     protected Button _btn3;
@@ -155,14 +156,15 @@ public partial class DialogWindow : IgWindow
 
     public DialogWindow()
     {
-        CanResize = false;
         ShowInTaskbar = true;
+        CanResize = false;
+
         ExtendClientAreaToDecorationsHint = true;
         ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.NoChrome;
         SizeToContent = SizeToContent.WidthAndHeight;
 
         TransparencyLevelHint = [WindowTransparencyLevel.Mica, WindowTransparencyLevel.None];
-        BackdropStyle = BackdropStyle.Acrylic;
+        BackdropStyle = BackdropStyle.Mica;
 
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         CloseWindowHotkeys = [new(Avalonia.Input.Key.Escape)];
@@ -269,22 +271,37 @@ public partial class DialogWindow : IgWindow
     /// <summary>
     /// Creates layout and content for dialog window.
     /// </summary>
-    [MemberNotNull(nameof(_contentEl), nameof(_footerEl), nameof(_btn1), nameof(_btn2), nameof(_btn3))]
+    [MemberNotNull(nameof(_titleEl), nameof(_contentEl), nameof(_footerEl), nameof(_btn1), nameof(_btn2), nameof(_btn3))]
     protected Grid CreateDialogContentElement()
     {
-        // 1. create content slot
+        // 1. create title bar
+        _titleEl = new Border
+        {
+            Padding = new Thickness(24, 8, 24, 7),
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            BorderBrush = Brushes.LightGray,
+            Child = new TextBlock
+            {
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                [!TextBlock.TextProperty] = this[!TitleProperty],
+            }
+        };
+
+
+
+        // 2. create content slot
         var slot = new ContentControl
         {
-            Padding = new Thickness(24),
+            Padding = new Thickness(24, 12),
             [!ContentControl.ContentProperty] = this[!DialogContentProperty],
         };
 
         _contentEl = new Grid();
         _contentEl.Children.Add(slot);
-        Grid.SetRow(_contentEl, 0);
 
 
-        // 2. create footer
+
+        // 3. create footer
         _btn1 = new Button
         {
             MinWidth = 80,
@@ -318,27 +335,34 @@ public partial class DialogWindow : IgWindow
         var footerContent = new StackPanel
         {
             Spacing = 8,
-            Margin = new Thickness(24),
+            Margin = new Thickness(24, 19, 24, 20),
             Orientation = Avalonia.Layout.Orientation.Horizontal,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
         };
         footerContent.KeyDown += FooterContent_KeyDown;
         footerContent.Children.AddRange([_btn1, _btn2, _btn3]);
 
-        _footerEl = new StackPanel();
-        _footerEl.Children.Add(footerContent);
-        Grid.SetRow(_footerEl, 1);
+        _footerEl = new Border
+        {
+            BorderThickness = new Thickness(0, 1, 0, 0),
+            Child = footerContent,
+        };
 
 
-        // 3. create root content
+        // 4. create root content
         var root = new Grid
         {
             MinWidth = MIN_WIDTH,
             MaxWidth = MAX_WIDTH,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            RowDefinitions = new RowDefinitions("*, Auto"),
+            RowDefinitions = new RowDefinitions("Auto, *, Auto"),
         };
+        Grid.SetRow(_titleEl, 0);
+        Grid.SetRow(_contentEl, 1);
+        Grid.SetRow(_footerEl, 2);
+
+        root.Children.Add(_titleEl);
         root.Children.Add(_contentEl);
         root.Children.Add(_footerEl);
 
@@ -480,10 +504,13 @@ public partial class DialogWindow : IgWindow
         var contentBg = bg.WithAlpha(contentAlpha);
         _contentEl.Background = new SolidColorBrush(contentBg);
 
-        // footer bg
+        // title & footer
         var footerAlpha = isDarkMode ? 100 : 150;
         var footerBg = bg.Blend(Core.Theme.InvertedBaseColor, 0.925f, footerAlpha);
-        _footerEl.Background = new SolidColorBrush(footerBg);
+        var footerBorder = bg.Blend(Core.Theme.InvertedBaseColor, 0.85f, footerAlpha);
+
+        _titleEl.Background = _footerEl.Background = footerBg.ToBrush();
+        _titleEl.BorderBrush = _footerEl.BorderBrush = footerBorder.ToBrush();
     }
 
 

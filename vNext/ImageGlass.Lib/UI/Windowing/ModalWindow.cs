@@ -487,7 +487,7 @@ public partial class ModalWindow : DialogWindow
     {
         var modal = new ModalWindow()
         {
-            //WindowTitle = title,
+            Title = title,
             DefaultFocus = defaultFocus,
             Heading = options.Heading,
             Description = options.Description,

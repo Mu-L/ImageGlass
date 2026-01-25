@@ -405,7 +405,7 @@ public partial class Config
 
 
         // 7. update app colors
-        Core.UpdateAppColorResources();
+        Core.UpdateAppThemedColorResources();
     }
 
 
