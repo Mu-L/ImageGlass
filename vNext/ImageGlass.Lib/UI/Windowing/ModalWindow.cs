@@ -128,8 +128,8 @@ public partial class ModalWindow : DialogWindow
     /// </summary>
     public string InputValue
     {
-        get => GetValue(InputValueProperty);
-        set => SetValue(InputValueProperty, value);
+        get => _txtInput?.GetValue(TextBox.TextProperty) ?? string.Empty;
+        set => _txtInput?.SetValue(TextBox.TextProperty, value);
     }
     public static readonly StyledProperty<string> InputValueProperty =
         AvaloniaProperty.Register<ModalWindow, string>(nameof(InputValue), string.Empty);
@@ -254,6 +254,8 @@ public partial class ModalWindow : DialogWindow
     }
 
 
+    #region Override methods
+
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
@@ -313,7 +315,6 @@ public partial class ModalWindow : DialogWindow
 
         base.OnDialogSubmitted(e);
     }
-
 
 
 
@@ -473,8 +474,11 @@ public partial class ModalWindow : DialogWindow
     }
 
 
+    #endregion // Override methods
 
 
+
+    #region Public static methods
 
     /// <summary>
     /// Shows modal dialog.
@@ -483,7 +487,7 @@ public partial class ModalWindow : DialogWindow
         string? title,
         ModalWindowButton buttons,
         ModalWindowOptions options,
-        DialogFocus defaultFocus = DialogFocus.Button1)
+        DialogFocus defaultFocus = DialogFocus.Default)
     {
         var modal = new ModalWindow()
         {
@@ -567,6 +571,8 @@ public partial class ModalWindow : DialogWindow
 
         return result;
     }
+
+    #endregion // Public static methods
 
 
 
