@@ -22,7 +22,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using ImageGlass.Common.Photoing;
-using ImageGlass.Lib.UI.Windowing;
+using ImageGlass.UI.Windowing;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;

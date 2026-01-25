@@ -30,7 +30,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Lib.UI.Windowing;
+namespace ImageGlass.UI.Windowing;
 
 
 public partial class IgWindow : Window

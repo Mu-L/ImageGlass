@@ -25,7 +25,6 @@ using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
-using ImageGlass.Lib.Common.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;

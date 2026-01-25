@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Types;
-using ImageGlass.Lib.UI.Windowing;
+using ImageGlass.UI.Windowing;
 using ImageGlass.Win32.Common;
 
 namespace ImageGlass.Win32.UI;

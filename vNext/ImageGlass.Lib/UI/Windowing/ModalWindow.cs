@@ -23,16 +23,17 @@ using Avalonia.Media.Imaging;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
-using ImageGlass.Lib.Common.Types;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
-namespace ImageGlass.Lib.UI.Windowing;
+namespace ImageGlass.UI.Windowing;
 
 public partial class ModalWindow : DialogWindow
 {
     private readonly double THUMBNAIL_SIZE = 80;
 
     protected TextBox _txtInput;
+    protected CheckBox _chkRememberOption;
 
 
 
@@ -95,7 +96,7 @@ public partial class ModalWindow : DialogWindow
         set => SetValue(NoteStyleProperty, value);
     }
     public static readonly StyledProperty<InfoBarSeverity> NoteStyleProperty =
-        AvaloniaProperty.Register<ModalWindow, InfoBarSeverity>(nameof(NoteStyle), InfoBarSeverity.Informational);
+        AvaloniaProperty.Register<ModalWindow, InfoBarSeverity>(nameof(NoteStyle), InfoBarSeverity.Info);
 
 
     /// <summary>
@@ -134,8 +135,16 @@ public partial class ModalWindow : DialogWindow
         AvaloniaProperty.Register<ModalWindow, string>(nameof(InputValue), string.Empty);
 
 
-    // TODO: add AcceptValue
-
+    /// <summary>
+    /// Gets, sets the rules for the input control.
+    /// </summary>
+    public TextBoxAcceptValue AcceptValue
+    {
+        get => GetValue(AcceptValueProperty);
+        set => SetValue(AcceptValueProperty, value);
+    }
+    public static readonly StyledProperty<TextBoxAcceptValue> AcceptValueProperty =
+        AvaloniaProperty.Register<ModalWindow, TextBoxAcceptValue>(nameof(AcceptValue), TextBoxAcceptValue.Any);
 
 
     /// <summary>
@@ -230,6 +239,11 @@ public partial class ModalWindow : DialogWindow
         AvaloniaProperty.Register<ModalWindow, string>(nameof(RememberOptionText), "[Don't show this message again]");
 
 
+    /// <summary>
+    /// Gets the check state of Remember option checkbox.
+    /// </summary>
+    public bool IsRememberOptionChecked => _chkRememberOption?.IsChecked ?? false;
+
     #endregion // Public Properties
 
 
@@ -250,6 +264,7 @@ public partial class ModalWindow : DialogWindow
             _txtInput.SelectAll();
         }
     }
+
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {
@@ -292,9 +307,17 @@ public partial class ModalWindow : DialogWindow
     }
 
 
+    protected override void OnDialogSubmitted(DialogEventArgs e)
+    {
+        // TODO: validate
+
+        base.OnDialogSubmitted(e);
+    }
 
 
-    [MemberNotNull(nameof(_txtInput))]
+
+
+    [MemberNotNull(nameof(_txtInput), nameof(_chkRememberOption))]
     private StackPanel CreateModalWindowContentElement()
     {
         // 1. create the main 2-column layout
@@ -417,7 +440,7 @@ public partial class ModalWindow : DialogWindow
                 [!TextBlock.IsVisibleProperty] = this[!IsNoteVisibleProperty],
             }
         };
-        var chkRememberOption = new CheckBox
+        _chkRememberOption = new CheckBox
         {
             [!CheckBox.IsVisibleProperty] = this[!IsRememberOptionVisibleProperty],
             Content = new TextBlock
@@ -432,7 +455,7 @@ public partial class ModalWindow : DialogWindow
             Orientation = Avalonia.Layout.Orientation.Vertical,
         };
         notePanel.Children.Add(noteContainer);
-        notePanel.Children.Add(chkRememberOption);
+        notePanel.Children.Add(_chkRememberOption);
 
 
 
@@ -450,6 +473,100 @@ public partial class ModalWindow : DialogWindow
     }
 
 
+
+
+
+    /// <summary>
+    /// Shows modal dialog.
+    /// </summary>
+    public static async Task<ModalWindowResult> ShowAsync(IgWindow? owner,
+        string? title,
+        ModalWindowButton buttons,
+        ModalWindowOptions options,
+        DialogFocus defaultFocus = DialogFocus.Button1)
+    {
+        var modal = new ModalWindow()
+        {
+            //WindowTitle = title,
+            DefaultFocus = defaultFocus,
+            Heading = options.Heading,
+            Description = options.Description,
+            Details = options.Details,
+            Note = options.Note,
+            NoteStyle = options.NoteStyle,
+            Thumbnail = options.Thumbnail,
+            ThumbnailIcon = options.ThumbnailIcon,
+            InputValue = options.InputValue,
+            IsInputVisible = options.IsInputVisible,
+            IsRememberOptionVisible = options.IsRememberOptionVisible,
+        };
+
+        switch (buttons)
+        {
+            case ModalWindowButton.OK:
+                modal.Button1Text = Core.Lang[LangId._OK];
+                modal.IsButton1Visible = true;
+                modal.IsButton2Visible = modal.IsButton3Visible = false;
+                break;
+
+            case ModalWindowButton.Close:
+                modal.Button1Text = Core.Lang[LangId._Close];
+                modal.IsButton1Visible = true;
+                modal.IsButton2Visible = modal.IsButton3Visible = false;
+                break;
+
+            case ModalWindowButton.Yes_No:
+                modal.Button1Text = Core.Lang[LangId._Yes];
+                modal.Button2Text = Core.Lang[LangId._No];
+                modal.IsButton1Visible = modal.IsButton2Visible = true;
+                modal.IsButton3Visible = false;
+                break;
+
+            case ModalWindowButton.OK_Cancel:
+                modal.Button1Text = Core.Lang[LangId._OK];
+                modal.Button2Text = Core.Lang[LangId._Cancel];
+                modal.IsButton1Visible = modal.IsButton2Visible = true;
+                modal.IsButton3Visible = false;
+                break;
+
+            case ModalWindowButton.OK_Close:
+                modal.Button1Text = Core.Lang[LangId._OK];
+                modal.Button2Text = Core.Lang[LangId._Close];
+                modal.IsButton1Visible = modal.IsButton2Visible = true;
+                modal.IsButton3Visible = false;
+                break;
+
+            case ModalWindowButton.LearnMore_Close:
+                modal.Button1Text = Core.Lang[LangId._LearnMore];
+                modal.Button2Text = Core.Lang[LangId._Close];
+                modal.IsButton1Visible = modal.IsButton2Visible = true;
+                modal.IsButton3Visible = false;
+                break;
+
+            case ModalWindowButton.Continue_Quit:
+                modal.Button1Text = Core.Lang[LangId._Continue];
+                modal.Button2Text = Core.Lang[LangId._Quit];
+                modal.IsButton1Visible = modal.IsButton2Visible = true;
+                modal.IsButton3Visible = false;
+                break;
+
+            default:
+                break;
+        }
+
+
+        var exitCode = await modal.ShowAsync(owner);
+
+        // get dialog result
+        var result = new ModalWindowResult()
+        {
+            ExitCode = exitCode,
+            InputValue = modal.InputValue,
+            IsRememberOptionChecked = modal.IsRememberOptionChecked,
+        };
+
+        return result;
+    }
 
 
 

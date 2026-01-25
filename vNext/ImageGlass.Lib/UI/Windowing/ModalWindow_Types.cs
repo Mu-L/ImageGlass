@@ -16,7 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-namespace ImageGlass.Lib.UI.Windowing;
+using Avalonia.Media.Imaging;
+
+namespace ImageGlass.UI.Windowing;
 
 
 /// <summary>
@@ -24,7 +26,7 @@ namespace ImageGlass.Lib.UI.Windowing;
 /// </summary>
 public enum InfoBarSeverity
 {
-    Informational,
+    Info,
     Success,
     Warning,
     Error,
@@ -44,16 +46,6 @@ public enum ModalWindowButton
     OK_Close,
     LearnMore_Close,
     Continue_Quit,
-}
-
-
-/// <summary>
-/// Stores modal window data.
-/// </summary>
-public class ModalWindowData
-{
-    public string InputValue { get; set; } = "";
-    public bool IsRememberOptionChecked { get; set; } = false;
 }
 
 
@@ -78,3 +70,18 @@ public class ModalWindowResult
     public bool IsRememberOptionChecked { get; internal set; } = false;
 }
 
+
+public class ModalWindowOptions
+{
+    public string? Heading { get; set; }
+    public string? Description { get; set; }
+    public string? Details { get; set; }
+    public string? Note { get; set; }
+    public InfoBarSeverity NoteStyle { get; set; }
+    public Bitmap? Thumbnail { get; set; }
+    public Bitmap? ThumbnailIcon { get; set; }
+    public bool IsRememberOptionVisible { get; set; }
+    public bool IsInputVisible { get; set; }
+    public string InputValue { get; set; } = string.Empty;
+    public TextBoxAcceptValue AcceptValue { get; set; } = TextBoxAcceptValue.Any;
+}

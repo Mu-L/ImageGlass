@@ -30,7 +30,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Lib.UI.Windowing;
+namespace ImageGlass.UI.Windowing;
 
 public partial class DialogWindow : IgWindow
 {

@@ -20,7 +20,7 @@ using Avalonia;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using System;
 
-namespace ImageGlass.Lib.Common.Types;
+namespace ImageGlass.Common.Types;
 
 
 public static class Resx

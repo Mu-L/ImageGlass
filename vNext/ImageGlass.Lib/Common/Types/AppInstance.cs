@@ -17,14 +17,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Threading;
-using ImageGlass.Common.Types;
 using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Lib.Common.Types;
+namespace ImageGlass.Common.Types;
 
 public partial class AppInstance : DisposableImpl
 {

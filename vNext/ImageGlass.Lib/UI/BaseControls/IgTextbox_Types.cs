@@ -16,41 +16,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
-using ImageGlass.Common.Types;
-using ImageGlass.UI.Windowing;
+using System;
 
-namespace ImageGlass.ViewModels;
+namespace ImageGlass.UI;
 
-public partial class MainViewModel : IgReactive
+
+public class ValidatedEventArgs(bool isValid, string? value) : EventArgs
 {
-    public static Config Config => Core.Config;
+    public bool IsValid { get; set; } = isValid;
+    public string? Value { get; set; } = value;
+}
 
 
-    /// <summary>
-    /// Gets the owner window.
-    /// </summary>
-    public virtual IgWindow Window { get; }
-
-
-    /// <summary>
-    /// Gets, sets the window title.
-    /// </summary>
-    public string Title
-    {
-        get; set
-        {
-            if (field.Equals(value)) return;
-
-            field = value;
-            OnPropertyChanged();
-        }
-    } = "ImageGlass";
-
-
-    public MainViewModel(IgWindow window)
-    {
-        Window = window;
-    }
-
+public enum TextBoxAcceptValue
+{
+    Any,
+    RegexPattern,
+    IntValueOnly,
+    UnsignedIntValueOnly,
+    FloatValueOnly,
+    UnsignedFloatValueOnly,
+    FileNameValueOnly,
 }
