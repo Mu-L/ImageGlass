@@ -23,6 +23,7 @@ using Avalonia.Media.Imaging;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
+using ImageGlass.Lib.Common.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
@@ -33,6 +34,7 @@ public partial class ModalWindow : DialogWindow
     private readonly double THUMBNAIL_SIZE = 80;
 
     protected TextBox _txtInput;
+    protected Image _thumbnailIconImage;
     protected Border _noteContainer;
     protected CheckBox _chkRememberOption;
 
@@ -119,13 +121,13 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Gets, sets the thumbnail icon of modal.
     /// </summary>
-    public Bitmap? ThumbnailIcon
+    public StockIconId? ThumbnailIcon
     {
         get => GetValue(ThumbnailIconProperty);
         set => SetValue(ThumbnailIconProperty, value);
     }
-    public static readonly StyledProperty<Bitmap?> ThumbnailIconProperty =
-        AvaloniaProperty.Register<ModalWindow, Bitmap?>(nameof(ThumbnailIcon));
+    public static readonly StyledProperty<StockIconId?> ThumbnailIconProperty =
+        AvaloniaProperty.Register<ModalWindow, StockIconId?>(nameof(ThumbnailIcon));
 
 
     /// <summary>
@@ -266,6 +268,8 @@ public partial class ModalWindow : DialogWindow
     {
         base.OnLoaded(e);
 
+        LoadThumbnailIconSource();
+
         if (IsInputVisible)
         {
             _txtInput.Focus(Avalonia.Input.NavigationMethod.Tab);
@@ -325,13 +329,15 @@ public partial class ModalWindow : DialogWindow
 
 
 
-    [MemberNotNull(nameof(_txtInput), nameof(_noteContainer))]
+    [MemberNotNull(nameof(_thumbnailIconImage), nameof(_txtInput), nameof(_noteContainer))]
     private StackPanel CreateDialogContentElement()
     {
         // 1. create the main 2-column layout
         // 1.1 create left section
         var leftSection = new Grid
         {
+            Width = THUMBNAIL_SIZE,
+            Height = THUMBNAIL_SIZE,
             Margin = new Thickness(0, 0, 24, 0),
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
@@ -351,17 +357,14 @@ public partial class ModalWindow : DialogWindow
                 [!Image.SourceProperty] = this[!ThumbnailProperty],
             },
         };
-        var thumbnailIconImage = new Image
+        _thumbnailIconImage = new Image
         {
             Width = 40,
             Height = 40,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom,
-            [!Image.SourceProperty] = this[!ThumbnailIconProperty],
             [!Image.IsVisibleProperty] = this[!IsThumbnailIconVisibleProperty],
         };
         leftSection.Children.Add(thumbnailViewbox);
-        leftSection.Children.Add(thumbnailIconImage);
+        leftSection.Children.Add(_thumbnailIconImage);
 
 
         // 1.2 create right section
@@ -398,7 +401,7 @@ public partial class ModalWindow : DialogWindow
         {
             ClipToBounds = true,
             [!Border.CornerRadiusProperty] = Resx.CreateBinding(ResxId.ControlCornerRadius),
-
+            [!SelectableTextBlock.IsVisibleProperty] = this[!IsDetailsVisibleProperty],
             Child = new ScrollViewer
             {
                 MinHeight = 50,
@@ -413,7 +416,6 @@ public partial class ModalWindow : DialogWindow
                     FontWeight = Avalonia.Media.FontWeight.SemiLight,
                     TextWrapping = Avalonia.Media.TextWrapping.Wrap,
                     [!SelectableTextBlock.TextProperty] = this[!DetailsProperty],
-                    [!SelectableTextBlock.IsVisibleProperty] = this[!IsDetailsVisibleProperty],
                     [!SelectableTextBlock.BackgroundProperty] = Resx.CreateBinding(ResxId.IG_BackgroundNeutralBrush),
                 },
             }
@@ -455,6 +457,7 @@ public partial class ModalWindow : DialogWindow
             Orientation = Avalonia.Layout.Orientation.Vertical,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
             Spacing = 16,
+            MinHeight = 100,
         };
         root.Children.Add(mainGrid);
 
@@ -509,30 +512,62 @@ public partial class ModalWindow : DialogWindow
 
 
 
+
+
+
+    /// <summary>
+    /// Loads thumbnail icon.
+    /// </summary>
+    private void LoadThumbnailIconSource()
+    {
+        if (_thumbnailIconImage.Source is not null) return;
+
+        // get system icon
+        var bmp = StockIcon.Get(ThumbnailIcon);
+
+        // set the icon
+        _thumbnailIconImage.Width = Thumbnail is null ? 50 : 40;
+        _thumbnailIconImage.Height = Thumbnail is null ? 50 : 40;
+        _thumbnailIconImage.Source = bmp;
+
+        if (Thumbnail is null)
+        {
+            _thumbnailIconImage.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+            _thumbnailIconImage.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center;
+        }
+        else
+        {
+            _thumbnailIconImage.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right;
+            _thumbnailIconImage.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom;
+        }
+    }
+
+
+
+
     #region Public static methods
 
     /// <summary>
     /// Shows modal dialog.
     /// </summary>
     public static async Task<ModalWindowResult> ShowAsync(IgWindow? owner,
-        string? title,
-        ModalWindowButton buttons,
         ModalWindowOptions options,
+        ModalWindowButton buttons = ModalWindowButton.OK,
         DialogFocus defaultFocus = DialogFocus.Default)
     {
         var modal = new ModalWindow()
         {
-            Title = title,
+            Title = options.Title ?? string.Empty,
             DefaultFocus = defaultFocus,
             Heading = options.Heading,
             Description = options.Description,
             Details = options.Details,
             Note = options.Note,
-            NoteStyle = options.NoteStyle,
+            NoteStyle = options.NoteStyle ?? InfoBarSeverity.Info,
             Thumbnail = options.Thumbnail,
             ThumbnailIcon = options.ThumbnailIcon,
             InputValue = options.InputValue,
-            IsInputVisible = options.IsInputVisible,
+            IsInputVisible = options.IsInputVisible ?? false,
             IsRememberOptionVisible = options.IsRememberOptionVisible,
         };
 
@@ -602,6 +637,60 @@ public partial class ModalWindow : DialogWindow
         };
 
         return result;
+    }
+
+
+    /// <summary>
+    /// Shows modal dialog for warning.
+    /// </summary>
+    public static async Task<ModalWindowResult> ShowWarningAsync(IgWindow? owner,
+        ModalWindowOptions options, ModalWindowButton buttons = ModalWindowButton.OK)
+    {
+        options.Heading ??= Core.Lang[LangId._Warning];
+        options.NoteStyle ??= InfoBarSeverity.Warning;
+        options.ThumbnailIcon ??= StockIconId.Warning;
+
+        return await ShowAsync(owner, options, buttons);
+    }
+
+
+    /// <summary>
+    /// Shows modal dialog for error.
+    /// </summary>
+    public static async Task<ModalWindowResult> ShowErrorAsync(IgWindow? owner,
+        ModalWindowOptions options, ModalWindowButton buttons = ModalWindowButton.OK)
+    {
+        options.Heading ??= string.Empty;
+        options.NoteStyle ??= InfoBarSeverity.Danger;
+        options.ThumbnailIcon ??= StockIconId.Error;
+
+        return await ShowWarningAsync(owner, options, buttons);
+    }
+
+
+    /// <summary>
+    /// Shows modal dialog for information.
+    /// </summary>
+    public static async Task<ModalWindowResult> ShowInfoAsync(IgWindow? owner,
+        ModalWindowOptions options, ModalWindowButton buttons = ModalWindowButton.OK)
+    {
+        options.Heading ??= string.Empty;
+        options.NoteStyle ??= InfoBarSeverity.Info;
+        options.ThumbnailIcon ??= StockIconId.Info;
+
+        return await ShowAsync(owner, options, buttons);
+    }
+
+
+    /// <summary>
+    /// Shows modal dialog for information.
+    /// </summary>
+    public static async Task<ModalWindowResult> ShowInputAsync(IgWindow? owner,
+        ModalWindowOptions options, ModalWindowButton buttons = ModalWindowButton.OK)
+    {
+        options.IsInputVisible ??= true;
+
+        return await ShowAsync(owner, options, buttons);
     }
 
     #endregion // Public static methods

@@ -74,6 +74,14 @@ public partial class DialogWindow : IgWindow
 
 
     /// <summary>
+    /// Gets the visibility of title bar.
+    /// </summary>
+    public bool IsTitleVisible => !string.IsNullOrWhiteSpace(Title);
+    public static readonly DirectProperty<ModalWindow, bool> IsTitleVisibleProperty =
+        AvaloniaProperty.RegisterDirect<ModalWindow, bool>(nameof(IsTitleVisible), i => i.IsTitleVisible);
+
+
+    /// <summary>
     /// Gets, sets the button 1 text.
     /// </summary>
     public string Button1Text
@@ -168,9 +176,8 @@ public partial class DialogWindow : IgWindow
 
     public DialogWindow()
     {
-        ShowInTaskbar = true;
         CanResize = false;
-
+        ShowInTaskbar = false;
         ExtendClientAreaToDecorationsHint = true;
         ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.NoChrome;
         SizeToContent = SizeToContent.WidthAndHeight;
@@ -277,6 +284,16 @@ public partial class DialogWindow : IgWindow
     }
 
 
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        if (e.Property == TitleProperty)
+        {
+            RaisePropertyChanged(IsTitleVisibleProperty, default, IsTitleVisible);
+        }
+    }
+
 
     /// <summary>
     /// Creates layout and content for dialog window.
@@ -290,6 +307,7 @@ public partial class DialogWindow : IgWindow
             Padding = new Thickness(24, 8, 24, 7),
             BorderThickness = new Thickness(0, 0, 0, 1),
             BorderBrush = Brushes.LightGray,
+            [!Border.IsVisibleProperty] = this[!IsTitleVisibleProperty],
             Child = new TextBlock
             {
                 TextTrimming = TextTrimming.CharacterEllipsis,
@@ -321,7 +339,7 @@ public partial class DialogWindow : IgWindow
         // 3.2 right footer
         _btn1 = new Button
         {
-            MinWidth = 80,
+            MinWidth = 100,
             HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center,
             [!Button.ContentProperty] = this[!Button1TextProperty],
@@ -329,7 +347,7 @@ public partial class DialogWindow : IgWindow
         };
         _btn2 = new Button
         {
-            MinWidth = 80,
+            MinWidth = 100,
             HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center,
             [!Button.ContentProperty] = this[!Button2TextProperty],
@@ -337,7 +355,7 @@ public partial class DialogWindow : IgWindow
         };
         _btn3 = new Button
         {
-            MinWidth = 80,
+            MinWidth = 100,
             HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center,
             [!Button.ContentProperty] = this[!Button3TextProperty],
