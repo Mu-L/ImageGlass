@@ -233,6 +233,17 @@ public static class Core
                 Resx.Set(ResxId.IG_BackgroundDangerBrush, IgTheme.BackgroundDangerLight.ToBrush());
             }
 
+            var bgNeutralAlpha = Core.Theme.Settings.IsDarkMode ? 100 : 150;
+            var bgColor = Core.Theme.ComputedColors.BgColor.NoAlpha();
+            var bgNeutral = bgColor.Blend(Core.Theme.InvertedBaseColor, 0.9f, bgNeutralAlpha);
+            var borderNeutral = bgColor.Blend(Core.Theme.InvertedBaseColor, 0.8f, bgNeutralAlpha);
+            var borderControl = bgColor.Blend(Core.Theme.InvertedBaseColor, 0.5f, bgNeutralAlpha);
+
+            Resx.Set(ResxId.IG_BackgroundNeutralBrush, bgNeutral.ToBrush());
+            Resx.Set(ResxId.IG_BorderNeutralBrush, borderNeutral.ToBrush());
+            Resx.Set(ResxId.IG_BorderControlBrush, borderControl.ToBrush());
+
+
             // update text color
             var textBrush = Theme.ComputedColors.TextColor.ToBrush();
             Resx.Set(ResxId.SystemControlForegroundBaseHighBrush, textBrush);
@@ -243,9 +254,8 @@ public static class Core
             Resx.Set(ResxId.CheckBoxForegroundUncheckedPointerOver, textBrush);
 
             // update border color
-            var borderBrush = Theme.ComputedColors.TextColor.A(180).ToBrush();
-            Resx.Set(ResxId.TextControlBorderBrush, borderBrush);
-            Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUnchecked, borderBrush);
+            Resx.Set(ResxId.TextControlBorderBrush, borderControl);
+            Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUnchecked, borderControl);
         });
     }
 
@@ -279,7 +289,8 @@ public static class Core
             Resx.Set(ResxId.SystemAccentColorDark3, accentDark3);
 
 
-            var borderHoverBrush = accent.ToBrush();
+            // border hover styles
+            var borderHoverBrush = accentLight1.ToBrush();
             Resx.Set(ResxId.TextControlBorderBrushPointerOver, borderHoverBrush);
             Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUncheckedPointerOver, borderHoverBrush);
         });

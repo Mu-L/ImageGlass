@@ -406,7 +406,7 @@ public partial class ModalWindow : DialogWindow
                     TextWrapping = Avalonia.Media.TextWrapping.Wrap,
                     [!SelectableTextBlock.TextProperty] = this[!DetailsProperty],
                     [!SelectableTextBlock.IsVisibleProperty] = this[!IsDetailsVisibleProperty],
-                    [!SelectableTextBlock.BackgroundProperty] = Resx.CreateBinding(ResxId.TextControlBackground),
+                    [!SelectableTextBlock.BackgroundProperty] = Resx.CreateBinding(ResxId.IG_BackgroundNeutralBrush),
                 },
             }
         };

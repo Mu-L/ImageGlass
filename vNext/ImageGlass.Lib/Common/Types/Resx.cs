@@ -108,4 +108,7 @@ public enum ResxId
     IG_BackgroundSuccessBrush,
     IG_BackgroundWarningBrush,
     IG_BackgroundDangerBrush,
+    IG_BackgroundNeutralBrush,
+    IG_BorderNeutralBrush,
+    IG_BorderControlBrush,
 }

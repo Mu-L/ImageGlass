@@ -503,12 +503,8 @@ public partial class DialogWindow : IgWindow
         _contentEl.Background = new SolidColorBrush(contentBg);
 
         // title & footer
-        var footerAlpha = isDarkMode ? 100 : 150;
-        var footerBg = bg.Blend(Core.Theme.InvertedBaseColor, 0.925f, footerAlpha);
-        var footerBorder = bg.Blend(Core.Theme.InvertedBaseColor, 0.85f, footerAlpha);
-
-        _titleEl.Background = _footerEl.Background = footerBg.ToBrush();
-        _titleEl.BorderBrush = _footerEl.BorderBrush = footerBorder.ToBrush();
+        _titleEl.Background = _footerEl.Background = Resx.Get<IBrush>(ResxId.IG_BackgroundNeutralBrush);
+        _titleEl.BorderBrush = _footerEl.BorderBrush = Resx.Get<IBrush>(ResxId.IG_BorderNeutralBrush);
     }
 
 
