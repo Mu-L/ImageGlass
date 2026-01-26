@@ -105,6 +105,14 @@ public enum LangId
     _Position_Top,
     _Position_Bottom,
 
+    _Validation_Required,
+    _Validation_RegexPattern,
+    _Validation_IntValueOnly,
+    _Validation_UnsignedIntValueOnly,
+    _Validation_FloatValueOnly,
+    _Validation_UnsignedFloatValueOnly,
+    _Validation_FileNameValueOnly,
+
     #endregion // General
 
 

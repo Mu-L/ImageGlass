@@ -1,0 +1,268 @@
+﻿/*
+ImageGlass Project - Image viewer for Windows
+Copyright (C) 2010 - 2026 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using ImageGlass.Common;
+using ImageGlass.Common.Localization;
+using ImageGlass.Common.Types;
+using ImageGlass.UI.Windowing;
+using System;
+using System.IO;
+using System.Text.RegularExpressions;
+
+namespace ImageGlass.UI;
+
+
+public partial class IgTextBox : TextBox
+{
+    protected override Type StyleKeyOverride => typeof(TextBox);
+
+
+    #region Private Regex
+    private static Regex Regex_IntValueOnly => new Regex(
+            pattern: $"^[{Const.SIGN_POSITIVE}{Const.SIGN_NEGATIVE}]?[0-9]+$",
+            options: RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static Regex Regex_FloatValueOnly => new Regex(
+            pattern: $"^([0-9]+([{Const.DECIMAL_SEPARATOR}][0-9]*)?|[{Const.DECIMAL_SEPARATOR}][0-9]+)$",
+            options: RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static Regex Regex_UnsignedFloatValueOnly => new Regex(
+            pattern: $"^[{Const.SIGN_POSITIVE}]?([0-9]+([{Const.DECIMAL_SEPARATOR}][0-9]*)?|[{Const.DECIMAL_SEPARATOR}][0-9]+)$",
+            options: RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+
+    [GeneratedRegex("^[0-9]+$", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex Regex_UnsignedIntValueOnly();
+
+
+    #endregion // Private Regex
+
+
+    #region Public properties
+
+    /// <summary>
+    /// Gets, sets the rules for the input control.
+    /// </summary>
+    public TextBoxAcceptValue AcceptValue
+    {
+        get => GetValue(AcceptValueProperty);
+        set => SetValue(AcceptValueProperty, value);
+    }
+    public static readonly StyledProperty<TextBoxAcceptValue> AcceptValueProperty =
+        AvaloniaProperty.Register<ModalWindow, TextBoxAcceptValue>(nameof(AcceptValue), TextBoxAcceptValue.Any);
+
+
+    /// <summary>
+    /// Gets, sets the regex pattern for the validation
+    /// if <see cref="AcceptValue"/> is <see cref="TextBoxAcceptValue.RegexPattern"/>.
+    /// </summary>
+    public string? RegexPattern
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            ValidateAndShowError();
+        }
+    }
+
+
+    /// <summary>
+    /// Gets, sets the value indicates that empty value is not allowed.
+    /// </summary>
+    public bool IsRequired
+    {
+        get; set
+        {
+            if (field == value) return;
+            field = value;
+            ValidateAndShowError();
+        }
+    } = false;
+
+
+    /// <summary>
+    /// Gets, sets the value indicates that
+    /// the textbox should be validated when pressing Enter key
+    /// (and when <see cref="TextBox.AcceptsReturn"/> is <c>false</c>).
+    /// </summary>
+    public bool ValidateByPressingEnter { get; set; } = true;
+
+
+    #endregion // Public properties
+
+
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
+        TextChanged += IgTextBox_TextChanged;
+        Core.LanguageChanged += Core_LanguageChanged;
+    }
+
+
+    protected override void OnUnloaded(RoutedEventArgs e)
+    {
+        base.OnUnloaded(e);
+
+        TextChanged -= IgTextBox_TextChanged;
+        Core.LanguageChanged -= Core_LanguageChanged;
+    }
+
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (AcceptsReturn) return;
+
+        // submit the textbox
+        if (ValidateByPressingEnter && e.Key == Key.Enter)
+        {
+            _ = ValidateAndShowError();
+        }
+    }
+
+
+    private void IgTextBox_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        ValidateAndShowError();
+    }
+
+
+    private void Core_LanguageChanged(object? sender, EventArgs e)
+    {
+        ValidateAndShowError();
+    }
+
+
+    /// <summary>
+    /// Validates the text input.
+    /// </summary>
+    protected (bool IsValid, ValidationException? Error) Validate()
+    {
+        ValidationException? error = null;
+        var isValid = true;
+        var textValue = Text ?? string.Empty;
+        var isEmpty = string.IsNullOrEmpty(textValue);
+
+        if (isEmpty)
+        {
+            isValid = !IsRequired;
+            if (!isValid) error = new ValidationException(Core.Lang[LangId._Validation_Required]);
+        }
+        else
+        {
+            // validate according to the accept value
+            switch (AcceptValue)
+            {
+                // use custom regex
+                case TextBoxAcceptValue.RegexPattern:
+                    if (!string.IsNullOrEmpty(RegexPattern))
+                    {
+                        isValid = Regex.IsMatch(textValue, RegexPattern);
+                        if (!isValid) error = new ValidationException(Core.Lang[LangId._Validation_RegexPattern]);
+                    }
+                    break;
+
+                // Int value only
+                case TextBoxAcceptValue.IntValueOnly:
+                    isValid = Regex_IntValueOnly.IsMatch(textValue);
+                    if (!isValid) error = new ValidationException(Core.Lang[LangId._Validation_IntValueOnly]);
+                    break;
+
+                // Unsigned Int value only
+                case TextBoxAcceptValue.UnsignedIntValueOnly:
+                    isValid = Regex_UnsignedIntValueOnly().IsMatch(textValue);
+                    if (!isValid) error = new ValidationException(Core.Lang[LangId._Validation_UnsignedIntValueOnly]);
+                    break;
+
+                // Float value only
+                case TextBoxAcceptValue.FloatValueOnly:
+                    isValid = Regex_FloatValueOnly.IsMatch(textValue);
+                    if (!isValid) error = new ValidationException(Core.Lang[LangId._Validation_FloatValueOnly]);
+                    break;
+
+                // Unsigned Float value only
+                case TextBoxAcceptValue.UnsignedFloatValueOnly:
+                    isValid = Regex_UnsignedFloatValueOnly.IsMatch(textValue);
+                    if (!isValid) error = new ValidationException(Core.Lang[LangId._Validation_UnsignedFloatValueOnly]);
+                    break;
+
+                // Valid filename only
+                case TextBoxAcceptValue.FileNameValueOnly:
+                    var badChars = Path.GetInvalidFileNameChars();
+
+                    foreach (var c in badChars.AsSpan())
+                    {
+                        if (textValue.Contains(c))
+                        {
+                            isValid = false;
+                            if (!isValid) error = new ValidationException(Core.Lang[LangId._Validation_FileNameValueOnly]);
+                            break;
+                        }
+                    }
+                    break;
+
+                // Any value
+                default:
+                    break;
+            }
+        }
+
+        return (IsValid: isValid, Error: error);
+    }
+
+
+
+    /// <summary>
+    /// Validates the text input and shows error.
+    /// </summary>
+    public bool ValidateAndShowError()
+    {
+        DataValidationErrors.ClearErrors(this);
+
+        var result = Validate();
+        if (!result.IsValid)
+        {
+            DataValidationErrors.SetError(this, result.Error);
+        }
+
+        return result.IsValid;
+    }
+
+
+}
+
+
+
+public enum TextBoxAcceptValue
+{
+    Any,
+    RegexPattern,
+    IntValueOnly,
+    UnsignedIntValueOnly,
+    FloatValueOnly,
+    UnsignedFloatValueOnly,
+    FileNameValueOnly,
+}

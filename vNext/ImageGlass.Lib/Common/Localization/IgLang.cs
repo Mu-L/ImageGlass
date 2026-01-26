@@ -363,6 +363,15 @@ public class IgLang
         new(LangId._Position_Top, "Top"),
         new(LangId._Position_Bottom, "Bottom"),
 
+        // validation
+        new(LangId._Validation_Required, "Required"),
+        new(LangId._Validation_RegexPattern, "Invalid value"),
+        new(LangId._Validation_IntValueOnly, "Must be an integer"),
+        new(LangId._Validation_UnsignedIntValueOnly, "Must be a non-negative integer"),
+        new(LangId._Validation_FloatValueOnly, "Must be a number"),
+        new(LangId._Validation_UnsignedFloatValueOnly, "Must be a non-negative number"),
+        new(LangId._Validation_FileNameValueOnly, "Invalid filename"),
+
         #endregion // General
     
         
