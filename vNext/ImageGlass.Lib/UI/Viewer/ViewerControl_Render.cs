@@ -159,7 +159,7 @@ public partial class ViewerControl
         var ft = new FormattedText(
             $"""
             DPI = {Dpi}
-            Control Size = {Bounds.Width} x {Bounds.Height}
+            Control Bounds = {Bounds}
             DrawingArea = {DrawingArea}
             Image size = {BitmapSize}
             _srcRect = {_srcRect}
@@ -180,7 +180,6 @@ public partial class ViewerControl
 
         // draw zoomed point
         c.DrawEllipse(Brushes.Red, new Pen(Brushes.White, 2), _zooming.ZoomedPoint, 5, 5);
-
     }
 
 

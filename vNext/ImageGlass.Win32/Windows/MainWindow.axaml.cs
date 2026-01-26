@@ -16,15 +16,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Windowing;
+using ImageGlass.Win32.Common;
 using ImageGlass.Win32.Common.Types;
 using ImageGlass.Win32.UI;
 using ImageGlass.Win32.WindowModels;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Win32.Windows;
 
@@ -43,6 +46,13 @@ public partial class MainWindow : Win32Window
         Height = 400;
 
         Core.AppInstance.InstanceInvoked += AppInstance_InstanceInvoked;
+
+        Position = new Avalonia.PixelPoint((int)Core.Config.MainWindowBounds.X, (int)Core.Config.MainWindowBounds.Y);
+        Width = Core.Config.MainWindowBounds.Width;
+        Height = Core.Config.MainWindowBounds.Height;
+
+        if (Core.Config.IsMainWindowMaximized) WindowState = WindowState.Maximized;
+        if (Core.Config.EnableFullScreen) WindowState = WindowState.FullScreen;
     }
 
 
@@ -85,6 +95,14 @@ public partial class MainWindow : Win32Window
     }
 
 
+    protected override async void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+
+        await SaveConfigOnClosingAsync();
+    }
+
+
     private void ColorProfileService_Changed(IWindowColorProfileProvider sender, ColorProfileChangedEventArgs e)
     {
         VM.Title = $"{e.IsHdr} | {e.ProfilePath}";
@@ -95,6 +113,34 @@ public partial class MainWindow : Win32Window
     {
         base.OnKeyDown(e);
         if (e.Handled) return;
+
+        // enter full screen
+        if (e.Key == Key.F11)
+        {
+            Core.Config.EnableFullScreen = !Core.Config.EnableFullScreen;
+
+            if (Core.Config.EnableFullScreen)
+            {
+                Core.Config.IsMainWindowMaximized = WindowState == WindowState.Maximized;
+                Core.Config.MainWindowBounds = new Avalonia.Rect(Position.X, Position.Y, Width, Height);
+                WindowState = WindowState.FullScreen;
+            }
+            else
+            {
+                if (Core.Config.IsMainWindowMaximized)
+                {
+                    WindowState = WindowState.Maximized;
+                }
+                else
+                {
+                    WindowState = WindowState.Normal;
+                    Width = Core.Config.MainWindowBounds.Width;
+                    Height = Core.Config.MainWindowBounds.Height;
+                }
+            }
+
+            return;
+        }
 
 
         var res = await ModalWindow.ShowInputAsync(this, new ModalWindowOptions
@@ -122,6 +168,50 @@ public partial class MainWindow : Win32Window
 
 
 
+
+
+    private async Task SaveConfigOnClosingAsync()
+    {
+        // save window maximized state
+        Core.Config.IsMainWindowMaximized = WindowState == Avalonia.Controls.WindowState.Maximized;
+        Core.Config.EnableFullScreen = WindowState == WindowState.FullScreen;
+
+        // save window bounds
+        if (WindowState == Avalonia.Controls.WindowState.Normal)
+        {
+            Core.Config.MainWindowBounds = new Avalonia.Rect(Position.X, Position.Y, Width, Height);
+        }
+
+
+        // fullscreen mode: use the backup value
+        if (Core.Config.EnableFullScreen)
+        {
+            //Core.Config.ShowToolbar = _showToolbar;
+            //Core.Config.ShowGallery = _showGallery;
+        }
+
+
+        Core.Config.LastSeenImagePath = CoreWin32.Photos.CurrentFilePath;
+        //Core.Config.ZoomLockValue = Viewer.ZoomFactor * 100f;
+
+
+        // save config to file
+        await Core.Config.SaveAsync();
+
+
+        // dispose the global singleton
+        Core.Dispose();
+        CoreWin32.Dispose();
+
+
+        //// cleaning
+        //try
+        //{
+        //    // delete trash
+        //    Directory.Delete(Config.ConfigDir(PathType.Dir, Dir.Temporary), true);
+        //}
+        //catch { }
+    }
 
 }
 

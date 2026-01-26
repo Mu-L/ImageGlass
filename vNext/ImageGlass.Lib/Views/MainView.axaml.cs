@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using ImageGlass.ViewModels;
 
 namespace ImageGlass.Views;
@@ -30,6 +31,32 @@ public partial class MainView : UserControl
     {
         InitializeComponent();
     }
+
+
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+    }
+
+
+
+    protected override void OnUnloaded(RoutedEventArgs e)
+    {
+        base.OnUnloaded(e);
+
+
+
+    }
+
+
+
+
+
+
+
+
+
 
 
 

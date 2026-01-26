@@ -7,7 +7,31 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ImageGlass.Views.MainView"
              x:DataType="vm:MainViewModel">
-    <viewer:ViewerControl>
-		<TextBlock Text="{CompiledBinding Title}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-    </viewer:ViewerControl>
+
+    <Grid >
+		<Grid.RowDefinitions >
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+
+        <Border Grid.Row="0" ZIndex="90" Background="#55BDB76B" Height="50" >
+			
+        </Border>
+
+
+        <Grid Grid.Row="1">
+            <viewer:ViewerControl>
+                <TextBlock Text="{CompiledBinding Title}" />
+            </viewer:ViewerControl>
+        </Grid>
+
+
+        <Border Grid.Row="2" ZIndex="80" Background="#55FF1493" Height="90" >
+			
+        </Border>
+
+    </Grid>
+    
 </UserControl>
