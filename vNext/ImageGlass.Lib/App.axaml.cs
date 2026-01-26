@@ -73,16 +73,6 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
-
-
-        // check if the config has any error
-        if (Config.LoadingException is not null)
-        {
-            var isContinue = await ModalWindow.ShowUnhandledErrorAsync(
-                Config.LoadingException,
-                "There was an error while loading user settings");
-            if (!isContinue) return;
-        }
     }
 
 

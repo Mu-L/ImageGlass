@@ -72,6 +72,12 @@ public partial class IgWindow : Window
 
 
     /// <summary>
+    /// Gets, sets the value indicates that the window icon won't be loaded by default.
+    /// </summary>
+    public virtual bool UseCustomWindowIcon { get; set; } = false;
+
+
+    /// <summary>
     /// Gets, sets the window backdrop style.
     /// </summary>
     public BackdropStyle BackdropStyle
@@ -195,7 +201,10 @@ public partial class IgWindow : Window
         if (string.IsNullOrEmpty(e.PropertyName))
         {
             // update app icon
-            _ = UpdateWindowIconAsync();
+            if (!UseCustomWindowIcon)
+            {
+                _ = UpdateWindowIconAsync();
+            }
         }
 
         OnIgThemeChanged(e);
@@ -356,7 +365,7 @@ public partial class IgWindow : Window
     /// <summary>
     /// Updates icon for window and taskbar.
     /// </summary>
-    protected async Task UpdateWindowIconAsync()
+    protected async Task UpdateWindowIconAsync(string? customIconPath = null)
     {
         // 1. get full path of icon
         var iconPath = Core.Theme.GetIconPath(IgThemeIcon.AppLogo);
@@ -364,16 +373,24 @@ public partial class IgWindow : Window
 
 
         // 2. use default icon as logo
-        if (useDefaultIcon)
+        if (string.IsNullOrWhiteSpace(customIconPath))
         {
-            // get default logo icon if theme's app logo does not exist
-            Icon = StockIcon.GetDefaultWindowIcon();
+            if (useDefaultIcon)
+            {
+                // get default logo icon if theme's app logo does not exist
+                Icon = StockIcon.GetDefaultWindowIcon();
 
-            return;
+                return;
+            }
+        }
+        // 3. use custom icon path
+        else
+        {
+            iconPath = customIconPath;
         }
 
 
-        // 2. use theme icon as logo
+        // 4. use theme icon as logo
         // decode the logo
         var size = (int)DpiScale * 64;
         var bytes = await MagickCodec.QuickDecodeAsync(iconPath, ImageMagick.MagickFormat.Ico, size, size);

@@ -537,6 +537,12 @@ public partial class ModalWindow : DialogWindow
             _thumbnailIconImage.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right;
             _thumbnailIconImage.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom;
         }
+
+
+        if (bmp is not null)
+        {
+            Icon = new WindowIcon(bmp);
+        }
     }
 
 
@@ -587,7 +593,8 @@ public partial class ModalWindow : DialogWindow
             AcceptValue = options.AcceptValue,
             IsInputVisible = options.IsInputVisible ?? false,
             IsRememberOptionVisible = options.IsRememberOptionVisible,
-            ShowInTaskbar = options.ShowInTaskbar ?? false,
+            ShowInTaskbar = options.ShowInTaskbar ?? true,
+            UseCustomWindowIcon = options.ThumbnailIcon != null,
         };
 
 
@@ -717,7 +724,7 @@ public partial class ModalWindow : DialogWindow
     /// Reports unhandled exception,
     /// returns <c>true</c> if user ignores the error to continue.
     /// </summary>
-    public static async Task<bool> ShowUnhandledErrorAsync(Exception ex,
+    public static async Task<bool> ShowUnhandledErrorAsync(Exception ex, IgWindow? owner = null,
         string? heading = null, string? description = null)
     {
         // get error details
@@ -729,9 +736,9 @@ public partial class ModalWindow : DialogWindow
             : ex.Message;
 
         // show error modal dialog
-        var result = await ShowErrorAsync(null, new ModalWindowOptions
+        var result = await ShowErrorAsync(owner, new ModalWindowOptions
         {
-            Title = Core.Lang[LangId._UnhandledException],
+            Title = $"{Core.Lang[LangId._UnhandledException]} – {BHelper.AppName}",
             Heading = heading ?? ex.Message,
             Description = descriptionText,
             Details = details,

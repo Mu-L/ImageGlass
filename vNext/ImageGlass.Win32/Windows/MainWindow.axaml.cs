@@ -67,6 +67,16 @@ public partial class MainWindow : Win32Window
 
     protected override async void OnLoaded(RoutedEventArgs e)
     {
+        // check if the config loading was failed
+        if (Config.LoadingException is not null)
+        {
+            var isContinue = await ModalWindow.ShowUnhandledErrorAsync(
+                Config.LoadingException, this,
+                "There was an error while loading user settings");
+            if (!isContinue) return;
+        }
+
+
         base.OnLoaded(e);
 
         Core.ColorProfileService = new Win32ColorProfileProvider();
@@ -99,7 +109,7 @@ public partial class MainWindow : Win32Window
             AcceptValue = ImageGlass.UI.TextBoxAcceptValue.IntValueOnly,
             IsRememberOptionVisible = true,
             Thumbnail = new Bitmap(@"C:\Users\d2pha\Desktop\pic.jpg"),
-            ThumbnailIcon = StockIconId.Shield,
+            ThumbnailIcon = StockIconId.Delete,
             NoteStyle = InfoBarSeverity.Warning,
         }, ModalWindowButton.OK_Cancel);
 
