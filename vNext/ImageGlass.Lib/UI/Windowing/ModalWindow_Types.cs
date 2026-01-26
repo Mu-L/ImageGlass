@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Media.Imaging;
-using ImageGlass.Lib.Common.Types;
+using ImageGlass.Common.Types;
 
 namespace ImageGlass.UI.Windowing;
 

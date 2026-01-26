@@ -29,7 +29,6 @@ using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
-using ImageGlass.Lib.Common.Types;
 using System;
 using System.IO;
 using System.Threading.Tasks;

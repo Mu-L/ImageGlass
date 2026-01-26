@@ -21,7 +21,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using System;
 
-namespace ImageGlass.Lib.Common.Types;
+namespace ImageGlass.Common.Types;
 
 
 public static class StockIcon

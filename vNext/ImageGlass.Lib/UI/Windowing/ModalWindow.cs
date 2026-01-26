@@ -23,7 +23,6 @@ using Avalonia.Media.Imaging;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
-using ImageGlass.Lib.Common.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
@@ -33,7 +32,7 @@ public partial class ModalWindow : DialogWindow
 {
     private readonly double THUMBNAIL_SIZE = 80;
 
-    protected TextBox _txtInput;
+    protected IgTextBox _txtInput;
     protected Image _thumbnailIconImage;
     protected Border _noteContainer;
     protected CheckBox _chkRememberOption;
@@ -262,6 +261,7 @@ public partial class ModalWindow : DialogWindow
     }
 
 
+
     #region Override methods
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -322,13 +322,22 @@ public partial class ModalWindow : DialogWindow
 
     protected override void OnDialogSubmitted(DialogEventArgs e)
     {
-        // TODO: validate
+        // don't proceed if value is invalid
+        if (!_txtInput.ValidateAndShowError()) return;
 
         base.OnDialogSubmitted(e);
     }
 
 
+    #endregion // Override methods
 
+
+
+    #region Private methods
+
+    /// <summary>
+    /// Creates dialog content element.
+    /// </summary>
     [MemberNotNull(nameof(_thumbnailIconImage), nameof(_txtInput), nameof(_noteContainer))]
     private StackPanel CreateDialogContentElement()
     {
@@ -392,8 +401,10 @@ public partial class ModalWindow : DialogWindow
             [!TextBlock.TextProperty] = this[!DescriptionProperty],
             [!TextBlock.IsVisibleProperty] = this[!IsDescriptionVisibleProperty],
         };
-        _txtInput = new TextBox
+        _txtInput = new IgTextBox
         {
+            IsRequired = true,
+            [!IgTextBox.AcceptValueProperty] = this[!AcceptValueProperty],
             [!TextBox.TextProperty] = this[!InputValueProperty],
             [!TextBox.IsVisibleProperty] = this[!IsInputVisibleProperty],
         };
@@ -465,7 +476,9 @@ public partial class ModalWindow : DialogWindow
     }
 
 
-
+    /// <summary>
+    /// Create left section element for dialog footer.
+    /// </summary>
     [MemberNotNull(nameof(_chkRememberOption))]
     private StackPanel CreateDialogFooterLeftContentElement()
     {
@@ -490,29 +503,6 @@ public partial class ModalWindow : DialogWindow
 
         return root;
     }
-
-
-
-    private void BindNoteBackground()
-    {
-        if (_noteContainer is null) return;
-
-        _noteContainer[!Border.BackgroundProperty] = NoteStyle switch
-        {
-            InfoBarSeverity.Info => Resx.CreateBinding(ResxId.IG_BackgroundInfoBrush),
-            InfoBarSeverity.Success => Resx.CreateBinding(ResxId.IG_BackgroundSuccessBrush),
-            InfoBarSeverity.Warning => Resx.CreateBinding(ResxId.IG_BackgroundWarningBrush),
-            InfoBarSeverity.Danger => Resx.CreateBinding(ResxId.IG_BackgroundDangerBrush),
-            _ => Resx.CreateBinding(ResxId.IG_BackgroundNeutralBrush),
-        };
-    }
-
-
-    #endregion // Override methods
-
-
-
-
 
 
     /// <summary>
@@ -543,6 +533,26 @@ public partial class ModalWindow : DialogWindow
     }
 
 
+    /// <summary>
+    /// Creates binding for note's background.
+    /// </summary>
+    private void BindNoteBackground()
+    {
+        if (_noteContainer is null) return;
+
+        _noteContainer[!Border.BackgroundProperty] = NoteStyle switch
+        {
+            InfoBarSeverity.Info => Resx.CreateBinding(ResxId.IG_BackgroundInfoBrush),
+            InfoBarSeverity.Success => Resx.CreateBinding(ResxId.IG_BackgroundSuccessBrush),
+            InfoBarSeverity.Warning => Resx.CreateBinding(ResxId.IG_BackgroundWarningBrush),
+            InfoBarSeverity.Danger => Resx.CreateBinding(ResxId.IG_BackgroundDangerBrush),
+            _ => Resx.CreateBinding(ResxId.IG_BackgroundNeutralBrush),
+        };
+    }
+
+
+    #endregion // Private methods
+
 
 
     #region Public static methods
@@ -567,6 +577,7 @@ public partial class ModalWindow : DialogWindow
             Thumbnail = options.Thumbnail,
             ThumbnailIcon = options.ThumbnailIcon,
             InputValue = options.InputValue,
+            AcceptValue = options.AcceptValue,
             IsInputVisible = options.IsInputVisible ?? false,
             IsRememberOptionVisible = options.IsRememberOptionVisible,
         };
@@ -698,3 +709,4 @@ public partial class ModalWindow : DialogWindow
 
 
 }
+
