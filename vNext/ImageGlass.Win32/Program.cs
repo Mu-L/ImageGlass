@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
-using ImageGlass.Win32.WindowModels;
+using ImageGlass.ViewModels;
 using ImageGlass.Win32.Windows;
 using System;
 using System.Globalization;
@@ -79,7 +79,7 @@ sealed class Program
         {
             var app = (App?)builder.Instance;
 
-            var mainWindow = new MainWindow();
+            var mainWindow = new MainWindow32();
             mainWindow.DataContext = new MainWindowModel(mainWindow);
 
             app?.CreateMainWindowIfNotExist(mainWindow);

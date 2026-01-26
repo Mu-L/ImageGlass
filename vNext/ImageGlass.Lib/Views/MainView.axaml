@@ -23,7 +23,12 @@
 
         <Grid Grid.Row="1">
             <viewer:ViewerControl>
-                <TextBlock Text="{CompiledBinding Title}" />
+                <TextBlock Background="#4B006290"
+                           Text="{CompiledBinding Title}"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center" />
             </viewer:ViewerControl>
         </Grid>
 

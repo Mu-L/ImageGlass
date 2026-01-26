@@ -16,10 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.ViewModels;
-using ImageGlass.Win32.Windows;
+using ImageGlass.Common.Windows;
 
-namespace ImageGlass.Win32.WindowModels;
+namespace ImageGlass.ViewModels;
 
 public class MainWindowModel : MainViewModel
 {

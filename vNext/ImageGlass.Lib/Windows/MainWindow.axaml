@@ -1,18 +1,17 @@
-<ui32:Win32Window xmlns="https://github.com/avaloniaui"
+<win:IgWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:ImageGlass.Win32.WindowModels"
-        xmlns:ui32="using:ImageGlass.Win32.UI"
-        xmlns:views="using:ImageGlass.Views"
+        xmlns:win="using:ImageGlass.UI.Windowing"
+        xmlns:view="using:ImageGlass.Views"
+        xmlns:vm="using:ImageGlass.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="ImageGlass.Win32.Windows.MainWindow" 
+        x:Class="ImageGlass.Common.Windows.MainWindow"
         x:DataType="vm:MainWindowModel"
         BackdropStyle="{CompiledBinding Config.WindowBackdrop}"
         IsFrameless="{CompiledBinding Config.EnableFrameless}"
         Title="{CompiledBinding Title}">
 
-    <views:MainView DataContext="{CompiledBinding .}"></views:MainView>
-    
+  <view:MainView DataContext="{CompiledBinding .}"></view:MainView>
 
-</ui32:Win32Window>
+</win:IgWindow >
