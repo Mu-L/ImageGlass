@@ -76,6 +76,22 @@ public partial class IgTextBox : TextBox
 
 
     /// <summary>
+    /// Gets, sets the value indicates that empty value is not allowed.
+    /// </summary>
+    public bool IsRequired
+    {
+        get => GetValue(IsRequiredProperty);
+        set
+        {
+            SetValue(IsRequiredProperty, value);
+            ValidateAndShowError();
+        }
+    }
+    public static readonly StyledProperty<bool> IsRequiredProperty =
+        AvaloniaProperty.Register<ModalWindow, bool>(nameof(IsRequired));
+
+
+    /// <summary>
     /// Gets, sets the regex pattern for the validation
     /// if <see cref="AcceptValue"/> is <see cref="TextBoxAcceptValue.RegexPattern"/>.
     /// </summary>
@@ -89,20 +105,6 @@ public partial class IgTextBox : TextBox
             ValidateAndShowError();
         }
     }
-
-
-    /// <summary>
-    /// Gets, sets the value indicates that empty value is not allowed.
-    /// </summary>
-    public bool IsRequired
-    {
-        get; set
-        {
-            if (field == value) return;
-            field = value;
-            ValidateAndShowError();
-        }
-    } = false;
 
 
     /// <summary>

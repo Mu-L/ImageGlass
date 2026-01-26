@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using ImageGlass.Common.Types;
 using System;
 using System.Diagnostics;
@@ -168,6 +170,25 @@ public partial class BHelper
             Thread.CurrentThread.CurrentUICulture = cultureUi;
             return func();
         }).Unwrap().GetAwaiter().GetResult();
+    }
+
+
+    /// <summary>
+    /// Exits the app.
+    /// </summary>
+    public static void ExitApp(bool forced, int exitCode = 0)
+    {
+        var appLf = Application.Current?.ApplicationLifetime;
+
+        // try to exit the app
+        if (!forced && appLf is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.TryShutdown(exitCode);
+            return;
+        }
+
+        // force exit
+        Environment.Exit(exitCode);
     }
 
 }

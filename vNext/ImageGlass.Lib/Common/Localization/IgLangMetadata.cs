@@ -28,5 +28,5 @@ public record IgLangMetadata
     public string EnglishName { get; set; } = "English";
     public string LocalName { get; set; } = "English";
     public string Author { get; set; } = "Duong Dieu Phap";
-    public string MinVersion { get; set; } = "10";
+    public float MinVersion { get; set; } = 10;
 }

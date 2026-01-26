@@ -23,6 +23,7 @@ using Avalonia.Media.Imaging;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
@@ -409,7 +410,7 @@ public partial class ModalWindow : DialogWindow
         };
         _txtInput = new IgTextBox
         {
-            IsRequired = true,
+            [!IgTextBox.IsRequiredProperty] = this[!IsInputVisibleProperty],
             [!IgTextBox.AcceptValueProperty] = this[!AcceptValueProperty],
             [!TextBox.TextProperty] = this[!InputValueProperty],
             [!TextBox.IsVisibleProperty] = this[!IsInputVisibleProperty],
@@ -586,6 +587,7 @@ public partial class ModalWindow : DialogWindow
             AcceptValue = options.AcceptValue,
             IsInputVisible = options.IsInputVisible ?? false,
             IsRememberOptionVisible = options.IsRememberOptionVisible,
+            ShowInTaskbar = options.ShowInTaskbar ?? false,
         };
 
 
@@ -709,6 +711,49 @@ public partial class ModalWindow : DialogWindow
 
         return await ShowAsync(owner, options, buttons);
     }
+
+
+    /// <summary>
+    /// Reports unhandled exception,
+    /// returns <c>true</c> if user ignores the error to continue.
+    /// </summary>
+    public static async Task<bool> ShowUnhandledErrorAsync(Exception ex,
+        string? heading = null, string? description = null)
+    {
+        // get error details
+        var details = BHelper.GetExceptionDetails(ex);
+        var isContinue = false;
+
+        var descriptionText = string.IsNullOrEmpty(heading)
+            ? string.Empty
+            : ex.Message;
+
+        // show error modal dialog
+        var result = await ShowErrorAsync(null, new ModalWindowOptions
+        {
+            Title = Core.Lang[LangId._UnhandledException],
+            Heading = heading ?? ex.Message,
+            Description = descriptionText,
+            Details = details,
+            ShowInTaskbar = true,
+            NoteStyle = InfoBarSeverity.Danger,
+            Note = Core.Lang[LangId._UnhandledException_Description],
+        }, ModalWindowButton.Continue_Quit);
+
+
+        // user chooses 'Quit': force exit
+        if (result.ExitCode == DialogExitCode.Cancel)
+        {
+            BHelper.ExitApp(true, 0);
+        }
+        else if (result.ExitCode == DialogExitCode.OK)
+        {
+            isContinue = true;
+        }
+
+        return isContinue;
+    }
+
 
     #endregion // Public static methods
 

@@ -58,12 +58,10 @@ public partial class App : Application
     }
 
 
-
-
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public override void OnFrameworkInitializationCompleted()
+    public override async void OnFrameworkInitializationCompleted()
     {
         ApplyUIConfigs();
 
@@ -75,6 +73,16 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+
+
+        // check if the config has any error
+        if (Config.LoadingException is not null)
+        {
+            var isContinue = await ModalWindow.ShowUnhandledErrorAsync(
+                Config.LoadingException,
+                "There was an error while loading user settings");
+            if (!isContinue) return;
+        }
     }
 
 
@@ -90,20 +98,33 @@ public partial class App : Application
 
 
 
-    private static void UIThread_UnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    private static async void UIThread_UnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
+        e.Handled = await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
 
+#if DEBUG
+        throw e.Exception;
+#endif
     }
 
 
-    private static void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    private static async void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
+        await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
 
+#if DEBUG
+        throw e.Exception;
+#endif
     }
 
-    private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private async void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
+        var ex = (Exception)e.ExceptionObject;
+        _ = await ModalWindow.ShowUnhandledErrorAsync(ex);
 
+#if DEBUG
+        throw ex;
+#endif
     }
 
 

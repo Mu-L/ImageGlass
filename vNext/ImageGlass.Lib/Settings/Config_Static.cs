@@ -273,7 +273,7 @@ public partial class Config
             try
             {
                 var config = BHelper.ReadJsonFromFile(configPath, jsonContext.Config)
-                    ?? throw new FileLoadException($"Cannot parse settings from file: {configPath}");
+                    ?? throw new FileLoadException($"Could not parse settings from file: {configPath}");
 
 
                 // 3. migrate user config file if config version is changed
