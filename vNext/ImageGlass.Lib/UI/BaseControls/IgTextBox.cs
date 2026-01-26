@@ -17,9 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.Styling;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
@@ -27,9 +30,9 @@ using ImageGlass.UI.Windowing;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
-
 
 public partial class IgTextBox : TextBox
 {
@@ -55,6 +58,7 @@ public partial class IgTextBox : TextBox
 
 
     #endregion // Private Regex
+
 
 
     #region Public properties
@@ -113,6 +117,8 @@ public partial class IgTextBox : TextBox
 
 
 
+    #region Override methods
+
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
@@ -139,10 +145,16 @@ public partial class IgTextBox : TextBox
         // submit the textbox
         if (ValidateByPressingEnter && e.Key == Key.Enter)
         {
-            _ = ValidateAndShowError();
+            var isValid = ValidateAndShowError();
+            if (!isValid) _ = AnimateValidationErrorAsync();
         }
     }
 
+    #endregion // Override methods
+
+
+
+    #region Control Methods
 
     private void IgTextBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
@@ -234,7 +246,6 @@ public partial class IgTextBox : TextBox
     }
 
 
-
     /// <summary>
     /// Validates the text input and shows error.
     /// </summary>
@@ -250,6 +261,56 @@ public partial class IgTextBox : TextBox
 
         return result.IsValid;
     }
+
+
+    /// <summary>
+    /// Animates the validation error.
+    /// </summary>
+    public async Task AnimateValidationErrorAsync()
+    {
+        var distance = 5;
+        var duration = 30;
+
+        await AnimateMarginAsync(this,
+                new Thickness(Margin.Left + distance, Margin.Top, Margin.Right, Margin.Bottom),
+                duration);
+        await AnimateMarginAsync(this,
+                new Thickness(Margin.Left - distance, Margin.Top, Margin.Right, Margin.Bottom),
+                duration);
+        await AnimateMarginAsync(this, Margin, duration);
+    }
+
+
+    /// <summary>
+    /// Animates control margin.
+    /// </summary>
+    private static async Task AnimateMarginAsync(Control control, Thickness toMargin, int durationMs)
+    {
+        var fromMargin = control.Margin;
+        var animation = new Animation
+        {
+            Duration = TimeSpan.FromMilliseconds(durationMs),
+            FillMode = FillMode.Forward,
+            Children =
+            {
+                new KeyFrame
+                {
+                    Cue = new Cue(0.0),
+                    Setters = { new Setter(Layoutable.MarginProperty, fromMargin) }
+                },
+                new KeyFrame
+                {
+                    Cue = new Cue(1.0),
+                    Setters = { new Setter(Layoutable.MarginProperty, toMargin) }
+                }
+            }
+        };
+
+        await animation.RunAsync(control);
+    }
+
+
+    #endregion // Control Methods
 
 
 }

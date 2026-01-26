@@ -320,10 +320,16 @@ public partial class ModalWindow : DialogWindow
     }
 
 
-    protected override void OnDialogSubmitted(DialogEventArgs e)
+    protected override async void OnDialogSubmitted(DialogEventArgs e)
     {
         // don't proceed if value is invalid
-        if (!_txtInput.ValidateAndShowError()) return;
+        var isValid = _txtInput.ValidateAndShowError();
+        if (!isValid)
+        {
+            await _txtInput.AnimateValidationErrorAsync();
+            return;
+        }
+
 
         base.OnDialogSubmitted(e);
     }
