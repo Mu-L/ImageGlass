@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
+using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
 
 namespace ImageGlass.ViewModels;
@@ -25,6 +26,12 @@ namespace ImageGlass.ViewModels;
 public partial class MainViewModel : IgReactive
 {
     public static Config Config => Core.Config;
+
+
+    /// <summary>
+    /// Gets view model of toolbar control.
+    /// </summary>
+    public static ToolbarControlModel ToolbarVM => new();
 
 
     /// <summary>
