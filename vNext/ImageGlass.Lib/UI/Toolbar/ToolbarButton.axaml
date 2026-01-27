@@ -1,0 +1,25 @@
+<ToggleButton xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="using:ImageGlass.UI"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="ImageGlass.UI.ToolbarButton"
+        x:DataType="ui:ToolbarItemModel"
+        Padding="{CompiledBinding ItemPadding}"
+        IsChecked="{CompiledBinding IsChecked}"
+        IsVisible="{CompiledBinding IsNotOverflow}">
+    <StackPanel Orientation="Horizontal"
+                Spacing="{CompiledBinding InnerSpacing}">
+
+        <Svg Path="{CompiledBinding ImagePath}"
+             Width="{CompiledBinding Config.ToolbarIconHeight}"
+             Height="{CompiledBinding Config.ToolbarIconHeight}" />
+
+        <TextBlock
+            x:Name="PART_ButtonText"
+            VerticalAlignment="Center"
+            Text="{CompiledBinding DisplayText}"
+            IsVisible="{CompiledBinding IsTextVisible}"/>
+    </StackPanel>
+</ToggleButton>

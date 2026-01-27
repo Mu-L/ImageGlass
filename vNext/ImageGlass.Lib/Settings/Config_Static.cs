@@ -21,6 +21,7 @@ using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
+using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using System;
 using System.Collections.ObjectModel;

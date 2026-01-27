@@ -20,6 +20,7 @@ using Avalonia;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Types.JsonTypeConverters;
+using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using System;
 using System.Collections.Generic;

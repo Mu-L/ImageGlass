@@ -16,12 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia;
+using ImageGlass.Common;
 using ImageGlass.Common.Actions;
+using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Types;
 using System;
+using System.IO;
 using System.Text.Json.Serialization;
 
-namespace ImageGlass.Common;
+namespace ImageGlass.UI;
 
 
 [JsonSerializable(typeof(ToolbarItemModel))]
@@ -30,6 +34,9 @@ public partial class ToolbarItemModelJsonContext : JsonSerializerContext { }
 
 public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
 {
+    public static Config Config => Core.Config;
+
+
     /// <summary>
     /// Gets the ID for toolbar separator.
     /// </summary>
@@ -39,6 +46,22 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     /// Gets a separator toolbar item.
     /// </summary>
     public static ToolbarItemModel Separator => new(ID_SEPARATOR);
+
+    /// <summary>
+    /// Gets inner spacing of toolbar item.
+    /// </summary>
+    public static double InnerSpacing => Core.Config.ToolbarIconHeight / 6f; // 4
+
+    /// <summary>
+    /// Gets the padding of toolbar button.
+    /// </summary>
+    public static Thickness ItemPadding => new(Core.Config.ToolbarIconHeight / 4.8f); // 5
+
+    /// <summary>
+    /// Gets the end point of separator line.
+    /// </summary>
+    public static Point SeparatorEndPoint => new Point(0, Core.Config.ToolbarIconHeight);
+
 
 
     #region JSON Properties
@@ -72,6 +95,7 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
             field = value;
 
             _ = OnPropertyChanged();
+            _ = OnPropertyChanged(nameof(ImagePath));
         }
     } = "";
 
@@ -185,6 +209,35 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     #region Non-JSON Properties
 
     /// <summary>
+    /// Gets full path of toolbar icon.
+    /// </summary>
+    [JsonIgnore]
+    public string ImagePath
+    {
+        get
+        {
+            var svgPath = string.Empty;
+            if (string.IsNullOrWhiteSpace(Image)) return svgPath;
+
+            // absolute path
+            if (File.Exists(Image)) return svgPath;
+
+            // get toolbar icon enum from theme
+            if (!Enum.TryParse<IgThemeIcon>(Image, out var themeIconNameEnum)) return svgPath;
+
+            // get icon file name from theme
+            var themeIconName = Core.Theme.GetIconPath(themeIconNameEnum);
+            if (string.IsNullOrWhiteSpace(themeIconName)) return svgPath;
+
+            // theme icon path
+            svgPath = Path.Combine(Core.Theme.FolderPath, themeIconName);
+
+            return svgPath;
+        }
+    }
+
+
+    /// <summary>
     /// Gets the value indicating that the toolbar button can be toggled.
     /// </summary>
     [JsonIgnore]
@@ -227,7 +280,7 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     /// Gets, sets the value indicating that the toolbar item is hidden due to overflow.
     /// </summary>
     [JsonIgnore]
-    public bool IsOverflow
+    public bool IsNotOverflow
     {
         get; set
         {
@@ -236,7 +289,7 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
 
             _ = OnPropertyChanged();
         }
-    } = false;
+    } = true;
 
 
     /// <summary>
@@ -289,10 +342,13 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
 
 
     public ToolbarItemModel() { }
+
+
     public ToolbarItemModel(string id)
     {
         Id = id;
     }
+
 
 
     /// <summary>
@@ -300,9 +356,8 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     /// </summary>
     public override string ToString()
     {
-        return $"[{SourceIndex} | {Id} | {Text} | {nameof(IsOverflow)}={IsOverflow}";
+        return $"[{SourceIndex} | {Id} | {Text} | {nameof(IsNotOverflow)}={IsNotOverflow}";
     }
-
 
 
     public void OnDeserialized()

@@ -21,6 +21,7 @@
     <PackageVersion Include="D2Phap.EggShell-x64" Version="1.0.517" />
     <PackageVersion Include="Magick.NET-Q8-OpenMP-x64" Version="14.10.2" />
     <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.269" />
+    <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="11.3.9.2" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="using:ImageGlass.UI"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="60"
+             x:Class="ImageGlass.UI.ToolbarControl"
+             x:DataType="ui:ToolbarControlModel">
+  
+    <Border x:Name="PART_Root"
+            Padding="{CompiledBinding ItemPadding}"
+            Background="{CompiledBinding Background}">
+        <Grid x:Name="PART_RootGrid"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Center">
+
+            <!--  Toolbar: Primary Items  -->
+            <StackPanel x:Name="PART_PrimaryGroup"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Spacing="{CompiledBinding ItemSpacing}">
+            </StackPanel>
+
+
+            <!--  Toolbar: Right column  -->
+            <StackPanel x:Name="PART_RightGroup"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Stretch"
+                        ZIndex="90"
+                        Spacing="{CompiledBinding ItemSpacing}">
+			
+                <!--  Toolbar: Overflow button  -->
+                <ui:ToolbarButton x:Name="BtnOverflowMenu"
+                        VerticalAlignment="Stretch"
+                        VerticalContentAlignment="Bottom"
+                        DataContext="{CompiledBinding ButtonOverflowVM}" />
+
+
+                <!--  Toolbar: Secondary Items  -->
+                <StackPanel x:Name="PART_SecondaryGroup"
+                            Orientation="Horizontal"
+                            Spacing="{CompiledBinding ItemSpacing}">
+                </StackPanel>
+
+
+                <!--  Menu button  -->
+                <ui:ToolbarButton x:Name="BtnMainMenu"
+                                  DataContext="{CompiledBinding ButtonMenuVM}" />
+
+            </StackPanel>
+
+        </Grid>
+    </Border>
+
+</UserControl>
