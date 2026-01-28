@@ -10,6 +10,40 @@
         <FluentTheme />
 
 
+        <!-- Menu animation -->
+        <Style Selector="MenuFlyoutPresenter, ContextMenu">
+            <!-- 1. Initialize the transform so the animator has something to target -->
+            <Setter Property="RenderTransform">
+                <ScaleTransform ScaleX="0.95" ScaleY="0.95" />
+            </Setter>
+    
+            <Style.Animations>
+                <Animation Duration="0:0:0.15" Easing="CubicEaseOut">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Opacity" Value="0.0"/>
+                        <!-- 2. Target the specific properties of the ScaleTransform -->
+                        <Setter Property="ScaleTransform.ScaleX" Value="0.95"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="0.95"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Opacity" Value="1.0"/>
+                        <Setter Property="ScaleTransform.ScaleX" Value="1.0"/>
+                        <Setter Property="ScaleTransform.ScaleY" Value="1.0"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
+
+
+        <!-- Context Menu shadow -->
+        <Style Selector="ContextMenu > Border">
+            <Setter Property="Margin" Value="8, 1, 8, 12" />
+            <Setter Property="BoxShadow" Value="{DynamicResource MenuShadow}" />
+        </Style>
+
+
+
         <!-- Fix the focus style of button -->
         <Style Selector="Button">
             <Setter Property="FocusAdorner">
@@ -20,14 +54,27 @@
                 </FocusAdornerTemplate>
             </Setter>
         </Style>
+
     </Application.Styles>
 
 
 
     <Application.Resources>
-        <SolidColorBrush x:Key="TextControlSelectionHighlightColor" 
+
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <BoxShadows x:Key="MenuShadow">0 8 16 0 #40000000</BoxShadows>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <BoxShadows x:Key="MenuShadow">0 8 16 0 #60000000</BoxShadows>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+            <SolidColorBrush x:Key="TextControlSelectionHighlightColor" 
                          Color="{DynamicResource SystemAccentColor}" 
                          Opacity="0.4"/>
+        </ResourceDictionary>
     </Application.Resources>
 
 </Application>
