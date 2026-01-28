@@ -39,7 +39,7 @@ public partial class ToolbarControl : UserControl
     public readonly List<ToolbarItemModel> PrimaryItemsOverflow = [];
     public readonly List<ToolbarItemModel> SecondaryItems = [];
 
-    private readonly List<Control> _allItemEls = [];
+    private readonly List<Control> _itemEls = [];
 
 
     /// <summary>
@@ -65,33 +65,12 @@ public partial class ToolbarControl : UserControl
     }
 
 
-    private void Core_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
-    {
-        // a new theme just loaded
-        if (string.IsNullOrEmpty(e.PropertyName))
-        {
-            _ = VM.OnPropertyChanged(nameof(VM.Background));
-        }
-    }
-
-
-    private void Config_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (nameof(Core.Config.ToolbarIconHeight).Equals(e.PropertyName))
-        {
-            _ = VM.OnPropertyChanged(nameof(VM.ItemSpacing));
-            _ = VM.OnPropertyChanged(nameof(VM.ItemPadding));
-        }
-    }
-
-
     protected override async void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
 
         await Task.Delay(100);
         HandleOverflow__();
-
     }
 
 
@@ -113,12 +92,33 @@ public partial class ToolbarControl : UserControl
     }
 
 
+    private void Core_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
+    {
+        // a new theme just loaded
+        if (string.IsNullOrEmpty(e.PropertyName))
+        {
+            _ = VM.OnPropertyChanged(nameof(VM.Background));
+        }
+    }
+
+
+    private void Config_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (nameof(Core.Config.ToolbarIconHeight).Equals(e.PropertyName))
+        {
+            _ = VM.OnPropertyChanged(nameof(VM.ItemSpacing));
+            _ = VM.OnPropertyChanged(nameof(VM.ItemPadding));
+        }
+    }
+
+
+
     /// <summary>
     /// Loads toolbar items.
     /// </summary>
     private void LoadItems__()
     {
-        _allItemEls.Clear();
+        _itemEls.Clear();
         _metadataMap.Clear();
         _configBindingsMap.Clear();
 
@@ -162,7 +162,7 @@ public partial class ToolbarControl : UserControl
                 PrimaryItems.Add(vm);
                 primaryList.Add(itemEl);
             }
-            _allItemEls.Add(itemEl);
+            _itemEls.Add(itemEl);
 
 
             // save item metadata

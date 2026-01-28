@@ -26,7 +26,7 @@
         </ui:ToolbarControl>
 
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Background="{CompiledBinding ViewerBackground}">
             <viewer:ViewerControl>
                 <TextBlock Background="#4B006290"
                            Text="{CompiledBinding Title}"

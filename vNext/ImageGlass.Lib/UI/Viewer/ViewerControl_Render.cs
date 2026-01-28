@@ -37,10 +37,7 @@ public partial class ViewerControl
     private Rect _destRect = new();
 
     private RenderTargetBitmap? _bmpCheckerboard;
-    private readonly CheckerboardInfo _checkerboard = new()
-    {
-        Mode = CheckerboardMode.Client,
-    };
+    private readonly CheckerboardInfo _checkerboard = new();
 
     private readonly Lock _lockSource = new();
     private readonly Lock _lockPreview = new();

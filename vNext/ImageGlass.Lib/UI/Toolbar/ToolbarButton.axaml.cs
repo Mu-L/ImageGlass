@@ -16,17 +16,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using ImageGlass.Common;
-using System;
 
 namespace ImageGlass.UI;
 
-public partial class ToolbarButton : ToggleButton, IToolbarItem
+public partial class ToolbarButton : PhToolButton, IToolbarItem
 {
-    protected override Type StyleKeyOverride => typeof(Button);
     public ToolbarItemModel VM => (ToolbarItemModel)DataContext!;
 
 
@@ -36,12 +32,14 @@ public partial class ToolbarButton : ToggleButton, IToolbarItem
     }
 
 
+
+    #region Control Events
+
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
 
         Core.Config.PropertyChanged += Config_PropertyChanged;
-        Core.ThemeChanged += Core_ThemeChanged;
     }
 
 
@@ -50,12 +48,27 @@ public partial class ToolbarButton : ToggleButton, IToolbarItem
         base.OnUnloaded(e);
 
         Core.Config.PropertyChanged -= Config_PropertyChanged;
-        Core.ThemeChanged -= Core_ThemeChanged;
     }
 
 
-    private void Core_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
+    protected override void OnIgDropdownMenuOpened(RoutedEventArgs e)
     {
+        base.OnIgDropdownMenuOpened(e);
+        IsChecked = true;
+    }
+
+
+    protected override void OnIgDropdownMenuClosed(RoutedEventArgs e)
+    {
+        base.OnIgDropdownMenuClosed(e);
+        IsChecked = false;
+    }
+
+
+    protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
+    {
+        base.OnIgThemeChanged(e);
+
         if (string.IsNullOrEmpty(e.PropertyName))
         {
             _ = VM.OnPropertyChanged(nameof(VM.ImagePath));
@@ -73,6 +86,7 @@ public partial class ToolbarButton : ToggleButton, IToolbarItem
         }
     }
 
+    #endregion Control Events
 
 
 }

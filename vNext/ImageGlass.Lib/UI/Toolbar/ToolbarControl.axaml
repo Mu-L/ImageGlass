@@ -46,7 +46,21 @@
 
                 <!--  Menu button  -->
                 <ui:ToolbarButton x:Name="BtnMainMenu"
-                                  DataContext="{CompiledBinding ButtonMenuVM}" />
+                                  IsOpenDropdownMenuOnClick="True"
+                                  DataContext="{CompiledBinding ButtonMenuVM}">
+                    <ui:ToolbarButton.DropdownMenu>
+						<ContextMenu Placement="BottomEdgeAlignedRight" VerticalOffset="0" HorizontalOffset="8">
+							<MenuItem Header="File">
+                                <MenuItem Header="Open"></MenuItem>
+                                <MenuItem Header="Share"></MenuItem>
+                                <MenuItem Header="Print"></MenuItem>
+                            </MenuItem>
+                            <MenuItem Header="Edit"></MenuItem>
+                            <MenuItem Header="-"></MenuItem>
+                            <MenuItem Header="Close"></MenuItem>
+                        </ContextMenu>
+                    </ui:ToolbarButton.DropdownMenu>
+                </ui:ToolbarButton>
 
             </StackPanel>
 
