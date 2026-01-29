@@ -11,7 +11,7 @@
 
 
         <!-- Menu animation -->
-        <Style Selector="MenuFlyoutPresenter, ContextMenu">
+        <Style Selector="MenuFlyoutPresenter, ContextMenu, ToolTip, Popup">
             <!-- 1. Initialize the transform so the animator has something to target -->
             <Setter Property="RenderTransform">
                 <ScaleTransform ScaleX="0.95" ScaleY="0.95" />
@@ -37,7 +37,7 @@
 
 
         <!-- Context Menu shadow -->
-        <Style Selector="ContextMenu > Border">
+        <Style Selector="ContextMenu > Border, ToolTip > Border, Popup > Border">
             <Setter Property="Margin" Value="8, 1, 8, 12" />
             <Setter Property="BoxShadow" Value="{DynamicResource MenuShadow}" />
         </Style>
@@ -62,6 +62,7 @@
     <Application.Resources>
 
         <ResourceDictionary>
+
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
                     <BoxShadows x:Key="MenuShadow">0 8 16 0 #40000000</BoxShadows>

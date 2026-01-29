@@ -8,7 +8,8 @@
         x:DataType="ui:ToolbarItemModel"
         Padding="{CompiledBinding ItemPadding}"
         IsChecked="{CompiledBinding IsChecked}"
-        IsVisible="{CompiledBinding IsNotOverflow}">
+        IsVisible="{CompiledBinding IsNotOverflow}"
+        ToolTip.Tip="{CompiledBinding Tooltip}">
     <StackPanel Orientation="Horizontal"
                 Spacing="{CompiledBinding InnerSpacing}">
 

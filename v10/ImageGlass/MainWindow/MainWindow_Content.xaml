@@ -438,9 +438,7 @@
             x:Name="PART_ViewerWrapper"
             Grid.Row="1"
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            BorderBrush="BlueViolet"
-            BorderThickness="2">
+            VerticalAlignment="Stretch">
 
             <!--  Viewer  -->
             <ui:VirtualViewerControl
