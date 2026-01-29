@@ -34,7 +34,7 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
 
-public partial class IgTextBox : TextBox
+public partial class PhTextBox : TextBox
 {
     protected override Type StyleKeyOverride => typeof(TextBox);
 
@@ -125,7 +125,7 @@ public partial class IgTextBox : TextBox
     {
         base.OnLoaded(e);
 
-        TextChanged += IgTextBox_TextChanged;
+        TextChanged += PhTextBox_TextChanged;
         Core.LanguageChanged += Core_LanguageChanged;
     }
 
@@ -134,7 +134,7 @@ public partial class IgTextBox : TextBox
     {
         base.OnUnloaded(e);
 
-        TextChanged -= IgTextBox_TextChanged;
+        TextChanged -= PhTextBox_TextChanged;
         Core.LanguageChanged -= Core_LanguageChanged;
     }
 
@@ -158,7 +158,7 @@ public partial class IgTextBox : TextBox
 
     #region Control Methods
 
-    private void IgTextBox_TextChanged(object? sender, TextChangedEventArgs e)
+    private void PhTextBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
         ValidateAndShowError();
     }

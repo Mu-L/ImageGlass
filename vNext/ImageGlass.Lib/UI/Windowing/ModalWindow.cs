@@ -33,7 +33,7 @@ public partial class ModalWindow : DialogWindow
 {
     private readonly double THUMBNAIL_SIZE = 80;
 
-    protected IgTextBox _txtInput;
+    protected PhTextBox _txtInput;
     protected Image _thumbnailIconImage;
     protected Border _noteContainer;
     protected CheckBox _chkRememberOption;
@@ -408,10 +408,10 @@ public partial class ModalWindow : DialogWindow
             [!TextBlock.TextProperty] = this[!DescriptionProperty],
             [!TextBlock.IsVisibleProperty] = this[!IsDescriptionVisibleProperty],
         };
-        _txtInput = new IgTextBox
+        _txtInput = new PhTextBox
         {
-            [!IgTextBox.IsRequiredProperty] = this[!IsInputVisibleProperty],
-            [!IgTextBox.AcceptValueProperty] = this[!AcceptValueProperty],
+            [!PhTextBox.IsRequiredProperty] = this[!IsInputVisibleProperty],
+            [!PhTextBox.AcceptValueProperty] = this[!AcceptValueProperty],
             [!TextBox.TextProperty] = this[!InputValueProperty],
             [!TextBox.IsVisibleProperty] = this[!IsInputVisibleProperty],
         };
