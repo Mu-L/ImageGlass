@@ -6,6 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ImageGlass.UI.ToolbarButton"
         x:DataType="ui:ToolbarItemModel"
+        BorderThickness="1"
         Padding="{CompiledBinding ItemPadding}"
         IsChecked="{CompiledBinding IsChecked}"
         IsVisible="{CompiledBinding IsNotOverflow}"

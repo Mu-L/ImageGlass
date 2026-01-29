@@ -55,7 +55,7 @@ public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
     /// <summary>
     /// Gets the padding of toolbar button.
     /// </summary>
-    public static Thickness ItemPadding => new(Core.Config.ToolbarIconHeight / 4.8f); // 5
+    public static Thickness ItemPadding => new(Core.Config.ToolbarIconHeight / 4.5f); // 5.33
 
     /// <summary>
     /// Gets the end point of separator line.

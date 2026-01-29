@@ -41,7 +41,7 @@ public partial class Config
     /// Gets the user config file name.
     /// </summary>
     [JsonIgnore]
-    public static string CONFIG_USER => "igconfig.json";
+    public static string CONFIG_USER => "igconfig_winui3.json";
 
 
     /// <summary>

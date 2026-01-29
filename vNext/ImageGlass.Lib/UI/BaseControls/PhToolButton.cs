@@ -17,10 +17,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.Styling;
 using ImageGlass.Common;
+using ImageGlass.Common.Types;
 using ImageGlass.UI.Windowing;
 using System;
 using System.ComponentModel;
@@ -79,6 +83,77 @@ public partial class PhToolButton : ToggleButton
 
 
     #endregion // Public Properties
+
+
+
+    static PhToolButton()
+    {
+        // create theme for tool button
+        ThemeProperty.OverrideDefaultValue<PhToolButton>(new ControlTheme(typeof(ToggleButton))
+        {
+            Setters =
+            {
+                new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrush)),
+                new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrush)),
+                new Setter(CornerRadiusProperty, Resx.CreateBinding(ResxId.ControlCornerRadius)),
+                new Setter(TransitionsProperty, new Transitions
+                {
+                    new BrushTransition {
+                        Property = BackgroundProperty,
+                        Duration = TimeSpan.FromMilliseconds(100),
+                    },
+                    new BrushTransition {
+                        Property = BorderBrushProperty,
+                        Duration = TimeSpan.FromMilliseconds(100),
+                    },
+                    new TransformOperationsTransition {
+                        Property = RenderTransformProperty,
+                        Duration = TimeSpan.FromMilliseconds(100),
+                    },
+                }),
+            },
+            Children =
+            {
+                new Style(x => x.Nesting().Class(":checked")
+                    .Not(y => y.Class(":disabled")))
+                {
+                    Setters = {
+                        new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushChecked)),
+                        new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushChecked)),
+                    },
+                },
+                new Style(x => x.Nesting().Class(":pressed")
+                    .Not(y => y.Class(":disabled")))
+                {
+                    Setters = {
+                        new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushPressed)),
+                        new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushPressed)),
+                        new Setter(RenderTransformProperty, new ScaleTransform(0.95, 0.95)),
+                        new Setter(TransitionsProperty, new Transitions
+                        {
+                            new BrushTransition {
+                                Property = BackgroundProperty,
+                                Duration = TimeSpan.FromMilliseconds(50),
+                            },
+                            new BrushTransition {
+                                Property = BorderBrushProperty,
+                                Duration = TimeSpan.FromMilliseconds(50),
+                            },
+                        }),
+                    }
+                },
+                new Style(x => x.Nesting().Class(":pointerover")
+                    .Not(y => y.Class(":pressed"))
+                    .Not(y => y.Class(":disabled")))
+                {
+                    Setters = {
+                        new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushHover)),
+                        new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushHover)),
+                    },
+                },
+            },
+        });
+    }
 
 
 

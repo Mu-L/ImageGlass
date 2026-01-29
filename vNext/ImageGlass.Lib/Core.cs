@@ -293,6 +293,19 @@ public static class Core
             var borderHoverBrush = accentLight1.ToBrush();
             Resx.Set(ResxId.TextControlBorderBrushPointerOver, borderHoverBrush);
             Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUncheckedPointerOver, borderHoverBrush);
+
+
+            // style for tool buttons
+            var btnBgAlphaGap = Core.Theme.Settings.IsDarkMode ? 0 : -50;
+            var btnBg = accent.A(0);
+            var btnBgHover = accent.A((byte)(90 + btnBgAlphaGap));
+            var btnBgPressed = accent.A((byte)(130 + btnBgAlphaGap));
+            var btnBgChecked = accent.A((byte)(150 + btnBgAlphaGap));
+
+            Resx.Set(ResxId.IG_ToolButtonBackgroundBrush, btnBg.ToBrush());
+            Resx.Set(ResxId.IG_ToolButtonBackgroundBrushHover, btnBgHover.ToBrush());
+            Resx.Set(ResxId.IG_ToolButtonBackgroundBrushPressed, btnBgPressed.ToBrush());
+            Resx.Set(ResxId.IG_ToolButtonBackgroundBrushChecked, btnBgChecked.ToBrush());
         });
     }
 
