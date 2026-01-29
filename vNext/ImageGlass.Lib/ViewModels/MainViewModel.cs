@@ -28,7 +28,10 @@ namespace ImageGlass.ViewModels;
 public partial class MainViewModel : IgReactive
 {
     public static Config Config => Core.Config;
+
+
     public static IBrush ViewerBackground => Core.Theme.ComputedColors.BgColor.ToBrush();
+    public static IBrush GalleryBackground => Core.Theme.ComputedColors.GalleryBgColor.ToBrush();
 
 
     /// <summary>

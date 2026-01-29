@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+<ui:PhControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -9,7 +9,7 @@
              x:Class="ImageGlass.Views.MainView"
              x:DataType="vm:MainViewModel">
 
-    <Grid >
+    <Grid>
 		<Grid.RowDefinitions >
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -17,16 +17,18 @@
         </Grid.RowDefinitions>
 
 
-        <ui:ToolbarControl Grid.Row="0"
+        <ui:ToolbarControl x:Name="PART_Toolbar"
+                           Grid.Row="0"
                            ZIndex="90"
-                           Background="#55BDB76B"
                            DataContext="{CompiledBinding ToolbarVM}"
+                           Background="{CompiledBinding Background}"
                            Items="{CompiledBinding Config.ToolbarButtons}">
 			
         </ui:ToolbarControl>
 
 
-        <Grid Grid.Row="1" Background="{CompiledBinding ViewerBackground}">
+        <Grid Grid.Row="1"
+              Background="{CompiledBinding ViewerBackground}">
             <viewer:ViewerControl>
                 <TextBlock Background="#4B006290"
                            Text="{CompiledBinding Title}"
@@ -38,10 +40,14 @@
         </Grid>
 
 
-        <Border Grid.Row="2" ZIndex="80" Background="#55FF1493" Height="90" >
+        <Border x:Name="PART_Gallery"
+                Grid.Row="2"
+                ZIndex="80"
+                Height="90"
+                Background="{CompiledBinding GalleryBackground}">
 			
         </Border>
 
     </Grid>
     
-</UserControl>
+</ui:PhControl>

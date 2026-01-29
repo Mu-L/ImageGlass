@@ -21,8 +21,10 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using ImageGlass.Common.Types;
+using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
 using ImageGlass.ViewModels;
+using System;
 
 namespace ImageGlass.Common.Windows;
 
@@ -83,6 +85,9 @@ public partial class MainWindow : IgWindow
 
 
         base.OnLoaded(e);
+
+
+        PART_MainView.PART_Toolbar.ItemClicked += PART_Toolbar_ItemClicked;
     }
 
 
@@ -156,7 +161,16 @@ public partial class MainWindow : IgWindow
 
 
 
-
+    private void PART_Toolbar_ItemClicked(ToolbarButton sender, EventArgs e)
+    {
+        _ = ModalWindow.ShowInfoAsync(this, new ModalWindowOptions
+        {
+            Title = sender.VM.DisplayText,
+            Heading = sender.VM.DisplayText,
+            Description = sender.VM.Tooltip,
+            Details = $"{sender.VM.OnClick?.Executable}({sender.VM.OnClick?.Argument})",
+        });
+    }
 
 
 

@@ -20,6 +20,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ImageGlass.Common;
+using ImageGlass.Common.Types;
 using ImageGlass.UI.Windowing;
 using System;
 using System.Collections.Generic;
@@ -28,19 +29,24 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
 
-public partial class ToolbarControl : UserControl
+public partial class ToolbarControl : PhControl
 {
     public ToolbarControlModel VM => (ToolbarControlModel)DataContext!;
 
 
+    // events
+    public event TEventHandler<ToolbarButton, EventArgs>? ItemClicked;
+
+
     private readonly Dictionary<string, List<int>> _configBindingsMap = [];
     private readonly Dictionary<int, ToolbarItemMetadata> _metadataMap = [];
-    public readonly List<ToolbarItemModel> PrimaryItems = [];
-    public readonly List<ToolbarItemModel> PrimaryItemsOverflow = [];
-    public readonly List<ToolbarItemModel> SecondaryItems = [];
+    public readonly List<ToolbarItemModel> _groupPrimaryItemModels = [];
+    public readonly List<ToolbarItemModel> _groupSecondaryItemModels = [];
+    public readonly List<ToolbarItemModel> _groupOverflowItemModels = [];
+    private readonly List<Control> _itemElements = [];
 
-    private readonly List<Control> _itemEls = [];
 
+    #region Public Properties
 
     /// <summary>
     /// Gets, sets the value indicates that empty value is not allowed.
@@ -54,23 +60,34 @@ public partial class ToolbarControl : UserControl
         AvaloniaProperty.Register<ModalWindow, ObservableCollection<ToolbarItemModel>>(nameof(Items), []);
 
 
+    #endregion // Public Properties
+
 
 
     public ToolbarControl()
     {
         InitializeComponent();
-
-        Core.ThemeChanged += Core_ThemeChanged;
-        Core.Config.PropertyChanged += Config_PropertyChanged;
     }
 
+
+
+    #region Control Events
 
     protected override async void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
 
+        Core.Config.PropertyChanged += Config_PropertyChanged;
+
         await Task.Delay(100);
         HandleOverflow__();
+    }
+
+
+    protected override void OnUnloaded(RoutedEventArgs e)
+    {
+        base.OnUnloaded(e);
+        Core.Config.PropertyChanged -= Config_PropertyChanged;
     }
 
 
@@ -78,6 +95,18 @@ public partial class ToolbarControl : UserControl
     {
         base.OnSizeChanged(e);
         HandleOverflow__();
+    }
+
+
+    protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
+    {
+        base.OnIgThemeChanged(e);
+
+        // a new theme just loaded
+        if (string.IsNullOrEmpty(e.PropertyName))
+        {
+            _ = VM.OnPropertyChanged(nameof(VM.Background));
+        }
     }
 
 
@@ -92,16 +121,6 @@ public partial class ToolbarControl : UserControl
     }
 
 
-    private void Core_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
-    {
-        // a new theme just loaded
-        if (string.IsNullOrEmpty(e.PropertyName))
-        {
-            _ = VM.OnPropertyChanged(nameof(VM.Background));
-        }
-    }
-
-
     private void Config_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (nameof(Core.Config.ToolbarIconHeight).Equals(e.PropertyName))
@@ -112,19 +131,47 @@ public partial class ToolbarControl : UserControl
     }
 
 
+    #endregion // Control Events
+
+
+
+    #region Methods
+
+    /// <summary>
+    /// Clears all items and metadata.
+    /// </summary>
+    private void ClearItems__()
+    {
+        // remove item events
+        foreach (var item in _itemElements)
+        {
+            item.PropertyChanged -= ToolbarItem_PropertyChanged;
+
+            if (item is ToolbarButton itemBtn)
+            {
+                itemBtn.Click -= ToolbarButton_Click;
+            }
+        }
+
+        _itemElements.Clear();
+        _metadataMap.Clear();
+        _configBindingsMap.Clear();
+
+        _groupPrimaryItemModels.Clear();
+        _groupOverflowItemModels.Clear();
+        _groupSecondaryItemModels.Clear();
+
+        PART_PrimaryGroup.Children.Clear();
+        PART_SecondaryGroup.Children.Clear();
+    }
+
 
     /// <summary>
     /// Loads toolbar items.
     /// </summary>
     private void LoadItems__()
     {
-        _itemEls.Clear();
-        _metadataMap.Clear();
-        _configBindingsMap.Clear();
-
-        PrimaryItems.Clear();
-        PrimaryItemsOverflow.Clear();
-        SecondaryItems.Clear();
+        ClearItems__();
 
         var primaryList = new List<Control>();
         var secondaryList = new List<Control>();
@@ -142,27 +189,32 @@ public partial class ToolbarControl : UserControl
             // create toolbar item element
             Control itemEl;
             if (vm.IsSeparator) itemEl = new ToolbarSeparator();
-            else itemEl = new ToolbarButton();
+            else
+            {
+                var itemBtn = new ToolbarButton();
+                itemBtn.Click += ToolbarButton_Click;
+                itemEl = itemBtn;
+            }
 
             itemEl.DataContext = vm;
-            itemEl.PropertyChanged += ItemEl_PropertyChanged;
+            itemEl.PropertyChanged += ToolbarItem_PropertyChanged;
 
 
             // group: secondary
             if (vm.Alignment == ToolbarItemAlignment.Right)
             {
                 secondaryIndex++;
-                SecondaryItems.Add(vm);
+                _groupSecondaryItemModels.Add(vm);
                 secondaryList.Add(itemEl);
             }
             // group: primary
             else
             {
                 primaryIndex++;
-                PrimaryItems.Add(vm);
+                _groupPrimaryItemModels.Add(vm);
                 primaryList.Add(itemEl);
             }
-            _itemEls.Add(itemEl);
+            _itemElements.Add(itemEl);
 
 
             // save item metadata
@@ -173,6 +225,7 @@ public partial class ToolbarControl : UserControl
                 SecondaryItemIndex = secondaryIndex,
                 RenderedWidth = 0,
             });
+
 
             // save binding map
             var bindingIndice = _configBindingsMap.GetValueOrDefault(vm.ConfigBinding) ?? [];
@@ -193,33 +246,18 @@ public partial class ToolbarControl : UserControl
         }
 
 
-
-        PART_PrimaryGroup.Children.Clear();
+        // append to visual tree
         PART_PrimaryGroup.Children.AddRange(primaryList);
-
-        PART_SecondaryGroup.Children.Clear();
         PART_SecondaryGroup.Children.AddRange(secondaryList);
     }
 
 
-    private void ItemEl_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property != Control.BoundsProperty) return;
-        if (e.NewValue is not Rect bounds) return;
-        if (bounds.Width == 0 || bounds.Height == 0) return;
-        if (sender is not IToolbarItem item) return;
-
-        // save toolbar item width
-        if (_metadataMap.TryGetValue(item.VM.SourceIndex, out var meta))
-        {
-            meta.RenderedWidth = bounds.Width;
-        }
-    }
-
-
+    /// <summary>
+    /// Updates item position and alignment.
+    /// </summary>
     private void HandleOverflow__()
     {
-        PrimaryItemsOverflow.Clear();
+        _groupOverflowItemModels.Clear();
 
         // 1. calculate how much space can I safely use for center toolbar items
         // before they hit the right-side panel
@@ -252,10 +290,10 @@ public partial class ToolbarControl : UserControl
             - PART_Root.Padding.Left
             - PART_Root.Padding.Right
             - PART_RightGroup.Bounds.Width
-            - (PrimaryItems.Count * ToolbarControlModel.ItemSpacing);
+            - (_groupPrimaryItemModels.Count * ToolbarControlModel.ItemSpacing);
 
         // 3.2 check if we should hide the item
-        foreach (var item in PrimaryItems)
+        foreach (var item in _groupPrimaryItemModels)
         {
             if (!_metadataMap.TryGetValue(item.SourceIndex, out var meta)) continue;
             usedWidth += meta.RenderedWidth;
@@ -267,13 +305,40 @@ public partial class ToolbarControl : UserControl
             // add overflow item
             if (!item.IsNotOverflow)
             {
-                PrimaryItemsOverflow.Add(item);
+                _groupOverflowItemModels.Add(item);
             }
         }
 
         // 4. show the overflow button if there are hidden icons
         BtnOverflowMenu.IsVisible = usedWidth > availableWidth;
     }
+
+
+
+    private void ToolbarButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not ToolbarButton btn) return;
+
+        ItemClicked?.Invoke(btn, EventArgs.Empty);
+    }
+
+
+    private void ToolbarItem_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property != Control.BoundsProperty) return;
+        if (e.NewValue is not Rect bounds) return;
+        if (bounds.Width == 0 || bounds.Height == 0) return;
+        if (sender is not IToolbarItem item) return;
+
+        // save toolbar item width
+        if (_metadataMap.TryGetValue(item.VM.SourceIndex, out var meta))
+        {
+            meta.RenderedWidth = bounds.Width;
+        }
+    }
+
+
+    #endregion // Methods
 
 
 }

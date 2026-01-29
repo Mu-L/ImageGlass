@@ -16,13 +16,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia.Controls;
 using Avalonia.Interactivity;
+using ImageGlass.Common;
+using ImageGlass.UI;
 using ImageGlass.ViewModels;
 
 namespace ImageGlass.Views;
 
-public partial class MainView : UserControl
+public partial class MainView : PhControl
 {
     public MainViewModel VM => (MainViewModel)DataContext!;
 
@@ -40,18 +41,23 @@ public partial class MainView : UserControl
     }
 
 
-
     protected override void OnUnloaded(RoutedEventArgs e)
     {
         base.OnUnloaded(e);
-
-
-
     }
 
 
 
+    protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
+    {
+        base.OnIgThemeChanged(e);
 
+        if (string.IsNullOrEmpty(e.PropertyName))
+        {
+            _ = VM.OnPropertyChanged(nameof(VM.ViewerBackground));
+            _ = VM.OnPropertyChanged(nameof(VM.GalleryBackground));
+        }
+    }
 
 
 

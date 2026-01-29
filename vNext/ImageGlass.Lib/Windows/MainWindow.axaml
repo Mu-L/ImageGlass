@@ -12,6 +12,6 @@
         IsFrameless="{CompiledBinding Config.EnableFrameless}"
         Title="{CompiledBinding Title}">
 
-  <view:MainView DataContext="{CompiledBinding .}"></view:MainView>
+  <view:MainView x:Name="PART_MainView" DataContext="{CompiledBinding .}"></view:MainView>
 
 </win:IgWindow >
