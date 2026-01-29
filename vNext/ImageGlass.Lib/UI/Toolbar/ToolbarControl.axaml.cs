@@ -25,6 +25,7 @@ using ImageGlass.UI.Windowing;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
@@ -123,10 +124,40 @@ public partial class ToolbarControl : PhControl
 
     private void Config_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
+        // update toolbar spacing
         if (nameof(Core.Config.ToolbarIconHeight).Equals(e.PropertyName))
         {
             _ = VM.OnPropertyChanged(nameof(VM.ItemSpacing));
             _ = VM.OnPropertyChanged(nameof(VM.ItemPadding));
+        }
+
+        // update toolbar button check state
+        else
+        {
+            UpdateButtonCheckState__(e.PropertyName);
+        }
+    }
+
+
+    private void ToolbarButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not ToolbarButton btn) return;
+
+        ItemClicked?.Invoke(btn, EventArgs.Empty);
+    }
+
+
+    private void ToolbarItem_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property != Control.BoundsProperty) return;
+        if (e.NewValue is not Rect bounds) return;
+        if (bounds.Width == 0 || bounds.Height == 0) return;
+        if (sender is not IToolbarItem item) return;
+
+        // save toolbar item width
+        if (_metadataMap.TryGetValue(item.VM.SourceIndex, out var meta))
+        {
+            meta.RenderedWidth = bounds.Width;
         }
     }
 
@@ -314,26 +345,22 @@ public partial class ToolbarControl : PhControl
     }
 
 
-
-    private void ToolbarButton_Click(object? sender, RoutedEventArgs e)
+    /// <summary>
+    /// Updates check state of toolbar button according to config name.
+    /// </summary>
+    private void UpdateButtonCheckState__(string? configName)
     {
-        if (sender is not ToolbarButton btn) return;
+        if (string.IsNullOrWhiteSpace(configName)) return;
+        if (_configBindingsMap.GetValueOrDefault(configName) is not List<int> itemIndice) return;
+        if (Items is not IEnumerable<ToolbarItemModel> allItems) return;
 
-        ItemClicked?.Invoke(btn, EventArgs.Empty);
-    }
-
-
-    private void ToolbarItem_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property != Control.BoundsProperty) return;
-        if (e.NewValue is not Rect bounds) return;
-        if (bounds.Width == 0 || bounds.Height == 0) return;
-        if (sender is not IToolbarItem item) return;
-
-        // save toolbar item width
-        if (_metadataMap.TryGetValue(item.VM.SourceIndex, out var meta))
+        var items = allItems.ToArray();
+        foreach (var srcIndex in itemIndice)
         {
-            meta.RenderedWidth = bounds.Width;
+            var configValue = Core.Config.GetAsString(configName);
+            var isChecked = configValue.Equals(items[srcIndex].ConfigBindingValue, StringComparison.Ordinal);
+
+            items[srcIndex].IsChecked = isChecked;
         }
     }
 
