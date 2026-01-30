@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ImageGlass.Common;
@@ -26,6 +27,8 @@ namespace ImageGlass.UI;
 public partial class PhControl : ContentControl
 {
     protected override Type StyleKeyOverride => typeof(ContentControl);
+
+    public double Dpi => VisualRoot?.RenderScaling ?? 1d;
 
 
     #region Control Events
@@ -77,6 +80,29 @@ public partial class PhControl : ContentControl
     protected virtual void OnIgLanguageChanged() { }
 
     #endregion // Virtual Methods
+
+
+    #region Public Methods
+
+    /// <summary>
+    /// Scales the given number on the DPI scaling factor.
+    /// </summary>
+    public double DpiScale(double value) => Dpi * value;
+
+
+    /// <summary>
+    /// Scales the given size based on the DPI scaling factor.
+    /// </summary>
+    public Size DpiScale(Size value) => new Size(DpiScale(value.Width), DpiScale(value.Height));
+
+
+    /// <summary>
+    /// Scales the given point on the DPI scaling factor.
+    /// </summary>
+    public Point DpiScale(Point value) => new Point(DpiScale(value.X), DpiScale(value.Y));
+
+    #endregion // Public Methods
+
 
 
 }
