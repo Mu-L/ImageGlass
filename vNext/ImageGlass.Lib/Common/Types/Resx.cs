@@ -103,6 +103,40 @@ public enum ResxId
     CheckBoxCheckBackgroundStrokeUncheckedPointerOver,
 
 
+    // menu
+    MenuFlyoutPresenterBackground,
+    MenuFlyoutPresenterBorderBrush,
+
+    MenuFlyoutSeparatorThemePadding,
+    IG_MenuSeparatorBackground,
+    MenuFlyoutItemBackgroundPointerOver,
+    MenuFlyoutItemBackgroundPressed,
+
+    // menu text
+    MenuFlyoutItemForeground,
+    MenuFlyoutItemForegroundPointerOver,
+    MenuFlyoutItemForegroundPressed,
+    MenuFlyoutItemForegroundDisabled,
+
+    // menu hotkey text
+    MenuFlyoutItemKeyboardAcceleratorTextForeground,
+    MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver,
+    MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed,
+    MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled,
+
+    // menu chevron
+    MenuFlyoutSubItemChevron,
+    MenuFlyoutSubItemChevronPointerOver,
+    MenuFlyoutSubItemChevronPressed,
+    MenuFlyoutSubItemChevronDisabled,
+    MenuFlyoutSubItemChevronSubMenuOpened,
+
+    // tooltip
+    ToolTipBackground,
+    ToolTipForeground,
+    ToolTipBorderBrush,
+
+
     // situational backgrounds
     IG_BackgroundInfoBrush,
     IG_BackgroundSuccessBrush,
@@ -114,8 +148,10 @@ public enum ResxId
 
 
     // tool button styles
-    IG_ToolButtonBackgroundBrush,
-    IG_ToolButtonBackgroundBrushHover,
-    IG_ToolButtonBackgroundBrushPressed,
-    IG_ToolButtonBackgroundBrushChecked,
+    IG_ToolButtonBackground,
+    IG_ToolButtonBackgroundHover,
+    IG_ToolButtonBackgroundPressed,
+    IG_ToolButtonBackgroundChecked,
+
+
 }

@@ -93,8 +93,8 @@ public partial class PhToolButton : ToggleButton
         {
             Setters =
             {
-                new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrush)),
-                new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrush)),
+                new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackground)),
+                new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackground)),
                 new Setter(CornerRadiusProperty, Resx.CreateBinding(ResxId.ControlCornerRadius)),
                 new Setter(TransitionsProperty, new Transitions
                 {
@@ -118,16 +118,16 @@ public partial class PhToolButton : ToggleButton
                     .Not(y => y.Class(":disabled")))
                 {
                     Setters = {
-                        new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushChecked)),
-                        new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushChecked)),
+                        new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundChecked)),
+                        new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundChecked)),
                     },
                 },
                 new Style(x => x.Nesting().Class(":pressed")
                     .Not(y => y.Class(":disabled")))
                 {
                     Setters = {
-                        new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushPressed)),
-                        new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushPressed)),
+                        new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundPressed)),
+                        new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundPressed)),
                         new Setter(RenderTransformProperty, new ScaleTransform(0.95, 0.95)),
                         new Setter(TransitionsProperty, new Transitions
                         {
@@ -147,8 +147,8 @@ public partial class PhToolButton : ToggleButton
                     .Not(y => y.Class(":disabled")))
                 {
                     Setters = {
-                        new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushHover)),
-                        new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundBrushHover)),
+                        new Setter(BackgroundProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundHover)),
+                        new Setter(BorderBrushProperty, Resx.CreateBinding(ResxId.IG_ToolButtonBackgroundHover)),
                     },
                 },
             },

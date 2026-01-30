@@ -37,20 +37,72 @@
 
 
         <!-- Context Menu shadow -->
-        <Style Selector="ContextMenu > Border, ToolTip > Border, Popup > Border">
-            <Setter Property="Margin" Value="8, 1, 8, 12" />
+        <Style Selector="MenuFlyoutPresenter > Border,
+            ContextMenu > Border,
+            ToolTip > Border,
+            Popup > Border">
+            <Setter Property="Margin" Value="6, 1, 6, 12" />
             <Setter Property="BoxShadow" Value="{DynamicResource MenuShadow}" />
         </Style>
 
 
+        
+        <!-- Menu separator -->
+        <Style Selector="Separator">
+            <Setter Property="Background" Value="{DynamicResource IG_MenuSeparatorBackground}" />
+        </Style>
 
-        <!-- Fix the focus style of button -->
-        <Style Selector="Button">
+
+        <!-- Menu item -->
+        <Style Selector="MenuItem">
+            <Setter Property="Margin" Value="4, 0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+
+
+            <!-- Menu item content -->
+            <Style Selector="^ /template/ Border#PART_LayoutRoot">
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <BrushTransition Property="Background" Duration="0:0:0.1" />
+                        <BrushTransition Property="BorderBrush" Duration="0:0:0.1" />
+                    </Transitions>
+                </Setter>
+            </Style>
+
+            <!-- Fixed: check mark is cut -->
+            <Style Selector="^:checked:toggle /template/ ContentControl#PART_ToggleIconPresenter Path">
+                <Setter Property="Width" Value="18" />
+            </Style>
+
+            <Style Selector="^:selected /template/ Border#PART_LayoutRoot">
+                <Setter Property="BorderBrush" Value="{DynamicResource IG_ToolButtonBackgroundHover}" />
+            </Style>
+
+            <Style Selector="^:pressed /template/ Border#PART_LayoutRoot:pointerover">
+                <Setter Property="BorderBrush" Value="{DynamicResource IG_ToolButtonBackgroundPressed}" />
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <BrushTransition Property="Background" Duration="0:0:0.05" />
+                        <BrushTransition Property="BorderBrush" Duration="0:0:0.05" />
+                    </Transitions>
+                </Setter>
+            </Style>
+        </Style>
+        
+
+        <!-- Fixed: focus style -->
+        <Style Selector="Button, CheckBox, TextBox, SelectableTextBlock, RadioButton, ContextMenu, MenuItem">
             <Setter Property="FocusAdorner">
                 <FocusAdornerTemplate>
                     <Border BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}"
                             CornerRadius="{DynamicResource ControlCornerRadius}"
-                            BorderThickness="2"/>
+                            BorderThickness="2">
+                        <Border BorderBrush="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                            CornerRadius="{DynamicResource ControlCornerRadius}"
+                            BorderThickness="1" />
+                    </Border>
                 </FocusAdornerTemplate>
             </Setter>
         </Style>
@@ -60,18 +112,21 @@
 
 
     <Application.Resources>
-
         <ResourceDictionary>
-
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
-                    <BoxShadows x:Key="MenuShadow">0 8 16 0 #40000000</BoxShadows>
+                    <BoxShadows x:Key="MenuShadow">0 6 12 0 #40000000</BoxShadows>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <BoxShadows x:Key="MenuShadow">0 8 16 0 #60000000</BoxShadows>
+                    <BoxShadows x:Key="MenuShadow">0 6 12 0 #60000000</BoxShadows>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
+
+            <!-- Menu item padding -->
+            <Thickness x:Key="MenuFlyoutItemThemePaddingNarrow">8,4,8,4</Thickness>
+
+            <!-- Text selection color -->
             <SolidColorBrush x:Key="TextControlSelectionHighlightColor" 
                          Color="{DynamicResource SystemAccentColor}" 
                          Opacity="0.4"/>

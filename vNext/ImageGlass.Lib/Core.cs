@@ -205,6 +205,7 @@ public static class Core
 
         // 2. update control styles
         Resx.Set(ResxId.ControlCornerRadius, new CornerRadius(6));
+        Resx.Set(ResxId.MenuFlyoutSeparatorThemePadding, new Thickness(0, 4));
     }
 
 
@@ -246,6 +247,8 @@ public static class Core
 
             // update text color
             var textBrush = Theme.ComputedColors.TextColor.ToBrush();
+            var textDisabled = Theme.ComputedColors.TextColor.Blend(Core.Theme.BaseColor, 0.5f, Theme.ComputedColors.TextColor.A);
+
             Resx.Set(ResxId.SystemControlForegroundBaseHighBrush, textBrush);
             Resx.Set(ResxId.TextControlForeground, textBrush);
             Resx.Set(ResxId.CheckBoxForegroundChecked, textBrush);
@@ -256,6 +259,41 @@ public static class Core
             // update border color
             Resx.Set(ResxId.TextControlBorderBrush, borderControl);
             Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUnchecked, borderControl);
+
+
+            // update dropdown menu
+            var menuBg = Core.Theme.ComputedColors.MenuBgColor.NoAlpha(); // no alpha support
+            var menuBorder = Core.Theme.InvertedBaseColor.WithAlpha(30);
+            var menuText = Theme.ComputedColors.MenuTextColor;
+            var menuTextDisabled = menuText.Blend(Core.Theme.InvertedBaseColor, 0.8f, 100);
+
+            Resx.Set(ResxId.MenuFlyoutPresenterBackground, menuBg);
+            Resx.Set(ResxId.MenuFlyoutPresenterBorderBrush, menuBorder);
+            Resx.Set(ResxId.IG_MenuSeparatorBackground, menuText.A(20));
+
+            // menu text
+            Resx.Set(ResxId.MenuFlyoutItemForeground, menuText);
+            Resx.Set(ResxId.MenuFlyoutItemForegroundPointerOver, menuText);
+            Resx.Set(ResxId.MenuFlyoutItemForegroundPressed, menuText);
+            Resx.Set(ResxId.MenuFlyoutItemForegroundDisabled, menuTextDisabled);
+
+            // menu hotkey text
+            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForeground, menuText);
+            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver, menuText);
+            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed, menuText);
+            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled, menuTextDisabled);
+
+            // menu chevron
+            Resx.Set(ResxId.MenuFlyoutSubItemChevron, menuText);
+            Resx.Set(ResxId.MenuFlyoutSubItemChevronPointerOver, menuText);
+            Resx.Set(ResxId.MenuFlyoutSubItemChevronPressed, menuText);
+            Resx.Set(ResxId.MenuFlyoutSubItemChevronDisabled, menuTextDisabled);
+            Resx.Set(ResxId.MenuFlyoutSubItemChevronSubMenuOpened, menuText);
+
+            // tooltip
+            Resx.Set(ResxId.ToolTipForeground, menuText);
+            Resx.Set(ResxId.ToolTipBackground, menuBg);
+            Resx.Set(ResxId.ToolTipBorderBrush, menuBorder);
         });
     }
 
@@ -295,17 +333,21 @@ public static class Core
             Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUncheckedPointerOver, borderHoverBrush);
 
 
-            // style for tool buttons
+            // tool buttons
             var btnBgAlphaGap = Core.Theme.Settings.IsDarkMode ? 0 : -50;
             var btnBg = accent.A(0);
             var btnBgHover = accent.A((byte)(90 + btnBgAlphaGap));
             var btnBgPressed = accent.A((byte)(130 + btnBgAlphaGap));
             var btnBgChecked = accent.A((byte)(150 + btnBgAlphaGap));
 
-            Resx.Set(ResxId.IG_ToolButtonBackgroundBrush, btnBg.ToBrush());
-            Resx.Set(ResxId.IG_ToolButtonBackgroundBrushHover, btnBgHover.ToBrush());
-            Resx.Set(ResxId.IG_ToolButtonBackgroundBrushPressed, btnBgPressed.ToBrush());
-            Resx.Set(ResxId.IG_ToolButtonBackgroundBrushChecked, btnBgChecked.ToBrush());
+            Resx.Set(ResxId.IG_ToolButtonBackground, btnBg);
+            Resx.Set(ResxId.IG_ToolButtonBackgroundHover, btnBgHover);
+            Resx.Set(ResxId.IG_ToolButtonBackgroundPressed, btnBgPressed);
+            Resx.Set(ResxId.IG_ToolButtonBackgroundChecked, btnBgChecked);
+
+            // menu item background
+            Resx.Set(ResxId.MenuFlyoutItemBackgroundPointerOver, btnBgHover);
+            Resx.Set(ResxId.MenuFlyoutItemBackgroundPressed, btnBgPressed);
         });
     }
 

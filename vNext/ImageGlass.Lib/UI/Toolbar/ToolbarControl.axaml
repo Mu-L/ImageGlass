@@ -49,17 +49,17 @@
                                   IsOpenDropdownMenuOnClick="True"
                                   DataContext="{CompiledBinding ButtonMenuVM}">
                     <ui:ToolbarButton.DropdownMenu>
-						<ContextMenu Placement="BottomEdgeAlignedRight" VerticalOffset="0" HorizontalOffset="8">
+						<ContextMenu Placement="BottomEdgeAlignedRight" HorizontalOffset="6">
 							<MenuItem Header="File">
                                 <MenuItem Header="Open"></MenuItem>
                                 <MenuItem Header="Share"></MenuItem>
                                 <MenuItem Header="Print">
-                                  <MenuItem Header="Child 1"/>
-                                  <MenuItem Header="Child 2"/>
-                                  <MenuItem Header="Child 3"/>
+                                  <MenuItem Header="Child 1" ToggleType="Radio" />
+                                  <MenuItem Header="Child 2" ToggleType="Radio" InputGesture="Ctrl+Shift+W" />
+                                  <MenuItem Header="Child 3" ToggleType="Radio" IsChecked="True" />
                                   <Separator/>
-                                  <MenuItem Header="Child 4"/>
-                                  <MenuItem Header="Child 5"/>
+                                  <MenuItem Header="Child 4" ToggleType="CheckBox" IsChecked="True" />
+                                  <MenuItem Header="Child 5" ToggleType="CheckBox" />
                                   <MenuItem Header="Child 6"/>
                                   <MenuItem Header="Child 7"/>
                                   <MenuItem Header="Child 8"/>
@@ -73,7 +73,7 @@
 
 
                             <MenuItem Header="_Standard"/>
-                            <MenuItem IsSelected="True" Header="Selected"/>
+                            <MenuItem IsSelected="True" Header="Selected" InputGesture="Ctrl+U" />
                             <MenuItem Header="With Icon">
                               <MenuItem.Icon>
                                 <TextBlock>😊</TextBlock>
@@ -87,7 +87,7 @@
                             <MenuItem Header="Input Gesture" InputGesture="Ctrl+G"/>
                             <MenuItem Header="Disabled" IsEnabled="False"/>
                             <MenuItem Header="-"/>
-                            <MenuItem Header="Disabled Parent" IsEnabled="False">
+                            <MenuItem Header="Disabled Parent" IsEnabled="False" InputGesture="Ctrl+Shift+A">
                               <MenuItem Header="Child"/>
                             </MenuItem>
                         </ContextMenu>

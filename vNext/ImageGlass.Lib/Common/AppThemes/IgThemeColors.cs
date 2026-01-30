@@ -25,16 +25,24 @@ namespace ImageGlass.Common.AppThemes;
 public class IgThemeColors
 {
     public string AccentColor { get; set; } = string.Empty; // use system accent color
-
-
-    // Viewer
     public string TextColor { get; set; } = "#d3d3d3";
     public string BgColor { get; set; } = "#151b1f00";
+
+
+    public string ToolbarBgColor { get; set; } = "#1E242900";
+    public string GalleryBgColor { get; set; } = "#1E242900";
+    public string MenuBgColor { get; set; } = "#0000";
+
+
+
+
+    // Legacy theme specs
+
     public string NavigationButtonColor { get; set; } = "ff000015";
 
 
     // Toolbar
-    public string ToolbarBgColor { get; set; } = "#1E242900";
+
     public string ToolbarTextColor { get; set; } = "#dedede";
     public string ToolbarItemHoverColor { get; set; } = "#ffffff33";
     public string ToolbarItemActiveColor { get; set; } = "#ffffff22";
@@ -42,7 +50,7 @@ public class IgThemeColors
 
 
     // Gallery
-    public string GalleryBgColor { get; set; } = "#1E242900";
+
     public string GalleryTextColor { get; set; } = "#dedede";
     public string GalleryItemHoverColor { get; set; } = "#ffffff33";
     public string GalleryItemActiveColor { get; set; } = "#ffffff22";
@@ -50,7 +58,6 @@ public class IgThemeColors
 
 
     // Menu
-    public string MenuBgColor { get; set; } = "#0000";
     public string MenuBgHoverColor { get; set; } = "#ffffff10";
     public string MenuBgActiveColor { get; set; } = "#ffffff08";
     public string MenuTextColor { get; set; } = "#d3d3d3";
