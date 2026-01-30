@@ -66,8 +66,8 @@ public partial class ViewerControl
         // Touch double-tap:
         // enable double-tapping for drawing selection
 
-        // TODO:
-        //OnSelectionBeginWithTouch(e);
+        var args = (TappedEventArgs)e;
+        OnSelectionBeginWithTouch(args);
     }
 
 

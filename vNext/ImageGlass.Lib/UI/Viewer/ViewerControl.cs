@@ -46,9 +46,6 @@ public partial class ViewerControl : PhControl
     public Size BitmapSize => _bitmapSize;
 
 
-    public double Dpi => VisualRoot?.RenderScaling ?? 1d;
-
-
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
@@ -95,6 +92,55 @@ public partial class ViewerControl : PhControl
     }
 
 
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    {
+        base.OnPointerPressed(e);
+
+        var p = e.GetCurrentPoint(this);
+        var requestRerender = OnSelectionBegin(p);
+
+        // request re-render control
+        if (requestRerender) InvalidateVisual();
+    }
+
+
+    protected override void OnPointerMoved(PointerEventArgs e)
+    {
+        base.OnPointerMoved(e);
+
+        var p = e.GetCurrentPoint(this);
+        var requestRerender = OnSelectionUpdating(p);
+
+        // request re-render control
+        if (requestRerender) InvalidateVisual();
+    }
+
+
+    protected override void OnPointerExited(PointerEventArgs e)
+    {
+        base.OnPointerExited(e);
+        _ = OnSelectionEnd(true);
+    }
+
+
+    protected override void OnPointerReleased(PointerReleasedEventArgs e)
+    {
+        var requestRerender = OnSelectionEnd(false);
+        if (requestRerender) InvalidateVisual();
+
+        base.OnPointerReleased(e);
+    }
+
+
+    protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
+    {
+        var requestRerender = OnSelectionEnd(false);
+        if (requestRerender) InvalidateVisual();
+
+        base.OnPointerCaptureLost(e);
+    }
+
+
     protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
     {
         base.OnPointerWheelChanged(e);
@@ -126,6 +172,10 @@ public partial class ViewerControl : PhControl
         // Zooming
         _ = ZoomByDeltaToPoint(delta, position);
     }
+
+
+
+
 
 
     private void TopLevel_ScalingChanged(object? sender, EventArgs e)

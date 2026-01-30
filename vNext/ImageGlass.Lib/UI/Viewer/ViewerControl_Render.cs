@@ -143,9 +143,10 @@ public partial class ViewerControl
 
     public override void Render(DrawingContext c)
     {
-        OnDrawCheckerboard(c);
-        OnDrawImage(c);
-        OnDrawDebugInfo(c);
+        OnDrawCheckerboard(c);      // draw checkerboard
+        OnDrawImage(c);             // draw image
+        OnDrawSelection(c);         // draw selection
+        OnDrawDebugInfo(c);         // draw debug info
 
         base.Render(c);
     }
