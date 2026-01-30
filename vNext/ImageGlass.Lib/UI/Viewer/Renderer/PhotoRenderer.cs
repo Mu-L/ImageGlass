@@ -129,12 +129,60 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
 
 
+    /// <summary>
+    /// Returns a new image after applying color management effect on the original image.
+    /// </summary>
+    private static SKImage? ApplyColorManagement(GRContext gr, SKImage oriImg, SKColorSpace destIccColor)
+    {
+        // 1. convert the original image to the destination color space
+        using var convertedImg = ConvertToColorSpace(gr, oriImg, destIccColor);
+
+        // 2. convert again to sRGB color space
+        var newImg = ConvertToSrgbSpace(gr, convertedImg);
+
+        return newImg;
+    }
 
 
+    /// <summary>
+    /// Returns a new image after converting the given image to the destination color space.
+    /// </summary>
+    private static SKImage? ConvertToColorSpace(GRContext gr, SKImage? srcImg, SKColorSpace destColorSpace)
+    {
+        if (srcImg is null) return null;
+
+        var dstInfo = srcImg.Info.WithColorSpace(destColorSpace);
+        using var surface = SKSurface.Create(gr, false, dstInfo);
+        if (surface is null) return null;
+
+        // convert ICC color profile with GPU
+        surface.Canvas.Clear(SKColors.Transparent);
+        surface.Canvas.DrawImage(srcImg, 0, 0);
+
+        // return the converted image
+        return surface.Snapshot();
+    }
 
 
+    /// <summary>
+    /// Returns a new image after converting the given image to the sRGB color space.
+    /// </summary>
+    private static SKImage? ConvertToSrgbSpace(GRContext gr, SKImage? srcImg)
+    {
+        if (srcImg is null) return null;
 
+        var srgb = SKColorSpace.CreateSrgb();
+        var dstInfo = srcImg.Info.WithColorSpace(srgb);
+        using var surface = SKSurface.Create(gr, false, dstInfo);
+        if (surface is null) return null;
 
+        // convert sRGB color profile with GPU
+        surface.Canvas.Clear(SKColors.Transparent);
+        surface.Canvas.DrawImage(srcImg, 0, 0);
+
+        // return the converted image
+        return surface.Snapshot();
+    }
 
 
 
