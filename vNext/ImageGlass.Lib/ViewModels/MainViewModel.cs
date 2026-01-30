@@ -25,7 +25,7 @@ using ImageGlass.UI.Windowing;
 
 namespace ImageGlass.ViewModels;
 
-public partial class MainViewModel : IgReactive
+public partial class MainViewModel : PhReactive
 {
     public static Config Config => Core.Config;
 
@@ -43,7 +43,7 @@ public partial class MainViewModel : IgReactive
     /// <summary>
     /// Gets the owner window.
     /// </summary>
-    public virtual IgWindow Window { get; }
+    public virtual PhWindow Window { get; }
 
 
     /// <summary>
@@ -61,7 +61,7 @@ public partial class MainViewModel : IgReactive
     } = "ImageGlass";
 
 
-    public MainViewModel(IgWindow window)
+    public MainViewModel(PhWindow window)
     {
         Window = window;
     }

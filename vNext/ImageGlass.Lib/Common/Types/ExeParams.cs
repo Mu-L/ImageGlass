@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace ImageGlass.Common.Types;
 
-public static class IgExeParams
+public static class ExeParams
 {
     public static string SINGLE_INSTANCE => "single-instance";
 

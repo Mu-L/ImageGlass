@@ -22,7 +22,7 @@ using System.Windows.Input;
 namespace ImageGlass.Common.Commands;
 
 
-public interface IIgCommand : ICommand
+public interface IPhCommand : ICommand
 {
     /// <summary>
     /// Gets the value indicates that the command should be executed asynchronously.

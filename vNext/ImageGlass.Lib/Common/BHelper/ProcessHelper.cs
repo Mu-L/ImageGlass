@@ -64,7 +64,7 @@ public partial class BHelper
         {
             if (appendIgArgs)
             {
-                args += $" {IgExeParams.HIDE_ADMIN_REQUIRED_ERROR_UI}";
+                args += $" {ExeParams.HIDE_ADMIN_REQUIRED_ERROR_UI}";
             }
 
             code = (IgExitCode)await RunExeAsync(exePath, args, false, waitForExit, showError);

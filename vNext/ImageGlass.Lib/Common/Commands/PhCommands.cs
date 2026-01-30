@@ -21,44 +21,44 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Commands;
 
-public static class IgCommands
+public static class PhCommands
 {
-    public static IIgCommand Create(Action? execute)
+    public static IPhCommand Create(Action? execute)
     {
         return new SyncCommand(WrapAction(execute), CanExecuteTrue);
     }
 
-    public static IIgCommand Create(Action<string?>? execute)
+    public static IPhCommand Create(Action<string?>? execute)
     {
         return new SyncCommand(execute ?? DefaultExecute, CanExecuteTrue);
     }
 
-    public static IIgCommand Create(Action? execute, Func<bool>? canExecute)
+    public static IPhCommand Create(Action? execute, Func<bool>? canExecute)
     {
         return new SyncCommand(WrapAction(execute), WrapAction(canExecute));
     }
 
-    public static IIgCommand Create(Action<string?>? execute, Func<object?, bool>? canExecute)
+    public static IPhCommand Create(Action<string?>? execute, Func<object?, bool>? canExecute)
     {
         return new SyncCommand(execute ?? DefaultExecute, canExecute ?? CanExecuteTrue);
     }
 
-    public static IIgCommand Create(Func<Task>? execute)
+    public static IPhCommand Create(Func<Task>? execute)
     {
         return new AsyncCommand(WrapAction(execute), CanExecuteTrue);
     }
 
-    public static IIgCommand Create(Func<string?, Task>? execute)
+    public static IPhCommand Create(Func<string?, Task>? execute)
     {
         return new AsyncCommand(execute ?? DefaultExecuteAsync, CanExecuteTrue);
     }
 
-    public static IIgCommand Create(Func<Task>? execute, Func<bool>? canExecute)
+    public static IPhCommand Create(Func<Task>? execute, Func<bool>? canExecute)
     {
         return new AsyncCommand(WrapAction(execute), WrapAction(canExecute));
     }
 
-    public static IIgCommand Create(Func<string?, Task>? execute, Func<object?, bool>? canExecute)
+    public static IPhCommand Create(Func<string?, Task>? execute, Func<object?, bool>? canExecute)
     {
         return new AsyncCommand(execute ?? DefaultExecuteAsync, canExecute ?? CanExecuteTrue);
     }

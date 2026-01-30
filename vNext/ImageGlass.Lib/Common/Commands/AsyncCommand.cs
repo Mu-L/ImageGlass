@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Commands;
 
-public sealed partial class AsyncCommand : IIgCommand
+public sealed partial class AsyncCommand : IPhCommand
 {
     private readonly Func<string?, Task> _executeFn;
     private readonly Func<object?, bool> _canExecuteFn;

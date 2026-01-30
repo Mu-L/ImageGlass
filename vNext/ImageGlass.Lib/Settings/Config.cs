@@ -34,7 +34,7 @@ namespace ImageGlass.Common;
 public partial class ConfigJsonContext : JsonSerializerContext { }
 
 
-public partial class Config : IgReactive
+public partial class Config : PhReactive
 {
     [JsonIgnore]
     private readonly Dictionary<ConfigId, object> _values = [];

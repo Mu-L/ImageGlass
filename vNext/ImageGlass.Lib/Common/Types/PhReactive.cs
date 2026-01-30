@@ -28,7 +28,7 @@ namespace ImageGlass.Common.Types;
 /// <summary>
 /// Provides a base implementation of <see cref="INotifyPropertyChanged"/> interface.
 /// </summary>
-public partial class IgReactive : INotifyPropertyChanged
+public partial class PhReactive : INotifyPropertyChanged
 {
     #region INotifyPropertyChanged Implementation
 

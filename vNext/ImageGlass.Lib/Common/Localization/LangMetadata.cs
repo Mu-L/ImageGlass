@@ -22,7 +22,7 @@ namespace ImageGlass.Common.Localization;
 /// <summary>
 /// Language information.
 /// </summary>
-public record IgLangMetadata
+public record LangMetadata
 {
     public string Code { get; set; } = "en-US";
     public string EnglishName { get; set; } = "English";

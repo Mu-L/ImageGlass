@@ -32,7 +32,7 @@ namespace ImageGlass.UI;
 public partial class ToolbarItemModelJsonContext : JsonSerializerContext { }
 
 
-public partial class ToolbarItemModel : IgReactive, IJsonOnDeserialized
+public partial class ToolbarItemModel : PhReactive, IJsonOnDeserialized
 {
     public static Config Config => Core.Config;
 

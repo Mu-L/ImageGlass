@@ -29,7 +29,7 @@ using System;
 namespace ImageGlass.Common.Windows;
 
 
-public partial class MainWindow : IgWindow
+public partial class MainWindow : PhWindow
 {
     public MainWindowModel VM => (MainWindowModel)DataContext!;
 
@@ -56,7 +56,7 @@ public partial class MainWindow : IgWindow
     private void AppInstance_InstanceInvoked(AppInstance sender, InstanceInvokedEventArgs e)
     {
         // handle single instance command
-        if (e.Command.Equals(IgExeParams.SINGLE_INSTANCE))
+        if (e.Command.Equals(ExeParams.SINGLE_INSTANCE))
         {
             if (WindowState == Avalonia.Controls.WindowState.Minimized)
             {

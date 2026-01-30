@@ -28,7 +28,7 @@ namespace ImageGlass.Common.Actions;
 public partial class ToggleActionJsonContext : JsonSerializerContext { }
 
 
-public partial class ToggleAction : IgReactive
+public partial class ToggleAction : PhReactive
 {
     /// <summary>
     /// Gets the manager to check whether the <see cref="ToggleAction"/>

@@ -573,7 +573,7 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog.
     /// </summary>
-    public static async Task<ModalWindowResult> ShowAsync(IgWindow? owner,
+    public static async Task<ModalWindowResult> ShowAsync(PhWindow? owner,
         ModalWindowOptions options,
         ModalWindowButton buttons = ModalWindowButton.OK,
         DialogFocus defaultFocus = DialogFocus.Default)
@@ -669,7 +669,7 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for warning.
     /// </summary>
-    public static async Task<ModalWindowResult> ShowWarningAsync(IgWindow? owner,
+    public static async Task<ModalWindowResult> ShowWarningAsync(PhWindow? owner,
         ModalWindowOptions options, ModalWindowButton buttons = ModalWindowButton.OK)
     {
         options.Heading ??= Core.Lang[LangId._Warning];
@@ -683,7 +683,7 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for error.
     /// </summary>
-    public static async Task<ModalWindowResult> ShowErrorAsync(IgWindow? owner,
+    public static async Task<ModalWindowResult> ShowErrorAsync(PhWindow? owner,
         ModalWindowOptions options, ModalWindowButton buttons = ModalWindowButton.OK)
     {
         options.Heading ??= string.Empty;
@@ -697,7 +697,7 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for information.
     /// </summary>
-    public static async Task<ModalWindowResult> ShowInfoAsync(IgWindow? owner,
+    public static async Task<ModalWindowResult> ShowInfoAsync(PhWindow? owner,
         ModalWindowOptions options, ModalWindowButton buttons = ModalWindowButton.OK)
     {
         options.Heading ??= string.Empty;
@@ -711,7 +711,7 @@ public partial class ModalWindow : DialogWindow
     /// <summary>
     /// Shows modal dialog for information.
     /// </summary>
-    public static async Task<ModalWindowResult> ShowInputAsync(IgWindow? owner,
+    public static async Task<ModalWindowResult> ShowInputAsync(PhWindow? owner,
         ModalWindowOptions options, ModalWindowButton buttons = ModalWindowButton.OK)
     {
         options.IsInputVisible ??= true;
@@ -724,7 +724,7 @@ public partial class ModalWindow : DialogWindow
     /// Reports unhandled exception,
     /// returns <c>true</c> if user ignores the error to continue.
     /// </summary>
-    public static async Task<bool> ShowUnhandledErrorAsync(Exception ex, IgWindow? owner = null,
+    public static async Task<bool> ShowUnhandledErrorAsync(Exception ex, PhWindow? owner = null,
         string? heading = null, string? description = null)
     {
         // get error details

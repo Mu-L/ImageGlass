@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.UI.Windowing;
 
-public partial class DialogWindow : IgWindow
+public partial class DialogWindow : PhWindow
 {
     internal readonly int MIN_WIDTH = 400;
     internal readonly int MAX_WIDTH = 600;
@@ -597,7 +597,7 @@ public partial class DialogWindow : IgWindow
     /// <summary>
     /// Shows dialog.
     /// </summary>
-    public async Task<DialogExitCode> ShowAsync(IgWindow? owner)
+    public async Task<DialogExitCode> ShowAsync(PhWindow? owner)
     {
         _taskSourceExitCode = new TaskCompletionSource<DialogExitCode>();
 

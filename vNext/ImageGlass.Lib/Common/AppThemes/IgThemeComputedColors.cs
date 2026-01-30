@@ -22,7 +22,7 @@ using ImageGlass.Common.Types;
 namespace ImageGlass.Common.AppThemes;
 
 
-public partial class IgThemeComputedColors : IgReactive
+public partial class IgThemeComputedColors : PhReactive
 {
     // Viewer
     public Color TextColor { get; private set; } = new();

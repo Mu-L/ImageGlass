@@ -27,7 +27,7 @@ namespace ImageGlass.Common.Types;
 /// and <see cref="INotifyPropertyChanged"/> interface,
 /// including support for managed and unmanaged resource cleanup.
 /// </summary>
-public partial class DisposableImpl : IgReactive, IDisposable
+public partial class DisposableImpl : PhReactive, IDisposable
 {
     #region IDisposable Disposing
 

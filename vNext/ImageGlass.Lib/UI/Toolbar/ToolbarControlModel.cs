@@ -26,7 +26,7 @@ using ImageGlass.Common.Types;
 
 namespace ImageGlass.UI;
 
-public class ToolbarControlModel : IgReactive
+public class ToolbarControlModel : PhReactive
 {
     public static Config Config => Core.Config;
     public static double ItemSpacing => Core.Config.ToolbarIconHeight / 6f; // 4

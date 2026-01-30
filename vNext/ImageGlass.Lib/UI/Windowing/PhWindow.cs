@@ -36,7 +36,7 @@ using System.Threading.Tasks;
 namespace ImageGlass.UI.Windowing;
 
 
-public partial class IgWindow : Window
+public partial class PhWindow : Window
 {
     protected static readonly Color InactivatedColorDark = Color.FromRgb(32, 32, 32);
     protected static readonly Color InactivatedColorLight = Color.FromRgb(243, 243, 243);
@@ -119,7 +119,7 @@ public partial class IgWindow : Window
 
 
 
-    public IgWindow()
+    public PhWindow()
     {
         OnIgFramelessModeChanged(IsFrameless);
 
@@ -142,9 +142,9 @@ public partial class IgWindow : Window
     {
         base.OnLoaded(e);
 
-        ActualThemeVariantChanged += IgWindow_ActualThemeVariantChanged;
-        Activated += IgWindow_Activated;
-        Deactivated += IgWindow_Deactivated;
+        ActualThemeVariantChanged += PhWindow_ActualThemeVariantChanged;
+        Activated += PhWindow_Activated;
+        Deactivated += PhWindow_Deactivated;
     }
 
 
@@ -152,25 +152,25 @@ public partial class IgWindow : Window
     {
         base.OnClosing(e);
 
-        ActualThemeVariantChanged -= IgWindow_ActualThemeVariantChanged;
-        Activated -= IgWindow_Activated;
-        Deactivated -= IgWindow_Deactivated;
+        ActualThemeVariantChanged -= PhWindow_ActualThemeVariantChanged;
+        Activated -= PhWindow_Activated;
+        Deactivated -= PhWindow_Deactivated;
 
         Core.ThemeChanged -= Core_ThemeChanged;
         Core.LanguageChanged -= Core_LanguageChanged;
     }
 
 
-    private void IgWindow_ActualThemeVariantChanged(object? sender, EventArgs e)
+    private void PhWindow_ActualThemeVariantChanged(object? sender, EventArgs e)
     {
         if (UseCustomBackdrop) return;
 
-        if (IsActive) IgWindow_Activated(sender, e);
-        else IgWindow_Deactivated(sender, e);
+        if (IsActive) PhWindow_Activated(sender, e);
+        else PhWindow_Deactivated(sender, e);
     }
 
 
-    private async void IgWindow_Activated(object? sender, EventArgs e)
+    private async void PhWindow_Activated(object? sender, EventArgs e)
     {
         OnIgActivated(e);
 
@@ -184,7 +184,7 @@ public partial class IgWindow : Window
     }
 
 
-    private async void IgWindow_Deactivated(object? sender, EventArgs e)
+    private async void PhWindow_Deactivated(object? sender, EventArgs e)
     {
         OnIgDeactivated(e);
 

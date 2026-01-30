@@ -30,7 +30,7 @@ using System.Threading;
 namespace ImageGlass.UI.Viewer;
 
 
-public partial class ViewerControl : ContentControl
+public partial class ViewerControl : PhControl
 {
 
     // loading

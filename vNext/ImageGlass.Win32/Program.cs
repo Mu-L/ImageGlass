@@ -53,7 +53,7 @@ sealed class Program
         {
             if (!Core.AppInstance.IsFirstInstance)
             {
-                Core.AppInstance.SendArgsToExistingInstances(IgExeParams.SINGLE_INSTANCE, args);
+                Core.AppInstance.SendArgsToExistingInstances(ExeParams.SINGLE_INSTANCE, args);
                 return 0;
             }
         }

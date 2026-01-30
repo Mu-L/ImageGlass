@@ -32,13 +32,13 @@ namespace ImageGlass.Common;
 
 public partial class App : Application
 {
-    private IgWindow? _mainWindow = null;
+    private PhWindow? _mainWindow = null;
 
 
     /// <summary>
     /// Gets the main window.
     /// </summary>
-    public IgWindow MainWindow => _mainWindow!;
+    public PhWindow MainWindow => _mainWindow!;
 
 
     /// <summary>
@@ -79,7 +79,7 @@ public partial class App : Application
     /// <summary>
     /// Create a new main window.
     /// </summary>
-    public void CreateMainWindowIfNotExist(IgWindow window)
+    public void CreateMainWindowIfNotExist(PhWindow window)
     {
         if (_mainWindow is not null) return;
 

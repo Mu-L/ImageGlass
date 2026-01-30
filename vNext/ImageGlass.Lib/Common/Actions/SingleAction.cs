@@ -27,7 +27,7 @@ namespace ImageGlass.Common.Actions;
 public partial class SingleActionJsonContext : JsonSerializerContext { }
 
 
-public partial class SingleAction : IgReactive
+public partial class SingleAction : PhReactive
 {
     /// <summary>
     /// Executable action, its value can be:

@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Commands;
 
-public sealed partial class SyncCommand : IIgCommand
+public sealed partial class SyncCommand : IPhCommand
 {
     private readonly Action<string?> _executeFn;
     private readonly Func<object?, bool> _canExecuteFn;

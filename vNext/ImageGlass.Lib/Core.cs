@@ -110,7 +110,7 @@ public static class Core
     /// <summary>
     /// Gets, sets the current language.
     /// </summary>
-    public static IgLang Lang
+    public static Lang Lang
     {
         get; set
         {

@@ -33,7 +33,7 @@ public partial class IgThemeJsonContext : JsonSerializerContext { }
 /// <summary>
 /// Represents a theme pack for the app.
 /// </summary>
-public partial class IgTheme : IgReactive
+public partial class IgTheme : PhReactive
 {
     private IgThemeComputedColors _computedColors = new();
 

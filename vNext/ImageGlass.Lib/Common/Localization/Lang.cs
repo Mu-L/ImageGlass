@@ -27,14 +27,14 @@ using System.Threading.Tasks;
 namespace ImageGlass.Common.Localization;
 
 
-[JsonSerializable(typeof(IgLang))]
-public partial class IgLangJsonContext : JsonSerializerContext { }
+[JsonSerializable(typeof(Lang))]
+public partial class LangJsonContext : JsonSerializerContext { }
 
 
 /// <summary>
 /// ImageGlass language pack (<c>*.iglang.json</c>)
 /// </summary>
-public class IgLang
+public class Lang
 {
 
     #region JSON Serializable Properties
@@ -42,7 +42,7 @@ public class IgLang
     /// <summary>
     /// Gets, sets the language metadata.
     /// </summary>
-    public IgLangMetadata Metadata { get; set; } = new();
+    public LangMetadata Metadata { get; set; } = new();
 
     /// <summary>
     /// Gets, sets the language string dictionary.
@@ -103,14 +103,14 @@ public class IgLang
     /// <summary>
     /// Initializes a language pack.
     /// </summary>
-    public IgLang() { }
+    public Lang() { }
 
 
     /// <summary>
     /// Initializes a language pack.
     /// </summary>
     /// <param name="filePath">E.g. <c>C:\ImageGlass\Language\Vietnamese.iglang.json</c></param>
-    public IgLang(string filePath)
+    public Lang(string filePath)
     {
         FilePath = filePath;
     }
@@ -130,12 +130,12 @@ public class IgLang
 
         // 1. create json context
         var jsonOptions = BHelper.CreateJsonOptions();
-        var jsonContext = new IgLangJsonContext(jsonOptions);
+        var jsonContext = new LangJsonContext(jsonOptions);
 
         try
         {
             // 2. load language strings
-            var lang = await BHelper.ReadJsonFromFileAsync(FilePath, jsonContext.IgLang);
+            var lang = await BHelper.ReadJsonFromFileAsync(FilePath, jsonContext.Lang);
             if (lang == null) return;
 
             // 3. store the language strings
@@ -151,7 +151,7 @@ public class IgLang
     /// </summary>
     public async Task SaveAsFileAsync(string filePath)
     {
-        var lang = new IgLang()
+        var lang = new Lang()
         {
             Metadata = Metadata,
             Items = Items,
@@ -166,9 +166,9 @@ public class IgLang
 
 
         var jsonOptions = BHelper.CreateJsonOptions();
-        var jsonContext = new IgLangJsonContext(jsonOptions);
+        var jsonContext = new LangJsonContext(jsonOptions);
 
-        await BHelper.WriteJsonToFileAsync(filePath, lang, jsonContext.IgLang);
+        await BHelper.WriteJsonToFileAsync(filePath, lang, jsonContext.Lang);
     }
 
 

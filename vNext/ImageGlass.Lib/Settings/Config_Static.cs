@@ -121,7 +121,7 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.OpenFile) }",
             Image = nameof(IgThemeIcon.OpenFile),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuOpenFile],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuOpenFile],
             Alignment = ToolbarItemAlignment.Right,
             OnClick = new(LangId.FrmMain_MnuOpenFile, API.IG_OpenFile),
         },
@@ -132,14 +132,14 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.ViewPreviousImage)}",
             Image = nameof(IgThemeIcon.ViewPreviousImage),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuViewPrevious],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuViewPrevious],
             OnClick = new(LangId.FrmMain_MnuViewPrevious, API.IG_ViewPrevious),
         },
         // view next
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.ViewNextImage)}",
             Image = nameof(IgThemeIcon.ViewNextImage),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuViewNext],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuViewNext],
             OnClick = new(LangId.FrmMain_MnuViewNext, API.IG_ViewNext),
         },
         ToolbarItemModel.Separator,
@@ -149,7 +149,7 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.AutoZoom)}",
             Image = nameof(IgThemeIcon.AutoZoom),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuAutoZoom],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuAutoZoom],
             ConfigBinding = nameof(Config.ZoomMode),
             ConfigBindingValue = ZoomMode.AutoZoom.ToString(),
             OnClick = new(LangId.FrmMain_MnuAutoZoom, API.IG_SetZoomMode, nameof(ZoomMode.AutoZoom)),
@@ -158,7 +158,7 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.LockZoom)}",
             Image = nameof(IgThemeIcon.LockZoom),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuLockZoom],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuLockZoom],
             ConfigBinding = nameof(Config.ZoomMode),
             ConfigBindingValue = ZoomMode.LockZoom.ToString(),
             OnClick = new(LangId.FrmMain_MnuLockZoom, API.IG_SetZoomMode, nameof(ZoomMode.LockZoom)),
@@ -167,7 +167,7 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.ScaleToWidth)}",
             Image = nameof(IgThemeIcon.ScaleToWidth),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuScaleToWidth],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuScaleToWidth],
             ConfigBinding = nameof(Config.ZoomMode),
             ConfigBindingValue = ZoomMode.ScaleToWidth.ToString(),
             OnClick = new(LangId.FrmMain_MnuScaleToWidth, API.IG_SetZoomMode, nameof(ZoomMode.ScaleToWidth)),
@@ -176,7 +176,7 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.ScaleToHeight)}",
             Image = nameof(IgThemeIcon.ScaleToHeight),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuScaleToHeight],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuScaleToHeight],
             ConfigBinding = nameof(Config.ZoomMode),
             ConfigBindingValue = ZoomMode.ScaleToHeight.ToString(),
             OnClick = new(LangId.FrmMain_MnuScaleToHeight, API.IG_SetZoomMode, nameof(ZoomMode.ScaleToHeight)),
@@ -185,7 +185,7 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.ScaleToFit)}",
             Image = nameof(IgThemeIcon.ScaleToFit),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuScaleToFit],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuScaleToFit],
             ConfigBinding = nameof(Config.ZoomMode),
             ConfigBindingValue = ZoomMode.ScaleToFit.ToString(),
             OnClick = new(LangId.FrmMain_MnuScaleToFit, API.IG_SetZoomMode, nameof(ZoomMode.ScaleToFit)),
@@ -194,7 +194,7 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.ScaleToFill)}",
             Image = nameof(IgThemeIcon.ScaleToFill),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuScaleToFill],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuScaleToFill],
             ConfigBinding = nameof(Config.ZoomMode),
             ConfigBindingValue = ZoomMode.ScaleToFill.ToString(),
             OnClick = new(LangId.FrmMain_MnuScaleToFill, API.IG_SetZoomMode, nameof(ZoomMode.ScaleToFill)),
@@ -206,14 +206,14 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.Refresh)}",
             Image = nameof(IgThemeIcon.Refresh),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuRefresh],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuRefresh],
             OnClick = new(LangId.FrmMain_MnuRefresh, API.IG_Refresh),
         },
         // toggle gallery
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.Gallery)}",
             Image = nameof(IgThemeIcon.Gallery),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuToggleGallery],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuToggleGallery],
             ConfigBinding = nameof(Config.ShowGallery),
             ConfigBindingValue = "True",
             OnClick = new(LangId.FrmMain_MnuToggleGallery, API.IG_ToggleGallery),
@@ -222,14 +222,14 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.Checkerboard)}",
             Image = nameof(IgThemeIcon.Checkerboard),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuToggleCheckerboard],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuToggleCheckerboard],
             OnClick = new(LangId.FrmMain_MnuToggleCheckerboard, API.IG_ToggleCheckerboard),
         },
         // toggle fullscreen
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.FullScreen)}",
             Image = nameof(IgThemeIcon.FullScreen),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuFullScreen],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuFullScreen],
             ConfigBinding = nameof(Config.EnableFullScreen),
             ConfigBindingValue = "True",
             OnClick = new(LangId.FrmMain_MnuFullScreen, API.IG_ToggleFullScreen),
@@ -241,7 +241,7 @@ public partial class Config
         new() {
             Id = $"Btn_{nameof(IgThemeIcon.Delete)}",
             Image = nameof(IgThemeIcon.Delete),
-            Text = IgLang.KeysMap[LangId.FrmMain_MnuMoveToRecycleBin],
+            Text = Lang.KeysMap[LangId.FrmMain_MnuMoveToRecycleBin],
             OnClick = new(LangId.FrmMain_MnuMoveToRecycleBin, API.IG_Delete),
         }
     ];
@@ -346,7 +346,7 @@ public partial class Config
     public async Task LoadCurrentLanguageAsync()
     {
         var langPath = BHelper.BaseDir(Dir.Language, Language);
-        var lang = new IgLang(langPath);
+        var lang = new Lang(langPath);
 
         // load language pack
         await lang.LoadAsync();
