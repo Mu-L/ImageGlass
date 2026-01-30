@@ -32,27 +32,30 @@ namespace ImageGlass.UI.Viewer;
 
 public partial class ViewerControl : PhControl
 {
-
     // loading
     private IDisposable? _photo; // TODO
     private CancellationTokenSource? _cancelPreview;
     private InterlockedBool _isPreviewing = new();
 
 
+    /// <summary>
+    /// Gets the drawing area.
+    /// </summary>
+    public Rect DrawingArea { get; private set; }
 
 
-    public Rect DrawingArea => Bounds.Deflate(Padding);
+    /// <summary>
+    /// Gets the bitmap size.
+    /// </summary>
+    public Size BitmapSize { get; private set; }
 
-    public Size BitmapSize => _bitmapSize;
 
 
+    #region Override Methods
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
-
-        // add events
-        TopLevel.GetTopLevel(this)?.ScalingChanged += TopLevel_ScalingChanged;
 
         EnableTouchGestures__();
     }
@@ -63,16 +66,37 @@ public partial class ViewerControl : PhControl
         base.OnUnloaded(e);
 
         DisableTouchGestures__();
-        TopLevel.GetTopLevel(this)?.ScalingChanged -= TopLevel_ScalingChanged;
-
-
         DisposeCheckerboard();
+
+        _photoRenderer?.Dispose();
+        _photoRenderer = null;
 
         _bmpSource?.Dispose();
         _bmpSource = null;
 
         _bmpPreview?.Dispose();
         _bmpPreview = null;
+    }
+
+
+    protected override void OnIgDpiChanged()
+    {
+        base.OnIgDpiChanged();
+
+        DisposeCheckerboard();
+        InvalidateVisual();
+    }
+
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        // update drawing area
+        if (e.Property == PaddingProperty || e.Property == BoundsProperty)
+        {
+            DrawingArea = Bounds.Deflate(Padding);
+        }
     }
 
 
@@ -174,27 +198,11 @@ public partial class ViewerControl : PhControl
     }
 
 
+    #endregion // Override Methods
 
 
 
-
-    private void TopLevel_ScalingChanged(object? sender, EventArgs e)
-    {
-        OnDpiChanged();
-    }
-
-
-    protected virtual void OnDpiChanged()
-    {
-        DisposeCheckerboard();
-        InvalidateVisual();
-    }
-
-
-
-
-
-
+    #region Public Methods
 
     /// <summary>
     /// Forces the control to reset zoom mode and invalidate itself.
@@ -221,6 +229,7 @@ public partial class ViewerControl : PhControl
         });
     }
 
+    #endregion // Public Methods
 
 
 }

@@ -31,7 +31,7 @@ internal class CheckerboardInfo
     /// <summary>
     /// Represents the current mode of the checkerboard.
     /// </summary>
-    public CheckerboardMode Mode { get; set; } = CheckerboardMode.None;
+    public CheckerboardMode Mode { get; set; } = CheckerboardMode.Client;
 
 
     /// <summary>

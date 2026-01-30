@@ -29,7 +29,7 @@
 
         <Grid Grid.Row="1"
               Background="{CompiledBinding ViewerBackground}">
-            <viewer:ViewerControl EnableSelection="True">
+            <viewer:ViewerControl EnableSelection="True" Padding="20">
                 <TextBlock Background="#4B006290"
                            Text="{CompiledBinding Title}"
                            TextWrapping="Wrap"

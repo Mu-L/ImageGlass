@@ -29,20 +29,21 @@ namespace ImageGlass.UI.Viewer;
 
 public partial class ViewerControl
 {
+    private PhotoRenderer? _photoRenderer;
+
     // drawing image
-    private Size _bitmapSize = new();
-    private WriteableBitmap? _bmpSource;
-    private WriteableBitmap? _bmpPreview;
-    private Rect _srcRect = new();
-    private Rect _destRect = new();
+    internal WriteableBitmap? _bmpSource;
+    internal WriteableBitmap? _bmpPreview;
+    internal Rect _srcRect = new();
+    internal Rect _destRect = new();
 
-    private RenderTargetBitmap? _bmpCheckerboard;
-    private readonly CheckerboardInfo _checkerboard = new();
+    internal RenderTargetBitmap? _bmpCheckerboard;
+    internal readonly CheckerboardInfo _checkerboard = new();
 
-    private readonly Lock _lockSource = new();
-    private readonly Lock _lockPreview = new();
-    private ImageInterpolation _interpolationScaleDown = ImageInterpolation.HighQuality;
-    private ImageInterpolation _interpolationScaleUp = ImageInterpolation.None;
+    internal readonly Lock _lockSource = new();
+    internal readonly Lock _lockPreview = new();
+    internal ImageInterpolation _interpolationScaleDown = ImageInterpolation.HighQuality;
+    internal ImageInterpolation _interpolationScaleUp = ImageInterpolation.None;
 
 
     // Public Properties
@@ -257,6 +258,11 @@ public partial class ViewerControl
 
     protected virtual void OnDrawImage(DrawingContext c)
     {
+        _photoRenderer ??= new PhotoRenderer(this);
+        c.Custom(_photoRenderer);
+
+
+        // TODO:
         using (c.PushRenderOptions(new()
         {
             BitmapInterpolationMode = (BitmapInterpolationMode)CurrentInterpolation,
