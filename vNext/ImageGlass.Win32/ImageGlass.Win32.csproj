@@ -16,8 +16,22 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
   </PropertyGroup>
 
+  
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>icon256.ico</ApplicationIcon>
+    <AssemblyName>ImageGlass</AssemblyName>
+    <AssemblyTitle>ImageGlass - A Lightweight, Versatile Image Viewer</AssemblyTitle>
+    <PublishAot>True</PublishAot>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+
+  <PropertyGroup Label="Avalonia">
+    <AvaloniaUseCompiledBindingsByDefault>True</AvaloniaUseCompiledBindingsByDefault>
+    <AvaloniaNameGeneratorDefaultFieldModifier>Public</AvaloniaNameGeneratorDefaultFieldModifier>
+    <FileVersion>10.0.0.129</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +48,10 @@
       <Isolated>false</Isolated>
       <EmbedInteropTypes>true</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="icon256.ico" />
   </ItemGroup>
 
   <ItemGroup>
