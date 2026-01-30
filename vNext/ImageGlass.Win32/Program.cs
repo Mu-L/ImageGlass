@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Input;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using ImageGlass.ViewModels;
@@ -67,7 +68,11 @@ sealed class Program
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
 #if DEBUG
         .LogToTrace()
-        .WithDeveloperTools()
+        .WithDeveloperTools(o =>
+        {
+            o.ApplicationName = BHelper.AppName;
+            o.Gesture = new KeyGesture(Key.I, KeyModifiers.Control | KeyModifiers.Shift);
+        })
 #endif
         .UseWin32()
         .UseSkia()

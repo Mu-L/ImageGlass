@@ -16,7 +16,7 @@
     <PackageVersion Include="Avalonia.Browser" Version="11.3.10" />
     <PackageVersion Include="Avalonia.Android" Version="11.3.10" />
     <PackageVersion Include="Avalonia.Win32" Version="11.3.11" />
-    <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.1.1" />
+    <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.0-beta2" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageVersion Include="D2Phap.EggShell-x64" Version="1.0.517" />
     <PackageVersion Include="Magick.NET-Q8-OpenMP-x64" Version="14.10.2" />
