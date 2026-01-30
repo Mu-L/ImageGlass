@@ -31,6 +31,7 @@ public partial class PhControl : ContentControl
     public double Dpi => VisualRoot?.RenderScaling ?? 1d;
 
 
+
     #region Control Events
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -38,8 +39,10 @@ public partial class PhControl : ContentControl
         base.OnLoaded(e);
 
         OnIgLanguageChanged();
+
         Core.ThemeChanged += Core_ThemeChanged;
         Core.LanguageChanged += Core_LanguageChanged;
+        TopLevel.GetTopLevel(this)?.ScalingChanged += TopLevel_ScalingChanged;
     }
 
 
@@ -49,6 +52,7 @@ public partial class PhControl : ContentControl
 
         Core.ThemeChanged -= Core_ThemeChanged;
         Core.LanguageChanged -= Core_LanguageChanged;
+        TopLevel.GetTopLevel(this)?.ScalingChanged -= TopLevel_ScalingChanged;
     }
 
 
@@ -63,10 +67,24 @@ public partial class PhControl : ContentControl
         OnIgLanguageChanged();
     }
 
+
+    private void TopLevel_ScalingChanged(object? sender, EventArgs e)
+    {
+        OnIgDpiChanged();
+    }
+
+
     #endregion // Control Events
 
 
+
     #region Virtual Methods
+
+    /// <summary>
+    /// Occurs when DPI is changed.
+    /// </summary>
+    protected virtual void OnIgDpiChanged() { }
+
 
     /// <summary>
     /// Occurs when the app theme is changed.
@@ -80,6 +98,7 @@ public partial class PhControl : ContentControl
     protected virtual void OnIgLanguageChanged() { }
 
     #endregion // Virtual Methods
+
 
 
     #region Public Methods
