@@ -20,7 +20,10 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
+using ImageGlass.Common.Photoing;
+using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer.Checkerboard;
+using SkiaSharp;
 using System.Globalization;
 using System.Threading;
 
@@ -31,23 +34,43 @@ public partial class ViewerControl
 {
     private PhotoRenderer? _photoRenderer;
 
+    internal Photo? _photo;
+    internal CancellationTokenSource? _cancelPreview;
+    internal InterlockedBool _isPreviewing = new();
+
     // drawing image
-    internal WriteableBitmap? _bmpSource;
-    internal WriteableBitmap? _bmpPreview;
-    internal Rect _srcRect = new();
-    internal Rect _destRect = new();
+    internal SKImage? _bmpSource;
+    internal SKImage? _bmpPreview;
 
     internal RenderTargetBitmap? _bmpCheckerboard;
     internal readonly CheckerboardInfo _checkerboard = new();
 
     internal readonly Lock _lockSource = new();
     internal readonly Lock _lockPreview = new();
-    internal ImageInterpolation _interpolationScaleDown = ImageInterpolation.HighQuality;
+    internal ImageInterpolation _interpolationScaleDown = ImageInterpolation.High;
     internal ImageInterpolation _interpolationScaleUp = ImageInterpolation.None;
 
 
     // Public Properties
     #region Public Properties
+
+    /// <summary>
+    /// Gets, sets value indicates whether the previewing is enabled or not.
+    /// </summary>
+    public bool EnableImagePreview { get; set; } = true;
+
+
+    /// <summary>
+    /// Gets the rectangle of the source image region being drawn.
+    /// </summary>
+    public Rect SrcRect { get; internal set; } = new();
+
+
+    /// <summary>
+    /// Gets rectangle of the viewport.
+    /// </summary>
+    public Rect DestRect { get; internal set; } = new();
+
 
     /// <summary>
     /// Gets or sets the size of the checkerboard.
@@ -142,6 +165,13 @@ public partial class ViewerControl
 
 
 
+    protected void DisposeCheckerboard()
+    {
+        _bmpCheckerboard?.Dispose();
+        _bmpCheckerboard = null;
+    }
+
+
     public override void Render(DrawingContext c)
     {
         OnDrawCheckerboard(c);      // draw checkerboard
@@ -161,8 +191,8 @@ public partial class ViewerControl
             Control Bounds = {Bounds}
             DrawingArea = {DrawingArea}
             Image size = {BitmapSize}
-            _srcRect = {_srcRect}
-            _destRect = {_destRect}
+            _srcRect = {SrcRect}
+            _destRect = {DestRect}
             _zoomFactor = {_zooming.Factor}
             _zoomedPoint = {_zooming.ZoomedPoint}
             """,
@@ -175,7 +205,7 @@ public partial class ViewerControl
         c.DrawText(ft, new Point(DrawingArea.X + 20, DrawingArea.Y + 20));
 
         // draw image bounds
-        c.DrawRectangle(new Pen(Brushes.LightGreen, 2, DashStyle.Dash, PenLineCap.Round, PenLineJoin.Round), _destRect);
+        c.DrawRectangle(new Pen(Brushes.LightGreen, 2, DashStyle.Dash, PenLineCap.Round, PenLineJoin.Round), DestRect);
 
         // draw zoomed point
         c.DrawEllipse(Brushes.Red, new Pen(Brushes.White, 2), _zooming.ZoomedPoint, 5, 5);
@@ -202,7 +232,7 @@ public partial class ViewerControl
             //    region = _destRect;
             //}
 
-            region = _destRect;
+            region = DestRect;
         }
         else
         {
@@ -262,50 +292,35 @@ public partial class ViewerControl
         c.Custom(_photoRenderer);
 
 
-        // TODO:
-        using (c.PushRenderOptions(new()
+        // draw bitmap preview
+        if (_bmpPreview is not null)
         {
-            BitmapInterpolationMode = (BitmapInterpolationMode)CurrentInterpolation,
-        }))
-        {
-            using (c.PushClip(_destRect))
+            lock (_lockPreview)
             {
-                // draw bitmap preview
                 if (_bmpPreview is not null)
                 {
-                    lock (_lockPreview)
-                    {
-                        if (_bmpPreview is not null)
-                        {
-                            c.DrawImage(_bmpPreview, _srcRect, _destRect);
-                        }
-                    }
+                    _photoRenderer.Image = _bmpPreview;
+                    c.Custom(_photoRenderer);
                 }
+            }
+        }
 
 
-                // draw bitmap in full resolution
+        // draw bitmap in full resolution
+        if (_bmpSource is not null)
+        {
+            lock (_lockSource)
+            {
                 if (_bmpSource is not null)
                 {
-                    lock (_lockSource)
-                    {
-                        if (_bmpSource is not null)
-                        {
-                            c.DrawImage(_bmpSource, _srcRect, _destRect);
-                        }
-                    }
+                    _photoRenderer.Image = _bmpSource;
+                    c.Custom(_photoRenderer);
                 }
-
             }
         }
 
     }
 
-
-    protected void DisposeCheckerboard()
-    {
-        _bmpCheckerboard?.Dispose();
-        _bmpCheckerboard = null;
-    }
 
 
 }

@@ -67,13 +67,20 @@ public partial class PhotoRenderer : ICustomDrawOperation
     private ViewerControl _viewer;
 
 
+    #region Public Properties
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public Rect Bounds { get; set; }
+    public Rect Bounds => _viewer.DrawingArea;
 
 
+    /// <summary>
+    /// Gets, sets the image to render.
+    /// </summary>
+    public SKImage? Image { get; set; }
 
+    #endregion // Public Properties
 
 
     public PhotoRenderer(ViewerControl viewer)
@@ -81,6 +88,9 @@ public partial class PhotoRenderer : ICustomDrawOperation
         _viewer = viewer;
     }
 
+
+
+    #region Interface Methods
 
     /// <summary>
     /// Releases the managed objects.
@@ -102,6 +112,8 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// </summary>
     public void Render(ImmediateDrawingContext c)
     {
+        if (Image is null) return;
+
         var leaseFeature = c.TryGetFeature<ISkiaSharpApiLeaseFeature>();
         if (leaseFeature is null) return;
 
@@ -112,22 +124,21 @@ public partial class PhotoRenderer : ICustomDrawOperation
         var canvas = lease.SkCanvas;
         canvas.Save();
 
-        // TODO:
-        // draw image
-
-        using var p = new SkiaSharp.SKPaint
+        // paint the image
+        using var paintOptions = new SKPaint
         {
-            Color = SKColors.Yellow,
-            StrokeWidth = 2,
-            IsStroke = true,
+            FilterQuality = (SKFilterQuality)_viewer.CurrentInterpolation,
         };
-
-        canvas.DrawRect(_viewer.DrawingArea.ToSKRect(), p);
+        canvas.DrawImage(Image, _viewer.SrcRect.ToSKRect(), _viewer.DestRect.ToSKRect(), paintOptions);
 
         canvas.Restore();
     }
 
+    #endregion // Interface Methods
 
+
+
+    #region Private Methods
 
     /// <summary>
     /// Returns a new image after applying color management effect on the original image.
@@ -185,9 +196,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
     }
 
 
-
-
-
+    #endregion // Private Methods
 
 
 }

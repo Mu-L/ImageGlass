@@ -49,7 +49,10 @@ public partial class Photo : DisposableImpl
     #region Public Propterties
 
     /// <summary>
-    /// Gets the native bitmap.
+    /// Gets the native bitmap,
+    /// either <see cref="SKBitmap"/>,
+    /// or <see cref="SKCodec"/>,
+    /// or <see cref="SkiaAnimator"/>.
     /// </summary>
     public IDisposable? Bitmap { get; private set; } = null;
 

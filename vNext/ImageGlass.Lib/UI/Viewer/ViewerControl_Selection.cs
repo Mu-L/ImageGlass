@@ -238,8 +238,8 @@ public partial class ViewerControl
     /// </summary>
     public Point PointClientToSource(Point clientPoint)
     {
-        var x = (clientPoint.X - _destRect.X) / _zooming.Factor + _srcRect.X;
-        var y = (clientPoint.Y - _destRect.Y) / _zooming.Factor + _srcRect.Y;
+        var x = (clientPoint.X - DestRect.X) / _zooming.Factor + SrcRect.X;
+        var y = (clientPoint.Y - DestRect.Y) / _zooming.Factor + SrcRect.Y;
 
         return new Point(x, y);
     }
@@ -289,8 +289,8 @@ public partial class ViewerControl
     /// </summary>
     public Point PointSourceToClient(Point srcPoint)
     {
-        var x = (srcPoint.X - _srcRect.X) * _zooming.Factor + _destRect.X;
-        var y = (srcPoint.Y - _srcRect.Y) * _zooming.Factor + _destRect.Y;
+        var x = (srcPoint.X - SrcRect.X) * _zooming.Factor + DestRect.X;
+        var y = (srcPoint.Y - SrcRect.Y) * _zooming.Factor + DestRect.Y;
 
         return new Point(x, y);
     }
@@ -533,10 +533,10 @@ public partial class ViewerControl
             DpiScale(_selection.PointerDownPoint.Value),
             DpiScale(_selection.PointerMovePoint.Value),
             SelectionAspectRatio,
-            BitmapSize.Width, BitmapSize.Height, _destRect);
+            BitmapSize.Width, BitmapSize.Height, DestRect);
 
         // limit the selected area to the image
-        cliRect = cliRect.Intersect(_destRect);
+        cliRect = cliRect.Intersect(DestRect);
 
         var srcRect = RectClientToSource(cliRect);
         SetSourceSelection(srcRect, true);

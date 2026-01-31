@@ -636,7 +636,7 @@ public partial class Config : PhReactive
     [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleDown
     {
-        get => Get(ConfigId.ImageInterpolationScaleDown, ImageInterpolation.HighQuality);
+        get => Get(ConfigId.ImageInterpolationScaleDown, ImageInterpolation.High);
         set => Set(ConfigId.ImageInterpolationScaleDown, value);
     }
 

@@ -69,18 +69,18 @@ public enum ImageInterpolation : int
     //
     // Summary:
     //     Disable interpolation.
-    None = 1,
+    None = 0,
     //
     // Summary:
-    //     The best performance but worst image quality.
-    LowQuality = 2,
+    //     The best performance but worst image quality. 
+    Low = 2,
     //
     // Summary:
     //     Good performance and decent image quality.
-    MediumQuality = 3,
+    Medium = 3,
     //
     // Summary:
     //     Highest quality but worst performance.
-    HighQuality = 4,
+    High = 4,
 }
 

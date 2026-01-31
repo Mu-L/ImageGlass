@@ -158,7 +158,7 @@ public partial class ViewerControl
     /// <summary>
     /// Gets the center point of the image viewport.
     /// </summary>
-    public Point ViewportCenterPoint => _destRect.Center;
+    public Point ViewportCenterPoint => DestRect.Center;
 
 
     #endregion // Public Properies
@@ -177,8 +177,8 @@ public partial class ViewerControl
     {
         if (DrawingArea.IsEmpty || BitmapSize.IsEmpty)
         {
-            _srcRect = new();
-            _destRect = new();
+            SrcRect = new();
+            DestRect = new();
             return;
         }
 
@@ -197,15 +197,15 @@ public partial class ViewerControl
 
 
         // 1.3 initialize new values for source and destination rectangles
-        var srcX = _srcRect.X;
-        var srcY = _srcRect.Y;
-        var srcWidth = _srcRect.Width;
-        var srcHeight = _srcRect.Height;
+        var srcX = SrcRect.X;
+        var srcY = SrcRect.Y;
+        var srcWidth = SrcRect.Width;
+        var srcHeight = SrcRect.Height;
 
-        var destX = _destRect.X;
-        var destY = _destRect.Y;
-        var destWidth = _destRect.Width;
-        var destHeight = _destRect.Height;
+        var destX = DestRect.X;
+        var destY = DestRect.Y;
+        var destWidth = DestRect.Width;
+        var destHeight = DestRect.Height;
 
 
         // 2. calculate x-axis and width
@@ -277,8 +277,8 @@ public partial class ViewerControl
 
 
         // 5. get the final rectangles
-        _srcRect = new(srcX, srcY, srcWidth, srcHeight);
-        _destRect = new(destX, destY, destWidth, destHeight);
+        SrcRect = new(srcX, srcY, srcWidth, srcHeight);
+        DestRect = new(destX, destY, destWidth, destHeight);
     }
 
 
@@ -290,7 +290,7 @@ public partial class ViewerControl
         // reset viewport
         if (!isManualZoom)
         {
-            _srcRect = new();
+            SrcRect = new();
             _zooming.ZoomedPoint = new();
         }
 
@@ -466,8 +466,8 @@ public partial class ViewerControl
         }
 
         // get the gap when the viewport is smaller than the control size
-        var gapX = Math.Max(0, _destRect.X);
-        var gapY = Math.Max(0, _destRect.Y);
+        var gapX = Math.Max(0, DestRect.X);
+        var gapY = Math.Max(0, DestRect.Y);
 
         // the location after zoomed
         var zoomedLocation = new Point(
@@ -640,28 +640,28 @@ public partial class ViewerControl
 
         hDistance *= Dpi;
         vDistance *= Dpi;
-        var oldSrcRect = _srcRect;
+        var oldSrcRect = SrcRect;
 
 
         // horizontal
         if (hDistance != 0)
         {
-            var newX = _srcRect.X + hDistance / _zooming.Factor;
-            _srcRect.WithX(newX);
+            var newX = SrcRect.X + hDistance / _zooming.Factor;
+            SrcRect.WithX(newX);
         }
 
         // vertical 
         if (vDistance != 0)
         {
-            var newY = _srcRect.Y + vDistance / _zooming.Factor;
-            _srcRect.WithY(newY);
+            var newY = SrcRect.Y + vDistance / _zooming.Factor;
+            SrcRect.WithY(newY);
         }
 
         _zooming.ZoomedPoint = pointerPosition ?? new();
 
 
         // emit panning event
-        Panning?.Invoke(this, new ViewerPanEventArgs(oldSrcRect, _srcRect));
+        Panning?.Invoke(this, new ViewerPanEventArgs(oldSrcRect, SrcRect));
 
         // update drawing regions
         CalculateDrawingRegion();

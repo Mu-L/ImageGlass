@@ -23,20 +23,13 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.OsApi;
-using ImageGlass.Common.Types;
 using System;
-using System.Threading;
 
 namespace ImageGlass.UI.Viewer;
 
 
 public partial class ViewerControl : PhControl
 {
-    // loading
-    private IDisposable? _photo; // TODO
-    private CancellationTokenSource? _cancelPreview;
-    private InterlockedBool _isPreviewing = new();
-
 
     /// <summary>
     /// Gets the drawing area.
