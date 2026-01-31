@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Input;
 using ImageGlass.Common;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.ViewModels;
 using ImageGlass.Win32.Common.ServiceProviders;
@@ -94,6 +95,11 @@ sealed class Program
             // create main window
             var mainWindow = new MainWindow32();
             mainWindow.DataContext = new MainWindowModel(mainWindow);
+
+
+            // initialize service providers
+            Core.API = new AppAPIProvider(mainWindow);
+
             app?.CreateMainWindowIfNotExist(mainWindow);
         });
 

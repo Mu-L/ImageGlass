@@ -35,6 +35,12 @@ public interface IShellProvider : IDisposable
 
 
     /// <summary>
+    /// Gets the foreground shell object.
+    /// </summary>
+    IDisposable? GetForegroundWindowView();
+
+
+    /// <summary>
     /// Gets the target path from shortcute file path
     /// </summary>
     string? GetTargetPathFromShortcut(string? lnkFilePath);

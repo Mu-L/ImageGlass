@@ -98,6 +98,18 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    public IDisposable? GetForegroundWindowView()
+    {
+        using var shell = new EggShell();
+        var ev = shell.GetForegroundWindowView();
+
+        return ev;
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public string? GetTargetPathFromShortcut(string? lnkFilePath)
     {
         if (string.IsNullOrWhiteSpace(lnkFilePath)) return null;

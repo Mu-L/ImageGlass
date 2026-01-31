@@ -73,6 +73,12 @@ public static class Core
     /// </summary>
     public static IShellProvider? ShellProvider { get; set; } = null;
 
+
+    /// <summary>
+    /// Provides a singleton instance to access app APIs.
+    /// </summary>
+    public static AppAPIProvider? API { get; set; } = null;
+
     #endregion // Platform Service Provider
 
 
