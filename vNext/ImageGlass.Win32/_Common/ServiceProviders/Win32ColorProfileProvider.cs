@@ -17,8 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Controls;
-using ImageGlass.Common;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
+using ImageGlass.UI.Windowing;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -27,8 +28,7 @@ using Windows.Win32.Devices.Display;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 
-namespace ImageGlass.Win32.Common.Types;
-
+namespace ImageGlass.Win32.Common.ServiceProviders;
 
 public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorProfileProvider
 {
@@ -45,6 +45,8 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
     /// </summary>
     public event TEventHandler<IWindowColorProfileProvider, ColorProfileChangedEventArgs>? Changed;
 
+
+    #region Public Properties
 
     /// <summary>
     /// <inheritdoc/>
@@ -63,6 +65,11 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
     /// </summary>
     public bool IsInitialized { get; private set; } = false;
 
+    #endregion // Public Properties
+
+
+
+    #region Instance Methods
 
     /// <summary>
     /// <inheritdoc/>
@@ -95,7 +102,7 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
     /// </summary>
     /// <param name="window"></param>
     /// <returns></returns>
-    public async Task InitializeAsync(Window window)
+    public void Initialize(Window window)
     {
         if (IsInitialized) return;
 
@@ -174,6 +181,24 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
         UpdateColorProfile();
     }
 
+    #endregion // Instance Methods
+
+
+
+    #region Public Static Methods
+
+    /// <summary>
+    /// Creates and initializes new instance of color profile provider.
+    /// </summary>
+    public static Win32ColorProfileProvider Create(PhWindow window,
+        TEventHandler<IWindowColorProfileProvider, ColorProfileChangedEventArgs> onChangedFn)
+    {
+        var sp = new Win32ColorProfileProvider();
+        sp.Changed += onChangedFn;
+
+        sp.Initialize(window);
+        return sp;
+    }
 
 
     /// <summary>
@@ -186,7 +211,6 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
 
         return monitor;
     }
-
 
 
     /// <summary>
@@ -232,7 +256,6 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
 
         return string.Empty;
     }
-
 
 
     /// <summary>
@@ -316,6 +339,8 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
 
         return false;
     }
+
+    #endregion // Public Static Methods
 
 
 }

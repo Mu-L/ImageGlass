@@ -7,7 +7,7 @@
 
     <LangVersion>Preview</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RootNamespace>ImageGlass.Common</RootNamespace>
+    <RootNamespace>ImageGlass</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\Delete.png" />

@@ -24,6 +24,7 @@ using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,17 @@ public static class Core
     public static event EventHandler<PhotoSaveEventArgs>? PhotoSaved;
 
     private static string _initImagePathFromArgs = "";
+
+
+
+    #region Platform Service Provider
+
+    /// <summary>
+    /// Provides a singleton instance to retrieve photo preview & thumbnail.
+    /// </summary>
+    public static IPhotoPreviewProvider? PreviewProvider { get; set; } = null;
+
+    #endregion // Platform Service Provider
 
 
 
@@ -124,19 +136,6 @@ public static class Core
 
 
     /// <summary>
-    /// Provides a singleton instance of the <see cref="WindowColorProfileProvider"/> class.
-    /// </summary>
-    public static IWindowColorProfileProvider? ColorProfileService
-    {
-        get; set
-        {
-            if (field is not null) return;
-            field = value;
-        }
-    } = null;
-
-
-    /// <summary>
     /// Gets the path of the image file from the arguments.
     /// </summary>
     public static string InputImagePathFromArgs => _initImagePathFromArgs;
@@ -183,8 +182,8 @@ public static class Core
 
         DisposeClipboardPhoto();
 
-        ColorProfileService?.Dispose();
-        ColorProfileService = null;
+        ColorProfileProvider?.Dispose();
+        ColorProfileProvider = null;
     }
 
 

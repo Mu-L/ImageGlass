@@ -19,10 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ImageGlass.Common;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Windows;
 using ImageGlass.Win32.Common;
-using ImageGlass.Win32.Common.Types;
+using ImageGlass.Win32.Common.ServiceProviders;
 using System.Threading.Tasks;
 
 namespace ImageGlass.Win32.Windows;
@@ -40,14 +41,12 @@ public partial class MainWindow32 : MainWindow
 
 
 
-    protected override async void OnLoaded(RoutedEventArgs e)
+    protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
 
         // initialize Windows color profile service
-        Core.ColorProfileService = new Win32ColorProfileProvider();
-        Core.ColorProfileService.Changed += ColorProfileService_Changed;
-        await Core.ColorProfileService.InitializeAsync(this);
+        Core.ColorProfileProvider = Win32ColorProfileProvider.Create(this, ColorProfileProvider_Changed);
     }
 
 
@@ -84,7 +83,7 @@ public partial class MainWindow32 : MainWindow
 
 
 
-    private void ColorProfileService_Changed(IWindowColorProfileProvider sender, ColorProfileChangedEventArgs e)
+    private void ColorProfileProvider_Changed(IWindowColorProfileProvider sender, ColorProfileChangedEventArgs e)
     {
         VM.Title = $"{e.IsHdr} | {e.ProfilePath}";
     }

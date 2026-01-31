@@ -22,7 +22,7 @@ using ImageGlass.Common.Types;
 using System;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Common;
+namespace ImageGlass.Common.ServiceProviders;
 
 
 /// <summary>
@@ -57,7 +57,7 @@ public interface IWindowColorProfileProvider : IDisposable
     /// <summary>
     /// Initializes the color profile setting instance for the given window.
     /// </summary>
-    Task InitializeAsync(Window window);
+    void Initialize(Window window);
 
 
     /// <summary>
