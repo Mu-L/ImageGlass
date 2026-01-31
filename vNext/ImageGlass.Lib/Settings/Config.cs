@@ -716,7 +716,7 @@ public partial class Config : PhReactive
     [JsonConverter(typeof(JsonHashSetToStringConverter))]
     public HashSet<string> NativeCodecReadFormats
     {
-        get => Get(ConfigId.NativeCodecReadFormats, new HashSet<string> { ".gif", ".gifv", ".webp", ".fax", ".apng" });
+        get => Get(ConfigId.NativeCodecReadFormats, new HashSet<string> { ".png", ".jpg", ".gif", ".gifv", ".webp", ".fax", ".apng" });
         set => Set(ConfigId.NativeCodecReadFormats, value);
     }
 

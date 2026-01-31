@@ -50,7 +50,7 @@ public partial class MainView : PhControl
         // drag-drop events
         DragDrop.SetAllowDrop(PART_Viewer, true);
         DragDrop.AddDragOverHandler(PART_Viewer, PART_Viewer_DragOver);
-        DragDrop.AddDragEnterHandler(PART_Viewer, PART_Viewer_Drop);
+        DragDrop.AddDropHandler(PART_Viewer, PART_Viewer_Drop);
     }
 
 
@@ -60,7 +60,7 @@ public partial class MainView : PhControl
 
         // drag-drop events
         DragDrop.RemoveDragOverHandler(PART_Viewer, PART_Viewer_DragOver);
-        DragDrop.RemoveDragEnterHandler(PART_Viewer, PART_Viewer_Drop);
+        DragDrop.RemoveDropHandler(PART_Viewer, PART_Viewer_Drop);
     }
 
 
