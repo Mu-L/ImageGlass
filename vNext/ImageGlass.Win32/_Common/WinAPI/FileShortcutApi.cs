@@ -33,7 +33,7 @@ public static class FileShortcutApi
     /// </summary>
     /// <param name="shortcutPath">Path of shortcut (*.lnk)</param>
     /// <returns></returns>
-    public static string GetTargetPathFromShortcut(string shortcutPath)
+    public static string? GetTargetPathFromShortcut(string shortcutPath)
     {
         var shell = new IWshRuntimeLibrary.WshShell();
 
@@ -41,13 +41,14 @@ public static class FileShortcutApi
         {
             var shortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortcutPath);
 
-            return shortcut.TargetPath ?? "";
+            return shortcut.TargetPath;
         }
         catch // (COMException)
         {
             // A COMException is thrown if the file is not a valid shortcut (.lnk) file 
-            return "";
         }
+
+        return null;
     }
 
 

@@ -59,6 +59,11 @@ public static class Core
     /// </summary>
     public static IPhotoPreviewProvider? PreviewProvider { get; set; } = null;
 
+    /// <summary>
+    /// Provides a singleton instance to resolve path.
+    /// </summary>
+    public static IPathProvider? PathProvider { get; set; } = null;
+
     #endregion // Platform Service Provider
 
 

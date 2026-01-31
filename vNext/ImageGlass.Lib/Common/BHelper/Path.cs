@@ -21,6 +21,7 @@ using Avalonia.Controls;
 using ImageGlass.Common.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,6 +32,12 @@ namespace ImageGlass.Common;
 
 public partial class BHelper
 {
+    private static string Win32ShortcutExtension => ".lnk";
+
+
+    /// <summary>
+    /// Gets app name.
+    /// </summary>
     public static string AppName => "ImageGlass_10";
 
 
@@ -38,6 +45,30 @@ public partial class BHelper
     /// Gets the app executable file path.
     /// </summary>
     public static string AppExePath => Environment.ProcessPath ?? "";
+
+
+    /// <summary>
+    /// Gets the app version.
+    /// </summary>
+    public static Version AppVersion
+    {
+        get
+        {
+            var defaultVersion = new Version();
+            if (string.IsNullOrWhiteSpace(AppExePath)) return defaultVersion;
+
+            try
+            {
+                if (Version.TryParse(FileVersionInfo.GetVersionInfo(AppExePath).FileVersion, out var fileVersion))
+                {
+                    return fileVersion;
+                }
+            }
+            catch { }
+
+            return defaultVersion;
+        }
+    }
 
 
     /// <summary>
@@ -50,6 +81,7 @@ public partial class BHelper
     /// Gets the config dir path.
     /// </summary>
     public static string ConfigPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
+
 
 
     /// <summary>
@@ -157,8 +189,7 @@ public partial class BHelper
     /// <summary>
     /// Get distinct directories list from paths list.
     /// </summary>
-    public static (List<string> DirPaths, List<string> FilePaths) GetDistinctDirsFromPaths(
-        IEnumerable<string> pathList, Func<string, string>? lnkExtResolverFn = null)
+    public static (List<string> DirPaths, List<string> FilePaths) GetDistinctDirsFromPaths(IEnumerable<string> pathList)
     {
         if (!pathList.Any()) return ([], []);
 
@@ -178,11 +209,11 @@ public partial class BHelper
             {
                 string? dir;
 
-                if (string.Equals(Path.GetExtension(path), ".lnk", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(Path.GetExtension(path), Win32ShortcutExtension, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (lnkExtResolverFn is null) continue;
+                    if (Core.PathProvider is null) continue;
 
-                    var shortcutPath = lnkExtResolverFn(path);
+                    var shortcutPath = Core.PathProvider.GetTargetPathFromShortcut(path);
                     var shortcutPathType = BHelper.CheckPath(shortcutPath);
                     if (shortcutPathType == PathType.Unknown) continue;
 
@@ -241,6 +272,11 @@ public partial class BHelper
         // parse environment vars to absolute path
         path = Environment.ExpandEnvironmentVariables(path);
 
+        if (string.Equals(Path.GetExtension(inputPath), Win32ShortcutExtension, StringComparison.OrdinalIgnoreCase))
+        {
+            path = Core.PathProvider?.GetTargetPathFromShortcut(path) ?? path;
+        }
+
         return path;
     }
 
@@ -257,7 +293,7 @@ public partial class BHelper
         {
             var ub = new UriBuilder(url);
             var queries = HttpUtility.ParseQueryString(ub.Query);
-            queries["utm_source"] = "app_TODO"; // TODO: App.Version;
+            queries["utm_source"] = $"app_{AppVersion}";
             queries["utm_medium"] = "app_click";
             queries["utm_campaign"] = campaign;
 
@@ -275,11 +311,38 @@ public partial class BHelper
 
 
     /// <summary>
-    /// Delete a file.
+    /// Opens file path in Explorer and selects it.
     /// </summary>
-    /// <param name="filePath">Full file path to delete</param>
-    public static void DeleteFile(string filePath)
+    public static void OpenFilePath(string? filePath)
     {
+        if (Core.PathProvider is null) return;
+
+        Core.PathProvider.OpenFilePath(filePath);
+    }
+
+
+    /// <summary>
+    /// Opens the folder path in Explorer, creates the folder path if not existed.
+    /// </summary>
+    public static void OpenFolderPath(string? dirPath)
+    {
+        if (Core.PathProvider is null) return;
+
+        Core.PathProvider.OpenFolderPath(dirPath);
+    }
+
+
+    /// <summary>
+    /// Deletes a file with option to move to recycle bin.
+    /// </summary>
+    public static void DeleteFile(string filePath, bool moveToRecycleBin = true)
+    {
+        if (Core.PathProvider is not null)
+        {
+            Core.PathProvider.DeleteFile(filePath, moveToRecycleBin);
+            return;
+        }
+
         try
         {
             File.Delete(filePath);
