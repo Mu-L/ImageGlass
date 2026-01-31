@@ -311,4 +311,22 @@ public static partial class SkiaCodec
     }
 
 
+    /// <summary>
+    /// Converts bitmap to image with optional source color space.
+    /// </summary>
+    public static SKImage? ConvertToSKImage(SKBitmap? bmp, SKColorSpace? srcColorSpace = null)
+    {
+        if (bmp is null) return null;
+
+        // convert color space
+        if (srcColorSpace is not null)
+        {
+            var info = bmp.Info.WithColorSpace(srcColorSpace);
+            return SKImage.FromPixels(info, bmp.GetPixels());
+        }
+
+        return SKImage.FromBitmap(bmp);
+    }
+
+
 }

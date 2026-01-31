@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia;
 using ImageGlass.Common.Types;
 using ImageMagick;
 using SkiaSharp;
@@ -25,7 +26,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -59,17 +59,17 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Gets the size of the photo.
     /// </summary>
-    public Vector2 Size => new Vector2(_width, _height);
+    public Size Size => new Size(_width, _height);
 
     /// <summary>
     /// Gets the width of the photo.
     /// </summary>
-    public uint Width => (uint)Size.X;
+    public uint Width => (uint)Size.Width;
 
     /// <summary>
     /// Gets the height of the photo.
     /// </summary>
-    public uint Height => (uint)Size.Y;
+    public uint Height => (uint)Size.Height;
 
     /// <summary>
     /// Gets the loading state of the photo.
@@ -502,7 +502,7 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public virtual async Task LoadAsync(bool useCache,
         PhotoReadOptions? newOptions = null,
-        IProgress<PhotoLoadingEventArgs>? progress = null,
+        Func<PhotoLoadingEventArgs, Task>? handleProgressFn = null,
         bool skipLoadingEvent = false)
     {
         // use cached data
@@ -530,7 +530,10 @@ public partial class Photo : DisposableImpl
 
             if (!skipLoadingEvent)
             {
-                progress?.Report(new PhotoLoadingEventArgs(PhotoLoadingState.Loading, this, token));
+                if (handleProgressFn is not null)
+                {
+                    await handleProgressFn(new(PhotoLoadingState.Loading, this, token));
+                }
             }
 
 
@@ -558,7 +561,10 @@ public partial class Photo : DisposableImpl
 
             // done loading
             State = PhotoLoadingState.Loaded;
-            progress?.Report(new PhotoLoadingEventArgs(PhotoLoadingState.Loaded, this, token));
+            if (handleProgressFn is not null)
+            {
+                await handleProgressFn(new(PhotoLoadingState.Loaded, this, token));
+            }
         }
         catch (Exception ex)
         {
@@ -635,6 +641,51 @@ public partial class Photo : DisposableImpl
         catch (Exception ex)
         {
             Debug.WriteLine($"❌❌❌ {nameof(LoadMetadataAsync)}: {ex.Message}");
+        }
+
+        return null;
+    }
+
+
+    /// <summary>
+    /// Gets an image frame from the photo.
+    /// </summary>
+    public SKImage? GetFrame(uint frameIndex = 0)
+    {
+        SKBitmap? bitmap = null;
+
+        // 1. native bitmap is a single-frame bitmap
+        if (Bitmap is SKBitmap bmp)
+        {
+            bitmap = bmp;
+        }
+
+        // 2. native bitmap is a multi-frame bitmap
+        if (Bitmap is SKCodec codec)
+        {
+            var bmpFrame = new SKBitmap(codec.Info);
+            var codecOption = new SKCodecOptions((int)Metadata.FrameIndex);
+            if (codec.GetPixels(codec.Info, bmpFrame.GetPixels(), codecOption) == SKCodecResult.Success)
+            {
+                bitmap = bmpFrame;
+            }
+        }
+
+
+        // 3. convert to image
+        if (bitmap is not null)
+        {
+            // TODO:
+            //// get source color space
+            //SKColorSpace? srcColorSpace = null;
+            //if (Metadata.ColorProfileData is not null)
+            //{
+            //    srcColorSpace = SKColorSpace.CreateIcc(Metadata.ColorProfileData);
+            //}
+
+            // convert
+            var img = SkiaCodec.ConvertToSKImage(bitmap); //, srcColorSpace);
+            return img;
         }
 
         return null;

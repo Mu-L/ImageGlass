@@ -78,7 +78,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// <summary>
     /// Gets, sets the image to render.
     /// </summary>
-    public SKImage? Image { get; set; }
+    public SKImage? Image { get; set; } = null;
 
     #endregion // Public Properties
 

@@ -19,6 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace ImageGlass.UI.Viewer;
 
 
+public enum PhotoSource
+{
+    None,
+    Native,
+    Webview2,
+}
+
+
 /// <summary>
 /// Specifies the display styles for the background texture grid
 /// </summary>

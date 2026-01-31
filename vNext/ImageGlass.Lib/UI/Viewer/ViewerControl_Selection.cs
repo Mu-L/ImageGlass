@@ -325,7 +325,7 @@ public partial class ViewerControl
     /// </summary>
     private bool OnSelectionBegin(PointerPoint p)
     {
-        if (_bmpSource == null) return false;
+        if (_imgSource == null) return false;
 
 
         var dpiCursorPosition = DpiScale(p.Position);

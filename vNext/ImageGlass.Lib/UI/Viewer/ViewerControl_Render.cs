@@ -21,7 +21,6 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
 using ImageGlass.Common.Photoing;
-using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer.Checkerboard;
 using SkiaSharp;
 using System.Globalization;
@@ -34,21 +33,18 @@ public partial class ViewerControl
 {
     private PhotoRenderer? _photoRenderer;
 
-    internal Photo? _photo;
-    internal CancellationTokenSource? _cancelPreview;
-    internal InterlockedBool _isPreviewing = new();
-
     // drawing image
-    internal SKImage? _bmpSource;
-    internal SKImage? _bmpPreview;
+    private SKImage? _imgSource;
+    private SKImage? _imgPreview;
+    private SkiaAnimator? _animator;
 
-    internal RenderTargetBitmap? _bmpCheckerboard;
-    internal readonly CheckerboardInfo _checkerboard = new();
+    private RenderTargetBitmap? _bmpCheckerboard;
+    private readonly CheckerboardInfo _checkerboard = new();
 
-    internal readonly Lock _lockSource = new();
-    internal readonly Lock _lockPreview = new();
-    internal ImageInterpolation _interpolationScaleDown = ImageInterpolation.High;
-    internal ImageInterpolation _interpolationScaleUp = ImageInterpolation.None;
+    private readonly Lock _lockSource = new();
+    private readonly Lock _lockPreview = new();
+    private ImageInterpolation _interpolationScaleDown = ImageInterpolation.High;
+    private ImageInterpolation _interpolationScaleUp = ImageInterpolation.None;
 
 
     // Public Properties
@@ -293,13 +289,13 @@ public partial class ViewerControl
 
 
         // draw bitmap preview
-        if (_bmpPreview is not null)
+        if (_imgPreview is not null)
         {
             lock (_lockPreview)
             {
-                if (_bmpPreview is not null)
+                if (_imgPreview is not null)
                 {
-                    _photoRenderer.Image = _bmpPreview;
+                    _photoRenderer.Image = _imgPreview;
                     c.Custom(_photoRenderer);
                 }
             }
@@ -307,13 +303,13 @@ public partial class ViewerControl
 
 
         // draw bitmap in full resolution
-        if (_bmpSource is not null)
+        if (_imgSource is not null)
         {
             lock (_lockSource)
             {
-                if (_bmpSource is not null)
+                if (_imgSource is not null)
                 {
-                    _photoRenderer.Image = _bmpSource;
+                    _photoRenderer.Image = _imgSource;
                     c.Custom(_photoRenderer);
                 }
             }
