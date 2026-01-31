@@ -52,13 +52,13 @@ public partial class ToolbarControl : PhControl
     /// <summary>
     /// Gets, sets the value indicates that empty value is not allowed.
     /// </summary>
-    public ObservableCollection<ToolbarItemModel> Items
+    public ObservableCollection<ToolbarItemModel> ItemsSource
     {
-        get => GetValue(ItemsProperty);
-        set => SetValue(ItemsProperty, value);
+        get => GetValue(ItemsSourceProperty);
+        set => SetValue(ItemsSourceProperty, value);
     }
-    public static readonly StyledProperty<ObservableCollection<ToolbarItemModel>> ItemsProperty =
-        AvaloniaProperty.Register<ModalWindow, ObservableCollection<ToolbarItemModel>>(nameof(Items), []);
+    public static readonly StyledProperty<ObservableCollection<ToolbarItemModel>> ItemsSourceProperty =
+        AvaloniaProperty.Register<ModalWindow, ObservableCollection<ToolbarItemModel>>(nameof(ItemsSource), []);
 
 
     #endregion // Public Properties
@@ -115,7 +115,7 @@ public partial class ToolbarControl : PhControl
     {
         base.OnPropertyChanged(e);
 
-        if (e.Property == ItemsProperty)
+        if (e.Property == ItemsSourceProperty)
         {
             LoadItems__();
         }
@@ -211,7 +211,7 @@ public partial class ToolbarControl : PhControl
         int primaryIndex = -1;
         int secondaryIndex = -1;
 
-        foreach (var vm in Items)
+        foreach (var vm in ItemsSource)
         {
             srcIndex++;
             vm.SourceIndex = srcIndex;
@@ -352,7 +352,7 @@ public partial class ToolbarControl : PhControl
     {
         if (string.IsNullOrWhiteSpace(configName)) return;
         if (_configBindingsMap.GetValueOrDefault(configName) is not List<int> itemIndice) return;
-        if (Items is not IEnumerable<ToolbarItemModel> allItems) return;
+        if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
 
         var items = allItems.ToArray();
         foreach (var srcIndex in itemIndice)
