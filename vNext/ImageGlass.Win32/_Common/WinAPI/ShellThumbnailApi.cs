@@ -87,7 +87,7 @@ public static class ShellThumbnailApi
 
         // get thumbnail
         shItemImageFac.GetImage(new SIZE(width, height), options, out var hBitmap);
-        Marshal.ReleaseComObject(shItemImageFac);
+        Marshal.ReleaseComObject(shItemObj);
 
         return hBitmap;
     }

@@ -34,6 +34,14 @@
     <FileVersion>10.0.0.130</FileVersion>
   </PropertyGroup>
 
+
+  <PropertyGroup>
+    <!-- AOT support for GeneratedComInterface and LibraryImport -->
+    <CsWin32RunAsBuildTask>true</CsWin32RunAsBuildTask>
+    <DisableRuntimeMarshalling>true</DisableRuntimeMarshalling>
+  </PropertyGroup>
+
+  
   <ItemGroup>
     <AdditionalFiles Remove="NativeMethods.json" />
   </ItemGroup>

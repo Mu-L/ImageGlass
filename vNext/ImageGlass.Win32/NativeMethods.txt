@@ -11,11 +11,18 @@ GetDIBits
 BITMAP
 BITMAPINFO
 
+
 IFolderView2
 IPersistFolder2
 SHELLEXECUTEINFOW
 ITEMIDLIST
 ShellExecuteEx
+
+
+SHGetPathFromIDList
+SHParseDisplayName
+SHOpenFolderAndSelectItems
+CoTaskMemFree
 
 
 MONITORINFOEXW
@@ -24,6 +31,7 @@ GetMonitorInfo
 GetICMProfile
 CreateDC
 DeleteDC
+
 
 DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO
 DISPLAYCONFIG_SOURCE_DEVICE_NAME
