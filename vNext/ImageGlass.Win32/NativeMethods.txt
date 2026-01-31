@@ -1,4 +1,16 @@
 ﻿
+DeleteObject
+IShellItem
+SHCreateItemFromParsingName
+IShellItemImageFactory
+SIIGBF
+CreateCompatibleDC
+SelectObject
+GetObject
+GetDIBits
+BITMAP
+BITMAPINFO
+
 IFolderView2
 IPersistFolder2
 SHELLEXECUTEINFOW

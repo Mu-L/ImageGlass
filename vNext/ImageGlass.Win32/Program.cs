@@ -21,6 +21,7 @@ using Avalonia.Input;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using ImageGlass.ViewModels;
+using ImageGlass.Win32.Common.ServiceProviders;
 using ImageGlass.Win32.Windows;
 using System;
 using System.Globalization;
@@ -84,9 +85,12 @@ sealed class Program
         {
             var app = (App?)builder.Instance;
 
+            // initialize service providers
+            Core.PreviewProvider = new Win32PhotoPreviewProvider();
+
+            // create main window
             var mainWindow = new MainWindow32();
             mainWindow.DataContext = new MainWindowModel(mainWindow);
-
             app?.CreateMainWindowIfNotExist(mainWindow);
         });
 

@@ -49,6 +49,12 @@ public static class Core
     #region Platform Service Provider
 
     /// <summary>
+    /// Provides a singleton instance to detect color profile of monitor.
+    /// </summary>
+    public static IWindowColorProfileProvider? ColorProfileProvider { get; set; } = null;
+
+
+    /// <summary>
     /// Provides a singleton instance to retrieve photo preview & thumbnail.
     /// </summary>
     public static IPhotoPreviewProvider? PreviewProvider { get; set; } = null;
