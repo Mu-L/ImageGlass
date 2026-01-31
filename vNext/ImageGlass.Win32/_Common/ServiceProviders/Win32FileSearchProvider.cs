@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using D2Phap;
-using ImageGlass.Common.FileSystem;
+using ImageGlass.Common.ServiceProviders.FileSearchService;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -27,20 +27,20 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Win32.Common.FileSystem;
+namespace ImageGlass.Win32.Common.ServiceProviders;
 
 
-public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
+public partial class Win32FileSearchProvider : FileSearchProvider
 {
 
     /// <summary>
     /// Searches files from the provided directories.
-    /// If <see cref="FileShellSearchOptions.UseExplorerSortOrder"/> is <c>true</c>,
+    /// If <see cref="FileSearchOptions.UseExplorerSortOrder"/> is <c>true</c>,
     /// it follows there steps:
     /// 
     /// <list type="number">
     /// <item>
-    ///   Get files from provided shell view of <see cref="FileShellSearchOptions.ForegroundShell"/>,
+    ///   Get files from provided shell view of <see cref="FileSearchOptions.ForegroundShell"/>,
     ///   ignoring the param <c><paramref name="dirs"/></c>.
     /// </item>
     /// <item>
@@ -54,22 +54,25 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
     /// 
     /// <inheritdoc/>
     /// </summary>
-    public override async Task SearchAsync(IEnumerable<string> dirs, FileShellSearchOptions options, IProgress<FileSearchingEventArgs> progress)
+    public override async Task SearchAsync(IEnumerable<string> dirs, FileSearchOptions options, Action<FileSearchingEventArgs>? progressFn = null)
     {
+        _progressFn = progressFn;
+        Options = options;
+
         // cancel ongoing search
         CancelSearching();
         IsSearchEnded = false;
 
 
         // 1. get files from the foreground window
-        if (options.ForegroundShell != null && options.UseExplorerSortOrder)
+        if (Options.ForegroundShell != null && Options.UseExplorerSortOrder)
         {
             try
             {
                 // get shell folder
-                var folderShell = GetShellFolderView(null, options.ForegroundShell);
+                var folderShell = GetShellFolderView(null, (ExplorerView?)Options.ForegroundShell);
 
-                FindFiles_WithShell(folderShell.View, folderShell.DirPath, options, progress, _cancelSearching.Token);
+                FindFiles_WithShell(folderShell.View, folderShell.DirPath, _cancelSearching.Token);
                 return;
             }
             catch (COMException) { }
@@ -80,7 +83,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
         var fvMap = new ConcurrentDictionary<string, ExplorerFolderView?>();
         var dirList = dirs.ToList();
 
-        if (options.UseExplorerSortOrder)
+        if (Options.UseExplorerSortOrder)
         {
             // find and save all shell folder view
             foreach (var dirPath in dirList)
@@ -101,13 +104,13 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
                 // with shell
                 if (folderShellView != null)
                 {
-                    FindFiles_WithShell(folderShellView, dirPath, options, progress, _cancelSearching.Token);
+                    FindFiles_WithShell(folderShellView, dirPath, _cancelSearching.Token);
                 }
 
                 // without shell
                 else
                 {
-                    FindFiles(dirPath, options, progress, _cancelSearching.Token);
+                    FindFiles(dirPath, _cancelSearching.Token);
                 }
             }
         });
@@ -129,7 +132,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
     /// Finds files in the given <see cref="ExplorerFolderView"/>.
     /// Use the <see cref="FilesEnumerated"/> event to get results.
     /// </summary>
-    private void FindFiles_WithShell(ExplorerFolderView? fv, string? rootDir, FileShellSearchOptions options, IProgress<FileSearchingEventArgs> progress, CancellationToken token)
+    private void FindFiles_WithShell(ExplorerFolderView? fv, string? rootDir, CancellationToken token)
     {
         // if no folder view
         if (fv is null)
@@ -137,7 +140,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
             // use .NET
             if (!string.IsNullOrWhiteSpace(rootDir))
             {
-                FindFiles(rootDir, options, progress, token);
+                FindFiles(rootDir, token);
             }
             return;
         }
@@ -159,7 +162,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
                     if (attrs.HasFlag(FileAttributes.Directory)) return false;
 
                     // path is hidden
-                    if (!options.IncludeHidden && attrs.HasFlag(FileAttributes.Hidden)) return false;
+                    if (!Options.IncludeHidden && attrs.HasFlag(FileAttributes.Hidden)) return false;
                 }
                 catch
                 {
@@ -167,11 +170,11 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
                 }
 
                 // filter extensions
-                if (options.AllowedExtensions is not null)
+                if (Options.AllowedExtensions is not null)
                 {
                     var ext = Path.GetExtension(path).ToLowerInvariant();
 
-                    return options.AllowedExtensions.Contains(ext);
+                    return Options.AllowedExtensions.Contains(ext);
                 }
 
                 return true;
@@ -183,7 +186,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
 
 
         // 3. emits results
-        progress.Report(new FileSearchingEventArgs(filePaths, IsSearchEnded));
+        _progressFn?.Invoke(new FileSearchingEventArgs(filePaths, IsSearchEnded));
 
 
         // cancel if requested
@@ -191,14 +194,14 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
 
 
         // 4. search all sub-directories if root dir is not empty
-        if (options.SearchSubDirectories && !string.IsNullOrWhiteSpace(rootDir))
+        if (Options.SearchSubDirectories && !string.IsNullOrWhiteSpace(rootDir))
         {
             // search files for the sub dirs
             // get sub folders
             var subDirList = Directory.EnumerateDirectories(rootDir, "*", new EnumerationOptions()
             {
                 IgnoreInaccessible = true,
-                AttributesToSkip = options.IncludeHidden
+                AttributesToSkip = Options.IncludeHidden
                     ? FileAttributes.System
                     : FileAttributes.System | FileAttributes.Hidden,
                 RecurseSubdirectories = false,
@@ -207,7 +210,7 @@ public partial class FileSearcher : FileSearcherImpl<FileShellSearchOptions>
             // find files in sub-folders
             foreach (var dirPath in subDirList)
             {
-                FindFiles(dirPath, options, progress, token);
+                FindFiles(dirPath, token);
             }
         }
     }

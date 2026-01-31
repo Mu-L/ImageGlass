@@ -26,50 +26,65 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Common.FileSystem;
+namespace ImageGlass.Common.ServiceProviders.FileSearchService;
 
 
 /// <summary>
 /// Handles file searching, filtering, and sorting based on specified criteria.
 /// </summary>
-public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
-    where TOptions : FileSearchOptions
+public abstract partial class FileSearchProvider() : DisposableImpl, IFileSearchProvider
 {
     protected CancellationTokenSource? _cancelSearching;
+    protected Action<FileSearchingEventArgs>? _progressFn;
 
 
     // Public Properties
     #region Public Properties
 
     /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public FileSearchOptions Options { get; protected set; } = new();
+
+
+    /// <summary>
     /// Gets a value indicating whether the search operation has completed.
     /// </summary>
     public bool IsSearchEnded { get; protected set; } = false;
+
 
     #endregion // Public Properties
 
 
 
+    #region Public Methods
+
     /// <summary>
-    /// Searches files from the provided directories with
-    /// <see cref="FindFiles(string, TOptions, IProgress{FileSearchingEventArgs}, CancellationToken)"/>.
+    /// <inheritdoc/>
     /// </summary>
-    /// <param name="dirs">List of directories to search for files</param>
-    public virtual async Task SearchAsync(IEnumerable<string> dirs, TOptions options, IProgress<FileSearchingEventArgs> progress)
+    public async virtual Task SearchAsync(IEnumerable<string> dirs, FileSearchOptions options, Action<FileSearchingEventArgs>? progressFn = null)
     {
+        _progressFn = progressFn;
+        Options = options;
+
         // cancel ongoing search
         CancelSearching();
         IsSearchEnded = false;
 
 
         // get files from the given directories
-        await Task.Run(() =>
+        try
         {
-            foreach (var dirPath in dirs)
+            await Task.Run(() =>
             {
-                FindFiles(dirPath, options, progress, _cancelSearching.Token);
-            }
-        });
+                foreach (var dirPath in dirs)
+                {
+                    if (_cancelSearching.Token.IsCancellationRequested) break;
+                    FindFiles(dirPath, _cancelSearching.Token);
+                }
+            }, _cancelSearching.Token);
+        }
+        catch { }
 
         IsSearchEnded = true;
     }
@@ -79,7 +94,7 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
     /// Cancels an ongoing file searching operation.
     /// </summary>
     [MemberNotNull(nameof(_cancelSearching))]
-    public void CancelSearching()
+    public virtual void CancelSearching()
     {
         _cancelSearching?.Cancel();
         _cancelSearching?.Dispose();
@@ -87,8 +102,10 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
     }
 
 
+    #endregion // Public Methods
 
-    // Protected Functions
+
+
     #region Protected Functions
 
     /// <summary>
@@ -98,6 +115,7 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
     {
         base.OnDisposing();
 
+        _progressFn = null;
         CancelSearching();
     }
 
@@ -106,7 +124,7 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
     /// Filters a collection of strings and returns the filtered results.
     /// </summary>
     protected virtual IEnumerable<string> OnFiltering(IEnumerable<string> fileList,
-        TOptions options)
+        FileSearchOptions options)
     {
         if (options.AllowedExtensions is null) return fileList;
 
@@ -123,7 +141,7 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
     /// Sorts a collection of image file paths based on provided criteria.
     /// </summary>
     protected virtual OrderedParallelQuery<string> OnSorting(IEnumerable<string> fileList,
-        TOptions options)
+        FileSearchOptions options)
     {
         return SortFiles(fileList, options);
     }
@@ -132,22 +150,21 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
     /// <summary>
     /// Finds files in the given directory, emits <see cref="FileSearching"/> event.
     /// </summary>
-    protected void FindFiles(string dirPath, TOptions options,
-        IProgress<FileSearchingEventArgs> progress, CancellationToken token)
+    protected void FindFiles(string dirPath, CancellationToken token)
     {
         // cancel if requested
         if (token.IsCancellationRequested) return;
 
         // check attributes to skip
         var skipAttrs = FileAttributes.System;
-        if (!options.IncludeHidden) skipAttrs |= FileAttributes.Hidden;
+        if (!Options.IncludeHidden) skipAttrs |= FileAttributes.Hidden;
 
         // search files
         var filePaths = Directory.EnumerateFiles(dirPath, "*", new EnumerationOptions()
         {
             IgnoreInaccessible = true,
             AttributesToSkip = skipAttrs,
-            RecurseSubdirectories = options.SearchSubDirectories,
+            RecurseSubdirectories = Options.SearchSubDirectories,
         });
 
 
@@ -155,28 +172,28 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
         if (token.IsCancellationRequested) return;
 
         // filter list
-        filePaths = OnFiltering(filePaths, options);
+        filePaths = OnFiltering(filePaths, Options);
 
 
         // cancel if requested
         if (token.IsCancellationRequested) return;
 
         // sort list
-        filePaths = OnSorting(filePaths, options);
+        filePaths = OnSorting(filePaths, Options);
 
 
         // cancel if requested
         if (token.IsCancellationRequested) return;
 
         // emits results
-        progress.Report(new FileSearchingEventArgs(filePaths, IsSearchEnded));
+        _progressFn?.Invoke(new FileSearchingEventArgs(filePaths, IsSearchEnded));
     }
 
 
     /// <summary>
     /// Sorts a collection of image file paths based on provided criteria.
     /// </summary>
-    public static OrderedParallelQuery<string> SortFiles(IEnumerable<string> fileList, TOptions options)
+    public static OrderedParallelQuery<string> SortFiles(IEnumerable<string> fileList, FileSearchOptions options)
     {
         var query = fileList.AsParallel();
 
@@ -299,6 +316,7 @@ public abstract partial class FileSearcherImpl<TOptions>() : DisposableImpl
             .OrderBy(f => Path.GetDirectoryName(f), dirPathComparer)
             .ThenBy(f => Path.GetFileName(f), filePathComparer);
     }
+
 
     #endregion // Protected Functions
 

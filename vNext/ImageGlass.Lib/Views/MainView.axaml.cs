@@ -18,8 +18,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Interactivity;
 using ImageGlass.Common;
+using ImageGlass.Common.Photoing;
 using ImageGlass.UI;
 using ImageGlass.ViewModels;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Views;
 
@@ -47,7 +49,6 @@ public partial class MainView : PhControl
     }
 
 
-
     protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
     {
         base.OnIgThemeChanged(e);
@@ -60,6 +61,48 @@ public partial class MainView : PhControl
     }
 
 
+
+
+
+
+
+
+
+
+    private async Task ViewPhotoAsync(Photo? photo, bool useCache = true, bool scrollToThumbnail = true)
+    {
+        //// clear the current in-app message
+        //_ = _contentEl.ShowMessageAsync(null);
+
+        Core.DisposeClipboardPhoto();
+        Core.ImageTransform.Clear();
+
+        // set read options for photo
+        if (photo is not null)
+        {
+            photo.ReadOptions = new()
+            {
+                FrameIndex = 0,
+                FirstFrameOnly = Core.Config.SingleFrameFormats.Contains(photo.Extension),
+            };
+        }
+
+        // apply user settings to the viewer
+        PART_Viewer.EnableImagePreview = Core.Config.ShowImagePreview;
+
+
+        //if (scrollToThumbnail)
+        //{
+        //    Dispatcher.UIThread.Post(() =>
+        //    {
+        //        // set photo to the viewer
+        //        PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex);
+        //    });
+        //}
+
+
+        await PART_Viewer.SetPhotoAsync(photo, useCache);
+    }
 
 
 

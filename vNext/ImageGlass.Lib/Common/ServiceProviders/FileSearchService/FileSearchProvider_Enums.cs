@@ -16,25 +16,36 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using System;
-using System.Collections.Generic;
 
-namespace ImageGlass.Common.FileSystem;
+namespace ImageGlass.Common.ServiceProviders.FileSearchService;
 
 
 /// <summary>
-/// Event arguments for the <see cref="FileSearcherImpl.FileSearching"/> event.
+/// The loading order list.
+/// **If we need to rename, we MUST update the language string too.
+/// Because the name is also language keyword!
 /// </summary>
-public class FileSearchingEventArgs(IEnumerable<string> filePaths, bool isSearchEnded) : EventArgs
+public enum ImageOrderBy
 {
-    /// <summary>
-    /// Gets the file paths that have been enumerated.
-    /// </summary>
-    public IEnumerable<string> Results { get; } = filePaths;
+    Name = 0,
+    Random,
+    FileSize,
+    Extension,
+    DateCreated,
+    DateAccessed,
+    DateModified,
+    ExifDateTaken,
+    ExifRating,
+}
 
-    /// <summary>
-    /// Gets a value indicating whether the search operation has completed.
-    /// </summary>
-    public bool IsSearchEnded => isSearchEnded;
 
+/// <summary>
+/// The loading order types list
+/// **If we need to rename, we MUST update the language string too.
+/// Because the name is also language keyword!
+/// </summary>
+public enum ImageOrderType
+{
+    Asc = 0,
+    Desc = 1,
 }

@@ -16,15 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common.FileSystem;
+using ImageGlass.Common.ServiceProviders;
+using ImageGlass.Common.ServiceProviders.FileSearchService;
 using System;
 using System.Collections.Generic;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class PhotoManagerImpl<Fs, FsOptions>
+public partial class PhotoManagerImpl
 {
-    protected Fs _fileSearcher;
+    protected IFileSearchProvider _fileSearcher;
     protected int _currentIndex = -1;
 
 
@@ -68,7 +69,7 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
     /// <summary>
     /// Creates file searcher service.
     /// </summary>
-    protected abstract Fs CreateFileSearcher();
+    protected abstract IFileSearchProvider CreateFileSearcher();
 
 
 
@@ -86,7 +87,7 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
     /// </summary>
     /// <param name="path">Full path of file or directory</param>
     public virtual Photo? StartLoadingFiles(ICollection<string> paths, string? currentFilePath,
-        FsOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
+        FileSearchOptions searchOptions, Action<FileSearchingEventArgs> progressFn)
     {
         throw new NotImplementedException();
     }

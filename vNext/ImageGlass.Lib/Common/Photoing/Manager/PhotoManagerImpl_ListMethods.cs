@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class PhotoManagerImpl<Fs, FsOptions>
+public partial class PhotoManagerImpl
 {
 
     /// <summary>
@@ -41,7 +41,7 @@ public partial class PhotoManagerImpl<Fs, FsOptions>
     public void Add(IEnumerable<string> filePaths, int index = -1)
     {
         var addedIndex = index;
-        var newItems = filePaths.Select(path => CreatePhotoItem(path));
+        var newItems = filePaths.Select(path => new Photo(path));
 
         if (index < 0)
         {

@@ -16,9 +16,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common.FileSystem;
 using ImageGlass.Common.Photoing;
-using ImageGlass.Win32.Common.FileSystem;
+using ImageGlass.Common.ServiceProviders;
+using ImageGlass.Common.ServiceProviders.FileSearchService;
+using ImageGlass.Win32.Common.ServiceProviders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace ImageGlass.Win32.Common.Photoing;
 /// <summary>
 /// <inheritdoc/>
 /// </summary>
-public partial class PhotoManager : PhotoManagerImpl<FileSearcher, FileShellSearchOptions>
+public partial class PhotoManager : PhotoManagerImpl
 {
 
     public PhotoManager(IEnumerable<string>? list = null) : base(list)
@@ -42,18 +43,9 @@ public partial class PhotoManager : PhotoManagerImpl<FileSearcher, FileShellSear
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    protected override FileSearcher CreateFileSearcher()
+    protected override IFileSearchProvider CreateFileSearcher()
     {
-        return new FileSearcher();
-    }
-
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    protected override Photo CreatePhotoItem(string filePath)
-    {
-        return new Photo(filePath);
+        return new Win32FileSearchProvider();
     }
 
 
@@ -61,7 +53,7 @@ public partial class PhotoManager : PhotoManagerImpl<FileSearcher, FileShellSear
     /// <inheritdoc/>
     /// </summary>
     public override Photo? StartLoadingFiles(ICollection<string> paths, string? currentFilePath,
-        FileShellSearchOptions searchOptions, IProgress<FileSearchingEventArgs> progress)
+        FileSearchOptions searchOptions, Action<FileSearchingEventArgs> progressFn)
     {
         // 1. stop any ongoing search
         _fileSearcher.CancelSearching();
@@ -90,12 +82,12 @@ public partial class PhotoManager : PhotoManagerImpl<FileSearcher, FileShellSear
 
         if (!string.IsNullOrWhiteSpace(initFilePath))
         {
-            InitPhoto = CreatePhotoItem(initFilePath);
+            InitPhoto = new Photo(initFilePath);
         }
 
 
         // 5. start searching files in a new thread
-        _ = _fileSearcher.SearchAsync(DistinctDirs, searchOptions, progress);
+        _ = _fileSearcher.SearchAsync(DistinctDirs, searchOptions, progressFn);
 
         return InitPhoto;
     }

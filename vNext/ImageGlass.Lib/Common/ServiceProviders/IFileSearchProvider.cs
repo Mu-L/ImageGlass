@@ -16,36 +16,31 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common.ServiceProviders.FileSearchService;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace ImageGlass.Common.FileSystem;
+namespace ImageGlass.Common.ServiceProviders;
 
-
-/// <summary>
-/// The loading order list.
-/// **If we need to rename, we MUST update the language string too.
-/// Because the name is also language keyword!
-/// </summary>
-public enum ImageOrderBy
+public interface IFileSearchProvider : IDisposable
 {
-    Name = 0,
-    Random,
-    FileSize,
-    Extension,
-    DateCreated,
-    DateAccessed,
-    DateModified,
-    ExifDateTaken,
-    ExifRating,
-}
+    /// <summary>
+    /// Gets the current search options.
+    /// </summary>
+    FileSearchOptions Options { get; }
 
 
-/// <summary>
-/// The loading order types list
-/// **If we need to rename, we MUST update the language string too.
-/// Because the name is also language keyword!
-/// </summary>
-public enum ImageOrderType
-{
-    Asc = 0,
-    Desc = 1,
+    /// <summary>
+    /// Starts searching files from the provided directories.
+    /// </summary>
+    Task SearchAsync(IEnumerable<string> dirs, FileSearchOptions options, Action<FileSearchingEventArgs> progressFn);
+
+
+    /// <summary>
+    /// Cancels the ongoing file searching operation.
+    /// </summary>
+    void CancelSearching();
+
+
 }

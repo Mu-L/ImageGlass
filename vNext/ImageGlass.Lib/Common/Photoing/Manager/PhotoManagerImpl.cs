@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Collections;
-using ImageGlass.Common.FileSystem;
 using ImageGlass.Common.Types;
 using ImageMagick;
 using System;
@@ -35,9 +34,7 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// Class for managing a collection of photos.
 /// </summary>
-public abstract partial class PhotoManagerImpl<Fs, FsOptions> : DisposableImpl
-    where Fs : FileSearcherImpl<FsOptions>
-    where FsOptions : FileSearchOptions
+public abstract partial class PhotoManagerImpl : DisposableImpl
 {
     // photo list
     protected AvaloniaList<Photo> _items = [];
@@ -119,12 +116,6 @@ public abstract partial class PhotoManagerImpl<Fs, FsOptions> : DisposableImpl
 
     // Abstract / Virtual functions
     #region Abstract / Virtual functions
-
-    /// <summary>
-    /// Creates a photo item from the specified file path.
-    /// </summary>
-    protected abstract Photo CreatePhotoItem(string filePath);
-
 
     /// <summary>
     /// Clears and disposes the resources of <see cref="PhotoManagerImpl{T}"/> instance.

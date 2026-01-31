@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 
-namespace ImageGlass.Common.FileSystem;
+namespace ImageGlass.Common.ServiceProviders.FileSearchService;
 
 public class FileSearchOptions
 {
@@ -61,5 +61,15 @@ public class FileSearchOptions
     /// Indicates whether hidden items should be included. Defaults to <c>false</c>.
     /// </summary>
     public bool IncludeHidden { get; set; } = false;
+
+    /// <summary>
+    /// Gets, sets option to use the sort order from explorer.
+    /// </summary>
+    public bool UseExplorerSortOrder { get; set; } = false;
+
+    /// <summary>
+    /// Gets, sets the shell object of the foreground window.
+    /// </summary>
+    public IDisposable? ForegroundShell { get; set; } = null;
 
 }
