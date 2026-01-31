@@ -110,7 +110,7 @@ public partial class MainWindow32 : MainWindow
         }
 
 
-        Core.Config.LastSeenImagePath = CoreWin32.Photos.CurrentFilePath;
+        Core.Config.LastSeenImagePath = Core.Photos.CurrentFilePath;
         //Core.Config.ZoomLockValue = Viewer.ZoomFactor * 100f;
 
 

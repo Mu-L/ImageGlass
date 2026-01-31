@@ -34,7 +34,7 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// Class for managing a collection of photos.
 /// </summary>
-public abstract partial class PhotoManagerImpl : DisposableImpl
+public partial class PhotoManagerImpl : DisposableImpl
 {
     // photo list
     protected AvaloniaList<Photo> _items = [];
@@ -103,12 +103,10 @@ public abstract partial class PhotoManagerImpl : DisposableImpl
 
 
     /// <summary>
-    /// Initializes a new instance of <see cref="PhotoManagerImpl{T}"/>.
+    /// Initializes a new instance.
     /// </summary>
     public PhotoManagerImpl(IEnumerable<string>? list = null)
     {
-        _fileSearcher = CreateFileSearcher();
-
         if (list is not null) Add(list);
     }
 
@@ -118,14 +116,13 @@ public abstract partial class PhotoManagerImpl : DisposableImpl
     #region Abstract / Virtual functions
 
     /// <summary>
-    /// Clears and disposes the resources of <see cref="PhotoManagerImpl{T}"/> instance.
+    /// Clears and disposes the resources.
     /// </summary>
     protected override void OnDisposing()
     {
         base.OnDisposing();
 
         Clear();
-        DisposeFileSearcher();
 
         _tokenThumbnail?.Cancel();
         _tokenThumbnail?.Dispose();

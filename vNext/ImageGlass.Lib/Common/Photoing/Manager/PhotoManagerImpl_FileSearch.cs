@@ -16,16 +16,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.ServiceProviders.FileSearchService;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ImageGlass.Common.Photoing;
 
 public partial class PhotoManagerImpl
 {
-    protected IFileSearchProvider _fileSearcher;
     protected int _currentIndex = -1;
 
 
@@ -65,31 +64,51 @@ public partial class PhotoManagerImpl
     #endregion // Public properties
 
 
-
-    /// <summary>
-    /// Creates file searcher service.
-    /// </summary>
-    protected abstract IFileSearchProvider CreateFileSearcher();
-
-
-
-    /// <summary>
-    /// Frees resources of file searcher.
-    /// </summary>
-    protected void DisposeFileSearcher()
-    {
-        _fileSearcher.Dispose();
-    }
-
-
     /// <summary>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
     /// <param name="path">Full path of file or directory</param>
-    public virtual Photo? StartLoadingFiles(ICollection<string> paths, string? currentFilePath,
+    public Photo? StartLoadingFiles(ICollection<string> paths, string? currentFilePath,
         FileSearchOptions searchOptions, Action<FileSearchingEventArgs> progressFn)
     {
-        throw new NotImplementedException();
+        if (Core.FileSearchProvider is null)
+            throw new NullReferenceException(nameof(Core.FileSearchProvider));
+
+        // 1. stop any ongoing search
+        Core.FileSearchProvider.CancelSearching();
+
+        // 2. get distinct dir paths for searching
+        var inputPaths = BHelper.GetDistinctDirsFromPaths(paths);
+
+        // don't use foreground shell if no file paths
+        if (inputPaths.FilePaths.Count == 0)
+        {
+            searchOptions.UseExplorerSortOrder = false;
+        }
+
+
+        // 3. reset the list, MUST be after getting distinct dirs
+        Clear();
+        DistinctDirs = inputPaths.DirPaths;
+
+
+        // 4. create init photo
+        var initFilePath = currentFilePath;
+        if (string.IsNullOrWhiteSpace(initFilePath))
+        {
+            initFilePath = inputPaths.FilePaths.FirstOrDefault() ?? "";
+        }
+
+        if (!string.IsNullOrWhiteSpace(initFilePath))
+        {
+            InitPhoto = new Photo(initFilePath);
+        }
+
+
+        // 5. start searching files in a new thread
+        _ = Core.FileSearchProvider.SearchAsync(DistinctDirs, searchOptions, progressFn);
+
+        return InitPhoto;
     }
 
 }

@@ -93,9 +93,9 @@ public partial class AppStatusInfo : DisposableImpl
             if (Core.ClipboardImage is not null) return null;
 
             if (Core.Config.ImageInfoTags.Contains(nameof(FileSize))
-                && CoreWin32.Photos.CurrentMetadata != null)
+                && Core.Photos.CurrentMetadata != null)
             {
-                return CoreWin32.Photos.CurrentMetadata.FileSizeFormatted;
+                return Core.Photos.CurrentMetadata.FileSizeFormatted;
             }
 
             return null;
@@ -112,9 +112,9 @@ public partial class AppStatusInfo : DisposableImpl
 
             if ((Core.Config.ImageInfoTags.Contains(nameof(ModifiedDateTime))
                 || Core.Config.ImageInfoTags.Contains(nameof(DateTimeAuto)))
-                && CoreWin32.Photos.CurrentMetadata != null)
+                && Core.Photos.CurrentMetadata != null)
             {
-                return CoreWin32.Photos.CurrentMetadata.FileLastWriteTimeFormatted + " (m)";
+                return Core.Photos.CurrentMetadata.FileLastWriteTimeFormatted + " (m)";
             }
 
             return null;
@@ -132,9 +132,9 @@ public partial class AppStatusInfo : DisposableImpl
                 {
                     return $"{Core.ClipboardImage.Width:n0}×{Core.ClipboardImage.Height:n0}";
                 }
-                else if (CoreWin32.Photos.CurrentMetadata is not null)
+                else if (Core.Photos.CurrentMetadata is not null)
                 {
-                    return $"{CoreWin32.Photos.CurrentMetadata.Width:n0}×{CoreWin32.Photos.CurrentMetadata.Height:n0}";
+                    return $"{Core.Photos.CurrentMetadata.Width:n0}×{Core.Photos.CurrentMetadata.Height:n0}";
                 }
             }
 
@@ -151,13 +151,13 @@ public partial class AppStatusInfo : DisposableImpl
             if (Core.ClipboardImage is not null) return null;
 
             if (Core.Config.ImageInfoTags.Contains(nameof(FrameCount))
-                && CoreWin32.Photos.CurrentMetadata != null
-                && CoreWin32.Photos.CurrentMetadata.FrameCount > 1)
+                && Core.Photos.CurrentMetadata != null
+                && Core.Photos.CurrentMetadata.FrameCount > 1)
             {
                 var frameInfo = new StringBuilder();
-                frameInfo.Append(CoreWin32.Photos.CurrentMetadata.FrameIndex + 1);
+                frameInfo.Append(Core.Photos.CurrentMetadata.FrameIndex + 1);
                 frameInfo.Append('/');
-                frameInfo.Append(CoreWin32.Photos.CurrentMetadata.FrameCount);
+                frameInfo.Append(Core.Photos.CurrentMetadata.FrameCount);
 
                 return Core.Lang[LangId._ImageInfo_FrameCount, frameInfo];
             }
@@ -175,12 +175,12 @@ public partial class AppStatusInfo : DisposableImpl
             if (Core.ClipboardImage is not null) return null;
 
             if (Core.Config.ImageInfoTags.Contains(nameof(ListCount))
-                && CoreWin32.Photos.Count > 0)
+                && Core.Photos.Count > 0)
             {
                 var listInfo = new StringBuilder();
-                listInfo.Append(CoreWin32.Photos.CurrentIndex + 1);
+                listInfo.Append(Core.Photos.CurrentIndex + 1);
                 listInfo.Append('/');
-                listInfo.Append(CoreWin32.Photos.Count);
+                listInfo.Append(Core.Photos.Count);
 
                 return Core.Lang[LangId._ImageInfo_ListCount, listInfo.ToString()];
             }
@@ -194,7 +194,7 @@ public partial class AppStatusInfo : DisposableImpl
     {
         get
         {
-            if (Core.Config.ImageInfoTags.Contains(nameof(Zoom)) && CoreWin32.Photos.Count > 0)
+            if (Core.Config.ImageInfoTags.Contains(nameof(Zoom)) && Core.Photos.Count > 0)
             {
                 return $"{Math.Round(_viewer.ZoomFactor * 100, 2):n2}%";
             }
@@ -212,9 +212,9 @@ public partial class AppStatusInfo : DisposableImpl
             if (Core.ClipboardImage is not null) return null;
 
             if (Core.Config.ImageInfoTags.Contains(nameof(ExifRating))
-                && CoreWin32.Photos.CurrentMetadata != null)
+                && Core.Photos.CurrentMetadata != null)
             {
-                return CoreWin32.Photos.CurrentMetadata.ExifRatingFormatted;
+                return Core.Photos.CurrentMetadata.ExifRatingFormatted;
             }
 
             return null;
@@ -231,10 +231,10 @@ public partial class AppStatusInfo : DisposableImpl
 
             if ((Core.Config.ImageInfoTags.Contains(nameof(ExifDateTime))
                 || Core.Config.ImageInfoTags.Contains(nameof(DateTimeAuto)))
-                && CoreWin32.Photos.CurrentMetadata != null
-                && CoreWin32.Photos.CurrentMetadata.ExifDateTime != null)
+                && Core.Photos.CurrentMetadata != null
+                && Core.Photos.CurrentMetadata.ExifDateTime != null)
             {
-                return BHelper.FormatDateTime(CoreWin32.Photos.CurrentMetadata.ExifDateTime) + " (e)";
+                return BHelper.FormatDateTime(Core.Photos.CurrentMetadata.ExifDateTime) + " (e)";
             }
 
             return null;
@@ -251,10 +251,10 @@ public partial class AppStatusInfo : DisposableImpl
 
             if ((Core.Config.ImageInfoTags.Contains(nameof(ExifDateTimeOriginal))
                 || Core.Config.ImageInfoTags.Contains(nameof(DateTimeAuto)))
-                && CoreWin32.Photos.CurrentMetadata != null
-                && CoreWin32.Photos.CurrentMetadata.ExifDateTimeOriginal != null)
+                && Core.Photos.CurrentMetadata != null
+                && Core.Photos.CurrentMetadata.ExifDateTimeOriginal != null)
             {
-                return BHelper.FormatDateTime(CoreWin32.Photos.CurrentMetadata.ExifDateTimeOriginal) + " (o)";
+                return BHelper.FormatDateTime(Core.Photos.CurrentMetadata.ExifDateTimeOriginal) + " (o)";
             }
 
             return null;
@@ -270,14 +270,14 @@ public partial class AppStatusInfo : DisposableImpl
             if (Core.ClipboardImage is not null) return null;
 
             if (Core.Config.ImageInfoTags.Contains(nameof(DateTimeAuto))
-                && CoreWin32.Photos.CurrentMetadata != null)
+                && Core.Photos.CurrentMetadata != null)
             {
-                if (CoreWin32.Photos.CurrentMetadata.ExifDateTimeOriginal != null)
+                if (Core.Photos.CurrentMetadata.ExifDateTimeOriginal != null)
                 {
                     return ExifDateTimeOriginal;
                 }
 
-                if (CoreWin32.Photos.CurrentMetadata.ExifDateTime != null)
+                if (Core.Photos.CurrentMetadata.ExifDateTime != null)
                 {
                     return ExifDateTime;
                 }
@@ -298,12 +298,12 @@ public partial class AppStatusInfo : DisposableImpl
             if (Core.ClipboardImage is not null) return null;
 
             if (Core.Config.ImageInfoTags.Contains(nameof(ColorSpace))
-                && CoreWin32.Photos.CurrentMetadata != null
-                && CoreWin32.Photos.CurrentMetadata.ColorSpace != ImageMagick.ColorSpace.Undefined)
+                && Core.Photos.CurrentMetadata != null
+                && Core.Photos.CurrentMetadata.ColorSpace != ImageMagick.ColorSpace.Undefined)
             {
-                var colorSpace = CoreWin32.Photos.CurrentMetadata.ColorSpace.ToString();
-                var colorProfile = !string.IsNullOrEmpty(CoreWin32.Photos.CurrentMetadata.ColorProfileName)
-                    ? CoreWin32.Photos.CurrentMetadata.ColorProfileName
+                var colorSpace = Core.Photos.CurrentMetadata.ColorSpace.ToString();
+                var colorProfile = !string.IsNullOrEmpty(Core.Photos.CurrentMetadata.ColorProfileName)
+                    ? Core.Photos.CurrentMetadata.ColorProfileName
                     : "-";
 
                 if (colorSpace.Equals(colorProfile, StringComparison.OrdinalIgnoreCase))
@@ -382,7 +382,7 @@ public partial class AppStatusInfo : DisposableImpl
     {
         _viewer = viewer;
 
-        CoreWin32.Photos.PropertyChanged += Photos_PropertyChanged;
+        Core.Photos.PropertyChanged += Photos_PropertyChanged;
         _viewer.ZoomChanged += Viewer_ZoomChanged;
     }
 
@@ -391,18 +391,18 @@ public partial class AppStatusInfo : DisposableImpl
     {
         base.OnDisposing();
 
-        CoreWin32.Photos.PropertyChanged -= Photos_PropertyChanged;
+        Core.Photos.PropertyChanged -= Photos_PropertyChanged;
         _viewer.ZoomChanged -= Viewer_ZoomChanged;
     }
 
 
     private void Photos_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(CoreWin32.Photos.CurrentFilePath))
+        if (e.PropertyName == nameof(Core.Photos.CurrentFilePath))
         {
-            _filePath = string.IsNullOrEmpty(CoreWin32.Photos.CurrentFilePath)
-                ? CoreWin32.Photos.GetFilePath(CoreWin32.Photos.CurrentIndex)
-                : BHelper.ResolvePath(CoreWin32.Photos.CurrentFilePath);
+            _filePath = string.IsNullOrEmpty(Core.Photos.CurrentFilePath)
+                ? Core.Photos.GetFilePath(Core.Photos.CurrentIndex)
+                : BHelper.ResolvePath(Core.Photos.CurrentFilePath);
         }
 
         Changed?.Invoke(this, EventArgs.Empty);
