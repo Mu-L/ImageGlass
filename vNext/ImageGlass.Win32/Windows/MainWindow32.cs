@@ -120,7 +120,6 @@ public partial class MainWindow32 : MainWindow
 
         // dispose the global singleton
         Core.Dispose();
-        CoreWin32.Dispose();
 
 
         //// cleaning

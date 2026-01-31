@@ -86,8 +86,10 @@ sealed class Program
             var app = (App?)builder.Instance;
 
             // initialize service providers
-            Core.PreviewProvider = new Win32PhotoPreviewProvider();
             Core.PathProvider = new Win32PathProvider();
+            Core.ShellProvider = new Win32ShellProvider();
+            Core.PreviewProvider = new Win32PhotoPreviewProvider();
+
 
             // create main window
             var mainWindow = new MainWindow32();

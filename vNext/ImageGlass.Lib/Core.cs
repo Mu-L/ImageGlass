@@ -28,7 +28,9 @@ using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Common;
 
@@ -42,7 +44,7 @@ public static class Core
     public static event EventHandler<PhotoUnloadedEventArgs>? PhotoUnloaded;
     public static event EventHandler<PhotoSaveEventArgs>? PhotoSaved;
 
-    private static string _initImagePathFromArgs = "";
+    private static string _initImagePathFromArgs = string.Empty;
 
 
 
@@ -64,6 +66,12 @@ public static class Core
     /// </summary>
     public static IPathProvider? PathProvider { get; set; } = null;
 
+
+    /// <summary>
+    /// Provides a singleton instance to manage foreground shell object.
+    /// </summary>
+    public static IShellProvider? ShellProvider { get; set; } = null;
+
     #endregion // Platform Service Provider
 
 
@@ -80,6 +88,12 @@ public static class Core
     /// Gets the arguments passed to the application.
     /// </summary>
     public static string[] Args { get; set; } = [];
+
+
+    /// <summary>
+    /// Gets the photo manager.
+    /// </summary>
+    public static PhotoManagerImpl Photos { get; set; } = new();
 
 
     /// <summary>
@@ -193,6 +207,7 @@ public static class Core
 
         DisposeClipboardPhoto();
 
+        Photos.Dispose();
         ColorProfileProvider?.Dispose();
         ColorProfileProvider = null;
     }
@@ -399,6 +414,50 @@ public static class Core
         }
 
         _initImagePathFromArgs = pathToLoad;
+    }
+
+
+    /// <summary>
+    /// Quickly save the viewing photo as a temporary file.
+    /// </summary>
+    public static async Task<string?> SavePhotoAsTempFileAsync(string ext = ".png")
+    {
+        // 1. check if we can use the current clipboard image path
+        if (File.Exists(Core.TempImagePath))
+        {
+            var extension = Path.GetExtension(Core.TempImagePath);
+
+            if (extension.Equals(ext, StringComparison.OrdinalIgnoreCase))
+            {
+                return Core.TempImagePath;
+            }
+        }
+
+
+        // 2. create temp file path
+        var tempDir = BHelper.ConfigDir(Dir.Temporary);
+        Directory.CreateDirectory(tempDir);
+        var tempFilePath = Path.Combine(tempDir, $"ig_temp_{DateTime.UtcNow:yyyy-MM-dd-hh-mm-ss}{ext}");
+
+
+        // 3. save the photo to file
+        var photo = Core.ClipboardImage ?? Core.Photos.Current;
+        if (photo is not null)
+        {
+            try
+            {
+                // save photo as file
+                await photo.SaveAsAsync(tempFilePath, Core.ImageTransform, 85);
+
+                Core.TempImagePath = tempFilePath;
+            }
+            catch
+            {
+                Core.TempImagePath = null;
+            }
+        }
+
+        return Core.TempImagePath;
     }
 
 
