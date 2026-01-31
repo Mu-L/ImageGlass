@@ -126,7 +126,7 @@ public partial class SkiaAnimator : AnimatorImpl
 
 
         // convert to immutable SKImage
-        var frameImage = SKImage.FromBitmap(frameBitmap);
+        var frameImage = SkiaCodec.ConvertToSKImage(frameBitmap);
         _frameCache[_currentFrame] = frameImage;
 
         return frameImage;
