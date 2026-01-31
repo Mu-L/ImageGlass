@@ -100,7 +100,7 @@ public static class Core
     /// <summary>
     /// Gets the photo manager.
     /// </summary>
-    public static PhotoManagerImpl Photos { get; set; } = new();
+    public static PhotoManager Photos { get; set; } = new();
 
 
     /// <summary>

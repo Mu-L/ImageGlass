@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class PhotoManagerImpl
+public partial class PhotoManager
 {
 
     /// <summary>

@@ -23,7 +23,7 @@ using System.Linq;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class PhotoManagerImpl
+public partial class PhotoManager
 {
     protected int _currentIndex = -1;
 

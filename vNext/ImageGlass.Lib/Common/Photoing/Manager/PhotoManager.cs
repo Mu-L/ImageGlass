@@ -30,11 +30,10 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Photoing;
 
-
 /// <summary>
 /// Class for managing a collection of photos.
 /// </summary>
-public partial class PhotoManagerImpl : DisposableImpl
+public partial class PhotoManager : DisposableImpl
 {
     // photo list
     protected AvaloniaList<Photo> _items = [];
@@ -105,7 +104,7 @@ public partial class PhotoManagerImpl : DisposableImpl
     /// <summary>
     /// Initializes a new instance.
     /// </summary>
-    public PhotoManagerImpl(IEnumerable<string>? list = null)
+    public PhotoManager(IEnumerable<string>? list = null)
     {
         if (list is not null) Add(list);
     }
