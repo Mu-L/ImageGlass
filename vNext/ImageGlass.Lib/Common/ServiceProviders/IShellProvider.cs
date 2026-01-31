@@ -33,4 +33,28 @@ public interface IShellProvider : IDisposable
     /// </summary>
     bool CanUseForegroundShell();
 
+
+    /// <summary>
+    /// Gets the target path from shortcute file path
+    /// </summary>
+    string? GetTargetPathFromShortcut(string? lnkFilePath);
+
+
+    /// <summary>
+    /// Opens file explorer and selects the file.
+    /// </summary>
+    void OpenFilePath(string? filePath);
+
+
+    /// <summary>
+    /// Opens file explorer and selects the folder.
+    /// </summary>
+    void OpenFolderPath(string? dirPath);
+
+
+    /// <summary>
+    /// Deletes a file with option to move to recycle bin.
+    /// </summary>
+    void DeleteFile(string filePath, bool moveToRecycleBin = true);
+
 }

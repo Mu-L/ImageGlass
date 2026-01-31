@@ -20,7 +20,9 @@ using D2Phap;
 using ImageGlass.Common;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
+using Microsoft.VisualBasic.FileIO;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace ImageGlass.Win32.Common.ServiceProviders;
@@ -72,6 +74,8 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
 
 
 
+    #region Public Methods
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
@@ -89,6 +93,73 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
 
         return useForegroundWindow;
     }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public string? GetTargetPathFromShortcut(string? lnkFilePath)
+    {
+        if (string.IsNullOrWhiteSpace(lnkFilePath)) return null;
+
+        return FileShortcutApi.GetTargetPathFromShortcut(lnkFilePath);
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void OpenFilePath(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath)) return;
+
+        try
+        {
+            ExplorerApi.SelectFileFromExplorer(filePath);
+        }
+        catch
+        {
+            using var proc = Process.Start("explorer.exe", $"/select,\"{filePath}\"");
+        }
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void OpenFolderPath(string? dirPath)
+    {
+        if (string.IsNullOrWhiteSpace(dirPath)) return;
+
+        try
+        {
+            Directory.CreateDirectory(dirPath);
+        }
+        catch { }
+
+        try
+        {
+            using var proc = Process.Start("explorer.exe", $"\"{dirPath}\"");
+        }
+        catch { }
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void DeleteFile(string filePath, bool moveToRecycleBin = true)
+    {
+        var option = moveToRecycleBin ? RecycleOption.SendToRecycleBin : RecycleOption.DeletePermanently;
+
+        try
+        {
+            Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, option);
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    #endregion // Public Methods
 
 
 }

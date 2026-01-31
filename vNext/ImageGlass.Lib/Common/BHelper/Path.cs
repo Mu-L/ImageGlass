@@ -164,7 +164,7 @@ public partial class BHelper
     /// <summary>
     /// Checks type of the path.
     /// </summary>
-    public static PathType CheckPath(string path)
+    public static PathType CheckPath(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return PathType.Unknown;
 
@@ -211,9 +211,11 @@ public partial class BHelper
 
                 if (string.Equals(Path.GetExtension(path), Win32ShortcutExtension, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (Core.PathProvider is null) continue;
+                    if (Core.ShellProvider is null) continue;
 
-                    var shortcutPath = Core.PathProvider.GetTargetPathFromShortcut(path);
+                    var shortcutPath = Core.ShellProvider.GetTargetPathFromShortcut(path);
+                    if (string.IsNullOrEmpty(shortcutPath)) continue;
+
                     var shortcutPathType = BHelper.CheckPath(shortcutPath);
                     if (shortcutPathType == PathType.Unknown) continue;
 
@@ -274,7 +276,7 @@ public partial class BHelper
 
         if (string.Equals(Path.GetExtension(inputPath), Win32ShortcutExtension, StringComparison.OrdinalIgnoreCase))
         {
-            path = Core.PathProvider?.GetTargetPathFromShortcut(path) ?? path;
+            path = Core.ShellProvider?.GetTargetPathFromShortcut(path) ?? path;
         }
 
         return path;
@@ -315,9 +317,9 @@ public partial class BHelper
     /// </summary>
     public static void OpenFilePath(string? filePath)
     {
-        if (Core.PathProvider is null) return;
+        if (Core.ShellProvider is null) return;
 
-        Core.PathProvider.OpenFilePath(filePath);
+        Core.ShellProvider.OpenFilePath(filePath);
     }
 
 
@@ -326,9 +328,9 @@ public partial class BHelper
     /// </summary>
     public static void OpenFolderPath(string? dirPath)
     {
-        if (Core.PathProvider is null) return;
+        if (Core.ShellProvider is null) return;
 
-        Core.PathProvider.OpenFolderPath(dirPath);
+        Core.ShellProvider.OpenFolderPath(dirPath);
     }
 
 
@@ -337,9 +339,9 @@ public partial class BHelper
     /// </summary>
     public static void DeleteFile(string filePath, bool moveToRecycleBin = true)
     {
-        if (Core.PathProvider is not null)
+        if (Core.ShellProvider is not null)
         {
-            Core.PathProvider.DeleteFile(filePath, moveToRecycleBin);
+            Core.ShellProvider.DeleteFile(filePath, moveToRecycleBin);
             return;
         }
 
@@ -350,16 +352,5 @@ public partial class BHelper
         catch { }
     }
 
-}
-
-
-/// <summary>
-/// Types of path
-/// </summary>
-public enum PathType
-{
-    File,
-    Dir,
-    Unknown,
 }
 

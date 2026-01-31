@@ -69,13 +69,7 @@ public static class Core
 
 
     /// <summary>
-    /// Provides a singleton instance to resolve path.
-    /// </summary>
-    public static IPathProvider? PathProvider { get; set; } = null;
-
-
-    /// <summary>
-    /// Provides a singleton instance to manage foreground shell object.
+    /// Provides a singleton instance to manage OS shell & file path.
     /// </summary>
     public static IShellProvider? ShellProvider { get; set; } = null;
 
