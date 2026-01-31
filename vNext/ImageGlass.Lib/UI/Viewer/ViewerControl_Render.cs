@@ -20,9 +20,11 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
+using Avalonia.Threading;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI.Viewer.Checkerboard;
 using SkiaSharp;
+using System;
 using System.Globalization;
 using System.Threading;
 
@@ -32,6 +34,11 @@ namespace ImageGlass.UI.Viewer;
 public partial class ViewerControl
 {
     private PhotoRenderer? _photoRenderer;
+
+    // FPS
+    private double _fps;
+    private long _lastFpsTime = Environment.TickCount64;
+
 
     // drawing image
     private SKImage? _imgSource;
@@ -47,8 +54,14 @@ public partial class ViewerControl
     private ImageInterpolation _interpolationScaleUp = ImageInterpolation.None;
 
 
-    // Public Properties
+
     #region Public Properties
+
+    /// <summary>
+    /// Gets, sets the debug mode.
+    /// </summary>
+    public bool EnableDebug { get; set; } = true;
+
 
     /// <summary>
     /// Gets, sets value indicates whether the previewing is enabled or not.
@@ -170,20 +183,54 @@ public partial class ViewerControl
 
     public override void Render(DrawingContext c)
     {
+        CalculateFps();
+
         OnDrawCheckerboard(c);      // draw checkerboard
         OnDrawImage(c);             // draw image
         OnDrawSelection(c);         // draw selection
+        base.Render(c);
+        OnDrawAnimationSource();    // draw animation source
         OnDrawDebugInfo(c);         // draw debug info
 
-        base.Render(c);
+
+        // loop for drawing animation source
+        if (EnableDrawingAnimation)
+        {
+            Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Render);
+        }
     }
 
 
+    /// <summary>
+    /// Calculates FPS in debug mode.
+    /// </summary>
+    private void CalculateFps()
+    {
+        if (!EnableDebug) return;
+
+        var now = Environment.TickCount64;
+        var delta = now - _lastFpsTime;
+
+        if (delta > 0)
+        {
+            _fps = _fps * 0.9 + (1000.0 / delta) * 0.1;
+            _fps = Math.Round(_fps, 2);
+        }
+
+        _lastFpsTime = now;
+    }
+
+
+    /// <summary>
+    /// Draw debug information.
+    /// </summary>
     protected virtual void OnDrawDebugInfo(DrawingContext c)
     {
+        if (!EnableDebug) return;
+
         var ft = new FormattedText(
             $"""
-            DPI = {Dpi}
+            DPI = {Dpi}, FPS = {_fps}
             Control Bounds = {Bounds}
             DrawingArea = {DrawingArea}
             Image size = {BitmapSize}
@@ -208,6 +255,9 @@ public partial class ViewerControl
     }
 
 
+    /// <summary>
+    /// Draws checkerboard.
+    /// </summary>
     protected virtual void OnDrawCheckerboard(DrawingContext c)
     {
         if (CheckerboardMode == CheckerboardMode.None) return;
@@ -282,6 +332,9 @@ public partial class ViewerControl
     }
 
 
+    /// <summary>
+    /// Draws image.
+    /// </summary>
     protected virtual void OnDrawImage(DrawingContext c)
     {
         _photoRenderer ??= new PhotoRenderer(this);
@@ -315,6 +368,45 @@ public partial class ViewerControl
             }
         }
 
+    }
+
+
+    /// <summary>
+    /// Draws animation source.
+    /// </summary>
+    protected virtual void OnDrawAnimationSource()
+    {
+        //if (UseWebview2) return;
+
+        // Panning
+        if (AnimationSource.HasFlag(AnimationSources.PanLeft))
+        {
+            PanLeft(requestRerender: false);
+        }
+        else if (AnimationSource.HasFlag(AnimationSources.PanRight))
+        {
+            PanRight(requestRerender: false);
+        }
+
+        if (AnimationSource.HasFlag(AnimationSources.PanUp))
+        {
+            PanUp(requestRerender: false);
+        }
+        else if (AnimationSource.HasFlag(AnimationSources.PanDown))
+        {
+            PanDown(requestRerender: false);
+        }
+
+
+        // Zooming
+        if (AnimationSource.HasFlag(AnimationSources.ZoomIn))
+        {
+            _ = ZoomByDeltaToPoint(20, null, requestRerender: false);
+        }
+        else if (AnimationSource.HasFlag(AnimationSources.ZoomOut))
+        {
+            _ = ZoomByDeltaToPoint(-20, null, requestRerender: false);
+        }
     }
 
 

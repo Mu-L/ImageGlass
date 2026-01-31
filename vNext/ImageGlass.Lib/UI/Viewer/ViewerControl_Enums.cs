@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using System;
+
 namespace ImageGlass.UI.Viewer;
 
 
@@ -65,6 +67,27 @@ public enum ZoomChangeSource
     Unknown,
     ZoomMode,
     SizeChanged,
+}
+
+
+[Flags]
+public enum AnimationSources
+{
+    None = 0,
+
+    PanLeft = 1 << 1,
+    PanRight = 1 << 2,
+    PanUp = 1 << 3,
+    PanDown = 1 << 4,
+
+    /// <summary>
+    /// Zoom in animation. It does nothing if <see cref="ViewerCanvas.ZoomLevels"/> is set.
+    /// </summary>
+    ZoomIn = 1 << 5,
+    /// <summary>
+    /// Zoom out animation. It does nothing if <see cref="ViewerCanvas.ZoomLevels"/> is set.
+    /// </summary>
+    ZoomOut = 1 << 6,
 }
 
 

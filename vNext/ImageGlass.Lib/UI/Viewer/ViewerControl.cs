@@ -298,7 +298,7 @@ public partial class ViewerControl : PhControl
         _photo?.Unload();
 
         // reset
-        //AnimationSource = AnimationSources.None; // TODO:
+        AnimationSource = AnimationSources.None;
         _enablePanningVelocity = false;
         SetSourceSelection(new Rect(), false);
         BitmapSize = new();
