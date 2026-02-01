@@ -50,8 +50,6 @@ public partial class ViewerControl
 
     private readonly Lock _lockSource = new();
     private readonly Lock _lockPreview = new();
-    private ImageInterpolation _interpolationScaleDown = ImageInterpolation.High;
-    private ImageInterpolation _interpolationScaleUp = ImageInterpolation.None;
 
 
 
@@ -126,16 +124,13 @@ public partial class ViewerControl
     /// </summary>
     public ImageInterpolation InterpolationScaleDown
     {
-        get => _interpolationScaleDown;
-        set
+        get; set
         {
-            if (_interpolationScaleDown != value)
-            {
-                _interpolationScaleDown = value;
-                InvalidateVisual();
-            }
+            if (field == value) return;
+            field = value;
+            InvalidateVisual();
         }
-    }
+    } = ImageInterpolation.Medium;
 
 
     /// <summary>
@@ -144,16 +139,13 @@ public partial class ViewerControl
     /// </summary>
     public ImageInterpolation InterpolationScaleUp
     {
-        get => _interpolationScaleUp;
-        set
+        get; set
         {
-            if (_interpolationScaleUp != value)
-            {
-                _interpolationScaleUp = value;
-                InvalidateVisual();
-            }
+            if (field == value) return;
+            field = value;
+            InvalidateVisual();
         }
-    }
+    } = ImageInterpolation.None;
 
 
     /// <summary>
@@ -163,8 +155,8 @@ public partial class ViewerControl
     {
         get
         {
-            if (ZoomFactor < 1f) return _interpolationScaleDown;
-            if (ZoomFactor > 1f) return _interpolationScaleUp;
+            if (ZoomFactor < 1f) return InterpolationScaleDown;
+            if (ZoomFactor > 1f) return InterpolationScaleUp;
 
             return ImageInterpolation.None;
         }

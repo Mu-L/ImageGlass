@@ -106,19 +106,19 @@ public partial class PhControl : ContentControl
     /// <summary>
     /// Scales the given number on the DPI scaling factor.
     /// </summary>
-    public double DpiScale(double value) => Dpi * value;
+    public double DpiScale(double value, double? scaleFactor = null) => (scaleFactor ?? Dpi) * value;
 
 
     /// <summary>
     /// Scales the given size based on the DPI scaling factor.
     /// </summary>
-    public Size DpiScale(Size value) => new Size(DpiScale(value.Width), DpiScale(value.Height));
+    public Size DpiScale(Size value, double? scaleFactor = null) => new Size(DpiScale(value.Width, scaleFactor), DpiScale(value.Height, scaleFactor));
 
 
     /// <summary>
     /// Scales the given point on the DPI scaling factor.
     /// </summary>
-    public Point DpiScale(Point value) => new Point(DpiScale(value.X), DpiScale(value.Y));
+    public Point DpiScale(Point value, double? scaleFactor = null) => new Point(DpiScale(value.X, scaleFactor), DpiScale(value.Y, scaleFactor));
 
     #endregion // Public Methods
 

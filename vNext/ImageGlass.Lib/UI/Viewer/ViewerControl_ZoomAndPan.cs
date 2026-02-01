@@ -182,18 +182,22 @@ public partial class ViewerControl
             return;
         }
 
+
         // 1. scale the values according to DPI
+        var currentZoomFactor = _zooming.Factor / Dpi;
+        var oldZoomFactor = _zooming.OldFactor / Dpi;
+
         // 1.1 zoom point
-        var zoomX = _zooming.ZoomedPoint.X * Dpi - Padding.Left;
-        var zoomY = _zooming.ZoomedPoint.Y * Dpi - Padding.Top;
+        var zoomX = _zooming.ZoomedPoint.X - Padding.Left;
+        var zoomY = _zooming.ZoomedPoint.Y - Padding.Top;
 
 
         // 1.2 source and viewport size
         var controlW = DrawingArea.Width;
         var controlH = DrawingArea.Height;
 
-        var scaledImgWidth = BitmapSize.Width * _zooming.Factor;
-        var scaledImgHeight = BitmapSize.Height * _zooming.Factor;
+        var scaledImgWidth = BitmapSize.Width * currentZoomFactor;
+        var scaledImgHeight = BitmapSize.Height * currentZoomFactor;
 
 
         // 1.3 initialize new values for source and destination rectangles
@@ -219,8 +223,8 @@ public partial class ViewerControl
         }
         else
         {
-            var oldControlW = controlW / _zooming.OldFactor;
-            var newControlW = controlW / _zooming.Factor;
+            var oldControlW = controlW / oldZoomFactor;
+            var newControlW = controlW / currentZoomFactor;
 
             srcX += (oldControlW - newControlW) / ((controlW + float.Epsilon) / zoomX);
             srcWidth = newControlW;
@@ -241,8 +245,8 @@ public partial class ViewerControl
         }
         else
         {
-            var oldControlH = controlH / _zooming.OldFactor;
-            var newControlH = controlH / _zooming.Factor;
+            var oldControlH = controlH / oldZoomFactor;
+            var newControlH = controlH / currentZoomFactor;
 
             srcY += (oldControlH - newControlH) / ((controlH + float.Epsilon) / zoomY);
             srcHeight = newControlH;
@@ -250,8 +254,6 @@ public partial class ViewerControl
             destY = DrawingArea.Top;
             destHeight = controlH;
         }
-
-        _zooming.OldFactor = _zooming.Factor;
 
 
         // 4. Panning to the edge:
@@ -279,6 +281,8 @@ public partial class ViewerControl
         // 5. get the final rectangles
         SrcRect = new(srcX, srcY, srcWidth, srcHeight);
         DestRect = new(destX, destY, destWidth, destHeight);
+
+        _zooming.OldFactor = _zooming.Factor;
     }
 
 
@@ -355,8 +359,8 @@ public partial class ViewerControl
     {
         if (srcWidth == 0 || srcHeight == 0 || viewportW == 0 || viewportH == 0) return _zooming.Factor;
 
-        var widthScale = viewportW / srcWidth;
-        var heightScale = viewportH / srcHeight;
+        var widthScale = viewportW / srcWidth * Dpi;
+        var heightScale = viewportH / srcHeight * Dpi;
         double zoomFactor;
 
         if (zoomMode == ZoomMode.ScaleToWidth)

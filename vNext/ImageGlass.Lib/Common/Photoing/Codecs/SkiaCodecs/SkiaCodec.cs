@@ -325,8 +325,7 @@ public static partial class SkiaCodec
             return SKImage.FromPixels(info, bmp.GetPixels());
         }
 
-        var pixels = bmp.GetPixels();
-        var img = SKImage.FromPixels(bmp.Info, pixels);
+        var img = SKImage.FromBitmap(bmp);
 
         return img;
     }
