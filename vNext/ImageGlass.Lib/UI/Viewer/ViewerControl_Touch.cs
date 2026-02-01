@@ -42,12 +42,10 @@ public partial class ViewerControl
         });
 
 
-        // touch screen + touchpad gestures
-        Gestures.AddScrollGestureHandler(this, OnTouchPanning);  // panning
-
         // touch screen gestures
         _pinchGesture.Pinch += OnTouchPinched; // pinch gesture
         GestureRecognizers.Add(_pinchGesture);
+        Gestures.AddScrollGestureHandler(this, OnTouchPanning);  // panning
         Gestures.AddDoubleTappedHandler(this, OnTouchDoubleTapped);  // double-tap
 
         // touchpad gestures
@@ -73,7 +71,7 @@ public partial class ViewerControl
 
 
     /// <summary>
-    /// Handles panning event for touch screen and touchpad.
+    /// Handles panning event for touch screen.
     /// </summary>
     private void OnTouchPanning(object? sender, RoutedEventArgs e)
     {

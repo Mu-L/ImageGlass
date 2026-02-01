@@ -17,9 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using System;
 
 namespace ImageGlass.Common.Extensions;
-
 
 public static class Rect_Exts
 {
@@ -41,6 +41,49 @@ public static class Rect_Exts
             var y = double.IsFinite(rect.Y) ? rect.Y : 0;
             var w = double.IsFinite(rect.Width) ? rect.Width : 0;
             var h = double.IsFinite(rect.Height) ? rect.Height : 0;
+
+            return new Rect(x, y, w, h);
+        }
+
+
+        /// <summary>
+        /// Determines if two rectangles overlap in a 2D space.
+        /// </summary>
+        public bool IntersectsWith(Rect rect2)
+        {
+            if (rect.Width < 0f || rect2.Width < 0f) return false;
+
+            if (rect2.X <= rect.X + rect.Width
+                && rect2.X + rect2.Width >= rect.X
+                && rect2.Y <= rect.Y + rect.Height)
+            {
+                return rect2.Y + rect2.Height >= rect.Y;
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        /// Calculates the intersection of a rectangle with a specified width and height.
+        /// </summary>
+        public Rect GetIntersection(double width, double height)
+        {
+            return rect.GetIntersection(new Rect(0, 0, width, height));
+        }
+
+
+        /// <summary>
+        /// Calculates the intersection of two rectangles and returns the intersected area.
+        /// </summary>
+        public Rect GetIntersection(Rect rect2)
+        {
+            if (!rect.IntersectsWith(rect2)) return rect;
+
+            var x = Math.Max(rect.X, rect2.X);
+            var y = Math.Max(rect.Y, rect2.Y);
+            var w = Math.Max(Math.Min(rect.X + rect.Width, rect2.X + rect2.Width) - x, 0);
+            var h = Math.Max(Math.Min(rect.Y + rect.Height, rect2.Y + rect2.Height) - y, 0);
 
             return new Rect(x, y, w, h);
         }

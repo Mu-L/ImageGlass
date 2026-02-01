@@ -223,7 +223,7 @@ public partial class ViewerControl
         // use integer numbers for pixel rounding
         var w = (int)BitmapSize.Width;
         var h = (int)BitmapSize.Height;
-        _selection.SourceRect = srcRect.Intersect(new Rect(0, 0, w, h));
+        _selection.SourceRect = srcRect.GetIntersection(new Rect(0, 0, w, h));
 
         if (triggerEvent)
         {
@@ -659,7 +659,7 @@ public partial class ViewerControl
             BitmapSize.Width, BitmapSize.Height, DestRect);
 
         // limit the selected area to the image
-        cliRect = cliRect.Intersect(DestRect);
+        cliRect = cliRect.GetIntersection(DestRect);
 
         var srcRect = RectClientToSource(cliRect);
         SetSourceSelection(srcRect, true);
@@ -703,7 +703,7 @@ public partial class ViewerControl
         selectedArea = selectedArea.WithHeight(height);
 
         // limit the selected area to the limitRect
-        selectedArea = selectedArea.Intersect(limitRect);
+        selectedArea = selectedArea.GetIntersection(limitRect);
 
 
         // free aspect ratio
@@ -862,9 +862,10 @@ public partial class ViewerControl
             newWidth = Math.Max(0, srcSelectionBeforeMoved.Width - dW);
         }
 
+
         // limit the selected client rect to the image source
         var newSrcRect = new Rect(newX, newY, newWidth, newHeight)
-            .Intersect(new Rect(0, 0, BitmapSize.Width, BitmapSize.Height));
+            .GetIntersection(new Rect(0, 0, BitmapSize.Width, BitmapSize.Height));
 
         #endregion // 1. Get correct size and location of new selection
 
@@ -966,6 +967,8 @@ public partial class ViewerControl
 
 
         #region 4. Handle small size (<= 1px)
+
+
 
         // limit the size to 1 pixel
         if (finalSrcRect.Width <= 1) finalSrcRect = finalSrcRect.WithWidth(1);
