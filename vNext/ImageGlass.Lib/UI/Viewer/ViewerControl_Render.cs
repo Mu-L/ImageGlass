@@ -17,10 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
-using Avalonia.Threading;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI.Viewer.Checkerboard;
 using SkiaSharp;
@@ -183,21 +183,27 @@ public partial class ViewerControl
 
     public override void Render(DrawingContext c)
     {
-        CalculateFps();
+        base.Render(c);
 
         OnDrawCheckerboard(c);      // draw checkerboard
         OnDrawImage(c);             // draw image
         OnDrawSelection(c);         // draw selection
-        base.Render(c);
-        OnDrawAnimationSource();    // draw animation source
         OnDrawDebugInfo(c);         // draw debug info
+    }
 
+
+    /// <summary>
+    /// Prepares logics for frame animation source.
+    /// </summary>
+    protected virtual void OnPrepareAnimationFrame(TimeSpan ts)
+    {
+        if (!EnableDrawingAnimation) return;
+
+        CalculateFps();
+        OnDrawAnimationSource();    // draw animation source
 
         // loop for drawing animation source
-        if (EnableDrawingAnimation)
-        {
-            Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Render);
-        }
+        TopLevel.GetTopLevel(this)?.RequestAnimationFrame(OnPrepareAnimationFrame);
     }
 
 
@@ -338,7 +344,6 @@ public partial class ViewerControl
     protected virtual void OnDrawImage(DrawingContext c)
     {
         _photoRenderer ??= new PhotoRenderer(this);
-        c.Custom(_photoRenderer);
 
 
         // draw bitmap preview
