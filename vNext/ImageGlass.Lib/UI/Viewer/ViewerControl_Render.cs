@@ -236,6 +236,9 @@ public partial class ViewerControl
             _destRect = {DestRect}
             _zoomFactor = {_zooming.Factor}
             _zoomedPoint = {_zooming.ZoomedPoint}
+            
+            SourceRect = {_selection.SourceRect}
+            ClientSelection = {ClientSelection}
             """,
             CultureInfo.InvariantCulture,
             FlowDirection.LeftToRight,

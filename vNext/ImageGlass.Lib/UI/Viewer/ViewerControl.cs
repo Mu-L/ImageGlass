@@ -141,7 +141,11 @@ public partial class ViewerControl : PhControl
         // set the init point for panning
         if (p.Pointer.Type == PointerType.Mouse)
         {
-            _lastMousePanPoint = p.Position;
+            var canPanByMouse = !EnableSelection || e.Properties.IsMiddleButtonPressed;
+            if (canPanByMouse)
+            {
+                _lastMousePanPoint = p.Position;
+            }
         }
 
         var requestRerender = OnSelectionBegin(p);

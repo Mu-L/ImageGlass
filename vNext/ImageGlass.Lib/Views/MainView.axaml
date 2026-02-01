@@ -32,9 +32,8 @@
               Background="{CompiledBinding ViewerBackground}">
             <viewer:ViewerControl x:Name="PART_Viewer"
                                   Padding="20"
-                                  EnableSelection="False">
+                                  EnableSelection="True">
                 <TextBlock Background="#4B006290"
-                           Text="{CompiledBinding Title}"
                            TextWrapping="Wrap"
                            TextAlignment="Center"
                            VerticalAlignment="Center"

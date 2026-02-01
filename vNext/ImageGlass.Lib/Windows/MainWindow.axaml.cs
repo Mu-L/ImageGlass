@@ -132,6 +132,7 @@ public partial class MainWindow : PhWindow
         }
 
 
+        if (e.Key != Key.Enter) return;
         var res = await ModalWindow.ShowInputAsync(this, new ModalWindowOptions
         {
             Title = "Hello World!",

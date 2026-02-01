@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Input;
 using Avalonia.Media;
+using ImageGlass.Common;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Types;
 using System;
@@ -98,8 +99,8 @@ public partial class ViewerControl
         {
             if (SourceSelection.IsEmpty) return [];
 
-            var resizerSize = DpiScale(12f);
-            var resizerMargin = DpiScale(2f);
+            var resizerSize = DpiScale(7f);
+            var resizerMargin = DpiScale(1f);
             var hitSize = DpiScale(resizerSize * 1.3f);
 
 
@@ -238,8 +239,9 @@ public partial class ViewerControl
     /// </summary>
     public Point PointClientToSource(Point clientPoint)
     {
-        var x = (clientPoint.X - DestRect.X) / _zooming.Factor + SrcRect.X;
-        var y = (clientPoint.Y - DestRect.Y) / _zooming.Factor + SrcRect.Y;
+        var dpiFactor = _zooming.Factor / Dpi;
+        var x = (clientPoint.X - DestRect.X) / dpiFactor + SrcRect.X;
+        var y = (clientPoint.Y - DestRect.Y) / dpiFactor + SrcRect.Y;
 
         return new Point(x, y);
     }
@@ -289,8 +291,9 @@ public partial class ViewerControl
     /// </summary>
     public Point PointSourceToClient(Point srcPoint)
     {
-        var x = (srcPoint.X - SrcRect.X) * _zooming.Factor + DestRect.X;
-        var y = (srcPoint.Y - SrcRect.Y) * _zooming.Factor + DestRect.Y;
+        var dpiFactor = _zooming.Factor / Dpi;
+        var x = (srcPoint.X - SrcRect.X) * dpiFactor + DestRect.X;
+        var y = (srcPoint.Y - SrcRect.Y) * dpiFactor + DestRect.Y;
 
         return new Point(x, y);
     }
@@ -302,9 +305,10 @@ public partial class ViewerControl
     public Rect RectSourceToClient(Rect rect)
     {
         var safeRect = rect.Normalize();
+        var dpiFactor = _zooming.Factor / Dpi;
 
         var loc = PointSourceToClient(new Point(safeRect.X, safeRect.Y));
-        var size = new Size(safeRect.Width * _zooming.Factor, safeRect.Height * _zooming.Factor);
+        var size = new Size(safeRect.Width * dpiFactor, safeRect.Height * dpiFactor);
 
         return new Rect(loc, size);
     }
@@ -328,7 +332,6 @@ public partial class ViewerControl
         if (_imgSource == null) return false;
 
 
-        var dpiCursorPosition = DpiScale(p.Position);
         _selection.PointerDownPoint = p.Position;
         _selection.IsLeftButtonPressed = p.Properties.IsLeftButtonPressed;
 
@@ -337,12 +340,12 @@ public partial class ViewerControl
         var canSelect = EnableSelection
             && p.Properties.IsLeftButtonPressed;
         // TODO: && TouchedPoints <= 1;
-        var isSelectionHovered = ClientSelection.Contains(dpiCursorPosition);
+        var isSelectionHovered = ClientSelection.Contains(p.Position);
         var requestRerender = canSelect && !SourceSelection.IsEmpty;
 
 
         // get the selected resizer
-        _selection.SelectedResizer = SelectionResizers.Find(i => i.HitRegion.Contains(dpiCursorPosition));
+        _selection.SelectedResizer = SelectionResizers.Find(i => i.HitRegion.Contains(p.Position));
         CurrentSelectionAction = SelectionAction.None;
 
 
@@ -430,14 +433,13 @@ public partial class ViewerControl
         if (EnableSelection)
         {
             // set resizer cursor
-            var dpiCursorPosition = DpiScale(p.Position);
-            var hoveredResizer = SelectionResizers.Find(i => i.HitRegion.Contains(dpiCursorPosition));
+            var hoveredResizer = SelectionResizers.Find(i => i.HitRegion.Contains(p.Position));
 
             if (hoveredResizer != null)
             {
                 Cursor = hoveredResizer.GetCursor();
             }
-            else if (ClientSelection.Contains(dpiCursorPosition))
+            else if (ClientSelection.Contains(p.Position))
             {
                 Cursor = new Cursor(StandardCursorType.SizeAll);
             }
@@ -448,7 +450,7 @@ public partial class ViewerControl
 
 
             // redraw the canvas
-            var isSelectionHovered = ClientSelection.Contains(dpiCursorPosition);
+            var isSelectionHovered = ClientSelection.Contains(p.Position);
             requestRerender = requestRerender
                 || _selection.IsHovered != isSelectionHovered
                 || _selection.HoveredResizer != hoveredResizer;
@@ -517,7 +519,128 @@ public partial class ViewerControl
         //if (UseWebview2 || Source == ImageSource.Null || SourceSelection.IsEmpty) return;
         if (!EnableSelection || SourceSelection.IsEmpty) return;
 
-        // TODO
+
+        // 1. draw the clip selection region
+        var selectionGeo = g.GetCombinedRectGeometryEx(ClientSelection, DestRect, 0, 0, GeometryCombineMode.Xor);
+        g.DrawGeometryEx(selectionGeo, Colors.Transparent,
+            Colors.Black.WithAlpha(_selection.IsLeftButtonPressed ? 100 : 180));
+
+
+        // 2. draw selection grid, resizers
+        if (_selection.IsLeftButtonPressed || _selection.IsHovered || _selection.HoveredResizer != null)
+        {
+            var width3 = ClientSelection.Width / 3;
+            var height3 = ClientSelection.Height / 3;
+
+
+            // draw grid, ignore alpha value
+            for (int i = 1; i < 3; i++)
+            {
+                g.DrawLineEx(
+                    ClientSelection.X + (i * width3),
+                    ClientSelection.Y,
+                    ClientSelection.X + (i * width3),
+                    ClientSelection.Y + ClientSelection.Height, Colors.Black.WithAlpha(200),
+                    0.4f);
+                g.DrawLineEx(
+                    ClientSelection.X + (i * width3),
+                    ClientSelection.Y,
+                    ClientSelection.X + (i * width3),
+                    ClientSelection.Y + ClientSelection.Height, Colors.White.WithAlpha(200),
+                    0.4f);
+                g.DrawLineEx(
+                    ClientSelection.X + (i * width3),
+                    ClientSelection.Y,
+                    ClientSelection.X + (i * width3),
+                    ClientSelection.Y + ClientSelection.Height, Core.AccentColor.WithAlpha(200),
+                    0.4f);
+
+
+                g.DrawLineEx(
+                    ClientSelection.X,
+                    ClientSelection.Y + (i * height3),
+                    ClientSelection.X + ClientSelection.Width,
+                    ClientSelection.Y + (i * height3), Colors.Black.WithAlpha(200),
+                    0.4f);
+                g.DrawLineEx(
+                    ClientSelection.X,
+                    ClientSelection.Y + (i * height3),
+                    ClientSelection.X + ClientSelection.Width,
+                    ClientSelection.Y + (i * height3), Colors.White.WithAlpha(200),
+                    0.4f);
+                g.DrawLineEx(
+                    ClientSelection.X,
+                    ClientSelection.Y + (i * height3),
+                    ClientSelection.X + ClientSelection.Width,
+                    ClientSelection.Y + (i * height3), Core.AccentColor.WithAlpha(200),
+                    0.4f);
+            }
+
+
+            // draw selection size
+            var text = $"{_selection.SourceRect.Width} x {_selection.SourceRect.Height}";
+            var textSize = g.MeasureTextEx(text, FontFamily, FontSize * 0.95);
+            var textPadding = new Thickness(5, 2.5);
+            var textX = ClientSelection.X + (ClientSelection.Width / 2 - textSize.Width / 2);
+            var textY = ClientSelection.Y + (ClientSelection.Height / 2 - textSize.Height / 2);
+            var textBgRect = new Rect(
+                textX - textPadding.Left,
+                textY - textPadding.Top,
+                textSize.Width + textPadding.Left + textPadding.Right,
+                textSize.Height + textPadding.Top + textPadding.Bottom);
+
+            if (textBgRect.Width + 10 < ClientSelection.Width
+                && textBgRect.Height + 10 < ClientSelection.Height)
+            {
+                g.DrawRectangleEx(textBgRect, (float)textSize.Height / 5, Colors.White.WithAlpha(100), Colors.Black.WithAlpha(100));
+                g.DrawRectangleEx(textBgRect, (float)textSize.Height / 5, Core.AccentColor.WithAlpha(100), Core.AccentColor.WithAlpha(150));
+                g.DrawTextEx(text, FontFamily, FontSize * 0.95, textX, textY, Colors.White);
+            }
+
+
+            // draw resizers with layer order
+            var resizers = SelectionResizers;
+            resizers.Reverse();
+
+            foreach (var rItem in resizers)
+            {
+                var hideTopBottomResizers = ClientSelection.Width < rItem.IndicatorRegion.Width * 5;
+                if (hideTopBottomResizers
+                    && (rItem.Type == SelectionResizerType.Top
+                    || rItem.Type == SelectionResizerType.Bottom)) continue;
+
+                var hideLeftRightResizers = ClientSelection.Height < rItem.IndicatorRegion.Height * 5;
+                if (hideLeftRightResizers
+                    && (rItem.Type == SelectionResizerType.Left
+                    || rItem.Type == SelectionResizerType.Right)) continue;
+
+                // hover style
+                var resizerRect = rItem.IndicatorRegion;
+                var fillColor = Colors.White.WithAlpha(200);
+                if (rItem.Type == _selection.HoveredResizer?.Type)
+                {
+                    resizerRect.Inflate(DpiScale(1.45f));
+                    fillColor = Core.AccentColor.WithAlpha(200);
+                }
+
+                g.DrawEllipseEx(resizerRect, Colors.White.WithAlpha(50), Colors.Black.WithAlpha(200), 4f);
+                g.DrawEllipseEx(resizerRect, Core.AccentColor.WithAlpha(255), fillColor, 1f);
+
+
+                // draw debug Hit region
+                if (EnableDebug)
+                {
+                    g.DrawRectangleEx(rItem.HitRegion, 0, Colors.Red);
+                }
+            }
+        }
+
+
+        // 3. draw the selection border
+        var borderWidth = (_selection.IsHovered && _selection.IsLeftButtonPressed) ? 0.6f : 0.3f;
+        g.DrawRectangleEx(ClientSelection, 0, Colors.White, null, borderWidth);
+        g.DrawRectangleEx(ClientSelection, 0, Core.AccentColor, null, borderWidth);
+
     }
 
 
@@ -530,8 +653,8 @@ public partial class ViewerControl
         if (_selection.PointerDownPoint == null || _selection.PointerMovePoint == null) return;
 
         var cliRect = GetRectBetween2Points(
-            DpiScale(_selection.PointerDownPoint.Value),
-            DpiScale(_selection.PointerMovePoint.Value),
+            _selection.PointerDownPoint.Value,
+            _selection.PointerMovePoint.Value,
             SelectionAspectRatio,
             BitmapSize.Width, BitmapSize.Height, DestRect);
 
@@ -626,8 +749,8 @@ public partial class ViewerControl
     {
         if (!EnableSelection || _selection.PointerDownPoint == null) return;
 
-        var srcPoint = PointClientToSource(DpiScale(clientPoint));
-        var srcMouseDownPoint = PointClientToSource(DpiScale(_selection.PointerDownPoint.Value));
+        var srcPoint = PointClientToSource(clientPoint);
+        var srcMouseDownPoint = PointClientToSource(_selection.PointerDownPoint.Value);
 
 
         // get the distance the source rect moved
@@ -671,8 +794,8 @@ public partial class ViewerControl
     {
         if (!EnableSelection || _selection.PointerDownPoint == null) return;
 
-        var srcPoint = PointClientToSource(DpiScale(clientPoint));
-        var srcMouseDownPoint = PointClientToSource(DpiScale(_selection.PointerDownPoint.Value));
+        var srcPoint = PointClientToSource(clientPoint);
+        var srcMouseDownPoint = PointClientToSource(_selection.PointerDownPoint.Value);
         var srcSelectionBeforeMoved = _selection.SourceRectBeforeMoved;
         var finalSrcRect = new Rect();
 
