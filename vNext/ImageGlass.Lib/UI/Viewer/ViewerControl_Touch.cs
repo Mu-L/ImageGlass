@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Input;
+using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
 using ImageGlass.UI.Viewer.ZoomAndPan;
 
@@ -24,75 +25,110 @@ namespace ImageGlass.UI.Viewer;
 
 public partial class ViewerControl
 {
+    private double _lastPinchScale = 1.0;
 
-    private void EnableTouchGestures__()
+
+    /// <summary>
+    /// Registers touch gestures.
+    /// </summary>
+    private void RegisterTouchGestures()
     {
         // add support for gestures
         GestureRecognizers.Add(new PinchGestureRecognizer());
-        //GestureRecognizers.Add(new ScrollGestureRecognizer()
-        //{
-        //    CanHorizontallyScroll = true,
-        //    CanVerticallyScroll = true,
-        //    IsScrollInertiaEnabled = true,
-        //});
+        GestureRecognizers.Add(new ScrollGestureRecognizer
+        {
+            CanHorizontallyScroll = true,
+            CanVerticallyScroll = true,
+            IsScrollInertiaEnabled = true,
+        });
 
-        var panGesture = new PanGestureRecognizer();
-        panGesture.Panning += TouchScreen_Panning;
-        GestureRecognizers.Add(panGesture);
+        // touch screen + touchpad gestures
+        Gestures.AddScrollGestureHandler(this, OnTouchPanning);  // panning
 
         // touch screen gestures
-        Gestures.AddDoubleTappedHandler(this, TouchScreen_DoubleTapped);
-        //Gestures.AddScrollGestureHandler(this, TouchScreen_Scrolled);
-        Gestures.AddPinchHandler(this, TouchScreen_Pinched);
+        Gestures.AddPinchHandler(this, OnTouchPinched); // pinch
+        Gestures.AddPinchEndedHandler(this, OnTouchPinchEnded); // pinch-end
+        Gestures.AddDoubleTappedHandler(this, OnTouchDoubleTapped);  // double-tap
 
         // touchpad gestures
-        Gestures.AddPointerTouchPadGestureMagnifyHandler(this, TouchPad_Pinched);
+        Gestures.AddPointerTouchPadGestureMagnifyHandler(this, OnTouchPadPinched); // pinch
     }
 
 
-    private void DisableTouchGestures__()
+    /// <summary>
+    /// Removes the touch gestures.
+    /// </summary>
+    private void UnregisterTouchGestures()
     {
-        Gestures.RemoveDoubleTappedHandler(this, TouchScreen_DoubleTapped);
-        //Gestures.RemoveScrollGestureHandler(this, TouchScreen_Scrolled);
-        Gestures.RemovePinchHandler(this, TouchScreen_Pinched);
+        // touch screen + touchpad gestures
+        Gestures.RemoveScrollGestureHandler(this, OnTouchPanning); // panning
 
-        Gestures.RemovePointerTouchPadGestureMagnifyHandler(this, TouchPad_Pinched);
+        // touch screen gestures
+        Gestures.RemovePinchHandler(this, OnTouchPinched); // pinch
+        Gestures.RemovePinchEndedHandler(this, OnTouchPinchEnded); // pinch-end
+        Gestures.RemoveDoubleTappedHandler(this, OnTouchDoubleTapped); // double-tap
+
+        // touchpad gestures
+        Gestures.RemovePointerTouchPadGestureMagnifyHandler(this, OnTouchPadPinched); // pinch
     }
 
 
+    /// <summary>
+    /// Handles panning event for touch screen and touchpad.
+    /// </summary>
+    private void OnTouchPanning(object? sender, RoutedEventArgs e)
+    {
+        var args = (ScrollGestureEventArgs)e;
 
-    private void TouchScreen_DoubleTapped(object? sender, RoutedEventArgs e)
+        // perform panning
+        _ = PanTo(args.Delta.X, args.Delta.Y, null);
+        e.Handled = true;
+    }
+
+
+    /// <summary>
+    /// Handles pinch event for touch screen.
+    /// </summary>
+    private void OnTouchPinched(object? sender, PinchEventArgs e)
+    {
+        // normalize scale value to delta
+        var scaleDiff = e.Scale / _lastPinchScale;
+        var delta = (scaleDiff - 1.0) * ZoomInfo.MAX_ZOOM_SPEED;
+        _lastPinchScale = e.Scale;
+
+        // perform zooming
+        _ = ZoomByDeltaToPoint(delta, e.ScaleOrigin);
+        e.Handled = true;
+    }
+
+
+    /// <summary>
+    /// Handles pinch-end event for touch screen.
+    /// </summary>
+    private void OnTouchPinchEnded(object? sender, PinchEndedEventArgs e)
+    {
+        _lastPinchScale = 1.0;
+    }
+
+
+    /// <summary>
+    /// Handles double-tap event for touch screen.
+    /// </summary>
+    private void OnTouchDoubleTapped(object? sender, RoutedEventArgs e)
     {
         // Touch double-tap:
         // enable double-tapping for drawing selection
 
         var args = (TappedEventArgs)e;
         OnSelectionBeginWithTouch(args);
+        e.Handled = true;
     }
 
 
-    private void TouchScreen_Panning(object? sender, PanUpdatedEventArgs e)
-    {
-        PanTo(e.TotalX, e.TotalY, null);
-    }
-
-
-    //private void TouchScreen_Scrolled(object? sender, RoutedEventArgs e)
-    //{
-    //    var e = (ScrollGestureEventArgs)args;
-
-    //    PanTo(e.Delta.X, e.Delta.Y);
-    //    e.Handled = true;
-    //}
-
-
-    private void TouchScreen_Pinched(object? sender, PinchEventArgs e)
-    {
-
-    }
-
-
-    private void TouchPad_Pinched(object? sender, PointerDeltaEventArgs e)
+    /// <summary>
+    /// Handles pinch event for touchpad.
+    /// </summary>
+    private void OnTouchPadPinched(object? sender, PointerDeltaEventArgs e)
     {
         var position = e.GetPosition(this);
 

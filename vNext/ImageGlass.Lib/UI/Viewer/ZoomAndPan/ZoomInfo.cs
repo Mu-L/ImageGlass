@@ -26,6 +26,9 @@ namespace ImageGlass.UI.Viewer.ZoomAndPan;
 /// </summary>
 internal class ZoomInfo
 {
+    public const double MAX_ZOOM_SPEED = 500;
+
+
     /// <summary>
     /// Represents the zoom mode for a component.
     /// </summary>

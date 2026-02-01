@@ -81,7 +81,7 @@ public partial class ViewerControl : PhControl
     {
         base.OnLoaded(e);
 
-        EnableTouchGestures__();
+        RegisterTouchGestures();
     }
 
 
@@ -89,7 +89,7 @@ public partial class ViewerControl : PhControl
     {
         base.OnUnloaded(e);
 
-        DisableTouchGestures__();
+        UnregisterTouchGestures();
 
 
         _photoRenderer?.Dispose();

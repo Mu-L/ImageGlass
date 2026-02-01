@@ -136,8 +136,8 @@ public partial class ViewerControl
         get => _zooming.Speed;
         set
         {
-            _zooming.Speed = Math.Min(value, 500f); // max 500f
-            _zooming.Speed = Math.Max(value, -500f); // min -500f
+            _zooming.Speed = Math.Min(value, ZoomInfo.MAX_ZOOM_SPEED);
+            _zooming.Speed = Math.Max(value, -ZoomInfo.MAX_ZOOM_SPEED);
         }
     }
 
@@ -569,7 +569,7 @@ public partial class ViewerControl
         // use smooth zooming
         else
         {
-            var speed = delta / (501f - ZoomSpeed);
+            var speed = delta / (ZoomInfo.MAX_ZOOM_SPEED - ZoomSpeed + 1);
 
             // zoom in
             if (delta > 0)
@@ -651,14 +651,14 @@ public partial class ViewerControl
         if (hDistance != 0)
         {
             var newX = SrcRect.X + hDistance / _zooming.Factor;
-            SrcRect.WithX(newX);
+            SrcRect = SrcRect.WithX(newX);
         }
 
         // vertical 
         if (vDistance != 0)
         {
             var newY = SrcRect.Y + vDistance / _zooming.Factor;
-            SrcRect.WithY(newY);
+            SrcRect = SrcRect.WithY(newY);
         }
 
         _zooming.ZoomedPoint = pointerPosition ?? new();
