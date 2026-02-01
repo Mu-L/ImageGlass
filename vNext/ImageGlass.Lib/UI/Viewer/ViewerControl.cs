@@ -17,12 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using ImageGlass.Common;
-using ImageGlass.Common.Extensions;
 using ImageGlass.Common.OsApi;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
@@ -39,6 +37,9 @@ public partial class ViewerControl : PhControl
     private Photo? _photo;
     private CancellationTokenSource? _cancelPreview;
     private InterlockedBool _isPreviewing = new();
+
+    private Point? _lastMousePanPoint = null; // mouse panning
+
 
     // events
     public event TEventHandler<ViewerControl, PhotoLoadingEventArgs>? PhotoLoading;
@@ -116,23 +117,17 @@ public partial class ViewerControl : PhControl
         // update drawing area
         if (e.Property == PaddingProperty || e.Property == BoundsProperty)
         {
-            DrawingArea = Bounds.Deflate(Padding);
-        }
-    }
+            Dispatcher.UIThread.Post(() =>
+            {
+                DrawingArea = Bounds.Deflate(Padding);
+                CalculateDrawingRegion();
 
-
-    protected override void OnSizeChanged(SizeChangedEventArgs e)
-    {
-        base.OnSizeChanged(e);
-        if (e.NewSize.IsEmpty) return;
-
-        // update drawing regions
-        CalculateDrawingRegion();
-
-        // redraw the control on resizing if it's not manual zoom
-        if (_photo is not null && !_zooming.IsManual)
-        {
-            Refresh(true, false, true);
+                // redraw the control on resizing if it's not manual zoom
+                if (_photo is not null && !_zooming.IsManual)
+                {
+                    Refresh(true, false, true);
+                }
+            });
         }
     }
 
@@ -142,19 +137,14 @@ public partial class ViewerControl : PhControl
         base.OnPointerPressed(e);
 
         var p = e.GetCurrentPoint(this);
+
+        // set the init point for panning
+        if (p.Pointer.Type == PointerType.Mouse)
+        {
+            _lastMousePanPoint = p.Position;
+        }
+
         var requestRerender = OnSelectionBegin(p);
-
-        // request re-render control
-        if (requestRerender) InvalidateVisual();
-    }
-
-
-    protected override void OnPointerMoved(PointerEventArgs e)
-    {
-        base.OnPointerMoved(e);
-
-        var p = e.GetCurrentPoint(this);
-        var requestRerender = OnSelectionUpdating(p);
 
         // request re-render control
         if (requestRerender) InvalidateVisual();
@@ -170,6 +160,10 @@ public partial class ViewerControl : PhControl
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
+        // reset the panning point
+        _lastMousePanPoint = null;
+
+
         var requestRerender = OnSelectionEnd(false);
         if (requestRerender) InvalidateVisual();
 
@@ -179,10 +173,41 @@ public partial class ViewerControl : PhControl
 
     protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
     {
+        // reset the panning point
+        _lastMousePanPoint = null;
+
+
         var requestRerender = OnSelectionEnd(false);
         if (requestRerender) InvalidateVisual();
 
         base.OnPointerCaptureLost(e);
+    }
+
+
+    protected override void OnPointerMoved(PointerEventArgs e)
+    {
+        base.OnPointerMoved(e);
+        var p = e.GetCurrentPoint(this);
+        var requestRerender = false;
+
+
+        // if user is panning with mouse
+        if (_lastMousePanPoint is not null)
+        {
+            var hDistance = _lastMousePanPoint.Value.X - p.Position.X;
+            var vDistance = _lastMousePanPoint.Value.Y - p.Position.Y;
+            _lastMousePanPoint = p.Position;
+
+            requestRerender = PanTo(hDistance, vDistance, p.Position);
+        }
+        else
+        {
+            requestRerender = OnSelectionUpdating(p);
+        }
+
+
+        // request re-render control
+        if (requestRerender) InvalidateVisual();
     }
 
 
@@ -361,7 +386,8 @@ public partial class ViewerControl : PhControl
         // previewing
         if (e.State == PhotoLoadingState.Loading)
         {
-            await HandlePhotoPreviewAsync(e);
+            //TODO:
+            //await HandlePhotoPreviewAsync(e);
         }
         // load full resolution photo
         else
