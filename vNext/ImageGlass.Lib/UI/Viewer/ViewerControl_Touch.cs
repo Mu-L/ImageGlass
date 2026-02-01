@@ -25,7 +25,7 @@ namespace ImageGlass.UI.Viewer;
 
 public partial class ViewerControl
 {
-    private double _lastPinchScale = 1.0;
+    private PhPinchGestureRecognizer _pinchGesture = new();
 
 
     /// <summary>
@@ -33,8 +33,7 @@ public partial class ViewerControl
     /// </summary>
     private void RegisterTouchGestures()
     {
-        // add support for gestures
-        GestureRecognizers.Add(new PinchGestureRecognizer());
+        // add support for panning gesture
         GestureRecognizers.Add(new ScrollGestureRecognizer
         {
             CanHorizontallyScroll = true,
@@ -42,12 +41,13 @@ public partial class ViewerControl
             IsScrollInertiaEnabled = true,
         });
 
+
         // touch screen + touchpad gestures
         Gestures.AddScrollGestureHandler(this, OnTouchPanning);  // panning
 
         // touch screen gestures
-        Gestures.AddPinchHandler(this, OnTouchPinched); // pinch
-        Gestures.AddPinchEndedHandler(this, OnTouchPinchEnded); // pinch-end
+        _pinchGesture.Pinch += OnTouchPinched; // pinch gesture
+        GestureRecognizers.Add(_pinchGesture);
         Gestures.AddDoubleTappedHandler(this, OnTouchDoubleTapped);  // double-tap
 
         // touchpad gestures
@@ -64,8 +64,7 @@ public partial class ViewerControl
         Gestures.RemoveScrollGestureHandler(this, OnTouchPanning); // panning
 
         // touch screen gestures
-        Gestures.RemovePinchHandler(this, OnTouchPinched); // pinch
-        Gestures.RemovePinchEndedHandler(this, OnTouchPinchEnded); // pinch-end
+        _pinchGesture.Pinch -= OnTouchPinched; // pinch
         Gestures.RemoveDoubleTappedHandler(this, OnTouchDoubleTapped); // double-tap
 
         // touchpad gestures
@@ -89,25 +88,28 @@ public partial class ViewerControl
     /// <summary>
     /// Handles pinch event for touch screen.
     /// </summary>
-    private void OnTouchPinched(object? sender, PinchEventArgs e)
+    private void OnTouchPinched(object? sender, PhPinchEventArgs e)
     {
-        // normalize scale value to delta
-        var scaleDiff = e.Scale / _lastPinchScale;
-        var delta = (scaleDiff - 1.0) * ZoomInfo.MAX_ZOOM_SPEED;
-        _lastPinchScale = e.Scale;
+        // 1. normalize expansion value to delta
+        var delta = e.Expansion * ZoomInfo.MAX_ZOOM_SPEED;
 
-        // perform zooming
-        _ = ZoomByDeltaToPoint(delta, e.ScaleOrigin);
+
+        // 2. check if the manipulation is a pinch gesture
+        var isPintching = delta != 0;
+        if (!isPintching) return;
+
+
+        // 3. perform panning
+        PanTo(-e.Translation.X, -e.Translation.Y, e.Position, !isPintching);
+
+
+        // 4. perform zooming for Pinch gesture
+        if (isPintching)
+        {
+            _ = ZoomByDeltaToPoint(delta, e.Position);
+        }
+
         e.Handled = true;
-    }
-
-
-    /// <summary>
-    /// Handles pinch-end event for touch screen.
-    /// </summary>
-    private void OnTouchPinchEnded(object? sender, PinchEndedEventArgs e)
-    {
-        _lastPinchScale = 1.0;
     }
 
 
