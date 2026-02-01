@@ -46,7 +46,7 @@ public partial class ViewerControl
         _pinchGesture.Pinch += OnTouchPinched; // pinch gesture
         GestureRecognizers.Add(_pinchGesture);
         Gestures.AddScrollGestureHandler(this, OnTouchPanning);  // panning
-        Gestures.AddDoubleTappedHandler(this, OnTouchDoubleTapped);  // double-tap
+        Gestures.AddScrollGestureEndedHandler(this, OnTouchPanningEnd);
 
         // touchpad gestures
         Gestures.AddPointerTouchPadGestureMagnifyHandler(this, OnTouchPadPinched); // pinch
@@ -58,12 +58,10 @@ public partial class ViewerControl
     /// </summary>
     private void UnregisterTouchGestures()
     {
-        // touch screen + touchpad gestures
-        Gestures.RemoveScrollGestureHandler(this, OnTouchPanning); // panning
-
         // touch screen gestures
         _pinchGesture.Pinch -= OnTouchPinched; // pinch
-        Gestures.RemoveDoubleTappedHandler(this, OnTouchDoubleTapped); // double-tap
+        Gestures.RemoveScrollGestureHandler(this, OnTouchPanning); // panning
+        Gestures.RemoveScrollGestureEndedHandler(this, OnTouchPanningEnd);
 
         // touchpad gestures
         Gestures.RemovePointerTouchPadGestureMagnifyHandler(this, OnTouchPadPinched); // pinch
@@ -77,9 +75,26 @@ public partial class ViewerControl
     {
         var args = (ScrollGestureEventArgs)e;
 
-        // perform panning
-        _ = PanTo(args.Delta.X, args.Delta.Y, null);
+        if (EnableSelection && CurrentSelectionAction != SelectionAction.None)
+        {
+            // TODO:
+            // OnSelectionUpdating(position);
+        }
+        else
+        {
+            if (!_enablePanningVelocity) args.ShouldEndScrollGesture = true;
+
+            // perform panning
+            _ = PanTo(args.Delta.X, args.Delta.Y, null);
+        }
+
         e.Handled = true;
+    }
+
+
+    private void OnTouchPanningEnd(object? sender, ScrollGestureEndedEventArgs e)
+    {
+        _enablePanningVelocity = true;
     }
 
 
@@ -110,19 +125,6 @@ public partial class ViewerControl
         e.Handled = true;
     }
 
-
-    /// <summary>
-    /// Handles double-tap event for touch screen.
-    /// </summary>
-    private void OnTouchDoubleTapped(object? sender, RoutedEventArgs e)
-    {
-        // Touch double-tap:
-        // enable double-tapping for drawing selection
-
-        var args = (TappedEventArgs)e;
-        OnSelectionBeginWithTouch(args);
-        e.Handled = true;
-    }
 
 
     /// <summary>

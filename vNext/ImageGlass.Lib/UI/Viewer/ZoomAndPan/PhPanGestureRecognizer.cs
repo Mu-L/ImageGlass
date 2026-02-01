@@ -1,5 +1,6 @@
 ﻿using Avalonia.Input;
 using Avalonia.Input.GestureRecognizers;
+using Avalonia.Interactivity;
 using global::Avalonia;
 using System;
 
@@ -14,7 +15,7 @@ public enum PanGestureStatus
 {
     Started,
     Running,
-    Completed
+    Completed,
 }
 
 /// <summary>
@@ -50,7 +51,7 @@ public enum PanDirection
 /// <summary>
 /// The gesture recognizer for pan gesture 
 /// </summary>
-public class PanGestureRecognizer : GestureRecognizer
+public class PhPanGestureRecognizer : GestureRecognizer
 {
     private IInputElement? _inputElement;
     private IPointer? _tracking;
@@ -120,15 +121,19 @@ public class PanGestureRecognizer : GestureRecognizer
 
         if (_state == PanGestureStatus.Started)
         {
-            Panning?.Invoke(_inputElement, new PanUpdatedEventArgs(PanGestureStatus.Started, 0, 0));
-            e.Handled = true;
-            Capture(e.Pointer);
+            var args = new PanUpdatedEventArgs(PanGestureStatus.Started, 0, 0, currentPosition);
+            Panning?.Invoke(_inputElement, args);
+            e.Handled = args.Handled;
+            if (e.Handled) Capture(e.Pointer);
         }
 
-        Panning?.Invoke(_inputElement, new PanUpdatedEventArgs(PanGestureStatus.Running, _delta.X, _delta.Y));
+
+        var args2 = new PanUpdatedEventArgs(PanGestureStatus.Running, _delta.X, _delta.Y, currentPosition);
+        Panning?.Invoke(_inputElement, args2);
         _state = PanGestureStatus.Running;
-        e.Handled = true;
-        e.PreventGestureRecognition();
+
+        e.Handled = args2.Handled;
+        if (e.Handled) e.PreventGestureRecognition();
     }
 
 
@@ -143,9 +148,10 @@ public class PanGestureRecognizer : GestureRecognizer
         _state = PanGestureStatus.Completed;
         var currentPosition = e.GetPosition(_parent);
         var delta = currentPosition - _startPosition;
-        Panning?.Invoke(_inputElement, new PanUpdatedEventArgs(PanGestureStatus.Completed, delta.X, delta.Y));
 
-        e.Handled = true;
+        var args = new PanUpdatedEventArgs(PanGestureStatus.Completed, delta.X, delta.Y, currentPosition);
+        Panning?.Invoke(_inputElement, args);
+        e.Handled = args.Handled;
     }
 
 
@@ -158,10 +164,8 @@ public class PanGestureRecognizer : GestureRecognizer
 
         if (_state != PanGestureStatus.Running) return;
 
-        Panning?.Invoke(_inputElement, new PanUpdatedEventArgs(
-            PanGestureStatus.Completed,
-            delta.X,
-            delta.Y));
+        var args = new PanUpdatedEventArgs(PanGestureStatus.Completed, delta.X, delta.Y, null);
+        Panning?.Invoke(_inputElement, args);
     }
 }
 
@@ -170,18 +174,20 @@ public class PanGestureRecognizer : GestureRecognizer
 /// <summary>
 /// Contains the pan updates event data 
 /// </summary>
-public class PanUpdatedEventArgs : EventArgs
+public class PanUpdatedEventArgs : RoutedEventArgs
 {
     public PanGestureStatus StatusType { get; set; }
     public double TotalX { get; set; }
     public double TotalY { get; set; }
+    public Point? Position { get; set; }
 
 
-    public PanUpdatedEventArgs(PanGestureStatus statusType, double totalX, double totalY)
+    public PanUpdatedEventArgs(PanGestureStatus statusType, double totalX, double totalY, Point? position)
     {
         StatusType = statusType;
         TotalX = totalX;
         TotalY = totalY;
+        Position = position;
     }
 
 }

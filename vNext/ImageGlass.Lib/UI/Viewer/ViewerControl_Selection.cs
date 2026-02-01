@@ -331,15 +331,12 @@ public partial class ViewerControl
     {
         if (_imgSource == null) return false;
 
-
         _selection.PointerDownPoint = p.Position;
         _selection.IsLeftButtonPressed = p.Properties.IsLeftButtonPressed;
 
 
         // check if we can start the selection
-        var canSelect = EnableSelection
-            && p.Properties.IsLeftButtonPressed;
-        // TODO: && TouchedPoints <= 1;
+        var canSelect = EnableSelection && p.Properties.IsLeftButtonPressed;
         var isSelectionHovered = ClientSelection.Contains(p.Position);
         var requestRerender = canSelect && !SourceSelection.IsEmpty;
 
@@ -366,12 +363,7 @@ public partial class ViewerControl
             // draw selection
             else if (canSelect)
             {
-                // enable only for non-touch pointers.
-                // for Touch pointer, we handle in OnSelectionBeginWithTouch()
-                if (p.Pointer.Type != PointerType.Touch)
-                {
-                    CurrentSelectionAction = SelectionAction.Drawing;
-                }
+                CurrentSelectionAction = SelectionAction.Drawing;
             }
         }
 
@@ -381,29 +373,13 @@ public partial class ViewerControl
 
 
     /// <summary>
-    /// Initializes the selection logics when double-tap event occurs.
-    /// </summary>
-    private void OnSelectionBeginWithTouch(TappedEventArgs e)
-    {
-        if (e.Pointer.Type != PointerType.Touch) return;
-
-        // enable double-tapping for drawing selection
-        var canTouchDrawSelection = EnableSelection
-            && _selection.IsLeftButtonPressed
-            && CurrentSelectionAction == SelectionAction.None;
-
-        if (canTouchDrawSelection) CurrentSelectionAction = SelectionAction.Drawing;
-    }
-
-
-    /// <summary>
     /// Updates selection logics when <see cref="OnPointerMoved"/> event occurs.
     /// </summary>
-    private bool OnSelectionUpdating(PointerPoint p)
+    private bool OnSelectionUpdating(Point position)
     {
         var requestRerender = false;
         var canSelect = EnableSelection && _selection.IsLeftButtonPressed;
-        _selection.PointerMovePoint = p.Position;
+        _selection.PointerMovePoint = position;
 
 
         if (_selection.IsLeftButtonPressed)
@@ -411,13 +387,13 @@ public partial class ViewerControl
             // resize the selection
             if (CurrentSelectionAction == SelectionAction.Resizing && _selection.SelectedResizer != null)
             {
-                ResizeSelection(p.Position, _selection.SelectedResizer.Type);
+                ResizeSelection(position, _selection.SelectedResizer.Type);
                 requestRerender = true;
             }
             // move selection
             else if (CurrentSelectionAction == SelectionAction.Moving)
             {
-                MoveSelection(p.Position);
+                MoveSelection(position);
                 requestRerender = true;
             }
             // draw new selection
@@ -433,13 +409,13 @@ public partial class ViewerControl
         if (EnableSelection)
         {
             // set resizer cursor
-            var hoveredResizer = SelectionResizers.Find(i => i.HitRegion.Contains(p.Position));
+            var hoveredResizer = SelectionResizers.Find(i => i.HitRegion.Contains(position));
 
             if (hoveredResizer != null)
             {
                 Cursor = hoveredResizer.GetCursor();
             }
-            else if (ClientSelection.Contains(p.Position))
+            else if (ClientSelection.Contains(position))
             {
                 Cursor = new Cursor(StandardCursorType.SizeAll);
             }
@@ -450,7 +426,7 @@ public partial class ViewerControl
 
 
             // redraw the canvas
-            var isSelectionHovered = ClientSelection.Contains(p.Position);
+            var isSelectionHovered = ClientSelection.Contains(position);
             requestRerender = requestRerender
                 || _selection.IsHovered != isSelectionHovered
                 || _selection.HoveredResizer != hoveredResizer;

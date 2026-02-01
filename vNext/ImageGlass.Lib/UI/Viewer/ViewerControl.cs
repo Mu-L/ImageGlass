@@ -137,18 +137,22 @@ public partial class ViewerControl : PhControl
         base.OnPointerPressed(e);
 
         var p = e.GetCurrentPoint(this);
+        var requestRerender = false;
 
         // set the init point for panning
         if (p.Pointer.Type == PointerType.Mouse)
         {
             var canPanByMouse = !EnableSelection || e.Properties.IsMiddleButtonPressed;
+
             if (canPanByMouse)
             {
                 _lastMousePanPoint = p.Position;
             }
+            else if (EnableSelection)
+            {
+                requestRerender = OnSelectionBegin(p);
+            }
         }
-
-        var requestRerender = OnSelectionBegin(p);
 
         // request re-render control
         if (requestRerender) InvalidateVisual();
@@ -158,7 +162,11 @@ public partial class ViewerControl : PhControl
     protected override void OnPointerExited(PointerEventArgs e)
     {
         base.OnPointerExited(e);
-        _ = OnSelectionEnd(true);
+
+        if (CurrentSelectionAction != SelectionAction.None)
+        {
+            _ = OnSelectionEnd(true);
+        }
     }
 
 
@@ -206,7 +214,7 @@ public partial class ViewerControl : PhControl
         }
         else
         {
-            requestRerender = OnSelectionUpdating(p);
+            requestRerender = OnSelectionUpdating(p.Position);
         }
 
 
