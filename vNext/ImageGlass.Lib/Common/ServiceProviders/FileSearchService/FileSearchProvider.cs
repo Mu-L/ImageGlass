@@ -32,7 +32,7 @@ namespace ImageGlass.Common.ServiceProviders.FileSearchService;
 /// <summary>
 /// Handles file searching, filtering, and sorting based on specified criteria.
 /// </summary>
-public abstract partial class FileSearchProvider() : DisposableImpl, IFileSearchProvider
+public partial class FileSearchProvider() : DisposableImpl, IFileSearchProvider
 {
     protected CancellationTokenSource? _cancelSearching;
     protected Action<FileSearchingEventArgs>? _progressFn;

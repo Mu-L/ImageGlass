@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+using Avalonia.Threading;
 using ImageGlass.Common.Types;
 using ImageMagick;
 using SkiaSharp;
@@ -310,7 +311,10 @@ public abstract class AnimatorImpl : DisposableImpl
     /// </summary>
     protected virtual void OnFrameChanged(AnimatorFrameChangedEventArgs e)
     {
-        FrameChanged?.Invoke(this, e);
+        Dispatcher.UIThread.Post(() =>
+        {
+            FrameChanged?.Invoke(this, e);
+        });
     }
 
 
