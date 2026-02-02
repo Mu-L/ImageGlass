@@ -140,7 +140,7 @@ public abstract partial class FileSearchProvider() : DisposableImpl, IFileSearch
     /// <summary>
     /// Sorts a collection of image file paths based on provided criteria.
     /// </summary>
-    protected virtual OrderedParallelQuery<string> OnSorting(IEnumerable<string> fileList,
+    protected virtual IOrderedEnumerable<string> OnSorting(IEnumerable<string> fileList,
         FileSearchOptions options)
     {
         return SortFiles(fileList, options);
@@ -193,9 +193,10 @@ public abstract partial class FileSearchProvider() : DisposableImpl, IFileSearch
     /// <summary>
     /// Sorts a collection of image file paths based on provided criteria.
     /// </summary>
-    public static OrderedParallelQuery<string> SortFiles(IEnumerable<string> fileList, FileSearchOptions options)
+    public static IOrderedEnumerable<string> SortFiles(IEnumerable<string> fileList, FileSearchOptions options)
     {
-        var query = fileList.AsParallel();
+        var query = fileList;
+
 
         // Gets the file path comparer.
         var filePathComparer = new StringNaturalComparer(options.OrderType == ImageOrderType.Asc, StringComparison.OrdinalIgnoreCase);

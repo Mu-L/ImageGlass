@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -270,10 +269,10 @@ public partial class PhotoManager
         _currentIndex = -1;
 
         // dispose photos in the list
-        Parallel.ForEach(Items, item =>
+        foreach (var item in Items)
         {
             item.WithNoReactive(() => item.Dispose());
-        });
+        }
 
         Items.Clear();
         _dict.Clear();
