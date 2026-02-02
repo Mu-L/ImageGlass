@@ -70,6 +70,12 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = MainWindow;
+
+            // get foreground shell
+            if (Core.Config.ShouldUseExplorerSortOrder)
+            {
+                Core.ShellProvider?.ForegroundShell = Core.ShellProvider.GetForegroundWindowView();
+            }
         }
 
         base.OnFrameworkInitializationCompleted();

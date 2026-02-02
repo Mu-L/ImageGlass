@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia.Threading;
 using D2Phap;
 using ImageGlass.Common.ServiceProviders.FileSearchService;
 using System;
@@ -67,15 +68,17 @@ public partial class Win32FileSearchProvider : FileSearchProvider
         // 1. get files from the foreground window
         if (Options.ForegroundShell != null && Options.UseExplorerSortOrder)
         {
-            try
+            Dispatcher.UIThread.Post(() =>
             {
-                // get shell folder
-                var folderShell = GetShellFolderView(null, (ExplorerView?)Options.ForegroundShell);
+                try
+                {
+                    var folderShell = GetShellFolderView(null, (ExplorerView?)Options.ForegroundShell);
+                    FindFiles_WithShell(folderShell.View, folderShell.DirPath, _cancelSearching.Token);
+                }
+                catch (COMException) { }
+            });
 
-                FindFiles_WithShell(folderShell.View, folderShell.DirPath, _cancelSearching.Token);
-                return;
-            }
-            catch (COMException) { }
+            return;
         }
 
 
@@ -88,7 +91,13 @@ public partial class Win32FileSearchProvider : FileSearchProvider
             // find and save all shell folder view
             foreach (var dirPath in dirList)
             {
-                var fv = GetShellFolderView(dirPath, null).View;
+                var folderShell = await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    var dirShell = GetShellFolderView(dirPath, null);
+                    return dirShell;
+                });
+
+                var fv = folderShell.View;
                 _ = fvMap.TryAdd(dirPath, fv);
             }
         }
@@ -104,7 +113,10 @@ public partial class Win32FileSearchProvider : FileSearchProvider
                 // with shell
                 if (folderShellView != null)
                 {
-                    FindFiles_WithShell(folderShellView, dirPath, _cancelSearching.Token);
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        FindFiles_WithShell(folderShellView, dirPath, _cancelSearching.Token);
+                    });
                 }
 
                 // without shell
