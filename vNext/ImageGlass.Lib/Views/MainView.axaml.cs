@@ -23,9 +23,11 @@ using Avalonia.Threading;
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders.FileSearchService;
+using ImageGlass.Common.Types;
 using ImageGlass.UI;
 using ImageGlass.ViewModels;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -51,6 +53,10 @@ public partial class MainView : PhControl
         DragDrop.SetAllowDrop(PART_Viewer, true);
         DragDrop.AddDragOverHandler(PART_Viewer, PART_Viewer_DragOver);
         DragDrop.AddDropHandler(PART_Viewer, PART_Viewer_Drop);
+
+
+        // load image from command line arguments
+        LoadImagesFromCmdArgs();
     }
 
 
@@ -121,6 +127,41 @@ public partial class MainView : PhControl
 
         // 3.2 open the path
         Core.API?.IG_OpenPath(paths[0]);
+    }
+
+
+
+
+    private void LoadImagesFromCmdArgs()
+    {
+        var pathToLoad = Core.InputImagePathFromArgs;
+
+        // check for last seen image
+        if (string.IsNullOrEmpty(pathToLoad)
+            && Core.Config.ShouldOpenLastSeenImage
+            && BHelper.CheckPath(Core.Config.LastSeenImagePath) == PathType.File)
+        {
+            pathToLoad = Core.Config.LastSeenImagePath;
+        }
+
+        // check for Welcome image
+        if (string.IsNullOrEmpty(pathToLoad))
+        {
+            if (Core.Config.ShowWelcomeImage)
+            {
+                pathToLoad = BHelper.BaseDir("default.webp");
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        if (!File.Exists(pathToLoad)) return;
+
+        // start loading path with the foreground shell
+        PrepareLoadPhotoList([pathToLoad],
+            currentFilePath: null, disposeForegroundShell: false, loadInitPhoto: true);
     }
 
 

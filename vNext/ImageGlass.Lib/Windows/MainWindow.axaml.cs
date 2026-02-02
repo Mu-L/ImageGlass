@@ -63,6 +63,13 @@ public partial class MainWindow : PhWindow
                 WindowState = Avalonia.Controls.WindowState.Normal;
             }
 
+            // set instance arguments
+            Core.Args = e.Arguments;
+            Core.UpdateInitImagePath();
+
+            // load image path
+            Core.API?.IG_OpenPath(Core.InputImagePathFromArgs);
+
             Activate();
             Topmost = true;
             Topmost = Core.Config.EnableWindowTopMost;
