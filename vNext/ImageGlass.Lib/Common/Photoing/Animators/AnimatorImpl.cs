@@ -87,7 +87,7 @@ public abstract class AnimatorImpl : DisposableImpl
     /// <summary>
     /// Renders the current frame of the animation and returns the resulting bitmap.
     /// </summary>
-    public abstract SKImage? GetRenderedFrameBitmap();
+    public abstract SKImage? GetRenderedFrameBitmap(int frameIndex);
 
 
 
@@ -231,7 +231,8 @@ public abstract class AnimatorImpl : DisposableImpl
     {
         if (_isPaused) return;
 
-        var frameDelay = GetFrameDelay(_currentFrame);
+        var frameIndex = _currentFrame;
+        var frameDelay = GetFrameDelay(frameIndex);
         var now = _stopwatch.Elapsed;
 
         // check if it's time to update frame
@@ -242,13 +243,13 @@ public abstract class AnimatorImpl : DisposableImpl
             // frame changed
             OnFrameChanged(new AnimatorFrameChangedEventArgs()
             {
-                CurrentFrame = _currentFrame,
+                CurrentFrame = frameIndex,
                 CurrentLoop = _currentLoop,
                 FrameCount = _frameCount,
                 LoopCount = _loopCount,
             });
 
-            _currentFrame++;
+            _currentFrame = frameIndex + 1;
 
             // check for loop
             if (_currentFrame >= _frameCount)

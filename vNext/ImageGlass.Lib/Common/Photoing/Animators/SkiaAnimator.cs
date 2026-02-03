@@ -104,29 +104,29 @@ public partial class SkiaAnimator : AnimatorImpl
     /// <inheritdoc/>
     /// </summary>
     /// <returns></returns>
-    public override SKImage? GetRenderedFrameBitmap()
+    public override SKImage? GetRenderedFrameBitmap(int frameIndex)
     {
         if (_codec is null) return null;
 
         // use cached frame first
-        if (_frameCache[_currentFrame] is not null)
+        if (_frameCache[frameIndex] is not null)
         {
-            return _frameCache[_currentFrame];
+            return _frameCache[frameIndex];
         }
 
 
         // decode the frame
+        var priorFrame = frameIndex > 0 ? frameIndex - 1 : -1;
+        var options = new SKCodecOptions(frameIndex, priorFrame);
         using var bmpFrame = new SKBitmap(_codec.Info);
 
-        var priorFrame = _currentFrame > 0 ? _currentFrame - 1 : -1;
-        var options = new SKCodecOptions(_currentFrame, priorFrame);
         var result = _codec.GetPixels(_codec.Info, bmpFrame.GetPixels(), options);
         if (result != SKCodecResult.Success) return null;
 
 
         // convert to immutable SKImage
         var imgFrame = SkiaCodec.ConvertToSKImage(bmpFrame);
-        _frameCache[_currentFrame] = imgFrame;
+        _frameCache[frameIndex] = imgFrame;
 
         return imgFrame;
     }

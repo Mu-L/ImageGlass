@@ -679,11 +679,9 @@ public partial class ViewerControl : PhControl
     /// </summary>
     private void Animator_FrameChanged(AnimatorImpl sender, AnimatorFrameChangedEventArgs e)
     {
-        DisposeNativePhotoResources();
-
         // update the frame bitmap
         SourceKind = PhotoSource.Native;
-        _imgSource = sender.GetRenderedFrameBitmap();
+        _imgSource = sender.GetRenderedFrameBitmap(e.CurrentFrame);
 
         InvalidateVisual();
     }
