@@ -12,27 +12,12 @@ BITMAP
 BITMAPINFO
 
 
-IFolderView2
-IPersistFolder2
-SHELLEXECUTEINFOW
-ITEMIDLIST
-ShellExecuteEx
-
-
-SHGetPathFromIDList
-SHParseDisplayName
-SHOpenFolderAndSelectItems
-CoTaskMemFree
-
-
 MONITORINFOEXW
 MonitorFromWindow
 GetMonitorInfo
 GetICMProfile
 CreateDC
 DeleteDC
-
-
 DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO
 DISPLAYCONFIG_SOURCE_DEVICE_NAME
 GetDisplayConfigBufferSizes
@@ -43,8 +28,3 @@ DisplayConfigGetDeviceInfo
 DwmSetWindowAttribute
 
 
-CoCreateInstance
-IShellLinkW
-IPersistFile
-WIN32_FIND_DATAW
-CLSCTX

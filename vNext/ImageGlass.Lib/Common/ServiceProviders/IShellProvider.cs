@@ -25,7 +25,7 @@ public interface IShellProvider : IDisposable
     /// <summary>
     /// Gets, sets the Shell object of foreground window.
     /// </summary>
-    IDisposable? ForegroundShell { get; set; }
+    object? ForegroundShell { get; set; }
 
 
     /// <summary>
@@ -37,7 +37,7 @@ public interface IShellProvider : IDisposable
     /// <summary>
     /// Gets the foreground shell object.
     /// </summary>
-    IDisposable? GetForegroundWindowView();
+    object? GetForegroundWindowView();
 
 
     /// <summary>

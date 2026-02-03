@@ -71,6 +71,6 @@ public class FileSearchOptions
     /// <summary>
     /// Gets, sets the shell object of the foreground window.
     /// </summary>
-    public IDisposable? ForegroundShell { get; set; } = null;
+    public object? ForegroundShell { get; set; } = null;
 
 }

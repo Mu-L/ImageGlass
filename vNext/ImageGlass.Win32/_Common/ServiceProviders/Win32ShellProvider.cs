@@ -29,6 +29,7 @@ namespace ImageGlass.Win32.Common.ServiceProviders;
 
 public class Win32ShellProvider : DisposableImpl, IShellProvider
 {
+    private readonly EggShell _shell = new();
     private static ExplorerView? _foregroundShell = null;
     private static string _foregroundShellPath = string.Empty;
 
@@ -39,12 +40,12 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public IDisposable? ForegroundShell
+    public object? ForegroundShell
     {
         get => _foregroundShell;
         set
         {
-            _foregroundShell?.Dispose();
+            _foregroundShell = null;
             _foregroundShell = (ExplorerView?)value;
 
             try
@@ -55,7 +56,6 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
             catch
             {
                 _foregroundShellPath = string.Empty;
-                _foregroundShell?.Dispose();
                 _foregroundShell = null;
             }
         }
@@ -98,10 +98,9 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public IDisposable? GetForegroundWindowView()
+    public object? GetForegroundWindowView()
     {
-        using var shell = new EggShell();
-        var ev = shell.GetForegroundWindowView();
+        var ev = _shell.GetForegroundWindowView();
 
         return ev;
     }
@@ -114,7 +113,7 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
     {
         if (string.IsNullOrWhiteSpace(lnkFilePath)) return null;
 
-        return FileShortcutApi.GetTargetPathFromShortcut(lnkFilePath);
+        return EggShell.GetTargetPathFromShortcut(lnkFilePath);
     }
 
 
@@ -127,7 +126,7 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
 
         try
         {
-            ExplorerApi.SelectFileFromExplorer(filePath);
+            _shell.SelectFileFromExplorer(filePath);
         }
         catch
         {

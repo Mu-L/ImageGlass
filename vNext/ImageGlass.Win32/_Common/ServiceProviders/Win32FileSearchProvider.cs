@@ -30,7 +30,6 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Win32.Common.ServiceProviders;
 
-
 public partial class Win32FileSearchProvider : FileSearchProvider
 {
 
@@ -132,10 +131,6 @@ public partial class Win32FileSearchProvider : FileSearchProvider
         IsSearchEnded = true;
 
         // dipose shell objects
-        foreach (var fv in fvMap)
-        {
-            fv.Value?.Dispose();
-        }
         fvMap.Clear();
     }
 
@@ -235,9 +230,9 @@ public partial class Win32FileSearchProvider : FileSearchProvider
     /// <exception cref="COMException"></exception>
     private static (ExplorerFolderView? View, string DirPath) GetShellFolderView(string? rootDir, ExplorerView? foregroundShell)
     {
-        var folderPath = "";
+        var folderPath = string.Empty;
+        var shell = new EggShell();
         ExplorerFolderView? folderView = null;
-        using var shell = new EggShell();
 
 
         // if no dir path, get the explorer's folder view where the application opened from
