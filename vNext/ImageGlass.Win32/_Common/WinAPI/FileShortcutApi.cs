@@ -16,66 +16,53 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using System;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.Storage.FileSystem;
+using Windows.Win32.System.Com;
+using Windows.Win32.UI.Shell;
+
 namespace ImageGlass.Win32.Common;
 
 public static class FileShortcutApi
 {
-    public enum ShortcutWindowStyle
-    {
-        Normal = 4,
-        Maximized = 3,
-        Minimized = 7,
-    }
+    private static Guid CLSID_ShellLink = new Guid("00021401-0000-0000-C000-000000000046");
 
 
     /// <summary>
     /// Get the target path from shortcut (*.lnk)
     /// </summary>
     /// <param name="shortcutPath">Path of shortcut (*.lnk)</param>
-    /// <returns></returns>
-    public static string? GetTargetPathFromShortcut(string shortcutPath)
+    public static unsafe string? GetTargetPathFromShortcut(string shortcutPath)
     {
-        var shell = new IWshRuntimeLibrary.WshShell();
-
         try
         {
-            var shortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortcutPath);
+            var CLSID_IShellLinkW = typeof(IShellLinkW).GUID;
 
-            return shortcut.TargetPath;
+            PInvoke.CoCreateInstance(CLSID_ShellLink, null,
+                CLSCTX.CLSCTX_INPROC_SERVER, in CLSID_IShellLinkW, out object obj)
+                .ThrowOnFailure();
+
+            if (obj is not IShellLinkW shellLink) return null;
+            if (obj is not IPersistFile persistFile) return null;
+
+            // open the shortcut path
+            persistFile.Load(shortcutPath, STGM.STGM_READ);
+
+            // get full path
+            char* buffer = stackalloc char[260];
+            WIN32_FIND_DATAW findData = default;
+            shellLink.GetPath(new PWSTR(buffer), 260, &findData, 0);
+
+            var path = new string(buffer);
+            return path;
         }
-        catch // (COMException)
-        {
-            // A COMException is thrown if the file is not a valid shortcut (.lnk) file 
-        }
+        catch { }
 
         return null;
     }
 
 
-    /// <summary>
-    /// Create shortcut file
-    /// </summary>
-    /// <param name="shortcutPath"></param>
-    /// <param name="targetPath"></param>
-    /// <param name="args"></param>
-    /// <param name="windowStyle"></param>
-    public static void CreateShortcut(string shortcutPath,
-        string targetPath,
-        string args = "",
-        ShortcutWindowStyle windowStyle = ShortcutWindowStyle.Normal)
-    {
-        var shell = new IWshRuntimeLibrary.WshShell();
-
-        try
-        {
-            var shortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortcutPath);
-
-            shortcut.TargetPath = targetPath;
-            shortcut.IconLocation = targetPath;
-            shortcut.Arguments = args;
-            shortcut.WindowStyle = (int)windowStyle;
-            shortcut.Save();
-        }
-        catch { }
-    }
 }
+

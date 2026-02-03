@@ -41,3 +41,10 @@ DisplayConfigGetDeviceInfo
 
 
 DwmSetWindowAttribute
+
+
+CoCreateInstance
+IShellLinkW
+IPersistFile
+WIN32_FIND_DATAW
+CLSCTX
