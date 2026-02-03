@@ -426,7 +426,6 @@ public partial class ViewerControl : PhControl
         }
 
 
-        SKBitmap? bmpPreview = null;
         SKImage? imgPreview = null;
         var token = _cancelPreview?.Token ?? default;
         var hasPreview = false;
@@ -438,8 +437,8 @@ public partial class ViewerControl : PhControl
             var previewHeight = Math.Min(DrawingArea.Height, e.Metadata.Height) / Dpi;
 
             // try to get photo preview
-            bmpPreview = await Core.PreviewProvider!.GetPreviewAsync(e.Metadata, previewHeight, token);
-            hasPreview = bmpPreview is not null;
+            imgPreview = await Core.PreviewProvider!.GetPreviewAsync(e.Metadata, previewHeight, token);
+            hasPreview = imgPreview is not null;
 
 
             // cancel if requested
@@ -452,13 +451,9 @@ public partial class ViewerControl : PhControl
             if (hasPreview)
             {
                 // get thumbnail size
-                var prevWidth = bmpPreview?.Width ?? (int)e.Metadata.Width;
-                var prevHeight = bmpPreview?.Height ?? (int)e.Metadata.Height;
+                var prevWidth = imgPreview?.Width ?? (int)e.Metadata.Width;
+                var prevHeight = imgPreview?.Height ?? (int)e.Metadata.Height;
                 BitmapSize = new(prevWidth, prevHeight);
-
-
-                // create new native bitmap for previewing off-thread
-                imgPreview = SkiaCodec.ConvertToSKImage(bmpPreview);
 
                 // cancel if requested
                 if (token.IsCancellationRequested)
@@ -474,11 +469,6 @@ public partial class ViewerControl : PhControl
         catch
         {
             HandleCancelLoading();
-        }
-        finally
-        {
-            bmpPreview?.Dispose();
-            bmpPreview = null;
         }
 
 
@@ -537,7 +527,7 @@ public partial class ViewerControl : PhControl
         var prevSize = BitmapSize;
 
         // source
-        SKImage? bitmap = null;
+        SKImage? imgFrame = null;
         SkiaAnimator? animator = null;
         var hasSource = false;
 
@@ -577,8 +567,8 @@ public partial class ViewerControl : PhControl
                 else
                 {
                     // create GPU bitmap
-                    bitmap = e.Photo.GetFrame();
-                    hasSource = bitmap != null;
+                    imgFrame = e.Photo.GetFrame();
+                    hasSource = imgFrame != null;
                 }
             }
 
@@ -603,7 +593,7 @@ public partial class ViewerControl : PhControl
             if (hasSource)
             {
                 // set the source
-                _imgSource = bitmap;
+                _imgSource = imgFrame;
 
 
                 // set animator
@@ -673,8 +663,8 @@ public partial class ViewerControl : PhControl
         {
             if (userCancelled) e.Photo.Unload();
 
-            bitmap?.Dispose();
-            bitmap = null;
+            imgFrame?.Dispose();
+            imgFrame = null;
 
             animator?.Dispose();
             animator = null;

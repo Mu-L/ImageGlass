@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common.Photoing;
 using SkiaSharp;
 using System;
 using System.Diagnostics;
@@ -36,11 +37,11 @@ public static class ShellThumbnailApi
     /// <summary>
     /// Gets Shell thumbnail from file.
     /// </summary>
-    public static SKBitmap? GetThumbnail(string filePath, int width, int height)
+    public static SKImage? GetThumbnail(string filePath, int width, int height)
     {
         if (!File.Exists(filePath)) return null;
 
-        SKBitmap? thumbnail = null;
+        SKImage? imgThumbnail = null;
         HGDIOBJ? bmpObj = null;
 
         try
@@ -51,7 +52,7 @@ public static class ShellThumbnailApi
             if (hBitmap is null) return null;
 
             // convert to SKBitmap
-            thumbnail = ConvertHBitmapToSKBitmap(hBitmap);
+            imgThumbnail = ConvertHBitmapToSKBitmap(hBitmap);
         }
         catch (Exception ex)
         {
@@ -69,7 +70,7 @@ public static class ShellThumbnailApi
             }
         }
 
-        return thumbnail;
+        return imgThumbnail;
     }
 
 
@@ -95,11 +96,11 @@ public static class ShellThumbnailApi
     /// <summary>
     /// Converts HBitmap to SKBitmap
     /// </summary>
-    private static unsafe SKBitmap? ConvertHBitmapToSKBitmap(DeleteObjectSafeHandle hBitmap)
+    private static unsafe SKImage? ConvertHBitmapToSKBitmap(DeleteObjectSafeHandle hBitmap)
     {
         HDC hdc = default;
         HGDIOBJ oldBitmap = default;
-        SKBitmap? bitmap = null;
+        SKImage? imgOutput = null;
 
         try
         {
@@ -111,7 +112,7 @@ public static class ShellThumbnailApi
                 return null;
 
             var info = new SKImageInfo(bm.bmWidth, bm.bmHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
-            bitmap = new SKBitmap(info);
+            var bmpOutput = new SKBitmap(info);
 
             var bmi = new BITMAPINFO
             {
@@ -127,27 +128,26 @@ public static class ShellThumbnailApi
             };
 
             if (PInvoke.GetDIBits(hdc, (HBITMAP)hBitmap.DangerousGetHandle(),
-                0, (uint)bm.bmHeight, (void*)bitmap.GetPixels(), &bmi, DIB_USAGE.DIB_RGB_COLORS) == 0)
+                0, (uint)bm.bmHeight, (void*)bmpOutput.GetPixels(), &bmi, DIB_USAGE.DIB_RGB_COLORS) == 0)
             {
-                bitmap.Dispose();
-                bitmap = null;
+                bmpOutput.Dispose();
+                bmpOutput = null;
                 return null;
             }
 
-            var result = bitmap;
-            bitmap = null; // prevent disposal in finally
-            return result;
+            imgOutput = SkiaCodec.ConvertToSKImage(bmpOutput);
+            return imgOutput;
         }
         catch
         {
-            bitmap?.Dispose();
+            imgOutput?.Dispose();
             return null;
         }
         finally
         {
-            bitmap?.Dispose(); // cleanup if still referenced
             if (oldBitmap != default)
                 PInvoke.SelectObject(hdc, oldBitmap);
+
             if (hdc != default)
                 PInvoke.DeleteDC(hdc);
         }

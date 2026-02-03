@@ -116,20 +116,19 @@ public partial class SkiaAnimator : AnimatorImpl
 
 
         // decode the frame
-        var info = _codec.Info;
-        using var frameBitmap = new SKBitmap(info.Width, info.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+        using var bmpFrame = new SKBitmap(_codec.Info);
 
         var priorFrame = _currentFrame > 0 ? _currentFrame - 1 : -1;
         var options = new SKCodecOptions(_currentFrame, priorFrame);
-        var result = _codec.GetPixels(info, frameBitmap.GetPixels(), options);
+        var result = _codec.GetPixels(_codec.Info, bmpFrame.GetPixels(), options);
         if (result != SKCodecResult.Success) return null;
 
 
         // convert to immutable SKImage
-        var frameImage = SkiaCodec.ConvertToSKImage(frameBitmap);
-        _frameCache[_currentFrame] = frameImage;
+        var imgFrame = SkiaCodec.ConvertToSKImage(bmpFrame);
+        _frameCache[_currentFrame] = imgFrame;
 
-        return frameImage;
+        return imgFrame;
     }
 
 

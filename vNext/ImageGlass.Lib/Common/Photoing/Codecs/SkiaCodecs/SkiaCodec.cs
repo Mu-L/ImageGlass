@@ -131,11 +131,11 @@ public static partial class SkiaCodec
 
 
         // 2. read single-frame formats
-        var bitmap = new SKBitmap(codec.Info);
+        using var bmpFrame = new SKBitmap(codec.Info);
         var codecOption = new SKCodecOptions((int)meta.FrameIndex);
-        if (codec.GetPixels(codec.Info, bitmap.GetPixels(), codecOption) == SKCodecResult.Success)
+        if (codec.GetPixels(codec.Info, bmpFrame.GetPixels(), codecOption) == SKCodecResult.Success)
         {
-            result.SingleFrame = bitmap;
+            result.SingleFrame = ConvertToSKImage(bmpFrame);
         }
 
         codec.Dispose();
@@ -150,23 +150,23 @@ public static partial class SkiaCodec
     /// </summary>
     /// <returns><c>true</c> if file is saved.</returns>
     /// <exception cref="Exception"></exception>
-    public static async Task SaveAsync(SKBitmap? srcBmp, string destFilePath,
+    public static async Task SaveAsync(SKImage? srcImg, string destFilePath,
         ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
     {
-        if (srcBmp is null) return;
+        if (srcImg is null) return;
 
         try
         {
             // 1. apply transforms
-            using var dstBmp = TransformImage(srcBmp, transform);
-            if (dstBmp is null || token.IsCancellationRequested) return;
+            using var dstImg = TransformImage(srcImg, transform);
+            if (dstImg is null || token.IsCancellationRequested) return;
 
 
             // 2. use Magick to save
             if (MagickCodec.CanWrite(destFilePath))
             {
                 // convert to pixels
-                var pixels = dstBmp.GetPixelSpan();
+                var pixels = dstImg.EncodedData.AsSpan();
                 if (token.IsCancellationRequested) return;
 
                 // convert to MagickImage
@@ -174,8 +174,8 @@ public static partial class SkiaCodec
                 var settings = new MagickReadSettings()
                 {
                     Format = MagickFormat.Bgra,
-                    Width = (uint)dstBmp.Width,
-                    Height = (uint)dstBmp.Height,
+                    Width = (uint)dstImg.Width,
+                    Height = (uint)dstImg.Height,
                 };
                 imgM.Read(pixels, settings);
                 imgM.Quality = quality;
@@ -238,15 +238,13 @@ public static partial class SkiaCodec
     /// <summary>
     /// Returns the new transformed bitmap.
     /// </summary>
-    public static SKBitmap? TransformImage(SKBitmap? bmpSrc, ImgTransform? transform)
+    public static SKImage? TransformImage(SKImage? imgSrc, ImgTransform? transform)
     {
-        if (bmpSrc is null || transform is null || !transform.HasChanges) return null;
+        if (imgSrc is null || transform is null || !transform.HasChanges) return null;
 
-
-        var dstBmp = new SKBitmap(bmpSrc.Info);
-        using var canvas = new SKCanvas(dstBmp);
-        canvas.Clear(SKColors.Transparent);
-        canvas.Translate(dstBmp.Width * 0.5f, dstBmp.Height * 0.5f);
+        var surface = SKSurface.Create(imgSrc.Info);
+        var canvas = surface.Canvas;
+        canvas.Translate(imgSrc.Width * 0.5f, imgSrc.Height * 0.5f);
 
 
         // flip
@@ -264,9 +262,8 @@ public static partial class SkiaCodec
             canvas.RotateDegrees(transform.Rotation);
         }
 
-
-        canvas.Translate(-dstBmp.Width * 0.5f, -dstBmp.Height * 0.5f);
-        canvas.DrawBitmap(bmpSrc, 0, 0);
+        canvas.Translate(-imgSrc.Width * 0.5f, -imgSrc.Height * 0.5f);
+        canvas.DrawImage(imgSrc, 0, 0);
 
 
         // invert color
@@ -285,29 +282,27 @@ public static partial class SkiaCodec
                 ColorFilter = SKColorFilter.CreateColorMatrix(colorMatrix),
             };
 
-            canvas.DrawBitmap(bmpSrc, 0, 0, paint);
+            canvas.DrawImage(imgSrc, 0, 0, paint);
         }
 
-
-        return dstBmp;
+        return surface.Snapshot();
     }
 
 
     /// <summary>
     /// Converts Magick image to SKBitmap.
     /// </summary>
-    public static SKBitmap? ConvertFromMagick(MagickImage? imgM)
+    public static SKImage? ConvertFromMagick(MagickImage? imgM)
     {
         if (imgM is null) return null;
 
         var info = new SKImageInfo((int)imgM.Width, (int)imgM.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
-        var bmp = new SKBitmap(info);
 
         // use direct pixels from magick image
-        var imgMPtr = MagickCodec.GetPixelsPointer(imgM);
-        bmp.SetPixels(imgMPtr);
+        var imgMPtr = MagickCodec.GetPixelsPointer(imgM, MagickFormat.Bgra);
+        var img = SKImage.FromPixels(info, imgMPtr);
 
-        return bmp;
+        return img;
     }
 
 

@@ -50,7 +50,7 @@ public partial class Photo : DisposableImpl
 
     /// <summary>
     /// Gets the native bitmap,
-    /// either <see cref="SKBitmap"/>,
+    /// either <see cref="SKImage"/>,
     /// or <see cref="SKCodec"/>,
     /// or <see cref="SkiaAnimator"/>.
     /// </summary>
@@ -440,11 +440,11 @@ public partial class Photo : DisposableImpl
         // single-frame formats
         else
         {
-            var bmp = SkiaCodec.ConvertFromMagick(data.SingleFrame);
+            var img = SkiaCodec.ConvertFromMagick(data.SingleFrame);
 
-            Bitmap = bmp;
-            _width = (uint)(bmp?.Width ?? 0);
-            _height = (uint)(bmp?.Height ?? 0);
+            Bitmap = img;
+            _width = (uint)(img?.Width ?? 0);
+            _height = (uint)(img?.Height ?? 0);
         }
     }
 
@@ -652,40 +652,20 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public SKImage? GetFrame(uint frameIndex = 0)
     {
-        SKBitmap? bitmap = null;
-
         // 1. native bitmap is a single-frame bitmap
-        if (Bitmap is SKBitmap bmp)
-        {
-            bitmap = bmp;
-        }
+        if (Bitmap is SKImage img) return img;
+
 
         // 2. native bitmap is a multi-frame bitmap
         if (Bitmap is SKCodec codec)
         {
             var bmpFrame = new SKBitmap(codec.Info);
             var codecOption = new SKCodecOptions((int)Metadata.FrameIndex);
+
             if (codec.GetPixels(codec.Info, bmpFrame.GetPixels(), codecOption) == SKCodecResult.Success)
             {
-                bitmap = bmpFrame;
+                return SkiaCodec.ConvertToSKImage(bmpFrame);
             }
-        }
-
-
-        // 3. convert to image
-        if (bitmap is not null)
-        {
-            // TODO:
-            //// get source color space
-            //SKColorSpace? srcColorSpace = null;
-            //if (Metadata.ColorProfileData is not null)
-            //{
-            //    srcColorSpace = SKColorSpace.CreateIcc(Metadata.ColorProfileData);
-            //}
-
-            // convert
-            var img = SkiaCodec.ConvertToSKImage(bitmap); //, srcColorSpace);
-            return img;
         }
 
         return null;
@@ -783,9 +763,9 @@ public partial class Photo : DisposableImpl
             var destExt = Path.GetExtension(destFilePath).ToLowerInvariant();
 
             // 1. save clipboard photo to file
-            if (IsClipboard && Bitmap is SKBitmap bmp)
+            if (IsClipboard && Bitmap is SKImage img)
             {
-                await SkiaCodec.SaveAsync(bmp, destFilePath, transforms, quality, token);
+                await SkiaCodec.SaveAsync(img, destFilePath, transforms, quality, token);
             }
 
             // 2. save photo file to file

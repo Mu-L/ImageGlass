@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -25,7 +26,9 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders.FileSearchService;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
+using ImageGlass.UI.Windowing;
 using ImageGlass.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -54,6 +57,9 @@ public partial class MainView : PhControl
         DragDrop.AddDragOverHandler(PART_Viewer, PART_Viewer_DragOver);
         DragDrop.AddDropHandler(PART_Viewer, PART_Viewer_Drop);
 
+        // control events
+        PART_Toolbar.ItemClicked += PART_Toolbar_ItemClicked;
+
 
         // load image from command line arguments
         LoadImagesFromCmdArgs();
@@ -67,6 +73,9 @@ public partial class MainView : PhControl
         // drag-drop events
         DragDrop.RemoveDragOverHandler(PART_Viewer, PART_Viewer_DragOver);
         DragDrop.RemoveDropHandler(PART_Viewer, PART_Viewer_Drop);
+
+        // control events
+        PART_Toolbar.ItemClicked -= PART_Toolbar_ItemClicked;
     }
 
 
@@ -82,7 +91,16 @@ public partial class MainView : PhControl
     }
 
 
-
+    private void PART_Toolbar_ItemClicked(ToolbarButton sender, EventArgs e)
+    {
+        _ = ModalWindow.ShowInfoAsync((PhWindow?)TopLevel.GetTopLevel(this), new ModalWindowOptions
+        {
+            Title = sender.VM.DisplayText,
+            Heading = sender.VM.DisplayText,
+            Description = sender.VM.Tooltip,
+            Details = $"{sender.VM.OnClick?.Executable}({sender.VM.OnClick?.Argument})",
+        });
+    }
 
 
     private void PART_Viewer_DragOver(object? sender, DragEventArgs e)
@@ -163,7 +181,6 @@ public partial class MainView : PhControl
         PrepareLoadPhotoList([pathToLoad],
             currentFilePath: null, disposeForegroundShell: false, loadInitPhoto: true);
     }
-
 
 
     public void PrepareLoadPhotoList(ICollection<string> inputPaths, string? currentFilePath,
@@ -250,8 +267,6 @@ public partial class MainView : PhControl
             });
         }
     }
-
-
 
 
     public async Task ViewPhotoAsync(Photo? photo, bool useCache = true, bool scrollToThumbnail = true)

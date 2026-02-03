@@ -26,7 +26,7 @@ namespace ImageGlass.Common.Photoing;
 
 public partial class SkiaDecoderOutput : DisposableImpl
 {
-    public SKBitmap? SingleFrame { get; set; } = null;
+    public SKImage? SingleFrame { get; set; } = null;
     public SKCodec? MultiFrames { get; set; } = null;
     public SkiaAnimator? Animator { get; set; } = null;
     public Size Size { get; set; } = new();

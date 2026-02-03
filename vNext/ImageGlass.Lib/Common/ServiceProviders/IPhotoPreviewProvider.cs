@@ -29,12 +29,12 @@ public interface IPhotoPreviewProvider
     /// Retrieves an embedded thumbnail from either a RAW format or an EXIF profile if exists.
     /// Tries to use native platform API to get the thumbnail if it not exist or size is too small.
     /// </summary>
-    Task<SKBitmap?> GetPreviewAsync(PhotoMetadata meta, double? minHeight, CancellationToken token = default);
+    Task<SKImage?> GetPreviewAsync(PhotoMetadata meta, double? minHeight, CancellationToken token = default);
 
 
     /// <summary>
     /// Gets thumbnail of the photo.
     /// </summary>
-    Task<SKBitmap?> GetThumbnailAsync(PhotoMetadata meta, double minHeight, CancellationToken token = default);
+    Task<SKImage?> GetThumbnailAsync(PhotoMetadata meta, double minHeight, CancellationToken token = default);
 
 }

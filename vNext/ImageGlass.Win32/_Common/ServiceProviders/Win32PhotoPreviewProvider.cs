@@ -31,45 +31,45 @@ public class Win32PhotoPreviewProvider : IPhotoPreviewProvider
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public async Task<SKBitmap?> GetPreviewAsync(PhotoMetadata meta, double? minHeight, CancellationToken token = default)
+    public async Task<SKImage?> GetPreviewAsync(PhotoMetadata meta, double? minHeight, CancellationToken token = default)
     {
         var previewHeight = minHeight ?? double.MinValue;
 
         // 1. get thumbnail from Shell first
-        var wicThumb = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath,
+        var imgThumbnail = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath,
             (int)previewHeight, (int)previewHeight), token);
 
 
         // 2. try to get embedded preview
-        if (wicThumb is null)
+        if (imgThumbnail is null)
         {
             using var thumbM = meta.GetEmbeddedPreview();
 
             if (thumbM is not null && thumbM.Height >= previewHeight)
             {
-                wicThumb = SkiaCodec.ConvertFromMagick(thumbM);
+                imgThumbnail = SkiaCodec.ConvertFromMagick(thumbM);
             }
         }
 
-        return wicThumb;
+        return imgThumbnail;
     }
 
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public async Task<SKBitmap?> GetThumbnailAsync(PhotoMetadata meta, double minHeight, CancellationToken token = default)
+    public async Task<SKImage?> GetThumbnailAsync(PhotoMetadata meta, double minHeight, CancellationToken token = default)
     {
         // 1. try to get thumbnail from the Shell & embedded thumbnail
-        var wicBmp = await GetPreviewAsync(meta, minHeight, default);
-        if (wicBmp is not null) return wicBmp;
+        var imgPreview = await GetPreviewAsync(meta, minHeight, default);
+        if (imgPreview is not null) return imgPreview;
 
 
         // 2. use ImageMagick to decode the unsupported formats, skip for those larger than 3000px
         using var imgM = await MagickCodec.QuickDecodeAsync(meta.FilePath, 0, 0, 0, 3000, token);
-        wicBmp = SkiaCodec.ConvertFromMagick(imgM);
+        imgPreview = SkiaCodec.ConvertFromMagick(imgM);
 
-        return wicBmp;
+        return imgPreview;
     }
 
 
