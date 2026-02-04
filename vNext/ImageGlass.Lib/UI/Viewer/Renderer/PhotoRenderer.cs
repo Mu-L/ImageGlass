@@ -23,6 +23,7 @@ using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
 using SkiaSharp;
 using System;
+using System.Threading;
 
 namespace ImageGlass.UI.Viewer;
 
@@ -65,6 +66,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
 
     private ViewerControl _viewer;
+    private readonly Lock _lock = new();
 
 
     #region Public Properties
@@ -72,13 +74,8 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public Rect Bounds => _viewer.DrawingArea;
+    public Rect Bounds => _viewer.Bounds;
 
-
-    /// <summary>
-    /// Gets, sets the image to render.
-    /// </summary>
-    public SKImage? Image { get; set; } = null;
 
     #endregion // Public Properties
 
@@ -107,13 +104,12 @@ public partial class PhotoRenderer : ICustomDrawOperation
     public bool HitTest(Point p) => true;
 
 
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
     public void Render(ImmediateDrawingContext c)
     {
-        if (Image is null) return;
-
         var leaseFeature = c.TryGetFeature<ISkiaSharpApiLeaseFeature>();
         if (leaseFeature is null) return;
 
@@ -121,18 +117,41 @@ public partial class PhotoRenderer : ICustomDrawOperation
         if (lease is null) return;
 
 
+        // process the ooriginal image
+        if (_viewer._imgRender is null && _viewer._imgSource is not null)
+        {
+            // clear cache
+            lease.GrContext!.PurgeResources();
+
+
+            // color management
+            //
+
+
+            // set the image to draw
+            _viewer._imgRender ??= _viewer._imgSource;
+        }
+        if (_viewer._imgRender == null) return;
+
+
         var canvas = lease.SkCanvas;
         canvas.Save();
+
+        var srcRect = _viewer.SrcRect.ToSKRect();
+        var destRect = _viewer.DestRect.ToSKRect();
+
 
         // paint the image
         using var paintOptions = new SKPaint
         {
             FilterQuality = (SKFilterQuality)_viewer.CurrentInterpolation,
         };
-        canvas.DrawImage(Image, _viewer.SrcRect.ToSKRect(), _viewer.DestRect.ToSKRect(), paintOptions);
-
+        canvas.DrawImage(_viewer._imgRender, srcRect, destRect, paintOptions);
         canvas.Restore();
     }
+
+
+
 
     #endregion // Interface Methods
 

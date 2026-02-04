@@ -33,16 +33,15 @@ namespace ImageGlass.UI.Viewer;
 
 public partial class ViewerControl
 {
-    private PhotoRenderer? _photoRenderer;
-
     // FPS
     private double _fps;
     private long _lastFpsTime = Environment.TickCount64;
 
 
     // drawing image
-    private SKImage? _imgSource;
+    internal SKImage? _imgSource;
     private SKImage? _imgPreview;
+    internal SKImage? _imgRender;
     private SkiaAnimator? _animator;
 
     private RenderTargetBitmap? _bmpCheckerboard;
@@ -338,8 +337,6 @@ public partial class ViewerControl
     /// </summary>
     protected virtual void OnDrawImage(DrawingContext c)
     {
-        _photoRenderer ??= new PhotoRenderer(this);
-
 
         // draw bitmap preview
         if (_imgPreview is not null)
@@ -348,8 +345,7 @@ public partial class ViewerControl
             {
                 if (_imgPreview is not null)
                 {
-                    _photoRenderer.Image = _imgPreview;
-                    c.Custom(_photoRenderer);
+                    c.Custom(new PhotoRenderer(this));
                 }
             }
         }
@@ -362,8 +358,7 @@ public partial class ViewerControl
             {
                 if (_imgSource is not null)
                 {
-                    _photoRenderer.Image = _imgSource;
-                    c.Custom(_photoRenderer);
+                    c.Custom(new PhotoRenderer(this));
                 }
             }
         }

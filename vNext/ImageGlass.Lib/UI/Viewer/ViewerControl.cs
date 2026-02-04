@@ -92,10 +92,6 @@ public partial class ViewerControl : PhControl
 
         UnregisterTouchGestures();
 
-
-        _photoRenderer?.Dispose();
-        _photoRenderer = null;
-
         DisposeCheckerboard();
         DisposeNativePhotoResources();
     }
@@ -320,6 +316,9 @@ public partial class ViewerControl : PhControl
         // dispose native bitmap
         _imgSource?.Dispose();
         _imgSource = null;
+
+        _imgRender?.Dispose();
+        _imgRender = null;
     }
 
 
@@ -681,7 +680,7 @@ public partial class ViewerControl : PhControl
     {
         // update the frame bitmap
         SourceKind = PhotoSource.Native;
-        _imgSource = sender.GetRenderedFrameBitmap(e.CurrentFrame);
+        _imgSource = _imgRender = sender.GetRenderedFrameBitmap(e.CurrentFrame);
 
         InvalidateVisual();
     }
