@@ -292,17 +292,29 @@ public static partial class SkiaCodec
     /// <summary>
     /// Converts Magick image to SKBitmap.
     /// </summary>
-    public static SKImage? ConvertFromMagick(MagickImage? imgM)
+    public static unsafe SKImage? ConvertFromMagick(MagickImage? imgM)
     {
         if (imgM is null) return null;
 
-        var info = new SKImageInfo((int)imgM.Width, (int)imgM.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+        // prepare image info
+        var alphaType = imgM.HasAlpha ? SKAlphaType.Unpremul : SKAlphaType.Opaque;
+        var info = new SKImageInfo((int)imgM.Width, (int)imgM.Height, SKColorType.Rgba8888, alphaType);
 
-        // use direct pixels from magick image
-        var imgMPtr = MagickCodec.GetPixelsPointer(imgM, MagickFormat.Bgra);
-        var img = SKImage.FromPixels(info, imgMPtr);
+        // get pixels array
+        using var pixels = imgM.GetPixelsUnsafe();
+        var bytes = pixels.ToByteArray(PixelMapping.RGBA);
+        if (bytes is null) return null;
 
-        return img;
+        // create data from pinned pointer
+        var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+        var data = SKData.Create(
+            handle.AddrOfPinnedObject(),
+            bytes.Length,
+            (addr, ctx) => ((GCHandle)ctx).Free(),
+            handle
+        );
+
+        return SKImage.FromPixels(info, data);
     }
 
 
