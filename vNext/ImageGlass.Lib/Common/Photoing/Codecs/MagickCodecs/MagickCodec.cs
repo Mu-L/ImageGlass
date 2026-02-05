@@ -781,58 +781,25 @@ public static partial class MagickCodec
     }
 
 
-
-
-
-
-
-
     /// <summary>
-    /// Get color profile
+    /// Get built-in color profile by name.
     /// </summary>
-    /// <param name="nameOrPath">Name or Full path of color profile</param>
-    public static ColorProfile? GetColorProfile(string nameOrPath)
+    /// <param name="magickProfileName">Magick's color profile name</param>
+    public static ColorProfile? GetBuiltinColorProfile(string magickProfileName)
     {
-        var currentMonitorProfile = nameof(ColorProfileOption.CurrentMonitorProfile);
-
-        if (nameOrPath.Equals(currentMonitorProfile, StringComparison.InvariantCultureIgnoreCase))
+        // get magick's color profile from name
+        var profile = magickProfileName switch
         {
-            // TODO:
-            //var winHandle = Process.GetCurrentProcess().MainWindowHandle;
-            //var colorProfilePath = DisplayApi.GetMonitorColorProfileFromWindow(winHandle);
+            nameof(ColorProfiles.AdobeRGB1998) => ColorProfiles.AdobeRGB1998,
+            nameof(ColorProfiles.AppleRGB) => ColorProfiles.AppleRGB,
+            nameof(ColorProfiles.CoatedFOGRA39) => ColorProfiles.CoatedFOGRA39,
+            nameof(ColorProfiles.ColorMatchRGB) => ColorProfiles.ColorMatchRGB,
+            nameof(ColorProfiles.SRGB) => ColorProfiles.SRGB,
+            nameof(ColorProfiles.USWebCoatedSWOP) => ColorProfiles.USWebCoatedSWOP,
+            _ => null,
+        };
 
-            //if (string.IsNullOrEmpty(colorProfilePath))
-            //{
-            //    return ColorProfile.SRGB;
-            //}
-
-            //return new ColorProfile(colorProfilePath);
-            return ColorProfiles.SRGB;
-        }
-        else if (File.Exists(nameOrPath))
-        {
-            return new ColorProfile(nameOrPath);
-        }
-        else
-        {
-            // get all profile names in Magick.NET
-            var profiles = typeof(ColorProfile).GetProperties();
-            var result = Array.Find(profiles, i => string.Equals(i.Name, nameOrPath, StringComparison.InvariantCultureIgnoreCase));
-
-            if (result != null)
-            {
-                try
-                {
-                    return (ColorProfile?)result.GetValue(result);
-                }
-                catch (Exception)
-                {
-                    return null;
-                }
-            }
-        }
-
-        return null;
+        return profile;
     }
 
 

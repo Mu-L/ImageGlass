@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia.Controls;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
-using ImageGlass.UI.Windowing;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -140,7 +139,6 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
     }
 
 
-
     private IntPtr WndProcHook(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
         if (msg == WM_COLORSPACECHANGED || msg == WM_DISPLAYCHANGE)
@@ -155,19 +153,7 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
     }
 
 
-
-    private void UpdateColorProfile()
-    {
-        // get profile of the monitor
-        ProfilePath = GetColorProfilePath(_currentMonitor);
-        IsHdr = IsHdrEnabled(_currentMonitor);
-
-        Changed?.Invoke(this, new ColorProfileChangedEventArgs(ProfilePath, IsHdr));
-    }
-
-
-
-    private async void OnWindowMoved(object? sender, PixelPointEventArgs e)
+    private void OnWindowMoved(object? sender, PixelPointEventArgs e)
     {
         if (_windowHandle == IntPtr.Zero) return;
 
@@ -181,25 +167,22 @@ public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorPro
         UpdateColorProfile();
     }
 
+
+    private void UpdateColorProfile()
+    {
+        // get profile of the monitor
+        ProfilePath = GetColorProfilePath(_currentMonitor);
+        IsHdr = IsHdrEnabled(_currentMonitor);
+
+        Changed?.Invoke(this, new ColorProfileChangedEventArgs(ProfilePath, IsHdr));
+    }
+
+
     #endregion // Instance Methods
 
 
 
     #region Public Static Methods
-
-    /// <summary>
-    /// Creates and initializes new instance of color profile provider.
-    /// </summary>
-    public static Win32ColorProfileProvider Create(PhWindow window,
-        TEventHandler<IWindowColorProfileProvider, ColorProfileChangedEventArgs> onChangedFn)
-    {
-        var sp = new Win32ColorProfileProvider();
-        sp.Changed += onChangedFn;
-
-        sp.Initialize(window);
-        return sp;
-    }
-
 
     /// <summary>
     /// Gets the monitor from window.

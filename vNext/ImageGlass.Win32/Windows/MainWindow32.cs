@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ImageGlass.Common;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Windows;
@@ -46,7 +47,16 @@ public partial class MainWindow32 : MainWindow
         base.OnLoaded(e);
 
         // initialize Windows color profile service
-        Core.ColorProfileProvider = Win32ColorProfileProvider.Create(this, ColorProfileProvider_Changed);
+        Core.ColorProfileProvider = new Win32ColorProfileProvider();
+        Core.ColorProfileProvider.Changed += ColorProfileProvider_Changed;
+        Core.ColorProfileProvider.Initialize(this);
+    }
+
+    protected override void OnUnloaded(RoutedEventArgs e)
+    {
+        base.OnUnloaded(e);
+
+        Core.ColorProfileProvider?.Changed -= ColorProfileProvider_Changed;
     }
 
 
@@ -86,6 +96,12 @@ public partial class MainWindow32 : MainWindow
     private void ColorProfileProvider_Changed(IWindowColorProfileProvider sender, ColorProfileChangedEventArgs e)
     {
         VM.Title = $"{e.IsHdr} | {e.ProfilePath}";
+
+        // update the current color profile
+        if (Core.Config.ColorProfile == nameof(ColorProfileOption.CurrentMonitorProfile))
+        {
+            Core.CurrentDestinationColorProfile = Core.GetColorProfileFromSettings();
+        }
     }
 
 

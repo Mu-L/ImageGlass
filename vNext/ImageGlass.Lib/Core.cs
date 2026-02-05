@@ -26,6 +26,7 @@ using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,6 +44,7 @@ public static class Core
     public static event EventHandler<ThemePackChangedEventArgs>? ThemeChanged;
     public static event EventHandler<PhotoUnloadedEventArgs>? PhotoUnloaded;
     public static event EventHandler<PhotoSaveEventArgs>? PhotoSaved;
+    public static event EventHandler? ColorProfileChanged;
 
     private static string _initImagePathFromArgs = string.Empty;
 
@@ -125,9 +127,7 @@ public static class Core
         {
             if (field == value) return;
 
-            var oldValue = field;
             field = value;
-
             Core.UpdateAccentColorResources();
             Core.Theme.LoadColors(value);
             Core.OnThemeChanged(nameof(IgTheme.ComputedColors));
@@ -144,7 +144,6 @@ public static class Core
         {
             if (field == value) return;
 
-            var oldValue = field;
             field = value;
             Core.OnThemeChanged();
         }
@@ -160,7 +159,6 @@ public static class Core
         {
             if (field == value) return;
 
-            var oldValue = field;
             field = value;
             Core.OnLanguageChanged();
         }
@@ -198,6 +196,21 @@ public static class Core
     public static string? TempImagePath { get; set; }
 
 
+    /// <summary>
+    /// Gets, sets the color profile of current photo.
+    /// </summary>
+    public static SKColorSpace? CurrentDestinationColorProfile
+    {
+        get; set
+        {
+            if (field == value) return;
+
+            field?.Dispose();
+            field = value;
+            Core.OnColorProfileChanged();
+        }
+    }
+
     #endregion // Public Properties
 
 
@@ -217,6 +230,12 @@ public static class Core
         Photos.Dispose();
         ColorProfileProvider?.Dispose();
         ColorProfileProvider = null;
+
+        FileSearchProvider?.Dispose();
+        FileSearchProvider = null;
+
+        ShellProvider?.Dispose();
+        ShellProvider = null;
     }
 
 
@@ -476,6 +495,60 @@ public static class Core
         Core.ClipboardImage?.Dispose();
         Core.ClipboardImage = null;
         Core.TempImagePath = null;
+    }
+
+
+    /// <summary>
+    /// Gets SKColorSpace from settings.
+    /// </summary>
+    public static SKColorSpace? GetColorProfileFromSettings()
+    {
+        // 1. don't use color profile
+        if (Config.ColorProfile.Equals(nameof(ColorProfileOption.None))) return null;
+
+
+        // 2. use current monitor profile
+        if (Config.ColorProfile.Equals(nameof(ColorProfileOption.CurrentMonitorProfile)))
+        {
+            if (string.IsNullOrEmpty(ColorProfileProvider?.ProfilePath))
+                return null;
+
+            using var data = SKData.Create(ColorProfileProvider.ProfilePath);
+            var cp = SKColorSpace.CreateIcc(data);
+
+            return cp;
+        }
+
+
+        // 3. use built-in color profile
+        var magickProfile = MagickCodec.GetBuiltinColorProfile(Config.ColorProfile);
+        if (magickProfile is not null)
+        {
+            return SKColorSpace.CreateIcc(magickProfile.ToReadOnlySpan());
+        }
+
+
+        // 4. use custom color profile
+        if (Path.Exists(Config.ColorProfile))
+        {
+            using var data = SKData.Create(Config.ColorProfile);
+            return SKColorSpace.CreateIcc(data);
+        }
+
+
+        return null;
+    }
+
+
+    /// <summary>
+    /// Raises ColorProfileChanged event on UI thread.
+    /// </summary>
+    public static void OnColorProfileChanged()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            ColorProfileChanged?.Invoke(null, new());
+        });
     }
 
 
