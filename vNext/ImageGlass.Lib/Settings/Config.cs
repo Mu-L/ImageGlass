@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using ImageGlass.Common.Localization;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Types.JsonTypeConverters;
 using ImageGlass.UI;
@@ -257,10 +258,14 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ShouldOpenLastSeenImage, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets the value indicates that the ColorProfile will be applied for all or only the images with embedded profile
-    ///// </summary>
-    //public bool ShouldUseColorProfileForAll { get; set; } = false;
+    /// <summary>
+    /// Gets, sets the value indicates that the ColorProfile will be applied for all or only the images with embedded profile
+    /// </summary>
+    public bool ShouldUseColorProfileForAll
+    {
+        get => Get(ConfigId.ShouldUseColorProfileForAll, false);
+        set => Set(ConfigId.ShouldUseColorProfileForAll, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the value indicates whether to show or hide the Navigation Buttons on viewer
@@ -517,10 +522,14 @@ public partial class Config : PhReactive
 
     #region String items
 
-    ///// <summary>
-    ///// Gets, sets color profile string. It can be a defined name or ICC/ICM file path
-    ///// </summary>
-    //public string ColorProfile { get; set; } = nameof(ColorProfileOption.CurrentMonitorProfile);
+    /// <summary>
+    /// Gets, sets color profile string. It can be a defined name or ICC/ICM file path
+    /// </summary>
+    public string ColorProfile
+    {
+        get => Get(ConfigId.ColorProfile, nameof(ColorProfileOption.CurrentMonitorProfile));
+        set => Set(ConfigId.ColorProfile, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the last time to check for update. Set it to <c>0</c> to disable auto-update.

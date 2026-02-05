@@ -59,7 +59,7 @@ public enum ConfigId
     // ShowNewVersionIndicator,
     // EnableCenterToolbar,
     ShouldOpenLastSeenImage,
-    // ShouldUseColorProfileForAll,
+    ShouldUseColorProfileForAll,
     // EnableNavigationButtons,
     EnableRecursiveLoading,
     ShouldUseExplorerSortOrder,
@@ -107,7 +107,7 @@ public enum ConfigId
 
     #region String settings
 
-    // ColorProfile,
+    ColorProfile,
     // AutoUpdate,
     LastSeenImagePath,
     // LastOpenedSetting,
