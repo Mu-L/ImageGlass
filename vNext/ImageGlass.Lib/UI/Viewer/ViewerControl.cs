@@ -82,6 +82,8 @@ public partial class ViewerControl : PhControl
     {
         base.OnLoaded(e);
 
+        Core.ColorProfileChanged += Core_ColorProfileChanged;
+
         RegisterTouchGestures();
     }
 
@@ -90,10 +92,22 @@ public partial class ViewerControl : PhControl
     {
         base.OnUnloaded(e);
 
+        Core.ColorProfileChanged -= Core_ColorProfileChanged;
+
         UnregisterTouchGestures();
 
         DisposeCheckerboard();
         DisposeNativePhotoResources();
+    }
+
+
+    private void Core_ColorProfileChanged(object? sender, EventArgs e)
+    {
+        lock (_lock)
+        {
+            _imgRender = null;
+            InvalidateVisual();
+        }
     }
 
 

@@ -21,6 +21,8 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
+using Avalonia.Threading;
+using ImageGlass.Common;
 using SkiaSharp;
 using System;
 using System.Threading;
@@ -65,8 +67,17 @@ public partial class PhotoRenderer : ICustomDrawOperation
     #endregion
 
 
-    private ViewerControl _viewer;
+    private readonly Rect _bounds;
+    private readonly Action<SKImage?> _onDrawFirstTime;
+
+    private readonly SKImage? _imgSource;
+    private readonly SKImage? _imgRender;
+    private readonly SKRect _srcRect;
+    private readonly SKRect _destRect;
+    private readonly ImageInterpolation _interpolation;
+
     private readonly Lock _lock = new();
+
 
 
     #region Public Properties
@@ -74,33 +85,34 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public Rect Bounds => _viewer.Bounds;
+    public Rect Bounds => _bounds;
 
 
     #endregion // Public Properties
 
 
-    public PhotoRenderer(ViewerControl viewer)
+    public PhotoRenderer(ViewerControl viewer, Action<SKImage?> processFirstDrawFn)
     {
-        _viewer = viewer;
+        lock (_lock)
+        {
+            _bounds = viewer.Bounds;
+            _onDrawFirstTime = processFirstDrawFn;
+
+            _imgSource = viewer._imgSource;
+            _imgRender = viewer._imgRender;
+            _srcRect = viewer.SrcRect.ToSKRect();
+            _destRect = viewer.DestRect.ToSKRect();
+            _interpolation = viewer.CurrentInterpolation;
+        }
     }
 
 
 
     #region Interface Methods
 
-    /// <summary>
-    /// Releases the managed objects.
-    /// </summary>
-    protected virtual void OnDisposing()
-    {
-        //
-    }
 
-
+    protected virtual void OnDisposing() { }
     public bool Equals(ICustomDrawOperation? other) => false;
-
-
     public bool HitTest(Point p) => true;
 
 
@@ -117,40 +129,43 @@ public partial class PhotoRenderer : ICustomDrawOperation
         if (lease is null) return;
 
 
-        // process the ooriginal image
-        if (_viewer._imgRender is null && _viewer._imgSource is not null)
+        lock (_lock)
         {
-            // clear cache
-            lease.GrContext!.PurgeResources();
+            var imageRender = _imgRender;
+            var isFirstDrawing = _imgSource is not null && imageRender is null;
+
+            if (isFirstDrawing)
+            {
+                // process the original image
+                imageRender = ProcessImageForFirstDrawing(lease.GrContext, _imgSource);
 
 
-            // color management
-            //
-
+                // clear old cache
+                lease.GrContext?.PurgeResources();
+            }
 
             // set the image to draw
-            _viewer._imgRender ??= _viewer._imgSource;
+            imageRender ??= _imgSource;
+            if (imageRender is null) return;
+
+
+            // update the processed image
+            Dispatcher.UIThread.Post(() => _onDrawFirstTime(imageRender));
+
+
+            // start drawing image
+            var canvas = lease.SkCanvas;
+            canvas.Save();
+
+            using var paintOptions = new SKPaint
+            {
+                FilterQuality = (SKFilterQuality)_interpolation,
+            };
+
+            canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
+            canvas.Restore();
         }
-        if (_viewer._imgRender == null) return;
-
-
-        var canvas = lease.SkCanvas;
-        canvas.Save();
-
-        var srcRect = _viewer.SrcRect.ToSKRect();
-        var destRect = _viewer.DestRect.ToSKRect();
-
-
-        // paint the image
-        using var paintOptions = new SKPaint
-        {
-            FilterQuality = (SKFilterQuality)_viewer.CurrentInterpolation,
-        };
-        canvas.DrawImage(_viewer._imgRender, srcRect, destRect, paintOptions);
-        canvas.Restore();
     }
-
-
 
 
     #endregion // Interface Methods
@@ -160,15 +175,40 @@ public partial class PhotoRenderer : ICustomDrawOperation
     #region Private Methods
 
     /// <summary>
+    /// Processes image for the first drawing.
+    /// </summary>
+    private SKImage? ProcessImageForFirstDrawing(GRContext? dc, SKImage? srcImage)
+    {
+        if (dc is null || srcImage is null) return null;
+
+        SKImage? outputImage = null;
+        lock (_lock)
+        {
+            // double check the source image
+            if (srcImage is not null)
+            {
+                // apply color management
+                if (Core.CurrentDestinationColorProfile is not null)
+                {
+                    outputImage = ApplyColorManagement(dc, srcImage, Core.CurrentDestinationColorProfile);
+                }
+            }
+        }
+
+        return outputImage;
+    }
+
+
+    /// <summary>
     /// Returns a new image after applying color management effect on the original image.
     /// </summary>
-    private static SKImage? ApplyColorManagement(GRContext gr, SKImage oriImg, SKColorSpace destIccColor)
+    private static SKImage? ApplyColorManagement(GRContext dc, SKImage oriImg, SKColorSpace destIccColor)
     {
         // 1. convert the original image to the destination color space
-        using var convertedImg = ConvertToColorSpace(gr, oriImg, destIccColor);
+        using var convertedImg = ConvertToColorSpace(dc, oriImg, destIccColor);
 
         // 2. convert again to sRGB color space
-        var newImg = ConvertToSrgbSpace(gr, convertedImg);
+        var newImg = ConvertToSrgbSpace(dc, convertedImg);
 
         return newImg;
     }
@@ -177,12 +217,12 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// <summary>
     /// Returns a new image after converting the given image to the destination color space.
     /// </summary>
-    private static SKImage? ConvertToColorSpace(GRContext gr, SKImage? srcImg, SKColorSpace destColorSpace)
+    private static SKImage? ConvertToColorSpace(GRContext dc, SKImage? srcImg, SKColorSpace destColorSpace)
     {
         if (srcImg is null) return null;
 
         var dstInfo = srcImg.Info.WithColorSpace(destColorSpace);
-        using var surface = SKSurface.Create(gr, false, dstInfo);
+        using var surface = SKSurface.Create(dc, false, dstInfo);
         if (surface is null) return null;
 
         // convert ICC color profile with GPU

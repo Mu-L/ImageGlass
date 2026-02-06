@@ -514,7 +514,7 @@ public static class Core
                 return null;
 
             using var data = SKData.Create(ColorProfileProvider.ProfilePath);
-            var cp = SKColorSpace.CreateIcc(data);
+            var cp = SKColorSpace.CreateIcc(data); // Skia does not support all profiles
 
             return cp;
         }

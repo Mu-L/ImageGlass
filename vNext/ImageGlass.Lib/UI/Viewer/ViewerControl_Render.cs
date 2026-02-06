@@ -47,8 +47,7 @@ public partial class ViewerControl
     private RenderTargetBitmap? _bmpCheckerboard;
     private readonly CheckerboardInfo _checkerboard = new();
 
-    private readonly Lock _lockSource = new();
-    private readonly Lock _lockPreview = new();
+    private readonly Lock _lock = new();
 
 
 
@@ -338,31 +337,34 @@ public partial class ViewerControl
     protected virtual void OnDrawImage(DrawingContext c)
     {
 
-        // draw bitmap preview
-        if (_imgPreview is not null)
-        {
-            lock (_lockPreview)
-            {
-                if (_imgPreview is not null)
-                {
-                    c.Custom(new PhotoRenderer(this));
-                }
-            }
-        }
+        //// draw bitmap preview
+        //if (_imgPreview is not null)
+        //{
+        //    lock (_lockPreview)
+        //    {
+        //        if (_imgPreview is not null)
+        //        {
+        //            c.Custom(new PhotoRenderer(this));
+        //        }
+        //    }
+        //}
 
 
         // draw bitmap in full resolution
         if (_imgSource is not null)
         {
-            lock (_lockSource)
-            {
-                if (_imgSource is not null)
-                {
-                    c.Custom(new PhotoRenderer(this));
-                }
-            }
+            c.Custom(new PhotoRenderer(this, OnDrawnImageFirstTime));
         }
+    }
 
+
+    /// <summary>
+    /// Occurs when the source image drawn for the first time.
+    /// </summary>
+    protected void OnDrawnImageFirstTime(SKImage? img)
+    {
+        // cache the proccessed image for next draw
+        _imgRender = img;
     }
 
 
