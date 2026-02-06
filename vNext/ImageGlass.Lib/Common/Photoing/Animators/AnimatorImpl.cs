@@ -271,16 +271,29 @@ public abstract class AnimatorImpl : DisposableImpl
 
     /// <summary>
     /// Gets the delay duration for a specific animation frame.
+    /// Includes compatibility fix for 0 or very small delays.
     /// </summary>
     protected virtual TimeSpan GetFrameDelay(int frameIndex)
     {
-        var ticksPerMs = 1000 / _meta.Frames[frameIndex].AnimationTicksPerSecond;
-        var rawDelay = _meta.Frames[frameIndex].AnimationDelay;
+        var frameMeta = _meta.Frames[frameIndex];
 
-        // set minimum delay time if frame delay time is too small
-        if (rawDelay < 1) rawDelay = 10;
+        // 1. Calculate base delay in Milliseconds
+        // GIF usually 100 ticks/sec (1 tick = 10ms). WebP usually 1000 ticks/sec (1 tick = 1ms).
+        var ticksPerSec = frameMeta.AnimationTicksPerSecond > 0
+            ? frameMeta.AnimationTicksPerSecond
+            : 100; // Default to GIF standard if missing
 
-        var delayMs = rawDelay * ticksPerMs;
+        // Convert to milliseconds
+        var delayMs = (frameMeta.AnimationDelay * 1d / ticksPerSec) * 1000.0;
+
+
+        // 2. Browser/Legacy Compatibility Hack
+        // If delay is <= 10ms (<= 1 GIF tick), it is likely invalid or intended to be default speed.
+        // Most browsers force this to 100ms (10fps).
+        if (delayMs <= 10.1)
+        {
+            delayMs = 100.0;
+        }
 
         return TimeSpan.FromMilliseconds(delayMs);
     }
