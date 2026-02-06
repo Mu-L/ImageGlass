@@ -34,7 +34,7 @@ namespace ImageGlass.UI.Viewer;
 
 public partial class ViewerControl : PhControl
 {
-    private Photo? _photo;
+    internal Photo? _photo;
     private CancellationTokenSource? _cancelPreview;
     private InterlockedBool _isPreviewing = new();
 

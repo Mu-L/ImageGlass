@@ -21,7 +21,7 @@
   <PropertyGroup Label="Avalonia">
     <AvaloniaUseCompiledBindingsByDefault>True</AvaloniaUseCompiledBindingsByDefault>
     <AvaloniaNameGeneratorDefaultFieldModifier>Public</AvaloniaNameGeneratorDefaultFieldModifier>
-    <FileVersion>10.0.0.203</FileVersion>
+    <FileVersion>10.0.0.206</FileVersion>
   </PropertyGroup>
   
   
@@ -29,7 +29,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>icon256.ico</ApplicationIcon>
     <AssemblyName>ImageGlass</AssemblyName>
-    <AssemblyTitle>ImageGlass - A Lightweight, Versatile Image Viewer</AssemblyTitle>
+    <AssemblyTitle>ImageGlass $(FileVersion)</AssemblyTitle>
     <PublishAot>True</PublishAot>
     <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>

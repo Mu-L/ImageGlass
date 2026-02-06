@@ -74,6 +74,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
     private readonly SKImage? _imgRender;
     private readonly SKRect _srcRect;
     private readonly SKRect _destRect;
+    private readonly bool _hasSrcColorProfile;
     private readonly ImageInterpolation _interpolation;
 
     private readonly Lock _lock = new();
@@ -103,6 +104,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
             _srcRect = viewer.SrcRect.ToSKRect();
             _destRect = viewer.DestRect.ToSKRect();
             _interpolation = viewer.CurrentInterpolation;
+            _hasSrcColorProfile = viewer._photo?.Metadata?.ColorProfileData is not null;
         }
     }
 
@@ -187,10 +189,14 @@ public partial class PhotoRenderer : ICustomDrawOperation
             // double check the source image
             if (srcImage is not null)
             {
+                var useColorManagement = Core.DestColorProfile is not null
+                    && Core.IsDestColorProfileSupported
+                    && (Core.Config.ShouldUseColorProfileForAll || _hasSrcColorProfile);
+
                 // apply color management
-                if (Core.CurrentDestinationColorProfile is not null)
+                if (useColorManagement)
                 {
-                    outputImage = ApplyColorManagement(dc, srcImage, Core.CurrentDestinationColorProfile);
+                    outputImage = ApplyColorManagement(dc, srcImage, Core.DestColorProfile);
                 }
             }
         }
@@ -202,10 +208,12 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// <summary>
     /// Returns a new image after applying color management effect on the original image.
     /// </summary>
-    private static SKImage? ApplyColorManagement(GRContext dc, SKImage oriImg, SKColorSpace destIccColor)
+    private static SKImage? ApplyColorManagement(GRContext dc, SKImage oriImg, SKColorSpace? destColor)
     {
+        if (destColor is null) return null;
+
         // 1. convert the original image to the destination color space
-        using var convertedImg = ConvertToColorSpace(dc, oriImg, destIccColor);
+        using var convertedImg = ConvertToColorSpace(dc, oriImg, destColor);
 
         // 2. convert again to sRGB color space
         var newImg = ConvertToSrgbSpace(dc, convertedImg);
@@ -217,11 +225,11 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// <summary>
     /// Returns a new image after converting the given image to the destination color space.
     /// </summary>
-    private static SKImage? ConvertToColorSpace(GRContext dc, SKImage? srcImg, SKColorSpace destColorSpace)
+    private static SKImage? ConvertToColorSpace(GRContext dc, SKImage? srcImg, SKColorSpace? destColor)
     {
-        if (srcImg is null) return null;
+        if (srcImg is null || destColor is null) return null;
 
-        var dstInfo = srcImg.Info.WithColorSpace(destColorSpace);
+        var dstInfo = srcImg.Info.WithColorSpace(destColor);
         using var surface = SKSurface.Create(dc, false, dstInfo);
         if (surface is null) return null;
 
@@ -241,8 +249,8 @@ public partial class PhotoRenderer : ICustomDrawOperation
     {
         if (srcImg is null) return null;
 
-        var srgb = SKColorSpace.CreateSrgb();
-        var dstInfo = srcImg.Info.WithColorSpace(srgb);
+        var sRGB = SKColorSpace.CreateSrgb();
+        var dstInfo = srcImg.Info.WithColorSpace(sRGB);
         using var surface = SKSurface.Create(gr, false, dstInfo);
         if (surface is null) return null;
 

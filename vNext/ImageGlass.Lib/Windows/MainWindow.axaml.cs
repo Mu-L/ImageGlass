@@ -45,6 +45,8 @@ public partial class MainWindow : PhWindow
         if (Core.Config.IsMainWindowMaximized) WindowState = WindowState.Maximized;
         if (Core.Config.EnableFullScreen) WindowState = WindowState.FullScreen;
 
+        // load color profile
+        Core.UpdateDestColorProfile();
 
         // events
         Core.AppInstance.InstanceInvoked += AppInstance_InstanceInvoked;
@@ -87,7 +89,6 @@ public partial class MainWindow : PhWindow
                 "There was an error while loading user settings");
             if (!isContinue) return;
         }
-
 
         base.OnLoaded(e);
     }

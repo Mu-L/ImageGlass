@@ -190,26 +190,22 @@ public static class Core
 
 
     /// <summary>
-    /// Gets, sets the path of the temporary image
-    /// (clipboard image, temp image for printing, background,...)
+    /// Gets, sets the path of the temporary image (clipboard image, temp image for printing, background,...)
     /// </summary>
     public static string? TempImagePath { get; set; }
 
 
     /// <summary>
-    /// Gets, sets the color profile of current photo.
+    /// Gets the color profile of current photo.
     /// </summary>
-    public static SKColorSpace? CurrentDestinationColorProfile
-    {
-        get; set
-        {
-            if (field == value) return;
+    public static SKColorSpace? DestColorProfile { get; private set; }
 
-            field?.Dispose();
-            field = value;
-            Core.OnColorProfileChanged();
-        }
-    }
+
+    /// <summary>
+    /// Checks if the current color profile is supported by Skia.
+    /// </summary>
+    public static bool IsDestColorProfileSupported { get; private set; } = true;
+
 
     #endregion // Public Properties
 
@@ -499,24 +495,47 @@ public static class Core
 
 
     /// <summary>
+    /// Updates the current destination color space.
+    /// </summary>
+    public static void UpdateDestColorProfile()
+    {
+        var results = GetColorProfileFromSettings();
+
+        Core.IsDestColorProfileSupported = results.IsSupported;
+
+        // no change
+        if (Core.DestColorProfile == results.ColorSpace) return;
+
+        // color profile change
+        Core.DestColorProfile?.Dispose();
+        Core.DestColorProfile = results.ColorSpace;
+        Core.OnColorProfileChanged();
+    }
+
+
+    /// <summary>
     /// Gets SKColorSpace from settings.
     /// </summary>
-    public static SKColorSpace? GetColorProfileFromSettings()
+    private static (SKColorSpace? ColorSpace, bool IsSupported) GetColorProfileFromSettings()
     {
+        (SKColorSpace? ColorSpace, bool IsSupported) results = new(null, true);
+
+
         // 1. don't use color profile
-        if (Config.ColorProfile.Equals(nameof(ColorProfileOption.None))) return null;
+        if (Config.ColorProfile.Equals(nameof(ColorProfileOption.None))) return results;
 
 
         // 2. use current monitor profile
         if (Config.ColorProfile.Equals(nameof(ColorProfileOption.CurrentMonitorProfile)))
         {
             if (string.IsNullOrEmpty(ColorProfileProvider?.ProfilePath))
-                return null;
+                return results;
 
             using var data = SKData.Create(ColorProfileProvider.ProfilePath);
-            var cp = SKColorSpace.CreateIcc(data); // Skia does not support all profiles
+            results.ColorSpace = SKColorSpace.CreateIcc(data);
+            results.IsSupported = results.ColorSpace is not null; // Skia does not support all profiles
 
-            return cp;
+            return results;
         }
 
 
@@ -524,7 +543,10 @@ public static class Core
         var magickProfile = MagickCodec.GetBuiltinColorProfile(Config.ColorProfile);
         if (magickProfile is not null)
         {
-            return SKColorSpace.CreateIcc(magickProfile.ToReadOnlySpan());
+            results.ColorSpace = SKColorSpace.CreateIcc(magickProfile.ToReadOnlySpan());
+            results.IsSupported = results.ColorSpace is not null;
+
+            return results;
         }
 
 
@@ -532,12 +554,22 @@ public static class Core
         if (Path.Exists(Config.ColorProfile))
         {
             using var data = SKData.Create(Config.ColorProfile);
-            return SKColorSpace.CreateIcc(data);
+            results.ColorSpace = SKColorSpace.CreateIcc(data);
+            results.IsSupported = results.ColorSpace is not null;
+
+            return results;
         }
 
 
-        return null;
+        return results;
     }
+
+
+    #endregion // Public Methods
+
+
+
+    #region Methods to raise Events
 
 
     /// <summary>
@@ -602,7 +634,7 @@ public static class Core
     }
 
 
-    #endregion // Public Methods
+    #endregion // Methods to raise Events
 
 
 }

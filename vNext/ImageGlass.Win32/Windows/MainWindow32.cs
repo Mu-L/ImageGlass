@@ -100,7 +100,7 @@ public partial class MainWindow32 : MainWindow
         // update the current color profile
         if (Core.Config.ColorProfile == nameof(ColorProfileOption.CurrentMonitorProfile))
         {
-            Core.CurrentDestinationColorProfile = Core.GetColorProfileFromSettings();
+            Core.UpdateDestColorProfile();
         }
     }
 
