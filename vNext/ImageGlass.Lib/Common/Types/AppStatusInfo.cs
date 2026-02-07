@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer;
@@ -25,7 +24,7 @@ using System;
 using System.ComponentModel;
 using System.Text;
 
-namespace ImageGlass.Win32.Common;
+namespace ImageGlass.Common;
 
 public partial class AppStatusInfo : DisposableImpl
 {

@@ -21,14 +21,18 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using ImageGlass.Common.Types;
+using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
 using ImageGlass.ViewModels;
+using System;
 
 namespace ImageGlass.Common.Windows;
 
 
 public partial class MainWindow : PhWindow
 {
+    private readonly AppStatusInfo _status;
+
     public MainWindowModel VM => (MainWindowModel)DataContext!;
 
 
@@ -36,6 +40,9 @@ public partial class MainWindow : PhWindow
     {
         InitializeComponent();
         CloseWindowHotkeys = [new(Key.Escape)];
+
+        _status = new AppStatusInfo(PART_MainView.PART_Viewer);
+
 
         // load window bounds & state
         Position = new Avalonia.PixelPoint((int)Core.Config.MainWindowBounds.X, (int)Core.Config.MainWindowBounds.Y);
@@ -53,31 +60,8 @@ public partial class MainWindow : PhWindow
     }
 
 
-    private void AppInstance_InstanceInvoked(AppInstance sender, InstanceInvokedEventArgs e)
-    {
-        // handle single instance command
-        if (e.Command.Equals(ExeParams.SINGLE_INSTANCE))
-        {
-            if (WindowState == Avalonia.Controls.WindowState.Minimized)
-            {
-                WindowState = Avalonia.Controls.WindowState.Normal;
-            }
 
-            // set instance arguments
-            Core.Args = e.Arguments;
-            Core.UpdateInitImagePath();
-
-            // load image path
-            Core.API?.IG_OpenPath(Core.InputImagePathFromArgs);
-
-            Activate();
-            Topmost = true;
-            Topmost = Core.Config.EnableWindowTopMost;
-        }
-
-        VM.Title = e.Command + "\r\n" + string.Join("\r\n", e.Arguments);
-    }
-
+    #region Override Methods
 
     protected override async void OnLoaded(RoutedEventArgs e)
     {
@@ -86,18 +70,27 @@ public partial class MainWindow : PhWindow
         {
             var isContinue = await ModalWindow.ShowUnhandledErrorAsync(
                 Config.LoadingException, this,
-                "There was an error while loading user settings");
+                "IGE: There was an error while loading user settings");
             if (!isContinue) return;
         }
 
         base.OnLoaded(e);
+
+        // control events
+        _status.Changed += Status_Changed;
+        PART_MainView.PART_Toolbar.ItemClicked += PART_Toolbar_ItemClicked;
     }
 
 
-    protected override async void OnClosing(WindowClosingEventArgs e)
+    protected override void OnUnloaded(RoutedEventArgs e)
     {
-        base.OnClosing(e);
+        base.OnUnloaded(e);
 
+        // control events
+        _status.Changed -= Status_Changed;
+        _status.Dispose();
+
+        PART_MainView.PART_Toolbar.ItemClicked -= PART_Toolbar_ItemClicked;
     }
 
 
@@ -160,6 +153,57 @@ public partial class MainWindow : PhWindow
     }
 
 
+    #endregion // Override Methods
+
+
+
+    #region Control Events
+
+
+    private void AppInstance_InstanceInvoked(AppInstance sender, InstanceInvokedEventArgs e)
+    {
+        // handle single instance command
+        if (e.Command.Equals(ExeParams.SINGLE_INSTANCE))
+        {
+            if (WindowState == Avalonia.Controls.WindowState.Minimized)
+            {
+                WindowState = Avalonia.Controls.WindowState.Normal;
+            }
+
+            // set instance arguments
+            Core.Args = e.Arguments;
+            Core.UpdateInitImagePath();
+
+            // load image path
+            Core.API?.IG_OpenPath(Core.InputImagePathFromArgs);
+
+            Activate();
+            Topmost = true;
+            Topmost = Core.Config.EnableWindowTopMost;
+        }
+    }
+
+
+    private void Status_Changed(object? sender, EventArgs e)
+    {
+        VM.Title = _status.Text;
+    }
+
+
+    private void PART_Toolbar_ItemClicked(ToolbarButton sender, EventArgs e)
+    {
+        _ = ModalWindow.ShowInfoAsync(this, new ModalWindowOptions
+        {
+            Title = sender.VM.DisplayText,
+            Heading = sender.VM.DisplayText,
+            Description = sender.VM.Tooltip,
+            Details = $"{sender.VM.OnClick?.Executable}({sender.VM.OnClick?.Argument})",
+        });
+    }
+
+
+
+    #endregion Control Events
 
 
 
