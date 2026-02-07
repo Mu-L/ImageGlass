@@ -77,6 +77,12 @@ public static class Core
 
 
     /// <summary>
+    /// Provides a singleton instance to manage Share dialog.
+    /// </summary>
+    public static IShareProvider? ShareProvider { get; set; } = null;
+
+
+    /// <summary>
     /// Provides a singleton instance to access app APIs.
     /// </summary>
     public static AppAPIProvider? API { get; set; } = null;

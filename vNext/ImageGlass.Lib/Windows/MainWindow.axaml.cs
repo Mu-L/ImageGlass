@@ -128,6 +128,12 @@ public partial class MainWindow : PhWindow
         }
 
 
+        if (e.Key == Key.S)
+        {
+            Core.ShareProvider?.ShowShare(this.Handle, [Core.Photos.CurrentFilePath]);
+            return;
+        }
+
         if (e.Key != Key.Enter) return;
         var res = await ModalWindow.ShowInputAsync(this, new ModalWindowOptions
         {

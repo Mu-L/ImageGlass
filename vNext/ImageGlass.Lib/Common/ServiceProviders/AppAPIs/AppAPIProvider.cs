@@ -470,43 +470,45 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_ShareAsync()
     {
+        if (Core.ShareProvider is null) return;
+
         // TODO:
-        //var filePath = Core.Photos.CurrentFilePath;
+        var filePath = Core.Photos.CurrentFilePath;
 
-        //// print clipboard image
-        //if (Core.ClipboardImage is not null)
-        //{
-        //    _ = _contentEl.ShowMessageAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
+        // print clipboard image
+        if (Core.ClipboardImage is not null)
+        {
+            //_ = _contentEl.ShowMessageAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
 
-        //    // save image to temp file
-        //    filePath = await Core.SavePhotoAsTempFileAsync();
-        //}
+            // save image to temp file
+            filePath = await Core.SavePhotoAsTempFileAsync();
+        }
 
         //await _contentEl.ShowMessageAsync(null);
 
-        //if (!File.Exists(filePath))
-        //{
-        //    _ = ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
-        //    {
-        //        Title = Core.Lang[LangId.FrmMain_MnuShare],
-        //        Description = Core.Lang[LangId._CreatingFileError],
-        //    });
-        //}
-        //else
-        //{
-        //    try
-        //    {
-        //        WinShareApi.ShowShare(Handle, [filePath]);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _ = ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
-        //        {
-        //            Title = Core.Lang[LangId.FrmMain_MnuShare],
-        //            Description = $"{Core.Lang[LangId.FrmMain_MnuShare_Error]}\r\n\r\n{ex.Message}",
-        //        });
-        //    }
-        //}
+        if (!File.Exists(filePath))
+        {
+            _ = ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[LangId.FrmMain_MnuShare],
+                Description = Core.Lang[LangId._CreatingFileError],
+            });
+        }
+        else
+        {
+            try
+            {
+                Core.ShareProvider.ShowShare(_mainWindow.Handle, [filePath]);
+            }
+            catch (Exception ex)
+            {
+                _ = ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+                {
+                    Title = Core.Lang[LangId.FrmMain_MnuShare],
+                    Description = $"{Core.Lang[LangId.FrmMain_MnuShare_Error]}\r\n\r\n{ex.Message}",
+                });
+            }
+        }
     }
 
 

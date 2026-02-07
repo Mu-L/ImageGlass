@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+using ImageGlass.UI.Windowing;
 using System;
 using System.Collections.Generic;
 using Windows.ApplicationModel.DataTransfer;
@@ -26,7 +27,7 @@ namespace ImageGlass.Common;
 public static class WinShareApi
 {
     // declare datapackage
-    private static DataPackage? _dp;
+    private static DataTransferManager? _manager;
     private static readonly List<string> _filePaths = [];
 
 
@@ -39,10 +40,11 @@ public static class WinShareApi
         _filePaths.Clear();
         _filePaths.AddRange(filePaths);
 
-        var manager = DataTransferManagerInterop.GetForWindow(windowHandle);
+        _manager?.DataRequested -= DataTransferManager_DataRequested;
+        _manager ??= DataTransferManagerInterop.GetForWindow(windowHandle);
 
         // set datapackage to dtm
-        manager.DataRequested += DataTransferManager_DataRequested;
+        _manager.DataRequested += DataTransferManager_DataRequested;
 
         // show window
         DataTransferManagerInterop.ShowShareUIForWindow(windowHandle);
@@ -55,25 +57,25 @@ public static class WinShareApi
         var deferral = e.Request.GetDeferral();
 
         // create datapackage
-        _dp = e.Request.Data;
+        var dp = e.Request.Data;
 
         // create List to hold all files to share
         var filesToShare = new List<IStorageItem>();
 
 
         // Set properties of shareUI
-        _dp.Properties.Title = BHelper.AppName;
+        dp.Properties.Title = BHelper.AppName;
 
         try
         {
             if (_filePaths.Count == 1)
             {
                 // only 1 photo is being shared
-                _dp.Properties.Description = _filePaths[0];
+                dp.Properties.Description = _filePaths[0];
             }
             else
             {
-                _dp.Properties.Description = string.Join("\r\n", _filePaths);
+                dp.Properties.Description = string.Join("\r\n", _filePaths);
             }
 
             for (var i = 0; i < _filePaths.Count; i++)
@@ -82,9 +84,17 @@ public static class WinShareApi
                 filesToShare.Add(imageFile);
             }
 
-            _dp.SetStorageItems(filesToShare);
+            dp.SetStorageItems(filesToShare);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            await ModalWindow.ShowErrorAsync(null, new ModalWindowOptions
+            {
+                Title = Core.Lang[Localization.LangId.FrmMain_MnuShare],
+                Heading = ex.Message,
+                Details = ex.ToString(),
+            });
+        }
         finally
         {
             deferral.Complete();

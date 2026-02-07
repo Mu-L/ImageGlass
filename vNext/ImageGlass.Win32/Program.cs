@@ -90,6 +90,7 @@ sealed class Program
             Core.ShellProvider = new Win32ShellProvider();
             Core.PreviewProvider = new Win32PhotoPreviewProvider();
             Core.FileSearchProvider = new Win32FileSearchProvider();
+            Core.ShareProvider = new Win32ShareProvider();
 
 
             // create main window
