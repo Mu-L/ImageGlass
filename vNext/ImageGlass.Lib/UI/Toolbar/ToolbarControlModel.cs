@@ -41,7 +41,16 @@ public class ToolbarControlModel : PhReactive
     };
 
 
-    public static ToolbarItemModel ButtonMenuVM => new()
+    public ToolbarItemModel ButtonMenuVM
+    {
+        get; set
+        {
+            if (field == value) return;
+
+            field = value;
+            _ = OnPropertyChanged();
+        }
+    } = new()
     {
         Text = Core.Lang[LangId.FrmMain_MnuMain],
         Image = nameof(IgThemeIcon.MainMenu),

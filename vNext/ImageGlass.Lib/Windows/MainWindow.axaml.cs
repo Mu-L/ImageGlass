@@ -76,6 +76,10 @@ public partial class MainWindow : PhWindow
 
         base.OnLoaded(e);
 
+
+        // register app hotkeys
+        Core.API?.RegisterHotkeys();
+
         // control events
         _status.Changed += Status_Changed;
         PART_MainView.PART_Toolbar.ItemClicked += PART_Toolbar_ItemClicked;
