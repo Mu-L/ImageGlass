@@ -18,11 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using Avalonia.Threading;
 using ImageGlass.Common.Types;
-using ImageMagick;
 using SkiaSharp;
 using System;
 using System.Diagnostics;
-using System.Numerics;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -31,9 +29,9 @@ namespace ImageGlass.Common.Photoing;
 /// </summary>
 public abstract class AnimatorImpl : DisposableImpl
 {
-    protected PhotoMetadata _meta;
-    protected uint _frameCount = 0;
-    protected uint _loopCount = 0; // 0 - infinite loop
+    protected SKCodecFrameInfo[] _frames;
+    protected int _frameCount = 0;
+    protected int _loopCount = 0; // 0 - infinite loop
     protected int _currentFrame = 0;
     protected int _currentLoop = 0;
 
@@ -45,9 +43,9 @@ public abstract class AnimatorImpl : DisposableImpl
 
 
     /// <summary>
-    /// Gets metadata of this photo.
+    /// Gets frames of this photo.
     /// </summary>
-    public PhotoMetadata Metadata => _meta;
+    public SKCodecFrameInfo[] Frames => _frames;
 
     /// <summary>
     /// Occurs when the image frame is changed.
@@ -64,11 +62,10 @@ public abstract class AnimatorImpl : DisposableImpl
     /// <summary>
     /// Initialize new instance of <see cref="AnimatorImpl"/>.
     /// </summary>
-    public AnimatorImpl(PhotoMetadata meta)
+    public AnimatorImpl(SKCodecFrameInfo[] frames)
     {
-        _meta = meta;
-        _frameCount = meta.FrameCount;
-        _loopCount = meta.AnimationLoop;
+        _frames = frames;
+        _frameCount = frames.Length;
     }
 
 
@@ -275,48 +272,18 @@ public abstract class AnimatorImpl : DisposableImpl
     /// </summary>
     protected virtual TimeSpan GetFrameDelay(int frameIndex)
     {
-        var frameMeta = _meta.Frames[frameIndex];
-
-        // 1. Calculate base delay in Milliseconds
-        // GIF usually 100 ticks/sec (1 tick = 10ms). WebP usually 1000 ticks/sec (1 tick = 1ms).
-        var ticksPerSec = frameMeta.AnimationTicksPerSecond > 0
-            ? frameMeta.AnimationTicksPerSecond
-            : 100; // Default to GIF standard if missing
-
-        // Convert to milliseconds
-        var delayMs = (frameMeta.AnimationDelay * 1d / ticksPerSec) * 1000.0;
-
+        var frameMeta = _frames[frameIndex];
+        var delayMs = frameMeta.Duration;
 
         // 2. Browser/Legacy Compatibility Hack
         // If delay is <= 10ms (<= 1 GIF tick), it is likely invalid or intended to be default speed.
         // Most browsers force this to 100ms (10fps).
-        if (delayMs <= 10.1)
+        if (delayMs <= 10)
         {
-            delayMs = 100.0;
+            delayMs = 100;
         }
 
         return TimeSpan.FromMilliseconds(delayMs);
-    }
-
-
-    /// <summary>
-    /// Retrieves the bounds of the specified frame as a <see cref="Vector4"/>
-    /// <c>(X, Y, Z = Width, W = Height)</c>.
-    /// </summary>
-    protected Vector4 GetFrameBounds(int frameIndex)
-    {
-        var frameMeta = _meta.Frames[_currentFrame];
-
-        return new Vector4(frameMeta.X, frameMeta.Y, frameMeta.Width, frameMeta.Height);
-    }
-
-
-    /// <summary>
-    /// Retrieves the disposal method for the specified frame in the GIF animation.
-    /// </summary>
-    protected GifDisposeMethod GetFrameDisposal(int frameIndex)
-    {
-        return _meta.Frames[_currentFrame].GifDisposeMethod;
     }
 
 

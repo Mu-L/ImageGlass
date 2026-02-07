@@ -205,6 +205,10 @@ public static partial class MagickCodec
         catch (Exception ex)
         {
             Debug.WriteLine($"❌❌❌ {nameof(LoadMetadataAsync)}: {ex.Message}");
+
+            // try to load metadata with native codec
+            meta = await SkiaCodec.LoadMetadataAsync(filePath, options, token);
+            return meta;
         }
 
         // 3. load metadata
@@ -274,18 +278,21 @@ public static partial class MagickCodec
             // 2. read metadata of all frames
             try
             {
+                // get animation frames
+                var skiaFramesInfo = SkiaCodec.GetFramesMetadata(meta.FilePath);
+                meta.CanAnimate = skiaFramesInfo != null;
                 meta.AnimationLoop = imgC[0].AnimationIterations;
-                meta.Frames = imgC.Select(item => new FrameMetadata()
-                {
-                    BackgroundColor = (MagickColor?)item.BackgroundColor ?? MagickColors.Transparent,
-                    Width = item.Width,
-                    Height = item.Height,
-                    X = item.Page.X,
-                    Y = item.Page.Y,
 
-                    AnimationDelay = item.AnimationDelay,
-                    AnimationTicksPerSecond = (uint)item.AnimationTicksPerSecond,
-                    GifDisposeMethod = item.GifDisposeMethod,
+                // get frame metadata
+                meta.Frames = imgC.Select((frame, frameIndex) => new FrameMetadata()
+                {
+                    BackgroundColor = (MagickColor?)frame.BackgroundColor ?? MagickColors.Transparent,
+                    Width = frame.Width,
+                    Height = frame.Height,
+                    X = frame.Page.X,
+                    Y = frame.Page.Y,
+
+                    Animation = skiaFramesInfo?[frameIndex],
                 }).ToImmutableList();
             }
             catch { }
@@ -315,7 +322,6 @@ public static partial class MagickCodec
                 // image color
                 meta.HasAlpha = imgC.Any(i => i.HasAlpha);
                 meta.ColorSpace = imgC[frameIndex].ColorSpace;
-                meta.CanAnimate = CheckAnimatedFormat__(imgC, meta.FileExtension);
 
                 // get RAW thumbnail
                 meta.RawThumbnail = imgC[frameIndex].GetProfile("dng:thumbnail");

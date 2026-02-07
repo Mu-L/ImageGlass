@@ -20,6 +20,10 @@ using Avalonia;
 using ImageMagick;
 using SkiaSharp;
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,7 +58,6 @@ public static partial class SkiaCodec
 
         meta.FrameIndex = (uint)frameIndex;
         meta.FrameCount = (uint)decoder.FrameCount;
-        if (!decoder.GetFrameInfo(0, out var frame)) return meta;
         if (token.IsCancellationRequested) return meta;
 
 
@@ -63,6 +66,16 @@ public static partial class SkiaCodec
         {
             try
             {
+                // get animation frames
+                var skiaFramesInfo = SkiaCodec.GetFramesMetadata(meta.FilePath);
+                meta.CanAnimate = skiaFramesInfo != null;
+
+                // get frame metadata
+                meta.Frames = skiaFramesInfo?.Select(aniInfo => new FrameMetadata
+                {
+                    Animation = aniInfo,
+                }).ToImmutableList() ?? [];
+
                 // image size
                 meta.OriginalWidth = meta.Width = (uint)decoder.Info.Width;
                 meta.OriginalHeight = meta.Height = (uint)decoder.Info.Height;
@@ -76,21 +89,24 @@ public static partial class SkiaCodec
             // get color profile
             try
             {
-                // TODO: check null
                 // get embedded color profile
                 using var colorProfile = decoder.Info.ColorSpace.ToProfile();
-                var bytes = new byte[colorProfile.Size];
-                Marshal.Copy(colorProfile.Buffer, bytes, 0, (int)colorProfile.Size);
+                if (colorProfile.Size > 0)
+                {
+                    var bytes = new byte[colorProfile.Size];
+                    Marshal.Copy(colorProfile.Buffer, bytes, 0, (int)colorProfile.Size);
 
-                // create photo profile
-                var photoProfile = new PhotoColorProfile(bytes);
+                    // create photo profile
+                    var photoProfile = new PhotoColorProfile(bytes);
+
+                    meta.ColorProfileName = photoProfile.GetIccDescription();
+                    meta.ColorProfileData = photoProfile.ProfileData;
+                }
 
                 // save to meta
                 meta.ColorSpace = decoder.Info.ColorSpace.IsSrgb
                     ? ImageMagick.ColorSpace.sRGB
                     : ImageMagick.ColorSpace.Undefined;
-                meta.ColorProfileName = photoProfile.GetIccDescription();
-                meta.ColorProfileData = photoProfile.ProfileData;
             }
             catch { }
         }, token).ConfigureAwait(false);
@@ -125,7 +141,8 @@ public static partial class SkiaCodec
         // 1. read animated formats
         if (codec.FrameCount > 0)
         {
-            result.Animator = new SkiaAnimator(codec, meta);
+            var frames = meta.Frames.Select(f => (SKCodecFrameInfo)f.Animation!).ToArray();
+            result.Animator = new SkiaAnimator(codec, frames);
             return result;
         }
 
@@ -335,6 +352,34 @@ public static partial class SkiaCodec
         var img = SKImage.FromBitmap(bmp);
 
         return img;
+    }
+
+
+    /// <summary>
+    /// Extracts metadata for all frames.
+    /// </summary>
+    public static List<SKCodecFrameInfo>? GetFramesMetadata(string filePath)
+    {
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) return null;
+
+
+        using var data = SKData.Create(filePath);
+        using var codec = SKCodec.Create(data);
+        if (codec == null) return null;
+
+        int frameCount = codec.FrameCount;
+        var metadataList = new List<SKCodecFrameInfo>(frameCount);
+
+        for (int i = 0; i < frameCount; i++)
+        {
+            // GetFrameInfo provides duration and alpha info
+            if (codec.GetFrameInfo(i, out var info))
+            {
+                metadataList.Add(info);
+            }
+        }
+
+        return metadataList;
     }
 
 

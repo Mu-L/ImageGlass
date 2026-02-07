@@ -17,21 +17,24 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageMagick;
+using SkiaSharp;
 
 namespace ImageGlass.Common.Photoing;
 
 
 public class FrameMetadata
 {
-    public MagickColor BackgroundColor { get; set; } = MagickColors.Transparent;
-    public uint Width { get; set; } = 0;
-    public uint Height { get; set; } = 0;
-    public int X { get; set; } = 0;
-    public int Y { get; set; } = 0;
+    public MagickColor BackgroundColor { get; internal set; } = MagickColors.Transparent;
+    public uint Width { get; internal set; } = 0;
+    public uint Height { get; internal set; } = 0;
+    public int X { get; internal set; } = 0;
+    public int Y { get; internal set; } = 0;
 
-    public uint AnimationDelay { get; set; } = 0;
-    public uint AnimationTicksPerSecond { get; set; } = 0;
-    public GifDisposeMethod GifDisposeMethod { get; set; } = GifDisposeMethod.Undefined;
+
+    /// <summary>
+    /// Gets the animation frames info.
+    /// </summary>
+    public SKCodecFrameInfo? Animation { get; internal set; }
 
 }
 

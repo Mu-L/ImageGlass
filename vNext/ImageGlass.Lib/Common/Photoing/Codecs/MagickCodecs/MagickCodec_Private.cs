@@ -20,7 +20,6 @@ using Avalonia;
 using ImageGlass.Common.Types;
 using ImageMagick;
 using System;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace ImageGlass.Common.Photoing;
@@ -196,22 +195,6 @@ public static partial class MagickCodec
         if (exifValue == null) return defaultValue;
 
         return exifValue.Value;
-    }
-
-
-    /// <summary>
-    /// Checks if the image data is animated format.
-    /// </summary>
-    /// <param name="imgC"></param>
-    /// <param name="ext">File extension, e.g: <c>.gif</c></param>
-    private static bool CheckAnimatedFormat__(MagickImageCollection imgC, string? ext)
-    {
-        var isAnimatedExtension = ext == ".gif" || ext == ".gifv" || ext == ".webp" || ext == ".jxl";
-
-        var canAnimate = imgC.Count > 1
-            && (isAnimatedExtension || imgC.Any(i => i.AnimationDelay > 0));
-
-        return canAnimate;
     }
 
 
