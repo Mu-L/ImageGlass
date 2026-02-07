@@ -227,6 +227,7 @@ public partial class ToolbarControl : PhControl
                 itemEl = itemBtn;
             }
 
+            itemEl.IsTabStop = false;
             itemEl.DataContext = vm;
             itemEl.PropertyChanged += ToolbarItem_PropertyChanged;
 

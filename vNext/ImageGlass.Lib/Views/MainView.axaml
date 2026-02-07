@@ -45,7 +45,8 @@
                 Grid.Row="2"
                 ZIndex="80"
                 Height="90"
-                Background="{CompiledBinding GalleryBackground}">
+                Background="{CompiledBinding GalleryBackground}"
+                IsVisible="{CompiledBinding Config.ShowGallery}">
 			
         </Border>
 

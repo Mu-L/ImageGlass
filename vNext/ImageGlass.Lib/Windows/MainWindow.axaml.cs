@@ -103,6 +103,16 @@ public partial class MainWindow : PhWindow
         base.OnKeyDown(e);
         if (e.Handled) return;
 
+        // process app hotkeys
+        if (Core.API is not null)
+        {
+            await Core.API.HandleKeyDownAsync(e);
+            if (e.Handled) return;
+        }
+
+
+
+
         // enter full screen
         if (e.Key == Key.F11)
         {
@@ -132,11 +142,6 @@ public partial class MainWindow : PhWindow
         }
 
 
-        if (e.Key == Key.S)
-        {
-            Core.ShareProvider?.ShowShare(this.Handle, [Core.Photos.CurrentFilePath]);
-            return;
-        }
 
         if (e.Key != Key.Enter) return;
         var res = await ModalWindow.ShowInputAsync(this, new ModalWindowOptions
@@ -162,6 +167,16 @@ public partial class MainWindow : PhWindow
             """;
     }
 
+
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        if (e.Handled) return;
+
+
+        Core.API?.HandleKeyUp(e);
+        if (e.Handled) return;
+    }
 
     #endregion // Override Methods
 

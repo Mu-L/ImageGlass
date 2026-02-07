@@ -23,14 +23,18 @@ using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MKeys = Avalonia.Input.KeyModifiers;
 
 namespace ImageGlass.Common.ServiceProviders;
 
 public partial class AppAPIProvider
 {
+    private Hotkey? _lastHotkeyPressed = null;
+
 
     // list of all menu items & default action, hotkeys
     private static IReadOnlyCollection<HotkeySingleAction> _defaultMenuList => [
@@ -117,18 +121,15 @@ public partial class AppAPIProvider
     ];
 
 
-    // a map of menu and its action
+    // a map of menu and its action.
     private static Dictionary<LangId, HotkeySingleAction> _menuMap { get; set; }
         = new(_defaultMenuList.Select(ac => new KeyValuePair<LangId, HotkeySingleAction>(Lang.GetKey(ac.LangKey)!.Value, ac)));
 
-    // a map of hotkeys and actions
-    private static Dictionary<Hotkey, SingleAction> _hotkeyMap { get; set; } = new();
 
-
-
-
-
-
+    /// <summary>
+    /// Gets the map of hotkeys (string) and actions.
+    /// </summary>
+    public static Dictionary<string, SingleAction> AppHotkeysMap { get; private set; } = new();
 
 
 
@@ -189,7 +190,7 @@ public partial class AppAPIProvider
             foreach (var hk in item.OnClick.Hotkeys)
             {
                 // save custom hotkey to the map
-                _ = _hotkeyMap.TryAdd(hk, item.OnClick);
+                _ = AppHotkeysMap.TryAdd(hk.KeyString, item.OnClick);
             }
         }
 
@@ -210,14 +211,63 @@ public partial class AppAPIProvider
             foreach (var hk in item.Value.Hotkeys)
             {
                 // save to the maps
-                _hotkeyMap.TryAdd(hk, item.Value);
+                AppHotkeysMap.TryAdd(hk.KeyString, item.Value);
             }
         }
     }
 
 
     /// <summary>
-    /// Gets the menu action
+    /// Handles keydown event.
+    /// </summary>
+    public async Task HandleKeyDownAsync(KeyEventArgs e)
+    {
+        // 1. get hotkey action
+        var hotkey = new Hotkey(e.KeyModifiers, e.Key);
+        var action = AppHotkeysMap.GetValueOrDefault(hotkey.KeyString);
+        if (action is null) return;
+
+        var isPressedMultipleTimes = hotkey == _lastHotkeyPressed;
+        var executable = action.Executable ?? string.Empty;
+
+
+        // 2. handle special hotkeys
+        // save the last hotkey pressed
+        _lastHotkeyPressed = hotkey;
+
+        // for quick browsing, only load photo preview
+        var isQuickBrowsing = executable.Equals(nameof(API.IG_ViewByStep), StringComparison.Ordinal)
+            || executable.Equals(nameof(API.IG_ViewNext), StringComparison.Ordinal)
+            || executable.Equals(nameof(API.IG_ViewPrevious), StringComparison.Ordinal);
+        if (isQuickBrowsing && isPressedMultipleTimes)
+        {
+            Viewer.ShouldLoadFullResolution = false;
+        }
+
+
+        // 3. run the action
+        await RunActionAsync(action);
+
+
+        // 4. mark the hotkey handled
+        e.Handled = action != null;
+    }
+
+
+    /// <summary>
+    /// Handles keyup event.
+    /// </summary>
+    public void HandleKeyUp(KeyEventArgs e)
+    {
+        // the quick browsing ends, now start loading full resolution
+        Viewer.ShouldLoadFullResolution = true;
+
+        _lastHotkeyPressed = null;
+    }
+
+
+    /// <summary>
+    /// Gets the menu action.
     /// </summary>
     public static HotkeySingleAction? GetMenuAction(LangId? langKey)
     {

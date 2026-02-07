@@ -34,6 +34,7 @@
                 <ui:ToolbarButton x:Name="BtnOverflowMenu"
                         VerticalAlignment="Stretch"
                         VerticalContentAlignment="Bottom"
+                        IsTabStop="False"
                         DataContext="{CompiledBinding ButtonOverflowVM}" />
 
 
@@ -47,6 +48,7 @@
                 <!--  Menu button  -->
                 <ui:ToolbarButton x:Name="BtnMainMenu"
                                   IsOpenDropdownMenuOnClick="True"
+                                  IsTabStop="False"
                                   DataContext="{CompiledBinding ButtonMenuVM}">
                     <ui:ToolbarButton.DropdownMenu>
 						<ContextMenu Placement="BottomEdgeAlignedRight" HorizontalOffset="6">
