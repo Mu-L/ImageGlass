@@ -170,6 +170,15 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
         catch (OperationCanceledException) { }
     }
 
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void ShowFileProperties(string filePath, nint windowHandle)
+    {
+        EggShell.DisplayFileProperties(filePath, windowHandle);
+    }
+
     #endregion // Public Methods
 
 

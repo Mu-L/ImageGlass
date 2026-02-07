@@ -556,8 +556,11 @@ public static partial class MagickCodec
     /// <summary>
     /// Decodes photo from base64 string.
     /// </summary>
-    public static async Task<Photo?> DecodeBase64Async(string base64)
+    public static async Task<Photo?> DecodeBase64Async(string? base64)
     {
+        if (string.IsNullOrWhiteSpace(base64)) return null;
+
+
         // 1. convert base64 string to bytes
         var (MimeType, ByteData) = ConvertBase64ToBytes(base64);
         if (string.IsNullOrEmpty(MimeType)) return null;

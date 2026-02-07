@@ -63,4 +63,10 @@ public interface IShellProvider : IDisposable
     /// </summary>
     void DeleteFile(string filePath, bool moveToRecycleBin = true);
 
+
+    /// <summary>
+    /// Shows the file's Properties dialog.
+    /// </summary>
+    void ShowFileProperties(string filePath, nint windowHandle);
+
 }

@@ -712,7 +712,7 @@ public partial class ModalWindow : DialogWindow
     /// Shows modal dialog for information.
     /// </summary>
     public static async Task<ModalWindowResult> ShowInputAsync(PhWindow? owner,
-        ModalWindowOptions options, ModalWindowButton buttons = ModalWindowButton.OK)
+        ModalWindowOptions options, ModalWindowButton buttons = ModalWindowButton.OK_Cancel)
     {
         options.IsInputVisible ??= true;
 
