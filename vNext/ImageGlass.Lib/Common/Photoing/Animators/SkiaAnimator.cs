@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using Avalonia.Threading;
 using SkiaSharp;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace ImageGlass.Common.Photoing;
@@ -30,8 +31,11 @@ namespace ImageGlass.Common.Photoing;
 /// </summary>
 public class SkiaAnimator : AnimatorImpl
 {
+    private const int MAX_CACHE_COUNT = 5;
+
     private readonly SKCodec _codec;
     private readonly SKImage?[] _frameCache;
+    private readonly Queue<int> _cachedFramesQueue = new();
     private readonly Lock _syncLock = new();
 
 
@@ -89,6 +93,7 @@ public class SkiaAnimator : AnimatorImpl
                 _frameCache[i]?.Dispose();
                 _frameCache[i] = null;
             }
+            _cachedFramesQueue.Clear();
         }
     }
 
@@ -115,7 +120,7 @@ public class SkiaAnimator : AnimatorImpl
     {
         lock (_syncLock)
         {
-            if (IsDisposed || _codec == null) return null;
+            if (IsDisposed || _codec is null) return null;
 
             // 1. Return cached result if available
             if (_frameCache[frameIndex] is not null)
@@ -125,7 +130,7 @@ public class SkiaAnimator : AnimatorImpl
 
 
             // 2. Initialize Composite Bitmap if needed (Lazy init)
-            if (_compositeBitmap == null)
+            if (_compositeBitmap is null)
             {
                 var info = _codec.Info;
                 // Use Bgra8888 for best compatibility with Avalonia/Windows
@@ -133,6 +138,7 @@ public class SkiaAnimator : AnimatorImpl
                 _compositeBitmap = new SKBitmap(info.Width, info.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
                 _lastRenderedFrameIndex = -1;
             }
+
 
             // 3. Handle Seeking: If we are not strictly sequential, we must reset and replay.
             // Optimization: If moving from -1 to 0, or N to N+1, it is sequential.
@@ -144,6 +150,7 @@ public class SkiaAnimator : AnimatorImpl
                 _lastRenderedFrameIndex = -1;
             }
 
+
             // 4. Sequential Catch-up Loop
             // Renders all frames from the last rendered point up to the requested frame.
             // This ensures disposal methods and composition are applied correctly.
@@ -152,12 +159,32 @@ public class SkiaAnimator : AnimatorImpl
                 RenderSingleFrame(i);
             }
 
+
             // 5. Return Snapshot
             // SKImage.FromBitmap creates a copy if the bitmap is mutable.
             // This copy is ESSENTIAL for thread safety, preventing the UI from reading 
             // the bitmap while the animator modifies it for the next frame.
             var frameImage = SKImage.FromBitmap(_compositeBitmap);
             _frameCache[frameIndex] = frameImage;
+
+
+            // 6. Manage Cache: FIFO Eviction
+            if (!_cachedFramesQueue.Contains(frameIndex))
+            {
+                _cachedFramesQueue.Enqueue(frameIndex);
+            }
+
+            while (_cachedFramesQueue.Count > MAX_CACHE_COUNT)
+            {
+                var evictedIndex = _cachedFramesQueue.Dequeue();
+
+                // Ensure we don't dispose the one we just created (safety check)
+                if (evictedIndex != frameIndex)
+                {
+                    _frameCache[evictedIndex]?.Dispose();
+                    _frameCache[evictedIndex] = null;
+                }
+            }
 
             return frameImage;
         }
@@ -167,7 +194,7 @@ public class SkiaAnimator : AnimatorImpl
     private void RenderSingleFrame(int index)
     {
         if (index < 0 || index >= _frames.Length) return;
-        if (_compositeBitmap == null) return;
+        if (_compositeBitmap is null) return;
 
 
         // --- STEP A: Dispose the PREVIOUS frame ---
@@ -199,7 +226,7 @@ public class SkiaAnimator : AnimatorImpl
 
                 case SKCodecAnimationDisposalMethod.RestorePrevious:
                     // Restore the area from the backup buffer
-                    if (_backupBitmap != null)
+                    if (_backupBitmap is not null)
                     {
                         using var canvas = new SKCanvas(_compositeBitmap);
                         // Only redraw the specific area that needs restoring
@@ -224,7 +251,7 @@ public class SkiaAnimator : AnimatorImpl
         if (curMeta.DisposalMethod == SKCodecAnimationDisposalMethod.RestorePrevious)
         {
             // Allocate or re-allocate backup buffer if size mismatch
-            if (_backupBitmap == null || _backupBitmap.Info.Size != _compositeBitmap.Info.Size)
+            if (_backupBitmap is null || _backupBitmap.Info.Size != _compositeBitmap.Info.Size)
             {
                 _backupBitmap?.Dispose();
                 _backupBitmap = _compositeBitmap.Copy(); // Full copy
@@ -245,6 +272,9 @@ public class SkiaAnimator : AnimatorImpl
 
         // Assumption: We decode full frame size if FrameRect is unavailable.
         var curRect = new SKRectI(0, 0, _compositeBitmap.Width, _compositeBitmap.Height);
+
+        // OPTIMIZATION: Passing priorFrame tells the codec we are drawing on top of an existing state.
+        // This dramatically speeds up decoding for formats that support inter-frame compression (GIF/WebP).
         var frameOptions = new SKCodecOptions(index, curMeta.RequiredFrame);
 
         // Zero-copy attempt: Write directly to bitmap memory
@@ -279,7 +309,4 @@ public class SkiaAnimator : AnimatorImpl
 
         _lastRenderedFrameIndex = index;
     }
-
-
-
 }
