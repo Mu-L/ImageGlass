@@ -16,8 +16,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia.Platform.Storage;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace ImageGlass.Common.Types;
 
@@ -46,6 +48,12 @@ public static class SavingExts
 
 
     /// <summary>
+    /// Gets the file picker choices for save file dialog.
+    /// </summary>
+    public static ImmutableList<FilePickerFileType> FilePickerFileTypeChoices => GetFilterStringForSaveDialog();
+
+
+    /// <summary>
     /// Gets the map of supported extensions: <c>.extension, description</c>.
     /// </summary>
     public static FrozenDictionary<string, string> ExtensionsMap => new Dictionary<string, string>(SupportedExtensions).ToFrozenDictionary();
@@ -54,8 +62,26 @@ public static class SavingExts
     /// <summary>
     /// Gets, sets the last extensions used for saving.
     /// </summary>
-    public static string LastSavedExtension { get; set; } = string.Empty;
+    public static FilePickerFileType? LastSavedFileType { get; set; }
 
 
+
+    /// <summary>
+    /// Returns file picker choices for save file dialog.
+    /// </summary>
+    private static ImmutableList<FilePickerFileType> GetFilterStringForSaveDialog()
+    {
+        var list = new List<FilePickerFileType>(SupportedExtensions.Count);
+
+        foreach (var item in SupportedExtensions)
+        {
+            list.Add(new FilePickerFileType(item.Value)
+            {
+                Patterns = [$"*{item.Key}"],
+            });
+        }
+
+        return list.ToImmutableList();
+    }
 
 }
