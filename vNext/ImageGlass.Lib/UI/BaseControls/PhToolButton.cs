@@ -180,9 +180,9 @@ public partial class PhToolButton : ToggleButton
 
     protected override void OnClick()
     {
-        if (IsOpenDropdownMenuOnClick && DropdownMenu is not null)
+        if (IsOpenDropdownMenuOnClick)
         {
-            DropdownMenu.Open(this);
+            OpenDropdownMenu();
         }
 
         base.OnClick();
@@ -289,6 +289,23 @@ public partial class PhToolButton : ToggleButton
     protected virtual void OnIgDropdownMenuClosed(RoutedEventArgs e) { }
 
     #endregion // Virtual Methods
+
+
+
+    #region Public Methods
+
+    /// <summary>
+    /// Opens dropdown menu of this button if any.
+    /// </summary>
+    public void OpenDropdownMenu(PlacementMode? placement = null)
+    {
+        if (DropdownMenu is null) return;
+
+        DropdownMenu.Placement = placement ?? PlacementMode.BottomEdgeAlignedRight;
+        DropdownMenu.Open(this);
+    }
+
+    #endregion // Public Methods
 
 
 }
