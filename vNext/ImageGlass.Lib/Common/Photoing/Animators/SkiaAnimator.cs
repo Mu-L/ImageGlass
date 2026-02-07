@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using Avalonia.Threading;
 using SkiaSharp;
 using System;
+using System.Threading;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -31,7 +32,7 @@ public class SkiaAnimator : AnimatorImpl
 {
     private readonly SKCodec _codec;
     private readonly SKImage?[] _frameCache;
-    private readonly object _syncLock = new();
+    private readonly Lock _syncLock = new();
 
 
     /// <summary>

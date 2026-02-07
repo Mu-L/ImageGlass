@@ -76,6 +76,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
     private readonly SKRect _destRect;
     private readonly bool _hasSrcColorProfile;
     private readonly ImageInterpolation _interpolation;
+    private readonly bool _isFirstDraw;
 
     private readonly Lock _lock = new();
 
@@ -105,6 +106,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
             _destRect = viewer.DestRect.ToSKRect();
             _interpolation = viewer.CurrentInterpolation;
             _hasSrcColorProfile = viewer._photo?.Metadata?.ColorProfileData is not null;
+            _isFirstDraw = viewer._isFirstDraw.Value;
         }
     }
 
@@ -134,9 +136,8 @@ public partial class PhotoRenderer : ICustomDrawOperation
         lock (_lock)
         {
             var imageRender = _imgRender;
-            var isFirstDrawing = _imgSource is not null && imageRender is null;
 
-            if (isFirstDrawing)
+            if (_isFirstDraw)
             {
                 // process the original image
                 imageRender = ProcessImageForFirstDrawing(lease.GrContext, _imgSource);
@@ -144,15 +145,18 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
                 // clear old cache
                 lease.GrContext?.PurgeResources();
+
+
+                // set the image to draw
+                imageRender ??= _imgSource;
+
+                // update the processed image
+                Dispatcher.UIThread.Invoke(() => _onDrawFirstTime(imageRender));
             }
 
             // set the image to draw
             imageRender ??= _imgSource;
             if (imageRender is null) return;
-
-
-            // update the processed image
-            Dispatcher.UIThread.Post(() => _onDrawFirstTime(imageRender));
 
 
             // start drawing image

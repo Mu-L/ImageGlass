@@ -36,7 +36,8 @@ public partial class ViewerControl : PhControl
 {
     internal Photo? _photo;
     private CancellationTokenSource? _cancelPreview;
-    private InterlockedBool _isPreviewing = new();
+    private InterlockedBool _isPreviewing = new(false);
+    internal InterlockedBool _isFirstDraw = new(false);
 
     private Point? _lastMousePanPoint = null; // mouse panning
 
@@ -342,19 +343,23 @@ public partial class ViewerControl : PhControl
     [MemberNotNull(nameof(_cancelPreview))]
     public void UnloadPhoto()
     {
-        CancelPreview();
-        SourceKind = PhotoSource.None;
-        _photo?.CancelLoading();
-        _photo?.Unload();
+        lock (_lock)
+        {
+            CancelPreview();
+            SourceKind = PhotoSource.None;
+            _photo?.CancelLoading();
+            _photo?.Unload();
+            _isFirstDraw.Set();
 
-        // reset
-        AnimationSource = AnimationSources.None;
-        _enablePanningVelocity = false;
-        SetSourceSelection(new Rect(), false);
-        BitmapSize = new();
+            // reset
+            AnimationSource = AnimationSources.None;
+            _enablePanningVelocity = false;
+            SetSourceSelection(new Rect(), false);
+            BitmapSize = new();
 
-        // dispose native resources of photo
-        DisposeNativePhotoResources();
+            // dispose native resources of photo
+            DisposeNativePhotoResources();
+        }
     }
 
 
@@ -579,7 +584,6 @@ public partial class ViewerControl : PhControl
                 // native bitmap is a single-frame bitmap
                 else
                 {
-                    // create GPU bitmap
                     imgFrame = e.Photo.GetFrame();
                     hasSource = imgFrame != null;
                 }
@@ -612,8 +616,8 @@ public partial class ViewerControl : PhControl
                 // set animator
                 if (animator is not null)
                 {
+                    _animator?.FrameChanged -= Animator_FrameChanged;
                     _animator = animator;
-                    _animator.FrameChanged -= Animator_FrameChanged;
                     _animator.FrameChanged += Animator_FrameChanged;
                     _animator.Play();
                 }
@@ -698,8 +702,6 @@ public partial class ViewerControl : PhControl
 
         InvalidateVisual();
     }
-
-
 
 
 

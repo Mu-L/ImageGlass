@@ -363,8 +363,13 @@ public partial class ViewerControl
     /// </summary>
     protected void OnDrawnImageFirstTime(SKImage? img)
     {
-        // cache the proccessed image for next draw
-        _imgRender = img;
+        lock (_lock)
+        {
+            _isFirstDraw.Clear();
+
+            // cache the proccessed image for next draw
+            _imgRender = img;
+        }
     }
 
 
