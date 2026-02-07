@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia.Threading;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer;
@@ -404,13 +405,20 @@ public partial class AppStatusInfo : DisposableImpl
                 : BHelper.ResolvePath(Core.Photos.CurrentFilePath);
         }
 
-        Changed?.Invoke(this, EventArgs.Empty);
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            Changed?.Invoke(this, EventArgs.Empty);
+        });
     }
 
 
     private void Viewer_ZoomChanged(ViewerControl sender, ViewerZoomEventArgs e)
     {
-        Changed?.Invoke(this, EventArgs.Empty);
+        Dispatcher.UIThread.Post(() =>
+        {
+            Changed?.Invoke(this, EventArgs.Empty);
+        });
     }
 
 }
