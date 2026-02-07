@@ -151,7 +151,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
                 imageRender ??= _imgSource;
 
                 // update the processed image
-                Dispatcher.UIThread.Invoke(() => _onDrawFirstTime(imageRender));
+                Dispatcher.UIThread.Post(() => _onDrawFirstTime(imageRender), DispatcherPriority.Render);
             }
 
             // set the image to draw

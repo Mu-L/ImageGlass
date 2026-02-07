@@ -292,7 +292,7 @@ public static partial class MagickCodec
                     X = frame.Page.X,
                     Y = frame.Page.Y,
 
-                    Animation = skiaFramesInfo?[frameIndex],
+                    Animation = skiaFramesInfo?.ElementAtOrDefault(frameIndex),
                 }).ToImmutableList();
             }
             catch { }
