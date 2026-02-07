@@ -198,15 +198,8 @@ public partial class MainWindow : PhWindow
 
     private void PART_Toolbar_ItemClicked(ToolbarButton sender, EventArgs e)
     {
-        _ = ModalWindow.ShowInfoAsync(this, new ModalWindowOptions
-        {
-            Title = sender.VM.DisplayText,
-            Heading = sender.VM.DisplayText,
-            Description = sender.VM.Tooltip,
-            Details = $"{sender.VM.OnClick?.Executable}({sender.VM.OnClick?.Argument})",
-        });
+        _ = Core.API?.RunActionAsync(sender.VM.OnClick);
     }
-
 
 
     #endregion Control Events
