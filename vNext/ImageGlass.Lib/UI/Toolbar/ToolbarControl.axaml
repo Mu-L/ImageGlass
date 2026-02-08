@@ -75,7 +75,7 @@
                                   IsTabStop="False"
                                   DataContext="{CompiledBinding ButtonMenuVM}">
                     <ui:ToolbarButton.DropdownMenu>
-						<ContextMenu Placement="BottomEdgeAlignedRight" HorizontalOffset="6">
+						<ContextMenu x:Name="PART_MainMenu" Placement="BottomEdgeAlignedRight" HorizontalOffset="6">
 
                             <!-- File -->
                             <ui:PhMenuItem LangKey="FrmMain_MnuFile">
