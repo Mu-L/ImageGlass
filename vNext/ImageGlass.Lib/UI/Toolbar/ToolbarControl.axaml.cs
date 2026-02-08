@@ -82,7 +82,7 @@ public partial class ToolbarControl : PhControl
         Core.Config.PropertyChanged += Config_PropertyChanged;
 
         await Task.Delay(100);
-        HandleOverflow__();
+        HandleOverflow();
     }
 
 
@@ -96,7 +96,7 @@ public partial class ToolbarControl : PhControl
     protected override void OnSizeChanged(SizeChangedEventArgs e)
     {
         base.OnSizeChanged(e);
-        HandleOverflow__();
+        HandleOverflow();
     }
 
 
@@ -118,7 +118,7 @@ public partial class ToolbarControl : PhControl
 
         if (e.Property == ItemsSourceProperty)
         {
-            LoadItems__();
+            LoadItems();
         }
     }
 
@@ -135,7 +135,7 @@ public partial class ToolbarControl : PhControl
         // update toolbar button check state
         else
         {
-            UpdateButtonCheckState__(e.PropertyName);
+            UpdateButtonCheckState(e.PropertyName);
         }
     }
 
@@ -174,14 +174,14 @@ public partial class ToolbarControl : PhControl
             // 1. Separator
             if (item.IsSeparator)
             {
-                mnu.Items.Add(new MenuItem() { Header = "-" });
+                mnu.Items.Add(new PhMenuItem() { Header = "-" });
                 continue;
             }
 
 
             // 2. Button item
             // get toolbar item metadata
-            var mnuItem = new MenuItem
+            var mnuItem = new PhMenuItem
             {
                 ToggleType = item.IsToggle ? MenuItemToggleType.CheckBox : MenuItemToggleType.None,
                 IsChecked = item.IsChecked,
@@ -206,6 +206,7 @@ public partial class ToolbarControl : PhControl
 
             // get display text
             mnuItem.Header = item.DisplayText;
+            mnuItem.HotkeyText = item.HotkeyText;
 
             // add click event
             mnuItem.Click += OverflowMenuItem_Click;
@@ -233,7 +234,7 @@ public partial class ToolbarControl : PhControl
     /// <summary>
     /// Clears all items and metadata.
     /// </summary>
-    private void ClearItems__()
+    private void ClearItems()
     {
         // remove item events
         foreach (var item in _itemElements)
@@ -262,9 +263,9 @@ public partial class ToolbarControl : PhControl
     /// <summary>
     /// Loads toolbar items.
     /// </summary>
-    private void LoadItems__()
+    private void LoadItems()
     {
-        ClearItems__();
+        ClearItems();
 
         var primaryList = new List<Control>();
         var secondaryList = new List<Control>();
@@ -349,7 +350,7 @@ public partial class ToolbarControl : PhControl
     /// <summary>
     /// Updates item position and alignment.
     /// </summary>
-    private void HandleOverflow__()
+    private void HandleOverflow()
     {
         _groupOverflowItemModels.Clear();
 
@@ -411,7 +412,7 @@ public partial class ToolbarControl : PhControl
     /// <summary>
     /// Updates check state of toolbar button according to config name.
     /// </summary>
-    private void UpdateButtonCheckState__(string? configName)
+    private void UpdateButtonCheckState(string? configName)
     {
         if (string.IsNullOrWhiteSpace(configName)) return;
         if (_configBindingsMap.GetValueOrDefault(configName) is not List<int> itemIndice) return;

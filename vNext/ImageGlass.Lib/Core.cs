@@ -332,9 +332,10 @@ public static class Core
             Resx.Set(ResxId.MenuFlyoutItemForegroundDisabled, menuTextDisabled);
 
             // menu hotkey text
-            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForeground, menuText);
-            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver, menuText);
-            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed, menuText);
+            var hotkeyTextColor = menuText.A(200);
+            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForeground, hotkeyTextColor);
+            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver, hotkeyTextColor);
+            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed, hotkeyTextColor);
             Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled, menuTextDisabled);
 
             // menu chevron
