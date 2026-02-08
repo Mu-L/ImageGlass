@@ -21,10 +21,12 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using ImageGlass.Common;
+using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders.FileSearchService;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
+using ImageGlass.UI.Viewer;
 using ImageGlass.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -55,6 +57,8 @@ public partial class MainView : PhControl
         DragDrop.AddDragOverHandler(PART_Viewer, PART_Viewer_DragOver);
         DragDrop.AddDropHandler(PART_Viewer, PART_Viewer_Drop);
 
+        PART_Viewer.PhotoLoading += PART_Viewer_PhotoLoading;
+
 
         // load image from command line arguments
         LoadImagesFromCmdArgs();
@@ -68,6 +72,8 @@ public partial class MainView : PhControl
         // drag-drop events
         DragDrop.RemoveDragOverHandler(PART_Viewer, PART_Viewer_DragOver);
         DragDrop.RemoveDropHandler(PART_Viewer, PART_Viewer_Drop);
+
+        PART_Viewer.PhotoLoading -= PART_Viewer_PhotoLoading;
 
     }
 
@@ -129,6 +135,37 @@ public partial class MainView : PhControl
     }
 
 
+    private void PART_Viewer_PhotoLoading(ViewerControl sender, PhotoLoadingEventArgs e)
+    {
+        // Note: events are not fired in order
+
+        // 1. handle loading error first
+        if (e.Photo.Error is not null)
+        {
+            var heading = $"{Core.Lang[LangId.FrmMain_PicMain_ErrorText]} 😶";
+            var err = BHelper.GetInAppError(e.Photo.Error);
+
+            // show error message
+            _ = PART_Message.ShowAsync(err.DebugInfo, heading, err.Details, 0);
+        }
+
+        // 2. handle photo loading
+        else if (e.State == PhotoLoadingState.Loading)
+        {
+            // show loading message after 2s
+            _ = PART_Message.ShowAsync(Core.Lang[LangId.FrmMain_Loading], durationMs: 0, delayMs: 2000);
+        }
+
+        // 3. handle photo loaded
+        else if (e.State == PhotoLoadingState.Loaded)
+        {
+            // clear in-app message
+            _ = PART_Message.ShowAsync(null);
+        }
+    }
+
+
+
 
 
     private void LoadImagesFromCmdArgs()
@@ -164,8 +201,7 @@ public partial class MainView : PhControl
     }
 
 
-    public void PrepareLoadPhotoList(ICollection<string> inputPaths, string? currentFilePath,
-        bool disposeForegroundShell, bool loadInitPhoto)
+    public void PrepareLoadPhotoList(ICollection<string> inputPaths, string? currentFilePath, bool disposeForegroundShell, bool loadInitPhoto)
     {
         // dispose the foreground shell if requested
         if (disposeForegroundShell) Core.ShellProvider?.ForegroundShell = null;

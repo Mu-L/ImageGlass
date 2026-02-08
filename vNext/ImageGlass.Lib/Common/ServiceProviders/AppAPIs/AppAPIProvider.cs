@@ -50,6 +50,7 @@ public partial class AppAPIProvider
 
 
     private ViewerControl Viewer => _mainWindow.PART_MainView.PART_Viewer;
+    private MessageControl Message => _mainWindow.PART_MainView.PART_Message;
 
 
     public AppAPIProvider(MainWindow mainWindow)
@@ -301,12 +302,11 @@ public partial class AppAPIProvider
     /// </param>
     public async Task<bool> SaveImageAsync(string destFilePath)
     {
-        // TODO:
         //var saveSource = ImageSaveSource.Undefined;
         //var hasSrcPath = !string.IsNullOrEmpty(Core.Photos.CurrentFilePath);
         //Exception? error = null;
 
-        //_ = _contentEl.ShowMessageAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Saving]);
+        _ = Message.ShowAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Saving]);
 
 
         //// 1. save photo
@@ -357,7 +357,7 @@ public partial class AppAPIProvider
         //// 2. check for error
         //if (error is not null)
         //{
-        //    await _contentEl.ShowMessageAsync(null);
+        //    await Message.ClearAsync();
 
         //    _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
         //    {
@@ -394,7 +394,7 @@ public partial class AppAPIProvider
         //    }
         //}
 
-        //_ = _contentEl.ShowMessageAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Success]);
+        //_ = Message.ShowAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Success]);
 
 
         //// 4. update thumbnail & metadata if file in the list was overriden
@@ -425,7 +425,7 @@ public partial class AppAPIProvider
 
         //if (isClipboardPhoto)
         //{
-        //    _ = _contentEl.ShowMessageAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
+        //    _ = Message.ShowAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
 
         //    // save clipboard photo as temp PNG file
         //    filePath = await Core.SavePhotoAsTempFileAsync();
@@ -436,7 +436,7 @@ public partial class AppAPIProvider
         //}
 
 
-        //await _contentEl.ShowMessageAsync(null);
+        //await Message.ClearAsync();
         //if (!File.Exists(filePath))
         //{
         //    _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
@@ -478,13 +478,13 @@ public partial class AppAPIProvider
         // print clipboard image
         if (Core.ClipboardImage is not null)
         {
-            //_ = _contentEl.ShowMessageAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
+            _ = Message.ShowAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
 
             // save image to temp file
             filePath = await Core.SavePhotoAsTempFileAsync();
         }
 
-        //await _contentEl.ShowMessageAsync(null);
+        await Message.ClearAsync();
 
         if (!File.Exists(filePath))
         {
@@ -1184,7 +1184,7 @@ public partial class AppAPIProvider
 
     //    var filePath = Core.Photos.CurrentFilePath;
     //    var ext = Core.Photos.Current?.Extension.ToLowerInvariant() ?? string.Empty;
-    //    _ = _contentEl.ShowMessageAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
+    //    _ = Message.ShowAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
 
     //    var title = forLockScreen
     //        ? Core.Lang[LangId.FrmMain_MnuSetLockScreen]
@@ -1198,7 +1198,7 @@ public partial class AppAPIProvider
     //        // save image to temp file
     //        filePath = await Core.SavePhotoAsTempFileAsync(".jpg");
     //    }
-    //    await _contentEl.ShowMessageAsync(null);
+    //    await Message.ClearAsync();
 
 
     //    // 2. check if file path is valid
@@ -1230,7 +1230,7 @@ public partial class AppAPIProvider
     //            ? Core.Lang[LangId.FrmMain_MnuSetLockScreen_Success]
     //            : Core.Lang[LangId.FrmMain_MnuSetDesktopBackground_Success];
 
-    //        _ = _contentEl.ShowMessageAsync(successMsg);
+    //        _ = Message.ShowAsync(successMsg);
     //    }
     //    catch (Exception ex)
     //    {
@@ -1332,15 +1332,15 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_CopyImagePixelsAsync()
     {
-        //if (Viewer.SourceKind == PhotoSource.None) return;
+        if (Viewer.SourceKind == PhotoSource.None) return;
 
         //// 1. get rendered bitmap
         //var wicBmp = Viewer.GetRenderedBitmap();
         //if (wicBmp.IsDisposed()) return;
 
-        //// 2. show message
-        //await _contentEl.ShowMessageAsync(null);
-        //_ = _contentEl.ShowMessageAsync(Core.Lang[LangId.FrmMain_MnuCopyImagePixels_Copying], delayMs: 1000);
+        // 2. show message
+        await Message.ClearAsync();
+        _ = Message.ShowAsync(Core.Lang[LangId.FrmMain_MnuCopyImagePixels_Copying], delayMs: 1000);
 
         //// 3. copy the selected area
         //if (!Viewer.SourceSelection.IsEmpty)
@@ -1352,7 +1352,7 @@ public partial class AppAPIProvider
         //var success = await Task.Run(async () => await BHelper.SetClipboardImageAsync(wicBmp));
         //if (success)
         //{
-        //    _ = _contentEl.ShowMessageAsync(Core.Lang[LangId.FrmMain_MnuCopyImagePixels_Success]);
+        //    _ = Message.ShowAsync(Core.Lang[LangId.FrmMain_MnuCopyImagePixels_Success]);
         //}
     }
 
@@ -1368,9 +1368,8 @@ public partial class AppAPIProvider
         {
             _mainWindow.Clipboard?.SetTextAsync(Core.Photos.CurrentFilePath);
 
-            // TODO
-            //// show message
-            //_ = _contentEl.ShowMessageAsync(Core.Lang[LangId.FrmMain_MnuCopyPath_Success]);
+            // show message
+            _ = Message.ShowAsync(Core.Lang[LangId.FrmMain_MnuCopyPath_Success]);
         }
         catch { }
     }
@@ -1399,27 +1398,27 @@ public partial class AppAPIProvider
     /// </summary>
     private async Task SetFileToClipboardAsync(string? filePath, bool forCutting)
     {
-        //if (!File.Exists(filePath)) return;
+        if (!File.Exists(filePath)) return;
 
-        //// 1. cut/copy single file
-        //if (forCutting)
-        //{
-        //    if (!Core.Config.EnableCutMultipleFiles)
-        //    {
-        //        Core.StringClipboard.Clear();
-        //    }
-        //}
-        //else
-        //{
-        //    if (!Core.Config.EnableCopyMultipleFiles)
-        //    {
-        //        Core.StringClipboard.Clear();
-        //    }
-        //}
+        // 1. cut/copy single file
+        if (forCutting)
+        {
+            if (!Core.Config.EnableCutMultipleFiles)
+            {
+                Core.StringClipboard.Clear();
+            }
+        }
+        else
+        {
+            if (!Core.Config.EnableCopyMultipleFiles)
+            {
+                Core.StringClipboard.Clear();
+            }
+        }
 
 
-        //// 2. try adding current photo path to clipboard paths
-        //_ = Core.StringClipboard.Add(filePath);
+        // 2. try adding current photo path to clipboard paths
+        _ = Core.StringClipboard.Add(filePath);
 
 
         //// 3. set files to clipboard
@@ -1429,7 +1428,7 @@ public partial class AppAPIProvider
         //// 4. show message
         //if (success)
         //{
-        //    _ = _contentEl.ShowMessageAsync(
+        //    _ = Message.ShowAsync(
         //        Core.Lang[forCutting
         //            ? LangId.FrmMain_MnuCutFile_Success
         //            : LangId.FrmMain_MnuCopyFile_Success,
@@ -1452,9 +1451,9 @@ public partial class AppAPIProvider
             await _mainWindow.Clipboard.ClearAsync();
         }
 
-        // TODO
-        //// show message
-        //_ = _contentEl.ShowMessageAsync(Core.Lang[LangId.FrmMain_MnuClearClipboard_Success]);
+
+        // show message
+        _ = Message.ShowAsync(Core.Lang[LangId.FrmMain_MnuClearClipboard_Success]);
     }
 
     #endregion // Clipboard APIs
@@ -1531,10 +1530,9 @@ public partial class AppAPIProvider
         // show message
         if (showMessage && enabled)
         {
-            // TODO:
-            //_ = _contentEl.ShowMessageAsync(
-            //    Core.Config.Lang[LangId.FrmMain_MnuFrameless_EnableDescription],
-            //    Core.Config.Lang[LangId.FrmMain_MnuFrameless]);
+            _ = Message.ShowAsync(
+                Core.Lang[LangId.FrmMain_MnuFrameless_EnableDescription],
+                Core.Lang[LangId.FrmMain_MnuFrameless]);
         }
     }
 
@@ -1761,10 +1759,9 @@ public partial class AppAPIProvider
         enabled ??= !Core.Config.EnableWindowTopMost;
         Core.Config.EnableWindowTopMost = enabled.Value;
 
-        // TODO:
-        //_ = _contentEl.ShowMessageAsync(Core.Lang[enabled.Value
-        //    ? LangId.FrmMain_MnuToggleTopMost_Enable
-        //    : LangId.FrmMain_MnuToggleTopMost_Disable]);
+        _ = Message.ShowAsync(Core.Lang[enabled.Value
+            ? LangId.FrmMain_MnuToggleTopMost_Enable
+            : LangId.FrmMain_MnuToggleTopMost_Disable]);
     }
 
 

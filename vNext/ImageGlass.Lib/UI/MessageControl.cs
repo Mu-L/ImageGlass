@@ -176,22 +176,26 @@ public class MessageControl : ContentControl
 
 
         // bottom section
-        var bottomEl = new ScrollViewer
+        var bottomEl = new Border
         {
             Margin = new Thickness(0, 12, 0, 0),
-            Padding = new Thickness(5),
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             BorderThickness = new Thickness(1),
-            [!ScrollViewer.BorderBrushProperty] = Resx.CreateBinding(ResxId.IG_BorderControlBrush),
+            ClipToBounds = true,
             [!ScrollViewer.CornerRadiusProperty] = Resx.CreateBinding(ResxId.ControlCornerRadius),
+            [!ScrollViewer.BorderBrushProperty] = Resx.CreateBinding(ResxId.TextControlForeground),
             [!ScrollViewer.IsVisibleProperty] = this[!IsDetailsVisibleProperty],
-            Content = new TextBlock
+            Child = new ScrollViewer
             {
-                FontSize = Const.FONT_SIZE_SMALL,
-                FontFamily = Const.FONT_CODE,
-                FontWeight = Avalonia.Media.FontWeight.SemiLight,
-                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                [!TextBlock.TextProperty] = this[!DetailsProperty],
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                Content = new SelectableTextBlock
+                {
+                    Padding = new Thickness(5),
+                    FontSize = Const.FONT_SIZE_SMALL,
+                    FontFamily = Const.FONT_CODE,
+                    FontWeight = Avalonia.Media.FontWeight.SemiLight,
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                    [!TextBlock.TextProperty] = this[!DetailsProperty],
+                },
             },
         };
 
