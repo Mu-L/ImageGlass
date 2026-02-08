@@ -69,53 +69,232 @@
                 </StackPanel>
 
 
-                <!--  Menu button  -->
+                <!--  Main Menu button  -->
                 <ui:ToolbarButton x:Name="PART_BtnMainMenu"
                                   IsOpenDropdownMenuOnClick="True"
                                   IsTabStop="False"
                                   DataContext="{CompiledBinding ButtonMenuVM}">
                     <ui:ToolbarButton.DropdownMenu>
 						<ContextMenu Placement="BottomEdgeAlignedRight" HorizontalOffset="6">
-							<MenuItem Header="File">
-                                <MenuItem Header="Open"></MenuItem>
-                                <MenuItem Header="Share"></MenuItem>
-                                <MenuItem Header="Print">
-                                  <MenuItem Header="Child 1" ToggleType="Radio" />
-                                  <MenuItem Header="Child 2" ToggleType="Radio" InputGesture="Ctrl+Shift+W" />
-                                  <MenuItem Header="Child 3" ToggleType="Radio" IsChecked="True" />
-                                  <Separator/>
-                                  <MenuItem Header="Child 4" ToggleType="CheckBox" IsChecked="True" />
-                                  <MenuItem Header="Child 5" ToggleType="CheckBox" />
-                                  <MenuItem Header="Child 6"/>
-                                  <MenuItem Header="Child 7"/>
-                                  <MenuItem Header="Child 8"/>
-                                  <MenuItem Header="Child 9"/>
-                                  <MenuItem Header="Child 10"/>
-                                </MenuItem>
-                            </MenuItem>
-                            <MenuItem Header="Edit"></MenuItem>
-                            <MenuItem Header="-"></MenuItem>
-                            <MenuItem Header="Close"></MenuItem>
+
+                            <!-- File -->
+                            <ui:PhMenuItem LangKey="FrmMain_MnuFile">
+                                <ui:PhMenuItem LangKey="FrmMain_MnuOpenFile" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuNewWindow" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuSave" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuSaveAs" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuExportFrames" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuEdit" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuOpenWith" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuPrint" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuShare" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuOpenLocation" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuRename" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuMoveToRecycleBin" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuDeleteFromHardDisk" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuImageProperties" />
+                            </ui:PhMenuItem>
 
 
-                            <MenuItem Header="_Standard"/>
-                            <MenuItem IsSelected="True" Header="Selected" InputGesture="Ctrl+U" />
-                            <MenuItem Header="With Icon">
-                              <MenuItem.Icon>
-                                <TextBlock>😊</TextBlock>
-                              </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="With CheckBox">
-                              <MenuItem.Icon>
-                                <CheckBox IsChecked="True"/>
-                              </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Input Gesture" InputGesture="Ctrl+G"/>
-                            <MenuItem Header="Disabled" IsEnabled="False"/>
-                            <MenuItem Header="-"/>
-                            <MenuItem Header="Disabled Parent" IsEnabled="False" InputGesture="Ctrl+Shift+A">
-                              <MenuItem Header="Child"/>
-                            </MenuItem>
+                            <!-- Navigation -->
+                            <ui:PhMenuItem LangKey="FrmMain_MnuNavigation">
+                                <ui:PhMenuItem LangKey="FrmMain_MnuViewNext" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuViewPrevious" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuGoTo" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuGoToFirst" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuGoToLast" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuViewNextFrame" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuViewPreviousFrame" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuViewFirstFrame" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuViewLastFrame" />
+                            </ui:PhMenuItem>
+
+
+                            <!--  Zoom  -->
+                            <ui:PhMenuItem LangKey="FrmMain_MnuZoom">
+                                <ui:PhMenuItem LangKey="FrmMain_MnuZoomIn" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuZoomOut" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuCustomZoom" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuActualSize" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuAutoZoom" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuLockZoom" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuScaleToWidth" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuScaleToHeight" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuScaleToFit" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuScaleToFill" />
+                            </ui:PhMenuItem>
+
+
+                            <!--  Panning  -->
+                            <ui:PhMenuItem LangKey="FrmMain_MnuPanning">
+                                <ui:PhMenuItem LangKey="FrmMain_MnuPanLeft" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuPanRight" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuPanUp" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuPanDown" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuPanToLeftSide" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuPanToRightSide" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuPanToTop" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuPanToBottom" />
+                            </ui:PhMenuItem>
+
+
+                            <!--  Image  -->
+                            <ui:PhMenuItem LangKey="FrmMain_MnuImage">
+                                <ui:PhMenuItem LangKey="FrmMain_MnuRefresh" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuReload" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuReloadImageList" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuUnload" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuLoadingOrders">
+                                    <ui:PhMenuItem LangKey="FrmSettings_ShouldUseExplorerSortOrder"
+                                                   ToggleType="CheckBox"
+                                                   IsChecked="{CompiledBinding Config.ShouldUseExplorerSortOrder}"/>
+                                    <ui:PhMenuItem Header="-" />
+
+                                    <ui:PhMenuItem LangKey="ImageOrderBy_Name" GroupName="ImageOrderBy" ToggleType="Radio" />
+                                    <ui:PhMenuItem LangKey="ImageOrderBy_Random" GroupName="ImageOrderBy" ToggleType="Radio" />
+                                    <ui:PhMenuItem LangKey="ImageOrderBy_FileSize" GroupName="ImageOrderBy" ToggleType="Radio" />
+                                    <ui:PhMenuItem LangKey="ImageOrderBy_Extension" GroupName="ImageOrderBy" ToggleType="Radio" />
+                                    <ui:PhMenuItem LangKey="ImageOrderBy_DateCreated" GroupName="ImageOrderBy" ToggleType="Radio" />
+                                    <ui:PhMenuItem LangKey="ImageOrderBy_DateAccessed" GroupName="ImageOrderBy" ToggleType="Radio" />
+                                    <ui:PhMenuItem LangKey="ImageOrderBy_DateModified" GroupName="ImageOrderBy" ToggleType="Radio" />
+                                    <ui:PhMenuItem LangKey="ImageOrderBy_ExifDateTaken" GroupName="ImageOrderBy" ToggleType="Radio" />
+                                    <ui:PhMenuItem LangKey="ImageOrderBy_ExifRating" GroupName="ImageOrderBy" ToggleType="Radio" />
+                                    <ui:PhMenuItem Header="-" />
+
+                                    <ui:PhMenuItem LangKey="ImageOrderType_Asc" GroupName="ImageOrderType" ToggleType="Radio" />
+                                    <ui:PhMenuItem LangKey="ImageOrderType_Desc" GroupName="ImageOrderType" ToggleType="Radio" />
+                                </ui:PhMenuItem>
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuViewChannels">
+                                    <ui:PhMenuItem Header="R" />
+                                    <ui:PhMenuItem Header="G" />
+                                    <ui:PhMenuItem Header="B" />
+                                    <ui:PhMenuItem Header="A" />
+                                    <ui:PhMenuItem Header="-" />
+                                    <ui:PhMenuItem Header="RGBA" />
+                                    <ui:PhMenuItem Header="RGB" />
+                                    <ui:PhMenuItem Header="R + A" />
+                                    <ui:PhMenuItem Header="G + A" />
+                                    <ui:PhMenuItem Header="B + A" />
+                                    <ui:PhMenuItem Header="A" />
+                                </ui:PhMenuItem>
+                                <ui:PhMenuItem Header="-" />
+                                
+                                <ui:PhMenuItem LangKey="FrmMain_MnuInvertColors" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuToggleImageAnimation" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuRotateLeft" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuRotateRight" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuFlipHorizontal" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuFlipVertical" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuSetDesktopBackground" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuSetLockScreen" />
+                            </ui:PhMenuItem>
+
+
+                            <!--  Clipboard  -->
+                            <ui:PhMenuItem LangKey="FrmMain_MnuClipboard">
+                                <ui:PhMenuItem LangKey="FrmMain_MnuPasteImage" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuCopyImagePixels" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuCopyPath" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuCopyFile" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuCutFile" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuClearClipboard" />
+                            </ui:PhMenuItem>
+
+
+                            <!--  Window modes  -->
+                            <ui:PhMenuItem Header="-" />
+                            <ui:PhMenuItem LangKey="FrmMain_MnuWindowFit"
+                                           ToggleType="CheckBox"
+                                           IsChecked="{CompiledBinding Config.EnableWindowFit}" />
+                            <ui:PhMenuItem LangKey="FrmMain_MnuFrameless"
+                                           ToggleType="CheckBox"
+                                           IsChecked="{CompiledBinding Config.EnableFrameless}" />
+                            <ui:PhMenuItem LangKey="FrmMain_MnuFullScreen"
+                                           ToggleType="CheckBox"
+                                           IsChecked="{CompiledBinding Config.EnableFullScreen}" />
+                            <ui:PhMenuItem LangKey="FrmMain_MnuSlideshow"
+                                           ToggleType="CheckBox"
+                                           IsChecked="{CompiledBinding Config.EnableSlideshow}" />
+                            <ui:PhMenuItem Header="-" />
+
+
+                            <!--  Layout  -->
+                            <ui:PhMenuItem LangKey="FrmMain_MnuLayout">
+                                <ui:PhMenuItem LangKey="FrmMain_MnuToggleToolbar"
+                                               ToggleType="CheckBox"
+                                               IsChecked="{CompiledBinding Config.ShowToolbar}" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuToggleGallery"
+                                               ToggleType="CheckBox"
+                                               IsChecked="{CompiledBinding Config.ShowGallery}" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuToggleCheckerboard" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuToggleTopMost"
+                                               ToggleType="CheckBox"
+                                               IsChecked="{CompiledBinding Config.EnableWindowTopMost}" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuChangeBackgroundColor" />
+                            </ui:PhMenuItem>
+
+
+                            <!--  Tools  -->
+                            <ui:PhMenuItem LangKey="FrmMain_MnuTools">
+                                <ui:PhMenuItem LangKey="FrmMain_MnuColorPicker" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuCropTool" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuFrameNav" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuResizeTool" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuLosslessCompression" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem Header="-" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuGetMoreTools" />
+                            </ui:PhMenuItem>
+
+
+                            <!--  Settings  -->
+                            <ui:PhMenuItem Header="-" />
+                            <ui:PhMenuItem LangKey="FrmMain_MnuSettings" />
+
+
+                            <!--  Help  -->
+                            <ui:PhMenuItem LangKey="FrmMain_MnuHelp">
+                                <ui:PhMenuItem LangKey="FrmMain_MnuAbout" />
+                                <ui:PhMenuItem LangKey="_CheckForUpdate" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuReportIssue" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuQuickSetup" />
+                                <ui:PhMenuItem Header="-" />
+
+                                <ui:PhMenuItem LangKey="FrmMain_MnuSetDefaultPhotoViewer" />
+                                <ui:PhMenuItem LangKey="FrmMain_MnuRemoveDefaultPhotoViewer" />
+                            </ui:PhMenuItem>
+
+
+                            <!--  Exit  -->
+                            <ui:PhMenuItem Header="-" />
+                            <ui:PhMenuItem LangKey="FrmMain_MnuExit" />
+
                         </ContextMenu>
                     </ui:ToolbarButton.DropdownMenu>
                 </ui:ToolbarButton>
