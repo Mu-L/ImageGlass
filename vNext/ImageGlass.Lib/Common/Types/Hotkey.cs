@@ -18,8 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Input;
 using ImageGlass.Common.Types.JsonTypeConverters;
-using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace ImageGlass.Common.Types;
@@ -28,11 +26,6 @@ namespace ImageGlass.Common.Types;
 [JsonConverter(typeof(JsonStringToHotkeyConverter))]
 public class Hotkey
 {
-    private const string KEY_STR_CTRL = "Ctrl";
-    private const string KEY_STR_SHIFT = "Shift";
-    private const string KEY_STR_ALT = "Alt";
-
-
     /// <summary>
     /// Gets, sets the virtual key.
     /// </summary>
@@ -52,10 +45,12 @@ public class Hotkey
 
     public Hotkey() { }
 
+
     public Hotkey(Key key)
     {
         Key = key;
     }
+
 
     public Hotkey(KeyModifiers modifiers, Key key)
     {
@@ -64,11 +59,37 @@ public class Hotkey
     }
 
 
+    public Hotkey(KeyGesture kg)
+    {
+        Key = kg.Key;
+        Modifiers = kg.KeyModifiers;
+    }
+
+
+    public Hotkey(KeyEventArgs e)
+    {
+        Key = e.Key;
+        Modifiers = e.KeyModifiers;
+    }
+
+
+    #region Methods
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
     public override string ToString() => KeyString;
+
+
+    /// <summary>
+    /// Checks if the provided hotkey is same.
+    /// </summary>
+    public bool IsSame(Hotkey? hk)
+    {
+        if (hk is null) return false;
+
+        return IsSame(hk.Key, hk.Modifiers);
+    }
 
 
     /// <summary>
@@ -85,6 +106,14 @@ public class Hotkey
     }
 
 
+    /// <summary>
+    /// Converts to <see cref="KeyGesture"/>.
+    /// </summary>
+    public KeyGesture ToGesture()
+    {
+        return new KeyGesture(Key, Modifiers);
+    }
+
 
     /// <summary>
     /// Parses string to <see cref="Hotkey"/> instance.
@@ -93,39 +122,10 @@ public class Hotkey
     {
         if (string.IsNullOrWhiteSpace(s)) return null;
 
-        var hotkey = new Hotkey();
+        var kg = KeyGesture.Parse(s);
+        if (kg is null) return null;
 
-        try
-        {
-            var keySpan = s
-                .Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .AsSpan();
-
-            foreach (var str in keySpan)
-            {
-                if (str.Equals(KEY_STR_CTRL, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    hotkey.Modifiers |= KeyModifiers.Control;
-                }
-                else if (str.Equals(KEY_STR_SHIFT, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    hotkey.Modifiers |= KeyModifiers.Shift;
-                }
-                else if (str.Equals(KEY_STR_ALT, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    hotkey.Modifiers |= KeyModifiers.Alt;
-                }
-                else if (Enum.TryParse<Key>(str, true, out var vKey))
-                {
-                    hotkey.Key = vKey;
-                }
-            }
-
-            return hotkey;
-        }
-        catch { }
-
-        return null;
+        return new Hotkey(kg);
     }
 
 
@@ -134,14 +134,12 @@ public class Hotkey
     /// </summary>
     public static string ToString(Hotkey hotkey)
     {
-        var modifiers = new List<string>(4);
-        if (hotkey.Modifiers.HasFlag(KeyModifiers.Control)) modifiers.Add(KEY_STR_CTRL);
-        if (hotkey.Modifiers.HasFlag(KeyModifiers.Shift)) modifiers.Add(KEY_STR_SHIFT);
-        if (hotkey.Modifiers.HasFlag(KeyModifiers.Alt)) modifiers.Add(KEY_STR_ALT);
-
-        modifiers.Add(hotkey.Key.ToString());
-
-        return string.Join('+', modifiers);
+        var kg = new KeyGesture(hotkey.Key, hotkey.Modifiers);
+        return kg.ToString("p", null);
     }
+
+
+    #endregion // Methods
+
 
 }

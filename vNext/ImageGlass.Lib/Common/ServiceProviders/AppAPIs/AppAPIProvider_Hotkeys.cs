@@ -223,11 +223,11 @@ public partial class AppAPIProvider
     public async Task HandleKeyDownAsync(KeyEventArgs e)
     {
         // 1. get hotkey action
-        var hotkey = new Hotkey(e.KeyModifiers, e.Key);
+        var hotkey = new Hotkey(e);
         var action = AppHotkeysMap.GetValueOrDefault(hotkey.KeyString);
         if (action is null) return;
 
-        var isPressedMultipleTimes = hotkey == _lastHotkeyPressed;
+        var isPressedMultipleTimes = hotkey.IsSame(_lastHotkeyPressed);
         var executable = action.Executable ?? string.Empty;
 
 
