@@ -133,11 +133,9 @@ public partial class ViewerControl : PhControl
                 DrawingArea = Bounds.Deflate(Padding);
                 CalculateDrawingRegion();
 
-                // redraw the control on resizing if it's not manual zoom
-                if (_photo is not null && !_zooming.IsManual)
-                {
-                    Refresh(true, false, true);
-                }
+                // redraw the control on resizing
+                var shouldResetZoom = _photo is not null && !_zooming.IsManual;
+                Refresh(shouldResetZoom, false, true);
             });
         }
     }
