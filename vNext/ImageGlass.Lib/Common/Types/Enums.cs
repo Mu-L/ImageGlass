@@ -107,3 +107,12 @@ public enum ImageOrderType
     Asc = 0,
     Desc = 1,
 }
+
+
+public enum OSType
+{
+    Unknown,
+    Windows,
+    Mac,
+    Linux,
+}

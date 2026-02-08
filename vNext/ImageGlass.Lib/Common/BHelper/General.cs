@@ -32,6 +32,22 @@ namespace ImageGlass.Common;
 
 public partial class BHelper
 {
+
+    /// <summary>
+    /// Gets the type of operating system.
+    /// </summary>
+    public static OSType OS
+    {
+        get
+        {
+            if (OperatingSystem.IsWindows()) return OSType.Windows;
+            if (OperatingSystem.IsMacCatalyst()) return OSType.Mac;
+            if (OperatingSystem.IsLinux()) return OSType.Linux;
+            return OSType.Unknown;
+        }
+    }
+
+
     /// <summary>
     /// Generates a list of unique indexes within a specified range,
     /// wrapping around the center index, in the Center-Right-Left order.
@@ -181,7 +197,7 @@ public partial class BHelper
             Release code: {Const.APP_CODE}
             Magick.NET: {MagickNET.Version}
             Runtime: .NET {Environment.Version}
-            OS: {Environment.OSVersion.VersionString} {osArch}
+            OS: {OS} {Environment.OSVersion.VersionString} {osArch}
 
                                   :>>>>>>>:
                                   | Error |
@@ -207,13 +223,13 @@ public partial class BHelper
         var debugInfo = $"""
             {BHelper.AppName} {Const.APP_CODE} v{exeVersion}
             {MagickNET.Version}
-            Win{osArch} {Environment.OSVersion.Version}, .NET {Environment.Version}
+            {OS} {osArch} {Environment.OSVersion.Version}, .NET {Environment.Version}
             """;
 
         var errorLines = ex.StackTrace?.Split("\r\n", StringSplitOptions.RemoveEmptyEntries) ?? [];
         var errDetails = $"""
             {ex.Source} ▶ {ex.GetType().FullName} ▶ {ex.Message}
-               
+
             ▶{string.Join("\r\n▶", errorLines)}
             """;
 
