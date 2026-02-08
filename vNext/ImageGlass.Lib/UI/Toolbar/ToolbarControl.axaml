@@ -35,7 +35,9 @@
                         VerticalAlignment="Stretch"
                         VerticalContentAlignment="Bottom"
                         IsTabStop="False"
-                        DataContext="{CompiledBinding ButtonOverflowVM}">
+                        IsOpenDropdownMenuOnClick="True"
+                        DataContext="{CompiledBinding ButtonOverflowVM}"
+                        DropdownOpened="PART_BtnOverflowMenu_DropdownOpened">
                     <Border VerticalAlignment="Center"
                             Width="{CompiledBinding Config.ToolbarIconHeight}"
                             Height="{CompiledBinding Config.ToolbarIconHeight}">
@@ -51,6 +53,12 @@
                             </Viewbox>
                         </Grid>
                     </Border>
+
+                    <ui:ToolbarButton.DropdownMenu>
+                        <ContextMenu x:Name="PART_OverflowMenu"
+                                     Placement="BottomEdgeAlignedRight"
+                                     HorizontalOffset="6" />
+                    </ui:ToolbarButton.DropdownMenu>
                 </ui:ToolbarButton>
 
 

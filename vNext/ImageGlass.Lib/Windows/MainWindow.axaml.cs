@@ -215,9 +215,9 @@ public partial class MainWindow : PhWindow
     }
 
 
-    private void PART_Toolbar_ItemClicked(ToolbarButton sender, EventArgs e)
+    private void PART_Toolbar_ItemClicked(object sender, ToolbarItemClickEventArgs e)
     {
-        _ = Core.API?.RunActionAsync(sender.VM.OnClick);
+        _ = Core.API?.RunActionAsync(e.VM.OnClick);
     }
 
 

@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Svg.Skia;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Windowing;
@@ -36,7 +37,7 @@ public partial class ToolbarControl : PhControl
 
 
     // events
-    public event TEventHandler<ToolbarButton, EventArgs>? ItemClicked;
+    public event TEventHandler<object, ToolbarItemClickEventArgs>? ItemClicked;
 
 
     private readonly Dictionary<string, List<int>> _configBindingsMap = [];
@@ -143,7 +144,7 @@ public partial class ToolbarControl : PhControl
     {
         if (sender is not ToolbarButton btn) return;
 
-        ItemClicked?.Invoke(btn, EventArgs.Empty);
+        ItemClicked?.Invoke(btn, new ToolbarItemClickEventArgs(btn.VM));
     }
 
 
@@ -159,6 +160,67 @@ public partial class ToolbarControl : PhControl
         {
             meta.RenderedWidth = bounds.Width;
         }
+    }
+
+
+    private void PART_BtnOverflowMenu_DropdownOpened(ContextMenu sender, RoutedEventArgs e)
+    {
+        if (sender is not ContextMenu mnu) return;
+        mnu.Items.Clear();
+
+
+        foreach (var item in _groupOverflowItemModels)
+        {
+            // 1. Separator
+            if (item.IsSeparator)
+            {
+                mnu.Items.Add(new MenuItem() { Header = "-" });
+                continue;
+            }
+
+
+            // 2. Button item
+            // get toolbar item metadata
+            var mnuItem = new MenuItem
+            {
+                ToggleType = item.IsToggle ? MenuItemToggleType.CheckBox : MenuItemToggleType.None,
+                IsChecked = item.IsChecked,
+                DataContext = item, // save VM to data context
+            };
+
+            // get icon
+            if (!string.IsNullOrEmpty(item.ImagePath))
+            {
+                try
+                {
+                    mnuItem.Icon = new Image
+                    {
+                        Source = new SvgImage
+                        {
+                            Source = SvgSource.Load(item.ImagePath),
+                        },
+                    };
+                }
+                catch { }
+            }
+
+            // get display text
+            mnuItem.Header = item.DisplayText;
+
+            // add click event
+            mnuItem.Click += OverflowMenuItem_Click;
+
+            mnu.Items.Add(mnuItem);
+        }
+    }
+
+
+    private void OverflowMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuItem mnu) return;
+        if (mnu.DataContext is not ToolbarItemModel vm) return;
+
+        ItemClicked?.Invoke(mnu, new ToolbarItemClickEventArgs(vm));
     }
 
 
@@ -371,6 +433,11 @@ public partial class ToolbarControl : PhControl
 
 }
 
+
+public class ToolbarItemClickEventArgs(ToolbarItemModel vm) : RoutedEventArgs
+{
+    public ToolbarItemModel VM => vm;
+}
 
 
 public record ToolbarItemMetadata

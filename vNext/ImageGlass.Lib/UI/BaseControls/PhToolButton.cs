@@ -36,6 +36,13 @@ public partial class PhToolButton : ToggleButton
     protected override Type StyleKeyOverride => typeof(ToggleButton);
 
 
+    // events
+    public event TEventHandler<ContextMenu, CancelEventArgs>? DropdownOpening;
+    public event TEventHandler<ContextMenu, RoutedEventArgs>? DropdownOpened;
+    public event TEventHandler<ContextMenu, CancelEventArgs>? DropdownClosing;
+    public event TEventHandler<ContextMenu, RoutedEventArgs>? DropdownClosed;
+
+
     #region Public Properties
 
     /// <summary>
@@ -268,25 +275,37 @@ public partial class PhToolButton : ToggleButton
     /// <summary>
     /// Occurs when the value of the IsOpen property is changing from false to true.
     /// </summary>
-    protected virtual void OnIgDropdownMenuOpening(CancelEventArgs e) { }
+    protected virtual void OnIgDropdownMenuOpening(CancelEventArgs e)
+    {
+        DropdownOpening?.Invoke(DropdownMenu!, e);
+    }
 
 
     /// <summary>
     /// Occurs when the dropdown menu is opened.
     /// </summary>
-    protected virtual void OnIgDropdownMenuOpened(RoutedEventArgs e) { }
+    protected virtual void OnIgDropdownMenuOpened(RoutedEventArgs e)
+    {
+        DropdownOpened?.Invoke(DropdownMenu!, e);
+    }
 
 
     /// <summary>
     /// Occurs when the value of the IsOpen property is changing from true to false.
     /// </summary>
-    protected virtual void OnIgDropdownMenuClosing(CancelEventArgs e) { }
+    protected virtual void OnIgDropdownMenuClosing(CancelEventArgs e)
+    {
+        DropdownClosing?.Invoke(DropdownMenu!, e);
+    }
 
 
     /// <summary>
     /// Occurs when the dropdown menu is closed.
     /// </summary>
-    protected virtual void OnIgDropdownMenuClosed(RoutedEventArgs e) { }
+    protected virtual void OnIgDropdownMenuClosed(RoutedEventArgs e)
+    {
+        DropdownClosed?.Invoke(DropdownMenu!, e);
+    }
 
     #endregion // Virtual Methods
 
