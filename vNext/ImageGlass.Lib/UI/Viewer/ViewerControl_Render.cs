@@ -175,9 +175,13 @@ public partial class ViewerControl
     {
         base.Render(c);
 
-        OnDrawCheckerboard(c);      // draw checkerboard
-        OnDrawImage(c);             // draw image
-        OnDrawSelection(c);         // draw selection
+        using (c.PushClip(DrawingArea))
+        {
+            OnDrawCheckerboard(c);      // draw checkerboard
+            OnDrawImage(c);             // draw image
+            OnDrawSelection(c);         // draw selection
+        }
+
         OnDrawDebugInfo(c);         // draw debug info
     }
 

@@ -614,8 +614,8 @@ public partial class ViewerControl
 
         // 3. draw the selection border
         var borderWidth = (_selection.IsHovered && _selection.IsLeftButtonPressed) ? 0.6f : 0.3f;
-        g.DrawRectangleEx(ClientSelection, 0, Colors.White, null, borderWidth);
-        g.DrawRectangleEx(ClientSelection, 0, Core.AccentColor, null, borderWidth);
+        g.DrawRectangleEx(selectionGeo.Bounds, 0, Colors.White, null, borderWidth);
+        g.DrawRectangleEx(selectionGeo.Bounds, 0, Core.AccentColor, null, borderWidth);
 
     }
 
