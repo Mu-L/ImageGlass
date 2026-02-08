@@ -31,11 +31,27 @@
                         Spacing="{CompiledBinding ItemSpacing}">
 			
                 <!--  Toolbar: Overflow button  -->
-                <ui:ToolbarButton x:Name="BtnOverflowMenu"
+                <ui:ToolbarButton x:Name="PART_BtnOverflowMenu"
                         VerticalAlignment="Stretch"
                         VerticalContentAlignment="Bottom"
                         IsTabStop="False"
-                        DataContext="{CompiledBinding ButtonOverflowVM}" />
+                        DataContext="{CompiledBinding ButtonOverflowVM}">
+                    <Border VerticalAlignment="Center"
+                            Width="{CompiledBinding Config.ToolbarIconHeight}"
+                            Height="{CompiledBinding Config.ToolbarIconHeight}">
+                        <Grid RowDefinitions="1*,0.25*,0.5*"
+                              ColumnDefinitions="0.25*,1*,0.25*">
+                            <Viewbox Grid.Row="1"
+                                     Grid.Column="1" 
+                                     Stretch="Uniform" 
+                                     VerticalAlignment="Bottom">
+                                <Path Fill="{DynamicResource TextControlForeground}"
+                                      Stretch="Uniform"
+                                      Data="M3,12 A1.5,1.5 0 1,1 6,12 A1.5,1.5 0 1,1 3,12 M10,12 A1.5,1.5 0 1,1 13,12 A1.5,1.5 0 1,1 10,12 M17,12 A1.5,1.5 0 1,1 20,12 A1.5,1.5 0 1,1 17,12" />
+                            </Viewbox>
+                        </Grid>
+                    </Border>
+                </ui:ToolbarButton>
 
 
                 <!--  Toolbar: Secondary Items  -->
@@ -46,7 +62,7 @@
 
 
                 <!--  Menu button  -->
-                <ui:ToolbarButton x:Name="BtnMainMenu"
+                <ui:ToolbarButton x:Name="PART_BtnMainMenu"
                                   IsOpenDropdownMenuOnClick="True"
                                   IsTabStop="False"
                                   DataContext="{CompiledBinding ButtonMenuVM}">

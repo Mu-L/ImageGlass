@@ -342,7 +342,7 @@ public partial class ToolbarControl : PhControl
         }
 
         // 4. show the overflow button if there are hidden icons
-        BtnOverflowMenu.IsVisible = usedWidth > availableWidth;
+        PART_BtnOverflowMenu.IsVisible = usedWidth > availableWidth;
     }
 
 

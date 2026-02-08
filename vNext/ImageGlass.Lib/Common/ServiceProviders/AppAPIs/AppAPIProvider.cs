@@ -68,7 +68,7 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_OpenMainMenu()
     {
-        _mainWindow.PART_MainView.PART_Toolbar.BtnMainMenu.OpenDropdownMenu();
+        _mainWindow.PART_MainView.PART_Toolbar.PART_BtnMainMenu.OpenDropdownMenu();
     }
 
 
