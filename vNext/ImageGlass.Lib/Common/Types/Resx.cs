@@ -145,7 +145,7 @@ public enum ResxId
     IG_BackgroundNeutralBrush,
     IG_BorderNeutralBrush,
     IG_BorderControlBrush,
-
+    IG_MessageBackgroundBrush,
 
     // tool button styles
     IG_ToolButtonBackground,
