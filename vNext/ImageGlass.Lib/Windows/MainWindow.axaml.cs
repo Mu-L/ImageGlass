@@ -20,6 +20,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
@@ -83,6 +84,7 @@ public partial class MainWindow : PhWindow
         // control events
         _status.Changed += Status_Changed;
         PART_MainView.PART_Toolbar.ItemClicked += PART_Toolbar_ItemClicked;
+        PhMenuItem.ItemClick += PhMenuItem_ItemClick;
     }
 
 
@@ -95,6 +97,7 @@ public partial class MainWindow : PhWindow
         _status.Dispose();
 
         PART_MainView.PART_Toolbar.ItemClicked -= PART_Toolbar_ItemClicked;
+        PhMenuItem.ItemClick -= PhMenuItem_ItemClick;
     }
 
 
@@ -184,7 +187,6 @@ public partial class MainWindow : PhWindow
 
     #region Control Events
 
-
     private void AppInstance_InstanceInvoked(AppInstance sender, InstanceInvokedEventArgs e)
     {
         // handle single instance command
@@ -218,6 +220,14 @@ public partial class MainWindow : PhWindow
     private void PART_Toolbar_ItemClicked(object sender, ToolbarItemClickEventArgs e)
     {
         _ = Core.API?.RunActionAsync(e.VM.OnClick);
+    }
+
+
+    private void PhMenuItem_ItemClick(PhMenuItem sender, PhMenuItemClickEventArgs e)
+    {
+        var action = AppAPIProvider.GetMenuAction(e.Item.LangKey);
+
+        _ = Core.API?.RunActionAsync(action);
     }
 
 
