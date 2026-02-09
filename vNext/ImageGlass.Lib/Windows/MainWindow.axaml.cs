@@ -20,7 +20,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
-using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
@@ -33,7 +32,6 @@ namespace ImageGlass.Common.Windows;
 public partial class MainWindow : PhWindow
 {
     private readonly AppStatusInfo _status;
-    private bool _shouldUpdateMenuText = false;
 
     public MainWindowModel VM => (MainWindowModel)DataContext!;
 
@@ -85,8 +83,6 @@ public partial class MainWindow : PhWindow
         // control events
         _status.Changed += Status_Changed;
         PART_MainView.PART_Toolbar.ItemClicked += PART_Toolbar_ItemClicked;
-        PART_MainView.PART_Toolbar.PART_MainMenu.Opened += PART_MainMenu_Opened;
-        PhMenuItem.ItemClick += PhMenuItem_ItemClick;
     }
 
 
@@ -99,16 +95,6 @@ public partial class MainWindow : PhWindow
         _status.Dispose();
 
         PART_MainView.PART_Toolbar.ItemClicked -= PART_Toolbar_ItemClicked;
-        PART_MainView.PART_Toolbar.PART_MainMenu.Opened -= PART_MainMenu_Opened;
-        PhMenuItem.ItemClick -= PhMenuItem_ItemClick;
-    }
-
-
-    protected override void OnIgLanguageChanged()
-    {
-        base.OnIgLanguageChanged();
-
-        _shouldUpdateMenuText = true;
     }
 
 
@@ -235,62 +221,13 @@ public partial class MainWindow : PhWindow
     }
 
 
-    private void PhMenuItem_ItemClick(PhMenuItem sender, PhMenuItemClickEventArgs e)
-    {
-        var action = AppAPIProvider.GetMenuAction(e.Item.LangKey);
-
-        _ = Core.API?.RunActionAsync(action);
-    }
-
-
-    private void PART_MainMenu_Opened(object? sender, RoutedEventArgs e)
-    {
-        UpdateMenuTextIfNeeded();
-    }
-
-
     #endregion Control Events
 
 
 
 
 
-    /// <summary>
-    /// Updates the text and hotkey text of main menu if needed.
-    /// </summary>
-    private void UpdateMenuTextIfNeeded()
-    {
-        if (!_shouldUpdateMenuText) return;
-        if (PART_MainView.PART_Toolbar.PART_MainMenu.Items is not ItemCollection items) return;
 
-        LoadMenuText(items);
-        _shouldUpdateMenuText = false;
-    }
-
-
-    /// <summary>
-    /// Loads menu text.
-    /// </summary>.
-    private static void LoadMenuText(ItemCollection items)
-    {
-        foreach (var item in items)
-        {
-            if (item is not PhMenuItem mnuItem) continue;
-
-            // load submenu items
-            if (mnuItem.Items.Count > 0)
-            {
-                LoadMenuText(mnuItem.Items);
-            }
-
-            // update hotkey text for menu items
-            var action = AppAPIProvider.GetMenuAction(mnuItem.LangKey);
-            if (action is null || action.Hotkeys.Length == 0) continue;
-
-            var hotkeyText = String.Join(", ", action.Hotkeys);
-            mnuItem.HotkeyText = hotkeyText;
-        }
-    }
 
 
 

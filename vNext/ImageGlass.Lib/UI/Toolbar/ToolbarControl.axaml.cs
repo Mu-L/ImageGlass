@@ -21,15 +21,19 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Svg.Skia;
 using ImageGlass.Common;
+using ImageGlass.Common.Photoing;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Windowing;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
+
 
 public partial class ToolbarControl : PhControl
 {
@@ -39,13 +43,16 @@ public partial class ToolbarControl : PhControl
     // events
     public event TEventHandler<object, ToolbarItemClickEventArgs>? ItemClicked;
 
-
     private readonly Dictionary<string, List<int>> _configBindingsMap = [];
     private readonly Dictionary<int, ToolbarItemMetadata> _metadataMap = [];
     public readonly List<ToolbarItemModel> _groupPrimaryItemModels = [];
     public readonly List<ToolbarItemModel> _groupSecondaryItemModels = [];
     public readonly List<ToolbarItemModel> _groupOverflowItemModels = [];
     private readonly List<Control> _itemElements = [];
+
+    private bool _shouldUpdateMenuText = false;
+
+
 
 
     #region Public Properties
@@ -112,6 +119,13 @@ public partial class ToolbarControl : PhControl
     }
 
 
+    protected override void OnIgLanguageChanged()
+    {
+        base.OnIgLanguageChanged();
+        _shouldUpdateMenuText = true;
+    }
+
+
     protected override async void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
@@ -123,7 +137,7 @@ public partial class ToolbarControl : PhControl
     }
 
 
-    private void Config_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         // update toolbar spacing
         if (nameof(Core.Config.ToolbarIconHeight).Equals(e.PropertyName))
@@ -222,6 +236,36 @@ public partial class ToolbarControl : PhControl
         if (mnu.DataContext is not ToolbarItemModel vm) return;
 
         ItemClicked?.Invoke(mnu, new ToolbarItemClickEventArgs(vm));
+    }
+
+
+    private void PART_BtnMainMenu_DropdownOpened(ContextMenu sender, RoutedEventArgs e)
+    {
+        UpdateMenuTextIfNeeded();
+    }
+
+
+    private void MainMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not PhMenuItem mnu) return;
+
+        var action = AppAPIProvider.GetMenuAction(mnu.LangKey);
+        _ = Core.API?.RunActionAsync(action);
+    }
+
+
+    private void MainMenu_ViewChannelItem_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not PhMenuItem mnu) return;
+
+        var channelType = mnu.Tag?.ToString();
+        if (string.IsNullOrEmpty(channelType)) return;
+
+        if (Enum.TryParse<ColorChannels>(channelType, out var channels))
+        {
+            var isToggle = mnu.ToggleType == MenuItemToggleType.CheckBox;
+            SetColorChannels(channels, isToggle);
+        }
     }
 
 
@@ -426,6 +470,50 @@ public partial class ToolbarControl : PhControl
 
             items[srcIndex].IsChecked = isChecked;
         }
+    }
+
+
+    /// <summary>
+    /// Updates the text and hotkey text of main menu if needed.
+    /// </summary>
+    private void UpdateMenuTextIfNeeded()
+    {
+        if (!_shouldUpdateMenuText) return;
+        if (PART_MainMenu.Items is not ItemCollection items) return;
+
+        LoadMenuText(items);
+        _shouldUpdateMenuText = false;
+    }
+
+
+    /// <summary>
+    /// Loads menu text.
+    /// </summary>.
+    private static void LoadMenuText(ItemCollection items)
+    {
+        foreach (var item in items)
+        {
+            if (item is not PhMenuItem mnuItem) continue;
+
+            // load submenu items
+            if (mnuItem.Items.Count > 0)
+            {
+                LoadMenuText(mnuItem.Items);
+            }
+
+            // update hotkey text for menu items
+            var action = AppAPIProvider.GetMenuAction(mnuItem.LangKey);
+            if (action is null || action.Hotkeys.Length == 0) continue;
+
+            var hotkeyText = String.Join(", ", action.Hotkeys);
+            mnuItem.HotkeyText = hotkeyText;
+        }
+    }
+
+
+    private void SetColorChannels(ColorChannels channels, bool isToggle)
+    {
+        // TODO:
     }
 
 

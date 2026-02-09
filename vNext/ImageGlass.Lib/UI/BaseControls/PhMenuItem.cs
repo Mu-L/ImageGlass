@@ -33,13 +33,6 @@ public class PhMenuItem : MenuItem
     protected override Type StyleKeyOverride => typeof(MenuItem);
 
 
-    /// <summary>
-    /// Occurs when menu item is clicked.
-    /// </summary>
-    public static event TEventHandler<PhMenuItem, PhMenuItemClickEventArgs>? ItemClick;
-
-
-
     #region Public properties
 
     /// <summary>
@@ -107,7 +100,6 @@ public class PhMenuItem : MenuItem
         LocalizeText();
 
         Core.LanguageChanged += Core_LanguageChanged;
-        Click += PhMenuItem_Click;
     }
 
 
@@ -116,7 +108,6 @@ public class PhMenuItem : MenuItem
         base.OnUnloaded(e);
 
         Core.LanguageChanged -= Core_LanguageChanged;
-        Click -= PhMenuItem_Click;
     }
 
 
@@ -137,16 +128,6 @@ public class PhMenuItem : MenuItem
     }
 
 
-    private void PhMenuItem_Click(object? sender, RoutedEventArgs e)
-    {
-        ItemClick?.Invoke(this, new PhMenuItemClickEventArgs
-        {
-            Item = this,
-        });
-    }
-
-
-
     /// <summary>
     /// Localize menu item text.
     /// </summary>
@@ -165,8 +146,5 @@ public class PhMenuItem : MenuItem
 
 
 
-public class PhMenuItemClickEventArgs : RoutedEventArgs
-{
-    public required PhMenuItem Item { get; init; }
-}
+
 
