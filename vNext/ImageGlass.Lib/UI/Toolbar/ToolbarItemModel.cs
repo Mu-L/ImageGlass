@@ -20,6 +20,7 @@ using Avalonia;
 using ImageGlass.Common;
 using ImageGlass.Common.Actions;
 using ImageGlass.Common.AppThemes;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using System;
 using System.IO;
@@ -34,8 +35,9 @@ public partial class ToolbarItemModelJsonContext : JsonSerializerContext { }
 
 public partial class ToolbarItemModel : PhReactive, IJsonOnDeserialized
 {
-    public static Config Config => Core.Config;
+    #region Static Properties
 
+    public static Config Config => Core.Config;
 
     /// <summary>
     /// Gets the ID for toolbar separator.
@@ -61,6 +63,41 @@ public partial class ToolbarItemModel : PhReactive, IJsonOnDeserialized
     /// Gets the end point of separator line.
     /// </summary>
     public static Point SeparatorEndPoint => new Point(0, Core.Config.ToolbarIconHeight);
+
+
+    #region Main Menu Items Binding
+    public static bool IsZoomModeAutoZoom => Core.Config.ZoomMode == Viewer.ZoomMode.AutoZoom;
+    public static bool IsZoomModeLockZoom => Core.Config.ZoomMode == Viewer.ZoomMode.LockZoom;
+    public static bool IsZoomModeScaleToWidth => Core.Config.ZoomMode == Viewer.ZoomMode.ScaleToWidth;
+    public static bool IsZoomModeScaleToHeight => Core.Config.ZoomMode == Viewer.ZoomMode.ScaleToHeight;
+    public static bool IsZoomModeScaleToFit => Core.Config.ZoomMode == Viewer.ZoomMode.ScaleToFit;
+    public static bool IsZoomModeScaleToFill => Core.Config.ZoomMode == Viewer.ZoomMode.ScaleToFill;
+
+
+    public static bool IsLoadingByName => Core.Config.ImageLoadingOrder == ImageOrderBy.Name;
+    public static bool IsLoadingByRandom => Core.Config.ImageLoadingOrder == ImageOrderBy.Random;
+    public static bool IsLoadingByFileSize => Core.Config.ImageLoadingOrder == ImageOrderBy.FileSize;
+    public static bool IsLoadingByExtension => Core.Config.ImageLoadingOrder == ImageOrderBy.Extension;
+    public static bool IsLoadingByDateCreated => Core.Config.ImageLoadingOrder == ImageOrderBy.DateCreated;
+    public static bool IsLoadingByDateAccessed => Core.Config.ImageLoadingOrder == ImageOrderBy.DateAccessed;
+    public static bool IsLoadingByDateModified => Core.Config.ImageLoadingOrder == ImageOrderBy.DateModified;
+    public static bool IsLoadingByExifDateTaken => Core.Config.ImageLoadingOrder == ImageOrderBy.ExifDateTaken;
+    public static bool IsLoadingByExifRating => Core.Config.ImageLoadingOrder == ImageOrderBy.ExifRating;
+
+
+    public static bool IsLoadingAsc => Core.Config.ImageLoadingOrderType == ImageOrderType.Asc;
+    public static bool IsLoadingDesc => Core.Config.ImageLoadingOrderType == ImageOrderType.Desc;
+
+
+    public static bool IsColorChannelR => Core.ColorChannels.HasFlag(ColorChannels.R);
+    public static bool IsColorChannelG => Core.ColorChannels.HasFlag(ColorChannels.G);
+    public static bool IsColorChannelB => Core.ColorChannels.HasFlag(ColorChannels.B);
+    public static bool IsColorChannelA => Core.ColorChannels.HasFlag(ColorChannels.A);
+
+    #endregion // Main Menu Items Binding
+
+
+    #endregion // Static Properties
 
 
 
@@ -204,6 +241,7 @@ public partial class ToolbarItemModel : PhReactive, IJsonOnDeserialized
 
 
     #endregion // JSON Properties
+
 
 
     #region Non-JSON Properties

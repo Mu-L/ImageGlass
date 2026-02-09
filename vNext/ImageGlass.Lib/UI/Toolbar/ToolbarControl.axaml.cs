@@ -139,6 +139,7 @@ public partial class ToolbarControl : PhControl
 
     private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        // 1. Toolbar buttons
         // update toolbar spacing
         if (nameof(Core.Config.ToolbarIconHeight).Equals(e.PropertyName))
         {
@@ -150,6 +151,13 @@ public partial class ToolbarControl : PhControl
         else
         {
             UpdateButtonCheckState(e.PropertyName);
+        }
+
+
+        // 2. Main menu items
+        if (nameof(Core.Config.ZoomMode).Equals(e.PropertyName))
+        {
+            _ = VM.OnPropertyChanged(nameof(ToolbarItemModel.IsZoomModeAutoZoom));
         }
     }
 

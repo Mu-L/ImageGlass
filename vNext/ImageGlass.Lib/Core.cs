@@ -213,6 +213,11 @@ public static class Core
     public static bool IsDestColorProfileSupported { get; private set; } = true;
 
 
+    /// <summary>
+    /// Gets the color channels setting.
+    /// </summary>
+    public static ColorChannels ColorChannels { get; private set; } = ColorChannels.RGBA;
+
     #endregion // Public Properties
 
 
