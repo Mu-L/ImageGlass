@@ -38,6 +38,7 @@ public partial class DialogWindow : PhWindow
     internal readonly int MAX_WIDTH = 600;
 
     protected Border _titleEl;
+    protected TextBlock _titleTextEl;
     protected Grid _contentEl;
     protected Border _footerEl;
     protected Button _btn1;
@@ -228,6 +229,20 @@ public partial class DialogWindow : PhWindow
     }
 
 
+    protected override void OnIgActivated(EventArgs e)
+    {
+        base.OnIgActivated(e);
+        _titleTextEl.Opacity = 1;
+    }
+
+
+    protected override void OnIgDeactivated(EventArgs e)
+    {
+        base.OnIgDeactivated(e);
+        _titleTextEl.Opacity = 0.5;
+    }
+
+
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
@@ -298,23 +313,30 @@ public partial class DialogWindow : PhWindow
     /// <summary>
     /// Creates layout and content for dialog window.
     /// </summary>
-    [MemberNotNull(nameof(_titleEl), nameof(_contentEl), nameof(_footerEl), nameof(_btn1), nameof(_btn2), nameof(_btn3))]
+    [MemberNotNull(
+        nameof(_titleEl),
+        nameof(_titleTextEl),
+        nameof(_contentEl),
+        nameof(_footerEl),
+        nameof(_btn1),
+        nameof(_btn2),
+        nameof(_btn3))]
     protected Grid CreateContentElement()
     {
         // 1. create title bar
+        _titleTextEl = new TextBlock
+        {
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            [!TextBlock.TextProperty] = this[!TitleProperty],
+        };
         _titleEl = new Border
         {
             Padding = new Thickness(24, 8, 24, 7),
             BorderThickness = new Thickness(0, 0, 0, 1),
             BorderBrush = Brushes.LightGray,
+            Child = _titleTextEl,
             [!Border.IsVisibleProperty] = this[!IsTitleVisibleProperty],
-            Child = new TextBlock
-            {
-                TextTrimming = TextTrimming.CharacterEllipsis,
-                [!TextBlock.TextProperty] = this[!TitleProperty],
-            }
         };
-
 
 
         // 2. create content slot
