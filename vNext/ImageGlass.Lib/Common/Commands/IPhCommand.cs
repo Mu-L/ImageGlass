@@ -33,6 +33,6 @@ public interface IPhCommand : ICommand
     /// <summary>
     /// Defines the method to be called when the command is invoked.
     /// </summary>
-    Task ExecuteAsync(string? parameter);
+    Task ExecuteAsync(object? parameter);
 
 }

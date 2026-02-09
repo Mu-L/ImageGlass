@@ -24,16 +24,22 @@ namespace ImageGlass.Common.Commands;
 
 public sealed partial class SyncCommand : IPhCommand
 {
-    private readonly Action<string?> _executeFn;
+    private readonly Action<object?> _executeFn;
     private readonly Func<object?, bool> _canExecuteFn;
 
     public event EventHandler? CanExecuteChanged;
     public bool IsAsync => false;
 
 
-    public SyncCommand(Action<string?> execute, Func<object?, bool> canExecute)
+    public SyncCommand(Action<object?> execute, Func<object?, bool> canExecute)
     {
         _executeFn = execute;
+        _canExecuteFn = canExecute;
+    }
+
+    public SyncCommand(Action<string?> execute, Func<object?, bool> canExecute)
+    {
+        _executeFn = obj => execute(obj?.ToString());
         _canExecuteFn = canExecute;
     }
 
@@ -44,15 +50,10 @@ public sealed partial class SyncCommand : IPhCommand
 
     public void Execute(object? parameter)
     {
-        _executeFn.Invoke(parameter?.ToString());
-    }
-
-    public void Execute(string? parameter)
-    {
         _executeFn.Invoke(parameter);
     }
 
-    public async Task ExecuteAsync(string? parameter)
+    public async Task ExecuteAsync(object? parameter)
     {
         await Task.Delay(0);
         Execute(parameter);

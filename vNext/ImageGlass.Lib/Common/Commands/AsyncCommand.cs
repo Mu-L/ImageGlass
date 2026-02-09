@@ -24,7 +24,7 @@ namespace ImageGlass.Common.Commands;
 
 public sealed partial class AsyncCommand : IPhCommand
 {
-    private readonly Func<string?, Task> _executeFn;
+    private readonly Func<object?, Task> _executeFn;
     private readonly Func<object?, bool> _canExecuteFn;
     private bool _isExecuting;
 
@@ -32,9 +32,15 @@ public sealed partial class AsyncCommand : IPhCommand
     public bool IsAsync => true;
 
 
-    public AsyncCommand(Func<string?, Task> execute, Func<object?, bool> canExecute)
+    public AsyncCommand(Func<object?, Task> execute, Func<object?, bool> canExecute)
     {
         _executeFn = execute;
+        _canExecuteFn = canExecute;
+    }
+
+    public AsyncCommand(Func<string?, Task> execute, Func<object?, bool> canExecute)
+    {
+        _executeFn = obj => execute(obj?.ToString());
         _canExecuteFn = canExecute;
     }
 
@@ -45,15 +51,10 @@ public sealed partial class AsyncCommand : IPhCommand
 
     public void Execute(object? parameter)
     {
-        _ = ExecuteAsync(parameter?.ToString());
-    }
-
-    public void Execute(string? parameter)
-    {
         _ = ExecuteAsync(parameter);
     }
 
-    public async Task ExecuteAsync(string? parameter)
+    public async Task ExecuteAsync(object? parameter)
     {
         if (_isExecuting) return;
 

@@ -28,6 +28,11 @@ public static class PhCommands
         return new SyncCommand(WrapAction(execute), CanExecuteTrue);
     }
 
+    public static IPhCommand Create(Action<object?>? execute)
+    {
+        return new SyncCommand(execute ?? DefaultExecute, CanExecuteTrue);
+    }
+
     public static IPhCommand Create(Action<string?>? execute)
     {
         return new SyncCommand(execute ?? DefaultExecute, CanExecuteTrue);
@@ -38,7 +43,7 @@ public static class PhCommands
         return new SyncCommand(WrapAction(execute), WrapAction(canExecute));
     }
 
-    public static IPhCommand Create(Action<string?>? execute, Func<object?, bool>? canExecute)
+    public static IPhCommand Create(Action<object?>? execute, Func<object?, bool>? canExecute)
     {
         return new SyncCommand(execute ?? DefaultExecute, canExecute ?? CanExecuteTrue);
     }
@@ -46,6 +51,11 @@ public static class PhCommands
     public static IPhCommand Create(Func<Task>? execute)
     {
         return new AsyncCommand(WrapAction(execute), CanExecuteTrue);
+    }
+
+    public static IPhCommand Create(Func<object?, Task>? execute)
+    {
+        return new AsyncCommand(execute ?? DefaultExecuteAsync, CanExecuteTrue);
     }
 
     public static IPhCommand Create(Func<string?, Task>? execute)
@@ -58,7 +68,7 @@ public static class PhCommands
         return new AsyncCommand(WrapAction(execute), WrapAction(canExecute));
     }
 
-    public static IPhCommand Create(Func<string?, Task>? execute, Func<object?, bool>? canExecute)
+    public static IPhCommand Create(Func<object?, Task>? execute, Func<object?, bool>? canExecute)
     {
         return new AsyncCommand(execute ?? DefaultExecuteAsync, canExecute ?? CanExecuteTrue);
     }
