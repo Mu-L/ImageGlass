@@ -34,6 +34,7 @@ namespace ImageGlass.Common.ServiceProviders;
 public partial class AppAPIProvider
 {
     private Hotkey? _lastHotkeyPressed = null;
+    private bool _isHotkeyPressMultiTimes = false;
 
 
     // list of all menu items & default action, hotkeys
@@ -227,11 +228,12 @@ public partial class AppAPIProvider
         var action = AppHotkeysMap.GetValueOrDefault(hotkey.KeyString);
         if (action is null) return;
 
-        var isPressedMultipleTimes = hotkey.IsSame(_lastHotkeyPressed);
+        _isHotkeyPressMultiTimes = hotkey.IsSame(_lastHotkeyPressed);
         var executable = action.Executable ?? string.Empty;
 
 
         // 2. handle special hotkeys
+
         // save the last hotkey pressed
         _lastHotkeyPressed = hotkey;
 
@@ -239,9 +241,9 @@ public partial class AppAPIProvider
         var isQuickBrowsing = executable.Equals(nameof(API.IG_ViewByStep), StringComparison.Ordinal)
             || executable.Equals(nameof(API.IG_ViewNext), StringComparison.Ordinal)
             || executable.Equals(nameof(API.IG_ViewPrevious), StringComparison.Ordinal);
-        if (isQuickBrowsing && isPressedMultipleTimes)
+        if (isQuickBrowsing && _isHotkeyPressMultiTimes)
         {
-            Viewer.ShouldLoadFullResolution = false;
+            Viewer.ShouldLoadFullResolution.Value = false;
         }
 
 
@@ -257,12 +259,21 @@ public partial class AppAPIProvider
     /// <summary>
     /// Handles keyup event.
     /// </summary>
-    public void HandleKeyUp(KeyEventArgs e)
+    public async Task HandleKeyUpAsync(KeyEventArgs e)
     {
         // the quick browsing ends, now start loading full resolution
-        Viewer.ShouldLoadFullResolution = true;
+        if (_isHotkeyPressMultiTimes)
+        {
+            Viewer.Photo?.CancelLoading();
+            Viewer.ShouldLoadFullResolution.Value = true;
+
+            await Task.Delay(50);
+            await Viewer.LoadPhotoAsync(true, true);
+        }
+
 
         _lastHotkeyPressed = null;
+        _isHotkeyPressMultiTimes = false;
     }
 
 

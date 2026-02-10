@@ -106,7 +106,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
             _srcRect = viewer.SrcRect.ToSKRect();
             _destRect = viewer.DestRect.ToSKRect();
             _interpolation = viewer.CurrentInterpolation;
-            _hasSrcColorProfile = viewer._photo?.Metadata?.ColorProfileData is not null;
+            _hasSrcColorProfile = viewer.Photo?.Metadata?.ColorProfileData is not null;
             _isFirstDraw = viewer._isFirstDraw.Value;
         }
     }
@@ -169,10 +169,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
                 FilterQuality = (SKFilterQuality)_interpolation,
             };
 
-            if (!imageRender.IsDisposed())
-            {
-                canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
-            }
+            canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
 
             canvas.Restore();
         }

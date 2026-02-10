@@ -20,7 +20,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Media.Imaging;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
@@ -110,73 +109,20 @@ public partial class MainWindow : PhWindow
             await Core.API.HandleKeyDownAsync(e);
             if (e.Handled) return;
         }
-
-
-
-
-        // enter full screen
-        if (e.Key == Key.F11)
-        {
-            Core.Config.EnableFullScreen = !Core.Config.EnableFullScreen;
-
-            if (Core.Config.EnableFullScreen)
-            {
-                Core.Config.IsMainWindowMaximized = WindowState == WindowState.Maximized;
-                Core.Config.MainWindowBounds = new Avalonia.Rect(Position.X, Position.Y, Width, Height);
-                WindowState = WindowState.FullScreen;
-            }
-            else
-            {
-                if (Core.Config.IsMainWindowMaximized)
-                {
-                    WindowState = WindowState.Maximized;
-                }
-                else
-                {
-                    WindowState = WindowState.Normal;
-                    Width = Core.Config.MainWindowBounds.Width;
-                    Height = Core.Config.MainWindowBounds.Height;
-                }
-            }
-
-            return;
-        }
-
-
-
-        if (e.Key != Key.Enter) return;
-        var res = await ModalWindow.ShowInputAsync(this, new ModalWindowOptions
-        {
-            Title = "Hello World!",
-            Heading = "This program is distributed in the hope that it will be useful",
-            Description = "This program is free software",
-            Details = "you can redistribute it and/or modify\r\n\r\nit under the terms of the GNU General Public License as published by\r\n\r\nthe Free Software Foundation, either version 3 of the License, or\r\n\r\n(at your option) any later version.\r\n\r\nImageGlass Project - Image viewer for Windows\r\n\r\nCopyright (C) 2010 - 2026 DUONG DIEU PHAP\r\nProject homepage: https://imageglass.org",
-            Note = "You should have received a copy",
-            InputValue = "99x9",
-            IsInputVisible = true,
-            AcceptValue = ImageGlass.UI.TextBoxAcceptValue.IntValueOnly,
-            IsRememberOptionVisible = true,
-            Thumbnail = new Bitmap(@"C:\Users\d2pha\Desktop\pic.jpg"),
-            ThumbnailIcon = StockIconId.Delete,
-            NoteStyle = InfoBarSeverity.Warning,
-        }, ModalWindowButton.OK_Cancel);
-
-        VM.Title = $"""
-            ExitCode = {res.ExitCode}
-            IsRememberOptionChecked = {res.IsRememberOptionChecked}
-            InputValue = {res.InputValue}
-            """;
     }
 
 
-    protected override void OnKeyUp(KeyEventArgs e)
+    protected override async void OnKeyUp(KeyEventArgs e)
     {
         base.OnKeyUp(e);
         if (e.Handled) return;
 
-
-        Core.API?.HandleKeyUp(e);
-        if (e.Handled) return;
+        // process app hotkeys
+        if (Core.API is not null)
+        {
+            await Core.API.HandleKeyUpAsync(e);
+            if (e.Handled) return;
+        }
     }
 
 

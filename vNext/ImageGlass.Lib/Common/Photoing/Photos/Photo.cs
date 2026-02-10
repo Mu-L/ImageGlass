@@ -40,6 +40,7 @@ public partial class Photo : DisposableImpl
     private Task? _taskThumbnail;
     private Task<PhotoMetadata>? _taskMetadata;
     private CancellationTokenSource? _cancelPhotoLoading;
+    private readonly Lock _lock = new();
 
     // track pending tasks
     private ConcurrentDictionary<Guid, bool> _taskRefs = new();
@@ -490,10 +491,16 @@ public partial class Photo : DisposableImpl
     /// Stops any ongoing photo loading process.
     /// </summary>
     [MemberNotNull(nameof(_cancelPhotoLoading))]
-    public virtual void CancelLoading()
+    public virtual CancellationToken CancelLoading()
     {
-        _cancelPhotoLoading?.Cancel();
-        _cancelPhotoLoading = new();
+        lock (_lock)
+        {
+            _cancelPhotoLoading?.Cancel();
+            _cancelPhotoLoading?.Dispose();
+            _cancelPhotoLoading = new();
+
+            return _cancelPhotoLoading.Token;
+        }
     }
 
 
@@ -507,9 +514,7 @@ public partial class Photo : DisposableImpl
     {
         // use cached data
         if (useCache && State != PhotoLoadingState.None) return;
-
-        CancelLoading();
-        var token = _cancelPhotoLoading.Token;
+        var token = CancelLoading();
 
         try
         {

@@ -34,9 +34,8 @@ namespace ImageGlass.UI.Viewer;
 
 public partial class ViewerControl : PhControl
 {
-    internal Photo? _photo;
     private CancellationTokenSource? _cancelPreview;
-    private InterlockedBool _isPreviewing = new(false);
+    internal InterlockedBool _isPreviewing = new(false);
     internal InterlockedBool _isFirstDraw = new(false);
 
     private Point? _lastMousePanPoint = null; // mouse panning
@@ -56,6 +55,12 @@ public partial class ViewerControl : PhControl
 
 
     /// <summary>
+    /// Gets the current photo.
+    /// </summary>
+    public Photo? Photo { get; private set; }
+
+
+    /// <summary>
     /// Gets the bitmap size.
     /// </summary>
     public Size BitmapSize { get; private set; }
@@ -70,7 +75,7 @@ public partial class ViewerControl : PhControl
     /// <summary>
     /// Gets, sets value indicates whether full resolution is loaded or not.
     /// </summary>
-    public bool ShouldLoadFullResolution { get; set; } = true;
+    public InterlockedBool ShouldLoadFullResolution = new(true);
 
 
     #endregion // Public Properties
@@ -134,7 +139,7 @@ public partial class ViewerControl : PhControl
                 CalculateDrawingRegion();
 
                 // redraw the control on resizing
-                var shouldResetZoom = _photo is not null && !_zooming.IsManual;
+                var shouldResetZoom = Photo is not null && !_zooming.IsManual;
                 Refresh(shouldResetZoom, false, true);
             });
         }
@@ -311,9 +316,12 @@ public partial class ViewerControl : PhControl
     [MemberNotNull(nameof(_cancelPreview))]
     private void CancelPreview()
     {
-        _cancelPreview?.Cancel();
-        _cancelPreview?.Dispose();
-        _cancelPreview = new();
+        lock (_lock)
+        {
+            _cancelPreview?.Cancel();
+            _cancelPreview?.Dispose();
+            _cancelPreview = new();
+        }
     }
 
 
@@ -322,16 +330,15 @@ public partial class ViewerControl : PhControl
     /// </summary>
     private void DisposeNativePhotoResources()
     {
-        // dispose preview bitmap
-        _imgPreview?.Dispose();
-        _imgPreview = null;
+        lock (_lock)
+        {
+            // dispose native bitmap
+            _imgSource?.Dispose();
+            _imgSource = null;
 
-        // dispose native bitmap
-        _imgSource?.Dispose();
-        _imgSource = null;
-
-        _imgRender?.Dispose();
-        _imgRender = null;
+            _imgRender?.Dispose();
+            _imgRender = null;
+        }
     }
 
 
@@ -345,9 +352,8 @@ public partial class ViewerControl : PhControl
         {
             CancelPreview();
             SourceKind = PhotoSource.None;
-            _photo?.CancelLoading();
-            _photo?.Unload();
-            _isFirstDraw.Set();
+            Photo?.CancelLoading();
+            Photo?.Unload();
 
             // reset
             AnimationSource = AnimationSources.None;
@@ -371,7 +377,7 @@ public partial class ViewerControl : PhControl
 
         if (inputPhoto is null)
         {
-            _photo = null;
+            Photo = null;
             Refresh(true);
             return;
         }
@@ -379,7 +385,7 @@ public partial class ViewerControl : PhControl
 
         SourceKind = PhotoSource.Native;
         _enablePanningVelocity = true;
-        _photo = inputPhoto;
+        Photo = inputPhoto;
 
 
         // photo is loaded
@@ -390,7 +396,7 @@ public partial class ViewerControl : PhControl
         }
         else
         {
-            await LoadPhotoAsync(inputPhoto, useCache, false);
+            await LoadPhotoAsync(useCache, false);
         }
     }
 
@@ -398,11 +404,11 @@ public partial class ViewerControl : PhControl
     /// <summary>
     /// Loads photo data and renders to the viewer
     /// </summary>
-    private async Task LoadPhotoAsync(Photo? inputPhoto, bool useCache, bool skipLoadingEvent)
+    public async Task LoadPhotoAsync(bool useCache, bool skipLoadingEvent)
     {
-        if (inputPhoto is null) return;
+        if (Photo is null) return;
 
-        await inputPhoto.LoadAsync(useCache, null, OnPhotoLoadingProgressAsync, skipLoadingEvent);
+        await Photo.LoadAsync(useCache, null, OnPhotoLoadingProgressAsync, skipLoadingEvent);
     }
 
 
@@ -414,8 +420,7 @@ public partial class ViewerControl : PhControl
         // previewing
         if (e.State == PhotoLoadingState.Loading)
         {
-            //TODO:
-            //await HandlePhotoPreviewAsync(e);
+            await HandlePhotoPreviewAsync(e);
         }
         // load full resolution photo
         else
@@ -430,7 +435,7 @@ public partial class ViewerControl : PhControl
     /// </summary>
     private async Task HandlePhotoPreviewAsync(PhotoLoadingEventArgs e)
     {
-        if (!ShouldLoadFullResolution) e.Photo.CancelLoading();
+        if (!ShouldLoadFullResolution.Value) e.Photo.CancelLoading();
 
         // 1. skip the preview if it's not enable or in zoom lock mode
         if (!EnableImagePreview || ZoomMode == ZoomMode.LockZoom)
@@ -450,12 +455,11 @@ public partial class ViewerControl : PhControl
         // 2. try to get the preview bitmap
         try
         {
-            var previewHeight = Math.Min(DrawingArea.Height, e.Metadata.Height) / Dpi;
+            var previewHeight = Math.Min(Math.Min(DrawingArea.Height, e.Metadata.Height), 500);
 
             // try to get photo preview
             imgPreview = await Core.PreviewProvider!.GetPreviewAsync(e.Metadata, previewHeight, token);
             hasPreview = imgPreview is not null;
-
 
             // cancel if requested
             if (token.IsCancellationRequested)
@@ -477,9 +481,6 @@ public partial class ViewerControl : PhControl
                     HandleCancelLoading();
                     return;
                 }
-
-                // set preview source
-                _imgPreview = imgPreview;
             }
         }
         catch
@@ -491,29 +492,35 @@ public partial class ViewerControl : PhControl
         // 3. calculate viewport of preview
         if (hasPreview)
         {
-            var desiredSrcZoomFactor = CalculateZoomFactor(ZoomMode, e.Metadata.Width, e.Metadata.Height);
-            var previewZoomFactor = desiredSrcZoomFactor;
-
-            if (ZoomMode == ZoomMode.AutoZoom)
+            lock (_lock)
             {
-                // if the source size is bigger than viewport,
-                // fit the thumbnail to the viewport
-                if (desiredSrcZoomFactor < 1)
+                // set preview source
+                _imgSource = imgPreview;
+
+                var desiredSrcZoomFactor = CalculateZoomFactor(ZoomMode, e.Metadata.Width, e.Metadata.Height);
+                var previewZoomFactor = desiredSrcZoomFactor;
+
+                if (ZoomMode == ZoomMode.AutoZoom)
                 {
-                    previewZoomFactor = CalculateZoomFactor(ZoomMode.ScaleToFit, BitmapSize.Width, BitmapSize.Height);
+                    // if the source size is bigger than viewport,
+                    // fit the thumbnail to the viewport
+                    if (desiredSrcZoomFactor < 1)
+                    {
+                        previewZoomFactor = CalculateZoomFactor(ZoomMode.ScaleToFit, BitmapSize.Width, BitmapSize.Height);
+                    }
+                    // both preview and source size are smaller than viewport
+                    else
+                    {
+                        previewZoomFactor = 1;
+                    }
                 }
-                // both preview and source size are smaller than viewport
                 else
                 {
-                    previewZoomFactor = 1;
+                    previewZoomFactor = CalculateZoomFactor(ZoomMode, BitmapSize.Width, BitmapSize.Height);
                 }
-            }
-            else
-            {
-                previewZoomFactor = CalculateZoomFactor(ZoomMode, BitmapSize.Width, BitmapSize.Height);
-            }
 
-            SetZoomFactor(previewZoomFactor, false);
+                SetZoomFactor(previewZoomFactor, false);
+            }
         }
 
 
@@ -536,7 +543,7 @@ public partial class ViewerControl : PhControl
     /// </summary>
     private async Task HandlePhotoLoadedAsync(PhotoLoadingEventArgs e)
     {
-        if (!ShouldLoadFullResolution) return;
+        if (!ShouldLoadFullResolution.Value) return;
 
 
         // back up size of preview image
@@ -598,67 +605,67 @@ public partial class ViewerControl : PhControl
 
             // cancel the preview process
             CancelPreview();
-            _imgPreview?.Dispose();
-            _imgPreview = null;
 
-            // update bitmap size after the preview is cancelled
-            BitmapSize = e.Photo.Size;
 
-            // calculate the source viewport to match with the preview
-            if (hasSource)
+            lock (_lock)
             {
-                // set the source
-                _imgSource = imgFrame;
+                // update bitmap size after the preview is cancelled
+                BitmapSize = e.Photo.Size;
 
-
-                // set animator
-                if (animator is not null)
+                // calculate the source viewport to match with the preview
+                if (hasSource)
                 {
-                    _animator?.FrameChanged -= Animator_FrameChanged;
-                    _animator = animator;
-                    _animator.FrameChanged += Animator_FrameChanged;
-                    _animator.Play();
-                }
+                    // set the source
+                    _isFirstDraw.Set();
+                    _imgSource = imgFrame;
 
 
-                // if user zoomed and panned the preview
-                if (_isPreviewing.Value
-                    && _zooming.IsManual
-                    && ZoomMode != ZoomMode.LockZoom)
-                {
-                    var diffRatio = new Size(
-                        prevSize.Width / BitmapSize.Width,
-                        prevSize.Height / BitmapSize.Height);
+                    // set animator
+                    if (animator is not null)
+                    {
+                        _animator?.FrameChanged -= Animator_FrameChanged;
+                        _animator = animator;
+                        _animator.FrameChanged += Animator_FrameChanged;
+                        _animator.Play();
+                    }
 
-                    // calculate new source rect
-                    var newSrcRect = SrcRect;
-                    newSrcRect = newSrcRect.WithX(newSrcRect.X / diffRatio.Width);
-                    newSrcRect = newSrcRect.WithY(newSrcRect.Y / diffRatio.Height);
-                    newSrcRect = newSrcRect.WithWidth(newSrcRect.Width / diffRatio.Width);
-                    newSrcRect = newSrcRect.WithHeight(newSrcRect.Height / diffRatio.Height);
 
-                    // update zoom source
-                    SrcRect = newSrcRect.Normalize();
-                    _zooming.Factor *= diffRatio.Width;
-                    _zooming.ZoomedPoint = new();
+                    // if user zoomed and panned the preview
+                    if (_isPreviewing.Value
+                        && _zooming.IsManual
+                        && ZoomMode != ZoomMode.LockZoom)
+                    {
+                        var diffRatio = new Size(
+                            prevSize.Width / BitmapSize.Width,
+                            prevSize.Height / BitmapSize.Height);
 
-                    // make sure all zoomed point and viewport are synced
-                    // by manually applying a very small zoom factor
-                    ZoomByDeltaToPoint(double.Epsilon, _zooming.ZoomedPoint, false);
-                    _zooming.IsManual = false;
+                        // calculate new source rect
+                        var newSrcRect = SrcRect;
+                        newSrcRect = newSrcRect.WithX(newSrcRect.X / diffRatio.Width);
+                        newSrcRect = newSrcRect.WithY(newSrcRect.Y / diffRatio.Height);
+                        newSrcRect = newSrcRect.WithWidth(newSrcRect.Width / diffRatio.Width);
+                        newSrcRect = newSrcRect.WithHeight(newSrcRect.Height / diffRatio.Height);
 
-                    _isPreviewing.Clear();
-                    Refresh(false);
-                }
-                else
-                {
-                    _isPreviewing.Clear();
-                    Refresh(true);
+                        // update zoom source
+                        SrcRect = newSrcRect.Normalize();
+                        _zooming.Factor *= diffRatio.Width;
+                        _zooming.ZoomedPoint = new();
+
+                        // make sure all zoomed point and viewport are synced
+                        // by manually applying a very small zoom factor
+                        ZoomByDeltaToPoint(double.Epsilon, _zooming.ZoomedPoint, false);
+                        _zooming.IsManual = false;
+
+                        _isPreviewing.Clear();
+                        Refresh(false);
+                    }
+                    else
+                    {
+                        _isPreviewing.Clear();
+                        Refresh(true);
+                    }
                 }
             }
-
-
-            BHelper.GcCollect();
         }
         catch (Exception ex)
         {

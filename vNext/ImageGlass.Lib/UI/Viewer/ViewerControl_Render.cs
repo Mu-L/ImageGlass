@@ -41,7 +41,6 @@ public partial class ViewerControl
 
     // drawing image
     internal SKImage? _imgSource;
-    private SKImage? _imgPreview;
     internal SKImage? _imgRender;
     private SkiaAnimator? _animator;
 
@@ -170,6 +169,8 @@ public partial class ViewerControl
 
 
 
+    #region Override / Virtual Methods
+
     protected void DisposeCheckerboard()
     {
         _bmpCheckerboard?.Dispose();
@@ -208,26 +209,6 @@ public partial class ViewerControl
 
 
     /// <summary>
-    /// Calculates FPS in debug mode.
-    /// </summary>
-    private void CalculateFps()
-    {
-        if (!EnableDebug) return;
-
-        var now = Environment.TickCount64;
-        var delta = now - _lastFpsTime;
-
-        if (delta > 0)
-        {
-            _fps = _fps * 0.9 + (1000.0 / delta) * 0.1;
-            _fps = Math.Round(_fps, 2);
-        }
-
-        _lastFpsTime = now;
-    }
-
-
-    /// <summary>
     /// Draw debug information.
     /// </summary>
     protected virtual void OnDrawDebugInfo(DrawingContext c)
@@ -240,6 +221,7 @@ public partial class ViewerControl
             Control Bounds = {Bounds}
             DrawingArea = {DrawingArea}
             Image size = {BitmapSize}
+            _isPreviewing = {_isPreviewing}
             _srcRect = {SrcRect}
             _destRect = {DestRect}
             _zoomFactor = {_zooming.Factor}
@@ -346,25 +328,8 @@ public partial class ViewerControl
     /// </summary>
     protected virtual void OnDrawImage(DrawingContext c)
     {
-
-        //// draw bitmap preview
-        //if (_imgPreview is not null)
-        //{
-        //    lock (_lockPreview)
-        //    {
-        //        if (_imgPreview is not null)
-        //        {
-        //            c.Custom(new PhotoRenderer(this));
-        //        }
-        //    }
-        //}
-
-
-        // draw bitmap in full resolution
-        if (_imgSource is not null)
-        {
-            c.Custom(new PhotoRenderer(this, OnDrawnImageFirstTime));
-        }
+        // draw image
+        c.Custom(new PhotoRenderer(this, OnDrawnImageFirstTime));
     }
 
 
@@ -420,6 +385,35 @@ public partial class ViewerControl
             _ = ZoomByDeltaToPoint(-20, null, requestRerender: false);
         }
     }
+
+    #endregion // Override / Virtual Methods
+
+
+
+    #region Control Methods
+
+
+    /// <summary>
+    /// Calculates FPS in debug mode.
+    /// </summary>
+    private void CalculateFps()
+    {
+        if (!EnableDebug) return;
+
+        var now = Environment.TickCount64;
+        var delta = now - _lastFpsTime;
+
+        if (delta > 0)
+        {
+            _fps = _fps * 0.9 + (1000.0 / delta) * 0.1;
+            _fps = Math.Round(_fps, 2);
+        }
+
+        _lastFpsTime = now;
+    }
+
+
+    #endregion // Control Methods
 
 
 
