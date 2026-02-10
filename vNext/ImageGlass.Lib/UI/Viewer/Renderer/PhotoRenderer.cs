@@ -23,6 +23,7 @@ using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
 using Avalonia.Threading;
 using ImageGlass.Common;
+using ImageGlass.Common.Extensions;
 using SkiaSharp;
 using System;
 using System.Threading;
@@ -156,7 +157,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
             // set the image to draw
             imageRender ??= _imgSource;
-            if (imageRender is null) return;
+            if (imageRender.IsDisposed()) return;
 
 
             // start drawing image
@@ -168,7 +169,11 @@ public partial class PhotoRenderer : ICustomDrawOperation
                 FilterQuality = (SKFilterQuality)_interpolation,
             };
 
-            canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
+            if (!imageRender.IsDisposed())
+            {
+                canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
+            }
+
             canvas.Restore();
         }
     }
@@ -185,23 +190,22 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// </summary>
     private SKImage? ProcessImageForFirstDrawing(GRContext? dc, SKImage? srcImage)
     {
-        if (dc is null || srcImage is null) return null;
+        if (dc.IsDisposed() || srcImage.IsDisposed()) return null;
 
         SKImage? outputImage = null;
         lock (_lock)
         {
             // double check the source image
-            if (srcImage is not null)
-            {
-                var useColorManagement = Core.DestColorProfile is not null
+            if (srcImage.IsDisposed()) return outputImage;
+
+            var useColorManagement = !Core.DestColorProfile.IsDisposed()
                     && Core.IsDestColorProfileSupported
                     && (Core.Config.ShouldUseColorProfileForAll || _hasSrcColorProfile);
 
-                // apply color management
-                if (useColorManagement)
-                {
-                    outputImage = ApplyColorManagement(dc, srcImage, Core.DestColorProfile);
-                }
+            // apply color management
+            if (useColorManagement)
+            {
+                outputImage = ApplyColorManagement(dc, srcImage, Core.DestColorProfile);
             }
         }
 
@@ -212,9 +216,9 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// <summary>
     /// Returns a new image after applying color management effect on the original image.
     /// </summary>
-    private static SKImage? ApplyColorManagement(GRContext dc, SKImage oriImg, SKColorSpace? destColor)
+    private SKImage? ApplyColorManagement(GRContext dc, SKImage oriImg, SKColorSpace? destColor)
     {
-        if (destColor is null) return null;
+        if (destColor.IsDisposed()) return null;
 
         // 1. convert the original image to the destination color space
         using var convertedImg = ConvertToColorSpace(dc, oriImg, destColor);
@@ -229,41 +233,51 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// <summary>
     /// Returns a new image after converting the given image to the destination color space.
     /// </summary>
-    private static SKImage? ConvertToColorSpace(GRContext dc, SKImage? srcImg, SKColorSpace? destColor)
+    private SKImage? ConvertToColorSpace(GRContext dc, SKImage? srcImg, SKColorSpace? destColor)
     {
-        if (srcImg is null || destColor is null) return null;
+        if (srcImg.IsDisposed() || destColor.IsDisposed()) return null;
 
-        var dstInfo = srcImg.Info.WithColorSpace(destColor);
-        using var surface = SKSurface.Create(dc, false, dstInfo);
-        if (surface is null) return null;
+        lock (_lock)
+        {
+            if (srcImg.IsDisposed() || destColor.IsDisposed()) return null;
 
-        // convert ICC color profile with GPU
-        surface.Canvas.Clear(SKColors.Transparent);
-        surface.Canvas.DrawImage(srcImg, 0, 0);
+            var dstInfo = srcImg.Info.WithColorSpace(destColor);
+            using var surface = SKSurface.Create(dc, false, dstInfo);
+            if (surface.IsDisposed()) return null;
 
-        // return the converted image
-        return surface.Snapshot();
+            // convert ICC color profile with GPU
+            surface.Canvas.Clear(SKColors.Transparent);
+            surface.Canvas.DrawImage(srcImg, 0, 0);
+
+            // return the converted image
+            return surface.Snapshot();
+        }
     }
 
 
     /// <summary>
     /// Returns a new image after converting the given image to the sRGB color space.
     /// </summary>
-    private static SKImage? ConvertToSrgbSpace(GRContext gr, SKImage? srcImg)
+    private SKImage? ConvertToSrgbSpace(GRContext gr, SKImage? srcImg)
     {
-        if (srcImg is null) return null;
+        if (srcImg.IsDisposed()) return null;
 
-        var sRGB = SKColorSpace.CreateSrgb();
-        var dstInfo = srcImg.Info.WithColorSpace(sRGB);
-        using var surface = SKSurface.Create(gr, false, dstInfo);
-        if (surface is null) return null;
+        lock (_lock)
+        {
+            if (srcImg.IsDisposed()) return null;
 
-        // convert sRGB color profile with GPU
-        surface.Canvas.Clear(SKColors.Transparent);
-        surface.Canvas.DrawImage(srcImg, 0, 0);
+            var sRGB = SKColorSpace.CreateSrgb();
+            var dstInfo = srcImg.Info.WithColorSpace(sRGB);
+            using var surface = SKSurface.Create(gr, false, dstInfo);
+            if (surface.IsDisposed()) return null;
 
-        // return the converted image
-        return surface.Snapshot();
+            // convert sRGB color profile with GPU
+            surface.Canvas.Clear(SKColors.Transparent);
+            surface.Canvas.DrawImage(srcImg, 0, 0);
+
+            // return the converted image
+            return surface.Snapshot();
+        }
     }
 
 
