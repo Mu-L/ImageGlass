@@ -21,6 +21,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
+using Avalonia.Threading;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI.Viewer.Checkerboard;
 using SkiaSharp;
@@ -56,7 +57,13 @@ public partial class ViewerControl
     /// <summary>
     /// Gets, sets the debug mode.
     /// </summary>
-    public bool EnableDebug { get; set; } = true;
+    public bool EnableDebug
+    {
+        get => GetValue(EnableDebugProperty);
+        set => SetValue(EnableDebugProperty, value);
+    }
+    public static readonly StyledProperty<bool> EnableDebugProperty =
+        AvaloniaProperty.Register<ViewerControl, bool>(nameof(EnableDebug));
 
 
     /// <summary>
@@ -78,42 +85,27 @@ public partial class ViewerControl
 
 
     /// <summary>
-    /// Gets or sets the size of the checkerboard.
-    /// </summary>
-    public Size CheckerboardSize
-    {
-        get => _checkerboard.Size;
-        set
-        {
-            if (_checkerboard.Size.Width != value.Width
-                || _checkerboard.Size.Height != value.Height)
-            {
-                DisposeCheckerboard();
-
-                _checkerboard.Size = value;
-                InvalidateVisual();
-            }
-        }
-    }
-
-
-    /// <summary>
     /// Gets or sets the mode of the checkerboard.
     /// </summary>
-    public CheckerboardMode CheckerboardMode
+    public CheckerboardType CheckerboardMode
     {
-        get => _checkerboard.Mode;
-        set
-        {
-            if (_checkerboard.Mode != value)
-            {
-                DisposeCheckerboard();
-
-                _checkerboard.Mode = value;
-                InvalidateVisual();
-            }
-        }
+        get => GetValue(CheckerboardModeProperty);
+        set => SetValue(CheckerboardModeProperty, value);
     }
+    public static readonly StyledProperty<CheckerboardType> CheckerboardModeProperty =
+        AvaloniaProperty.Register<ViewerControl, CheckerboardType>(nameof(CheckerboardMode), CheckerboardType.None,
+            coerce: (sender, value) =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    var control = (ViewerControl)sender;
+                    control.DisposeCheckerboard();
+                    control._checkerboard.Mode = value;
+                    control.InvalidateVisual();
+                });
+
+                return value;
+            });
 
 
     /// <summary>
@@ -122,13 +114,20 @@ public partial class ViewerControl
     /// </summary>
     public ImageInterpolation InterpolationScaleDown
     {
-        get; set
+        get => GetValue(InterpolationScaleDownProperty);
+        set => SetValue(InterpolationScaleDownProperty, value);
+    }
+    public static readonly StyledProperty<ImageInterpolation> InterpolationScaleDownProperty =
+        AvaloniaProperty.Register<ViewerControl, ImageInterpolation>(nameof(InterpolationScaleDown), ImageInterpolation.Medium, coerce: (sender, value) =>
         {
-            if (field == value) return;
-            field = value;
-            InvalidateVisual();
-        }
-    } = ImageInterpolation.Medium;
+            Dispatcher.UIThread.Post(() =>
+            {
+                var control = (ViewerControl)sender;
+                control.InvalidateVisual();
+            });
+
+            return value;
+        });
 
 
     /// <summary>
@@ -137,13 +136,20 @@ public partial class ViewerControl
     /// </summary>
     public ImageInterpolation InterpolationScaleUp
     {
-        get; set
+        get => GetValue(InterpolationScaleUpProperty);
+        set => SetValue(InterpolationScaleUpProperty, value);
+    }
+    public static readonly StyledProperty<ImageInterpolation> InterpolationScaleUpProperty =
+        AvaloniaProperty.Register<ViewerControl, ImageInterpolation>(nameof(InterpolationScaleUp), ImageInterpolation.Medium, coerce: (sender, value) =>
         {
-            if (field == value) return;
-            field = value;
-            InvalidateVisual();
-        }
-    } = ImageInterpolation.None;
+            Dispatcher.UIThread.Post(() =>
+            {
+                var control = (ViewerControl)sender;
+                control.InvalidateVisual();
+            });
+
+            return value;
+        });
 
 
     /// <summary>
@@ -263,11 +269,11 @@ public partial class ViewerControl
     /// </summary>
     protected virtual void OnDrawCheckerboard(DrawingContext c)
     {
-        if (CheckerboardMode == CheckerboardMode.None) return;
+        if (CheckerboardMode == CheckerboardType.None) return;
 
         // region to draw
         Rect region;
-        if (CheckerboardMode == CheckerboardMode.Image)
+        if (CheckerboardMode == CheckerboardType.Image)
         {
             //if (UseWebview2)
             //{

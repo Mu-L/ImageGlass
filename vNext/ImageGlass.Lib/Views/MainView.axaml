@@ -31,7 +31,11 @@
         <Grid Grid.Row="1"
               Background="{CompiledBinding ViewerBackground}">
             <viewer:ViewerControl x:Name="PART_Viewer"
-                                  Padding="20">
+                                  EnableDebug="{CompiledBinding Config.EnableDebug}"
+                                  CheckerboardMode="{CompiledBinding Config.CheckerboardMode}"
+                                  ZoomMode="{CompiledBinding Config.ZoomMode}"
+                                  InterpolationScaleDown="{CompiledBinding Config.ImageInterpolationScaleDown}"
+                                  InterpolationScaleUp="{CompiledBinding Config.ImageInterpolationScaleUp}">
                 <ui:MessageControl x:Name="PART_Message" />
             </viewer:ViewerControl>
         </Grid>

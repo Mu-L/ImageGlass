@@ -32,7 +32,7 @@ public enum PhotoSource
 /// <summary>
 /// Specifies the display styles for the background texture grid
 /// </summary>
-public enum CheckerboardMode
+public enum CheckerboardType
 {
     /// <summary>
     /// No background.

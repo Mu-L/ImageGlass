@@ -599,10 +599,10 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets checkerboard mode of the viewer.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<CheckerboardMode>))]
-    public CheckerboardMode CheckerboardMode
+    [JsonConverter(typeof(JsonStringEnumConverter<CheckerboardType>))]
+    public CheckerboardType CheckerboardMode
     {
-        get => Get(ConfigId.CheckerboardMode, CheckerboardMode.None);
+        get => Get(ConfigId.CheckerboardMode, CheckerboardType.None);
         set => Set(ConfigId.CheckerboardMode, value);
     }
 

@@ -911,7 +911,7 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_SetZoomMode(ZoomMode mode)
     {
-        Viewer.ZoomMode = Core.Config.ZoomMode = mode;
+        Core.Config.ZoomMode = mode;
     }
 
 
@@ -1701,7 +1701,7 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_ToggleCheckerboard(string? mode = null)
     {
-        var isValid = Enum.TryParse<CheckerboardMode>(mode, out var wantedMode);
+        var isValid = Enum.TryParse<CheckerboardType>(mode, out var wantedMode);
 
         IG_ToggleCheckerboard(isValid ? wantedMode : null);
     }
@@ -1710,7 +1710,7 @@ public partial class AppAPIProvider
     /// <summary>
     /// Toggles the viewer's checkerboard mode.
     /// </summary>
-    public void IG_ToggleCheckerboard(CheckerboardMode? mode = null)
+    public void IG_ToggleCheckerboard(CheckerboardType? mode = null)
     {
         var wantedMode = Core.Config.CheckerboardMode;
 
@@ -1722,21 +1722,21 @@ public partial class AppAPIProvider
         {
             switch (wantedMode)
             {
-                case CheckerboardMode.None:
-                    wantedMode = CheckerboardMode.Client;
+                case CheckerboardType.None:
+                    wantedMode = CheckerboardType.Client;
                     break;
-                case CheckerboardMode.Client:
-                    wantedMode = CheckerboardMode.Image;
+                case CheckerboardType.Client:
+                    wantedMode = CheckerboardType.Image;
                     break;
-                case CheckerboardMode.Image:
-                    wantedMode = CheckerboardMode.None;
+                case CheckerboardType.Image:
+                    wantedMode = CheckerboardType.None;
                     break;
                 default:
                     break;
             }
         }
 
-        Viewer.CheckerboardMode = Core.Config.CheckerboardMode = wantedMode;
+        Core.Config.CheckerboardMode = wantedMode;
     }
 
 

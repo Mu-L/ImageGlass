@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using Avalonia;
+using Avalonia.Threading;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.OsApi;
 using ImageGlass.Common.Types;
@@ -61,13 +62,22 @@ public partial class ViewerControl
     /// </summary>
     public ZoomMode ZoomMode
     {
-        get => _zooming.Mode;
-        set
-        {
-            _zooming.Mode = value;
-            Refresh();
-        }
+        get => GetValue(ZoomModeProperty);
+        set => SetValue(ZoomModeProperty, value);
     }
+    public static readonly StyledProperty<ZoomMode> ZoomModeProperty =
+        AvaloniaProperty.Register<ViewerControl, ZoomMode>(nameof(ZoomMode), ZoomMode.AutoZoom,
+            coerce: (sender, value) =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    var control = (ViewerControl)sender;
+                    control._zooming.Mode = value;
+                    control.Refresh();
+                });
+
+                return value;
+            });
 
 
     /// <summary>
