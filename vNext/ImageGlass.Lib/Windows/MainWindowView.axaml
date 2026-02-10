@@ -6,8 +6,8 @@
              xmlns:viewer="using:ImageGlass.UI.Viewer"
              xmlns:vm="using:ImageGlass.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ImageGlass.Views.MainView"
-             x:DataType="vm:MainViewModel">
+             x:Class="ImageGlass.Common.Windows.MainWindowView"
+             x:DataType="vm:MainWindowViewModel">
 
     <Grid>
 		<Grid.RowDefinitions >

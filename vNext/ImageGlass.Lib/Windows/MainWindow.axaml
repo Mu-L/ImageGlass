@@ -1,9 +1,9 @@
-<win:PhWindow xmlns="https://github.com/avaloniaui"
+<uiw:PhWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:win="using:ImageGlass.UI.Windowing"
-        xmlns:view="using:ImageGlass.Views"
+        xmlns:uiw="using:ImageGlass.UI.Windowing"
+        xmlns:wv="using:ImageGlass.Common.Windows"
         xmlns:vm="using:ImageGlass.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ImageGlass.Common.Windows.MainWindow"
@@ -12,6 +12,6 @@
         IsFrameless="{CompiledBinding Config.EnableFrameless}"
         Title="{CompiledBinding Title}">
 
-  <view:MainView x:Name="PART_MainView" DataContext="{CompiledBinding .}"></view:MainView>
+  <wv:MainWindowView x:Name="PART_MainView" DataContext="{CompiledBinding .}" />
 
-</win:PhWindow >
+</uiw:PhWindow >

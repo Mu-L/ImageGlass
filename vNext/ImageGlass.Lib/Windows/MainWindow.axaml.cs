@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -45,7 +46,7 @@ public partial class MainWindow : PhWindow
 
 
         // load window bounds & state
-        Position = new Avalonia.PixelPoint((int)Core.Config.MainWindowBounds.X, (int)Core.Config.MainWindowBounds.Y);
+        Position = new PixelPoint((int)Core.Config.MainWindowBounds.X, (int)Core.Config.MainWindowBounds.Y);
         Width = Core.Config.MainWindowBounds.Width;
         Height = Core.Config.MainWindowBounds.Height;
 

@@ -25,7 +25,7 @@ using ImageGlass.UI.Windowing;
 
 namespace ImageGlass.ViewModels;
 
-public partial class MainViewModel : PhReactive
+public partial class MainWindowViewModel : PhReactive
 {
     public static Config Config => Core.Config;
 
@@ -58,10 +58,10 @@ public partial class MainViewModel : PhReactive
             field = value;
             OnPropertyChanged();
         }
-    } = "ImageGlass";
+    } = BHelper.AppName;
 
 
-    public MainViewModel(PhWindow window)
+    public MainWindowViewModel(PhWindow window)
     {
         Window = window;
     }

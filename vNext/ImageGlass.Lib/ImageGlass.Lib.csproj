@@ -45,4 +45,10 @@
     <PackageReference Include="Magick.NET-Q8-OpenMP-x64" />
     <PackageReference Include="Svg.Controls.Skia.Avalonia" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Windows\MainWindowView.axaml.cs">
+      <DependentUpon>MainWindowView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

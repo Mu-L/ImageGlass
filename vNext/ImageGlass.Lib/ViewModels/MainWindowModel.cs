@@ -20,7 +20,7 @@ using ImageGlass.Common.Windows;
 
 namespace ImageGlass.ViewModels;
 
-public class MainWindowModel : MainViewModel
+public class MainWindowModel : MainWindowViewModel
 {
 
     /// <summary>

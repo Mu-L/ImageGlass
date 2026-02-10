@@ -20,7 +20,6 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders.FileSearchService;
@@ -34,14 +33,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Views;
+namespace ImageGlass.Common.Windows;
 
-public partial class MainView : PhControl
+public partial class MainWindowView : PhControl
 {
-    public MainViewModel VM => (MainViewModel)DataContext!;
+    public MainWindowViewModel VM => (MainWindowViewModel)DataContext!;
 
 
-    public MainView()
+    public MainWindowView()
     {
         InitializeComponent();
     }
