@@ -3,19 +3,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ui="using:ImageGlass.UI"
+             xmlns:cm="using:ImageGlass.Common"
              xmlns:viewer="using:ImageGlass.UI.Viewer"
              xmlns:vm="using:ImageGlass.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ImageGlass.Common.Windows.MainWindowView"
              x:DataType="vm:MainWindowViewModel">
 
-    <Grid>
-		<Grid.RowDefinitions >
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
+    <Grid RowDefinitions="Auto, * Auto">
 
         <!-- Toolbar -->
         <ui:ToolbarControl x:Name="PART_Toolbar"
@@ -23,31 +18,31 @@
                            ZIndex="90"
                            DataContext="{CompiledBinding ToolbarVM}"
                            Background="{CompiledBinding Background}"
-                           ItemsSource="{CompiledBinding Config.ToolbarButtons}"
-                           IsVisible="{CompiledBinding Config.ShowToolbar}" />
+                           ItemsSource="{CompiledBinding ToolbarButtons, Source={x:Static cm:Core.Config}}"
+                           IsVisible="{CompiledBinding ShowToolbar, Source={x:Static cm:Core.Config}}" />
 
 
         <!-- Viewer -->
         <Grid Grid.Row="1"
               Background="{CompiledBinding ViewerBackground}">
             <viewer:ViewerControl x:Name="PART_Viewer"
-                                  EnableDebug="{CompiledBinding Config.EnableDebug}"
-                                  CheckerboardMode="{CompiledBinding Config.CheckerboardMode}"
-                                  ZoomMode="{CompiledBinding Config.ZoomMode}"
-                                  InterpolationScaleDown="{CompiledBinding Config.ImageInterpolationScaleDown}"
-                                  InterpolationScaleUp="{CompiledBinding Config.ImageInterpolationScaleUp}">
+                                  EnableDebug="{CompiledBinding EnableDebug, Source={x:Static cm:Core.Config}}"
+                                  CheckerboardMode="{CompiledBinding CheckerboardMode, Source={x:Static cm:Core.Config}}"
+                                  ZoomMode="{CompiledBinding ZoomMode, Source={x:Static cm:Core.Config}}"
+                                  InterpolationScaleDown="{CompiledBinding ImageInterpolationScaleDown, Source={x:Static cm:Core.Config}}"
+                                  InterpolationScaleUp="{CompiledBinding ImageInterpolationScaleUp, Source={x:Static cm:Core.Config}}">
                 <ui:MessageControl x:Name="PART_Message" />
             </viewer:ViewerControl>
         </Grid>
 
 
         <!-- Gallery -->
-        <Border x:Name="PART_Gallery"
-                Grid.Row="2"
-                ZIndex="80"
-                Height="90"
-                Background="{CompiledBinding GalleryBackground}"
-                IsVisible="{CompiledBinding Config.ShowGallery}" />
+        <ui:GalleryControl x:Name="PART_Gallery"
+                           Grid.Row="2"
+                           ZIndex="80"
+                           Background="{CompiledBinding GalleryBackground}"
+                           ItemsSource="{CompiledBinding Items, Source={x:Static cm:Core.Photos}}"
+                           IsVisible="{CompiledBinding ShowGallery, Source={x:Static cm:Core.Config}}" />
 
     </Grid>
     

@@ -1,0 +1,63 @@
+<ui:PhToolButton xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:photo="using:ImageGlass.Common.Photoing"
+             xmlns:ui="using:ImageGlass.UI"
+             xmlns:cm="using:ImageGlass.Common"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
+             x:Class="ImageGlass.UI.GalleryItem"
+             x:DataType="photo:Photo"
+             Padding="3"
+             BorderThickness="1">
+    <Grid RowDefinitions="*, Auto"
+          VerticalAlignment="Stretch">
+
+        <!--  Gallery Item: Thumbnail Skeleton -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource IG_BorderNeutralBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}"
+                IsVisible="{CompiledBinding IsGalleryThumbnailLoading}">
+            <Border.Styles>
+                <Style Selector="Border">
+                    <Style.Animations>
+                        <Animation Duration="0:0:1.2" IterationCount="Infinite">
+                            <KeyFrame Cue="0%">
+                                <Setter Property="Opacity" Value="0.2" />
+                            </KeyFrame>
+                            <KeyFrame Cue="50%">
+                                <Setter Property="Opacity" Value="1" />
+                            </KeyFrame>
+                            <KeyFrame Cue="100%">
+                                <Setter Property="Opacity" Value="0.2" />
+                            </KeyFrame>
+                        </Animation>
+                    </Style.Animations>
+                </Style>
+            </Border.Styles>
+        </Border>
+
+
+        <!--  Gallery Item: Thumbnail Skeleton -->
+        <Image Grid.Row="0"
+               Stretch="Uniform" 
+               Source="{CompiledBinding GalleryThumbnail}"
+               IsVisible="{CompiledBinding IsGalleryThumbnailLoaded}" />
+
+
+        <!--  Gallery Item: File name -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*, Auto"
+              HorizontalAlignment="Center">
+            <TextBlock Grid.Column="0"
+                       Padding="2,0,0,0"
+                       Text="{CompiledBinding GalleryFileTitle}"
+                       TextTrimming="CharacterEllipsis" />
+
+            <TextBlock Grid.Column="1"
+                       Padding="0,0,2,0"
+                       HorizontalAlignment="Right"
+                       Text="{CompiledBinding GalleryFileExtension}" />
+        </Grid>
+    </Grid>
+</ui:PhToolButton>
