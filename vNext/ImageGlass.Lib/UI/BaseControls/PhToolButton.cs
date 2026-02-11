@@ -106,15 +106,15 @@ public partial class PhToolButton : ToggleButton
                 {
                     new BrushTransition {
                         Property = BackgroundProperty,
-                        Duration = TimeSpan.FromMilliseconds(100),
+                        Duration = TimeSpan.FromMilliseconds(50),
                     },
                     new BrushTransition {
                         Property = BorderBrushProperty,
-                        Duration = TimeSpan.FromMilliseconds(100),
+                        Duration = TimeSpan.FromMilliseconds(50),
                     },
                     new TransformOperationsTransition {
                         Property = RenderTransformProperty,
-                        Duration = TimeSpan.FromMilliseconds(100),
+                        Duration = TimeSpan.FromMilliseconds(50),
                     },
                 }),
             },
@@ -139,11 +139,11 @@ public partial class PhToolButton : ToggleButton
                         {
                             new BrushTransition {
                                 Property = BackgroundProperty,
-                                Duration = TimeSpan.FromMilliseconds(50),
+                                Duration = TimeSpan.FromMilliseconds(30),
                             },
                             new BrushTransition {
                                 Property = BorderBrushProperty,
-                                Duration = TimeSpan.FromMilliseconds(50),
+                                Duration = TimeSpan.FromMilliseconds(30),
                             },
                         }),
                     }

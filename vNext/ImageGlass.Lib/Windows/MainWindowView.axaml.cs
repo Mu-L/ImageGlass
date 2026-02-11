@@ -304,7 +304,7 @@ public partial class MainWindowView : PhControl
             Dispatcher.UIThread.Post(() =>
             {
                 // set photo to the viewer
-                PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex);
+                PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex, false);
             });
         }
 

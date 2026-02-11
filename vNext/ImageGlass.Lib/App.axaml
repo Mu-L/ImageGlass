@@ -65,8 +65,8 @@
             <Style Selector="^ /template/ Border#PART_LayoutRoot">
                 <Setter Property="Transitions">
                     <Transitions>
-                        <BrushTransition Property="Background" Duration="0:0:0.1" />
-                        <BrushTransition Property="BorderBrush" Duration="0:0:0.1" />
+                        <BrushTransition Property="Background" Duration="0:0:0.05" />
+                        <BrushTransition Property="BorderBrush" Duration="0:0:0.05" />
                     </Transitions>
                 </Setter>
             </Style>
@@ -84,8 +84,8 @@
                 <Setter Property="BorderBrush" Value="{DynamicResource IG_ToolButtonBackgroundPressed}" />
                 <Setter Property="Transitions">
                     <Transitions>
-                        <BrushTransition Property="Background" Duration="0:0:0.05" />
-                        <BrushTransition Property="BorderBrush" Duration="0:0:0.05" />
+                        <BrushTransition Property="Background" Duration="0:0:0.03" />
+                        <BrushTransition Property="BorderBrush" Duration="0:0:0.03" />
                     </Transitions>
                 </Setter>
             </Style>
