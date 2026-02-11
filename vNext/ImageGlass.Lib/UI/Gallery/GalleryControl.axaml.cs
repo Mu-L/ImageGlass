@@ -21,6 +21,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using System.Collections.Generic;
@@ -127,8 +128,18 @@ public partial class GalleryControl : PhControl
     /// </summary>
     public void LoadThumbnail(int index, bool useCache)
     {
-        // TODO:
+        var photo = Core.Photos.Get(index);
+        if (photo is null) return;
+        LoadThumbnail(photo, useCache);
     }
+
+
+    private void LoadThumbnail(Photo photo, bool useCache)
+    {
+        var thumbSize = Core.Config.ThumbnailSize * Dpi;
+
+    }
+
 
 
 }

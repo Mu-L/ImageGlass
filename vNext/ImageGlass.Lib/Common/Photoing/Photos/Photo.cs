@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Media.Imaging;
 using ImageGlass.Common.Types;
 using ImageMagick;
 using SkiaSharp;
@@ -37,7 +38,6 @@ public partial class Photo : DisposableImpl
     private uint _width = 0;
     private uint _height = 0;
 
-    private Task? _taskThumbnail;
     private Task<PhotoMetadata>? _taskMetadata;
     private CancellationTokenSource? _cancelPhotoLoading;
     private readonly Lock _lock = new();
@@ -180,7 +180,6 @@ public partial class Photo : DisposableImpl
             if (field == value) return;
             try
             {
-                DisposeThumbnail();
                 field.Dispose();
                 field = value;
                 _ = OnPropertyChanged();
@@ -198,30 +197,9 @@ public partial class Photo : DisposableImpl
     public CancellationToken? CancelToken => _cancelPhotoLoading?.Token;
 
     /// <summary>
-    /// Gets, sets the thumbnail of photo.
-    /// </summary>
-    public SKBitmap? ThumbnailBitmap
-    {
-        get; set
-        {
-            if (field == value) return;
-            try
-            {
-                field = value;
-                _ = OnPropertyChanged();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"❌❌❌: ThumbnailBitmap setter: {ex.Message}");
-            }
-        }
-    }
-
-
-    /// <summary>
     /// Gets, sets the image source for gallery thumbnail.
     /// </summary>
-    public SKBitmap? GalleryThumbnail
+    public Bitmap? GalleryThumbnail
     {
         get; set
         {
@@ -231,8 +209,6 @@ public partial class Photo : DisposableImpl
             {
                 field = value;
                 _ = OnPropertyChanged();
-                _ = OnPropertyChanged(nameof(IsGalleryThumbnailLoaded));
-                _ = OnPropertyChanged(nameof(IsGalleryThumbnailLoading));
             }
             catch (Exception ex)
             {
@@ -240,11 +216,6 @@ public partial class Photo : DisposableImpl
             }
         }
     }
-
-    public bool IsGalleryThumbnailLoaded => GalleryThumbnail != null;
-
-    public bool IsGalleryThumbnailLoading => !IsGalleryThumbnailLoaded;
-
 
     #endregion // Public Propterties
 
@@ -343,8 +314,6 @@ public partial class Photo : DisposableImpl
 
             Metadata.Dispose();
             Metadata = new();
-
-            DisposeThumbnail();
 
             _cancelPhotoLoading?.Dispose();
             _cancelPhotoLoading = null;
@@ -674,83 +643,6 @@ public partial class Photo : DisposableImpl
         }
 
         return null;
-    }
-
-
-    /// <summary>
-    /// Dispose the thumbnail of photo.
-    /// </summary>
-    public void DisposeThumbnail()
-    {
-        ThumbnailBitmap = null;
-        GalleryThumbnail = null;
-
-        _taskThumbnail = null;
-    }
-
-
-    /// <summary>
-    /// Starts loading thumbnail off-thread.
-    /// </summary>
-    public async Task StartLoadingGalleryThumbnail(double size, bool useCache,
-        IProgress<ThumbnailLoadedEventArgs> progress)
-    {
-        if (useCache)
-        {
-            if (GalleryThumbnail is not null) return;
-
-            // if already started loading, wait for the task completes
-            if (_taskThumbnail is not null
-                && _taskThumbnail.Status != TaskStatus.Canceled
-                && _taskThumbnail.Status != TaskStatus.Faulted)
-            {
-                await _taskThumbnail;
-                return;
-            }
-        }
-        else
-        {
-            DisposeThumbnail();
-        }
-
-        // ensure metadata is loaded
-        var taskMetadata = LoadMetadataAsync(true);
-
-
-        // load thumbnail off-thread
-        var taskThumb = Task.Run(async () =>
-        {
-            var taskId = Guid.NewGuid();
-            _ = _taskRefs.TryAdd(taskId, true);
-
-            // TODO:
-            //SoftwareBitmap? softwareBmp = null;
-
-            //try
-            //{
-            //    // load thumbnail
-            //    using var wicBmp = await Metadata.GetThumbnailAsync(size);
-
-            //    // convert to software bitmap
-            //    if (wicBmp is not null)
-            //    {
-            //        softwareBmp = await wicBmp.ToSoftwareBitmapAsync();
-            //    }
-            //}
-            //catch
-            //{
-            //    softwareBmp?.Dispose();
-            //    softwareBmp = null;
-            //}
-            //finally
-            //{
-            //    progress.Report(new ThumbnailLoadedEventArgs(this, softwareBmp));
-            //    _ = _taskRefs.TryRemove(taskId, out _);
-            //}
-        });
-
-
-        _taskThumbnail = await taskMetadata.ContinueWith(_ => taskThumb);
     }
 
 
