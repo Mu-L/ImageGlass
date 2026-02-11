@@ -23,6 +23,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
 using Avalonia.Threading;
 using ImageGlass.Common.Photoing;
+using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer.Checkerboard;
 using SkiaSharp;
 using System;
@@ -40,14 +41,15 @@ public partial class ViewerControl
 
 
     // drawing image
-    internal SKImage? _imgSource;
-    internal SKImage? _imgRender;
+    internal SKImageRef? _imgSource;
+    internal SKImageRef? _imgRender;
     private SkiaAnimator? _animator;
 
     private RenderTargetBitmap? _bmpCheckerboard;
     private readonly CheckerboardInfo _checkerboard = new();
 
     internal readonly Lock _lock = new();
+
 
 
     #region Public Properties
@@ -342,7 +344,7 @@ public partial class ViewerControl
             _isFirstDraw.Clear();
 
             // cache the proccessed image for next draw
-            _imgRender = img;
+            SKImageRef.Set(ref _imgRender, img, _imgSource);
         }
     }
 

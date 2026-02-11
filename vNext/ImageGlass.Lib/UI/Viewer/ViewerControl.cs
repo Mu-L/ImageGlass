@@ -111,7 +111,7 @@ public partial class ViewerControl : PhControl
     {
         lock (_lock)
         {
-            _imgRender = null;
+            SKImageRef.Set(ref _imgRender, null);
             InvalidateVisual();
         }
     }
@@ -333,11 +333,8 @@ public partial class ViewerControl : PhControl
         lock (_lock)
         {
             // dispose native bitmap
-            _imgSource?.Dispose();
-            _imgSource = null;
-
-            _imgRender?.Dispose();
-            _imgRender = null;
+            SKImageRef.Set(ref _imgSource, null);
+            SKImageRef.Set(ref _imgRender, null);
         }
     }
 
@@ -495,7 +492,7 @@ public partial class ViewerControl : PhControl
             lock (_lock)
             {
                 // set preview source
-                _imgSource = imgPreview;
+                SKImageRef.Set(ref _imgSource, imgPreview);
 
                 var desiredSrcZoomFactor = CalculateZoomFactor(ZoomMode, e.Metadata.Width, e.Metadata.Height);
                 var previewZoomFactor = desiredSrcZoomFactor;
@@ -617,7 +614,7 @@ public partial class ViewerControl : PhControl
                 {
                     // set the source
                     _isFirstDraw.Set();
-                    _imgSource = imgFrame;
+                    SKImageRef.Set(ref _imgSource, imgFrame);
 
 
                     // set animator
@@ -703,7 +700,9 @@ public partial class ViewerControl : PhControl
     {
         // update the frame bitmap
         SourceKind = PhotoSource.Native;
-        _imgSource = _imgRender = sender.GetRenderedFrameBitmap(e.CurrentFrame);
+        var renderedFrame = sender.GetRenderedFrameBitmap(e.CurrentFrame);
+        SKImageRef.Set(ref _imgSource, renderedFrame);
+        SKImageRef.Set(ref _imgRender, renderedFrame, _imgSource);
 
         InvalidateVisual();
     }

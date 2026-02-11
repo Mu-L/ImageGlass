@@ -329,7 +329,7 @@ public partial class ViewerControl
     /// </summary>
     private bool OnSelectionBegin(PointerPoint p)
     {
-        if (_imgSource == null) return false;
+        if (_imgSource?.Image?.IsDisposed() ?? true) return false;
 
         _selection.PointerDownPoint = p.Position;
         _selection.IsLeftButtonPressed = p.Properties.IsLeftButtonPressed;

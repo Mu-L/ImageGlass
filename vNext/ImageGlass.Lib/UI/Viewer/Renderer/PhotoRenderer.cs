@@ -24,6 +24,7 @@ using Avalonia.Skia;
 using Avalonia.Threading;
 using ImageGlass.Common;
 using ImageGlass.Common.Extensions;
+using ImageGlass.Common.Types;
 using SkiaSharp;
 using System;
 using System.Threading;
@@ -70,17 +71,15 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
     private readonly Rect _bounds;
     private readonly Action<SKImage?> _onDrawFirstTime;
+    private readonly Lock _lock;
 
-    private readonly SKImage? _imgSource;
-    private readonly SKImage? _imgRender;
+    private readonly SKImageRef? _imgSource;
+    private readonly SKImageRef? _imgRender;
     private readonly SKRect _srcRect;
     private readonly SKRect _destRect;
     private readonly bool _hasSrcColorProfile;
     private readonly ImageInterpolation _interpolation;
     private readonly bool _isFirstDraw;
-
-    private readonly Lock _lock;
-
 
 
     #region Public Properties
@@ -138,43 +137,61 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
         lock (_lock)
         {
-            var imageRender = _imgRender;
+            SKImageRef.ImageLease? imageLease = null;
+            SKImageRef.ImageLease? srcLease = null;
 
-            if (_isFirstDraw)
+            try
             {
-                // process the original image
-                imageRender = ProcessImageForFirstDrawing(lease.GrContext, _imgSource);
+                SKImage? imageRender;
+
+                if (_isFirstDraw)
+                {
+                    srcLease = _imgSource?.Acquire();
+                    var srcImage = srcLease?.Image;
+                    if (srcImage is null || srcImage.IsDisposed()) return;
+
+                    // process the original image
+                    imageRender = ProcessImageForFirstDrawing(lease.GrContext, srcImage);
 
 
-                // set the image to draw
-                imageRender ??= _imgSource;
+                    // set the image to draw
+                    imageRender ??= srcImage;
 
-                // update the processed image
-                Dispatcher.UIThread.Post(() => _onDrawFirstTime(imageRender), DispatcherPriority.Render);
+                    // update the processed image
+                    Dispatcher.UIThread.Post(() => _onDrawFirstTime(imageRender), DispatcherPriority.Render);
+                }
+                else
+                {
+                    imageLease = _imgRender?.Acquire() ?? _imgSource?.Acquire();
+                    imageRender = imageLease?.Image;
+                }
+
+                if (imageRender is null || imageRender.IsDisposed()) return;
+
+
+                // start drawing image
+                var canvas = lease.SkCanvas;
+                canvas.Save();
+
+                using var paintOptions = new SKPaint
+                {
+                    FilterQuality = (SKFilterQuality)_interpolation,
+                };
+
+                canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
+                canvas.Restore();
+
+
+                if (_isFirstDraw)
+                {
+                    // clear old cache
+                    lease.GrContext?.PurgeResources();
+                }
             }
-
-            // set the image to draw
-            imageRender ??= _imgSource;
-            if (imageRender.IsDisposed()) return;
-
-
-            // start drawing image
-            var canvas = lease.SkCanvas;
-            canvas.Save();
-
-            using var paintOptions = new SKPaint
+            finally
             {
-                FilterQuality = (SKFilterQuality)_interpolation,
-            };
-
-            canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
-            canvas.Restore();
-
-
-            if (_isFirstDraw)
-            {
-                // clear old cache
-                lease.GrContext?.PurgeResources();
+                imageLease?.Dispose();
+                srcLease?.Dispose();
             }
         }
     }
