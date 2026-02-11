@@ -42,6 +42,7 @@
                     IsTabStop="False"
                     Width="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
                     Height="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
+                    IsChecked="{CompiledBinding IsCurrent}"
                     Click="GalleryItem_Click" />
             </DataTemplate>
         </ItemsControl.ItemTemplate>

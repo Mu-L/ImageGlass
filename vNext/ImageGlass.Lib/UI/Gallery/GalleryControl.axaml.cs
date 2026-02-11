@@ -32,9 +32,9 @@ public partial class GalleryControl : PhControl
 {
     public GalleryControlModel VM => (GalleryControlModel)DataContext!;
 
-
     // events
     public event TEventHandler<GalleryItem, GalleryItemClickEventArgs>? ItemClicked;
+
 
 
     #region Public Properties
@@ -64,8 +64,6 @@ public partial class GalleryControl : PhControl
 
 
     #endregion // Public Properties
-
-
 
 
 
@@ -130,6 +128,7 @@ public partial class GalleryControl : PhControl
     {
         var photo = Core.Photos.Get(index);
         if (photo is null) return;
+
         LoadThumbnail(photo, useCache);
     }
 
@@ -138,6 +137,7 @@ public partial class GalleryControl : PhControl
     {
         var thumbSize = Core.Config.ThumbnailSize * Dpi;
 
+        _ = photo.LoadThumbnailAsync(thumbSize, useCache);
     }
 
 

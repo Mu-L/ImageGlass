@@ -45,6 +45,9 @@ public partial class Photo : DisposableImpl
     // track pending tasks
     private ConcurrentDictionary<Guid, bool> _taskRefs = new();
 
+    private CancellationTokenSource? _cancelThumbnailLoading;
+    private readonly SemaphoreSlim _thumbnailLock = new(1, 1);
+
 
 
     #region Public Propterties
@@ -207,8 +210,10 @@ public partial class Photo : DisposableImpl
 
             try
             {
+                var old = field;
                 field = value;
                 _ = OnPropertyChanged();
+                old?.Dispose();
             }
             catch (Exception ex)
             {
@@ -307,6 +312,9 @@ public partial class Photo : DisposableImpl
         // dispose everything
         if (disposeEverything)
         {
+            UnloadThumbnail();
+            _thumbnailLock.Dispose();
+
             if (_taskMetadata is not null)
             {
                 await _taskMetadata;
@@ -676,6 +684,95 @@ public partial class Photo : DisposableImpl
         {
             _ = _taskRefs.TryRemove(taskId, out _);
         }
+    }
+
+
+    /// <summary>
+    /// Loads the gallery thumbnail asynchronously.
+    /// Uses a semaphore to ensure only one load per photo at a time,
+    /// and caches the result on <see cref="GalleryThumbnail"/>.
+    /// </summary>
+    public async Task LoadThumbnailAsync(double thumbSize, bool useCache)
+    {
+        // 1. fast path: use cached thumbnail
+        if (useCache && GalleryThumbnail is not null) return;
+        if (IsDisposed || string.IsNullOrEmpty(FilePath)) return;
+
+        await _thumbnailLock.WaitAsync();
+        try
+        {
+            // 2. double-check after acquiring the lock
+            if (useCache && GalleryThumbnail is not null) return;
+            if (IsDisposed) return;
+
+            // reset cancellation for this load
+            _cancelThumbnailLoading?.Dispose();
+            _cancelThumbnailLoading = new CancellationTokenSource();
+            var token = _cancelThumbnailLoading.Token;
+
+
+            // 3. load metadata if needed
+            await LoadMetadataAsync(true);
+            if (token.IsCancellationRequested) return;
+
+
+            // 4. get thumbnail from platform provider
+            if (Core.PreviewProvider is null) return;
+            using var skThumb = await Task.Run(() => Core.PreviewProvider.GetThumbnailAsync(Metadata, thumbSize, token), token);
+            if (token.IsCancellationRequested || skThumb is null) return;
+
+
+            // 5. convert SKImage to Avalonia Bitmap off-thread
+            var avBitmap = await Task.Run(() =>
+            {
+                using var data = skThumb.Encode(SKEncodedImageFormat.Png, 100);
+                if (data is null) return null;
+
+                using var stream = new MemoryStream(data.ToArray());
+                return new Bitmap(stream);
+            }, token);
+
+            if (token.IsCancellationRequested)
+            {
+                avBitmap?.Dispose();
+                return;
+            }
+
+
+            // 6. update the gallery thumbnail (triggers UI binding update)
+            GalleryThumbnail = avBitmap;
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"❌❌❌ {nameof(LoadThumbnailAsync)}: {ex.Message}");
+        }
+        finally
+        {
+            _thumbnailLock.Release();
+        }
+    }
+
+
+    /// <summary>
+    /// Cancels any in-progress thumbnail loading.
+    /// </summary>
+    public void CancelThumbnailLoading()
+    {
+        _cancelThumbnailLoading?.Cancel();
+    }
+
+
+    /// <summary>
+    /// Cancels pending thumbnail loading and disposes the cached thumbnail.
+    /// </summary>
+    public void UnloadThumbnail()
+    {
+        _cancelThumbnailLoading?.Cancel();
+        _cancelThumbnailLoading?.Dispose();
+        _cancelThumbnailLoading = null;
+
+        GalleryThumbnail = null;
     }
 
 

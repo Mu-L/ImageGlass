@@ -15,6 +15,7 @@
 
         <!--  Gallery Item: Thumbnail Skeleton -->
         <Border Grid.Row="0"
+                IsVisible="{CompiledBinding GalleryThumbnail, Converter={x:Static ObjectConverters.IsNull}}"
                 Background="{DynamicResource IG_BorderNeutralBrush}"
                 CornerRadius="{DynamicResource ControlCornerRadius}">
             <Border.Styles>
@@ -37,7 +38,7 @@
         </Border>
 
 
-        <!--  Gallery Item: Thumbnail Skeleton -->
+        <!--  Gallery Item: Thumbnail Image -->
         <Image Grid.Row="0"
                Stretch="Uniform" 
                Source="{CompiledBinding GalleryThumbnail}" />

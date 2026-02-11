@@ -25,6 +25,7 @@ using ImageGlass.Common.Types;
 using ImageGlass.Common.Windows;
 using ImageGlass.Win32.Common;
 using ImageGlass.Win32.Common.ServiceProviders;
+using System;
 using System.Threading.Tasks;
 
 namespace ImageGlass.Win32.Windows;
@@ -64,7 +65,16 @@ public partial class MainWindow32 : MainWindow
     {
         base.OnClosing(e);
 
+        // Only save config here, do NOT dispose resources yet
         await SaveConfigOnClosingAsync();
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+
+        // Dispose after the window (and its render loop) is fully closed
+        Core.Dispose();
     }
 
 
@@ -132,10 +142,6 @@ public partial class MainWindow32 : MainWindow
 
         // save config to file
         await Core.Config.SaveAsync();
-
-
-        // dispose the global singleton
-        Core.Dispose();
 
 
         //// cleaning

@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia.Interactivity;
+using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 
 namespace ImageGlass.UI;
@@ -29,5 +31,17 @@ public partial class GalleryItem : PhToolButton
     public GalleryItem()
     {
         InitializeComponent();
+    }
+
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
+        if (DataContext is Photo photo)
+        {
+            var dpi = VisualRoot?.RenderScaling ?? 1d;
+            _ = photo.LoadThumbnailAsync(Core.Config.ThumbnailSize * dpi, useCache: true);
+        }
     }
 }
