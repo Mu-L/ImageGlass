@@ -40,7 +40,8 @@
                     Margin="1"
                     IsTabStop="False"
                     Width="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
-                    Height="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}" />
+                    Height="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
+                    Click="GalleryItem_Click" />
             </DataTemplate>
         </ItemsControl.ItemTemplate>
         

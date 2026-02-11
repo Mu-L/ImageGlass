@@ -83,6 +83,7 @@ public partial class MainWindow : PhWindow
         // control events
         _status.Changed += Status_Changed;
         PART_MainView.PART_Toolbar.ItemClicked += PART_Toolbar_ItemClicked;
+        PART_MainView.PART_Gallery.ItemClicked += PART_Gallery_ItemClicked;
     }
 
 
@@ -95,6 +96,7 @@ public partial class MainWindow : PhWindow
         _status.Dispose();
 
         PART_MainView.PART_Toolbar.ItemClicked -= PART_Toolbar_ItemClicked;
+        PART_MainView.PART_Gallery.ItemClicked -= PART_Gallery_ItemClicked;
     }
 
 
@@ -168,13 +170,14 @@ public partial class MainWindow : PhWindow
     }
 
 
+    private void PART_Gallery_ItemClicked(GalleryItem sender, GalleryItemClickEventArgs e)
+    {
+        var photoIndex = Core.Photos.IndexOf(sender.VM.FilePath);
+        Core.API?.IG_ViewByIndex(photoIndex);
+    }
+
+
     #endregion Control Events
-
-
-
-
-
-
 
 
 

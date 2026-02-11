@@ -19,8 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using ImageGlass.Common.Photoing;
+using ImageGlass.Common.Types;
 using System.Collections.Generic;
 
 namespace ImageGlass.UI;
@@ -28,6 +30,10 @@ namespace ImageGlass.UI;
 public partial class GalleryControl : PhControl
 {
     public GalleryControlModel VM => (GalleryControlModel)DataContext!;
+
+
+    // events
+    public event TEventHandler<GalleryItem, GalleryItemClickEventArgs>? ItemClicked;
 
 
     #region Public Properties
@@ -91,4 +97,44 @@ public partial class GalleryControl : PhControl
 
     }
 
+
+    private void GalleryItem_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not GalleryItem itemEl) return;
+        if (itemEl.VM.IsCurrent) return;
+
+        // scroll the clicked item into the view
+        // TODO:
+
+
+        // raise event
+        ItemClicked?.Invoke(itemEl, new GalleryItemClickEventArgs(itemEl.VM));
+    }
+
+
+
+    /// <summary>
+    /// Scrolls the gallery to bring the specified item into view.
+    /// </summary>
+    public void ScrollToItem(int index, bool disableAnimation = true)
+    {
+        // TODO:
+    }
+
+
+    /// <summary>
+    /// Loads the thumbnail.
+    /// </summary>
+    public void LoadThumbnail(int index, bool useCache)
+    {
+        // TODO:
+    }
+
+
+}
+
+
+public class GalleryItemClickEventArgs(Photo vm) : RoutedEventArgs
+{
+    public Photo VM => vm;
 }
