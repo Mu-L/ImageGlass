@@ -21,10 +21,13 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.VisualTree;
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ImageGlass.UI;
 
@@ -102,10 +105,6 @@ public partial class GalleryControl : PhControl
         if (sender is not GalleryItem itemEl) return;
         if (itemEl.VM.IsCurrent) return;
 
-        // scroll the clicked item into the view
-        // TODO:
-
-
         // raise event
         ItemClicked?.Invoke(itemEl, new GalleryItemClickEventArgs(itemEl.VM));
     }
@@ -113,11 +112,44 @@ public partial class GalleryControl : PhControl
 
 
     /// <summary>
-    /// Scrolls the gallery to bring the specified item into view.
+    /// Scrolls the gallery to bring the specified item into the center of the view.
     /// </summary>
     public void ScrollToItem(int index, bool disableAnimation = true)
     {
-        // TODO:
+        var svEl = FindScrollViewer();
+        if (svEl is null || index < 0) return;
+
+        var itemSize = (double)Core.Config.ThumbnailSize;
+        var itemTotalSize = itemSize + 2; // Margin="1" = 1px on each side
+
+        if (Orientation == Orientation.Horizontal)
+        {
+            var itemCenter = 4 + (index * itemTotalSize) + (itemTotalSize / 2); // 4 = Border left padding
+            var target = itemCenter - (svEl.Viewport.Width / 2);
+            var maxOffset = Math.Max(0, svEl.Extent.Width - svEl.Viewport.Width);
+
+            svEl.Offset = new Vector(Math.Clamp(target, 0, maxOffset), svEl.Offset.Y);
+        }
+        else
+        {
+            var itemCenter = 4 + (index * itemTotalSize) + (itemTotalSize / 2); // 4 = Border top padding
+            var target = itemCenter - (svEl.Viewport.Height / 2);
+            var maxOffset = Math.Max(0, svEl.Extent.Height - svEl.Viewport.Height);
+
+            svEl.Offset = new Vector(svEl.Offset.X, Math.Clamp(target, 0, maxOffset));
+        }
+    }
+
+
+    /// <summary>
+    /// Finds the <see cref="ScrollViewer"/> inside the <see cref="ItemsControl"/> template.
+    /// </summary>
+    private ScrollViewer? FindScrollViewer()
+    {
+        return PART_ItemsControl
+            .GetVisualDescendants()
+            .OfType<ScrollViewer>()
+            .FirstOrDefault();
     }
 
 
@@ -129,17 +161,9 @@ public partial class GalleryControl : PhControl
         var photo = Core.Photos.Get(index);
         if (photo is null) return;
 
-        LoadThumbnail(photo, useCache);
-    }
-
-
-    private void LoadThumbnail(Photo photo, bool useCache)
-    {
         var thumbSize = Core.Config.ThumbnailSize * Dpi;
-
         _ = photo.LoadThumbnailAsync(thumbSize, useCache);
     }
-
 
 
 }

@@ -50,6 +50,7 @@ public partial class AppAPIProvider
 
 
     private ViewerControl Viewer => _mainWindow.PART_MainView.PART_Viewer;
+    private GalleryControl Gallery => _mainWindow.PART_MainView.PART_Gallery;
     private MessageControl Message => _mainWindow.PART_MainView.PART_Message;
 
 
@@ -1100,9 +1101,8 @@ public partial class AppAPIProvider
     {
         _ = _mainWindow.PART_MainView.ViewPhotoAsync(Core.Photos.Current, useCache: false);
 
-        // TODO:
-        //// reload thumbnail
-        //Gallery.LoadThumbnail(Core.Photos.CurrentIndex, false);
+        // reload thumbnail
+        Gallery.LoadThumbnail(Core.Photos.CurrentIndex, false);
     }
 
 

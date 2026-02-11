@@ -215,10 +215,6 @@ public partial class MainWindowView : PhControl
 
         Dispatcher.UIThread.Post(async () =>
         {
-            // TODO:
-            //// clear gallery
-            //await Gallery.ClearSourceAsync();
-
             // start loading files
             var initPhoto = Core.Photos.StartLoadingFiles(inputPaths, currentFilePath,
                 new FileSearchOptions()
@@ -274,12 +270,8 @@ public partial class MainWindowView : PhControl
         {
             Dispatcher.UIThread.Post(async () =>
             {
-                // TODO:
-                //// set gallery items source
-                //await Gallery.SetSourceAsync(AP.Photos.Items);
-
-                //// set photo to the viewer
-                //Gallery.ScrollToItem(AP.Photos.CurrentIndex, AP.Photos.Count > 100);
+                // set photo to the viewer
+                PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex, Core.Photos.Count > 100);
             });
         }
     }
@@ -287,8 +279,8 @@ public partial class MainWindowView : PhControl
 
     public async Task ViewPhotoAsync(Photo? photo, bool useCache = true, bool scrollToThumbnail = true)
     {
-        //// clear the current in-app message
-        //_ = _contentEl.ShowMessageAsync(null);
+        // clear the current in-app message
+        _ = PART_Message.ClearAsync();
 
         Core.DisposeClipboardPhoto();
         Core.ImageTransform.Clear();
@@ -307,14 +299,14 @@ public partial class MainWindowView : PhControl
         PART_Viewer.EnableImagePreview = Core.Config.ShowImagePreview;
 
 
-        //if (scrollToThumbnail)
-        //{
-        //    Dispatcher.UIThread.Post(() =>
-        //    {
-        //        // set photo to the viewer
-        //        PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex);
-        //    });
-        //}
+        if (scrollToThumbnail)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                // set photo to the viewer
+                PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex);
+            });
+        }
 
 
         await PART_Viewer.SetPhotoAsync(photo, useCache);
