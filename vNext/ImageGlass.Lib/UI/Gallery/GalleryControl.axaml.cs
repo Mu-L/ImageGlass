@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Layout;
 using ImageGlass.Common.Photoing;
 using System.Collections.Generic;
 
@@ -41,6 +44,18 @@ public partial class GalleryControl : PhControl
         AvaloniaProperty.Register<GalleryControl, IEnumerable<Photo>>(nameof(ItemsSource), []);
 
 
+    /// <summary>
+    /// Gets, sets the layout direction.
+    /// </summary>
+    public Orientation Orientation
+    {
+        get => GetValue(OrientationProperty);
+        set => SetValue(OrientationProperty, value);
+    }
+    public static readonly StyledProperty<Orientation> OrientationProperty =
+        AvaloniaProperty.Register<GalleryControl, Orientation>(nameof(Orientation), Orientation.Horizontal);
+
+
     #endregion // Public Properties
 
 
@@ -53,5 +68,27 @@ public partial class GalleryControl : PhControl
     }
 
 
+
+    private void PART_ScrollViewer_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        if (Orientation == Orientation.Vertical) return;
+        if (sender is not ScrollViewer svEl) return;
+        if (svEl.Extent.Width <= svEl.Viewport.Width) return;
+
+        // 1. Check if the user is scrolling vertically (Mouse Wheel)
+        //    and NOT already scrolling horizontally (Shift + Wheel / Touchpad)
+        if (e.Delta.X == 0 && e.Delta.Y == 0) return;
+
+        // 2. Translate Vertical Delta (Y) to Horizontal Offset (X)
+        // Multiply by 50 for reasonable scroll speed (adjust as needed)
+        var scrollAmount = e.Delta.Y * 50d;
+
+        // Subtract to match natural scroll direction (Wheel Down -> Scroll Right)
+        svEl.Offset = new Vector(svEl.Offset.X - scrollAmount, 0);
+
+        // 3. Mark event as handled to prevent bubbling
+        e.Handled = true;
+
+    }
 
 }

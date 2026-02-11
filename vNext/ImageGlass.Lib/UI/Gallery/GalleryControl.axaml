@@ -13,9 +13,10 @@
         <ItemsControl.Template>
             <ControlTemplate>
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" 
-                              VerticalScrollBarVisibility="Disabled"
-                              IsScrollInertiaEnabled="True">
-                    <Border Padding="4">
+                              VerticalScrollBarVisibility="Auto"
+                              IsScrollInertiaEnabled="True"
+                              PointerWheelChanged="PART_ScrollViewer_PointerWheelChanged">
+                    <Border Padding="4,4,4,8">
 						<ItemsPresenter ItemsPanel="{TemplateBinding ItemsPanel}" />
                     </Border>
                 </ScrollViewer>
@@ -26,8 +27,8 @@
         <!-- GalleryControl: Layout template -->
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-                <VirtualizingStackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Center" />
+                <VirtualizingStackPanel HorizontalAlignment="Center"
+                                        Orientation="{CompiledBinding Orientation, RelativeSource={RelativeSource AncestorType=ui:GalleryControl}}" />
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
 
