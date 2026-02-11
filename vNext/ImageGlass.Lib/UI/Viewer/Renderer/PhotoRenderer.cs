@@ -79,7 +79,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
     private readonly ImageInterpolation _interpolation;
     private readonly bool _isFirstDraw;
 
-    private readonly Lock _lock = new();
+    private readonly Lock _lock;
 
 
 
@@ -96,6 +96,8 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
     public PhotoRenderer(ViewerControl viewer, Action<SKImage?> processFirstDrawFn)
     {
+        _lock = viewer._lock;
+
         lock (_lock)
         {
             _bounds = viewer.Bounds;
@@ -144,10 +146,6 @@ public partial class PhotoRenderer : ICustomDrawOperation
                 imageRender = ProcessImageForFirstDrawing(lease.GrContext, _imgSource);
 
 
-                // clear old cache
-                lease.GrContext?.PurgeResources();
-
-
                 // set the image to draw
                 imageRender ??= _imgSource;
 
@@ -170,8 +168,14 @@ public partial class PhotoRenderer : ICustomDrawOperation
             };
 
             canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
-
             canvas.Restore();
+
+
+            if (_isFirstDraw)
+            {
+                // clear old cache
+                lease.GrContext?.PurgeResources();
+            }
         }
     }
 

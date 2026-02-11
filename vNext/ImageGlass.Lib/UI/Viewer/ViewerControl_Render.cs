@@ -47,8 +47,7 @@ public partial class ViewerControl
     private RenderTargetBitmap? _bmpCheckerboard;
     private readonly CheckerboardInfo _checkerboard = new();
 
-    private readonly Lock _lock = new();
-
+    internal readonly Lock _lock = new();
 
 
     #region Public Properties
