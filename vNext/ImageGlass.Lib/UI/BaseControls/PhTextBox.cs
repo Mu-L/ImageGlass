@@ -26,7 +26,6 @@ using Avalonia.Styling;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
-using ImageGlass.UI.Windowing;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -72,7 +71,7 @@ public partial class PhTextBox : TextBox
         set => SetValue(AcceptValueProperty, value);
     }
     public static readonly StyledProperty<TextBoxAcceptValue> AcceptValueProperty =
-        AvaloniaProperty.Register<ModalWindow, TextBoxAcceptValue>(nameof(AcceptValue), TextBoxAcceptValue.Any);
+        AvaloniaProperty.Register<PhTextBox, TextBoxAcceptValue>(nameof(AcceptValue), TextBoxAcceptValue.Any);
 
 
     /// <summary>
@@ -88,7 +87,7 @@ public partial class PhTextBox : TextBox
         }
     }
     public static readonly StyledProperty<bool> IsRequiredProperty =
-        AvaloniaProperty.Register<ModalWindow, bool>(nameof(IsRequired));
+        AvaloniaProperty.Register<PhTextBox, bool>(nameof(IsRequired));
 
 
     /// <summary>

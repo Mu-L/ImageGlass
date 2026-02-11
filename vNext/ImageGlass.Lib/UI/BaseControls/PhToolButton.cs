@@ -25,7 +25,6 @@ using Avalonia.Media;
 using Avalonia.Styling;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
-using ImageGlass.UI.Windowing;
 using System;
 using System.ComponentModel;
 
@@ -54,7 +53,7 @@ public partial class PhToolButton : ToggleButton
         set => SetValue(IsCheckOnClickProperty, value);
     }
     public static readonly StyledProperty<bool> IsCheckOnClickProperty =
-        AvaloniaProperty.Register<ModalWindow, bool>(nameof(IsCheckOnClick));
+        AvaloniaProperty.Register<PhToolButton, bool>(nameof(IsCheckOnClick));
 
 
     /// <summary>
@@ -66,7 +65,7 @@ public partial class PhToolButton : ToggleButton
         set => SetValue(IsOpenDropdownMenuOnClickProperty, value);
     }
     public static readonly StyledProperty<bool> IsOpenDropdownMenuOnClickProperty =
-        AvaloniaProperty.Register<ModalWindow, bool>(nameof(IsOpenDropdownMenuOnClick));
+        AvaloniaProperty.Register<PhToolButton, bool>(nameof(IsOpenDropdownMenuOnClick));
 
 
     /// <summary>
@@ -86,7 +85,7 @@ public partial class PhToolButton : ToggleButton
         }
     }
     public static readonly StyledProperty<ContextMenu?> DropdownMenuProperty =
-        AvaloniaProperty.Register<ModalWindow, ContextMenu?>(nameof(DropdownMenu));
+        AvaloniaProperty.Register<PhToolButton, ContextMenu?>(nameof(DropdownMenu));
 
 
     #endregion // Public Properties

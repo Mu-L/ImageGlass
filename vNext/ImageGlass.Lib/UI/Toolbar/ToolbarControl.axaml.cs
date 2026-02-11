@@ -24,7 +24,6 @@ using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
-using ImageGlass.UI.Windowing;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -66,7 +65,7 @@ public partial class ToolbarControl : PhControl
         set => SetValue(ItemsSourceProperty, value);
     }
     public static readonly StyledProperty<ObservableCollection<ToolbarItemModel>> ItemsSourceProperty =
-        AvaloniaProperty.Register<ModalWindow, ObservableCollection<ToolbarItemModel>>(nameof(ItemsSource), []);
+        AvaloniaProperty.Register<ToolbarControl, ObservableCollection<ToolbarItemModel>>(nameof(ItemsSource), []);
 
 
     #endregion // Public Properties
