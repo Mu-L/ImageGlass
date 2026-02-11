@@ -6,7 +6,7 @@
              xmlns:cm="using:ImageGlass.Common"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
              x:Class="ImageGlass.UI.GalleryControl"
-             x:DataType="ui:GalleryControlModel">
+             x:DataType="ui:GalleryControl">
     <ItemsControl x:Name="PART_ItemsControl"
                   ItemsSource="{CompiledBinding ItemsSource, RelativeSource={RelativeSource AncestorType=ui:GalleryControl}}">
 

@@ -28,12 +28,15 @@ using ImageGlass.Common.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
 
 public partial class GalleryControl : PhControl
 {
-    public GalleryControlModel VM => (GalleryControlModel)DataContext!;
+    private CancellationTokenSource? _cancelScrollAnimation;
+
 
     // events
     public event TEventHandler<GalleryItem, GalleryItemClickEventArgs>? ItemClicked;
@@ -77,6 +80,8 @@ public partial class GalleryControl : PhControl
 
 
 
+    #region Control Events
+
     private void PART_ScrollViewer_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         if (Orientation == Orientation.Vertical) return;
@@ -109,16 +114,52 @@ public partial class GalleryControl : PhControl
         ItemClicked?.Invoke(itemEl, new GalleryItemClickEventArgs(itemEl.VM));
     }
 
+    #endregion // Control Events
+
+
+
+    #region Control Methods
+
+    /// <summary>
+    /// Loads the thumbnail.
+    /// </summary>
+    public void LoadThumbnail(int index, bool useCache)
+    {
+        var photo = Core.Photos.Get(index);
+        if (photo is null) return;
+
+        var thumbSize = Core.Config.ThumbnailSize * Dpi;
+        _ = photo.LoadThumbnailAsync(thumbSize, useCache);
+    }
 
 
     /// <summary>
     /// Scrolls the gallery to bring the specified item into the center of the view.
     /// </summary>
-    public void ScrollToItem(int index, bool disableAnimation = true)
+    public void ScrollToItem(int index, bool enableAnimation = true)
     {
         var svEl = FindScrollViewer();
         if (svEl is null || index < 0) return;
 
+        var targetOffset = GetCenteredScrollOffset(svEl, index);
+
+        if (enableAnimation)
+        {
+            _ = AnimateScrollAsync(svEl, targetOffset);
+        }
+        else
+        {
+            _cancelScrollAnimation?.Cancel();
+            svEl.Offset = targetOffset;
+        }
+    }
+
+
+    /// <summary>
+    /// Calculates the scroll offset that centers the item at <paramref name="index"/>.
+    /// </summary>
+    private Vector GetCenteredScrollOffset(ScrollViewer svEl, int index)
+    {
         var itemSize = (double)Core.Config.ThumbnailSize;
         var itemTotalSize = itemSize + 2; // Margin="1" = 1px on each side
 
@@ -128,7 +169,7 @@ public partial class GalleryControl : PhControl
             var target = itemCenter - (svEl.Viewport.Width / 2);
             var maxOffset = Math.Max(0, svEl.Extent.Width - svEl.Viewport.Width);
 
-            svEl.Offset = new Vector(Math.Clamp(target, 0, maxOffset), svEl.Offset.Y);
+            return new Vector(Math.Clamp(target, 0, maxOffset), svEl.Offset.Y);
         }
         else
         {
@@ -136,7 +177,39 @@ public partial class GalleryControl : PhControl
             var target = itemCenter - (svEl.Viewport.Height / 2);
             var maxOffset = Math.Max(0, svEl.Extent.Height - svEl.Viewport.Height);
 
-            svEl.Offset = new Vector(svEl.Offset.X, Math.Clamp(target, 0, maxOffset));
+            return new Vector(svEl.Offset.X, Math.Clamp(target, 0, maxOffset));
+        }
+    }
+
+
+    /// <summary>
+    /// Smoothly animates the <see cref="ScrollViewer"/> offset
+    /// from its current position to <paramref name="targetOffset"/> using ease-out cubic.
+    /// </summary>
+    private async Task AnimateScrollAsync(ScrollViewer svEl, Vector targetOffset, int durationMs = 300)
+    {
+        _cancelScrollAnimation?.Cancel();
+        _cancelScrollAnimation = new CancellationTokenSource();
+        var token = _cancelScrollAnimation.Token;
+
+        var startOffset = svEl.Offset;
+        var startTime = Environment.TickCount64;
+
+        while (!token.IsCancellationRequested)
+        {
+            var elapsed = Environment.TickCount64 - startTime;
+            var progress = Math.Clamp((double)elapsed / durationMs, 0, 1);
+
+            // ease-out cubic: f(t) = 1 - (1 - t)^3
+            var eased = 1 - Math.Pow(1 - progress, 3);
+
+            var x = startOffset.X + (targetOffset.X - startOffset.X) * eased;
+            var y = startOffset.Y + (targetOffset.Y - startOffset.Y) * eased;
+            svEl.Offset = new Vector(x, y);
+
+            if (progress >= 1) break;
+
+            await Task.Delay(16, token); // ~60 fps
         }
     }
 
@@ -152,18 +225,7 @@ public partial class GalleryControl : PhControl
             .FirstOrDefault();
     }
 
-
-    /// <summary>
-    /// Loads the thumbnail.
-    /// </summary>
-    public void LoadThumbnail(int index, bool useCache)
-    {
-        var photo = Core.Photos.Get(index);
-        if (photo is null) return;
-
-        var thumbSize = Core.Config.ThumbnailSize * Dpi;
-        _ = photo.LoadThumbnailAsync(thumbSize, useCache);
-    }
+    #endregion // Control Methods
 
 
 }
