@@ -18,15 +18,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Collections;
 using ImageGlass.Common.Types;
-using ImageMagick;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -145,99 +140,6 @@ public partial class PhotoManager : DisposableImpl
         var photo = Select(safeIndex);
 
         return photo;
-    }
-
-
-
-
-
-
-
-
-
-    /// <summary>
-    /// Gets the thumbnail for the photo at the specified index.
-    /// </summary>
-    public async Task<IDisposable?> GetThumbnailAsync(int index, CancellationToken token = default)
-    {
-        // item not found
-        var photo = Get(index);
-        if (photo is null) return null;
-
-        MagickImage? thumbnail = null;
-
-
-        // get thumbnail from the photo
-        thumbnail = await Task.Run(() => photo.Metadata.GetEmbeddedPreview(), token);
-
-
-        if (token.IsCancellationRequested)
-        {
-            thumbnail?.Dispose();
-            thumbnail = null;
-        }
-        else
-        {
-            // check the thumbnail disk cache
-            _ = Task.Run(() => ManageThumbnailsDiskCache(token), token);
-        }
-
-
-        return thumbnail;
-    }
-
-
-    /// <summary>
-    /// Manages the disk cache for thumbnails,
-    /// ensures the total cache size does not exceed the configured maximum size.
-    /// </summary>
-    private void ManageThumbnailsDiskCache(CancellationToken token)
-    {
-
-        // get the thumbnail files
-        var filesDict = Directory
-            .EnumerateFiles("Thumbnails", "*.thumb.jpg")
-            .Select(fp =>
-            {
-                var fi = new FileInfo(fp);
-                var fileSizeInMb = fi.Length / 1024 / 1024;
-                var lastAccessed = fi.LastAccessTimeUtc;
-                var tuple = (fileSizeInMb, lastAccessed);
-
-                return new KeyValuePair<string, (long SizeInMb, DateTime LastAccessed)>(fp, tuple);
-            })
-            .OrderByDescending(i => i.Value.LastAccessed)
-            .ToImmutableDictionary();
-
-
-        // calculate total cache size
-        var totalCacheSizeInMb = filesDict.Values.Sum(i => i.SizeInMb);
-
-
-        // clear old cached files
-        while (totalCacheSizeInMb > _maxThumbnailCacheSizeInMb)
-        {
-            // cancel if requested
-            if (token.IsCancellationRequested) break;
-
-            var oldestFilePath = filesDict.FirstOrDefault().Key;
-
-            // delete the cached file
-            if (!string.IsNullOrWhiteSpace(oldestFilePath))
-            {
-                try
-                {
-                    File.Delete(oldestFilePath);
-                }
-                catch { }
-
-                filesDict.Remove(oldestFilePath);
-            }
-
-            // recalculate total cache size
-            totalCacheSizeInMb = filesDict.Values.Sum(i => i.SizeInMb);
-        }
-
     }
 
 

@@ -136,13 +136,12 @@ public partial class GalleryControl : PhControl
     /// <summary>
     /// Scrolls the gallery to bring the specified item into the center of the view.
     /// </summary>
-    public void ScrollToItem(int index, bool enableAnimation = true)
+    public void ScrollToItem(int index, bool enableAnimation = false)
     {
         var svEl = FindScrollViewer();
         if (svEl is null || index < 0) return;
 
         var targetOffset = GetCenteredScrollOffset(svEl, index);
-
         if (enableAnimation)
         {
             _ = AnimateScrollAsync(svEl, targetOffset);

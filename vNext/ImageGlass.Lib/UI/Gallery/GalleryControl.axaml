@@ -6,16 +6,16 @@
              xmlns:cm="using:ImageGlass.Common"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
              x:Class="ImageGlass.UI.GalleryControl"
-             x:DataType="ui:GalleryControl">
+             x:DataType="ui:GalleryControl"
+             x:Name="Root">
     <ItemsControl x:Name="PART_ItemsControl"
-                  ItemsSource="{CompiledBinding ItemsSource, RelativeSource={RelativeSource AncestorType=ui:GalleryControl}}">
+                  ItemsSource="{CompiledBinding #Root.ItemsSource}">
 
-        <!-- GalleryControl: Control template -->
+                  <!-- GalleryControl: Control template -->
         <ItemsControl.Template>
             <ControlTemplate>
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" 
                               VerticalScrollBarVisibility="Auto"
-                              IsScrollInertiaEnabled="True"
                               PointerWheelChanged="PART_ScrollViewer_PointerWheelChanged">
                     <Border Padding="4,4,4,8">
 						<ItemsPresenter ItemsPanel="{TemplateBinding ItemsPanel}" />

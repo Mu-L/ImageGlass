@@ -19,7 +19,7 @@
                            DataContext="{CompiledBinding ToolbarVM}"
                            Background="{CompiledBinding Background}"
                            ItemsSource="{CompiledBinding ToolbarButtons, Source={x:Static cm:Core.Config}}"
-                           IsVisible="{CompiledBinding ShowToolbar, Source={x:Static cm:Core.Config}}" />
+                           IsContentVisible="{CompiledBinding ShowToolbar, Source={x:Static cm:Core.Config}}" />
 
 
         <!-- Viewer -->
@@ -42,7 +42,7 @@
                            ZIndex="80"
                            Background="{CompiledBinding GalleryBackground}"
                            ItemsSource="{CompiledBinding Items, Source={x:Static cm:Core.Photos}}"
-                           IsVisible="{CompiledBinding ShowGallery, Source={x:Static cm:Core.Config}}" />
+                           IsContentVisible="{CompiledBinding ShowGallery, Source={x:Static cm:Core.Config}}" />
 
     </Grid>
     

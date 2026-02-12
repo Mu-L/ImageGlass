@@ -187,9 +187,7 @@ public partial class AppAPIProvider
                 Description = srcFilePath,
                 Note = Core.Lang[LangId.FrmMain_MnuSave_ConfirmDescription],
                 IsRememberOptionVisible = true,
-
-                // TODO:
-                //Thumbnail = Core.Photos.Current?.ThumbnailBitmap,
+                Thumbnail = Core.Photos.Current?.GalleryThumbnail,
             }, ModalWindowButton.Yes_No);
 
             // update ShowSaveOverrideConfirmation setting
@@ -547,7 +545,7 @@ public partial class AppAPIProvider
             InputValue = newName,
             AcceptValue = TextBoxAcceptValue.FileNameValueOnly,
             ThumbnailIcon = StockIconId.Rename,
-            //Thumbnail = Core.Photos.Current?.ThumbnailBitmap, // TODO:
+            Thumbnail = Core.Photos.Current?.GalleryThumbnail,
         });
 
         if (result.ExitCode != DialogExitCode.OK || string.IsNullOrWhiteSpace(result.InputValue)) return;
@@ -641,7 +639,7 @@ public partial class AppAPIProvider
                 """,
                 IsRememberOptionVisible = true,
                 ThumbnailIcon = thumbnailIcon,
-                //Thumbnail = Core.Photos.Current?.ThumbnailBitmap, // TODO
+                Thumbnail = Core.Photos.Current?.GalleryThumbnail,
             }, ModalWindowButton.Yes_No);
 
             // update remember confirm setting
@@ -1687,9 +1685,7 @@ public partial class AppAPIProvider
 
         if (enabled.Value)
         {
-            // TODO:
-            //await Gallery.WaitForLayoutAsync();
-            //Gallery.ScrollToItem(Core.Photos.CurrentIndex);
+            Gallery.ScrollToItem(Core.Photos.CurrentIndex);
         }
 
         // TODO: update window fit
