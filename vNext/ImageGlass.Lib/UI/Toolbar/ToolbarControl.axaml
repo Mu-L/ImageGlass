@@ -34,7 +34,7 @@
                 <ui:ToolbarButton x:Name="PART_BtnOverflowMenu"
                         VerticalAlignment="Stretch"
                         VerticalContentAlignment="Bottom"
-                        IsTabStop="False"
+                        Focusable="False"
                         IsOpenDropdownMenuOnClick="True"
                         DataContext="{CompiledBinding ButtonOverflowVM}"
                         DropdownOpened="PART_BtnOverflowMenu_DropdownOpened">
@@ -72,7 +72,7 @@
                 <!--  Main Menu button  -->
                 <ui:ToolbarButton x:Name="PART_BtnMainMenu"
                                   IsOpenDropdownMenuOnClick="True"
-                                  IsTabStop="False"
+                                  Focusable="False"
                                   DataContext="{CompiledBinding ButtonMenuVM}"
                                   DropdownOpened="PART_BtnMainMenu_DropdownOpened">
                     <ui:ToolbarButton.DropdownMenu>

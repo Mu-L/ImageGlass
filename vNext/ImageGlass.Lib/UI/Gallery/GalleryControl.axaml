@@ -40,10 +40,119 @@
                 <ui:GalleryItem
                     Margin="1"
                     IsTabStop="False"
+                    Focusable="False"
+                    ToolTip.Placement="Top"
+                    ToolTip.VerticalOffset="10"
                     Width="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
                     Height="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
                     IsChecked="{CompiledBinding IsCurrent}"
-                    Click="GalleryItem_Click" />
+                    Click="GalleryItem_Click">
+                    
+                    <ToolTip.Tip>
+                        <StackPanel>
+                            <!--  File Name (Size)  -->
+                            <Grid ColumnDefinitions="*, Auto"
+                                  Margin="0,0,0,4"
+                                  ColumnSpacing="4"
+                                  TextElement.FontSize="14"
+                                  TextElement.FontWeight="Bold">
+                                <TextBlock Grid.Column="0"
+                                           Foreground="{DynamicResource SystemAccentColor}"
+                                           Text="{CompiledBinding Metadata.FileName}"
+                                           TextWrapping="Wrap" />
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBlock Text="(" />
+                                    <TextBlock Text="{CompiledBinding Metadata.OriginalWidth}" />
+                                    <TextBlock Text="×" />
+                                    <TextBlock Text="{CompiledBinding Metadata.OriginalHeight}" />
+                                    <TextBlock Text=")" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!--  Dir Path  -->
+                            <TextBlock
+                                Margin="0,0,0,4"
+                                Text="{CompiledBinding DirPath}"
+                                TextWrapping="Wrap" />
+
+
+                            <!--  Metadata  -->
+                            <Border Margin="0,4,0,0"
+                                    Padding="0,4,0,0"
+                                    BorderBrush="{DynamicResource IG_BorderNeutralBrush}"
+                                    BorderThickness="0,1,0,0">
+                                <StackPanel Orientation="Vertical">
+                                    <!--  Frame Count  -->
+                                    <StackPanel Orientation="Horizontal"
+                                                IsVisible="{CompiledBinding Metadata.FrameCountFormatted, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=''}">
+                                        <ui:PhTextBlock LangKey="_Metadata_FrameCount" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{CompiledBinding Metadata.FrameCountFormatted}" />
+                                    </StackPanel>
+
+                                    <!--  File Size  -->
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:PhTextBlock LangKey="_Metadata_FileSize" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{CompiledBinding Metadata.FileSizeFormatted}" />
+                                    </StackPanel>
+
+                                    <!--  Date Modified  -->
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:PhTextBlock LangKey="_Metadata_FileLastWriteTime" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{CompiledBinding Metadata.FileLastWriteTimeFormatted}" />
+                                    </StackPanel>
+
+                                    <!--  Color Space  -->
+                                    <StackPanel Orientation="Horizontal"
+                                                IsVisible="{CompiledBinding Metadata.ColorSpace, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=Undefined}">
+                                        <ui:PhTextBlock LangKey="_Metadata_ColorSpace" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{CompiledBinding Metadata.ColorSpace}" />
+                                    </StackPanel>
+
+                                    <!--  Color Profile  -->
+                                    <StackPanel Orientation="Horizontal"
+                                                IsVisible="{CompiledBinding Metadata.ColorProfileName, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=''}">
+                                        <ui:PhTextBlock LangKey="_Metadata_ColorProfile" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{CompiledBinding Metadata.ColorProfileName}" />
+                                    </StackPanel>
+
+
+                                    <!--  EXIF: DateTimeOriginal  -->
+                                    <StackPanel Orientation="Horizontal"
+                                                IsVisible="{CompiledBinding Metadata.ExifDateTimeOriginalFormatted, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=''}">
+                                        <ui:PhTextBlock LangKey="_Metadata_ExifDateTimeOriginal" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{CompiledBinding Metadata.ExifDateTimeOriginalFormatted}" />
+                                    </StackPanel>
+
+                                    <!--  EXIF: DateTime  -->
+                                    <StackPanel Orientation="Horizontal"
+                                                IsVisible="{CompiledBinding Metadata.ExifDateTimeFormatted, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=''}">
+                                        <ui:PhTextBlock LangKey="_Metadata_ExifDateTime" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{CompiledBinding Metadata.ExifDateTimeFormatted}" />
+                                    </StackPanel>
+
+                                    <!--  EXIF: Rating  -->
+                                    <StackPanel Orientation="Horizontal"
+                                                IsVisible="{CompiledBinding Metadata.ExifRatingFormatted, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter=''}">
+                                        <ui:PhTextBlock LangKey="_Metadata_ExifRatingPercent" />
+                                        <TextBlock Margin="0,0,2,0" Text=":" />
+                                        <TextBlock Text="{CompiledBinding Metadata.ExifRatingFormatted}" />
+                                    </StackPanel>
+
+                                </StackPanel>
+                            </Border>
+
+                        </StackPanel>
+                    </ToolTip.Tip>
+                
+                </ui:GalleryItem>
             </DataTemplate>
         </ItemsControl.ItemTemplate>
         

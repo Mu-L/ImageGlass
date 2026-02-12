@@ -107,6 +107,13 @@ public partial class Photo : DisposableImpl
         }
     }
 
+
+    /// <summary>
+    /// Checks if this photo is a clipboard photo.
+    /// </summary>
+    public bool IsClipboard => string.IsNullOrEmpty(FilePath);
+
+
     /// <summary>
     /// Gets file path of the photo. E.g. <c>"C:\Album\My photo.png"</c>.
     /// </summary>
@@ -119,6 +126,7 @@ public partial class Photo : DisposableImpl
                 Metadata.FilePath = value;
 
                 OnPropertyChanged(nameof(FilePath));
+                OnPropertyChanged(nameof(DirPath));
                 OnPropertyChanged(nameof(Metadata));
 
                 OnPropertyChanged(nameof(IsClipboard));
@@ -131,9 +139,9 @@ public partial class Photo : DisposableImpl
     }
 
     /// <summary>
-    /// Checks if this photo is a clipboard photo.
+    /// Gets original dir path. E.g: <c>"C:\Album"</c>.
     /// </summary>
-    public bool IsClipboard => string.IsNullOrEmpty(FilePath);
+    public string DirPath => Path.GetDirectoryName(FilePath) ?? string.Empty;
 
     /// <summary>
     /// Gets original file extension. E.g: <c>".png"</c>.
