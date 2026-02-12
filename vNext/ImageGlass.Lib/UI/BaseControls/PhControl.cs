@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using ImageGlass.Common;
 using System;
 
@@ -28,7 +29,40 @@ public partial class PhControl : ContentControl
 {
     protected override Type StyleKeyOverride => typeof(ContentControl);
 
+
+    #region Public Properties
+
+    /// <summary>
+    /// Gets the DPI scale value.
+    /// </summary>
     public double Dpi => VisualRoot?.RenderScaling ?? 1d;
+
+
+    /// <summary>
+    /// Gets, sets the visibility.
+    /// </summary>
+    public bool IsContentVisible
+    {
+        get => GetValue(IsContentVisibleProperty);
+        set => SetValue(IsContentVisibleProperty, value);
+    }
+    public static readonly StyledProperty<bool> IsContentVisibleProperty =
+        AvaloniaProperty.Register<PhControl, bool>(nameof(IsContentVisible), true,
+            coerce: (sender, value) =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    var control = (PhControl)sender;
+                    if (control.Content is Control contentEl)
+                    {
+                        contentEl.IsVisible = value;
+                    }
+                });
+
+                return value;
+            });
+
+    #endregion // Public Properties
 
 
 
