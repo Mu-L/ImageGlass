@@ -699,10 +699,14 @@ public partial class ViewerControl : PhControl
     private void Animator_FrameChanged(AnimatorImpl sender, AnimatorFrameChangedEventArgs e)
     {
         // update the frame bitmap
-        SourceKind = PhotoSource.Native;
         var renderedFrame = sender.GetRenderedFrameBitmap(e.CurrentFrame);
-        SKImageRef.Set(ref _imgSource, renderedFrame);
-        SKImageRef.Set(ref _imgRender, renderedFrame, _imgSource);
+
+        lock (_lock)
+        {
+            SourceKind = PhotoSource.Native;
+            SKImageRef.Set(ref _imgSource, renderedFrame);
+            SKImageRef.Set(ref _imgRender, renderedFrame, _imgSource);
+        }
 
         InvalidateVisual();
     }

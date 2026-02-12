@@ -104,6 +104,11 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
             _imgSource = viewer._imgSource;
             _imgRender = viewer._imgRender;
+
+            // keep images alive until this renderer is disposed
+            _imgSource?.KeepAlive();
+            _imgRender?.KeepAlive();
+
             _srcRect = viewer.SrcRect.ToSKRect();
             _destRect = viewer.DestRect.ToSKRect();
             _interpolation = viewer.CurrentInterpolation;
@@ -117,7 +122,11 @@ public partial class PhotoRenderer : ICustomDrawOperation
     #region Interface Methods
 
 
-    protected virtual void OnDisposing() { }
+    protected virtual void OnDisposing()
+    {
+        _imgSource?.RequestDispose();
+        _imgRender?.RequestDispose();
+    }
     public bool Equals(ICustomDrawOperation? other) => false;
     public bool HitTest(Point p) => true;
 

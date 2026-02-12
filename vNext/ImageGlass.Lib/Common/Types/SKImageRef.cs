@@ -50,7 +50,7 @@ public sealed class SKImageRef
     /// <summary>
     /// Adds an owner reference to keep the image alive.
     /// </summary>
-    public void AddOwnerRef()
+    public void KeepAlive()
     {
         // No-op if the image is already cleared.
         if (_image is null) return;
@@ -160,7 +160,7 @@ public sealed class SKImageRef
         // Reuse a matching shared reference.
         if (shareFrom is not null && ReferenceEquals(shareFrom.Image, newImg))
         {
-            shareFrom.AddOwnerRef();
+            shareFrom.KeepAlive();
             srcImg = shareFrom;
             return;
         }
