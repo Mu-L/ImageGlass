@@ -55,7 +55,7 @@ public partial class AppAPIProvider
         // Navigation
         { API.IG_ViewNext,              PhCommands.Create(IG_ViewNext) },
         { API.IG_ViewPrevious,          PhCommands.Create(IG_ViewPrevious) },
-        { API.IG_Goto,                  PhCommands.Create(IG_GoTo) },
+        { API.IG_Goto,                  PhCommands.Create(IG_GoToAsync) },
         { API.IG_GotoFirst,             PhCommands.Create(IG_GoToFirst) },
         { API.IG_GotoLast,              PhCommands.Create(IG_GoToLast) },
 
@@ -64,7 +64,7 @@ public partial class AppAPIProvider
 
 
         // Zoom
-        { API.IG_CustomZoom,            PhCommands.Create(IG_CustomZoom) },
+        { API.IG_CustomZoom,            PhCommands.Create(IG_CustomZoomAsync) },
         { API.IG_SetZoom,               PhCommands.Create(IG_SetZoom) },
         { API.IG_ZoomIn,                PhCommands.Create(IG_ZoomIn) },
         { API.IG_ZoomOut,               PhCommands.Create(IG_ZoomOut) },

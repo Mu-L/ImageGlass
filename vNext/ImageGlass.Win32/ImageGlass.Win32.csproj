@@ -21,7 +21,7 @@
   <PropertyGroup Label="Avalonia">
     <AvaloniaUseCompiledBindingsByDefault>True</AvaloniaUseCompiledBindingsByDefault>
     <AvaloniaNameGeneratorDefaultFieldModifier>Public</AvaloniaNameGeneratorDefaultFieldModifier>
-    <FileVersion>10.0.0.211</FileVersion>
+    <FileVersion>10.0.0.212</FileVersion>
   </PropertyGroup>
   
   
@@ -73,9 +73,5 @@
     <None Update="NativeMethods.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="_UI\" />
   </ItemGroup>
 </Project>

@@ -5,12 +5,14 @@
         xmlns:uiw="using:ImageGlass.UI.Windowing"
         xmlns:wv="using:ImageGlass.Common.Windows"
         xmlns:vm="using:ImageGlass.ViewModels"
+        xmlns:cm="using:ImageGlass.Common"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ImageGlass.Common.Windows.MainWindow"
         x:DataType="vm:MainWindowModel"
         BackdropStyle="{CompiledBinding Config.WindowBackdrop}"
         IsFrameless="{CompiledBinding Config.EnableFrameless}"
-        Title="{CompiledBinding Title}">
+        Title="{CompiledBinding Title}"
+        Topmost="{CompiledBinding Config.EnableWindowTopMost}">
 
   <wv:MainWindowView x:Name="PART_MainView" DataContext="{CompiledBinding .}" />
 

@@ -305,7 +305,7 @@ public partial class AppAPIProvider
         //var hasSrcPath = !string.IsNullOrEmpty(Core.Photos.CurrentFilePath);
         //Exception? error = null;
 
-        _ = Message.ShowAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Saving]);
+        //_ = Message.ShowAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Saving]);
 
 
         //// 1. save photo
@@ -471,7 +471,6 @@ public partial class AppAPIProvider
     {
         if (Core.ShareProvider is null) return;
 
-        // TODO:
         var filePath = Core.Photos.CurrentFilePath;
 
         // print clipboard image
@@ -765,14 +764,6 @@ public partial class AppAPIProvider
     /// <summary>
     /// Shows an input dialog, and opens the user-input photo.
     /// </summary>
-    public void IG_GoTo()
-    {
-        _ = IG_GoToAsync();
-    }
-
-    /// <summary>
-    /// Shows an input dialog, and opens the user-input photo.
-    /// </summary>
     public async Task IG_GoToAsync()
     {
         if (Core.Photos.Count == 0) return;
@@ -824,14 +815,6 @@ public partial class AppAPIProvider
 
 
     #region Zoom APIs
-
-    /// <summary>
-    /// Shows input dialog for custom zoom.
-    /// </summary>
-    public void IG_CustomZoom()
-    {
-        _ = IG_CustomZoomAsync();
-    }
 
     /// <summary>
     /// Shows input dialog for custom zoom.
@@ -908,7 +891,7 @@ public partial class AppAPIProvider
     /// <summary>
     /// Sets the zoom mode value.
     /// </summary>
-    public void IG_SetZoomMode(ZoomMode mode)
+    public static void IG_SetZoomMode(ZoomMode mode)
     {
         Core.Config.ZoomMode = mode;
     }
@@ -1119,35 +1102,35 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_UnloadAsync()
     {
-        //var args = new PhotoUnloadedEventArgs()
-        //{
-        //    IsClipboardPhoto = Core.ClipboardImage is not null,
-        //    Index = Core.Photos.CurrentIndex,
-        //    FilePath = Core.Photos.CurrentFilePath,
-        //};
+        var args = new PhotoUnloadedEventArgs()
+        {
+            IsClipboardPhoto = Core.ClipboardImage is not null,
+            Index = Core.Photos.CurrentIndex,
+            FilePath = Core.Photos.CurrentFilePath,
+        };
 
 
-        //// 1. unload clipboard photo
-        //if (args.IsClipboardPhoto)
-        //{
-        //    await LoadClipboardPhotoAsync(null);
+        // 1. unload clipboard photo
+        if (args.IsClipboardPhoto)
+        {
+            await LoadClipboardPhotoAsync(null);
 
-        //    // show the current photo in the list
-        //    await ViewPhotoAsync(Core.Photos.Current);
-        //}
+            // show the current photo in the list
+            await _mainWindow.PART_MainView.ViewPhotoAsync(Core.Photos.Current);
+        }
 
-        //// 2. unload photo from the list
-        //else
-        //{
-        //    // cancel loading the current image
-        //    Core.Photos.Current?.CancelLoading();
+        // 2. unload photo from the list
+        else
+        {
+            // cancel loading the current image
+            Core.Photos.Current?.CancelLoading();
 
-        //    await ViewPhotoAsync(null, false);
-        //    Core.Photos.Current?.Unload();
-        //}
+            await _mainWindow.PART_MainView.ViewPhotoAsync(null, false);
+            Core.Photos.Current?.Unload();
+        }
 
-        //// raise unloaded event
-        //Core.OnPhotoUnloaded(args);
+        // raise unloaded event
+        Core.OnPhotoUnloaded(args);
     }
 
 
@@ -1706,7 +1689,7 @@ public partial class AppAPIProvider
     /// <summary>
     /// Toggles the viewer's checkerboard mode.
     /// </summary>
-    public void IG_ToggleCheckerboard(CheckerboardType? mode = null)
+    public static void IG_ToggleCheckerboard(CheckerboardType? mode = null)
     {
         var wantedMode = Core.Config.CheckerboardMode;
 
