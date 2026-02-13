@@ -165,6 +165,47 @@ public static partial class SkiaCodec
 
 
     /// <summary>
+    /// Loads a thumbnail using native scaled decoding.
+    /// For JPEG, this uses libjpeg-turbo's IDCT scaling to decode at
+    /// a reduced resolution (1/2, 1/4, 1/8) without processing the full image data.
+    /// </summary>
+    public static SKImage? LoadThumbnail(string filePath, int maxDimension)
+    {
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) return null;
+
+        try
+        {
+            using var codec = SKCodec.Create(filePath);
+            if (codec is null) return null;
+
+            var origW = codec.Info.Width;
+            var origH = codec.Info.Height;
+            if (origW <= 0 || origH <= 0) return null;
+
+            // calculate the scale needed to fit within maxDimension
+            var scale = Math.Min((float)maxDimension / origW, (float)maxDimension / origH);
+            scale = Math.Min(scale, 1f); // don't upscale
+
+            // get the native scaled dimensions (JPEG supports 1/2, 1/4, 1/8 natively)
+            var scaledSize = codec.GetScaledDimensions(scale);
+
+            var info = new SKImageInfo(scaledSize.Width, scaledSize.Height,
+                SKColorType.Bgra8888, SKAlphaType.Premul);
+            using var bmp = new SKBitmap(info);
+
+            var result = codec.GetPixels(info, bmp.GetPixels());
+            if (result is not SKCodecResult.Success and not SKCodecResult.IncompleteInput)
+            {
+                return null;
+            }
+
+            return ConvertToSKImage(bmp);
+        }
+        catch { return null; }
+    }
+
+
+    /// <summary>
     /// Saves photo to file using Magick codec.
     /// </summary>
     /// <returns><c>true</c> if file is saved.</returns>
@@ -444,6 +485,7 @@ public static partial class SkiaCodec
 
         return metadataList;
     }
+
 
 
 }

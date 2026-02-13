@@ -33,25 +33,35 @@ public class Win32PhotoPreviewProvider : IPhotoPreviewProvider
     /// </summary>
     public async Task<SKImage?> GetPreviewAsync(PhotoMetadata meta, double? minHeight, CancellationToken token = default)
     {
-        var previewHeight = minHeight ?? double.MinValue;
+        var size = (int)(minHeight ?? double.MinValue);
 
-        // 1. get thumbnail from Shell first
-        var imgThumbnail = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath,
-            (int)previewHeight, (int)previewHeight), token);
+        // 1. fast path: try Shell cache only (instant, no decoding)
+        var imgPreview = ShellThumbnailApi.GetThumbnail(meta.FilePath, size, size, true);
+        if (imgPreview is not null) return imgPreview;
 
 
-        // 2. try to get embedded preview
-        if (imgThumbnail is null)
+        // 2. fast path: native scaled decode via SkiaSharp
+        imgPreview = await Task.Run(() => SkiaCodec.LoadThumbnail(meta.FilePath, size), token)
+            .ConfigureAwait(false);
+        if (imgPreview is not null) return imgPreview;
+
+
+        // 3. try getting thumbnail from Shell
+        imgPreview = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath, size, size, false))
+            .ConfigureAwait(false);
+        if (imgPreview is not null) return imgPreview;
+
+
+        // 4. try embedded EXIF preview
+        using var thumbM = meta.GetEmbeddedPreview();
+        if (thumbM is not null && thumbM.Height >= minHeight)
         {
-            using var thumbM = meta.GetEmbeddedPreview();
-
-            if (thumbM is not null && thumbM.Height >= previewHeight)
-            {
-                imgThumbnail = SkiaCodec.ConvertFromMagick(thumbM);
-            }
+            imgPreview = SkiaCodec.ConvertFromMagick(thumbM);
+            if (imgPreview is not null) return imgPreview;
         }
 
-        return imgThumbnail;
+
+        return null;
     }
 
 
@@ -60,12 +70,14 @@ public class Win32PhotoPreviewProvider : IPhotoPreviewProvider
     /// </summary>
     public async Task<SKImage?> GetThumbnailAsync(PhotoMetadata meta, double minHeight, CancellationToken token = default)
     {
-        // 1. try to get thumbnail from the Shell & embedded thumbnail
-        var imgPreview = await GetPreviewAsync(meta, minHeight, default);
+        var size = (int)minHeight;
+
+        // 1. fast path: try to get the quick preview
+        var imgPreview = await GetPreviewAsync(meta, size, token);
         if (imgPreview is not null) return imgPreview;
 
 
-        // 2. use ImageMagick to decode the unsupported formats, skip for those larger than 3000px
+        // 2. slow path: use ImageMagick for unsupported formats, skip for those larger than 3000px
         using var imgM = await MagickCodec.QuickDecodeAsync(meta.FilePath, 0, 0, 0, 3000, token);
         imgPreview = SkiaCodec.ConvertFromMagick(imgM);
 

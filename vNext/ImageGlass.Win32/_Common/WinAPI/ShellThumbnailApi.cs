@@ -19,9 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Common.Photoing;
 using SkiaSharp;
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
@@ -37,40 +35,41 @@ public static class ShellThumbnailApi
     /// <summary>
     /// Gets Shell thumbnail from file.
     /// </summary>
-    public static SKImage? GetThumbnail(string filePath, int width, int height)
+    public static SKImage? GetThumbnail(string filePath, int width, int height, bool useCacheOnly)
     {
         if (!File.Exists(filePath)) return null;
 
-        SKImage? imgThumbnail = null;
-        HGDIOBJ? bmpObj = null;
-
         try
         {
-            // get thumbnail HBitmap
-            using var hBitmap = GetThumbnailHBitmap(filePath, width, height,
-                SIIGBF.SIIGBF_THUMBNAILONLY | SIIGBF.SIIGBF_BIGGERSIZEOK);
-            if (hBitmap is null) return null;
+            var flags = SIIGBF.SIIGBF_THUMBNAILONLY | SIIGBF.SIIGBF_BIGGERSIZEOK;
 
-            // convert to SKBitmap
-            imgThumbnail = ConvertHBitmapToSKBitmap(hBitmap);
-        }
-        catch (Exception ex)
-        {
-            if (ex is not COMException)
+            // 1. try to get cached thumbnail first
+            if (useCacheOnly)
             {
-                Debug.WriteLine($"⚠️⚠️⚠️ {nameof(GetThumbnail)}: {ex.Message}");
-            }
-        }
-        finally
-        {
-            // delete HBitmap to avoid memory leaks
-            if (bmpObj is not null)
-            {
-                PInvoke.DeleteObject(bmpObj.Value);
-            }
-        }
+                using var hBitmapCached = GetThumbnailHBitmap(filePath, width, height,
+                    flags | SIIGBF.SIIGBF_INCACHEONLY);
 
-        return imgThumbnail;
+                if (hBitmapCached is not null)
+                {
+                    return ConvertHBitmapToSKBitmap(hBitmapCached);
+                }
+            }
+
+            // 2. get the uncached thumbnail
+            else
+            {
+                using var hBitmap = GetThumbnailHBitmap(filePath, width, height, flags);
+
+                if (hBitmap is not null)
+                {
+                    return ConvertHBitmapToSKBitmap(hBitmap);
+                }
+            }
+
+        }
+        catch { }
+
+        return null;
     }
 
 
