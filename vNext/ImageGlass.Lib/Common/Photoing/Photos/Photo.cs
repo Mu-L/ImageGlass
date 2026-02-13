@@ -514,7 +514,7 @@ public partial class Photo : DisposableImpl
         try
         {
             // reset dispose status
-            IsDisposed = false;
+            _isDisposed.Value = false;
             State = PhotoLoadingState.None;
             Error = null;
             ReadOptions = newOptions ?? ReadOptions;

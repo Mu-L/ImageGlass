@@ -31,10 +31,13 @@ public partial class DisposableImpl : PhReactive, IDisposable
 {
     #region IDisposable Disposing
 
+    protected InterlockedBool _isDisposed = new(false);
+
+
     /// <summary>
     /// Gets a value indicating whether the object has been disposed.
     /// </summary>
-    public bool IsDisposed { get; protected set; } = false;
+    public bool IsDisposed => _isDisposed.Value;
 
     protected virtual void Dispose(bool disposing)
     {
@@ -50,7 +53,7 @@ public partial class DisposableImpl : PhReactive, IDisposable
         }
 
         // Free any unmanaged objects here.
-        IsDisposed = true;
+        _isDisposed.Value = true;
     }
 
     public virtual void Dispose()
