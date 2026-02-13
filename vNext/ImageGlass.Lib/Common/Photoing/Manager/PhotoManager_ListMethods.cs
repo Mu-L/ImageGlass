@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -40,24 +41,29 @@ public partial class PhotoManager
     public void Add(IEnumerable<string> filePaths, int index = -1)
     {
         var addedIndex = index;
-        var newItems = filePaths.Select(path => new Photo(path));
+        var newItems = filePaths.Select(path => new Photo(path)).ToList();
 
         if (index < 0)
         {
             addedIndex = (int)Count;
 
             Items.AddRange(newItems);
+
+            // only index the newly appended items
+            for (int i = addedIndex; i < Count; i++)
+            {
+                _dict[Items[i].FilePath] = i;
+            }
         }
         else
         {
             Items.InsertRange(index, newItems);
-        }
 
-        // update path dictionary
-        for (int i = addedIndex; i < Count; i++)
-        {
-            var item = Items[i];
-            _dict.AddOrUpdate(item.FilePath, i, (fIndex, oldValue) => i);
+            // re-index from insertion point (existing items shifted)
+            for (int i = addedIndex; i < Count; i++)
+            {
+                _dict[Items[i].FilePath] = i;
+            }
         }
 
         _ = OnPropertyChanged(nameof(Count));
@@ -161,10 +167,15 @@ public partial class PhotoManager
         var photo = Get(index);
         if (photo is null) return;
 
+        var oldFilePath = photo.FilePath;
         photo.FilePath = filePath;
 
-        _dict.Remove(filePath, out _);
-        _dict.AddOrUpdate(filePath, index, (fIndex, oldValue) => index);
+        // remove the old path entry, then add the new one
+        if (!string.Equals(oldFilePath, filePath, StringComparison.OrdinalIgnoreCase))
+        {
+            _dict.TryRemove(oldFilePath, out _);
+        }
+        _dict[filePath] = index;
 
         if (index == CurrentIndex)
         {

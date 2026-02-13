@@ -21,7 +21,6 @@ using ImageGlass.Common.Types;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -33,10 +32,6 @@ public partial class PhotoManager : DisposableImpl
     // photo list
     protected AvaloniaList<Photo> _items = [];
     protected readonly ConcurrentDictionary<string, int> _dict = new(StringComparer.OrdinalIgnoreCase);
-
-    // thumbnail
-    protected CancellationTokenSource? _tokenThumbnail;
-    protected readonly long _maxThumbnailCacheSizeInMb = 100; // 100MB
 
 
 
@@ -117,10 +112,6 @@ public partial class PhotoManager : DisposableImpl
         base.OnDisposing();
 
         Clear();
-
-        _tokenThumbnail?.Cancel();
-        _tokenThumbnail?.Dispose();
-        _tokenThumbnail = null;
     }
 
     #endregion // Abstract / Virtual functions
