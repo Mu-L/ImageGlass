@@ -45,9 +45,18 @@ public partial class Photo : DisposableImpl
 
     // track pending tasks
     private ConcurrentDictionary<Guid, bool> _taskRefs = new();
-
     private CancellationTokenSource? _cancelThumbnailLoading;
+
+    /// <summary>
+    /// Prevents duplicate concurrent loads of the same photo's thumbnail.
+    /// </summary>
     private readonly SemaphoreSlim _thumbnailLock = new(1, 1);
+
+    /// <summary>
+    /// Limits how many different Photo instances
+    /// load thumbnails concurrently across the entire app.
+    /// </summary>
+    private static readonly SemaphoreSlim _thumbnailThrottleLock = new(4, 4);
 
 
 
@@ -532,8 +541,9 @@ public partial class Photo : DisposableImpl
             // cancel if requested
             if (token.IsCancellationRequested) return;
 
-            // decode the photo off-thread
-            Error = await Task.Run(async () =>
+            // decode the photo on a dedicated thread to avoid thread pool starvation
+            // (thumbnail loading can saturate the thread pool when OS thumbnail cache is disabled)
+            Error = await Task.Factory.StartNew(async () =>
             {
                 try
                 {
@@ -544,7 +554,7 @@ public partial class Photo : DisposableImpl
                 {
                     return ex;
                 }
-            }, token);
+            }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
 
             // cancel if requested
             if (token.IsCancellationRequested) return;
@@ -707,51 +717,67 @@ public partial class Photo : DisposableImpl
         if (useCache && GalleryThumbnail is not null) return;
         if (IsDisposed || string.IsNullOrEmpty(FilePath)) return;
 
-        await _thumbnailLock.WaitAsync();
+        // 2. acquire global throttle to avoid saturating the thread pool
+        //    (prevents blocking the main image loading when many thumbnails load at once)
+        await _thumbnailThrottleLock.WaitAsync().ConfigureAwait(false);
+
         try
         {
-            // 2. double-check after acquiring the lock
-            if (useCache && GalleryThumbnail is not null) return;
-            if (IsDisposed) return;
+            await _thumbnailLock.WaitAsync().ConfigureAwait(false);
 
-            // reset cancellation for this load
-            _cancelThumbnailLoading?.Dispose();
-            _cancelThumbnailLoading = new CancellationTokenSource();
-            var token = _cancelThumbnailLoading.Token;
-
-
-            // 3. load metadata if needed
-            await LoadMetadataAsync(true);
-            if (token.IsCancellationRequested) return;
-
-
-            // 4. get thumbnail from platform provider
-            if (Core.PreviewProvider is null) return;
-            using var skThumb = await Task.Run(() => Core.PreviewProvider.GetThumbnailAsync(Metadata, thumbSize, token), token);
-            if (token.IsCancellationRequested || skThumb.IsDisposed()) return;
-
-
-            // 5. convert SKImage to Avalonia Bitmap
-            var avBitmap = await Task.Run(() => SkiaCodec.ConvertToBitmap(skThumb), token);
-
-            if (token.IsCancellationRequested)
+            try
             {
-                avBitmap?.Dispose();
-                return;
+                // 3. double-check after acquiring the lock
+                if (useCache && GalleryThumbnail is not null) return;
+                if (IsDisposed) return;
+
+                // reset cancellation for this load
+                _cancelThumbnailLoading?.Dispose();
+                _cancelThumbnailLoading = new CancellationTokenSource();
+                var token = _cancelThumbnailLoading.Token;
+
+
+                // 4. load metadata if needed
+                await LoadMetadataAsync(true);
+                if (token.IsCancellationRequested) return;
+
+
+                // 5. get thumbnail from platform provider
+                if (Core.PreviewProvider is null) return;
+                using var skThumb = await Task.Run(
+                    () => Core.PreviewProvider.GetThumbnailAsync(Metadata, thumbSize, token), token)
+                    .ConfigureAwait(false);
+                if (token.IsCancellationRequested || skThumb.IsDisposed()) return;
+
+
+                // 6. convert SKImage to Avalonia Bitmap
+                var avBitmap = await Task.Run(
+                    () => SkiaCodec.ConvertToBitmap(skThumb), token)
+                    .ConfigureAwait(false);
+
+                if (token.IsCancellationRequested)
+                {
+                    avBitmap?.Dispose();
+                    return;
+                }
+
+
+                // 7. update the gallery thumbnail (triggers UI binding update)
+                GalleryThumbnail = avBitmap;
             }
-
-
-            // 6. update the gallery thumbnail (triggers UI binding update)
-            GalleryThumbnail = avBitmap;
-        }
-        catch (OperationCanceledException) { }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"❌❌❌ {nameof(LoadThumbnailAsync)}: {ex.Message}");
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌❌❌ {nameof(LoadThumbnailAsync)}: {ex.Message}");
+            }
+            finally
+            {
+                _thumbnailLock.Release();
+            }
         }
         finally
         {
-            _thumbnailLock.Release();
+            _thumbnailThrottleLock.Release();
         }
     }
 
