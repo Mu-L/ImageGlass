@@ -271,7 +271,7 @@ public partial class MainWindowView : PhControl
             Dispatcher.UIThread.Post(async () =>
             {
                 // set photo to the viewer
-                PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex, Core.Photos.Count < 100);
+                PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex);
             });
         }
     }
