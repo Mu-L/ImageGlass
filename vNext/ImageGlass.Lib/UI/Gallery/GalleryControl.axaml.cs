@@ -20,7 +20,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Layout;
 using Avalonia.VisualTree;
 using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
@@ -37,8 +36,8 @@ namespace ImageGlass.UI;
 public partial class GalleryControl : PhControl
 {
     private CancellationTokenSource? _cancelScrollAnimation;
-    private static readonly Thickness GALLERY_ITEM_MARGIN = new(1);
-    private static readonly Thickness GALLERY_PADDING = new(4, 4, 4, 8);
+    public static readonly Thickness GalleryItemMargin = new(1);
+    public static readonly Thickness GalleryPadding = new(4, 4, 4, 8);
 
 
     // events
@@ -61,15 +60,15 @@ public partial class GalleryControl : PhControl
 
 
     /// <summary>
-    /// Gets, sets the layout direction.
+    /// Gets, sets the gallery view mode.
     /// </summary>
-    public Orientation Orientation
+    public PhVirtualizingUniformPanelViewMode ViewMode
     {
-        get => GetValue(OrientationProperty);
-        set => SetValue(OrientationProperty, value);
+        get => GetValue(ViewModeProperty);
+        set => SetValue(ViewModeProperty, value);
     }
-    public static readonly StyledProperty<Orientation> OrientationProperty =
-        AvaloniaProperty.Register<GalleryControl, Orientation>(nameof(Orientation), Orientation.Horizontal);
+    public static readonly StyledProperty<PhVirtualizingUniformPanelViewMode> ViewModeProperty =
+        AvaloniaProperty.Register<GalleryControl, PhVirtualizingUniformPanelViewMode>(nameof(ViewMode), PhVirtualizingUniformPanelViewMode.FilmStrip);
 
 
     #endregion // Public Properties
@@ -106,7 +105,7 @@ public partial class GalleryControl : PhControl
     {
         base.OnPropertyChanged(e);
 
-        if (e.Property == OrientationProperty)
+        if (e.Property == ViewModeProperty)
         {
             UpdateReservedSize();
         }
@@ -130,7 +129,7 @@ public partial class GalleryControl : PhControl
 
     private void PART_ScrollViewer_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
-        if (Orientation == Orientation.Vertical) return;
+        if (ViewMode == PhVirtualizingUniformPanelViewMode.Gallery) return;
         if (sender is not ScrollViewer svEl) return;
         if (svEl.Extent.Width <= svEl.Viewport.Width) return;
 
@@ -206,12 +205,17 @@ public partial class GalleryControl : PhControl
     /// </summary>
     private Vector GetCenteredScrollOffset(ScrollViewer svEl, int index)
     {
+        // Cell size = ItemSize + margin on each side (must match panel layout).
+        // Border padding offsets the panel within the scroll content.
         var itemSize = (double)Core.Config.ThumbnailSize;
-        var itemTotalSize = itemSize + 2; // Margin="1" = 1px on each side
+        var cellWidth = itemSize + GalleryItemMargin.Left + GalleryItemMargin.Right;
+        var cellHeight = itemSize + GalleryItemMargin.Top + GalleryItemMargin.Bottom;
+        var padLeft = GalleryPadding.Left;
+        var padTop = GalleryPadding.Top;
 
-        if (Orientation == Orientation.Horizontal)
+        if (ViewMode == PhVirtualizingUniformPanelViewMode.FilmStrip)
         {
-            var itemCenter = 4 + (index * itemTotalSize) + (itemTotalSize / 2); // 4 = Border left padding
+            var itemCenter = padLeft + (index * cellWidth) + (cellWidth / 2);
             var target = itemCenter - (svEl.Viewport.Width / 2);
             var maxOffset = Math.Max(0, svEl.Extent.Width - svEl.Viewport.Width);
 
@@ -219,7 +223,12 @@ public partial class GalleryControl : PhControl
         }
         else
         {
-            var itemCenter = 4 + (index * itemTotalSize) + (itemTotalSize / 2); // 4 = Border top padding
+            // Gallery mode: calculate row position
+            var availWidth = svEl.Viewport.Width - padLeft - GalleryPadding.Right;
+            var columnsPerRow = Math.Max(1, (int)(availWidth / cellWidth));
+            var row = index / columnsPerRow;
+
+            var itemCenter = padTop + (row * cellHeight) + (cellHeight / 2);
             var target = itemCenter - (svEl.Viewport.Height / 2);
             var maxOffset = Math.Max(0, svEl.Extent.Height - svEl.Viewport.Height);
 
@@ -273,19 +282,19 @@ public partial class GalleryControl : PhControl
 
 
     /// <summary>
-    /// Updates the minimum size of gallery control.
+    /// Updates the minimum size of gallery control and scroll bar visibility.
     /// </summary>
     private void UpdateReservedSize()
     {
         var itemSize = (double)Core.Config.ThumbnailSize;
         var totalWidth = itemSize
-            + GALLERY_ITEM_MARGIN.Left + GALLERY_ITEM_MARGIN.Right
-            + GALLERY_PADDING.Left + GALLERY_PADDING.Right;
+            + GalleryItemMargin.Left + GalleryItemMargin.Right
+            + GalleryPadding.Left + GalleryPadding.Right;
         var totalHeight = itemSize
-            + GALLERY_ITEM_MARGIN.Top + GALLERY_ITEM_MARGIN.Bottom
-            + GALLERY_PADDING.Top + GALLERY_PADDING.Bottom;
+            + GalleryItemMargin.Top + GalleryItemMargin.Bottom
+            + GalleryPadding.Top + GalleryPadding.Bottom;
 
-        if (Orientation == Orientation.Horizontal)
+        if (ViewMode == PhVirtualizingUniformPanelViewMode.FilmStrip)
         {
             PART_ItemsControl.MinHeight = totalHeight;
             PART_ItemsControl.MinWidth = 0;
@@ -294,6 +303,24 @@ public partial class GalleryControl : PhControl
         {
             PART_ItemsControl.MinWidth = totalWidth;
             PART_ItemsControl.MinHeight = 0;
+        }
+
+        // Update ScrollViewer visibility so the panel receives correct constraints:
+        // - FilmStrip: horizontal scroll, no vertical
+        // - Gallery: vertical scroll, no horizontal (gives finite width to panel)
+        var svEl = FindScrollViewer();
+        if (svEl is not null)
+        {
+            if (ViewMode == PhVirtualizingUniformPanelViewMode.FilmStrip)
+            {
+                svEl.HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto;
+                svEl.VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled;
+            }
+            else
+            {
+                svEl.HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled;
+                svEl.VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto;
+            }
         }
     }
 

@@ -11,13 +11,13 @@
     <ItemsControl x:Name="PART_ItemsControl"
                   ItemsSource="{CompiledBinding #Root.ItemsSource}">
 
-                  <!-- GalleryControl: Control template -->
+        <!-- GalleryControl: Control template -->
         <ItemsControl.Template>
             <ControlTemplate>
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" 
                               VerticalScrollBarVisibility="Auto"
                               PointerWheelChanged="PART_ScrollViewer_PointerWheelChanged">
-                    <Border Padding="{DynamicResource GALLERY_PADDING}">
+                    <Border Padding="{x:Static ui:GalleryControl.GalleryPadding}">
 						<ItemsPresenter ItemsPanel="{TemplateBinding ItemsPanel}" />
                     </Border>
                 </ScrollViewer>
@@ -28,8 +28,10 @@
         <!-- GalleryControl: Layout template -->
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-                <VirtualizingStackPanel HorizontalAlignment="Center"
-                                        Orientation="{CompiledBinding Orientation, RelativeSource={RelativeSource AncestorType=ui:GalleryControl}}" />
+                <ui:PhVirtualizingUniformPanel HorizontalAlignment="Center"
+                                            ViewMode="{CompiledBinding ViewMode, RelativeSource={RelativeSource AncestorType=ui:GalleryControl}}"
+                                            ItemSize="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
+                                            ItemMargin="{x:Static ui:GalleryControl.GalleryItemMargin}" />
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
 
@@ -38,7 +40,7 @@
         <ItemsControl.ItemTemplate>
             <DataTemplate>
                 <ui:GalleryItem
-                    Margin="{DynamicResource GALLERY_ITEM_MARGIN}"
+                    Margin="{x:Static ui:GalleryControl.GalleryItemMargin}"
                     IsTabStop="False"
                     Focusable="False"
                     ToolTip.Placement="Top"

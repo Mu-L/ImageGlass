@@ -40,6 +40,7 @@
         <ui:GalleryControl x:Name="PART_Gallery"
                            Grid.Row="2"
                            ZIndex="80"
+                           ViewMode="FilmStrip"
                            Background="{CompiledBinding GalleryBackground}"
                            ItemsSource="{CompiledBinding Items, Source={x:Static cm:Core.Photos}}"
                            IsContentVisible="{CompiledBinding ShowGallery, Source={x:Static cm:Core.Config}}" />
