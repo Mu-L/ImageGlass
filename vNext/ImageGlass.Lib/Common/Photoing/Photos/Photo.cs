@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using Avalonia.Media.Imaging;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Types;
 using ImageMagick;
 using SkiaSharp;
@@ -727,18 +728,11 @@ public partial class Photo : DisposableImpl
             // 4. get thumbnail from platform provider
             if (Core.PreviewProvider is null) return;
             using var skThumb = await Task.Run(() => Core.PreviewProvider.GetThumbnailAsync(Metadata, thumbSize, token), token);
-            if (token.IsCancellationRequested || skThumb is null) return;
+            if (token.IsCancellationRequested || skThumb.IsDisposed()) return;
 
 
-            // 5. convert SKImage to Avalonia Bitmap off-thread
-            var avBitmap = await Task.Run(() =>
-            {
-                using var data = skThumb.Encode(SKEncodedImageFormat.Png, 100);
-                if (data is null) return null;
-
-                using var stream = new MemoryStream(data.ToArray());
-                return new Bitmap(stream);
-            }, token);
+            // 5. convert SKImage to Avalonia Bitmap
+            var avBitmap = await Task.Run(() => SkiaCodec.ConvertToBitmap(skThumb), token);
 
             if (token.IsCancellationRequested)
             {

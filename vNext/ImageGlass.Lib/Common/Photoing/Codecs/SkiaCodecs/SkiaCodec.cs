@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using ImageMagick;
 using SkiaSharp;
 using System;
@@ -352,6 +354,67 @@ public static partial class SkiaCodec
         var img = SKImage.FromBitmap(bmp);
 
         return img;
+    }
+
+
+    /// <summary>
+    /// Converts SKImage to WriteableBitmap.
+    /// </summary>
+    public static WriteableBitmap? ConvertToBitmap(SKImage? imgSrc)
+    {
+        using var skPixmap = imgSrc?.PeekPixels();
+        if (skPixmap is null) return null;
+
+        var info = skPixmap.Info;
+        var wb = new WriteableBitmap(
+            new PixelSize(info.Width, info.Height),
+            new Vector(96, 96),
+            PixelFormats.Bgra8888,
+            AlphaFormat.Unpremul);
+
+        using (var buf = wb.Lock())
+        {
+            var srcPtr = skPixmap.GetPixels();
+            var srcRowBytes = skPixmap.RowBytes;
+            var dstStride = buf.RowBytes;
+
+            // if the SKImage is already Bgra8888, do a fast memcpy
+            if (info.ColorType == SKColorType.Bgra8888)
+            {
+                if (srcRowBytes == dstStride)
+                {
+                    unsafe
+                    {
+                        Buffer.MemoryCopy(
+                            (void*)srcPtr, (void*)buf.Address,
+                            (long)dstStride * info.Height,
+                            (long)srcRowBytes * info.Height);
+                    }
+                }
+                else
+                {
+                    for (int y = 0; y < info.Height; y++)
+                    {
+                        unsafe
+                        {
+                            Buffer.MemoryCopy(
+                                (byte*)srcPtr + (long)y * srcRowBytes,
+                                (byte*)buf.Address + (long)y * dstStride,
+                                dstStride,
+                                Math.Min(srcRowBytes, dstStride));
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // re-encode pixels into Bgra8888 via SKPixmap.ReadPixels
+                var dstInfo = new SKImageInfo(info.Width, info.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+                skPixmap.ReadPixels(dstInfo, buf.Address, dstStride);
+            }
+        }
+
+        return wb;
     }
 
 
