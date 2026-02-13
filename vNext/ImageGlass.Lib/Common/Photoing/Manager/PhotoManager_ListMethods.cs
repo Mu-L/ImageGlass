@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -40,29 +41,33 @@ public partial class PhotoManager
     /// </summary>
     public void Add(IEnumerable<string> filePaths, int index = -1)
     {
-        var addedIndex = index;
         var newItems = filePaths.Select(path => new Photo(path)).ToList();
 
-        if (index < 0)
+        lock (_lock)
         {
-            addedIndex = (int)Count;
+            var addedIndex = index;
 
-            Items.AddRange(newItems);
-
-            // only index the newly appended items
-            for (int i = addedIndex; i < Count; i++)
+            if (index < 0)
             {
-                _dict[Items[i].FilePath] = i;
+                addedIndex = (int)Count;
+
+                Items.AddRange(newItems);
+
+                // only index the newly appended items
+                for (int i = addedIndex; i < Count; i++)
+                {
+                    _dict[Items[i].FilePath] = i;
+                }
             }
-        }
-        else
-        {
-            Items.InsertRange(index, newItems);
-
-            // re-index from insertion point (existing items shifted)
-            for (int i = addedIndex; i < Count; i++)
+            else
             {
-                _dict[Items[i].FilePath] = i;
+                Items.InsertRange(index, newItems);
+
+                // re-index from insertion point (existing items shifted)
+                for (int i = addedIndex; i < Count; i++)
+                {
+                    _dict[Items[i].FilePath] = i;
+                }
             }
         }
 
@@ -75,10 +80,11 @@ public partial class PhotoManager
     /// </summary>
     public Photo? Get(int index)
     {
-        if (index < 0 || index >= Count) return null;
-        var item = Items[index];
-
-        return item;
+        lock (_lock)
+        {
+            if (index < 0 || index >= Count) return null;
+            return Items[index];
+        }
     }
 
 
@@ -108,25 +114,31 @@ public partial class PhotoManager
     /// </summary>
     public Photo? Select(int index)
     {
-        // deselect old index
-        if (0 <= CurrentIndex && CurrentIndex < Count)
+        Photo? result;
+
+        lock (_lock)
         {
-            Items[CurrentIndex].IsCurrent = false;
+            // deselect old index
+            if (0 <= CurrentIndex && CurrentIndex < Count)
+            {
+                Items[CurrentIndex].IsCurrent = false;
+            }
+
+            // validate new index
+            if (index < 0 || index >= Count) return null;
+
+            // select new index
+            Items[index].IsCurrent = true;
+            _currentIndex = index;
+            result = Items[index];
         }
-
-        // validate new index
-        if (index < 0 || index >= Count) return null;
-
-        // select new index
-        Items[index].IsCurrent = true;
-        _currentIndex = index;
 
         _ = OnPropertyChanged(nameof(Current));
         _ = OnPropertyChanged(nameof(CurrentIndex));
         _ = OnPropertyChanged(nameof(CurrentFilePath));
         _ = OnPropertyChanged(nameof(CurrentMetadata));
 
-        return Get(index);
+        return result;
     }
 
 
@@ -164,20 +176,27 @@ public partial class PhotoManager
     /// </summary>
     public void SetFilePath(int index, string filePath)
     {
-        var photo = Get(index);
-        if (photo is null) return;
+        bool isCurrent;
 
-        var oldFilePath = photo.FilePath;
-        photo.FilePath = filePath;
-
-        // remove the old path entry, then add the new one
-        if (!string.Equals(oldFilePath, filePath, StringComparison.OrdinalIgnoreCase))
+        lock (_lock)
         {
-            _dict.TryRemove(oldFilePath, out _);
-        }
-        _dict[filePath] = index;
+            var photo = Get(index);
+            if (photo is null) return;
 
-        if (index == CurrentIndex)
+            var oldFilePath = photo.FilePath;
+            photo.FilePath = filePath;
+
+            // remove the old path entry, then add the new one
+            if (!string.Equals(oldFilePath, filePath, StringComparison.OrdinalIgnoreCase))
+            {
+                _dict.TryRemove(oldFilePath, out _);
+            }
+            _dict[filePath] = index;
+
+            isCurrent = index == CurrentIndex;
+        }
+
+        if (isCurrent)
         {
             _ = OnPropertyChanged(nameof(Current));
             _ = OnPropertyChanged(nameof(CurrentFilePath));
@@ -238,25 +257,33 @@ public partial class PhotoManager
     /// </summary>
     public void Remove(string filePath)
     {
-        var index = IndexOf(filePath);
-        if (index < 0) return;
+        bool isCurrentPhoto;
+        Photo? removed;
 
-        var isCurrentPhoto = CurrentIndex == index;
-
-        // update index of affected items
-        for (int i = index + 1; i < Count; i++)
+        lock (_lock)
         {
-            var newIndex = i - 1;
-            var itemPath = GetFilePath(i);
-            _dict[itemPath] = newIndex;
+            var index = IndexOf(filePath);
+            if (index < 0) return;
+
+            isCurrentPhoto = CurrentIndex == index;
+
+            // update index of affected items
+            for (int i = index + 1; i < Count; i++)
+            {
+                var newIndex = i - 1;
+                var itemPath = GetFilePath(i);
+                _dict[itemPath] = newIndex;
+            }
+
+            removed = Items[index];
+
+            // remove from the lists
+            _dict.Remove(filePath, out var _);
+            Items.RemoveAt(index);
         }
 
-        // dispose removed item
-        Items[index].Dispose();
-
-        // remove from the lists
-        _dict.Remove(filePath, out var _);
-        Items.RemoveAt(index);
+        // dispose outside the lock to avoid blocking
+        removed?.Dispose();
 
         _ = OnPropertyChanged(nameof(Count));
 
@@ -274,20 +301,29 @@ public partial class PhotoManager
     /// </summary>
     public void Clear()
     {
-        // clear init photo
-        InitPhoto?.Dispose();
-        InitPhoto = null;
-        _currentIndex = -1;
+        Photo? initPhoto;
+        Photo[] snapshot;
 
-        // dispose photos in the list
-        foreach (var item in Items)
+        lock (_lock)
+        {
+            // clear init photo
+            initPhoto = InitPhoto;
+            InitPhoto = null;
+            _currentIndex = -1;
+
+            // snapshot items, then clear collections
+            snapshot = [.. Items];
+            Items.Clear();
+            _dict.Clear();
+            DistinctDirs.Clear();
+        }
+
+        // dispose outside the lock to avoid blocking
+        initPhoto?.Dispose();
+        foreach (var item in snapshot)
         {
             item.WithNoReactive(() => item.Dispose());
         }
-
-        Items.Clear();
-        _dict.Clear();
-        DistinctDirs.Clear();
     }
 
 }

@@ -25,7 +25,7 @@ namespace ImageGlass.Common.Photoing;
 
 public partial class PhotoManager
 {
-    protected int _currentIndex = -1;
+    protected volatile int _currentIndex = -1;
 
 
     // Public properties

@@ -21,6 +21,7 @@ using ImageGlass.Common.Types;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -32,6 +33,7 @@ public partial class PhotoManager : DisposableImpl
     // photo list
     protected AvaloniaList<Photo> _items = [];
     protected readonly ConcurrentDictionary<string, int> _dict = new(StringComparer.OrdinalIgnoreCase);
+    protected readonly Lock _lock = new();
 
 
 
