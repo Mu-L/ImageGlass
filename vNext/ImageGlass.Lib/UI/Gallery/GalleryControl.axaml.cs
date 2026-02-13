@@ -27,6 +27,7 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,6 +37,8 @@ namespace ImageGlass.UI;
 public partial class GalleryControl : PhControl
 {
     private CancellationTokenSource? _cancelScrollAnimation;
+    private static readonly Thickness GALLERY_ITEM_MARGIN = new(1);
+    private static readonly Thickness GALLERY_PADDING = new(4, 4, 4, 8);
 
 
     // events
@@ -80,6 +83,49 @@ public partial class GalleryControl : PhControl
 
 
 
+    #region Override Methods
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
+        UpdateReservedSize();
+        Core.Config.PropertyChanged += Config_PropertyChanged;
+    }
+
+
+    protected override void OnUnloaded(RoutedEventArgs e)
+    {
+        base.OnUnloaded(e);
+
+        Core.Config.PropertyChanged -= Config_PropertyChanged;
+    }
+
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        if (e.Property == OrientationProperty)
+        {
+            UpdateReservedSize();
+        }
+    }
+
+
+    private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Config.ThumbnailSize))
+        {
+            UpdateReservedSize();
+        }
+    }
+
+
+    #endregion // Override Methods
+
+
+
     #region Control Events
 
     private void PART_ScrollViewer_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
@@ -119,6 +165,7 @@ public partial class GalleryControl : PhControl
 
 
     #region Control Methods
+
 
     /// <summary>
     /// Loads the thumbnail.
@@ -223,6 +270,33 @@ public partial class GalleryControl : PhControl
             .OfType<ScrollViewer>()
             .FirstOrDefault();
     }
+
+
+    /// <summary>
+    /// Updates the minimum size of gallery control.
+    /// </summary>
+    private void UpdateReservedSize()
+    {
+        var itemSize = (double)Core.Config.ThumbnailSize;
+        var totalWidth = itemSize
+            + GALLERY_ITEM_MARGIN.Left + GALLERY_ITEM_MARGIN.Right
+            + GALLERY_PADDING.Left + GALLERY_PADDING.Right;
+        var totalHeight = itemSize
+            + GALLERY_ITEM_MARGIN.Top + GALLERY_ITEM_MARGIN.Bottom
+            + GALLERY_PADDING.Top + GALLERY_PADDING.Bottom;
+
+        if (Orientation == Orientation.Horizontal)
+        {
+            PART_ItemsControl.MinHeight = totalHeight;
+            PART_ItemsControl.MinWidth = 0;
+        }
+        else
+        {
+            PART_ItemsControl.MinWidth = totalWidth;
+            PART_ItemsControl.MinHeight = 0;
+        }
+    }
+
 
     #endregion // Control Methods
 

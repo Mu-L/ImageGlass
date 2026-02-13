@@ -17,7 +17,7 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" 
                               VerticalScrollBarVisibility="Auto"
                               PointerWheelChanged="PART_ScrollViewer_PointerWheelChanged">
-                    <Border Padding="4,4,4,8">
+                    <Border Padding="{DynamicResource GALLERY_PADDING}">
 						<ItemsPresenter ItemsPanel="{TemplateBinding ItemsPanel}" />
                     </Border>
                 </ScrollViewer>
@@ -38,7 +38,7 @@
         <ItemsControl.ItemTemplate>
             <DataTemplate>
                 <ui:GalleryItem
-                    Margin="1"
+                    Margin="{DynamicResource GALLERY_ITEM_MARGIN}"
                     IsTabStop="False"
                     Focusable="False"
                     ToolTip.Placement="Top"
