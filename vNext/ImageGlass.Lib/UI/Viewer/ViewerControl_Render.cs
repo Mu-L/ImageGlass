@@ -44,6 +44,7 @@ public partial class ViewerControl
     internal SKImageRef? _imgSource;
     internal SKImageRef? _imgRender;
     private SkiaAnimator? _animator;
+    internal MipmapTileCache? _mipmapCache;
 
     private RenderTargetBitmap? _bmpCheckerboard;
     private readonly CheckerboardInfo _checkerboard = new();
@@ -222,6 +223,7 @@ public partial class ViewerControl
             Control Bounds = {Bounds}
             DrawingArea = {DrawingArea}
             Image size = {BitmapSize}
+            Use MipMap = {_mipmapCache != null}
             _isPreviewing = {_isPreviewing}
             _srcRect = {SrcRect}
             _destRect = {DestRect}
@@ -341,10 +343,13 @@ public partial class ViewerControl
     {
         lock (_lock)
         {
-            _isFirstDraw.Clear();
+            _isFirstDraw.Value = false;
 
             // cache the proccessed image for next draw
             SKImageRef.Set(ref _imgRender, img, _imgSource);
+
+            // build mipmap tile cache for non-animated photos
+            BuildTileCache();
         }
     }
 
@@ -411,6 +416,25 @@ public partial class ViewerControl
         }
 
         _lastFpsTime = now;
+    }
+
+
+    /// <summary>
+    /// Builds the mipmap tile cache from the current render image.
+    /// Must be called inside <see cref="_lock"/>.
+    /// Skips animated photos (they update frames too frequently for tiling).
+    /// </summary>
+    private void BuildTileCache()
+    {
+        // dispose previous mipmap tile cache
+        _mipmapCache?.Dispose();
+        _mipmapCache = null;
+
+        // skip for animated photos
+        if (_animator is not null) return;
+
+        // use the processed (color-managed) image if available, otherwise the source
+        _mipmapCache = MipmapTileCache.Create(_imgRender ?? _imgSource);
     }
 
 

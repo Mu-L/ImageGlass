@@ -36,10 +36,13 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
     #region IDisposable Disposing
 
+    protected InterlockedBool _isDisposed = new(false);
+
+
     /// <summary>
     /// Gets a value indicating whether the object has been disposed.
     /// </summary>
-    public bool IsDisposed { get; protected set; } = false;
+    public bool IsDisposed => _isDisposed.Value;
 
     protected virtual void Dispose(bool disposing)
     {
@@ -52,7 +55,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
         }
 
         // Free any unmanaged objects here.
-        IsDisposed = true;
+        _isDisposed.Value = true;
     }
 
     public virtual void Dispose()
@@ -69,9 +72,11 @@ public partial class PhotoRenderer : ICustomDrawOperation
     #endregion
 
 
+
     private readonly Rect _bounds;
     private readonly Action<SKImage?> _onDrawFirstTime;
     private readonly Lock _lock;
+    private bool _isFirstDraw;
 
     private readonly SKImageRef? _imgSource;
     private readonly SKImageRef? _imgRender;
@@ -79,7 +84,8 @@ public partial class PhotoRenderer : ICustomDrawOperation
     private readonly SKRect _destRect;
     private readonly bool _hasSrcColorProfile;
     private readonly ImageInterpolation _interpolation;
-    private readonly bool _isFirstDraw;
+    private readonly MipmapTileCache? _tileCache;
+    private readonly double _zoomFactor;
 
 
     #region Public Properties
@@ -114,6 +120,8 @@ public partial class PhotoRenderer : ICustomDrawOperation
             _interpolation = viewer.CurrentInterpolation;
             _hasSrcColorProfile = viewer.Photo?.Metadata?.ColorProfileData is not null;
             _isFirstDraw = viewer._isFirstDraw.Value;
+            _tileCache = viewer._mipmapCache;
+            _zoomFactor = viewer.ZoomFactor;
         }
     }
 
@@ -124,6 +132,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
     protected virtual void OnDisposing()
     {
+        _isFirstDraw = false;
         _imgSource?.RequestDispose();
         _imgRender?.RequestDispose();
     }
@@ -167,34 +176,47 @@ public partial class PhotoRenderer : ICustomDrawOperation
                     imageRender ??= srcImage;
 
                     // update the processed image
+                    _isFirstDraw = false;
                     Dispatcher.UIThread.Post(() => _onDrawFirstTime(imageRender), DispatcherPriority.Render);
+
+                    // draw the full image for first frame
+                    var canvas = lease.SkCanvas;
+                    canvas.Save();
+
+                    using var paintOptions = new SKPaint
+                    {
+                        FilterQuality = (SKFilterQuality)_interpolation,
+                    };
+
+                    canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
+                    canvas.Restore();
+
+                    // clear old cache
+                    lease.GrContext?.PurgeResources();
+                }
+                else if (_tileCache is not null)
+                {
+                    // tiled rendering for large images
+                    RenderTiled(lease.SkCanvas);
                 }
                 else
                 {
+                    // direct rendering for small / animated images
                     imageLease = _imgRender?.Acquire() ?? _imgSource?.Acquire();
                     imageRender = imageLease?.Image;
-                }
 
-                if (imageRender is null || imageRender.IsDisposed()) return;
+                    if (imageRender is null || imageRender.IsDisposed()) return;
 
+                    var canvas = lease.SkCanvas;
+                    canvas.Save();
 
-                // start drawing image
-                var canvas = lease.SkCanvas;
-                canvas.Save();
+                    using var paintOptions = new SKPaint
+                    {
+                        FilterQuality = (SKFilterQuality)_interpolation,
+                    };
 
-                using var paintOptions = new SKPaint
-                {
-                    FilterQuality = (SKFilterQuality)_interpolation,
-                };
-
-                canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
-                canvas.Restore();
-
-
-                if (_isFirstDraw)
-                {
-                    // clear old cache
-                    lease.GrContext?.PurgeResources();
+                    canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
+                    canvas.Restore();
                 }
             }
             finally
@@ -211,6 +233,79 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
 
     #region Private Methods
+
+
+    /// <summary>
+    /// Renders visible tiles from the tile cache.
+    /// </summary>
+    private void RenderTiled(SKCanvas canvas)
+    {
+        var tileCache = _tileCache!;
+        var mipLevel = MipmapTileCache.GetMipLevel(_zoomFactor);
+        var sourceTileSize = MipmapTileCache.GetSourceTileSize(mipLevel);
+
+        // calculate visible tile range from SrcRect
+        var tileStartX = Math.Max(0, (int)(_srcRect.Left / sourceTileSize));
+        var tileStartY = Math.Max(0, (int)(_srcRect.Top / sourceTileSize));
+        var tileEndX = (int)Math.Ceiling(_srcRect.Right / sourceTileSize);
+        var tileEndY = (int)Math.Ceiling(_srcRect.Bottom / sourceTileSize);
+
+        // scale factors from source to destination coordinates
+        var scaleX = _destRect.Width / _srcRect.Width;
+        var scaleY = _destRect.Height / _srcRect.Height;
+
+        // bitmap coordinate scale: source pixels → tile bitmap pixels
+        var bmapScale = (float)MipmapTileCache.TILE_SIZE / sourceTileSize;
+
+        canvas.Save();
+
+        using var paint = new SKPaint
+        {
+            FilterQuality = (SKFilterQuality)_interpolation,
+        };
+
+        for (var ty = tileStartY; ty < tileEndY; ty++)
+        {
+            for (var tx = tileStartX; tx < tileEndX; tx++)
+            {
+                var tile = tileCache.GetTile(tx, ty, mipLevel);
+                if (tile is null) continue;
+
+                // tile bounds in original image coordinates
+                float tileSrcLeft = tx * sourceTileSize;
+                float tileSrcTop = ty * sourceTileSize;
+                float tileSrcW = Math.Min(sourceTileSize, tileCache.SourceWidth - tileSrcLeft);
+                float tileSrcH = Math.Min(sourceTileSize, tileCache.SourceHeight - tileSrcTop);
+
+                // clip to visible source rect
+                var clippedLeft = Math.Max(tileSrcLeft, _srcRect.Left);
+                var clippedTop = Math.Max(tileSrcTop, _srcRect.Top);
+                var clippedRight = Math.Min(tileSrcLeft + tileSrcW, _srcRect.Right);
+                var clippedBottom = Math.Min(tileSrcTop + tileSrcH, _srcRect.Bottom);
+
+                if (clippedLeft >= clippedRight || clippedTop >= clippedBottom) continue;
+
+                // map clipped region to tile bitmap coordinates
+                var tileBitmapSrc = new SKRect(
+                    (clippedLeft - tileSrcLeft) * bmapScale,
+                    (clippedTop - tileSrcTop) * bmapScale,
+                    Math.Min((clippedRight - tileSrcLeft) * bmapScale, tile.Width),
+                    Math.Min((clippedBottom - tileSrcTop) * bmapScale, tile.Height));
+
+                // map clipped region to destination screen coordinates
+                var tileDest = new SKRect(
+                    _destRect.Left + (clippedLeft - _srcRect.Left) * scaleX,
+                    _destRect.Top + (clippedTop - _srcRect.Top) * scaleY,
+                    _destRect.Left + (clippedRight - _srcRect.Left) * scaleX,
+                    _destRect.Top + (clippedBottom - _srcRect.Top) * scaleY);
+
+                canvas.DrawBitmap(tile, tileBitmapSrc, tileDest, paint);
+            }
+        }
+
+        canvas.Restore();
+    }
+
 
     /// <summary>
     /// Processes image for the first drawing.

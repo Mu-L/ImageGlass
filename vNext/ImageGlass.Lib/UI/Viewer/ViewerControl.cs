@@ -111,6 +111,10 @@ public partial class ViewerControl : PhControl
     {
         lock (_lock)
         {
+            // dispose tile cache (will be rebuilt after next first draw)
+            _mipmapCache?.Dispose();
+            _mipmapCache = null;
+
             SKImageRef.Set(ref _imgRender, null);
             InvalidateVisual();
         }
@@ -332,6 +336,13 @@ public partial class ViewerControl : PhControl
     {
         lock (_lock)
         {
+            // dispose tile cache first (it holds a KeepAlive on the source)
+            _mipmapCache?.Dispose();
+            _mipmapCache = null;
+
+            _animator?.Dispose();
+            _animator = null;
+
             // dispose native bitmap
             SKImageRef.Set(ref _imgSource, null);
             SKImageRef.Set(ref _imgRender, null);
