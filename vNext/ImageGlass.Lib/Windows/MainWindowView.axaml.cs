@@ -230,7 +230,7 @@ public partial class MainWindowView : PhControl
                 }, Files_Searched);
 
 
-            if (loadInitPhoto)
+            if (loadInitPhoto && initPhoto is not null)
             {
                 _ = ViewPhotoAsync(initPhoto);
             }
@@ -299,17 +299,16 @@ public partial class MainWindowView : PhControl
         PART_Viewer.EnableImagePreview = Core.Config.ShowImagePreview;
 
 
-        if (scrollToThumbnail)
+        Dispatcher.UIThread.Post(async () =>
         {
-            Dispatcher.UIThread.Post(() =>
+            if (scrollToThumbnail)
             {
                 // set photo to the viewer
                 PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex);
-            });
-        }
+            }
 
-
-        await PART_Viewer.SetPhotoAsync(photo, useCache);
+            await PART_Viewer.SetPhotoAsync(photo, useCache);
+        });
     }
 
 

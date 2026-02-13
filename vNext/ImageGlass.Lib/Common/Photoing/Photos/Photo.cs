@@ -571,6 +571,10 @@ public partial class Photo : DisposableImpl
         {
             Error = ex;
             State = PhotoLoadingState.Loaded;
+            if (handleProgressFn is not null)
+            {
+                await handleProgressFn(new(PhotoLoadingState.Loaded, this, token));
+            }
         }
         finally
         {
