@@ -34,6 +34,17 @@ public partial class ViewerControl
     private double _panSpeed = 20f;
     private bool _enablePanningVelocity = true;
 
+    /// <summary>
+    /// Maximum panning margin in screen pixels beyond the image edge.
+    /// </summary>
+    private double PAN_MARGIN => DpiScale(30);
+
+
+    /// <summary>
+    /// Logical source position (can be negative when over-panning).
+    /// This value is NOT clipped to image bounds, preserving the over-pan state across frames.
+    /// </summary>
+    private Point _logicalSrcPoint = new();
 
 
     // Public Events
@@ -189,6 +200,7 @@ public partial class ViewerControl
         {
             SrcRect = new();
             DestRect = new();
+            _logicalSrcPoint = new();
             return;
         }
 
@@ -211,8 +223,8 @@ public partial class ViewerControl
 
 
         // 1.3 initialize new values for source and destination rectangles
-        var srcX = SrcRect.X;
-        var srcY = SrcRect.Y;
+        var srcX = _logicalSrcPoint.X;
+        var srcY = _logicalSrcPoint.Y;
         var srcWidth = SrcRect.Width;
         var srcHeight = SrcRect.Height;
 
@@ -267,24 +279,68 @@ public partial class ViewerControl
 
 
         // 4. Panning to the edge:
-        // Make sure the source coordinates are within the image bounds
-        if (srcX < 0)
+        // Allow panning beyond image bounds by a margin (screen pixels converted to source coordinates).
+        // The margin only applies on axes where the image overflows the viewport.
+        var panMarginSrcX = scaledImgWidth > controlW ? PAN_MARGIN / currentZoomFactor : 0;
+        var panMarginSrcY = scaledImgHeight > controlH ? PAN_MARGIN / currentZoomFactor : 0;
+
+        if (srcX < -panMarginSrcX)
         {
-            srcX = 0;
+            srcX = -panMarginSrcX;
         }
-        else if (srcX + srcWidth > BitmapSize.Width)
+        else if (srcX + srcWidth > BitmapSize.Width + panMarginSrcX)
         {
-            srcX = BitmapSize.Width - srcWidth;
+            srcX = BitmapSize.Width - srcWidth + panMarginSrcX;
         }
 
-        if (srcY + srcHeight > BitmapSize.Height)
+        if (srcY + srcHeight > BitmapSize.Height + panMarginSrcY)
         {
-            srcY = BitmapSize.Height - srcHeight;
+            srcY = BitmapSize.Height - srcHeight + panMarginSrcY;
+        }
+
+        if (srcY < -panMarginSrcY)
+        {
+            srcY = -panMarginSrcY;
+        }
+
+        // preserve the logical (unclipped) position for the next frame
+        _logicalSrcPoint = new(srcX, srcY);
+
+
+        // 4.1 Clip source rect to valid image bounds
+        // and proportionally adjust the destination rect to show a gap at the edge.
+        if (srcX < 0)
+        {
+            var overPan = -srcX * currentZoomFactor;
+            destX += overPan;
+            destWidth -= overPan;
+            srcWidth += srcX; // reduce by |srcX|
+            srcX = 0;
+        }
+
+        if (srcX + srcWidth > BitmapSize.Width)
+        {
+            var excess = srcX + srcWidth - BitmapSize.Width;
+            var excessScreen = excess * currentZoomFactor;
+            destWidth -= excessScreen;
+            srcWidth = BitmapSize.Width - srcX;
         }
 
         if (srcY < 0)
         {
+            var overPan = -srcY * currentZoomFactor;
+            destY += overPan;
+            destHeight -= overPan;
+            srcHeight += srcY; // reduce by |srcY|
             srcY = 0;
+        }
+
+        if (srcY + srcHeight > BitmapSize.Height)
+        {
+            var excess = srcY + srcHeight - BitmapSize.Height;
+            var excessScreen = excess * currentZoomFactor;
+            destHeight -= excessScreen;
+            srcHeight = BitmapSize.Height - srcY;
         }
 
 
@@ -305,6 +361,7 @@ public partial class ViewerControl
         if (!isManualZoom)
         {
             SrcRect = new();
+            _logicalSrcPoint = new();
             _zooming.ZoomedPoint = new();
         }
 
@@ -660,15 +717,15 @@ public partial class ViewerControl
         // horizontal
         if (hDistance != 0)
         {
-            var newX = SrcRect.X + hDistance / _zooming.Factor;
-            SrcRect = SrcRect.WithX(newX);
+            var newX = _logicalSrcPoint.X + hDistance / _zooming.Factor;
+            _logicalSrcPoint = _logicalSrcPoint.WithX(newX);
         }
 
         // vertical 
         if (vDistance != 0)
         {
-            var newY = SrcRect.Y + vDistance / _zooming.Factor;
-            SrcRect = SrcRect.WithY(newY);
+            var newY = _logicalSrcPoint.Y + vDistance / _zooming.Factor;
+            _logicalSrcPoint = _logicalSrcPoint.WithY(newY);
         }
 
         _zooming.ZoomedPoint = pointerPosition ?? new();

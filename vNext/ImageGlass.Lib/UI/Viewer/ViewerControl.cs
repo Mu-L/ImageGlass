@@ -656,6 +656,7 @@ public partial class ViewerControl : PhControl
 
                         // update zoom source
                         SrcRect = newSrcRect.Normalize();
+                        _logicalSrcPoint = SrcRect.Position;
                         _zooming.Factor *= diffRatio.Width;
                         _zooming.ZoomedPoint = new();
 
