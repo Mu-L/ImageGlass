@@ -207,6 +207,27 @@ public partial class ViewerControl
     /// <summary>
     /// Calculates the drawing region for an image based on zoom level and control dimensions.
     /// Adjusts source and destination rectangles accordingly.
+    /// 
+    /// <para>
+    /// The method determines two rectangles:
+    /// <list type="bullet">
+    ///   <item><see cref="SrcRect"/>: the region of the source image to sample from.</item>
+    ///   <item><see cref="DestRect"/>: the region on the control where the sampled image is drawn.</item>
+    /// </list>
+    /// </para>
+    /// 
+    /// <para>
+    /// High-level flow:
+    /// <list type="number">
+    ///   <item>Convert zoom factors to DPI-aware values and compute scaled image size.</item>
+    ///   <item>For each axis (X then Y), determine source offset and dest position based on
+    ///         whether the scaled image fits within or overflows the viewport.</item>
+    ///   <item>Clamp the source position to enforce panning margins (with FreePan ratcheting).</item>
+    ///   <item>Preserve the logical (unclipped) position for the next frame.</item>
+    ///   <item>Clip source rect to valid image bounds, adjusting dest rect proportionally
+    ///         to show a gap at the edge when over-panned.</item>
+    /// </list>
+    /// </para>
     /// </summary>
     public virtual void CalculateDrawingRegion()
     {
@@ -219,24 +240,32 @@ public partial class ViewerControl
         }
 
 
-        // 1. scale the values according to DPI
+        // ═══════════════════════════════════════════════════════════════════════
+        // 1. Prepare DPI-scaled values and shared state
+        // ═══════════════════════════════════════════════════════════════════════
+
+        // zoom factors in device pixels (divide by DPI to go from logical to physical)
         var currentZoomFactor = _zooming.Factor / Dpi;
         var oldZoomFactor = _zooming.OldFactor / Dpi;
 
-        // 1.1 zoom point
+        // cursor position relative to the DrawingArea origin (excluding padding)
         var zoomX = _zooming.ZoomedPoint.X - Padding.Left;
         var zoomY = _zooming.ZoomedPoint.Y - Padding.Top;
 
-
-        // 1.2 source and viewport size
+        // viewport dimensions
         var controlW = DrawingArea.Width;
         var controlH = DrawingArea.Height;
 
+        // image dimensions scaled to screen pixels at current zoom
         var scaledImgWidth = BitmapSize.Width * currentZoomFactor;
         var scaledImgHeight = BitmapSize.Height * currentZoomFactor;
 
+        // true when this call is a zoom-to-cursor operation (factor changed with a valid cursor point)
+        var isZoomingToPoint = currentZoomFactor != oldZoomFactor && _zooming.ZoomedPoint != default;
 
-        // 1.3 initialize new values for source and destination rectangles
+        // initialize from the previous frame:
+        //   srcX/srcY  = logical (unclipped) source position from last frame
+        //   srcWidth/srcHeight, destX/destY/destWidth/destHeight = previous output rects
         var srcX = _logicalSrcPoint.X;
         var srcY = _logicalSrcPoint.Y;
         var srcWidth = SrcRect.Width;
@@ -248,124 +277,269 @@ public partial class ViewerControl
         var destHeight = DestRect.Height;
 
 
-        // 2. calculate x-axis and width
+        // ═══════════════════════════════════════════════════════════════════════
+        // 2. X-axis: determine srcX, srcWidth, destX, destWidth
+        // ═══════════════════════════════════════════════════════════════════════
         if (scaledImgWidth <= controlW)
         {
+            // --- Fits within viewport: show entire image width, center horizontally ---
             srcX = 0;
             srcWidth = BitmapSize.Width;
             destWidth = scaledImgWidth;
 
             if (EnableFreePan)
             {
-                // center the image, then apply pan offset
-                // allow panning within the free space (image stays inside DrawingArea)
-                var maxPanScreenX = (controlW - scaledImgWidth) / 2.0;
-                var panOffsetX = Math.Clamp(_logicalSrcPoint.X * currentZoomFactor, -maxPanScreenX, maxPanScreenX);
-                destX = (controlW - scaledImgWidth) / 2.0f + DrawingArea.Left - panOffsetX;
+                if (isZoomingToPoint)
+                {
+                    // Zoom anchor: map cursor to an image coordinate, then position
+                    // the image so that coordinate stays under the cursor.
+                    // Works for both normal fits-within and overflow → fits-within transitions.
+                    var screenZoomX = zoomX + DrawingArea.Left;
+                    var imgX = SrcRect.X + (screenZoomX - DestRect.X) / oldZoomFactor;
+                    imgX = Math.Clamp(imgX, 0, BitmapSize.Width);
+                    destX = screenZoomX - imgX * currentZoomFactor;
+                }
+                else
+                {
+                    // Panning or static: center image, then offset by the pan amount.
+                    // The pan offset is clamped so the image can't move beyond its centered position.
+                    var maxPanScreenX = (controlW - scaledImgWidth) / 2.0;
+                    var panOffsetX = Math.Clamp(_logicalSrcPoint.X * currentZoomFactor, -maxPanScreenX, maxPanScreenX);
+                    destX = (controlW - scaledImgWidth) / 2.0 + DrawingArea.Left - panOffsetX;
+                }
             }
             else
             {
-                destX = (controlW - scaledImgWidth) / 2.0f + DrawingArea.Left;
+                // No free-pan: always center the image
+                destX = (controlW - scaledImgWidth) / 2.0 + DrawingArea.Left;
             }
         }
         else
         {
-            var oldControlW = controlW / oldZoomFactor;
-            var newControlW = controlW / currentZoomFactor;
+            // --- Overflows viewport: show a viewport-width slice of the image ---
+            srcWidth = controlW / currentZoomFactor;
 
-            srcX += (oldControlW - newControlW) / ((controlW + float.Epsilon) / zoomX);
-            srcWidth = newControlW;
+            if (isZoomingToPoint)
+            {
+                // Zoom anchor: map cursor to an image coordinate, then compute the
+                // source offset so that coordinate stays under the cursor.
+                var screenZoomX = zoomX + DrawingArea.Left;
+                var rawImgX = SrcRect.X + (screenZoomX - DestRect.X) / oldZoomFactor;
+                var imgX = Math.Clamp(rawImgX, 0, BitmapSize.Width);
+
+                if (!EnableFreePan && rawImgX != imgX)
+                {
+                    // Cursor is in the PanMargin gap (outside the rendered image).
+                    // Anchor to the image edge's current screen position instead of
+                    // the cursor, so the margin gap is preserved during zoom.
+                    var edgeScreenX = rawImgX < 0
+                        ? DestRect.X
+                        : DestRect.X + DestRect.Width;
+                    srcX = imgX - (edgeScreenX - DrawingArea.Left) / currentZoomFactor;
+                }
+                else
+                {
+                    srcX = imgX - zoomX / currentZoomFactor;
+                }
+            }
+            // else: panning — srcX retains _logicalSrcPoint.X (initialized above)
 
             destX = DrawingArea.Left;
             destWidth = controlW;
         }
 
 
-        // 3. calculate y-axis and height
+        // ═══════════════════════════════════════════════════════════════════════
+        // 3. Y-axis: determine srcY, srcHeight, destY, destHeight
+        //    (mirrors the X-axis logic above)
+        // ═══════════════════════════════════════════════════════════════════════
         if (scaledImgHeight <= controlH)
         {
+            // --- Fits within viewport ---
             srcY = 0;
             srcHeight = BitmapSize.Height;
             destHeight = scaledImgHeight;
 
             if (EnableFreePan)
             {
-                // center the image, then apply pan offset
-                // allow panning within the free space (image stays inside DrawingArea)
-                var maxPanScreenY = (controlH - scaledImgHeight) / 2.0;
-                var panOffsetY = Math.Clamp(_logicalSrcPoint.Y * currentZoomFactor, -maxPanScreenY, maxPanScreenY);
-                destY = (controlH - scaledImgHeight) / 2f + DrawingArea.Top - panOffsetY;
+                if (isZoomingToPoint)
+                {
+                    var screenZoomY = zoomY + DrawingArea.Top;
+                    var imgY = SrcRect.Y + (screenZoomY - DestRect.Y) / oldZoomFactor;
+                    imgY = Math.Clamp(imgY, 0, BitmapSize.Height);
+                    destY = screenZoomY - imgY * currentZoomFactor;
+                }
+                else
+                {
+                    var maxPanScreenY = (controlH - scaledImgHeight) / 2.0;
+                    var panOffsetY = Math.Clamp(_logicalSrcPoint.Y * currentZoomFactor, -maxPanScreenY, maxPanScreenY);
+                    destY = (controlH - scaledImgHeight) / 2.0 + DrawingArea.Top - panOffsetY;
+                }
             }
             else
             {
-                destY = (controlH - scaledImgHeight) / 2f + DrawingArea.Top;
+                destY = (controlH - scaledImgHeight) / 2.0 + DrawingArea.Top;
             }
         }
         else
         {
-            var oldControlH = controlH / oldZoomFactor;
-            var newControlH = controlH / currentZoomFactor;
+            // --- Overflows viewport ---
+            srcHeight = controlH / currentZoomFactor;
 
-            srcY += (oldControlH - newControlH) / ((controlH + float.Epsilon) / zoomY);
-            srcHeight = newControlH;
+            if (isZoomingToPoint)
+            {
+                var screenZoomY = zoomY + DrawingArea.Top;
+                var rawImgY = SrcRect.Y + (screenZoomY - DestRect.Y) / oldZoomFactor;
+                var imgY = Math.Clamp(rawImgY, 0, BitmapSize.Height);
+
+                if (!EnableFreePan && rawImgY != imgY)
+                {
+                    var edgeScreenY = rawImgY < 0
+                        ? DestRect.Y
+                        : DestRect.Y + DestRect.Height;
+                    srcY = imgY - (edgeScreenY - DrawingArea.Top) / currentZoomFactor;
+                }
+                else
+                {
+                    srcY = imgY - zoomY / currentZoomFactor;
+                }
+            }
+            // else: panning — srcY retains _logicalSrcPoint.Y (initialized above)
 
             destY = DrawingArea.Top;
             destHeight = controlH;
         }
 
 
-        // 4. Panning to the edge:
-        // Allow panning beyond image bounds by a margin (screen pixels converted to source coordinates).
+        // ═══════════════════════════════════════════════════════════════════════
+        // 4. Clamp source position to enforce panning margins
+        // ═══════════════════════════════════════════════════════════════════════
+        //
+        // For overflow axes, limit how far the user can pan beyond the image edge.
+        // panMarginSrc is PanMargin (screen px) converted to source coordinates.
+        //
+        // Clamping is SKIPPED during zoom-to-cursor when:
+        //   - EnableFreePan is on: zoom-to-cursor must stay unconstrained for smooth
+        //     overflow ↔ fits-within transitions.
+        //   - The axis just transitioned from fits-within → overflow: skip for continuity
+        //     even without FreePan.
+
         var panMarginSrc = DpiScale(PanMargin) / currentZoomFactor;
 
-        // For overflow axes: clamp srcX/srcY with margin
+        // --- X-axis margin clamping ---
+        var wasWidthFitting = BitmapSize.Width * oldZoomFactor <= controlW;
+        if (scaledImgWidth > controlW && !(isZoomingToPoint && (EnableFreePan || wasWidthFitting)))
+        {
+            // Compute per-side effective margins.
+            // When EnableFreePan is on, use the PREVIOUS frame's edge gap (from DestRect,
+            // which hasn't been overwritten yet) as a floor. This "ratchet" preserves the
+            // over-pan established by zoom-to-cursor — the user can pan back but not further out.
+            var effectiveLeftMarginX = panMarginSrc;
+            var effectiveRightMarginX = panMarginSrc;
+            if (EnableFreePan)
+            {
+                var prevLeftGap = Math.Max(0, DestRect.X - DrawingArea.Left) / currentZoomFactor;
+                var prevRightGap = Math.Max(0, DrawingArea.Left + controlW - (DestRect.X + DestRect.Width)) / currentZoomFactor;
+                effectiveLeftMarginX = Math.Max(panMarginSrc, prevLeftGap);
+                effectiveRightMarginX = Math.Max(panMarginSrc, prevRightGap);
+            }
+
+            if (srcX < -effectiveLeftMarginX)
+            {
+                srcX = -effectiveLeftMarginX;
+            }
+            else if (srcX + srcWidth > BitmapSize.Width + effectiveRightMarginX)
+            {
+                srcX = BitmapSize.Width - srcWidth + effectiveRightMarginX;
+            }
+        }
+
+        // --- Y-axis margin clamping ---
+        var wasHeightFitting = BitmapSize.Height * oldZoomFactor <= controlH;
+        if (scaledImgHeight > controlH && !(isZoomingToPoint && (EnableFreePan || wasHeightFitting)))
+        {
+            var effectiveTopMarginY = panMarginSrc;
+            var effectiveBottomMarginY = panMarginSrc;
+            if (EnableFreePan)
+            {
+                var prevTopGap = Math.Max(0, DestRect.Y - DrawingArea.Top) / currentZoomFactor;
+                var prevBottomGap = Math.Max(0, DrawingArea.Top + controlH - (DestRect.Y + DestRect.Height)) / currentZoomFactor;
+                effectiveTopMarginY = Math.Max(panMarginSrc, prevTopGap);
+                effectiveBottomMarginY = Math.Max(panMarginSrc, prevBottomGap);
+            }
+
+            if (srcY + srcHeight > BitmapSize.Height + effectiveBottomMarginY)
+            {
+                srcY = BitmapSize.Height - srcHeight + effectiveBottomMarginY;
+            }
+
+            if (srcY < -effectiveTopMarginY)
+            {
+                srcY = -effectiveTopMarginY;
+            }
+        }
+
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // 4.1. Preserve the logical (unclipped) source position for the next frame
+        // ═══════════════════════════════════════════════════════════════════════
+        //
+        // For overflow axes: store srcX/srcY directly (already margin-clamped above).
+        // For fits-within axes:
+        //   - If FreePan is off: no panning state, always 0.
+        //   - If FreePan is on: back-compute the pan offset from destX/destY and clamp
+        //     it so the image can't drift beyond its centered position.
+        //     (Zoom-to-cursor sets destX/destY directly, so this clamp only
+        //     constrains subsequent panning frames.)
+
+        double logicalX;
         if (scaledImgWidth > controlW)
         {
-            if (srcX < -panMarginSrc)
-            {
-                srcX = -panMarginSrc;
-            }
-            else if (srcX + srcWidth > BitmapSize.Width + panMarginSrc)
-            {
-                srcX = BitmapSize.Width - srcWidth + panMarginSrc;
-            }
+            logicalX = srcX;
+        }
+        else if (EnableFreePan)
+        {
+            var halfGapX = (controlW - scaledImgWidth) / 2.0;
+            logicalX = Math.Clamp(
+                (halfGapX + DrawingArea.Left - destX) / currentZoomFactor,
+                -halfGapX / currentZoomFactor,
+                halfGapX / currentZoomFactor);
+        }
+        else
+        {
+            logicalX = 0;
         }
 
+        double logicalY;
         if (scaledImgHeight > controlH)
         {
-            if (srcY + srcHeight > BitmapSize.Height + panMarginSrc)
-            {
-                srcY = BitmapSize.Height - srcHeight + panMarginSrc;
-            }
-
-            if (srcY < -panMarginSrc)
-            {
-                srcY = -panMarginSrc;
-            }
+            logicalY = srcY;
+        }
+        else if (EnableFreePan)
+        {
+            var halfGapY = (controlH - scaledImgHeight) / 2.0;
+            logicalY = Math.Clamp(
+                (halfGapY + DrawingArea.Top - destY) / currentZoomFactor,
+                -halfGapY / currentZoomFactor,
+                halfGapY / currentZoomFactor);
+        }
+        else
+        {
+            logicalY = 0;
         }
 
-        // preserve the logical (unclipped) position for the next frame
-        // - overflow axes: save from srcX/srcY (already margin-clamped)
-        // - fits axes: clamp _logicalSrcPoint to the free space, or reset to 0 if free pan is disabled
-        var logicalX = scaledImgWidth > controlW
-            ? srcX
-            : EnableFreePan
-                ? Math.Clamp(_logicalSrcPoint.X,
-                    -(controlW - scaledImgWidth) / 2.0 / currentZoomFactor,
-                    (controlW - scaledImgWidth) / 2.0 / currentZoomFactor)
-                : 0;
-        var logicalY = scaledImgHeight > controlH
-            ? srcY
-            : EnableFreePan
-                ? Math.Clamp(_logicalSrcPoint.Y,
-                    -(controlH - scaledImgHeight) / 2.0 / currentZoomFactor,
-                    (controlH - scaledImgHeight) / 2.0 / currentZoomFactor)
-                : 0;
         _logicalSrcPoint = new(logicalX, logicalY);
 
 
-        // 4.1 Clip source rect to valid image bounds
-        // and proportionally adjust the destination rect to show a gap at the edge.
+        // ═══════════════════════════════════════════════════════════════════════
+        // 4.2. Clip source rect to valid image bounds
+        // ═══════════════════════════════════════════════════════════════════════
+        //
+        // When the source position extends beyond [0, BitmapSize], clip it back
+        // and proportionally shrink/offset the dest rect. This creates a visible
+        // gap at the edge when the user has over-panned.
+
+        // left edge: srcX < 0 → shift dest right, narrow both rects
         if (srcX < 0)
         {
             var overPan = -srcX * currentZoomFactor;
@@ -375,6 +549,7 @@ public partial class ViewerControl
             srcX = 0;
         }
 
+        // right edge: source extends past image width → narrow dest from the right
         if (srcX + srcWidth > BitmapSize.Width)
         {
             var excess = srcX + srcWidth - BitmapSize.Width;
@@ -383,6 +558,7 @@ public partial class ViewerControl
             srcWidth = BitmapSize.Width - srcX;
         }
 
+        // top edge
         if (srcY < 0)
         {
             var overPan = -srcY * currentZoomFactor;
@@ -392,6 +568,7 @@ public partial class ViewerControl
             srcY = 0;
         }
 
+        // bottom edge
         if (srcY + srcHeight > BitmapSize.Height)
         {
             var excess = srcY + srcHeight - BitmapSize.Height;
@@ -401,7 +578,9 @@ public partial class ViewerControl
         }
 
 
-        // 5. get the final rectangles
+        // ═══════════════════════════════════════════════════════════════════════
+        // 5. Commit the final rectangles
+        // ═══════════════════════════════════════════════════════════════════════
         SrcRect = new(srcX, srcY, srcWidth, srcHeight);
         DestRect = new(destX, destY, destWidth, destHeight);
 
