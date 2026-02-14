@@ -52,6 +52,7 @@ public enum ConfigId
     // EnableLoopBackNavigation,
     EnableMultiInstances,
     EnableWindowTopMost,
+    EnableFreePan,
     ShowDeleteConfirmation,
     ShowSaveOverrideConfirmation,
     // ShouldPreserveModifiedDate,
@@ -84,6 +85,7 @@ public enum ConfigId
     #region Number settings
 
     // QuickSetupVersion,
+    PanMargin,
     PanSpeed,
     ZoomSpeed,
     // SlideshowInterval,

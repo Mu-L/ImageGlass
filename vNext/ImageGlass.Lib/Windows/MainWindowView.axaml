@@ -28,6 +28,8 @@
             <viewer:ViewerControl x:Name="PART_Viewer"
                                   EnableDebug="{CompiledBinding EnableDebug, Source={x:Static cm:Core.Config}}"
                                   CheckerboardMode="{CompiledBinding CheckerboardMode, Source={x:Static cm:Core.Config}}"
+                                  EnableFreePan="{CompiledBinding EnableFreePan, Source={x:Static cm:Core.Config}}"
+                                  PanMargin="{CompiledBinding PanMargin, Source={x:Static cm:Core.Config}}"
                                   ZoomMode="{CompiledBinding ZoomMode, Source={x:Static cm:Core.Config}}"
                                   InterpolationScaleDown="{CompiledBinding ImageInterpolationScaleDown, Source={x:Static cm:Core.Config}}"
                                   InterpolationScaleUp="{CompiledBinding ImageInterpolationScaleUp, Source={x:Static cm:Core.Config}}">

@@ -208,6 +208,15 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
+    /// Gets, sets value indicating whether free panning is allowed.
+    /// </summary>
+    public bool EnableFreePan
+    {
+        get => Get(ConfigId.EnableFreePan, false);
+        set => Set(ConfigId.EnableFreePan, value);
+    }
+
+    /// <summary>
     /// Gets, sets value indicates that Confirmation dialog is displayed when deleting image
     /// </summary>
     public bool ShowDeleteConfirmation
@@ -400,15 +409,24 @@ public partial class Config : PhReactive
     ///// <summary>
     ///// Gets, sets the version that requires to open Quick setup ImageGlass dialog.
     ///// </summary>
-    //public float QuickSetupVersion { get; set; } = 0f;
+    //public double QuickSetupVersion { get; set; } = 0;
+
+    /// <summary>
+    /// Gets, sets the maximum panning margin in screen pixels beyond the image edge.
+    /// </summary>
+    public double PanMargin
+    {
+        get => Get(ConfigId.PanMargin, 30d);
+        set => Set(ConfigId.PanMargin, value);
+    }
 
     /// <summary>
     /// Gets, sets the panning speed.
     /// Value range is from 0 to 100.
     /// </summary>
-    public float PanSpeed
+    public double PanSpeed
     {
-        get => Get(ConfigId.PanSpeed, 20f);
+        get => Get(ConfigId.PanSpeed, 20d);
         set => Set(ConfigId.PanSpeed, value);
     }
 
@@ -416,21 +434,21 @@ public partial class Config : PhReactive
     /// Gets, sets the zooming speed.
     /// Value range is from -500 to 500.
     /// </summary>
-    public float ZoomSpeed
+    public double ZoomSpeed
     {
-        get => Get(ConfigId.ZoomSpeed, 0f);
+        get => Get(ConfigId.ZoomSpeed, 0d);
         set => Set(ConfigId.ZoomSpeed, value);
     }
 
     ///// <summary>
     ///// Gets, sets slide show interval (minimum value if it's random)
     ///// </summary>
-    //public float SlideshowInterval { get; set; } = 5f;
+    //public double SlideshowInterval { get; set; } = 5;
 
     ///// <summary>
     ///// Gets, sets the maximum slide show interval value
     ///// </summary>
-    //public float SlideshowIntervalTo { get; set; } = 5f;
+    //public double SlideshowIntervalTo { get; set; } = 5;
 
     ///// <summary>
     ///// Gets, sets the number of image changes to notify <see cref="SlideshowNotificationSound"/> sound in slideshow mode.
@@ -471,12 +489,12 @@ public partial class Config : PhReactive
     ///// Gets, sets the maximum image file size (in MB) when caching by <see cref="Base.Services.ImageBooster"/>.
     ///// If this value is <c>less than or equals 0</c>, the option will be ignored.
     ///// </summary>
-    //public float ImageBoosterCacheMaxFileSizeInMb { get; set; } = 100f;
+    //public double ImageBoosterCacheMaxFileSizeInMb { get; set; } = 100;
 
     ///// <summary>
     ///// Gets, sets fixed width on zooming
     ///// </summary>
-    //public float ZoomLockValue { get; set; } = 100f;
+    //public double ZoomLockValue { get; set; } = 100;
 
     /// <summary>
     /// Gets, sets toolbar icon height
