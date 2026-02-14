@@ -220,6 +220,8 @@ public partial class ViewerControl : PhControl
         var p = e.GetCurrentPoint(this);
         var requestRerender = false;
 
+        _zooming.ZoomedPoint = p.Position;
+
 
         // if user is panning with mouse
         if (_lastMousePanPoint is not null)

@@ -78,8 +78,21 @@ internal class ZoomInfo
 
 
     /// <summary>
-    /// Represents a point that has been zoomed in a graphical context.
+    /// Represents the last known pointer position or zoom/pan anchor point.
     /// </summary>
     public Point ZoomedPoint { get; set; } = default;
+
+
+    /// <summary>
+    /// Gets the zoom anchor point.
+    /// Returns <see cref="ZoomedPoint"/> if within bounds,
+    /// otherwise the center of the drawing area.
+    /// </summary>
+    public Point GetZoomAnchorPoint(Rect bounds, Rect drawingArea)
+    {
+        if (bounds.Contains(ZoomedPoint)) return ZoomedPoint;
+
+        return drawingArea.Center;
+    }
 
 }

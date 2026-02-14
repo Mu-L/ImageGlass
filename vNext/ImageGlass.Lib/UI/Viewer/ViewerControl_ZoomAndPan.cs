@@ -34,11 +34,6 @@ public partial class ViewerControl
     private double _panSpeed = 20f;
     private bool _enablePanningVelocity = true;
 
-    /// <summary>
-    /// Maximum panning margin in screen pixels beyond the image edge.
-    /// </summary>
-    private double PAN_MARGIN => DpiScale(30);
-
 
     /// <summary>
     /// Logical source position (can be negative when over-panning).
@@ -177,9 +172,28 @@ public partial class ViewerControl
 
 
     /// <summary>
-    /// Gets the center point of the image viewport.
+    /// Gets, sets a value indicating whether panning is allowed
+    /// when the rendered image fits within the <see cref="DrawingArea"/>.
     /// </summary>
-    public Point ViewportCenterPoint => DestRect.Center;
+    public bool EnableFreePan
+    {
+        get => GetValue(EnableFreePanProperty);
+        set => SetValue(EnableFreePanProperty, value);
+    }
+    public static readonly StyledProperty<bool> EnableFreePanProperty =
+        AvaloniaProperty.Register<ViewerControl, bool>(nameof(EnableFreePan));
+
+
+    /// <summary>
+    /// Gets, sets the maximum panning margin in screen pixels beyond the image edge.
+    /// </summary>
+    public double PanMargin
+    {
+        get => GetValue(PanMarginProperty);
+        set => SetValue(PanMarginProperty, value);
+    }
+    public static readonly StyledProperty<double> PanMarginProperty =
+        AvaloniaProperty.Register<ViewerControl, double>(nameof(PanMargin), 30);
 
 
     #endregion // Public Properies
@@ -239,9 +253,20 @@ public partial class ViewerControl
         {
             srcX = 0;
             srcWidth = BitmapSize.Width;
-
-            destX = (controlW - scaledImgWidth) / 2.0f + DrawingArea.Left;
             destWidth = scaledImgWidth;
+
+            if (EnableFreePan)
+            {
+                // center the image, then apply pan offset
+                // allow panning within the free space (image stays inside DrawingArea)
+                var maxPanScreenX = (controlW - scaledImgWidth) / 2.0;
+                var panOffsetX = Math.Clamp(_logicalSrcPoint.X * currentZoomFactor, -maxPanScreenX, maxPanScreenX);
+                destX = (controlW - scaledImgWidth) / 2.0f + DrawingArea.Left - panOffsetX;
+            }
+            else
+            {
+                destX = (controlW - scaledImgWidth) / 2.0f + DrawingArea.Left;
+            }
         }
         else
         {
@@ -261,9 +286,20 @@ public partial class ViewerControl
         {
             srcY = 0;
             srcHeight = BitmapSize.Height;
-
-            destY = (controlH - scaledImgHeight) / 2f + DrawingArea.Top;
             destHeight = scaledImgHeight;
+
+            if (EnableFreePan)
+            {
+                // center the image, then apply pan offset
+                // allow panning within the free space (image stays inside DrawingArea)
+                var maxPanScreenY = (controlH - scaledImgHeight) / 2.0;
+                var panOffsetY = Math.Clamp(_logicalSrcPoint.Y * currentZoomFactor, -maxPanScreenY, maxPanScreenY);
+                destY = (controlH - scaledImgHeight) / 2f + DrawingArea.Top - panOffsetY;
+            }
+            else
+            {
+                destY = (controlH - scaledImgHeight) / 2f + DrawingArea.Top;
+            }
         }
         else
         {
@@ -280,31 +316,52 @@ public partial class ViewerControl
 
         // 4. Panning to the edge:
         // Allow panning beyond image bounds by a margin (screen pixels converted to source coordinates).
-        // The margin only applies on axes where the image overflows the viewport.
-        var panMarginSrcX = scaledImgWidth > controlW ? PAN_MARGIN / currentZoomFactor : 0;
-        var panMarginSrcY = scaledImgHeight > controlH ? PAN_MARGIN / currentZoomFactor : 0;
+        var panMarginSrc = DpiScale(PanMargin) / currentZoomFactor;
 
-        if (srcX < -panMarginSrcX)
+        // For overflow axes: clamp srcX/srcY with margin
+        if (scaledImgWidth > controlW)
         {
-            srcX = -panMarginSrcX;
-        }
-        else if (srcX + srcWidth > BitmapSize.Width + panMarginSrcX)
-        {
-            srcX = BitmapSize.Width - srcWidth + panMarginSrcX;
-        }
-
-        if (srcY + srcHeight > BitmapSize.Height + panMarginSrcY)
-        {
-            srcY = BitmapSize.Height - srcHeight + panMarginSrcY;
+            if (srcX < -panMarginSrc)
+            {
+                srcX = -panMarginSrc;
+            }
+            else if (srcX + srcWidth > BitmapSize.Width + panMarginSrc)
+            {
+                srcX = BitmapSize.Width - srcWidth + panMarginSrc;
+            }
         }
 
-        if (srcY < -panMarginSrcY)
+        if (scaledImgHeight > controlH)
         {
-            srcY = -panMarginSrcY;
+            if (srcY + srcHeight > BitmapSize.Height + panMarginSrc)
+            {
+                srcY = BitmapSize.Height - srcHeight + panMarginSrc;
+            }
+
+            if (srcY < -panMarginSrc)
+            {
+                srcY = -panMarginSrc;
+            }
         }
 
         // preserve the logical (unclipped) position for the next frame
-        _logicalSrcPoint = new(srcX, srcY);
+        // - overflow axes: save from srcX/srcY (already margin-clamped)
+        // - fits axes: clamp _logicalSrcPoint to the free space, or reset to 0 if free pan is disabled
+        var logicalX = scaledImgWidth > controlW
+            ? srcX
+            : EnableFreePan
+                ? Math.Clamp(_logicalSrcPoint.X,
+                    -(controlW - scaledImgWidth) / 2.0 / currentZoomFactor,
+                    (controlW - scaledImgWidth) / 2.0 / currentZoomFactor)
+                : 0;
+        var logicalY = scaledImgHeight > controlH
+            ? srcY
+            : EnableFreePan
+                ? Math.Clamp(_logicalSrcPoint.Y,
+                    -(controlH - scaledImgHeight) / 2.0 / currentZoomFactor,
+                    (controlH - scaledImgHeight) / 2.0 / currentZoomFactor)
+                : 0;
+        _logicalSrcPoint = new(logicalX, logicalY);
 
 
         // 4.1 Clip source rect to valid image bounds
@@ -391,9 +448,13 @@ public partial class ViewerControl
     public void SetZoomMode(ZoomMode? mode = null, bool isManualZoom = false, bool zoomedByResizing = false)
     {
         // get zoom factor after applying the zoom mode
+        _logicalSrcPoint = default;
+        _zooming.ZoomedPoint = default;
+
         _zooming.Mode = mode ?? _zooming.Mode;
         _zooming.Factor = CalculateZoomFactor(_zooming.Mode, BitmapSize.Width, BitmapSize.Height);
         _zooming.IsManual = isManualZoom;
+
 
         // update drawing regions
         CalculateDrawingRegion();
@@ -475,7 +536,7 @@ public partial class ViewerControl
     /// </summary>
     /// <param name="point">
     /// Client's cursor location to zoom into.
-    /// <c><see cref="ViewportCenterPoint"/></c> is the default value.
+    /// <c><see cref="ZoomInfo.GetZoomAnchorPoint"/></c> is the default value.
     /// </param>
     /// <returns>
     ///   <list type="table">
@@ -494,7 +555,7 @@ public partial class ViewerControl
     /// </summary>
     /// <param name="point">
     /// Client's cursor location to zoom out.
-    /// <c><see cref="ViewportCenterPoint"/></c> is the default value.
+    /// <c><see cref="ZoomInfo.GetZoomAnchorPoint"/></c> is the default value.
     /// </param>
     /// <returns>
     ///   <list type="table">
@@ -515,7 +576,7 @@ public partial class ViewerControl
     /// <param name="point">
     /// Client's cursor location to zoom out.
     /// If its value is <c>null</c> or outside of the <see cref="VirtualViewerControl"/> control,
-    /// <c><see cref="ViewportCenterPoint"/></c> is used.
+    /// <c><see cref="ZoomInfo.GetZoomAnchorPoint"/></c> is used.
     /// </param>
     /// <returns>
     ///   <list type="table">
@@ -533,7 +594,7 @@ public partial class ViewerControl
         // use the center point if the point is outside
         if (!Bounds.Contains(location))
         {
-            location = ViewportCenterPoint;
+            location = _zooming.GetZoomAnchorPoint(Bounds, DrawingArea);
         }
 
         // get the gap when the viewport is smaller than the control size
@@ -598,7 +659,7 @@ public partial class ViewerControl
     /// </param>
     /// <param name="point">
     /// Client's cursor location to zoom out.
-    /// <c><see cref="ViewportCenterPoint"/></c> is the default value.
+    /// <c><see cref="ZoomInfo.GetZoomAnchorPoint"/></c> is the default value.
     /// </param>
     /// <returns>
     ///   <list type="table">
@@ -661,7 +722,7 @@ public partial class ViewerControl
         // use the center point if the point is outside
         if (!Bounds.Contains(location))
         {
-            location = ViewportCenterPoint;
+            location = _zooming.GetZoomAnchorPoint(Bounds, DrawingArea);
         }
 
 
@@ -728,7 +789,10 @@ public partial class ViewerControl
             _logicalSrcPoint = _logicalSrcPoint.WithY(newY);
         }
 
-        _zooming.ZoomedPoint = pointerPosition ?? new();
+        if (pointerPosition is not null)
+        {
+            _zooming.ZoomedPoint = pointerPosition.Value;
+        }
 
 
         // emit panning event
