@@ -891,9 +891,16 @@ public partial class AppAPIProvider
     /// <summary>
     /// Sets the zoom mode value.
     /// </summary>
-    public static void IG_SetZoomMode(ZoomMode mode)
+    public void IG_SetZoomMode(ZoomMode mode)
     {
-        Core.Config.ZoomMode = mode;
+        if (mode == Core.Config.ZoomMode)
+        {
+            IG_Refresh();
+        }
+        else
+        {
+            Core.Config.ZoomMode = mode;
+        }
     }
 
 
