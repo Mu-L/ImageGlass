@@ -989,12 +989,12 @@ public partial class ViewerControl
     /// </summary>
     /// <param name="distance">Distance to move</param>
     /// <param name="requestRerender"><c>true</c> to request the control invalidates.</param>
-    public void PanLeft(double? distance = null, bool requestRerender = true)
+    public void PanLeft(double distance = 0, bool requestRerender = true)
     {
-        distance ??= PanSpeed;
-        distance = Math.Max(distance.Value, 0); // min 0
+        distance *= PanSpeed;
+        distance = Math.Max(distance, 0); // min 0
 
-        _ = PanTo(-distance.Value, 0, null, requestRerender);
+        _ = PanTo(-distance, 0, null, requestRerender);
     }
 
 
@@ -1003,12 +1003,12 @@ public partial class ViewerControl
     /// </summary>
     /// <param name="distance">Distance to move</param>
     /// <param name="requestRerender"><c>true</c> to request the control invalidates.</param>
-    public void PanRight(double? distance = null, bool requestRerender = true)
+    public void PanRight(double distance = 0, bool requestRerender = true)
     {
-        distance ??= PanSpeed;
-        distance = Math.Max(distance.Value, 0); // min 0
+        distance *= PanSpeed;
+        distance = Math.Max(distance, 0); // min 0
 
-        _ = PanTo(distance.Value, 0, null, requestRerender);
+        _ = PanTo(distance, 0, null, requestRerender);
     }
 
 
@@ -1017,12 +1017,12 @@ public partial class ViewerControl
     /// </summary>
     /// <param name="distance">Distance to move</param>
     /// <param name="requestRerender"><c>true</c> to request the control invalidates.</param>
-    public void PanUp(double? distance = null, bool requestRerender = true)
+    public void PanUp(double distance = 0, bool requestRerender = true)
     {
-        distance ??= PanSpeed;
-        distance = Math.Max(distance.Value, 0); // min 0
+        distance *= PanSpeed;
+        distance = Math.Max(distance, 0); // min 0
 
-        _ = PanTo(0, -distance.Value, null, requestRerender);
+        _ = PanTo(0, -distance, null, requestRerender);
     }
 
 
@@ -1031,12 +1031,12 @@ public partial class ViewerControl
     /// </summary>
     /// <param name="distance">Distance to move</param>
     /// <param name="requestRerender"><c>true</c> to request the control invalidates.</param>
-    public void PanDown(double? distance = null, bool requestRerender = true)
+    public void PanDown(double distance = 0, bool requestRerender = true)
     {
-        distance ??= PanSpeed;
-        distance = Math.Max(distance.Value, 0); // min 0
+        distance *= PanSpeed;
+        distance = Math.Max(distance, 0); // min 0
 
-        _ = PanTo(0, distance.Value, null, requestRerender);
+        _ = PanTo(0, distance, null, requestRerender);
     }
 
 

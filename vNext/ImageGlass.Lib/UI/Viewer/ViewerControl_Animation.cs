@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Controls;
+using ImageGlass.Common;
+using System;
 
 namespace ImageGlass.UI.Viewer;
 
@@ -35,12 +37,44 @@ public partial class ViewerControl
     public AnimationSources AnimationSource { get; protected set; } = AnimationSources.None;
 
 
+
+
+
+    /// <summary>
+    /// Prepares logics for frame animation source.
+    /// </summary>
+    protected virtual void OnPrepareAnimationFrame(TimeSpan ts)
+    {
+        if (!EnableDrawingAnimation) return;
+
+        CalculateFps();
+
+        if (_lastAnimationFrameTime != TimeSpan.Zero)
+        {
+            // Calculate delta based on real time passed
+            var elapsedSinceUpdate = (ts - _lastAnimationFrameTime).TotalSeconds;
+
+            // How much to zoom this specific frame
+            OnDrawAnimationSource(elapsedSinceUpdate);
+            InvalidateVisual();
+        }
+        _lastAnimationFrameTime = ts;
+
+
+        // loop for drawing animation source
+        TopLevel.GetTopLevel(this)?.RequestAnimationFrame(OnPrepareAnimationFrame);
+    }
+
+
+
     /// <summary>
     /// Starts a built-in animation.
     /// </summary>
     /// <param name="sources">Source of animation</param>
-    public void StartDrawingAnimation(AnimationSources sources)
+    public void StartDrawingAnimation(AnimationSources sources, int durationMs = int.MaxValue, Action? callbackFn = null)
     {
+        if (durationMs <= 0) return;
+
         //if (UseWebview2)
         //{
         //    StartWeb2Animation(sources);
@@ -48,15 +82,33 @@ public partial class ViewerControl
 
         AnimationSource = sources;
         EnableDrawingAnimation = true;
+        _lastAnimationFrameTime = TimeSpan.Zero;
+
         TopLevel.GetTopLevel(this)?.RequestAnimationFrame(OnPrepareAnimationFrame);
+
+
+        // set time to stop animation source
+        if (durationMs < int.MaxValue)
+        {
+            BHelper.Debounce(durationMs, OnAnimationStopped,
+                new AnimationSourceArgs(sources, callbackFn), true);
+        }
     }
+
+
+    private void OnAnimationStopped(AnimationSourceArgs? e)
+    {
+        if (e is null) return;
+        StopDrawingAnimation(e.Source, e.CallbackFn);
+    }
+
 
 
     /// <summary>
     /// Stops a built-in animation.
     /// </summary>
     /// <param name="sources">Source of animation</param>
-    public void StopDrawingAnimation(AnimationSources sources)
+    public void StopDrawingAnimation(AnimationSources sources, Action? callbackFn = null)
     {
         //if (UseWebview2)
         //{
@@ -66,6 +118,8 @@ public partial class ViewerControl
         AnimationSource ^= sources;
         EnableDrawingAnimation = false;
         InvalidateVisual();
+
+        callbackFn?.Invoke();
     }
 
 

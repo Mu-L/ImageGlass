@@ -115,3 +115,10 @@ public enum ImageInterpolation : int
     High = 4,
 }
 
+
+public class AnimationSourceArgs(AnimationSources source, Action? callbackFn)
+{
+    public AnimationSources Source => source;
+    public Action? CallbackFn => callbackFn;
+}
+

@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
@@ -38,6 +37,7 @@ public partial class ViewerControl
     // FPS
     private double _fps;
     private long _lastFpsTime = Environment.TickCount64;
+    private TimeSpan _lastAnimationFrameTime = TimeSpan.Zero;
 
 
     // drawing image
@@ -196,21 +196,6 @@ public partial class ViewerControl
 
 
     /// <summary>
-    /// Prepares logics for frame animation source.
-    /// </summary>
-    protected virtual void OnPrepareAnimationFrame(TimeSpan ts)
-    {
-        if (!EnableDrawingAnimation) return;
-
-        CalculateFps();
-        OnDrawAnimationSource();    // draw animation source
-
-        // loop for drawing animation source
-        TopLevel.GetTopLevel(this)?.RequestAnimationFrame(OnPrepareAnimationFrame);
-    }
-
-
-    /// <summary>
     /// Draw debug information.
     /// </summary>
     protected virtual void OnDrawDebugInfo(DrawingContext c)
@@ -349,7 +334,7 @@ public partial class ViewerControl
             SKImageRef.Set(ref _imgRender, img, _imgSource);
 
             // build mipmap tile cache for non-animated photos
-            BuildTileCache();
+            CreateMipmapTileCache();
         }
     }
 
@@ -357,40 +342,44 @@ public partial class ViewerControl
     /// <summary>
     /// Draws animation source.
     /// </summary>
-    protected virtual void OnDrawAnimationSource()
+    protected virtual void OnDrawAnimationSource(double eslapseDelta)
     {
         //if (UseWebview2) return;
+        var panDelta = eslapseDelta * 30;
+        var zoomDelta = eslapseDelta * 1000;
 
         // Panning
         if (AnimationSource.HasFlag(AnimationSources.PanLeft))
         {
-            PanLeft(requestRerender: false);
+            PanLeft(panDelta, requestRerender: false);
         }
         else if (AnimationSource.HasFlag(AnimationSources.PanRight))
         {
-            PanRight(requestRerender: false);
+            PanRight(panDelta, requestRerender: false);
         }
 
         if (AnimationSource.HasFlag(AnimationSources.PanUp))
         {
-            PanUp(requestRerender: false);
+            PanUp(panDelta, requestRerender: false);
         }
         else if (AnimationSource.HasFlag(AnimationSources.PanDown))
         {
-            PanDown(requestRerender: false);
+            PanDown(panDelta, requestRerender: false);
         }
 
 
         // Zooming
         if (AnimationSource.HasFlag(AnimationSources.ZoomIn))
         {
-            _ = ZoomByDeltaToPoint(20, null, requestRerender: false);
+            _ = ZoomByDeltaToPoint(zoomDelta, null, requestRerender: false);
         }
         else if (AnimationSource.HasFlag(AnimationSources.ZoomOut))
         {
-            _ = ZoomByDeltaToPoint(-20, null, requestRerender: false);
+            _ = ZoomByDeltaToPoint(-zoomDelta, null, requestRerender: false);
         }
+
     }
+
 
     #endregion // Override / Virtual Methods
 
@@ -420,11 +409,11 @@ public partial class ViewerControl
 
 
     /// <summary>
-    /// Builds the mipmap tile cache from the current render image.
+    /// Creates the mipmap tile cache from the current render image.
     /// Must be called inside <see cref="_lock"/>.
     /// Skips animated photos (they update frames too frequently for tiling).
     /// </summary>
-    private void BuildTileCache()
+    private void CreateMipmapTileCache()
     {
         // dispose previous mipmap tile cache
         _mipmapCache?.Dispose();
