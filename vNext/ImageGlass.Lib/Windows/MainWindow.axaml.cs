@@ -25,6 +25,7 @@ using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
 using ImageGlass.ViewModels;
 using System;
+using System.Linq;
 
 namespace ImageGlass.Common.Windows;
 
@@ -145,7 +146,8 @@ public partial class MainWindow : PhWindow
             }
 
             // set instance arguments
-            Core.Args = e.Arguments;
+            var modulePath = Core.Args.ElementAtOrDefault(0) ?? string.Empty;
+            Core.Args = [modulePath, .. e.Arguments];
             Core.UpdateInitImagePath();
 
             // load image path
