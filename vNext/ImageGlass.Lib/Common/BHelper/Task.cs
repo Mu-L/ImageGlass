@@ -17,7 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using Avalonia.Threading;
 using System;
+using System.Collections.Concurrent;
 using System.Runtime;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,12 +31,90 @@ public partial class BHelper
     private static CancellationTokenSource? _cancelGcCollect;
 
 
+    #region Debouncer
+
+    // Key: The specific Action/Delegate instance.
+    private static readonly ConcurrentDictionary<object, CancellationTokenSource> _tokens = new();
+
+
+    /// <summary>
+    /// Debounces a parameterless action.
+    /// <b>Note</b>: 'action' delegate must be the same instance (cached) to work correctly.
+    /// </summary>
+    public static void Debounce(int delayMs, Action action, bool runUIThread = false)
+    {
+        // Pass 'action' as both the dictionary key and the workload
+        DebounceInternal(action, delayMs, action, runUIThread);
+    }
+
+
+    /// <summary>
+    /// Debounces an action with a parameter. 
+    /// <b>Note</b>: 'action' delegate must be the same instance (cached) to work correctly.
+    /// </summary>
+    public static void Debounce<T>(int delayMs, Action<T?> action, T? param = default, bool runUIThread = false)
+    {
+        // Pass 'action' as the key to ensure we cancel previous calls to THIS method.
+        // Create a lightweight closure for the workload to capture the new 'param'.
+        DebounceInternal(action, delayMs, () => action(param), runUIThread);
+    }
+
+
+    /// <summary>
+    /// Core logic to handle cancellation, delay, and execution.
+    /// </summary>
+    private static void DebounceInternal(object key, int delayMs, Action workload, bool runUIThread)
+    {
+        // 1. Cancel and dispose the previous timer for this delegate
+        if (_tokens.TryRemove(key, out var oldCts))
+        {
+            oldCts.Cancel();
+            oldCts.Dispose();
+        }
+
+        // 2. Create new token
+        var cts = new CancellationTokenSource();
+        _tokens.TryAdd(key, cts);
+
+        // 3. Start delay
+        Task.Delay(delayMs, cts.Token).ContinueWith(t =>
+        {
+            // Check cancellation immediately upon waking
+            if (cts.Token.IsCancellationRequested) return;
+
+            // Cleanup dictionary
+            if (_tokens.TryRemove(key, out var currentCts))
+            {
+                currentCts.Dispose();
+            }
+
+            // 4. Execute
+            if (runUIThread)
+            {
+                // 'Post' is fire-and-forget and slightly faster than InvokeAsync for this case
+                Dispatcher.UIThread.Post(workload, DispatcherPriority.Background);
+            }
+            else
+            {
+                workload();
+            }
+        },
+        CancellationToken.None,
+        TaskContinuationOptions.OnlyOnRanToCompletion,
+        TaskScheduler.Default);
+    }
+
+    #endregion // Debouncer
+
+
+
     /// <summary>
     /// Delay calling <see cref="GC.Collect"/> for <paramref name="delayMs"/> milliseconds.
     /// </summary>
     public static void GcCollect(int delayMs = 500)
     {
         _cancelGcCollect?.Cancel();
+        _cancelGcCollect?.Dispose();
         _cancelGcCollect = new();
 
         _ = GCCollectAsync(delayMs, _cancelGcCollect.Token);
@@ -58,5 +138,6 @@ public partial class BHelper
         GC.WaitForPendingFinalizers();
         GC.Collect();
     }
+
 
 }
