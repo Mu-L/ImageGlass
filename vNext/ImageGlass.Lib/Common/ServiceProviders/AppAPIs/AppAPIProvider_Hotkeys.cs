@@ -34,7 +34,7 @@ namespace ImageGlass.Common.ServiceProviders;
 public partial class AppAPIProvider
 {
     private Hotkey? _lastHotkeyPressed = null;
-    private bool _isHotkeyPressMultiTimes = false;
+    private bool _isQuickBrowsingPhotos = false;
 
 
     // list of all menu items & default action, hotkeys
@@ -228,20 +228,64 @@ public partial class AppAPIProvider
         var action = AppHotkeysMap.GetValueOrDefault(hotkey.KeyString);
         if (action is null) return;
 
-        _isHotkeyPressMultiTimes = hotkey.IsSame(_lastHotkeyPressed);
+        var isHotkeyPressMultiTimes = hotkey.IsSame(_lastHotkeyPressed);
         var executable = action.Executable ?? string.Empty;
-
-
-        // 2. handle special hotkeys
 
         // save the last hotkey pressed
         _lastHotkeyPressed = hotkey;
 
-        // for quick browsing, only load photo preview
-        var isQuickBrowsing = executable.Equals(nameof(API.IG_ViewByStep), StringComparison.Ordinal)
+        // mark the hotkey handled
+        e.Handled = action != null;
+
+
+        // 2. handle special hotkeys
+        // 2.1 animate Zoom In/Out
+        if (executable == nameof(API.IG_ZoomIn))
+        {
+            if (Viewer.ZoomLevels.Length == 0)
+            {
+                Viewer.StartDrawingAnimation(AnimationSources.ZoomIn);
+                return;
+            }
+        }
+        else if (executable == nameof(API.IG_ZoomOut))
+        {
+            if (Viewer.ZoomLevels.Length == 0)
+            {
+                Viewer.StartDrawingAnimation(AnimationSources.ZoomOut);
+                return;
+            }
+        }
+
+        // 2.2 animate Panning
+        if (executable == nameof(API.IG_PanLeft))
+        {
+            Viewer.StartDrawingAnimation(AnimationSources.PanLeft);
+            return;
+        }
+        if (executable == nameof(API.IG_PanRight))
+        {
+            Viewer.StartDrawingAnimation(AnimationSources.PanRight);
+            return;
+        }
+        if (executable == nameof(API.IG_PanUp))
+        {
+            Viewer.StartDrawingAnimation(AnimationSources.PanUp);
+            return;
+        }
+        if (executable == nameof(API.IG_PanDown))
+        {
+            Viewer.StartDrawingAnimation(AnimationSources.PanDown);
+            return;
+        }
+
+
+        // 2.3. quick browsing, only load photo preview
+        var isBrowsingAction = executable.Equals(nameof(API.IG_ViewByStep), StringComparison.Ordinal)
             || executable.Equals(nameof(API.IG_ViewNext), StringComparison.Ordinal)
             || executable.Equals(nameof(API.IG_ViewPrevious), StringComparison.Ordinal);
-        if (isQuickBrowsing && _isHotkeyPressMultiTimes)
+        _isQuickBrowsingPhotos = isBrowsingAction && isHotkeyPressMultiTimes;
+        if (_isQuickBrowsingPhotos)
         {
             Viewer.ShouldLoadFullResolution.Value = false;
         }
@@ -249,10 +293,6 @@ public partial class AppAPIProvider
 
         // 3. run the action
         await RunActionAsync(action);
-
-
-        // 4. mark the hotkey handled
-        e.Handled = action != null;
     }
 
 
@@ -261,9 +301,47 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task HandleKeyUpAsync(KeyEventArgs e)
     {
-        // the quick browsing ends, now start loading full resolution
-        if (_isHotkeyPressMultiTimes)
+        // 1. stop animation source
+        // 1.1 Zoom In/Out
+        if (Viewer.AnimationSource.HasFlag(AnimationSources.ZoomIn))
         {
+            Viewer.StopDrawingAnimation(AnimationSources.ZoomIn);
+            return;
+        }
+        if (Viewer.AnimationSource.HasFlag(AnimationSources.ZoomOut))
+        {
+            Viewer.StopDrawingAnimation(AnimationSources.ZoomOut);
+            return;
+        }
+
+        // 1.2 Panning
+        if (Viewer.AnimationSource.HasFlag(AnimationSources.PanLeft))
+        {
+            Viewer.StopDrawingAnimation(AnimationSources.PanLeft);
+            return;
+        }
+        if (Viewer.AnimationSource.HasFlag(AnimationSources.PanRight))
+        {
+            Viewer.StopDrawingAnimation(AnimationSources.PanRight);
+            return;
+        }
+        if (Viewer.AnimationSource.HasFlag(AnimationSources.PanUp))
+        {
+            Viewer.StopDrawingAnimation(AnimationSources.PanUp);
+            return;
+        }
+        if (Viewer.AnimationSource.HasFlag(AnimationSources.PanDown))
+        {
+            Viewer.StopDrawingAnimation(AnimationSources.PanDown);
+            return;
+        }
+
+
+        // 2. handle quick browsing end: start loading full resolution
+        if (_isQuickBrowsingPhotos)
+        {
+            _isQuickBrowsingPhotos = false;
+
             Viewer.Photo?.CancelLoading();
             Viewer.ShouldLoadFullResolution.Value = true;
 
@@ -273,7 +351,6 @@ public partial class AppAPIProvider
 
 
         _lastHotkeyPressed = null;
-        _isHotkeyPressMultiTimes = false;
     }
 
 

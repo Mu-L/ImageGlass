@@ -20,7 +20,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform.Storage;
-using Avalonia.Threading;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
@@ -905,31 +904,6 @@ public partial class AppAPIProvider
 
 
     /// <summary>
-    /// Start drawing animation.
-    /// </summary>
-    public void IG_Animate(AnimationSources source, int durationMs = 100, Action? callbackFn = null)
-    {
-        Viewer.StartDrawingAnimation(source);
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            Viewer.StopDrawingAnimation(source);
-            callbackFn?.Invoke();
-        }, DispatcherPriority.Render);
-
-        // TODO:
-        //BHelper.Debounce(durationMs, () =>
-        //{
-        //    DispatcherQueue?.TryEnqueue(() =>
-        //    {
-        //        Viewer.StopDrawingAnimation(source);
-        //        callbackFn?.Invoke();
-        //    });
-        //});
-    }
-
-
-    /// <summary>
     /// Zooms into the image.
     /// </summary>
     public void IG_ZoomIn()
@@ -941,7 +915,7 @@ public partial class AppAPIProvider
         }
 
         // smooth zooming
-        IG_Animate(AnimationSources.ZoomIn);
+        Viewer.StartDrawingAnimation(AnimationSources.ZoomIn, 100);
     }
 
 
@@ -957,7 +931,7 @@ public partial class AppAPIProvider
         }
 
         // smooth zooming
-        IG_Animate(AnimationSources.ZoomOut);
+        Viewer.StartDrawingAnimation(AnimationSources.ZoomOut, 100);
     }
 
     #endregion // Zoom APIs
@@ -972,7 +946,7 @@ public partial class AppAPIProvider
     public void IG_PanLeft()
     {
         // smooth zooming
-        IG_Animate(AnimationSources.PanLeft);
+        Viewer.StartDrawingAnimation(AnimationSources.PanLeft, 100);
     }
 
 
@@ -982,7 +956,7 @@ public partial class AppAPIProvider
     public void IG_PanRight()
     {
         // smooth zooming
-        IG_Animate(AnimationSources.PanRight);
+        Viewer.StartDrawingAnimation(AnimationSources.PanRight, 100);
     }
 
 
@@ -992,7 +966,7 @@ public partial class AppAPIProvider
     public void IG_PanUp()
     {
         // smooth zooming
-        IG_Animate(AnimationSources.PanUp);
+        Viewer.StartDrawingAnimation(AnimationSources.PanUp, 100);
     }
 
 
@@ -1002,7 +976,7 @@ public partial class AppAPIProvider
     public void IG_PanDown()
     {
         // smooth zooming
-        IG_Animate(AnimationSources.PanDown);
+        Viewer.StartDrawingAnimation(AnimationSources.PanDown, 100);
     }
 
 
@@ -1011,10 +985,11 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_PanToLeft()
     {
-        var distanceX = Viewer.SrcRect.X;
-        Viewer.PanSpeed = distanceX * Viewer.ZoomFactor / 10;
+        var distanceX = Viewer.SrcRect.X * Viewer.ZoomFactor;
+        var duration = 1000;
+        Viewer.PanSpeed = distanceX / duration * 60;
 
-        IG_Animate(AnimationSources.PanLeft, 200, () =>
+        Viewer.StartDrawingAnimation(AnimationSources.PanLeft, duration, () =>
         {
             Viewer.PanSpeed = Core.Config.PanSpeed;
         });
@@ -1027,10 +1002,11 @@ public partial class AppAPIProvider
     public void IG_PanToRight()
     {
         var x = Viewer.BitmapSize.Width - Viewer.SrcRect.Width;
-        var distanceX = x + Viewer.SrcRect.X;
-        Viewer.PanSpeed = distanceX * Viewer.ZoomFactor / 10;
+        var distanceX = (x + Viewer.SrcRect.X) * Viewer.ZoomFactor;
+        var duration = 1000;
+        Viewer.PanSpeed = distanceX / duration * 60;
 
-        IG_Animate(AnimationSources.PanRight, 200, () =>
+        Viewer.StartDrawingAnimation(AnimationSources.PanRight, duration, () =>
         {
             Viewer.PanSpeed = Core.Config.PanSpeed;
         });
@@ -1042,10 +1018,11 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_PanToTop()
     {
-        var distanceY = Viewer.SrcRect.Y;
-        Viewer.PanSpeed = distanceY * Viewer.ZoomFactor / 10;
+        var distanceY = Viewer.SrcRect.Y * Viewer.ZoomFactor;
+        var duration = 1000;
+        Viewer.PanSpeed = distanceY / duration * 60;
 
-        IG_Animate(AnimationSources.PanUp, 200, () =>
+        Viewer.StartDrawingAnimation(AnimationSources.PanUp, duration, () =>
         {
             Viewer.PanSpeed = Core.Config.PanSpeed;
         });
@@ -1058,10 +1035,11 @@ public partial class AppAPIProvider
     public void IG_PanToBottom()
     {
         var y = Viewer.BitmapSize.Height - Viewer.SrcRect.Height;
-        var distanceY = y + Viewer.SrcRect.Y;
-        Viewer.PanSpeed = distanceY * Viewer.ZoomFactor / 10;
+        var distanceY = (y + Viewer.SrcRect.Y) * Viewer.ZoomFactor;
+        var duration = 1000;
+        Viewer.PanSpeed = distanceY / duration * 60;
 
-        IG_Animate(AnimationSources.PanDown, 200, () =>
+        Viewer.StartDrawingAnimation(AnimationSources.PanDown, duration, () =>
         {
             Viewer.PanSpeed = Core.Config.PanSpeed;
         });
