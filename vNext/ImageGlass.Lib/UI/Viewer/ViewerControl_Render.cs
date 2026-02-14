@@ -244,9 +244,6 @@ public partial class ViewerControl
         // draw image bounds
         c.DrawRectangle(new Pen(Brushes.LightGreen, 2, DashStyle.Dash, PenLineCap.Round, PenLineJoin.Round), DestRect);
 
-        // draw zoom anchor point
-        c.DrawEllipse(Brushes.HotPink, new Pen(Brushes.White, 2), _zooming.GetZoomAnchorPoint(Bounds, DrawingArea), 10, 10);
-
         // draw zoomed point
         c.DrawEllipse(Brushes.Red, new Pen(Brushes.White, 2), _zooming.ZoomedPoint, 5, 5);
     }

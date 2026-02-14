@@ -536,7 +536,6 @@ public partial class ViewerControl
     /// </summary>
     /// <param name="point">
     /// Client's cursor location to zoom into.
-    /// <c><see cref="ZoomInfo.GetZoomAnchorPoint"/></c> is the default value.
     /// </param>
     /// <returns>
     ///   <list type="table">
@@ -555,7 +554,6 @@ public partial class ViewerControl
     /// </summary>
     /// <param name="point">
     /// Client's cursor location to zoom out.
-    /// <c><see cref="ZoomInfo.GetZoomAnchorPoint"/></c> is the default value.
     /// </param>
     /// <returns>
     ///   <list type="table">
@@ -576,7 +574,7 @@ public partial class ViewerControl
     /// <param name="point">
     /// Client's cursor location to zoom out.
     /// If its value is <c>null</c> or outside of the <see cref="VirtualViewerControl"/> control,
-    /// <c><see cref="ZoomInfo.GetZoomAnchorPoint"/></c> is used.
+    /// use DrawingArea center point.
     /// </param>
     /// <returns>
     ///   <list type="table">
@@ -594,7 +592,7 @@ public partial class ViewerControl
         // use the center point if the point is outside
         if (!Bounds.Contains(location))
         {
-            location = _zooming.GetZoomAnchorPoint(Bounds, DrawingArea);
+            location = DrawingArea.Center;
         }
 
         // get the gap when the viewport is smaller than the control size
@@ -659,7 +657,6 @@ public partial class ViewerControl
     /// </param>
     /// <param name="point">
     /// Client's cursor location to zoom out.
-    /// <c><see cref="ZoomInfo.GetZoomAnchorPoint"/></c> is the default value.
     /// </param>
     /// <returns>
     ///   <list type="table">
@@ -722,7 +719,7 @@ public partial class ViewerControl
         // use the center point if the point is outside
         if (!Bounds.Contains(location))
         {
-            location = _zooming.GetZoomAnchorPoint(Bounds, DrawingArea);
+            location = DrawingArea.Center;
         }
 
 
