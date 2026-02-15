@@ -179,6 +179,7 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
         EggShell.DisplayFileProperties(filePath, windowHandle);
     }
 
+
     #endregion // Public Methods
 
 

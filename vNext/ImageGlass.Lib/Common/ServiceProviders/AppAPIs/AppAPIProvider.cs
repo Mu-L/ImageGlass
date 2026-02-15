@@ -31,6 +31,7 @@ using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -419,50 +420,74 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_OpenWithAsync()
     {
-        // TODO:
-        //string? filePath = null;
-        //var isClipboardPhoto = Core.ClipboardImage is not null;
+        string? filePath = null;
+        var isClipboardPhoto = Core.ClipboardImage is not null;
 
 
-        //if (isClipboardPhoto)
-        //{
-        //    _ = Message.ShowAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
+        if (isClipboardPhoto)
+        {
+            _ = Message.ShowAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
 
-        //    // save clipboard photo as temp PNG file
-        //    filePath = await Core.SavePhotoAsTempFileAsync();
-        //}
-        //else
-        //{
-        //    filePath = Core.Photos.CurrentFilePath;
-        //}
+            // save clipboard photo as temp PNG file
+            filePath = await Core.SavePhotoAsTempFileAsync();
+        }
+        else
+        {
+            filePath = Core.Photos.CurrentFilePath;
+        }
 
 
-        //await Message.ClearAsync();
-        //if (!File.Exists(filePath))
-        //{
-        //    _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
-        //    {
-        //        Title = Core.Lang[LangId.FrmMain_MnuOpenWith],
-        //        Description = Core.Lang[LangId._CreatingFileError],
-        //    });
-        //}
-        //else
-        //{
-        //    using var p = new Process();
-        //    p.StartInfo.FileName = "openwith";
+        await Message.ClearAsync();
+        if (!File.Exists(filePath))
+        {
+            _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[LangId.FrmMain_MnuOpenWith],
+                Description = Core.Lang[LangId._CreatingFileError],
+            });
+        }
+        else
+        {
+            try
+            {
+                if (BHelper.OS == OSType.Windows)
+                {
+                    // Uses the system shell32.dll 'OpenAs_RunDLL' entry point
+                    var args = $"shell32.dll,OpenAs_RunDLL {filePath}";
+                    _ = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "rundll32.exe",
+                        Arguments = args,
+                        UseShellExecute = true,
+                    });
+                }
+                else if (BHelper.OS == OSType.Mac)
+                {
+                    var script = $"tell application \"Finder\" to open POSIX file \"{filePath}\" using (choose application)";
+                    var escapedScript = script.Replace("\"", "\\\"");
 
-        //    // Build the arguments
-        //    p.StartInfo.Arguments = $"\"{filePath}\"";
-
-        //    // show error dialog
-        //    p.StartInfo.ErrorDialog = true;
-
-        //    try
-        //    {
-        //        p.Start();
-        //    }
-        //    catch { }
-        //}
+                    _ = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "osascript",
+                        Arguments = $"-e \"{escapedScript}\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    });
+                }
+                else if (BHelper.OS == OSType.Linux)
+                {
+                    // -n forces a menu choice if multiple apps exist
+                    _ = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "mimeopen",
+                        Arguments = $"-n \"{filePath}\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = false, // Often needs a terminal context for choice
+                    });
+                }
+            }
+            catch { }
+        }
     }
 
 
