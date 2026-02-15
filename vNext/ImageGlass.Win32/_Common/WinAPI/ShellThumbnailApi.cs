@@ -134,7 +134,7 @@ public static class ShellThumbnailApi
                 return null;
             }
 
-            imgOutput = SkiaCodec.ConvertToSKImage(bmpOutput);
+            imgOutput = SkiaCodec.ToSKImage(bmpOutput);
             return imgOutput;
         }
         catch

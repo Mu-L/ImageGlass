@@ -19,7 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
@@ -1246,13 +1248,16 @@ public partial class AppAPIProvider
         // 2. if clipboard contains image pixels
         if (data.Contains(DataFormat.Bitmap))
         {
-            // TODO:
-            //var bmp = await data.TryGetBitmapAsync();
-            //if (bmp is not null)
-            //{
-            //    var photo = new Photo(wicBmp, wicBmp.Size.Width, wicBmp.Size.Height);
-            //    await LoadClipboardPhotoAsync(photo);
-            //}
+            using var abmp = await data.TryGetBitmapAsync();
+            using var skBmp = SkiaCodec.FromBitmap(abmp);
+            var skImg = SkiaCodec.ToSKImage(skBmp);
+
+            if (skImg is not null)
+            {
+                var photo = new Photo(skImg, skImg.Width, skImg.Height);
+                await LoadClipboardPhotoAsync(photo);
+            }
+
             return;
         }
 
@@ -1298,28 +1303,34 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_CopyImagePixelsAsync()
     {
-        if (Viewer.SourceKind == PhotoSource.None) return;
+        if (Viewer.SourceKind == PhotoSource.None || _mainWindow.Clipboard is null) return;
 
-        //// 1. get rendered bitmap
-        //var wicBmp = Viewer.GetRenderedBitmap();
-        //if (wicBmp.IsDisposed()) return;
+        // 1. get rendered bitmap
+        var bmp = Viewer.GetRenderedBitmap(!Viewer.SourceSelection.IsEmpty);
+        if (bmp.IsDisposed()) return;
+
 
         // 2. show message
         await Message.ClearAsync();
         _ = Message.ShowAsync(Core.Lang[LangId.FrmMain_MnuCopyImagePixels_Copying], delayMs: 1000);
 
-        //// 3. copy the selected area
-        //if (!Viewer.SourceSelection.IsEmpty)
-        //{
-        //    // TODO:
-        //}
 
-        //// 4. copy to clipboard
-        //var success = await Task.Run(async () => await BHelper.SetClipboardImageAsync(wicBmp));
-        //if (success)
-        //{
-        //    _ = Message.ShowAsync(Core.Lang[LangId.FrmMain_MnuCopyImagePixels_Success]);
-        //}
+        // 3. copy to clipboard
+        try
+        {
+            var abmp = SkiaCodec.ToWritableBitmap(bmp);
+            await _mainWindow.Clipboard.SetBitmapAsync(abmp);
+
+            _ = Message.ShowAsync(Core.Lang[LangId.FrmMain_MnuCopyImagePixels_Success]);
+        }
+        catch (Exception ex)
+        {
+            await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[LangId.FrmMain_MnuCopyImagePixels],
+                Description = ex.Message,
+            });
+        }
     }
 
 

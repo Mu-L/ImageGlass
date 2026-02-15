@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using ImageGlass.Common.Extensions;
 using ImageMagick;
 using SkiaSharp;
 using System;
@@ -26,6 +27,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -154,7 +156,7 @@ public static partial class SkiaCodec
         var codecOption = new SKCodecOptions((int)meta.FrameIndex);
         if (codec.GetPixels(codec.Info, bmpFrame.GetPixels(), codecOption) == SKCodecResult.Success)
         {
-            result.SingleFrame = ConvertToSKImage(bmpFrame);
+            result.SingleFrame = ToSKImage(bmpFrame);
         }
 
         codec.Dispose();
@@ -199,7 +201,7 @@ public static partial class SkiaCodec
                 return null;
             }
 
-            return ConvertToSKImage(bmp);
+            return ToSKImage(bmp);
         }
         catch { return null; }
     }
@@ -296,6 +298,34 @@ public static partial class SkiaCodec
 
 
     /// <summary>
+    /// Extracts metadata for all frames.
+    /// </summary>
+    public static List<SKCodecFrameInfo>? GetFramesMetadata(string filePath)
+    {
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) return null;
+
+
+        using var data = SKData.Create(filePath);
+        using var codec = SKCodec.Create(data);
+        if (codec == null) return null;
+
+        int frameCount = codec.FrameCount;
+        var metadataList = new List<SKCodecFrameInfo>(frameCount);
+
+        for (int i = 0; i < frameCount; i++)
+        {
+            // GetFrameInfo provides duration and alpha info
+            if (codec.GetFrameInfo(i, out var info))
+            {
+                metadataList.Add(info);
+            }
+        }
+
+        return metadataList;
+    }
+
+
+    /// <summary>
     /// Returns the new transformed bitmap.
     /// </summary>
     public static SKImage? TransformImage(SKImage? imgSrc, ImgTransform? transform)
@@ -352,7 +382,7 @@ public static partial class SkiaCodec
     /// <summary>
     /// Converts Magick image to SKBitmap.
     /// </summary>
-    public static unsafe SKImage? ConvertFromMagick(MagickImage? imgM)
+    public static unsafe SKImage? FromMagick(MagickImage? imgM)
     {
         if (imgM is null) return null;
 
@@ -379,9 +409,47 @@ public static partial class SkiaCodec
 
 
     /// <summary>
+    /// Converts <see cref="Bitmap"/> to <see cref="SKBitmap"/>.
+    /// </summary>
+    public static SKBitmap? FromBitmap(Bitmap? abmp)
+    {
+        if (abmp is null) return null;
+
+        // 1. Prepare Skia Info matching Avalonia's default layout (Bgra8888)
+        var info = new SKImageInfo(
+            abmp.PixelSize.Width,
+            abmp.PixelSize.Height,
+            SKColorType.Bgra8888,
+            SKAlphaType.Premul);
+
+        // 2. Allocate Skia Pixel Buffer
+        var skBmp = new SKBitmap(info);
+
+        // 3. Direct Memory Copy
+        // CopyPixels transfers data from Avalonia's internal buffer 
+        // directly to the address of the Skia bitmap.
+        try
+        {
+            abmp.CopyPixels(
+                new PixelRect(0, 0, info.Width, info.Height),
+                skBmp.GetPixels(),
+                info.RowBytes * info.Height, // Buffer size
+                info.RowBytes);              // Stride
+        }
+        catch
+        {
+            skBmp.Dispose();
+            return null;
+        }
+
+        return skBmp;
+    }
+
+
+    /// <summary>
     /// Converts bitmap to image with optional source color space.
     /// </summary>
-    public static SKImage? ConvertToSKImage(SKBitmap? bmp, SKColorSpace? srcColorSpace = null)
+    public static SKImage? ToSKImage(SKBitmap? bmp, SKColorSpace? srcColorSpace = null)
     {
         if (bmp is null) return null;
 
@@ -399,92 +467,88 @@ public static partial class SkiaCodec
 
 
     /// <summary>
-    /// Converts SKImage to WriteableBitmap.
+    /// Converts <see cref="SKImage"/> to <see cref="WriteableBitmap"/>.
     /// </summary>
-    public static WriteableBitmap? ConvertToBitmap(SKImage? imgSrc)
+    public static WriteableBitmap? ToWritableBitmap(SKImage? img)
     {
-        using var skPixmap = imgSrc?.PeekPixels();
-        if (skPixmap is null) return null;
+        if (img.IsDisposed()) return null;
 
-        var info = skPixmap.Info;
-        var wb = new WriteableBitmap(
+        // PeekPixels returns null if the image is on the GPU (Texture-backed)
+        using var pixmap = img.PeekPixels();
+        return ToWritableBitmap(pixmap);
+    }
+
+
+    /// <summary>
+    /// Converts <see cref="SKBitmap"/> to <see cref="WriteableBitmap"/>.
+    /// </summary>
+    public static WriteableBitmap? ToWritableBitmap(SKBitmap? bmp)
+    {
+        if (bmp.IsDisposed()) return null;
+
+        using var pixmap = bmp.PeekPixels();
+        return ToWritableBitmap(pixmap);
+    }
+
+
+    /// <summary>
+    /// Converts <see cref="SKPixmap"/> to <see cref="WriteableBitmap"/>.
+    /// </summary>
+    public static unsafe WriteableBitmap? ToWritableBitmap(SKPixmap? pixmap)
+    {
+        if (pixmap.IsDisposed()) return null;
+
+        var info = pixmap.Info;
+        var wbmp = new WriteableBitmap(
             new PixelSize(info.Width, info.Height),
             new Vector(96, 96),
-            PixelFormats.Bgra8888,
-            AlphaFormat.Unpremul);
+            PixelFormat.Bgra8888,
+            AlphaFormat.Premul);
 
-        using (var buf = wb.Lock())
+        using (ILockedFramebuffer fb = wbmp.Lock())
         {
-            var srcPtr = skPixmap.GetPixels();
-            var srcRowBytes = skPixmap.RowBytes;
-            var dstStride = buf.RowBytes;
+            // If the source is already Bgra8888, we can do a super-fast memcpy.
+            // We also check matching AlphaType to ensure we don't copy Premul into Unpremul blindly.
+            bool isFastPath = info.ColorType == SKColorType.Bgra8888 &&
+                              (info.AlphaType == SKAlphaType.Premul || info.AlphaType == SKAlphaType.Opaque);
 
-            // if the SKImage is already Bgra8888, do a fast memcpy
-            if (info.ColorType == SKColorType.Bgra8888)
+            if (isFastPath)
             {
-                if (srcRowBytes == dstStride)
+                byte* srcPtr = (byte*)pixmap.GetPixels();
+                byte* dstPtr = (byte*)fb.Address;
+                long srcRowBytes = pixmap.RowBytes;
+                long dstRowBytes = fb.RowBytes;
+                long bytesToCopy = info.Width * 4;
+
+                if (srcRowBytes == dstRowBytes)
                 {
-                    unsafe
-                    {
-                        Buffer.MemoryCopy(
-                            (void*)srcPtr, (void*)buf.Address,
-                            (long)dstStride * info.Height,
-                            (long)srcRowBytes * info.Height);
-                    }
+                    // Single block copy if strides match (most common)
+                    Unsafe.CopyBlock(dstPtr, srcPtr, (uint)(srcRowBytes * info.Height));
                 }
                 else
                 {
+                    // Row-by-row copy if strides differ
                     for (int y = 0; y < info.Height; y++)
                     {
-                        unsafe
-                        {
-                            Buffer.MemoryCopy(
-                                (byte*)srcPtr + (long)y * srcRowBytes,
-                                (byte*)buf.Address + (long)y * dstStride,
-                                dstStride,
-                                Math.Min(srcRowBytes, dstStride));
-                        }
+                        Unsafe.CopyBlock(dstPtr, srcPtr, (uint)bytesToCopy);
+                        srcPtr += srcRowBytes;
+                        dstPtr += dstRowBytes;
                     }
                 }
             }
             else
             {
-                // re-encode pixels into Bgra8888 via SKPixmap.ReadPixels
-                var dstInfo = new SKImageInfo(info.Width, info.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-                skPixmap.ReadPixels(dstInfo, buf.Address, dstStride);
+                // Slow path: Source is not Bgra8888 (e.g., Rgba8888, Gray8).
+                // We let Skia convert the pixels into the destination buffer.
+                var dstInfo = new SKImageInfo(info.Width, info.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+                pixmap.ReadPixels(dstInfo, fb.Address, fb.RowBytes);
             }
         }
 
-        return wb;
+        return wbmp;
     }
 
 
-    /// <summary>
-    /// Extracts metadata for all frames.
-    /// </summary>
-    public static List<SKCodecFrameInfo>? GetFramesMetadata(string filePath)
-    {
-        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) return null;
-
-
-        using var data = SKData.Create(filePath);
-        using var codec = SKCodec.Create(data);
-        if (codec == null) return null;
-
-        int frameCount = codec.FrameCount;
-        var metadataList = new List<SKCodecFrameInfo>(frameCount);
-
-        for (int i = 0; i < frameCount; i++)
-        {
-            // GetFrameInfo provides duration and alpha info
-            if (codec.GetFrameInfo(i, out var info))
-            {
-                metadataList.Add(info);
-            }
-        }
-
-        return metadataList;
-    }
 
 
 

@@ -436,7 +436,7 @@ public partial class Photo : DisposableImpl
         // single-frame formats
         else
         {
-            var img = SkiaCodec.ConvertFromMagick(data.SingleFrame);
+            var img = SkiaCodec.FromMagick(data.SingleFrame);
 
             Bitmap = img;
             _width = (uint)(img?.Width ?? 0);
@@ -669,7 +669,7 @@ public partial class Photo : DisposableImpl
 
             if (codec.GetPixels(codec.Info, bmpFrame.GetPixels(), codecOption) == SKCodecResult.Success)
             {
-                return SkiaCodec.ConvertToSKImage(bmpFrame);
+                return SkiaCodec.ToSKImage(bmpFrame);
             }
         }
 
@@ -756,7 +756,7 @@ public partial class Photo : DisposableImpl
 
                 // 6. convert SKImage to Avalonia Bitmap
                 var avBitmap = await Task.Run(
-                    () => SkiaCodec.ConvertToBitmap(skThumb), token)
+                    () => SkiaCodec.ToWritableBitmap(skThumb), token)
                     .ConfigureAwait(false);
 
                 if (token.IsCancellationRequested)

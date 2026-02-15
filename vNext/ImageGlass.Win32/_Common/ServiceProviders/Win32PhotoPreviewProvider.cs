@@ -56,7 +56,7 @@ public class Win32PhotoPreviewProvider : IPhotoPreviewProvider
         using var thumbM = meta.GetEmbeddedPreview();
         if (thumbM is not null && thumbM.Height >= minHeight)
         {
-            imgPreview = SkiaCodec.ConvertFromMagick(thumbM);
+            imgPreview = SkiaCodec.FromMagick(thumbM);
             if (imgPreview is not null) return imgPreview;
         }
 
@@ -79,7 +79,7 @@ public class Win32PhotoPreviewProvider : IPhotoPreviewProvider
 
         // 2. slow path: use ImageMagick for unsupported formats, skip for those larger than 3000px
         using var imgM = await MagickCodec.QuickDecodeAsync(meta.FilePath, 0, 0, 0, 3000, token);
-        imgPreview = SkiaCodec.ConvertFromMagick(imgM);
+        imgPreview = SkiaCodec.FromMagick(imgM);
 
         return imgPreview;
     }
