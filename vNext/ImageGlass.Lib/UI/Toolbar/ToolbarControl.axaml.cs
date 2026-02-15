@@ -57,7 +57,7 @@ public partial class ToolbarControl : PhControl
     #region Public Properties
 
     /// <summary>
-    /// Gets, sets the value indicates that empty value is not allowed.
+    /// Gets, sets items source of the toolbar.
     /// </summary>
     public ObservableCollection<ToolbarItemModel> ItemsSource
     {
@@ -67,6 +67,17 @@ public partial class ToolbarControl : PhControl
     public static readonly StyledProperty<ObservableCollection<ToolbarItemModel>> ItemsSourceProperty =
         AvaloniaProperty.Register<ToolbarControl, ObservableCollection<ToolbarItemModel>>(nameof(ItemsSource), []);
 
+
+    /// <summary>
+    /// Gets, sets tooltip placement of toolbar items.
+    /// </summary>
+    public PlacementMode ItemTooltipPlacement
+    {
+        get => GetValue(ItemTooltipPlacementProperty);
+        set => SetValue(ItemTooltipPlacementProperty, value);
+    }
+    public static readonly StyledProperty<PlacementMode> ItemTooltipPlacementProperty =
+        AvaloniaProperty.Register<ToolbarControl, PlacementMode>(nameof(ItemTooltipPlacement), PlacementMode.Bottom);
 
     #endregion // Public Properties
 
@@ -132,6 +143,10 @@ public partial class ToolbarControl : PhControl
         if (e.Property == ItemsSourceProperty)
         {
             LoadItems();
+        }
+        else if (e.Property == ItemTooltipPlacementProperty)
+        {
+            UpdateItemTooltipPlacement();
         }
     }
 
@@ -395,6 +410,9 @@ public partial class ToolbarControl : PhControl
         // append to visual tree
         PART_PrimaryGroup.Children.AddRange(primaryList);
         PART_SecondaryGroup.Children.AddRange(secondaryList);
+
+        // set tooltip placement
+        UpdateItemTooltipPlacement();
     }
 
 
@@ -514,6 +532,37 @@ public partial class ToolbarControl : PhControl
 
             var hotkeyText = String.Join(", ", action.Hotkeys);
             mnuItem.HotkeyText = hotkeyText;
+        }
+    }
+
+
+    /// <summary>
+    /// Updates the tooltip placement and vertical offset for the main menu button,
+    /// overflow menu, and all item elements
+    /// based on the current item tooltip placement setting.
+    /// </summary>
+    private void UpdateItemTooltipPlacement()
+    {
+        // calculate vertical offset
+        var vOffset = 0;
+        if (ItemTooltipPlacement is PlacementMode.Bottom
+            or PlacementMode.BottomEdgeAlignedLeft
+            or PlacementMode.BottomEdgeAlignedRight)
+        {
+            vOffset = 8;
+        }
+
+        // update placement and offset
+        ToolTip.SetPlacement(PART_BtnMainMenu, ItemTooltipPlacement);
+        ToolTip.SetVerticalOffset(PART_BtnMainMenu, vOffset);
+
+        ToolTip.SetPlacement(PART_OverflowMenu, ItemTooltipPlacement);
+        ToolTip.SetVerticalOffset(PART_OverflowMenu, vOffset);
+
+        foreach (var itemEl in _itemElements)
+        {
+            ToolTip.SetPlacement(itemEl, ItemTooltipPlacement);
+            ToolTip.SetVerticalOffset(itemEl, vOffset);
         }
     }
 

@@ -10,7 +10,7 @@
              x:Class="ImageGlass.Common.Windows.MainWindowView"
              x:DataType="vm:MainWindowViewModel">
 
-    <Grid RowDefinitions="Auto, * Auto">
+    <Grid x:Name="PART_Layout" RowDefinitions="Auto, *, Auto">
 
         <!-- Toolbar -->
         <ui:ToolbarControl x:Name="PART_Toolbar"
@@ -23,7 +23,8 @@
 
 
         <!-- Viewer -->
-        <Grid Grid.Row="1"
+        <Border x:Name="PART_ViewerWrapper"
+              Grid.Row="1"
               Background="{CompiledBinding ViewerBackground}">
             <viewer:ViewerControl x:Name="PART_Viewer"
                                   EnableDebug="{CompiledBinding EnableDebug, Source={x:Static cm:Core.Config}}"
@@ -35,7 +36,7 @@
                                   InterpolationScaleUp="{CompiledBinding ImageInterpolationScaleUp, Source={x:Static cm:Core.Config}}">
                 <ui:MessageControl x:Name="PART_Message" />
             </viewer:ViewerControl>
-        </Grid>
+        </Border>
 
 
         <!-- Gallery -->
