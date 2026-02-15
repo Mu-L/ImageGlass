@@ -1249,12 +1249,10 @@ public partial class AppAPIProvider
         if (data.Contains(DataFormat.Bitmap))
         {
             using var abmp = await data.TryGetBitmapAsync();
-            using var skBmp = SkiaCodec.FromBitmap(abmp);
-            var skImg = SkiaCodec.ToSKImage(skBmp);
-
-            if (skImg is not null)
+            var skBmp = SkiaCodec.FromBitmap(abmp);
+            if (skBmp is not null)
             {
-                var photo = new Photo(skImg, skImg.Width, skImg.Height);
+                var photo = new Photo(skBmp);
                 await LoadClipboardPhotoAsync(photo);
             }
 

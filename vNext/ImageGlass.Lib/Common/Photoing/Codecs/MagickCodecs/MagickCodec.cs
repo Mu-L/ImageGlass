@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageMagick;
 using ImageMagick.Formats;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -573,7 +574,7 @@ public static partial class MagickCodec
 
 
         // 3. create settings
-        IDisposable? bmpSrc = null;
+        SKBitmap? bmpSrc = null;
         var readSettings = new MagickReadSettings { Format = format };
         if (readSettings.Format == MagickFormat.Rsvg)
         {

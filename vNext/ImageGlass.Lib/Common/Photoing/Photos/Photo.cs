@@ -265,38 +265,29 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Initializes a new single-frame photo using a bitmap source for rendering.
     /// </summary>
-    public Photo(IDisposable? bmp, int width, int height, PhotoLoadingState state = PhotoLoadingState.Loaded)
+    public Photo(SKBitmap? bmp, PhotoLoadingState state = PhotoLoadingState.Loaded)
     {
-        Metadata.Dispose();
-        Metadata = new()
-        {
-            Width = (uint)width,
-            Height = (uint)height,
-            FrameCount = 1,
-        };
+        InitializePhoto(bmp, bmp?.Width ?? 0, bmp?.Height ?? 0, null, state);
+    }
 
-        Bitmap = bmp;
-        _width = (uint)Metadata.Width;
-        _height = (uint)Metadata.Height;
 
-        State = state;
+    /// <summary>
+    /// Initializes a new single-frame photo using a image source for rendering.
+    /// </summary>
+    public Photo(SKImage? img, PhotoLoadingState state = PhotoLoadingState.Loaded)
+    {
+        InitializePhoto(img, img?.Width ?? 0, img?.Height ?? 0, null, state);
     }
 
 
     /// <summary>
     /// Initializes a new single-frame using a bitmap source for rendering.
     /// </summary>
-    public Photo(IDisposable? bmp, PhotoMetadata? meta, PhotoLoadingState state = PhotoLoadingState.Loaded)
+    public Photo(SKBitmap? bmp, PhotoMetadata? meta, PhotoLoadingState state = PhotoLoadingState.Loaded)
     {
-        Metadata.Dispose();
-        Metadata = meta ?? new();
-
-        Bitmap = bmp;
-        _width = (uint)Metadata.Width;
-        _height = (uint)Metadata.Height;
-
-        State = state;
+        InitializePhoto(bmp, 0, 0, meta, state);
     }
+
 
     #endregion // Instance Initilization
 
@@ -352,6 +343,30 @@ public partial class Photo : DisposableImpl
 
 
     #region Private Functions
+
+    private void InitializePhoto(IDisposable? src, int width, int height, PhotoMetadata? meta, PhotoLoadingState state = PhotoLoadingState.Loaded)
+    {
+        // set Bitmap
+        if (src is null) Bitmap = null;
+        else if (src is SKImage img) Bitmap = img;
+        else if (src is SKBitmap bmp) Bitmap = SkiaCodec.ToSKImage(bmp);
+        else if (src is AnimatorImpl animator) Bitmap = animator;
+        else throw new ArgumentException("IGE: Unsupported bitmap source", nameof(src));
+
+
+        Metadata.Dispose();
+        Metadata = meta ?? new()
+        {
+            Width = (uint)width,
+            Height = (uint)height,
+            FrameCount = 1,
+        };
+
+        _width = (uint)Metadata.Width;
+        _height = (uint)Metadata.Height;
+
+        State = state;
+    }
 
 
     /// <summary>
