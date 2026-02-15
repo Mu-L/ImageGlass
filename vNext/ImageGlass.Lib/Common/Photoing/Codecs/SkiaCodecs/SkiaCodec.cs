@@ -220,29 +220,18 @@ public static partial class SkiaCodec
         try
         {
             // 1. apply transforms
-            using var dstImg = TransformImage(srcImg, transform);
+            using var dstImg = TransformImage(srcImg, transform) ?? srcImg;
             if (dstImg is null || token.IsCancellationRequested) return;
 
 
             // 2. use Magick to save
             if (MagickCodec.CanWrite(destFilePath))
             {
-                // convert to pixels
-                var pixels = dstImg.EncodedData.AsSpan();
-                if (token.IsCancellationRequested) return;
-
-                // convert to MagickImage
-                using var imgM = new MagickImage();
-                var settings = new MagickReadSettings()
-                {
-                    Format = MagickFormat.Bgra,
-                    Width = (uint)dstImg.Width,
-                    Height = (uint)dstImg.Height,
-                };
-                imgM.Read(pixels, settings);
-                imgM.Quality = quality;
+                using var imgM = ToMagick(srcImg);
+                if (imgM is null) return;
 
                 // write image data to file
+                imgM.Quality = quality;
                 await imgM.WriteAsync(destFilePath, token);
             }
             else
@@ -463,6 +452,42 @@ public static partial class SkiaCodec
         var img = SKImage.FromBitmap(bmp);
 
         return img;
+    }
+
+
+
+    /// <summary>
+    /// Converts <see cref="SKBitmap"/> to <see cref="MagickImage"/>.
+    /// </summary>
+    public static MagickImage? ToMagick(SKBitmap? skBmp)
+    {
+        using var skImg = ToSKImage(skBmp);
+        return ToMagick(skImg);
+    }
+
+
+    /// <summary>
+    /// Converts <see cref="SKImage"/> to <see cref="MagickImage"/>.
+    /// </summary>
+    public static MagickImage? ToMagick(SKImage? skImg)
+    {
+        if (skImg.IsDisposed()) return null;
+
+        // convert to pixels
+        using var pixmap = skImg.PeekPixels();
+        var pixSpan = pixmap.GetPixelSpan();
+
+        // convert to MagickImage
+        var imgM = new MagickImage();
+        var settings = new MagickReadSettings()
+        {
+            Format = MagickFormat.Bgra,
+            Width = (uint)skImg.Width,
+            Height = (uint)skImg.Height,
+        };
+        imgM.Read(pixSpan, settings);
+
+        return imgM;
     }
 
 

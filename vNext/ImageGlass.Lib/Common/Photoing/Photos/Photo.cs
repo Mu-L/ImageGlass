@@ -703,8 +703,6 @@ public partial class Photo : DisposableImpl
 
         try
         {
-            var destExt = Path.GetExtension(destFilePath).ToLowerInvariant();
-
             // 1. save clipboard photo to file
             if (IsClipboard && Bitmap is SKImage img)
             {

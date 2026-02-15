@@ -302,112 +302,113 @@ public partial class AppAPIProvider
     /// </param>
     public async Task<bool> SaveImageAsync(string destFilePath)
     {
-        //var saveSource = ImageSaveSource.Undefined;
-        //var hasSrcPath = !string.IsNullOrEmpty(Core.Photos.CurrentFilePath);
-        //Exception? error = null;
+        var saveSource = ImageSaveSource.Undefined;
+        var hasSrcPath = !string.IsNullOrEmpty(Core.Photos.CurrentFilePath);
+        Exception? error = null;
 
-        //_ = Message.ShowAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Saving]);
-
-
-        //// 1. save photo
-        //// 1.1 save the selection
-        //var hasSelection = Viewer.EnableSelection && !Viewer.SourceSelection.IsEmpty;
-        //if (hasSelection)
-        //{
-        //    try
-        //    {
-        //        var selectedBmp = Viewer.GetRenderedBitmap(true)!;
-        //        using var photo = new Photo(selectedBmp, selectedBmp.Size.Width, selectedBmp.Size.Height);
-
-        //        await photo.SaveAsAsync(destFilePath, new ImgTransform(), Core.Config.ImageEditQuality);
-        //        saveSource = ImageSaveSource.SelectedArea;
-        //    }
-        //    catch (Exception ex) { error = ex; }
-        //}
-
-        //// 1.2 save the clipboard image
-        //else if (Core.ClipboardImage is not null)
-        //{
-        //    try
-        //    {
-        //        await Core.ClipboardImage.SaveAsAsync(destFilePath, Core.ImageTransform, Core.Config.ImageEditQuality);
-        //        saveSource = ImageSaveSource.Clipboard;
-        //    }
-        //    catch (Exception ex) { error = ex; }
-        //}
-
-        //// 1.3 save the image in the list
-        //else if (Core.Photos.Current is not null)
-        //{
-        //    try
-        //    {
-        //        await Core.Photos.Current.SaveAsAsync(destFilePath, Core.ImageTransform, Core.Config.ImageEditQuality);
-        //        saveSource = ImageSaveSource.CurrentFile;
-        //    }
-        //    catch (Exception ex) { error = ex; }
-        //}
-
-        //// 1.4 image is empty
-        //else
-        //{
-        //    return false;
-        //}
+        _ = Message.ShowAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Saving]);
 
 
-        //// 2. check for error
-        //if (error is not null)
-        //{
-        //    await Message.ClearAsync();
+        // 1. save photo
+        // 1.1 save the selection
+        var hasSelection = Viewer.EnableSelection && !Viewer.SourceSelection.IsEmpty;
+        if (hasSelection)
+        {
+            try
+            {
+                using var selectedBmp = Viewer.GetRenderedBitmap(true);
+                var selectedImg = SkiaCodec.ToSKImage(selectedBmp)!;
+                using var photo = new Photo(selectedImg);
 
-        //    _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
-        //    {
-        //        Title = Core.Lang[LangId.FrmMain_MnuSave],
-        //        Heading = Core.Lang[LangId.FrmMain_MnuSave_Error],
-        //        Description = $"""
-        //        {error.Source}:
-        //        {error.Message}
+                await photo.SaveAsAsync(destFilePath, new ImgTransform(), Core.Config.ImageEditQuality);
+                saveSource = ImageSaveSource.SelectedArea;
+            }
+            catch (Exception ex) { error = ex; }
+        }
 
-        //        {destFilePath}
-        //        """
-        //    });
+        // 1.2 save the clipboard image
+        else if (Core.ClipboardImage is not null)
+        {
+            try
+            {
+                await Core.ClipboardImage.SaveAsAsync(destFilePath, Core.ImageTransform, Core.Config.ImageEditQuality);
+                saveSource = ImageSaveSource.Clipboard;
+            }
+            catch (Exception ex) { error = ex; }
+        }
 
-        //    return false;
-        //}
+        // 1.3 save the image in the list
+        else if (Core.Photos.Current is not null)
+        {
+            try
+            {
+                await Core.Photos.Current.SaveAsAsync(destFilePath, Core.ImageTransform, Core.Config.ImageEditQuality);
+                saveSource = ImageSaveSource.CurrentFile;
+            }
+            catch (Exception ex) { error = ex; }
+        }
 
-
-        //// 3. check for success
-        //var newPhotoIndex = Core.Photos.IndexOf(destFilePath);
-        //if (newPhotoIndex == Core.Photos.CurrentIndex)
-        //{
-        //    if (saveSource == ImageSaveSource.SelectedArea)
-        //    {
-        //        // reload to view the updated image
-        //        IG_Reload();
-        //    }
-        //    else if (saveSource == ImageSaveSource.Clipboard)
-        //    {
-        //        // clear the clipboard image
-        //        await LoadClipboardPhotoAsync(null);
-
-        //        // reload to view the updated image
-        //        IG_Reload();
-        //    }
-        //}
-
-        //_ = Message.ShowAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Success]);
-
-
-        //// 4. update thumbnail & metadata if file in the list was overriden
-        //var destPhoto = Core.Photos.Get(destFilePath);
-        //if (destPhoto is not null)
-        //{
-        //    // reload thumbnail
-        //    Gallery.LoadThumbnail(newPhotoIndex, false);
-        //}
+        // 1.4 image is empty
+        else
+        {
+            return false;
+        }
 
 
-        //// 5. emits saved event
-        //Core.OnPhotoSaved(new(Core.Photos.CurrentFilePath, destFilePath, saveSource));
+        // 2. check for error
+        if (error is not null)
+        {
+            await Message.ClearAsync();
+
+            _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[LangId.FrmMain_MnuSave],
+                Heading = Core.Lang[LangId.FrmMain_MnuSave_Error],
+                Description = $"""
+                {error.Source}:
+                {error.Message}
+
+                {destFilePath}
+                """
+            });
+
+            return false;
+        }
+
+
+        // 3. check for success
+        var newPhotoIndex = Core.Photos.IndexOf(destFilePath);
+        if (newPhotoIndex == Core.Photos.CurrentIndex)
+        {
+            if (saveSource == ImageSaveSource.SelectedArea)
+            {
+                // reload to view the updated image
+                IG_Reload();
+            }
+            else if (saveSource == ImageSaveSource.Clipboard)
+            {
+                // clear the clipboard image
+                await LoadClipboardPhotoAsync(null);
+
+                // reload to view the updated image
+                IG_Reload();
+            }
+        }
+
+        _ = Message.ShowAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Success]);
+
+
+        // 4. update thumbnail & metadata if file in the list was overriden
+        var destPhoto = Core.Photos.Get(destFilePath);
+        if (destPhoto is not null)
+        {
+            // reload thumbnail
+            Gallery.LoadThumbnail(newPhotoIndex, false);
+        }
+
+
+        // 5. emits saved event
+        Core.OnPhotoSaved(new(Core.Photos.CurrentFilePath, destFilePath, saveSource));
 
         return true;
     }
