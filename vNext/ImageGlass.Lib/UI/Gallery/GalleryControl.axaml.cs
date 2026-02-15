@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
@@ -71,6 +72,29 @@ public partial class GalleryControl : PhControl
         AvaloniaProperty.Register<GalleryControl, PhVirtualizingUniformPanelViewMode>(nameof(ViewMode), PhVirtualizingUniformPanelViewMode.FilmStrip);
 
 
+    /// <summary>
+    /// Gets the minimum content size.
+    /// </summary>
+    public Size MinContentSize
+    {
+        get
+        {
+            var totalItemWidth = CalculateWidthForGalleryView(1);
+            var totalItemHeight = Core.Config.ThumbnailSize
+                + GalleryItemMargin.Top + GalleryItemMargin.Bottom
+                + GalleryPadding.Top + GalleryPadding.Bottom;
+
+            if (ViewMode == PhVirtualizingUniformPanelViewMode.FilmStrip)
+            {
+                return new(0, totalItemHeight);
+            }
+
+            return new(totalItemWidth, 0);
+        }
+    }
+    public static readonly DirectProperty<GalleryControl, Size> MinContentSizeProperty =
+        AvaloniaProperty.RegisterDirect<GalleryControl, Size>(nameof(MinContentSize), i => i.MinContentSize);
+
     #endregion // Public Properties
 
 
@@ -107,6 +131,7 @@ public partial class GalleryControl : PhControl
 
         if (e.Property == ViewModeProperty)
         {
+            RaisePropertyChanged(MinContentSizeProperty, default, MinContentSize);
             UpdateReservedSize();
         }
     }
@@ -116,6 +141,7 @@ public partial class GalleryControl : PhControl
     {
         if (e.PropertyName == nameof(Config.ThumbnailSize))
         {
+            RaisePropertyChanged(MinContentSizeProperty, default, MinContentSize);
             UpdateReservedSize();
         }
     }
@@ -286,24 +312,8 @@ public partial class GalleryControl : PhControl
     /// </summary>
     private void UpdateReservedSize()
     {
-        var itemSize = (double)Core.Config.ThumbnailSize;
-        var totalWidth = itemSize
-            + GalleryItemMargin.Left + GalleryItemMargin.Right
-            + GalleryPadding.Left + GalleryPadding.Right;
-        var totalHeight = itemSize
-            + GalleryItemMargin.Top + GalleryItemMargin.Bottom
-            + GalleryPadding.Top + GalleryPadding.Bottom;
-
-        if (ViewMode == PhVirtualizingUniformPanelViewMode.FilmStrip)
-        {
-            PART_ItemsControl.MinHeight = totalHeight;
-            PART_ItemsControl.MinWidth = 0;
-        }
-        else
-        {
-            PART_ItemsControl.MinWidth = totalWidth;
-            PART_ItemsControl.MinHeight = 0;
-        }
+        PART_ItemsControl.MinWidth = MinContentSize.Width;
+        PART_ItemsControl.MinHeight = MinContentSize.Height;
 
         // Update ScrollViewer visibility so the panel receives correct constraints:
         // - FilmStrip: horizontal scroll, no vertical
@@ -313,15 +323,29 @@ public partial class GalleryControl : PhControl
         {
             if (ViewMode == PhVirtualizingUniformPanelViewMode.FilmStrip)
             {
-                svEl.HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto;
-                svEl.VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled;
+                svEl.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+                svEl.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
             }
             else
             {
-                svEl.HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled;
-                svEl.VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto;
+                svEl.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                svEl.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
             }
         }
+    }
+
+
+    /// <summary>
+    /// Calculates the total width required to display a gallery view
+    /// with the specified number of item columns.
+    /// </summary>
+    public static double CalculateWidthForGalleryView(int itemColumns)
+    {
+        var itemWidth = Core.Config.ThumbnailSize
+            + GalleryItemMargin.Left + GalleryItemMargin.Right
+            + GalleryPadding.Left + GalleryPadding.Right;
+
+        return itemWidth * itemColumns;
     }
 
 
