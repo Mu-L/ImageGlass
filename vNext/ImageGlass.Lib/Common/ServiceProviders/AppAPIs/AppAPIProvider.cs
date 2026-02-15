@@ -1375,7 +1375,7 @@ public partial class AppAPIProvider
     /// </summary>
     private async Task SetFileToClipboardAsync(string? filePath, bool forCutting)
     {
-        if (!File.Exists(filePath)) return;
+        if (_mainWindow.Clipboard is null || !File.Exists(filePath)) return;
 
         // 1. cut/copy single file
         if (forCutting)
@@ -1398,20 +1398,41 @@ public partial class AppAPIProvider
         _ = Core.StringClipboard.Add(filePath);
 
 
-        //// 3. set files to clipboard
-        //var success = await BHelper.SetClipboardFilesAsync(Core.StringClipboard.ToArray(), forCutting);
+        // 3. set files to clipboard
+        try
+        {
+            var dt = new DataTransfer();
+            foreach (var path in Core.StringClipboard)
+            {
+                var fi = await _mainWindow.StorageProvider.TryGetFileFromPathAsync(path);
+                if (fi is null) continue;
+
+                var dti = new DataTransferItem();
+                dti.SetFile(fi);
+                dt.Add(dti);
+            }
 
 
-        //// 4. show message
-        //if (success)
-        //{
-        //    _ = Message.ShowAsync(
-        //        Core.Lang[forCutting
-        //            ? LangId.FrmMain_MnuCutFile_Success
-        //            : LangId.FrmMain_MnuCopyFile_Success,
-        //        Core.StringClipboard.Count]);
-        //}
+            // 4. perform copy/cut
+            await _mainWindow.Clipboard.SetDataAsync(dt);
 
+            // permanently adds the data that is on the Clipboard so that it is available
+            // after the data's original application closes.
+            await _mainWindow.Clipboard.FlushAsync();
+
+            _ = Message.ShowAsync(Core.Lang[forCutting
+                    ? LangId.FrmMain_MnuCutFile_Success
+                    : LangId.FrmMain_MnuCopyFile_Success,
+                Core.StringClipboard.Count]);
+        }
+        catch (Exception ex)
+        {
+            await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[forCutting ? LangId.FrmMain_MnuCutFile : LangId.FrmMain_MnuCopyFile],
+                Description = ex.Message,
+            });
+        }
     }
 
 

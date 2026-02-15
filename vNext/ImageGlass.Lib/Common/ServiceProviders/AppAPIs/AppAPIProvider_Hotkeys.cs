@@ -101,7 +101,7 @@ public partial class AppAPIProvider
         new(LangId.FrmMain_MnuCopyFile,         API.IG_CopyFiles,           MKeys.Control, Key.C),
         new(LangId.FrmMain_MnuCutFile,          API.IG_CutFiles,            MKeys.Control, Key.X),
         new(LangId.FrmMain_MnuCopyPath,         API.IG_CopyImagePath,       MKeys.Control, Key.L),
-        new(LangId.FrmMain_MnuClearClipboard,   API.IG_ClearClipboard,      Key.OemTilde),
+        new(LangId.FrmMain_MnuClearClipboard,   API.IG_ClearClipboard,      MKeys.Control, Key.OemTilde),
 
 
         // Window modes

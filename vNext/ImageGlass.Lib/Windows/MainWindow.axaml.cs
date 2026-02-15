@@ -88,9 +88,9 @@ public partial class MainWindow : PhWindow
     }
 
 
-    protected override void OnUnloaded(RoutedEventArgs e)
+    protected override async void OnClosing(WindowClosingEventArgs e)
     {
-        base.OnUnloaded(e);
+        base.OnClosing(e);
 
         // control events
         _status.Changed -= Status_Changed;
