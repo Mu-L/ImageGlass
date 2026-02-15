@@ -21,6 +21,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using ImageGlass.Common;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.OsApi;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
@@ -724,6 +725,65 @@ public partial class ViewerControl : PhControl
 
         InvalidateVisual();
     }
+
+
+    /// <summary>
+    /// Gets a rendered bitmap of the current image or the selected region.
+    /// </summary>
+    public SKBitmap? GetRenderedBitmap(bool selectionOnly = false)
+    {
+        SKImageRef.ImageLease? imgLease = null;
+        Rect selectionRect;
+
+        try
+        {
+            lock (_lock)
+            {
+                var imageRef = _imgRender ?? _imgSource;
+                if (imageRef is null) return null;
+
+                // Acquire a lease to keep the image alive while we copy pixels.
+                imgLease = imageRef.Acquire();
+                var leaseImage = imgLease?.Image;
+                if (leaseImage is null || leaseImage.IsDisposed()) return null;
+                if (selectionOnly && SourceSelection.IsEmpty) return null;
+
+                // Determine the source rectangle to copy (in source image coords).
+                selectionRect = selectionOnly
+                    ? SourceSelection.Normalize()
+                    : new Rect(0, 0, leaseImage.Width, leaseImage.Height);
+            }
+
+            // Validate the leased image again after exiting the lock.
+            var img = imgLease?.Image;
+            if (img is null || img.IsDisposed()) return null;
+
+            // Intersect selection with actual image bounds to avoid out-of-range
+            // reads and to handle partially out-of-bounds selections.
+            var bounds = new Rect(0, 0, img.Width, img.Height);
+            selectionRect = selectionRect.GetIntersection(bounds);
+            if (selectionRect.IsEmpty) return null;
+
+            // prepare output bitmap
+            var rect = selectionRect.ToSKRectI();
+            var info = new SKImageInfo(rect.Width, rect.Height, img.ColorType, img.AlphaType, img.ColorSpace);
+            var bmpOutput = new SKBitmap(info);
+
+            // copy the image pixels to the output bitmap
+            if (!img.ReadPixels(info, bmpOutput.GetPixels(), bmpOutput.RowBytes, rect.Left, rect.Top))
+            {
+                bmpOutput.Dispose();
+                return null;
+            }
+
+            return bmpOutput;
+        }
+        finally
+        {
+            imgLease?.Dispose();
+        }
+    }
+
 
 
 

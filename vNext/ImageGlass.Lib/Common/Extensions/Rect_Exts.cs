@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using SkiaSharp;
 using System;
 
 namespace ImageGlass.Common.Extensions;
@@ -97,6 +98,14 @@ public static class Rect_Exts
             return [rect.X, rect.Y, rect.Width, rect.Height];
         }
 
+
+        /// <summary>
+        /// Converts to <see cref="SKRectI"/>.
+        /// </summary>
+        public SKRectI ToSKRectI()
+        {
+            return new SKRectI((int)rect.X, (int)rect.Y, (int)rect.Right, (int)rect.Bottom);
+        }
 
     }
 
