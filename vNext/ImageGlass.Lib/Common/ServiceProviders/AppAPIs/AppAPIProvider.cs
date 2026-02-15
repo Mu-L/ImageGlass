@@ -1712,6 +1712,8 @@ public partial class AppAPIProvider
             Gallery.ScrollToItem(Core.Photos.CurrentIndex);
         }
 
+        _mainWindow.PART_MainView.ApplyAppLayout();
+
         // TODO: update window fit
     }
 

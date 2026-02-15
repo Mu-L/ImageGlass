@@ -29,9 +29,9 @@
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
                 <ui:PhVirtualizingUniformPanel HorizontalAlignment="Center"
-                                            ViewMode="{CompiledBinding ViewMode, RelativeSource={RelativeSource AncestorType=ui:GalleryControl}}"
-                                            ItemSize="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
-                                            ItemMargin="{x:Static ui:GalleryControl.GalleryItemMargin}" />
+                                               ViewMode="{CompiledBinding ViewMode, RelativeSource={RelativeSource AncestorType=ui:GalleryControl}}"
+                                               ItemSize="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
+                                               ItemMargin="{x:Static ui:GalleryControl.GalleryItemMargin}" />
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
 

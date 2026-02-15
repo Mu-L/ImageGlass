@@ -95,6 +95,7 @@ public partial class GalleryControl : PhControl
     public static readonly DirectProperty<GalleryControl, Size> MinContentSizeProperty =
         AvaloniaProperty.RegisterDirect<GalleryControl, Size>(nameof(MinContentSize), i => i.MinContentSize);
 
+
     #endregion // Public Properties
 
 
@@ -298,11 +299,23 @@ public partial class GalleryControl : PhControl
     /// <summary>
     /// Finds the <see cref="ScrollViewer"/> inside the <see cref="ItemsControl"/> template.
     /// </summary>
-    private ScrollViewer? FindScrollViewer()
+    public ScrollViewer? FindScrollViewer()
     {
         return PART_ItemsControl
             .GetVisualDescendants()
             .OfType<ScrollViewer>()
+            .FirstOrDefault();
+    }
+
+
+    /// <summary>
+    /// Finds the virtual panel inside ItemsControl template.
+    /// </summary>
+    public PhVirtualizingUniformPanel? FindVirtualPanel()
+    {
+        return PART_ItemsControl
+            .GetVisualDescendants()
+            .OfType<PhVirtualizingUniformPanel>()
             .FirstOrDefault();
     }
 

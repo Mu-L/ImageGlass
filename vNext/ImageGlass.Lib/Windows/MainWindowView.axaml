@@ -10,7 +10,7 @@
              x:Class="ImageGlass.Common.Windows.MainWindowView"
              x:DataType="vm:MainWindowViewModel">
 
-    <Grid x:Name="PART_Layout" RowDefinitions="Auto, *, Auto">
+    <Grid x:Name="PART_Layout" RowDefinitions="Auto, *, Auto, Auto">
 
         <!-- Toolbar -->
         <ui:ToolbarControl x:Name="PART_Toolbar"
@@ -47,6 +47,16 @@
                            Background="{CompiledBinding GalleryBackground}"
                            ItemsSource="{CompiledBinding Items, Source={x:Static cm:Core.Photos}}"
                            IsContentVisible="{CompiledBinding ShowGallery, Source={x:Static cm:Core.Config}}" />
+
+
+        <GridSplitter x:Name="PART_GalleryResizer"
+                      Grid.Row="3"
+                      Width="3"
+                      Background="{DynamicResource IG_BorderControlBrush}"
+                      ResizeDirection="Columns"
+                      Focusable="False"
+                      IsVisible="False"
+                      DragCompleted="PART_GalleryResizer_DragCompleted"/>
 
     </Grid>
     

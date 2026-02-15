@@ -41,9 +41,9 @@ public class PhVirtualizingUniformPanel : VirtualizingPanel, IScrollSnapPointsIn
 
     // Layout cache (recalculated per measure pass)
     private int _columnsPerRow = 1;
+    private int _totalRows;
     private double _itemWidth;
     private double _itemHeight;
-    private int _totalRows;
 
     // Scroll tracking
     private ScrollViewer? _scrollViewer;
@@ -90,6 +90,18 @@ public class PhVirtualizingUniformPanel : VirtualizingPanel, IScrollSnapPointsIn
     }
     public static readonly StyledProperty<Thickness> ItemMarginProperty =
         AvaloniaProperty.Register<PhVirtualizingUniformPanel, Thickness>(nameof(ItemMargin));
+
+
+    /// <summary>
+    /// Gets the number of columns per row.
+    /// </summary>
+    public int ColumnsPerRow => _columnsPerRow;
+
+
+    /// <summary>
+    /// Gets the total number of rows.
+    /// </summary>
+    public int TotalRows => _totalRows;
 
     #endregion // Styled Properties
 

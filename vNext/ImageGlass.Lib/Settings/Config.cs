@@ -469,10 +469,14 @@ public partial class Config : PhReactive
     ///// </summary>
     //public int GalleryCacheSizeInMb { get; set; } = 400;
 
-    ///// <summary>
-    ///// Gets, sets number of thumbnail columns displayed in vertical gallery.
-    ///// </summary>
-    //public int GalleryColumns { get; set; } = 3;
+    /// <summary>
+    /// Gets, sets number of thumbnail columns displayed in vertical gallery.
+    /// </summary>
+    public int GalleryColumns
+    {
+        get => Get(ConfigId.GalleryColumns, 3);
+        set => Set(ConfigId.GalleryColumns, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the number of images cached by <see cref="Base.Services.ImageBooster"/>.

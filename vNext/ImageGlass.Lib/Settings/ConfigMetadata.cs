@@ -93,7 +93,7 @@ public enum ConfigId
     // SlideshowImagesToNotifySound,
     ThumbnailSize,
     // GalleryCacheSizeInMb,
-    // GalleryColumns,
+    GalleryColumns,
     // ImageBoosterCacheCount,
     // ImageBoosterCacheMaxDimension,
     // ImageBoosterCacheMaxFileSizeInMb,
