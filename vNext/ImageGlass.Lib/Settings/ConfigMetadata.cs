@@ -148,7 +148,7 @@ public enum ConfigId
     MenuHotkeys,
     // MouseClickActions,
     // MouseWheelActions,
-    // Layout,
+    Layout,
     // Tools,
     // DisabledMenus,
     ToolbarButtons,

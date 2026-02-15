@@ -790,11 +790,15 @@ public partial class Config : PhReactive
     ///// </summary>
     //public Dictionary<MouseWheelEvent, MouseWheelAction> MouseWheelActions { get; set; } = [];
 
-    ///// <summary>
-    ///// Gets, sets layout for FrmMain. Syntax:
-    ///// <c>Dictionary["ControlName", "DockStyle;order"]</c>
-    ///// </summary>
-    //public Dictionary<string, string?> Layout { get; set; } = [];
+    /// <summary>
+    /// Gets, sets layout for FrmMain. Syntax:
+    /// <c>Dictionary["ControlName", "LayoutPosition"]</c>
+    /// </summary>
+    public Dictionary<LayoutControl, LayoutPosition> Layout
+    {
+        get => Get(ConfigId.Layout, new Dictionary<LayoutControl, LayoutPosition>());
+        set => Set(ConfigId.Layout, value);
+    }
 
     ///// <summary>
     ///// Gets, sets tools.
