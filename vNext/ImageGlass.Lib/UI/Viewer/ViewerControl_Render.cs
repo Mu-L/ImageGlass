@@ -371,11 +371,11 @@ public partial class ViewerControl
         // Zooming
         if (AnimationSource.HasFlag(AnimationSources.ZoomIn))
         {
-            _ = ZoomByDeltaToPoint(zoomDelta, null, requestRerender: false);
+            _ = ZoomByDeltaToPoint(zoomDelta, _zooming.ZoomedPoint, requestRerender: false);
         }
         else if (AnimationSource.HasFlag(AnimationSources.ZoomOut))
         {
-            _ = ZoomByDeltaToPoint(-zoomDelta, null, requestRerender: false);
+            _ = ZoomByDeltaToPoint(-zoomDelta, _zooming.ZoomedPoint, requestRerender: false);
         }
 
     }

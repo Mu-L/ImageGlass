@@ -660,7 +660,7 @@ public partial class ViewerControl : PhControl
                         SrcRect = newSrcRect.Normalize();
                         _logicalSrcPoint = SrcRect.Position;
                         _zooming.Factor *= diffRatio.Width;
-                        _zooming.ZoomedPoint = new();
+                        _zooming.ZoomedPoint = new(-1, -1);
 
                         // make sure all zoomed point and viewport are synced
                         // by manually applying a very small zoom factor

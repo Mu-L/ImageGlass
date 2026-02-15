@@ -598,7 +598,7 @@ public partial class ViewerControl
         {
             SrcRect = new();
             _logicalSrcPoint = new();
-            _zooming.ZoomedPoint = new();
+            _zooming.ZoomedPoint = new(-1, -1);
         }
 
         _zooming.Factor = Math.Min(MaxZoom, Math.Max(zoomValue, MinZoom));
@@ -628,7 +628,7 @@ public partial class ViewerControl
     {
         // get zoom factor after applying the zoom mode
         _logicalSrcPoint = default;
-        _zooming.ZoomedPoint = default;
+        _zooming.ZoomedPoint = new(-1, -1);
 
         _zooming.Mode = mode ?? _zooming.Mode;
         _zooming.Factor = CalculateZoomFactor(_zooming.Mode, BitmapSize.Width, BitmapSize.Height);
