@@ -281,11 +281,11 @@ public partial class Photo : DisposableImpl
 
 
     /// <summary>
-    /// Initializes a new single-frame using a bitmap source for rendering.
+    /// Initializes a new single-frame using a image source for rendering.
     /// </summary>
-    public Photo(SKBitmap? bmp, PhotoMetadata? meta, PhotoLoadingState state = PhotoLoadingState.Loaded)
+    public Photo(SKImage? img, PhotoMetadata? meta, PhotoLoadingState state = PhotoLoadingState.Loaded)
     {
-        InitializePhoto(bmp, 0, 0, meta, state);
+        InitializePhoto(img, 0, 0, meta, state);
     }
 
 

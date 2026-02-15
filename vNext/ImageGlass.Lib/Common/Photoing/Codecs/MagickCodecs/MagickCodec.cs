@@ -574,7 +574,7 @@ public static partial class MagickCodec
 
 
         // 3. create settings
-        SKBitmap? bmpSrc = null;
+        SKImage? bmpSrc = null;
         var readSettings = new MagickReadSettings { Format = format };
         if (readSettings.Format == MagickFormat.Rsvg)
         {
@@ -583,32 +583,13 @@ public static partial class MagickCodec
 
 
         // 4. load bitmap from bytes
-        switch (format)
+        using (var imgM = new MagickImage(ByteData, readSettings))
         {
-            // 4.1 use WIC for multiple-frame formats
-            case MagickFormat.Gif:
-            case MagickFormat.Gif87:
-            case MagickFormat.Tif:
-            case MagickFormat.Tiff64:
-            case MagickFormat.Tiff:
-            case MagickFormat.Ico:
-            case MagickFormat.Icon:
-                // TODO:
-                //bmpSrc = PhotoWIC.CreateDecoder(ByteData);
-                break;
-
-            // 4.2 use Magick for the rest
-            default:
-                using (var imgM = new MagickImage(ByteData, readSettings))
-                {
-                    // TODO:
-                    //bmpSrc = PhotoWIC.ConvertFromMagick(imgM);
-                }
-                break;
+            bmpSrc = SkiaCodec.FromMagick(imgM);
         }
 
 
-        // 4. wrap the bitmap as photo object.
+        // 5. wrap the bitmap as photo object.
         var meta = await LoadMetadataAsync(ByteData, null, readSettings);
         var photo = new Photo(bmpSrc, meta);
 
