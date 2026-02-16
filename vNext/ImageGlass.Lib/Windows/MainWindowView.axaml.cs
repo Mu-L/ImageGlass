@@ -559,6 +559,7 @@ public partial class MainWindowView : PhControl
         {
             PART_Layout.ColumnDefinitions[galleryColIndex].Width = new(0);
             PART_Layout.ColumnDefinitions[galleryResizerColIndex].Width = new(0);
+            PART_GalleryResizer.IsVisible = false;
         }
 
         // 4. update gallery size
@@ -571,6 +572,7 @@ public partial class MainWindowView : PhControl
             PART_Layout.ColumnDefinitions[galleryColIndex].Width = new(galleryViewWidth);
             PART_Layout.ColumnDefinitions[galleryColIndex].MinWidth = galleryViewMinWidth;
             PART_Layout.ColumnDefinitions[galleryResizerColIndex].Width = new(5);
+            PART_GalleryResizer.IsVisible = true;
         }
     }
 
