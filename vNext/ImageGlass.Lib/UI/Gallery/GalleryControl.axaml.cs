@@ -73,6 +73,18 @@ public partial class GalleryControl : PhControl
 
 
     /// <summary>
+    /// Gets, sets tooltip placement for gallery item.
+    /// </summary>
+    public PlacementMode ItemTooltipPlacement
+    {
+        get => GetValue(ItemTooltipPlacementProperty);
+        set => SetValue(ItemTooltipPlacementProperty, value);
+    }
+    public static readonly StyledProperty<PlacementMode> ItemTooltipPlacementProperty =
+        AvaloniaProperty.Register<GalleryControl, PlacementMode>(nameof(ItemTooltipPlacement), PlacementMode.Pointer);
+
+
+    /// <summary>
     /// Gets the minimum content size.
     /// </summary>
     public Size MinContentSize

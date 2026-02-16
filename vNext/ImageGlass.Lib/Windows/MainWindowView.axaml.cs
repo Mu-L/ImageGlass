@@ -376,6 +376,7 @@ public partial class MainWindowView : PhControl
                 PART_GalleryResizer.IsVisible = false;
                 PART_Gallery.MaxWidth = double.PositiveInfinity;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.FilmStrip;
+                PART_Gallery.ItemTooltipPlacement = PlacementMode.Bottom;
                 Grid.SetColumnSpan(PART_Toolbar, 1);
 
                 Grid.SetRow(PART_Toolbar, 0);
@@ -393,6 +394,7 @@ public partial class MainWindowView : PhControl
                 PART_GalleryResizer.IsVisible = false;
                 PART_Gallery.MaxWidth = double.PositiveInfinity;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.FilmStrip;
+                PART_Gallery.ItemTooltipPlacement = PlacementMode.Top;
                 Grid.SetColumnSpan(PART_Toolbar, 1);
 
                 Grid.SetRow(PART_Toolbar, 0);
@@ -410,6 +412,7 @@ public partial class MainWindowView : PhControl
                 PART_GalleryResizer.IsVisible = true;
                 PART_Layout.ColumnDefinitions[0].MinWidth = galleryViewMinWidth;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.Gallery;
+                PART_Gallery.ItemTooltipPlacement = PlacementMode.Pointer;
                 Grid.SetColumnSpan(PART_Toolbar, 3);
 
                 Grid.SetRow(PART_Toolbar, 0);
@@ -435,6 +438,7 @@ public partial class MainWindowView : PhControl
                 PART_GalleryResizer.IsVisible = true;
                 PART_Layout.ColumnDefinitions[2].MinWidth = galleryViewMinWidth;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.Gallery;
+                PART_Gallery.ItemTooltipPlacement = PlacementMode.Pointer;
                 Grid.SetColumnSpan(PART_Toolbar, 3);
 
                 Grid.SetRow(PART_Toolbar, 0);
@@ -465,6 +469,7 @@ public partial class MainWindowView : PhControl
                 PART_GalleryResizer.IsVisible = false;
                 PART_Gallery.MaxWidth = double.PositiveInfinity;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.FilmStrip;
+                PART_Gallery.ItemTooltipPlacement = PlacementMode.Bottom;
                 Grid.SetColumnSpan(PART_Toolbar, 1);
 
                 Grid.SetRow(PART_Toolbar, 2);
@@ -482,6 +487,7 @@ public partial class MainWindowView : PhControl
                 PART_GalleryResizer.IsVisible = false;
                 PART_Gallery.MaxWidth = double.PositiveInfinity;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.FilmStrip;
+                PART_Gallery.ItemTooltipPlacement = PlacementMode.Top;
                 Grid.SetColumnSpan(PART_Toolbar, 1);
 
                 Grid.SetRow(PART_Toolbar, 2);
@@ -499,6 +505,7 @@ public partial class MainWindowView : PhControl
                 PART_GalleryResizer.IsVisible = true;
                 PART_Layout.ColumnDefinitions[0].MinWidth = galleryViewMinWidth;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.Gallery;
+                PART_Gallery.ItemTooltipPlacement = PlacementMode.Pointer;
                 Grid.SetColumnSpan(PART_Toolbar, 3);
 
                 Grid.SetRow(PART_Toolbar, 1);
@@ -524,6 +531,7 @@ public partial class MainWindowView : PhControl
                 PART_GalleryResizer.IsVisible = true;
                 PART_Layout.ColumnDefinitions[2].MinWidth = galleryViewMinWidth;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.Gallery;
+                PART_Gallery.ItemTooltipPlacement = PlacementMode.Pointer;
                 Grid.SetColumnSpan(PART_Toolbar, 3);
 
                 Grid.SetRow(PART_Toolbar, 1);

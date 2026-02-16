@@ -43,7 +43,7 @@
                     Margin="{x:Static ui:GalleryControl.GalleryItemMargin}"
                     IsTabStop="False"
                     Focusable="False"
-                    ToolTip.Placement="Top"
+                    ToolTip.Placement="{CompiledBinding ItemTooltipPlacement, RelativeSource={RelativeSource AncestorType=ui:GalleryControl}}"
                     ToolTip.VerticalOffset="10"
                     Width="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
                     Height="{CompiledBinding ThumbnailSize, Source={x:Static cm:Core.Config}}"
