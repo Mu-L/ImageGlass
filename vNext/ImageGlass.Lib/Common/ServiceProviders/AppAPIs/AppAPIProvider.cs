@@ -1721,7 +1721,7 @@ public partial class AppAPIProvider
     /// <summary>
     /// Toggles the viewer's checkerboard mode.
     /// </summary>
-    public void IG_ToggleCheckerboard(string? mode = null)
+    public static void IG_ToggleCheckerboard(string? mode = null)
     {
         var isValid = Enum.TryParse<CheckerboardType>(mode, out var wantedMode);
 
@@ -1742,19 +1742,21 @@ public partial class AppAPIProvider
         }
         else
         {
-            switch (wantedMode)
+            var hasAlpha = Core.Photos.CurrentMetadata?.HasAlpha ?? false;
+
+            if (Core.Config.CheckerboardMode == CheckerboardType.None)
             {
-                case CheckerboardType.None:
-                    wantedMode = CheckerboardType.Client;
-                    break;
-                case CheckerboardType.Client:
-                    wantedMode = CheckerboardType.Image;
-                    break;
-                case CheckerboardType.Image:
-                    wantedMode = CheckerboardType.None;
-                    break;
-                default:
-                    break;
+                wantedMode = hasAlpha
+                    ? CheckerboardType.Image
+                    : CheckerboardType.Client;
+            }
+            else if (Core.Config.CheckerboardMode == CheckerboardType.Image)
+            {
+                wantedMode = CheckerboardType.Client;
+            }
+            else if (Core.Config.CheckerboardMode == CheckerboardType.Client)
+            {
+                wantedMode = CheckerboardType.None;
             }
         }
 
