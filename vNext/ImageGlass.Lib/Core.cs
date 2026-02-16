@@ -353,7 +353,7 @@ public static class Core
             // tooltip
             Resx.Set(ResxId.ToolTipForeground, menuText);
             Resx.Set(ResxId.ToolTipBackground, menuBg);
-            Resx.Set(ResxId.ToolTipBorderBrush, menuBorder);
+            Resx.Set(ResxId.ToolTipBorder, menuBorder);
         });
     }
 

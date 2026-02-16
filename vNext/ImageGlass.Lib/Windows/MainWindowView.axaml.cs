@@ -570,7 +570,7 @@ public partial class MainWindowView : PhControl
 
             PART_Layout.ColumnDefinitions[galleryColIndex].Width = new(galleryViewWidth);
             PART_Layout.ColumnDefinitions[galleryColIndex].MinWidth = galleryViewMinWidth;
-            PART_Layout.ColumnDefinitions[galleryResizerColIndex].Width = new(4);
+            PART_Layout.ColumnDefinitions[galleryResizerColIndex].Width = new(5);
         }
     }
 

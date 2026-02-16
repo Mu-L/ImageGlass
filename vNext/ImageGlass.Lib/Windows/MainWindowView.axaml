@@ -49,14 +49,13 @@
                            IsContentVisible="{CompiledBinding ShowGallery, Source={x:Static cm:Core.Config}}" />
 
 
-        <GridSplitter x:Name="PART_GalleryResizer"
+        <ui:PhGridSplitter x:Name="PART_GalleryResizer"
                       Grid.Row="3"
-                      Width="3"
-                      Background="{DynamicResource IG_BorderControlBrush}"
                       ResizeDirection="Columns"
                       Focusable="False"
                       IsVisible="False"
-                      DragCompleted="PART_GalleryResizer_DragCompleted"/>
+                      CornerRadius="1"
+                      DragCompleted="PART_GalleryResizer_DragCompleted" />
 
     </Grid>
     

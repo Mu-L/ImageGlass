@@ -134,7 +134,7 @@ public enum ResxId
     // tooltip
     ToolTipBackground,
     ToolTipForeground,
-    ToolTipBorderBrush,
+    ToolTipBorder,
 
 
     // situational backgrounds
