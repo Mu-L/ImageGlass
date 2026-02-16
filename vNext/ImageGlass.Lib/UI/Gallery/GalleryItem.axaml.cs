@@ -1,5 +1,5 @@
 /*
-ImageGlass Project - Image viewer for Windows
+ImageGlass - A lightweight, versatile image viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
 
