@@ -29,7 +29,7 @@ namespace ImageGlass.Common;
 
 public static class ShellThumbnailApi
 {
-    private static Guid IID_IShellItem2 = new Guid("7E9FB0D3-919F-4307-AB2E-9B1860310C93");
+    private static readonly Guid IID_IShellItemImageFactory = new("bcc18b79-ba16-442f-80c4-8a59c30c463b");
 
 
     /// <summary>
@@ -79,8 +79,8 @@ public static class ShellThumbnailApi
     private static DeleteObjectSafeHandle? GetThumbnailHBitmap(string filePath,
         int width, int height, SIIGBF options)
     {
-        // create shell item
-        PInvoke.SHCreateItemFromParsingName(filePath, null, IID_IShellItem2, out var shItemObj)
+        // create shell item, requesting IShellItemImageFactory directly
+        PInvoke.SHCreateItemFromParsingName(filePath, null, IID_IShellItemImageFactory, out var shItemObj)
             .ThrowOnFailure();
 
         if (shItemObj is not IShellItemImageFactory shItemImageFac) return null;
@@ -132,6 +132,19 @@ public static class ShellThumbnailApi
                 bmpOutput.Dispose();
                 bmpOutput = null;
                 return null;
+            }
+
+            // source bitmap has no alpha channel (< 32bpp): GetDIBits leaves
+            // alpha bytes as 0x00, making the image fully transparent.
+            // Set them to 0xFF for correct opaque display.
+            if (bm.bmBitsPixel < 32)
+            {
+                var pixels = (byte*)bmpOutput.GetPixels();
+                var totalPixels = bm.bmWidth * bm.bmHeight;
+                for (var i = 0; i < totalPixels; i++)
+                {
+                    pixels[i * 4 + 3] = 0xFF;
+                }
             }
 
             imgOutput = SkiaCodec.ToSKImage(bmpOutput);
