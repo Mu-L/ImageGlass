@@ -80,6 +80,6 @@ internal class ZoomInfo
     /// <summary>
     /// Represents the last known pointer position or zoom/pan anchor point.
     /// </summary>
-    public Point ZoomedPoint { get; set; } = new(-1, -1);
+    public Point ZoomedPoint { get; set; } = new();
 
 }
