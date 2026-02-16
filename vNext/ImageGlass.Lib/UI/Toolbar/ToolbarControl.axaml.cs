@@ -400,9 +400,7 @@ public partial class ToolbarControl : PhControl
             // set item check state
             if (!string.IsNullOrWhiteSpace(vm.ConfigBinding))
             {
-                var configValue = Core.Config.GetAsString(vm.ConfigBinding);
-                var isChecked = configValue.Equals(vm.ConfigBindingValue, StringComparison.Ordinal);
-                vm.IsChecked = isChecked;
+                vm.IsChecked = ComputeCheckState(vm);
             }
         }
 
@@ -490,12 +488,32 @@ public partial class ToolbarControl : PhControl
         var items = allItems.ToArray();
         foreach (var srcIndex in itemIndice)
         {
-            var configValue = Core.Config.GetAsString(configName);
-            var isChecked = configValue.Equals(items[srcIndex].ConfigBindingValue, StringComparison.Ordinal);
-
-            items[srcIndex].IsChecked = isChecked;
+            items[srcIndex].IsChecked = ComputeCheckState(items[srcIndex]);
         }
     }
+
+
+    /// <summary>
+    /// Computes the check state of the input view model.
+    /// </summary>
+    private static bool ComputeCheckState(ToolbarItemModel vm)
+    {
+        var configValue = Core.Config.GetAsString(vm.ConfigBinding);
+        var configBindingValue = vm.ConfigBindingValue;
+        var configBindingValueEqual = true;
+
+        if (vm.ConfigBindingValue.StartsWith('!'))
+        {
+            configBindingValue = vm.ConfigBindingValue.Substring(1);
+            configBindingValueEqual = false;
+        }
+
+        var isChecked = configValue.Equals(configBindingValue, StringComparison.Ordinal);
+        if (!configBindingValueEqual) isChecked = !isChecked;
+
+        return isChecked;
+    }
+
 
 
     /// <summary>

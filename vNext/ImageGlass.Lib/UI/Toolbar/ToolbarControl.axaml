@@ -394,6 +394,11 @@
 
                             <!--  Layout  -->
                             <ui:PhMenuItem LangKey="FrmMain_MnuLayout">
+                                <ui:PhMenuItem LangKey="FrmMain_MnuToggleTopMost"
+                                               ToggleType="CheckBox"
+                                               IsChecked="{CompiledBinding Config.EnableWindowTopMost}"
+                                               Click="MainMenuItem_Click" />
+                                <ui:PhMenuItem Header="-" />
                                 <ui:PhMenuItem LangKey="FrmMain_MnuToggleToolbar"
                                                ToggleType="CheckBox"
                                                IsChecked="{CompiledBinding Config.ShowToolbar}"
@@ -402,13 +407,8 @@
                                                ToggleType="CheckBox"
                                                IsChecked="{CompiledBinding Config.ShowGallery}"
                                                Click="MainMenuItem_Click" />
-                                <ui:PhMenuItem LangKey="FrmMain_MnuToggleCheckerboard"
-                                               Click="MainMenuItem_Click" />
                                 <ui:PhMenuItem Header="-" />
-
-                                <ui:PhMenuItem LangKey="FrmMain_MnuToggleTopMost"
-                                               ToggleType="CheckBox"
-                                               IsChecked="{CompiledBinding Config.EnableWindowTopMost}"
+                                <ui:PhMenuItem LangKey="FrmMain_MnuToggleCheckerboard"
                                                Click="MainMenuItem_Click" />
                                 <ui:PhMenuItem LangKey="FrmMain_MnuChangeBackgroundColor"
                                                Click="MainMenuItem_Click" />

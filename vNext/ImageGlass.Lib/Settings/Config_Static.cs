@@ -223,6 +223,8 @@ public partial class Config
             Id = $"Btn_{nameof(IgThemeIcon.Checkerboard)}",
             Image = nameof(IgThemeIcon.Checkerboard),
             Text = Lang.KeysMap[LangId.FrmMain_MnuToggleCheckerboard],
+            ConfigBinding = nameof(Config.CheckerboardMode),
+            ConfigBindingValue = $"!{nameof(CheckerboardType.None)}",
             OnClick = new(LangId.FrmMain_MnuToggleCheckerboard, API.IG_ToggleCheckerboard),
         },
         // toggle fullscreen
