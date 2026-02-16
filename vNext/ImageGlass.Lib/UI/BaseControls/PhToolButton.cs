@@ -45,6 +45,12 @@ public partial class PhToolButton : ToggleButton
     #region Public Properties
 
     /// <summary>
+    /// Gets the DPI scale value.
+    /// </summary>
+    public double Dpi => VisualRoot?.RenderScaling ?? 1d;
+
+
+    /// <summary>
     /// Gets, sets the value indicates that the button is checked on click.
     /// </summary>
     public bool IsCheckOnClick

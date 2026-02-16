@@ -724,6 +724,16 @@ public partial class Photo : DisposableImpl
 
 
     /// <summary>
+    /// Loads a thumbnail image at the specified DPI scaling factor.
+    /// </summary>
+    public async Task LoadThumbnailAsync(double dpi)
+    {
+        var thumbSize = Core.Config.ThumbnailSize * dpi * 2; // 2x bigger
+        await LoadThumbnailAsync(thumbSize, useCache: true);
+    }
+
+
+    /// <summary>
     /// Loads the gallery thumbnail asynchronously.
     /// Uses a semaphore to ensure only one load per photo at a time,
     /// and caches the result on <see cref="GalleryThumbnail"/>.

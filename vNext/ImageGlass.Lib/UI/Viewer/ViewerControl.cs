@@ -469,7 +469,15 @@ public partial class ViewerControl : PhControl
             var previewHeight = Math.Min(Math.Min(DrawingArea.Height, e.Metadata.Height), 500);
 
             // try to get photo preview
-            imgPreview = await Core.PreviewProvider!.GetPreviewAsync(e.Metadata, previewHeight, token);
+            if (e.Photo.GalleryThumbnail is not null)
+            {
+                using var skBmp = SkiaCodec.FromBitmap(e.Photo.GalleryThumbnail);
+                imgPreview = SkiaCodec.ToSKImage(skBmp);
+            }
+            else
+            {
+                imgPreview = await Core.PreviewProvider!.GetPreviewAsync(e.Metadata, previewHeight, token);
+            }
             hasPreview = imgPreview is not null;
 
             // cancel if requested
