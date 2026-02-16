@@ -45,9 +45,6 @@ public partial class MainWindowView : PhControl
     public MainWindowView()
     {
         InitializeComponent();
-
-        // apply app layout from settings
-        ApplyAppLayout();
     }
 
 
@@ -56,6 +53,9 @@ public partial class MainWindowView : PhControl
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
+        // apply app layout from settings
+        ApplyAppLayout();
+
         base.OnLoaded(e);
 
         // drag-drop events
@@ -83,6 +83,14 @@ public partial class MainWindowView : PhControl
         Core.Config.PropertyChanged -= Config_PropertyChanged;
         PART_Viewer.PhotoLoading -= PART_Viewer_PhotoLoading;
 
+    }
+
+
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+
+        UpdateGalleryWidth();
     }
 
 
@@ -359,10 +367,6 @@ public partial class MainWindowView : PhControl
         }
 
 
-        var galleryViewMinWidth = GalleryControl.CalculateWidthForGalleryView(1);
-        var galleryViewWidth = GalleryControl.CalculateWidthForGalleryView(Core.Config.GalleryColumns);
-
-
         // 3. create layout
         if (toolbarPos == LayoutPosition.Top)
         {
@@ -371,7 +375,7 @@ public partial class MainWindowView : PhControl
             if (galleryPos == LayoutPosition.Top)
             {
                 PART_Layout.RowDefinitions = new("Auto, Auto, *");
-                PART_Layout.ColumnDefinitions = new();
+                PART_Layout.ColumnDefinitions = new("*");
 
                 PART_GalleryResizer.IsVisible = false;
                 PART_Gallery.MaxWidth = double.PositiveInfinity;
@@ -389,7 +393,7 @@ public partial class MainWindowView : PhControl
             else if (galleryPos == LayoutPosition.Bottom)
             {
                 PART_Layout.RowDefinitions = new("Auto, *, Auto");
-                PART_Layout.ColumnDefinitions = new();
+                PART_Layout.ColumnDefinitions = new("*");
 
                 PART_GalleryResizer.IsVisible = false;
                 PART_Gallery.MaxWidth = double.PositiveInfinity;
@@ -399,18 +403,19 @@ public partial class MainWindowView : PhControl
 
                 Grid.SetRow(PART_Toolbar, 0);
                 Grid.SetRow(PART_Gallery, 2);
+                Grid.SetRow(PART_GalleryResizer, 0);
                 Grid.SetRow(PART_ViewerWrapper, 1);
                 Grid.SetColumn(PART_Toolbar, 0);
                 Grid.SetColumn(PART_Gallery, 0);
+                Grid.SetColumn(PART_GalleryResizer, 0);
                 Grid.SetColumn(PART_ViewerWrapper, 0);
             }
             else if (galleryPos == LayoutPosition.Left)
             {
                 PART_Layout.RowDefinitions = new("Auto, *");
-                PART_Layout.ColumnDefinitions = new($"{galleryViewWidth}, Auto, *");
+                PART_Layout.ColumnDefinitions = new("Auto, Auto, *");
 
                 PART_GalleryResizer.IsVisible = true;
-                PART_Layout.ColumnDefinitions[0].MinWidth = galleryViewMinWidth;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.Gallery;
                 PART_Gallery.ItemTooltipPlacement = PlacementMode.Pointer;
                 Grid.SetColumnSpan(PART_Toolbar, 3);
@@ -423,20 +428,13 @@ public partial class MainWindowView : PhControl
                 Grid.SetColumn(PART_Gallery, 0);
                 Grid.SetColumn(PART_GalleryResizer, 1);
                 Grid.SetColumn(PART_ViewerWrapper, 2);
-
-                // hide gallery space
-                if (!Core.Config.ShowGallery)
-                {
-                    PART_Layout.ColumnDefinitions = new("0, 0, *");
-                }
             }
             else if (galleryPos == LayoutPosition.Right)
             {
                 PART_Layout.RowDefinitions = new("Auto, *");
-                PART_Layout.ColumnDefinitions = new($"*, Auto, {galleryViewWidth}");
+                PART_Layout.ColumnDefinitions = new("*, Auto, Auto");
 
                 PART_GalleryResizer.IsVisible = true;
-                PART_Layout.ColumnDefinitions[2].MinWidth = galleryViewMinWidth;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.Gallery;
                 PART_Gallery.ItemTooltipPlacement = PlacementMode.Pointer;
                 Grid.SetColumnSpan(PART_Toolbar, 3);
@@ -449,12 +447,6 @@ public partial class MainWindowView : PhControl
                 Grid.SetColumn(PART_Gallery, 2);
                 Grid.SetColumn(PART_GalleryResizer, 1);
                 Grid.SetColumn(PART_ViewerWrapper, 0);
-
-                // hide gallery space
-                if (!Core.Config.ShowGallery)
-                {
-                    PART_Layout.ColumnDefinitions = new("*, 0, 0");
-                }
             }
         }
         else if (toolbarPos == LayoutPosition.Bottom)
@@ -464,7 +456,7 @@ public partial class MainWindowView : PhControl
             if (galleryPos == LayoutPosition.Top)
             {
                 PART_Layout.RowDefinitions = new("Auto, *, Auto");
-                PART_Layout.ColumnDefinitions = new();
+                PART_Layout.ColumnDefinitions = new("*");
 
                 PART_GalleryResizer.IsVisible = false;
                 PART_Gallery.MaxWidth = double.PositiveInfinity;
@@ -474,15 +466,17 @@ public partial class MainWindowView : PhControl
 
                 Grid.SetRow(PART_Toolbar, 2);
                 Grid.SetRow(PART_Gallery, 0);
+                Grid.SetRow(PART_GalleryResizer, 0);
                 Grid.SetRow(PART_ViewerWrapper, 1);
                 Grid.SetColumn(PART_Toolbar, 0);
                 Grid.SetColumn(PART_Gallery, 0);
+                Grid.SetColumn(PART_GalleryResizer, 0);
                 Grid.SetColumn(PART_ViewerWrapper, 0);
             }
             else if (galleryPos == LayoutPosition.Bottom)
             {
                 PART_Layout.RowDefinitions = new("*, Auto, Auto");
-                PART_Layout.ColumnDefinitions = new();
+                PART_Layout.ColumnDefinitions = new("*");
 
                 PART_GalleryResizer.IsVisible = false;
                 PART_Gallery.MaxWidth = double.PositiveInfinity;
@@ -492,18 +486,19 @@ public partial class MainWindowView : PhControl
 
                 Grid.SetRow(PART_Toolbar, 2);
                 Grid.SetRow(PART_Gallery, 1);
+                Grid.SetRow(PART_GalleryResizer, 0);
                 Grid.SetRow(PART_ViewerWrapper, 0);
                 Grid.SetColumn(PART_Toolbar, 0);
                 Grid.SetColumn(PART_Gallery, 0);
+                Grid.SetColumn(PART_GalleryResizer, 0);
                 Grid.SetColumn(PART_ViewerWrapper, 0);
             }
             else if (galleryPos == LayoutPosition.Left)
             {
                 PART_Layout.RowDefinitions = new("*, Auto");
-                PART_Layout.ColumnDefinitions = new($"{galleryViewWidth}, Auto, *");
+                PART_Layout.ColumnDefinitions = new("Auto, Auto, *");
 
                 PART_GalleryResizer.IsVisible = true;
-                PART_Layout.ColumnDefinitions[0].MinWidth = galleryViewMinWidth;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.Gallery;
                 PART_Gallery.ItemTooltipPlacement = PlacementMode.Pointer;
                 Grid.SetColumnSpan(PART_Toolbar, 3);
@@ -516,20 +511,13 @@ public partial class MainWindowView : PhControl
                 Grid.SetColumn(PART_Gallery, 0);
                 Grid.SetColumn(PART_GalleryResizer, 1);
                 Grid.SetColumn(PART_ViewerWrapper, 2);
-
-                // hide gallery space
-                if (!Core.Config.ShowGallery)
-                {
-                    PART_Layout.ColumnDefinitions = new("0, 0, *");
-                }
             }
             else if (galleryPos == LayoutPosition.Right)
             {
                 PART_Layout.RowDefinitions = new("*, Auto");
-                PART_Layout.ColumnDefinitions = new($"*, Auto, {galleryViewWidth}");
+                PART_Layout.ColumnDefinitions = new("*, Auto, Auto");
 
                 PART_GalleryResizer.IsVisible = true;
-                PART_Layout.ColumnDefinitions[2].MinWidth = galleryViewMinWidth;
                 PART_Gallery.ViewMode = PhVirtualizingUniformPanelViewMode.Gallery;
                 PART_Gallery.ItemTooltipPlacement = PlacementMode.Pointer;
                 Grid.SetColumnSpan(PART_Toolbar, 3);
@@ -542,14 +530,47 @@ public partial class MainWindowView : PhControl
                 Grid.SetColumn(PART_Gallery, 2);
                 Grid.SetColumn(PART_GalleryResizer, 1);
                 Grid.SetColumn(PART_ViewerWrapper, 0);
-
-
-                // hide gallery space
-                if (!Core.Config.ShowGallery)
-                {
-                    PART_Layout.ColumnDefinitions = new("*, 0, 0");
-                }
             }
+        }
+
+        // update gallery initial width
+        UpdateGalleryWidth();
+    }
+
+
+    /// <summary>
+    /// Updates the width of the gallery and its resizer columns based on the current layout.
+    /// </summary>
+    private void UpdateGalleryWidth()
+    {
+        if (PART_Layout.ColumnDefinitions.Count == 0) return;
+
+        // 1. get gallery position
+        var galleryPos = Core.Config.Layout.GetValueOrDefault(LayoutControl.Gallery, LayoutPosition.Bottom);
+        if (galleryPos is LayoutPosition.Top or LayoutPosition.Bottom) return;
+
+        // 2. get column indexes
+        var galleryColIndex = Grid.GetColumn(PART_Gallery);
+        var galleryResizerColIndex = Grid.GetColumn(PART_GalleryResizer);
+
+
+        // 3. hide gallery space
+        if (!Core.Config.ShowGallery)
+        {
+            PART_Layout.ColumnDefinitions[galleryColIndex].Width = new(0);
+            PART_Layout.ColumnDefinitions[galleryResizerColIndex].Width = new(0);
+        }
+
+        // 4. update gallery size
+        else
+        {
+            var galleryViewMinWidth = GalleryControl.CalculateWidthForGalleryView(1);
+            var galleryViewWidth = GalleryControl.CalculateWidthForGalleryView(Core.Config.GalleryColumns);
+            galleryViewWidth = Math.Min(galleryViewWidth, Bounds.Width * 0.8); // max width = 80% window width
+
+            PART_Layout.ColumnDefinitions[galleryColIndex].Width = new(galleryViewWidth);
+            PART_Layout.ColumnDefinitions[galleryColIndex].MinWidth = galleryViewMinWidth;
+            PART_Layout.ColumnDefinitions[galleryResizerColIndex].Width = new(4);
         }
     }
 
