@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Common.ServiceProviders;
 
@@ -68,5 +69,17 @@ public interface IShellProvider : IDisposable
     /// Shows the file's Properties dialog.
     /// </summary>
     void ShowFileProperties(string filePath, nint windowHandle);
+
+
+    /// <summary>
+    /// Sets the desktop wallpaper.
+    /// </summary>
+    void SetWallpaper(string filePath);
+
+
+    /// <summary>
+    /// Sets the lock screen image.
+    /// </summary>
+    Task SetLockScreenAsync(string filePath);
 
 }

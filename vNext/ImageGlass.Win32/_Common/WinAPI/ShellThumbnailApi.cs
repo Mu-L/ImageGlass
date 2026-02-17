@@ -25,7 +25,7 @@ using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.UI.Shell;
 
-namespace ImageGlass.Common;
+namespace ImageGlass.Win32.Common;
 
 public static class ShellThumbnailApi
 {

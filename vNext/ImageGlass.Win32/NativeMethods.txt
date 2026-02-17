@@ -28,3 +28,6 @@ DisplayConfigGetDeviceInfo
 DwmSetWindowAttribute
 
 
+SystemParametersInfo
+SYSTEM_PARAMETERS_INFO_ACTION
+

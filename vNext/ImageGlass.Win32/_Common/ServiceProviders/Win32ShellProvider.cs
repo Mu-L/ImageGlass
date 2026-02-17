@@ -24,6 +24,9 @@ using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.System.UserProfile;
 
 namespace ImageGlass.Win32.Common.ServiceProviders;
 
@@ -177,6 +180,25 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
     public void ShowFileProperties(string filePath, nint windowHandle)
     {
         EggShell.DisplayFileProperties(filePath, windowHandle);
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void SetWallpaper(string filePath)
+    {
+        Win32DesktopApi.SetWallpaper(filePath, WallpaperStyle.Current);
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public async Task SetLockScreenAsync(string filePath)
+    {
+        var sFile = await StorageFile.GetFileFromPathAsync(filePath);
+        await LockScreen.SetImageFileAsync(sFile);
     }
 
 

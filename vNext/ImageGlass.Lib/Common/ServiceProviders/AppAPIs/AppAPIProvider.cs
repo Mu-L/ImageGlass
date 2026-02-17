@@ -30,6 +30,7 @@ using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
@@ -41,6 +42,9 @@ namespace ImageGlass.Common.ServiceProviders;
 public partial class AppAPIProvider
 {
     private MainWindow _mainWindow;
+
+    // wallapaer formats
+    private static FrozenSet<string> _desktopNativeFormats => [".bmp", ".jpg", ".jpeg", ".png", ".gif"];
 
     // variable to back up / restore window layout when changing window mode
     private bool _isFramelessBeforeFullscreen;
@@ -1152,7 +1156,7 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_SetDesktopBackgroundAsync()
     {
-        //await SetSystemBackgroundAsync__(false, WallpaperStyle.Current);
+        await SetSystemBackgroundAsync(false);
     }
 
 
@@ -1161,83 +1165,83 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_SetLockScreenImageAsync()
     {
-        //await SetSystemBackgroundAsync__(true);
+        await SetSystemBackgroundAsync(true);
     }
 
 
-    ///// <summary>
-    ///// Sets the current photo as system background.
-    ///// </summary>
-    ///// <param name="forLockScreen">
-    ///// <c>true</c>: For lock screen image, <c>false</c>: for desktop wallpaper
-    ///// </param>
-    ///// <param name="style">Desktop wallpaper style</param>
-    //private async Task SetSystemBackgroundAsync__(bool forLockScreen, WallpaperStyle style = WallpaperStyle.Current)
-    //{
-    //    if (Viewer.SourceKind == PhotoSource.None) return;
+    /// <summary>
+    /// Sets the current photo as system background.
+    /// </summary>
+    /// <param name="forLockScreen">
+    /// <c>true</c>: For lock screen image, <c>false</c>: for desktop wallpaper
+    /// </param>
+    private async Task SetSystemBackgroundAsync(bool forLockScreen)
+    {
+        if (Viewer.SourceKind == PhotoSource.None || Core.ShellProvider is null) return;
 
-    //    var filePath = Core.Photos.CurrentFilePath;
-    //    var ext = Core.Photos.Current?.Extension.ToLowerInvariant() ?? string.Empty;
-    //    _ = Message.ShowAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
+        var filePath = Core.Photos.CurrentFilePath;
+        var ext = Core.Photos.Current?.Extension.ToLowerInvariant() ?? string.Empty;
+        _ = Message.ShowAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
 
-    //    var title = forLockScreen
-    //        ? Core.Lang[LangId.FrmMain_MnuSetLockScreen]
-    //        : Core.Lang[LangId.FrmMain_MnuSetDesktopBackground];
-
+        var title = forLockScreen
+            ? Core.Lang[LangId.FrmMain_MnuSetLockScreen]
+            : Core.Lang[LangId.FrmMain_MnuSetDesktopBackground];
 
 
-    //    // 1. create temp image if needed
-    //    if (Core.ClipboardImage is not null || !_desktopNativeFormats.Contains(ext))
-    //    {
-    //        // save image to temp file
-    //        filePath = await Core.SavePhotoAsTempFileAsync(".jpg");
-    //    }
-    //    await Message.ClearAsync();
+        // 1. create temp image if needed
+        if (Core.ClipboardImage is not null || !_desktopNativeFormats.Contains(ext))
+        {
+            // save image to temp file
+            filePath = await Core.SavePhotoAsTempFileAsync(".jpg");
+        }
+        await Message.ClearAsync();
 
 
-    //    // 2. check if file path is valid
-    //    if (!File.Exists(filePath))
-    //    {
-    //        _ = await ModalWindow.ShowErrorAsync(this,
-    //            title: title,
-    //            description: Core.Lang[LangId._CreatingFileError]);
+        // 2. check if file path is valid
+        if (!File.Exists(filePath))
+        {
+            _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = title,
+                Description = Core.Lang[LangId._CreatingFileError],
+            });
 
-    //        return;
-    //    }
-
-
-    //    // 3. set background
-    //    try
-    //    {
-    //        if (forLockScreen)
-    //        {
-    //            var sFile = await StorageFile.GetFileFromPathAsync(filePath);
-    //            await LockScreen.SetImageFileAsync(sFile);
-    //        }
-    //        else
-    //        {
-    //            DesktopApi.SetWallpaper(filePath, style);
-    //        }
+            return;
+        }
 
 
-    //        var successMsg = forLockScreen
-    //            ? Core.Lang[LangId.FrmMain_MnuSetLockScreen_Success]
-    //            : Core.Lang[LangId.FrmMain_MnuSetDesktopBackground_Success];
+        // 3. set background
+        try
+        {
+            if (forLockScreen)
+            {
+                await Core.ShellProvider.SetLockScreenAsync(filePath);
+            }
+            else
+            {
+                Core.ShellProvider.SetWallpaper(filePath);
+            }
 
-    //        _ = Message.ShowAsync(successMsg);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        var heading = forLockScreen
-    //            ? Core.Lang[LangId.FrmMain_MnuSetLockScreen_Error]
-    //            : Core.Lang[LangId.FrmMain_MnuSetDesktopBackground_Error];
 
-    //        _ = await ModalWindow.ShowErrorAsync(this,
-    //            title: title,
-    //            description: ex.Message,
-    //            heading: heading);
-    //    }
-    //}
+            var successMsg = forLockScreen
+                ? Core.Lang[LangId.FrmMain_MnuSetLockScreen_Success]
+                : Core.Lang[LangId.FrmMain_MnuSetDesktopBackground_Success];
+            _ = Message.ShowAsync(successMsg);
+        }
+        catch (Exception ex)
+        {
+            var heading = forLockScreen
+                ? Core.Lang[LangId.FrmMain_MnuSetLockScreen_Error]
+                : Core.Lang[LangId.FrmMain_MnuSetDesktopBackground_Error];
+
+            _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = title,
+                Heading = heading,
+                Description = ex.Message,
+            });
+        }
+    }
 
 
     #endregion // Image APIs
