@@ -27,32 +27,9 @@ public partial class IgThemeComputedColors : PhReactive
     // Viewer
     public Color TextColor { get; private set; } = new();
     public Color BgColor { get; private set; } = new();
-    public Color NavigationButtonColor { get; private set; } = new();
-
-
-    // Toolbar
     public Color ToolbarBgColor { get; private set; } = new();
-    public Color ToolbarTextColor { get; private set; } = new();
-    public Color ToolbarItemHoverColor { get; private set; } = new();
-    public Color ToolbarItemActiveColor { get; private set; } = new();
-    public Color ToolbarItemSelectedColor { get; private set; } = new();
-
-
-    // Gallery
     public Color GalleryBgColor { get; private set; } = new();
-    public Color GalleryTextColor { get; private set; } = new();
-    public Color GalleryItemHoverColor { get; private set; } = new();
-    public Color GalleryItemActiveColor { get; private set; } = new();
-    public Color GalleryItemSelectedColor { get; private set; } = new();
-
-
-    // Menu
     public Color MenuBgColor { get; private set; } = new();
-    public Color MenuBgHoverColor { get; private set; } = new();
-    public Color MenuBgActiveColor { get; private set; } = new();
-    public Color MenuTextColor { get; private set; } = new();
-    public Color MenuTextHoverColor { get; private set; } = new();
-
 
 
 
@@ -86,12 +63,6 @@ public partial class IgThemeComputedColors : PhReactive
             BgColor = color;
             OnPropertyChanged(nameof(BgColor));
         }
-        color = BHelper.ColorFromHex(colors.NavigationButtonColor, accent);
-        if (NavigationButtonColor != color)
-        {
-            NavigationButtonColor = color;
-            OnPropertyChanged(nameof(NavigationButtonColor));
-        }
 
 
         // Toolbar
@@ -100,30 +71,6 @@ public partial class IgThemeComputedColors : PhReactive
         {
             ToolbarBgColor = color;
             OnPropertyChanged(nameof(ToolbarBgColor));
-        }
-        color = BHelper.ColorFromHex(colors.ToolbarTextColor, accent);
-        if (ToolbarTextColor != color)
-        {
-            ToolbarTextColor = color;
-            OnPropertyChanged(nameof(ToolbarTextColor));
-        }
-        color = BHelper.ColorFromHex(colors.ToolbarItemHoverColor, accent);
-        if (ToolbarItemHoverColor != color)
-        {
-            ToolbarItemHoverColor = color;
-            OnPropertyChanged(nameof(ToolbarItemHoverColor));
-        }
-        color = BHelper.ColorFromHex(colors.ToolbarItemActiveColor, accent);
-        if (ToolbarItemActiveColor != color)
-        {
-            ToolbarItemActiveColor = color;
-            OnPropertyChanged(nameof(ToolbarItemActiveColor));
-        }
-        color = BHelper.ColorFromHex(colors.ToolbarItemSelectedColor, accent);
-        if (ToolbarItemSelectedColor != color)
-        {
-            ToolbarItemSelectedColor = color;
-            OnPropertyChanged(nameof(ToolbarItemSelectedColor));
         }
 
 
@@ -134,30 +81,6 @@ public partial class IgThemeComputedColors : PhReactive
             GalleryBgColor = color;
             OnPropertyChanged(nameof(GalleryBgColor));
         }
-        color = BHelper.ColorFromHex(colors.GalleryTextColor, accent);
-        if (GalleryTextColor != color)
-        {
-            GalleryTextColor = color;
-            OnPropertyChanged(nameof(GalleryTextColor));
-        }
-        color = BHelper.ColorFromHex(colors.GalleryItemHoverColor, accent);
-        if (GalleryItemHoverColor != color)
-        {
-            GalleryItemHoverColor = color;
-            OnPropertyChanged(nameof(GalleryItemHoverColor));
-        }
-        color = BHelper.ColorFromHex(colors.GalleryItemActiveColor, accent);
-        if (GalleryItemActiveColor != color)
-        {
-            GalleryItemActiveColor = color;
-            OnPropertyChanged(nameof(GalleryItemActiveColor));
-        }
-        color = BHelper.ColorFromHex(colors.GalleryItemSelectedColor, accent);
-        if (GalleryItemSelectedColor != color)
-        {
-            GalleryItemSelectedColor = color;
-            OnPropertyChanged(nameof(GalleryItemSelectedColor));
-        }
 
 
         // Menu
@@ -166,30 +89,6 @@ public partial class IgThemeComputedColors : PhReactive
         {
             MenuBgColor = color;
             OnPropertyChanged(nameof(MenuBgColor));
-        }
-        color = BHelper.ColorFromHex(colors.MenuBgHoverColor, accent);
-        if (MenuBgHoverColor != color)
-        {
-            MenuBgHoverColor = color;
-            OnPropertyChanged(nameof(MenuBgHoverColor));
-        }
-        color = BHelper.ColorFromHex(colors.MenuBgActiveColor, accent);
-        if (MenuBgActiveColor != color)
-        {
-            MenuBgActiveColor = color;
-            OnPropertyChanged(nameof(MenuBgActiveColor));
-        }
-        color = BHelper.ColorFromHex(colors.MenuTextColor, accent);
-        if (MenuTextColor != color)
-        {
-            MenuTextColor = color;
-            OnPropertyChanged(nameof(MenuTextColor));
-        }
-        color = BHelper.ColorFromHex(colors.MenuTextHoverColor, accent);
-        if (MenuTextHoverColor != color)
-        {
-            MenuTextHoverColor = color;
-            OnPropertyChanged(nameof(MenuTextHoverColor));
         }
 
     }

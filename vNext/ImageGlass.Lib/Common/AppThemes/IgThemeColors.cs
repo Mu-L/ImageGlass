@@ -33,35 +33,5 @@ public class IgThemeColors
     public string GalleryBgColor { get; set; } = "#1E242900";
     public string MenuBgColor { get; set; } = "#0000";
 
-
-
-
-    // Legacy theme specs
-
-    public string NavigationButtonColor { get; set; } = "ff000015";
-
-
-    // Toolbar
-
-    public string ToolbarTextColor { get; set; } = "#dedede";
-    public string ToolbarItemHoverColor { get; set; } = "#ffffff33";
-    public string ToolbarItemActiveColor { get; set; } = "#ffffff22";
-    public string ToolbarItemSelectedColor { get; set; } = "#ffffff44";
-
-
-    // Gallery
-
-    public string GalleryTextColor { get; set; } = "#dedede";
-    public string GalleryItemHoverColor { get; set; } = "#ffffff33";
-    public string GalleryItemActiveColor { get; set; } = "#ffffff22";
-    public string GalleryItemSelectedColor { get; set; } = "#ffffff44";
-
-
-    // Menu
-    public string MenuBgHoverColor { get; set; } = "#ffffff10";
-    public string MenuBgActiveColor { get; set; } = "#ffffff08";
-    public string MenuTextColor { get; set; } = "#d3d3d3";
-    public string MenuTextHoverColor { get; set; } = "#d3d3d3";
-
 }
 

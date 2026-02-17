@@ -323,7 +323,7 @@ public static class Core
             // update dropdown menu
             var menuBg = Core.Theme.ComputedColors.MenuBgColor.NoAlpha(); // no alpha support
             var menuBorder = Core.Theme.InvertedBaseColor.WithAlpha(30);
-            var menuText = Theme.ComputedColors.MenuTextColor;
+            var menuText = Theme.ComputedColors.TextColor;
             var menuTextDisabled = menuText.Blend(Core.Theme.InvertedBaseColor, 0.8f, 100);
 
             Resx.Set(ResxId.MenuFlyoutPresenterBackground, menuBg);
