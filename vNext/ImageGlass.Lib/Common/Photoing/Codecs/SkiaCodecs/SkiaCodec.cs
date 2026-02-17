@@ -50,7 +50,7 @@ public static partial class SkiaCodec
 
         // create Skia codec
         using var decoder = SKCodec.Create(filePath);
-        if (decoder is null) return meta;
+        if (decoder.IsDisposed()) return meta;
 
 
         // 1. calculate the specific frame index
@@ -156,7 +156,20 @@ public static partial class SkiaCodec
         var codecOption = new SKCodecOptions((int)meta.FrameIndex);
         if (codec.GetPixels(codec.Info, bmpFrame.GetPixels(), codecOption) == SKCodecResult.Success)
         {
-            result.SingleFrame = ToSKImage(bmpFrame);
+            if (TryApplyOrientation(bmpFrame, codec.EncodedOrigin, out var fixedBmp))
+            {
+                if (fixedBmp is not null)
+                {
+                    result.Size = new Size(fixedBmp.Width, fixedBmp.Height);
+                    result.SingleFrame = ToSKImage(fixedBmp);
+                    bmpFrame.Dispose();
+                }
+            }
+
+            if (fixedBmp is null)
+            {
+                result.SingleFrame = ToSKImage(bmpFrame);
+            }
         }
 
         codec.Dispose();
@@ -178,7 +191,7 @@ public static partial class SkiaCodec
         try
         {
             using var codec = SKCodec.Create(filePath);
-            if (codec is null) return null;
+            if (codec.IsDisposed()) return null;
 
             var origW = codec.Info.Width;
             var origH = codec.Info.Height;
@@ -201,6 +214,14 @@ public static partial class SkiaCodec
                 return null;
             }
 
+            if (TryApplyOrientation(bmp, codec.EncodedOrigin, out var fixedBmp))
+            {
+                var output = ToSKImage(fixedBmp);
+                fixedBmp?.Dispose();
+
+                return output;
+            }
+
             return ToSKImage(bmp);
         }
         catch { return null; }
@@ -215,13 +236,13 @@ public static partial class SkiaCodec
     public static async Task SaveAsync(SKImage? srcImg, string destFilePath,
         ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
     {
-        if (srcImg is null) return;
+        if (srcImg.IsDisposed()) return;
 
         try
         {
             // 1. apply transforms
             using var dstImg = TransformImage(srcImg, transform) ?? srcImg;
-            if (dstImg is null || token.IsCancellationRequested) return;
+            if (dstImg.IsDisposed() || token.IsCancellationRequested) return;
 
 
             // 2. use Magick to save
@@ -250,7 +271,7 @@ public static partial class SkiaCodec
     public static bool CanPing(string srcFilePath)
     {
         using var codec = SKCodec.Create(srcFilePath);
-        if (codec is null) return false;
+        if (codec.IsDisposed()) return false;
 
         return true;
     }
@@ -276,7 +297,7 @@ public static partial class SkiaCodec
     public static bool CanRead(PhotoMetadata meta)
     {
         using var codec = SKCodec.Create(meta.FilePath);
-        if (codec is null) return false;
+        if (codec.IsDisposed()) return false;
 
         // multiple frames
         var isMultiFrames = meta.FrameCount > 1;
@@ -319,7 +340,7 @@ public static partial class SkiaCodec
     /// </summary>
     public static SKImage? TransformImage(SKImage? imgSrc, ImgTransform? transform)
     {
-        if (imgSrc is null || transform is null || !transform.HasChanges) return null;
+        if (imgSrc.IsDisposed() || transform is null || !transform.HasChanges) return null;
 
         var surface = SKSurface.Create(imgSrc.Info);
         var canvas = surface.Canvas;
@@ -365,6 +386,113 @@ public static partial class SkiaCodec
         }
 
         return surface.Snapshot();
+    }
+
+
+    /// <summary>
+    /// Attempts to apply the specified orientation to the source bitmap and outputs the transformed bitmap if
+    /// successful.
+    /// </summary>
+    public static bool TryApplyOrientation(SKBitmap? bmpSrc, SKEncodedOrigin? orientation, out SKBitmap? output)
+    {
+        output = null;
+        if (bmpSrc.IsDisposed()) return false;
+
+        var origin = orientation ?? SKEncodedOrigin.TopLeft;
+        if (origin is SKEncodedOrigin.TopLeft or SKEncodedOrigin.Default) return false;
+
+
+        // 1. determine if the result dimensions are swapped (90°/270° rotations)
+        var swapDims = origin is SKEncodedOrigin.LeftTop
+            or SKEncodedOrigin.RightTop
+            or SKEncodedOrigin.RightBottom
+            or SKEncodedOrigin.LeftBottom;
+
+        var w = swapDims ? bmpSrc.Height : bmpSrc.Width;
+        var h = swapDims ? bmpSrc.Width : bmpSrc.Height;
+
+        var info = bmpSrc.Info.WithSize(w, h);
+        var bmpOutput = new SKBitmap(info);
+
+        try
+        {
+            // 2. fix the orientation
+            using (var surface = SKSurface.Create(info, bmpOutput.GetPixels(), info.RowBytes))
+            {
+                var canvas = surface.Canvas;
+                switch (origin)
+                {
+                    case SKEncodedOrigin.TopRight:
+                        canvas.Translate(w, 0);
+                        canvas.Scale(-1, 1);
+                        break;
+
+                    case SKEncodedOrigin.BottomRight:
+                        canvas.RotateDegrees(180, w * 0.5f, h * 0.5f);
+                        break;
+
+                    case SKEncodedOrigin.BottomLeft:
+                        canvas.Translate(0, h);
+                        canvas.Scale(1, -1);
+                        break;
+
+                    case SKEncodedOrigin.LeftTop:
+                        canvas.Translate(w, 0);
+                        canvas.RotateDegrees(90);
+                        canvas.Scale(1, -1);
+                        break;
+
+                    case SKEncodedOrigin.RightTop:
+                        canvas.Translate(w, 0);
+                        canvas.RotateDegrees(90);
+                        break;
+
+                    case SKEncodedOrigin.RightBottom:
+                        canvas.Translate(0, h);
+                        canvas.RotateDegrees(-90);
+                        canvas.Scale(1, -1);
+                        break;
+
+                    case SKEncodedOrigin.LeftBottom:
+                        canvas.Translate(0, h);
+                        canvas.RotateDegrees(-90);
+                        break;
+                }
+
+                canvas.DrawBitmap(bmpSrc, 0, 0);
+                canvas.Flush();
+            }
+
+
+            output = bmpOutput;
+            return true;
+        }
+        catch
+        {
+            bmpOutput.Dispose();
+        }
+
+        return false;
+    }
+
+
+    /// <summary>
+    /// Converts the Skia's <see cref="SKEncodedOrigin"/> value to Magick's <see cref="OrientationType"/> value.
+    /// </summary>
+    public static OrientationType ToMagickOrientation(SKEncodedOrigin orientation)
+    {
+        return orientation switch
+        {
+            SKEncodedOrigin.TopLeft => OrientationType.TopLeft,
+            SKEncodedOrigin.TopRight => OrientationType.TopRight,
+            SKEncodedOrigin.BottomRight => OrientationType.BottomRight,
+            SKEncodedOrigin.BottomLeft => OrientationType.BottomLeft,
+            SKEncodedOrigin.LeftTop => OrientationType.LeftTop,
+            SKEncodedOrigin.RightTop => OrientationType.RightTop,
+            SKEncodedOrigin.RightBottom => OrientationType.RightBottom,
+            SKEncodedOrigin.LeftBottom => OrientationType.LeftBottom,
+            _ => OrientationType.Undefined,
+        };
     }
 
 
@@ -440,7 +568,7 @@ public static partial class SkiaCodec
     /// </summary>
     public static SKImage? ToSKImage(SKBitmap? bmp, SKColorSpace? srcColorSpace = null)
     {
-        if (bmp is null) return null;
+        if (bmp.IsDisposed()) return null;
 
         // convert color space
         if (srcColorSpace is not null)

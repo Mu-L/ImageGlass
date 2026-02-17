@@ -305,14 +305,14 @@ public static partial class MagickCodec
                 // image size
                 meta.OriginalWidth = meta.Width = imgC[frameIndex].Page.Width;
                 meta.OriginalHeight = meta.Height = imgC[frameIndex].Page.Height;
-                meta.Orientation = imgC[frameIndex].Orientation;
+                meta.Orientation = ToSkiaOrientation(imgC[frameIndex].Orientation);
 
-                // correct the image size according to orientation
-                if (meta.Orientation != OrientationType.Undefined // no tag: Undefined
-                    && meta.Orientation != OrientationType.TopLeft // Do nothing
-                    && meta.Orientation != OrientationType.TopRight // Flip horizontally
-                    && meta.Orientation != OrientationType.BottomLeft // Flip vertically
-                )
+                // determine if the result dimensions are swapped (90°/270° rotations)
+                var swapDims = meta.Orientation is SKEncodedOrigin.LeftTop
+                    or SKEncodedOrigin.RightTop
+                    or SKEncodedOrigin.RightBottom
+                    or SKEncodedOrigin.LeftBottom;
+                if (swapDims)
                 {
                     // swap width and height
                     meta.Width = meta.OriginalHeight;
@@ -769,6 +769,26 @@ public static partial class MagickCodec
 
             yield return (index, newFilename);
         }
+    }
+
+
+    /// <summary>
+    /// Converts the Magick's <see cref="OrientationType"/> value to Skia's <see cref="SKEncodedOrigin"/> value.
+    /// </summary>
+    public static SKEncodedOrigin ToSkiaOrientation(OrientationType orientation)
+    {
+        return orientation switch
+        {
+            OrientationType.TopLeft => SKEncodedOrigin.TopLeft,
+            OrientationType.TopRight => SKEncodedOrigin.TopRight,
+            OrientationType.BottomRight => SKEncodedOrigin.BottomRight,
+            OrientationType.BottomLeft => SKEncodedOrigin.BottomLeft,
+            OrientationType.LeftTop => SKEncodedOrigin.LeftTop,
+            OrientationType.RightTop => SKEncodedOrigin.RightTop,
+            OrientationType.RightBottom => SKEncodedOrigin.RightBottom,
+            OrientationType.LeftBottom => SKEncodedOrigin.LeftBottom,
+            _ => SKEncodedOrigin.Default,
+        };
     }
 
 

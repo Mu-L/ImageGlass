@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Types;
 using ImageMagick;
+using SkiaSharp;
 using System;
 using System.Collections.Immutable;
 using System.IO;
@@ -100,7 +101,7 @@ public partial class PhotoMetadata : DisposableImpl
     public IImmutableList<FrameMetadata> Frames { get; set; } = [];
     public bool HasAlpha { get; set; } = false;
     public bool CanAnimate { get; set; } = false;
-    public OrientationType Orientation { get; set; } = OrientationType.Undefined;
+    public SKEncodedOrigin Orientation { get; set; } = SKEncodedOrigin.Default;
 
     #endregion // Bitmap information
 
@@ -267,7 +268,7 @@ public partial class PhotoMetadata : DisposableImpl
         // 3. fix orientation
         if (thumbM is not null)
         {
-            thumbM.Orientation = Orientation;
+            thumbM.Orientation = SkiaCodec.ToMagickOrientation(Orientation);
             thumbM?.AutoOrient();
         }
 
