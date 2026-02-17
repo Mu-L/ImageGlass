@@ -5,11 +5,10 @@
              xmlns:ui="using:ImageGlass.UI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="60"
              x:Class="ImageGlass.UI.ToolbarControl"
-             x:DataType="ui:ToolbarControlModel">
+             x:DataType="ui:ToolbarControlModel"
+             x:Name="Root">
   
-    <Border x:Name="PART_Root"
-            Padding="{CompiledBinding ItemPadding}"
-            Background="{CompiledBinding Background}">
+    <Border x:Name="PART_Root" Padding="{CompiledBinding ItemPadding}">
         <Grid x:Name="PART_RootGrid"
               HorizontalAlignment="Stretch"
               VerticalAlignment="Center">

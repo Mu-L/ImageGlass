@@ -117,18 +117,6 @@ public partial class ToolbarControl : PhControl
     }
 
 
-    protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
-    {
-        base.OnIgThemeChanged(e);
-
-        // a new theme just loaded
-        if (string.IsNullOrEmpty(e.PropertyName))
-        {
-            _ = VM.OnPropertyChanged(nameof(VM.Background));
-        }
-    }
-
-
     protected override void OnIgLanguageChanged()
     {
         base.OnIgLanguageChanged();

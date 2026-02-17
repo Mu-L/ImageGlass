@@ -69,10 +69,7 @@ public partial class ToolbarButton : PhToolButton, IToolbarItem
     {
         base.OnIgThemeChanged(e);
 
-        if (string.IsNullOrEmpty(e.PropertyName))
-        {
-            _ = VM.OnPropertyChanged(nameof(VM.ImagePath));
-        }
+        _ = VM.OnPropertyChanged(nameof(VM.ImagePath));
     }
 
 

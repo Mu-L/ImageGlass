@@ -17,10 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
-using Avalonia.Media;
 using ImageGlass.Common;
 using ImageGlass.Common.AppThemes;
-using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
 
@@ -31,7 +29,6 @@ public class ToolbarControlModel : PhReactive
     public static Config Config => Core.Config;
     public static double ItemSpacing => Core.Config.ToolbarIconHeight / 6f; // 4
     public static Thickness ItemPadding => ToolbarItemModel.ItemPadding;
-    public static IBrush? Background => Core.Theme.ComputedColors.ToolbarBgColor.ToBrush();
 
 
     public static ToolbarItemModel ButtonOverflowVM => new()

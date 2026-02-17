@@ -94,18 +94,6 @@ public partial class MainWindowView : PhControl
     }
 
 
-    protected override void OnIgThemeChanged(ThemePackChangedEventArgs e)
-    {
-        base.OnIgThemeChanged(e);
-
-        if (string.IsNullOrEmpty(e.PropertyName))
-        {
-            _ = VM.OnPropertyChanged(nameof(VM.ViewerBackground));
-            _ = VM.OnPropertyChanged(nameof(VM.GalleryBackground));
-        }
-    }
-
-
     private void Config_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Config.Layout))

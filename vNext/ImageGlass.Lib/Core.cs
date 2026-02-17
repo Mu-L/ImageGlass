@@ -35,7 +35,6 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Common;
 
-
 public static class Core
 {
     public static readonly AppInstance AppInstance = new AppInstance("{f2a83de1-b9ac-4461-81d0-cc4547b0b27b}");
@@ -126,34 +125,13 @@ public static class Core
     /// <summary>
     /// Gets the system accent color.
     /// </summary>
-    public static Color AccentColor
-    {
-        get => field;
-        set
-        {
-            if (field == value) return;
-
-            field = value;
-            Core.UpdateAccentColorResources();
-            Core.Theme.LoadColors(value);
-            Core.OnThemeChanged(nameof(IgTheme.ComputedColors));
-        }
-    } = new();
+    public static Color AccentColor { get; private set; } = new();
 
 
     /// <summary>
-    /// Gets, sets the current app theme pack.
+    /// Gets the current app theme pack.
     /// </summary>
-    public static IgTheme Theme
-    {
-        get; set
-        {
-            if (field == value) return;
-
-            field = value;
-            Core.OnThemeChanged();
-        }
-    } = new();
+    public static IgTheme Theme { get; private set; } = new();
 
 
     /// <summary>
@@ -246,6 +224,24 @@ public static class Core
     }
 
 
+    public static bool SetTheme(IgTheme theme)
+    {
+        if (Core.Theme == theme) return false;
+
+        Core.Theme = theme;
+        return true;
+    }
+
+
+    public static bool SetAccentColor(Color accent)
+    {
+        if (Core.AccentColor == accent) return false;
+
+        Core.AccentColor = accent;
+        return true;
+    }
+
+
     /// <summary>
     /// Updates base controls resources
     /// </summary>
@@ -274,87 +270,91 @@ public static class Core
     {
         if (Application.Current is not App app) return;
 
-        Dispatcher.UIThread.Post(() =>
+        // update theme colors
+        Resx.Set(ResxId.IG_ThemeBackgroundBrush, AppThemeColors.BgBrush);
+        Resx.Set(ResxId.IG_ThemeForegroundBrush, AppThemeColors.TextColorBrush);
+        Resx.Set(ResxId.IG_ThemeToolbarBackgroundBrush, AppThemeColors.ToolbarBgBrush);
+        Resx.Set(ResxId.IG_ThemeGalleryBackgroundBrush, AppThemeColors.GalleryBgBrush);
+        Resx.Set(ResxId.IG_ThemeMenuBackgroundBrush, AppThemeColors.MenuBgBrush);
+
+        // update situational colors
+        if (Core.Theme.Settings.IsDarkMode)
         {
-            // update situational colors
-            if (Core.Theme.Settings.IsDarkMode)
-            {
-                Resx.Set(ResxId.IG_BackgroundInfoBrush, IgTheme.BackgroundInfoDark.ToBrush());
-                Resx.Set(ResxId.IG_BackgroundSuccessBrush, IgTheme.BackgroundSuccessDark.ToBrush());
-                Resx.Set(ResxId.IG_BackgroundWarningBrush, IgTheme.BackgroundWarningDark.ToBrush());
-                Resx.Set(ResxId.IG_BackgroundDangerBrush, IgTheme.BackgroundDangerDark.ToBrush());
-            }
-            else
-            {
-                Resx.Set(ResxId.IG_BackgroundInfoBrush, IgTheme.BackgroundInfoLight.ToBrush());
-                Resx.Set(ResxId.IG_BackgroundSuccessBrush, IgTheme.BackgroundSuccessLight.ToBrush());
-                Resx.Set(ResxId.IG_BackgroundWarningBrush, IgTheme.BackgroundWarningLight.ToBrush());
-                Resx.Set(ResxId.IG_BackgroundDangerBrush, IgTheme.BackgroundDangerLight.ToBrush());
-            }
+            Resx.Set(ResxId.IG_BackgroundInfoBrush, AppThemeColors.BackgroundInfoDark.ToBrush());
+            Resx.Set(ResxId.IG_BackgroundSuccessBrush, AppThemeColors.BackgroundSuccessDark.ToBrush());
+            Resx.Set(ResxId.IG_BackgroundWarningBrush, AppThemeColors.BackgroundWarningDark.ToBrush());
+            Resx.Set(ResxId.IG_BackgroundDangerBrush, AppThemeColors.BackgroundDangerDark.ToBrush());
+        }
+        else
+        {
+            Resx.Set(ResxId.IG_BackgroundInfoBrush, AppThemeColors.BackgroundInfoLight.ToBrush());
+            Resx.Set(ResxId.IG_BackgroundSuccessBrush, AppThemeColors.BackgroundSuccessLight.ToBrush());
+            Resx.Set(ResxId.IG_BackgroundWarningBrush, AppThemeColors.BackgroundWarningLight.ToBrush());
+            Resx.Set(ResxId.IG_BackgroundDangerBrush, AppThemeColors.BackgroundDangerLight.ToBrush());
+        }
 
-            var bgNeutralAlpha = Core.Theme.Settings.IsDarkMode ? 100 : 150;
-            var bgColor = Core.Theme.ComputedColors.BgColor.NoAlpha();
-            var bgNeutral = bgColor.Blend(Core.Theme.InvertedBaseColor, 0.9f, bgNeutralAlpha);
-            var borderNeutral = bgColor.Blend(Core.Theme.InvertedBaseColor, 0.8f, bgNeutralAlpha);
-            var borderControl = bgColor.Blend(Core.Theme.InvertedBaseColor, 0.5f, bgNeutralAlpha);
+        var bgNeutralAlpha = Core.Theme.Settings.IsDarkMode ? 100 : 150;
+        var bgColor = AppThemeColors.BgBrush.Color.NoAlpha();
+        var bgNeutral = bgColor.Blend(Core.Theme.InvertedBaseColor, 0.9f, bgNeutralAlpha);
+        var borderNeutral = bgColor.Blend(Core.Theme.InvertedBaseColor, 0.8f, bgNeutralAlpha);
+        var borderControl = bgColor.Blend(Core.Theme.InvertedBaseColor, 0.5f, bgNeutralAlpha);
 
-            Resx.Set(ResxId.IG_BackgroundNeutralBrush, bgNeutral.ToBrush());
-            Resx.Set(ResxId.IG_BorderNeutralBrush, borderNeutral.ToBrush());
-            Resx.Set(ResxId.IG_BorderControlBrush, borderControl.ToBrush());
-            Resx.Set(ResxId.IG_MessageBackgroundBrush, bgColor.A(200).ToBrush());
+        Resx.Set(ResxId.IG_BackgroundNeutralBrush, bgNeutral.ToBrush());
+        Resx.Set(ResxId.IG_BorderNeutralBrush, borderNeutral.ToBrush());
+        Resx.Set(ResxId.IG_BorderControlBrush, borderControl.ToBrush());
+        Resx.Set(ResxId.IG_MessageBackgroundBrush, bgColor.A(200).ToBrush());
 
 
-            // update text color
-            var textBrush = Theme.ComputedColors.TextColor.ToBrush();
-            var textDisabled = Theme.ComputedColors.TextColor.Blend(Core.Theme.BaseColor, 0.5f, Theme.ComputedColors.TextColor.A);
+        // update text color
+        var textBrush = AppThemeColors.TextColorBrush.Color.ToBrush();
+        var textDisabled = AppThemeColors.TextColorBrush.Color.Blend(Core.Theme.BaseColor, 0.5f, AppThemeColors.TextColorBrush.A);
 
-            Resx.Set(ResxId.SystemControlForegroundBaseHighBrush, textBrush);
-            Resx.Set(ResxId.TextControlForeground, textBrush);
-            Resx.Set(ResxId.CheckBoxForegroundChecked, textBrush);
-            Resx.Set(ResxId.CheckBoxForegroundCheckedPointerOver, textBrush);
-            Resx.Set(ResxId.CheckBoxForegroundUnchecked, textBrush);
-            Resx.Set(ResxId.CheckBoxForegroundUncheckedPointerOver, textBrush);
+        Resx.Set(ResxId.SystemControlForegroundBaseHighBrush, textBrush);
+        Resx.Set(ResxId.TextControlForeground, textBrush);
+        Resx.Set(ResxId.CheckBoxForegroundChecked, textBrush);
+        Resx.Set(ResxId.CheckBoxForegroundCheckedPointerOver, textBrush);
+        Resx.Set(ResxId.CheckBoxForegroundUnchecked, textBrush);
+        Resx.Set(ResxId.CheckBoxForegroundUncheckedPointerOver, textBrush);
 
-            // update border color
-            Resx.Set(ResxId.TextControlBorderBrush, borderControl);
-            Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUnchecked, borderControl);
+        // update border color
+        Resx.Set(ResxId.TextControlBorderBrush, borderControl);
+        Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUnchecked, borderControl);
 
 
-            // update dropdown menu
-            var menuBg = Core.Theme.ComputedColors.MenuBgColor.NoAlpha(); // no alpha support
-            var menuBorder = Core.Theme.InvertedBaseColor.WithAlpha(30);
-            var menuText = Theme.ComputedColors.TextColor;
-            var menuTextDisabled = menuText.Blend(Core.Theme.InvertedBaseColor, 0.8f, 100);
+        // update dropdown menu
+        var menuBg = AppThemeColors.MenuBgBrush.Color.NoAlpha(); // no alpha support
+        var menuBorder = Core.Theme.InvertedBaseColor.WithAlpha(30);
+        var menuText = AppThemeColors.TextColorBrush.Color;
+        var menuTextDisabled = menuText.Blend(Core.Theme.InvertedBaseColor, 0.8f, 100);
 
-            Resx.Set(ResxId.MenuFlyoutPresenterBackground, menuBg);
-            Resx.Set(ResxId.MenuFlyoutPresenterBorderBrush, menuBorder);
-            Resx.Set(ResxId.IG_MenuSeparatorBackground, menuText.A(20));
+        Resx.Set(ResxId.MenuFlyoutPresenterBackground, menuBg);
+        Resx.Set(ResxId.MenuFlyoutPresenterBorderBrush, menuBorder);
+        Resx.Set(ResxId.IG_MenuSeparatorBackground, menuText.A(20));
 
-            // menu text
-            Resx.Set(ResxId.MenuFlyoutItemForeground, menuText);
-            Resx.Set(ResxId.MenuFlyoutItemForegroundPointerOver, menuText);
-            Resx.Set(ResxId.MenuFlyoutItemForegroundPressed, menuText);
-            Resx.Set(ResxId.MenuFlyoutItemForegroundDisabled, menuTextDisabled);
+        // menu text
+        Resx.Set(ResxId.MenuFlyoutItemForeground, menuText);
+        Resx.Set(ResxId.MenuFlyoutItemForegroundPointerOver, menuText);
+        Resx.Set(ResxId.MenuFlyoutItemForegroundPressed, menuText);
+        Resx.Set(ResxId.MenuFlyoutItemForegroundDisabled, menuTextDisabled);
 
-            // menu hotkey text
-            var hotkeyTextColor = menuText.A(200);
-            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForeground, hotkeyTextColor);
-            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver, hotkeyTextColor);
-            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed, hotkeyTextColor);
-            Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled, menuTextDisabled);
+        // menu hotkey text
+        var hotkeyTextColor = menuText.A(200);
+        Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForeground, hotkeyTextColor);
+        Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver, hotkeyTextColor);
+        Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed, hotkeyTextColor);
+        Resx.Set(ResxId.MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled, menuTextDisabled);
 
-            // menu chevron
-            Resx.Set(ResxId.MenuFlyoutSubItemChevron, menuText);
-            Resx.Set(ResxId.MenuFlyoutSubItemChevronPointerOver, menuText);
-            Resx.Set(ResxId.MenuFlyoutSubItemChevronPressed, menuText);
-            Resx.Set(ResxId.MenuFlyoutSubItemChevronDisabled, menuTextDisabled);
-            Resx.Set(ResxId.MenuFlyoutSubItemChevronSubMenuOpened, menuText);
+        // menu chevron
+        Resx.Set(ResxId.MenuFlyoutSubItemChevron, menuText);
+        Resx.Set(ResxId.MenuFlyoutSubItemChevronPointerOver, menuText);
+        Resx.Set(ResxId.MenuFlyoutSubItemChevronPressed, menuText);
+        Resx.Set(ResxId.MenuFlyoutSubItemChevronDisabled, menuTextDisabled);
+        Resx.Set(ResxId.MenuFlyoutSubItemChevronSubMenuOpened, menuText);
 
-            // tooltip
-            Resx.Set(ResxId.ToolTipForeground, menuText);
-            Resx.Set(ResxId.ToolTipBackground, menuBg);
-            Resx.Set(ResxId.ToolTipBorder, menuBorder);
-        });
+        // tooltip
+        Resx.Set(ResxId.ToolTipForeground, menuText);
+        Resx.Set(ResxId.ToolTipBackground, menuBg);
+        Resx.Set(ResxId.ToolTipBorder, menuBorder);
     }
 
 
@@ -365,50 +365,47 @@ public static class Core
     {
         if (Application.Current is not App app) return;
 
-        Dispatcher.UIThread.Post(() =>
-        {
-            // update app accent color
-            var accent = Core.AccentColor;
-            var accentLight1 = accent.WithBrightness(0.2f);
-            var accentLight2 = accent.WithBrightness(0.3f);
-            var accentLight3 = accent.WithBrightness(0.4f);
-            var accentDark1 = accent.WithBrightness(-0.2f);
-            var accentDark2 = accent.WithBrightness(-0.3f);
-            var accentDark3 = accent.WithBrightness(-0.4f);
+        // update app accent color
+        var accent = Core.AccentColor;
+        var accentLight1 = accent.WithBrightness(0.2f);
+        var accentLight2 = accent.WithBrightness(0.3f);
+        var accentLight3 = accent.WithBrightness(0.4f);
+        var accentDark1 = accent.WithBrightness(-0.2f);
+        var accentDark2 = accent.WithBrightness(-0.3f);
+        var accentDark3 = accent.WithBrightness(-0.4f);
 
 
-            // update all accent-related resources
-            Resx.Set(ResxId.SystemAccentColor, accent);
-            Resx.Set(ResxId.SystemAccentColorLight1, accentLight1);
-            Resx.Set(ResxId.SystemAccentColorLight2, accentLight2);
-            Resx.Set(ResxId.SystemAccentColorLight3, accentLight3);
-            Resx.Set(ResxId.SystemAccentColorDark1, accentDark1);
-            Resx.Set(ResxId.SystemAccentColorDark2, accentDark2);
-            Resx.Set(ResxId.SystemAccentColorDark3, accentDark3);
+        // update all accent-related resources
+        Resx.Set(ResxId.SystemAccentColor, accent);
+        Resx.Set(ResxId.SystemAccentColorLight1, accentLight1);
+        Resx.Set(ResxId.SystemAccentColorLight2, accentLight2);
+        Resx.Set(ResxId.SystemAccentColorLight3, accentLight3);
+        Resx.Set(ResxId.SystemAccentColorDark1, accentDark1);
+        Resx.Set(ResxId.SystemAccentColorDark2, accentDark2);
+        Resx.Set(ResxId.SystemAccentColorDark3, accentDark3);
 
 
-            // border hover styles
-            var borderHoverBrush = accentLight1.ToBrush();
-            Resx.Set(ResxId.TextControlBorderBrushPointerOver, borderHoverBrush);
-            Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUncheckedPointerOver, borderHoverBrush);
+        // border hover styles
+        var borderHoverBrush = accentLight1.ToBrush();
+        Resx.Set(ResxId.TextControlBorderBrushPointerOver, borderHoverBrush);
+        Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUncheckedPointerOver, borderHoverBrush);
 
 
-            // tool buttons
-            var btnBgAlphaGap = Core.Theme.Settings.IsDarkMode ? 0 : -50;
-            var btnBg = accent.A(0);
-            var btnBgHover = accent.A((byte)(90 + btnBgAlphaGap));
-            var btnBgPressed = accent.A((byte)(130 + btnBgAlphaGap));
-            var btnBgChecked = accent.A((byte)(150 + btnBgAlphaGap));
+        // tool buttons
+        var btnBgAlphaGap = Core.Theme.Settings.IsDarkMode ? 0 : -50;
+        var btnBg = accent.A(0);
+        var btnBgHover = accent.A((byte)(90 + btnBgAlphaGap));
+        var btnBgPressed = accent.A((byte)(130 + btnBgAlphaGap));
+        var btnBgChecked = accent.A((byte)(150 + btnBgAlphaGap));
 
-            Resx.Set(ResxId.IG_ToolButtonBackground, btnBg);
-            Resx.Set(ResxId.IG_ToolButtonBackgroundHover, btnBgHover);
-            Resx.Set(ResxId.IG_ToolButtonBackgroundPressed, btnBgPressed);
-            Resx.Set(ResxId.IG_ToolButtonBackgroundChecked, btnBgChecked);
+        Resx.Set(ResxId.IG_ToolButtonBackground, btnBg);
+        Resx.Set(ResxId.IG_ToolButtonBackgroundHover, btnBgHover);
+        Resx.Set(ResxId.IG_ToolButtonBackgroundPressed, btnBgPressed);
+        Resx.Set(ResxId.IG_ToolButtonBackgroundChecked, btnBgChecked);
 
-            // menu item background
-            Resx.Set(ResxId.MenuFlyoutItemBackgroundPointerOver, btnBgHover);
-            Resx.Set(ResxId.MenuFlyoutItemBackgroundPressed, btnBgPressed);
-        });
+        // menu item background
+        Resx.Set(ResxId.MenuFlyoutItemBackgroundPointerOver, btnBgHover);
+        Resx.Set(ResxId.MenuFlyoutItemBackgroundPressed, btnBgPressed);
     }
 
 
@@ -604,8 +601,6 @@ public static class Core
     {
         Dispatcher.UIThread.Post(() =>
         {
-            // update color mode for app level
-            Core.SetDarkMode(Core.Theme.Settings.IsDarkMode);
             ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
         });
     }

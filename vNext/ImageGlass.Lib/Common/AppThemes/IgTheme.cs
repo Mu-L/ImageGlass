@@ -35,8 +35,6 @@ public partial class IgThemeJsonContext : JsonSerializerContext { }
 /// </summary>
 public partial class IgTheme : PhReactive
 {
-    private IgThemeComputedColors _computedColors = new();
-
 
     // Serializable properties
     public IgThemeMetadata _Metadata { get; set; } = new();
@@ -46,7 +44,7 @@ public partial class IgTheme : PhReactive
     public Dictionary<string, string> ToolbarIcons { get; set; } = [];
 
 
-    // Static Properties
+
     #region Static Properties
 
     /// <summary>
@@ -60,25 +58,10 @@ public partial class IgTheme : PhReactive
     public static string CONFIG_FILE => "igtheme.json";
 
 
-    // Situational Colors
-    // Light theme
-    public static Color BackgroundInfoLight => BHelper.ColorFromHex("#C2DAECBB");
-    public static Color BackgroundSuccessLight => BHelper.ColorFromHex("#DFF6DDBB");
-    public static Color BackgroundWarningLight => BHelper.ColorFromHex("#FFF4CEBB");
-    public static Color BackgroundDangerLight => BHelper.ColorFromHex("#FDE7E9BB");
-
-
-    // Dark theme
-    public static Color BackgroundInfoDark => BHelper.ColorFromHex("#1A3244BB");
-    public static Color BackgroundSuccessDark => BHelper.ColorFromHex("#393D1BBB");
-    public static Color BackgroundWarningDark => BHelper.ColorFromHex("#433519BB");
-    public static Color BackgroundDangerDark => BHelper.ColorFromHex("#442726BB");
-
-
     #endregion // Static Properties
 
 
-    // Instance Properties
+
     #region Instance Properties
 
     /// <summary>
@@ -104,13 +87,6 @@ public partial class IgTheme : PhReactive
     /// </summary>
     [JsonIgnore]
     public bool IsValid { get; set; } = false;
-
-    /// <summary>
-    /// Gets the theme computed colors.
-    /// </summary>
-    [JsonIgnore]
-    public IgThemeComputedColors ComputedColors => _computedColors;
-
 
     /// <summary>
     /// Gets the accent color parsed from theme pack.
@@ -140,17 +116,10 @@ public partial class IgTheme : PhReactive
         ? Avalonia.Media.Colors.White
         : Avalonia.Media.Colors.Black;
 
-    /// <summary>
-    /// Checks if the theme pack colors are fully transparent.
-    /// </summary>
-    [JsonIgnore]
-    public bool IsFullTransparent => ComputedColors.BgColor.A == 0
-        && ComputedColors.ToolbarBgColor.A == 0
-        && ComputedColors.GalleryBgColor.A == 0;
     #endregion // Instance Properties
 
 
-    // Public methods
+
     #region Public methods
 
     /// <summary>
@@ -205,17 +174,6 @@ public partial class IgTheme : PhReactive
         }
 
         return this;
-    }
-
-
-    /// <summary>
-    /// Loads the theme colors.
-    /// </summary>
-    public void LoadColors(Color accent)
-    {
-        ComputedColors.Load(Colors, accent);
-
-        OnPropertyChanged(nameof(ComputedColors));
     }
 
 

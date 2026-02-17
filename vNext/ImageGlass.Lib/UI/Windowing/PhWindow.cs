@@ -197,14 +197,10 @@ public partial class PhWindow : Window
 
     private void Core_ThemeChanged(object? sender, ThemePackChangedEventArgs e)
     {
-        // a new theme just loaded
-        if (string.IsNullOrEmpty(e.PropertyName))
+        // update app icon
+        if (!UseCustomWindowIcon)
         {
-            // update app icon
-            if (!UseCustomWindowIcon)
-            {
-                _ = UpdateWindowIconAsync();
-            }
+            _ = UpdateWindowIconAsync();
         }
 
         OnIgThemeChanged(e);

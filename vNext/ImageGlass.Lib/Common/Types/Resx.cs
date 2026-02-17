@@ -137,6 +137,13 @@ public enum ResxId
     ToolTipBorder,
 
 
+    // theme pack
+    IG_ThemeBackgroundBrush,
+    IG_ThemeForegroundBrush,
+    IG_ThemeToolbarBackgroundBrush,
+    IG_ThemeGalleryBackgroundBrush,
+    IG_ThemeMenuBackgroundBrush,
+
     // situational backgrounds
     IG_BackgroundInfoBrush,
     IG_BackgroundSuccessBrush,

@@ -17,7 +17,7 @@
                            Grid.Row="0"
                            ZIndex="90"
                            DataContext="{CompiledBinding ToolbarVM}"
-                           Background="{CompiledBinding Background}"
+                           Background="{DynamicResource IG_ThemeToolbarBackgroundBrush}"
                            ItemsSource="{CompiledBinding ToolbarButtons, Source={x:Static cm:Core.Config}}"
                            IsContentVisible="{CompiledBinding ShowToolbar, Source={x:Static cm:Core.Config}}" />
 
@@ -25,7 +25,7 @@
         <!-- Viewer -->
         <Border x:Name="PART_ViewerWrapper"
               Grid.Row="1"
-              Background="{CompiledBinding ViewerBackground}">
+              Background="{DynamicResource IG_ThemeBackgroundBrush}">
             <viewer:ViewerControl x:Name="PART_Viewer"
                                   EnableDebug="{CompiledBinding EnableDebug, Source={x:Static cm:Core.Config}}"
                                   CheckerboardMode="{CompiledBinding CheckerboardMode, Source={x:Static cm:Core.Config}}"
@@ -44,7 +44,7 @@
                            Grid.Row="2"
                            ZIndex="80"
                            ViewMode="FilmStrip"
-                           Background="{CompiledBinding GalleryBackground}"
+                           Background="{DynamicResource IG_ThemeGalleryBackgroundBrush}"
                            ItemsSource="{CompiledBinding Items, Source={x:Static cm:Core.Photos}}"
                            IsContentVisible="{CompiledBinding ShowGallery, Source={x:Static cm:Core.Config}}" />
 

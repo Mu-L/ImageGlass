@@ -372,7 +372,7 @@ public partial class Config
     /// </param>
     /// <param name="forceUpdateBackground">Force updating background according to theme value</param>
     /// <exception cref="ArgumentException"></exception>
-    public async Task LoadCurrentThemeAsync(bool darkMode,
+    public async Task<bool> LoadCurrentThemeAsync(bool darkMode,
         bool useFallBackTheme, bool throwIfThemeInvalid, bool forceUpdateBackground)
     {
         // 1. get the theme folder name
@@ -385,7 +385,7 @@ public partial class Config
         // 2. check if theme pack is already loaded
         if (themeFolderName.Equals(Core.Theme.FolderName, StringComparison.OrdinalIgnoreCase))
         {
-            return;
+            return false;
         }
 
         // 3. load theme pack
@@ -404,11 +404,8 @@ public partial class Config
 
 
         // 6. set to the current theme
-        Core.Theme = th;
-
-
-        // 7. update app colors
-        Core.UpdateAppThemedColorResources();
+        var success = Core.SetTheme(th);
+        return success;
     }
 
 

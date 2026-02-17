@@ -23,6 +23,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using ImageGlass.Common;
+using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Types;
 using System;
@@ -560,7 +561,7 @@ public partial class DialogWindow : PhWindow
     protected void ApplyTheme()
     {
         var isDarkMode = Core.Theme.Settings.IsDarkMode;
-        var bg = Core.Theme.ComputedColors.BgColor.NoAlpha();
+        var bg = AppThemeColors.BgBrush.Color.NoAlpha();
 
         // content bg
         var contentAlpha = isDarkMode ? 180 : 220;

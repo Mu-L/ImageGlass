@@ -16,9 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia.Media;
 using ImageGlass.Common;
-using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
@@ -28,10 +26,6 @@ namespace ImageGlass.ViewModels;
 public partial class MainWindowViewModel : PhReactive
 {
     public static Config Config => Core.Config;
-
-
-    public static IBrush ViewerBackground => Core.Theme.ComputedColors.BgColor.ToBrush();
-    public static IBrush GalleryBackground => Core.Theme.ComputedColors.GalleryBgColor.ToBrush();
 
 
     /// <summary>

@@ -31,7 +31,7 @@ public class IgThemeColors
 
     public string ToolbarBgColor { get; set; } = "#1E242900";
     public string GalleryBgColor { get; set; } = "#1E242900";
-    public string MenuBgColor { get; set; } = "#0000";
+    public string MenuBgColor { get; set; } = "#000";
 
 }
 

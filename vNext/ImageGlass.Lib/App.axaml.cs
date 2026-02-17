@@ -19,8 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI.Windowing;
@@ -128,14 +130,7 @@ public partial class App : Application
     {
         Core.IsSystemDarkMode = e.ThemeVariant == PlatformThemeVariant.Dark;
 
-        // load theme
-        await Core.Config.LoadCurrentThemeAsync(Core.IsSystemDarkMode, true, true, false);
-
-        // load & compute accent colors
-        var accent = Core.Theme.UseSystemAccent
-            ? e.AccentColor1
-            : Core.Theme.AccentColor;
-        Core.AccentColor = accent.WithBrightness(-0.125f);
+        await ApplyThemePackAsync(Core.IsSystemDarkMode, e.AccentColor1);
     }
 
 
@@ -150,13 +145,7 @@ public partial class App : Application
         var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;
         _ = Task.Run(async () =>
         {
-            await Core.Config.LoadCurrentThemeAsync(isSystemDarkMode, true, true, false);
-
-            // load & compute accent colors
-            var accent = Core.Theme.UseSystemAccent
-                ? info.AccentColor1
-                : Core.Theme.AccentColor;
-            Core.AccentColor = accent.WithBrightness(-0.125f);
+            await ApplyThemePackAsync(isSystemDarkMode, info.AccentColor1);
         });
 
 
@@ -166,6 +155,42 @@ public partial class App : Application
 
         // load app language
         _ = Core.Config.LoadCurrentLanguageAsync();
+    }
+
+
+    private static async Task ApplyThemePackAsync(bool isSystemDarkMode, Color systemAccentColor)
+    {
+        // load theme pack
+        var hasThemeChanged = await Core.Config.LoadCurrentThemeAsync(isSystemDarkMode,
+                useFallBackTheme: true,
+                throwIfThemeInvalid: true,
+                forceUpdateBackground: false);
+
+        // load & compute accent colors
+        var accent = Core.Theme.UseSystemAccent
+            ? systemAccentColor
+            : Core.Theme.AccentColor;
+        var hasAccentChanged = Core.SetAccentColor(accent.WithBrightness(-0.125f));
+
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            // update color mode for app level
+            Core.SetDarkMode(Core.Theme.Settings.IsDarkMode);
+
+            if (hasAccentChanged || hasThemeChanged)
+            {
+                Core.UpdateAccentColorResources();
+                AppThemeColors.Load(Core.Theme.Colors, accent);
+                Core.UpdateAppThemedColorResources();
+            }
+
+            if (hasThemeChanged)
+            {
+                Core.OnThemeChanged();
+            }
+        });
+
     }
 
 }
