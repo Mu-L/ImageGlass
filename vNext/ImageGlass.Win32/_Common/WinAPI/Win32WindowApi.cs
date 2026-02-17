@@ -22,7 +22,7 @@ using Windows.Win32.Graphics.Dwm;
 
 namespace ImageGlass.Win32.Common;
 
-public static class WindowApi
+public static class Win32WindowApi
 {
 
     /// <summary>

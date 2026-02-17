@@ -92,7 +92,7 @@ public partial class MainWindow32 : MainWindow
         };
 
         // use Win32 API for the backdrop
-        WindowApi.SetWindowBackdrop(Handle, type);
+        Win32WindowApi.SetWindowBackdrop(Handle, type);
     }
 
 

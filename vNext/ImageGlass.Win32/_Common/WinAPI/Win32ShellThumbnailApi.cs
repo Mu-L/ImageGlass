@@ -27,7 +27,7 @@ using Windows.Win32.UI.Shell;
 
 namespace ImageGlass.Win32.Common;
 
-public static class ShellThumbnailApi
+public static class Win32ShellThumbnailApi
 {
     private static readonly Guid IID_IShellItemImageFactory = new("bcc18b79-ba16-442f-80c4-8a59c30c463b");
 

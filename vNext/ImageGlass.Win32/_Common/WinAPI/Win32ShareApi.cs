@@ -24,7 +24,7 @@ using Windows.Storage;
 
 namespace ImageGlass.Common;
 
-public static class WinShareApi
+public static class Win32ShareApi
 {
     // declare datapackage
     private static DataTransferManager? _manager;

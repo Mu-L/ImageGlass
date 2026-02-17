@@ -29,7 +29,7 @@ public class Win32ShareProvider : IShareProvider
     /// </summary>
     public void ShowShare(nint windowHandle, string[] filePaths)
     {
-        WinShareApi.ShowShare(windowHandle, filePaths);
+        Win32ShareApi.ShowShare(windowHandle, filePaths);
     }
 
 }

@@ -466,8 +466,6 @@ public partial class ViewerControl : PhControl
         // 2. try to get the preview bitmap
         try
         {
-            var previewHeight = Math.Min(Math.Min(DrawingArea.Height, e.Metadata.Height), 500);
-
             // try to get photo preview
             if (e.Photo.GalleryThumbnail is not null)
             {
@@ -476,6 +474,7 @@ public partial class ViewerControl : PhControl
             }
             else
             {
+                var previewHeight = Math.Min(Math.Min(DrawingArea.Height, e.Metadata.Height), 700);
                 imgPreview = await Core.PreviewProvider!.GetPreviewAsync(e.Metadata, previewHeight, token);
             }
             hasPreview = imgPreview is not null;

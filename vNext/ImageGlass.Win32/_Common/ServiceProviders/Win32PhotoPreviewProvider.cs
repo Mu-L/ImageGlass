@@ -35,7 +35,7 @@ public class Win32PhotoPreviewProvider : IPhotoPreviewProvider
         var size = (int)(minHeight ?? double.MinValue);
 
         // 1. fast path: try Shell cache only (instant, no decoding)
-        var imgPreview = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath, size, size, true))
+        var imgPreview = await Task.Run(() => Win32ShellThumbnailApi.GetThumbnail(meta.FilePath, size, size, true))
             .ConfigureAwait(false);
         if (imgPreview is not null) return imgPreview;
 
@@ -47,7 +47,7 @@ public class Win32PhotoPreviewProvider : IPhotoPreviewProvider
 
 
         // 3. try getting thumbnail from Shell
-        imgPreview = await Task.Run(() => ShellThumbnailApi.GetThumbnail(meta.FilePath, size, size, false))
+        imgPreview = await Task.Run(() => Win32ShellThumbnailApi.GetThumbnail(meta.FilePath, size, size, false))
             .ConfigureAwait(false);
         if (imgPreview is not null) return imgPreview;
 
