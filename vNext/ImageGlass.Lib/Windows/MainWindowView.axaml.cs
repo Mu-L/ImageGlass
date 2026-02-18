@@ -267,7 +267,10 @@ public partial class MainWindowView : PhControl
     private async void Files_Searched(FileSearchingEventArgs e)
     {
         var isEmptyList = Core.Photos.Count == 0;
-        Core.Photos.Add(e.Results);
+
+        // add files to list on UI thread
+        Dispatcher.UIThread.Invoke(() => Core.Photos.Add(e.Results));
+
 
         // if we haven't found current index for the init photo yet
         if (Core.Photos.InitPhoto is not null && Core.Photos.CurrentIndex == -1)

@@ -25,6 +25,7 @@ using ImageGlass.Common.Extensions;
 using ImageGlass.Common.OsApi;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
+using ImageGlass.UI.Viewer.ZoomAndPan;
 using SkiaSharp;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -653,6 +654,8 @@ public partial class ViewerControl : PhControl
                         && _zooming.IsManual
                         && ZoomMode != ZoomMode.LockZoom)
                     {
+                        _isPreviewing.Clear();
+
                         var diffRatio = new Size(
                             prevSize.Width / BitmapSize.Width,
                             prevSize.Height / BitmapSize.Height);
@@ -670,12 +673,16 @@ public partial class ViewerControl : PhControl
                         _zooming.Factor *= diffRatio.Width;
                         _zooming.ZoomedPoint = new();
 
-                        // make sure all zoomed point and viewport are synced
-                        // by manually applying a very small zoom factor
-                        ZoomByDeltaToPoint(double.Epsilon, _zooming.ZoomedPoint, false);
-                        _zooming.IsManual = false;
+                        // trigger zoom changed event
+                        ZoomChanged?.Invoke(this, new ViewerZoomEventArgs()
+                        {
+                            ZoomFactor = _zooming.Factor,
+                            IsManualZoom = false,
+                            IsZoomModeChange = false,
+                            IsPreviewingImage = _isPreviewing.Value,
+                            ChangeSource = ZoomChangeSource.Unknown,
+                        });
 
-                        _isPreviewing.Clear();
                         Refresh(false);
                     }
                     else
