@@ -25,6 +25,7 @@ using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
 using ImageGlass.ViewModels;
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -47,20 +48,13 @@ public partial class MainWindow : PhWindow
 
         // load window size & position
         var initClientSize = ClientSize;
-        var initFrameSize = FrameSize ?? new();
+        var initFrameSize = FrameSize ?? ClientSize;
         var sizeDiff = initFrameSize - initClientSize;
-
         var winBounds = Core.Config.MainWindowBounds.ToRect(DpiScale);
+
         ClientSize = winBounds.Size - sizeDiff;
-        Position = new PixelPoint((int)winBounds.X, (int)winBounds.Y);
+        Position = new PixelPoint((int)Core.Config.MainWindowBounds.X, (int)Core.Config.MainWindowBounds.Y);
 
-        // load window state
-        if (Core.Config.IsMainWindowMaximized) WindowState = WindowState.Maximized;
-        if (Core.Config.EnableFullScreen) WindowState = WindowState.FullScreen;
-
-
-        // load color profile
-        Core.UpdateDestColorProfile();
 
         // events
         Core.AppInstance.InstanceInvoked += AppInstance_InstanceInvoked;
@@ -69,6 +63,31 @@ public partial class MainWindow : PhWindow
 
 
     #region Override Methods
+
+
+    protected override void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+
+        if (Core.Config.EnableWindowFit)
+        {
+            // load Window fit
+            Core.API?.IG_ToggleWindowFit(true);
+        }
+        else
+        {
+            // load window state
+            if (Core.Config.IsMainWindowMaximized) WindowState = WindowState.Maximized;
+
+            // load full screen
+            if (Core.Config.EnableFullScreen) WindowState = WindowState.FullScreen;
+        }
+
+
+        // load color profile
+        Core.UpdateDestColorProfile();
+    }
+
 
     protected override async void OnLoaded(RoutedEventArgs e)
     {
@@ -227,20 +246,20 @@ public partial class MainWindow : PhWindow
 
 
         Core.Config.LastSeenImagePath = Core.Photos.CurrentFilePath;
-        //Core.Config.ZoomLockValue = Viewer.ZoomFactor * 100f;
+        Core.Config.ZoomLockValue = PART_MainView.PART_Viewer.ZoomFactor * 100f;
 
 
         // save config to file
         await Core.Config.SaveAsync();
 
 
-        //// cleaning
-        //try
-        //{
-        //    // delete trash
-        //    Directory.Delete(Config.ConfigDir(PathType.Dir, Dir.Temporary), true);
-        //}
-        //catch { }
+        // cleaning
+        try
+        {
+            // delete trash
+            Directory.Delete(BHelper.ConfigDir(Dir.Temporary), true);
+        }
+        catch { }
     }
 
 

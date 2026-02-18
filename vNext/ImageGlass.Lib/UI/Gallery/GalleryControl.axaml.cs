@@ -138,6 +138,14 @@ public partial class GalleryControl : PhControl
     }
 
 
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+
+        ScrollToItem(Core.Photos.CurrentIndex, false);
+    }
+
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);

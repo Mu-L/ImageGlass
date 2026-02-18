@@ -328,10 +328,14 @@ public partial class Config : PhReactive
     }
 
 
-    ///// <summary>
-    ///// Gets, sets value indicates the window should be always center in Window Fit mode
-    ///// </summary>
-    //public bool CenterWindowFit { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value indicates the window should be always center in Window Fit mode
+    /// </summary>
+    public bool CenterWindowFit
+    {
+        get => Get(ConfigId.CenterWindowFit, true);
+        set => Set(ConfigId.CenterWindowFit, value);
+    }
 
     ///// <summary>
     ///// Displays the embedded thumbnail for RAW formats if found.
@@ -495,10 +499,14 @@ public partial class Config : PhReactive
     ///// </summary>
     //public double ImageBoosterCacheMaxFileSizeInMb { get; set; } = 100;
 
-    ///// <summary>
-    ///// Gets, sets fixed width on zooming
-    ///// </summary>
-    //public double ZoomLockValue { get; set; } = 100;
+    /// <summary>
+    /// Gets, sets fixed width on zooming
+    /// </summary>
+    public double ZoomLockValue
+    {
+        get => Get(ConfigId.ZoomLockValue, 100d);
+        set => Set(ConfigId.ZoomLockValue, value);
+    }
 
     /// <summary>
     /// Gets, sets toolbar icon height

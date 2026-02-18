@@ -21,6 +21,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
@@ -56,7 +57,9 @@ public partial class AppAPIProvider
 
 
     private ViewerControl Viewer => _mainWindow.PART_MainView.PART_Viewer;
+    private ToolbarControl Toolbar => _mainWindow.PART_MainView.PART_Toolbar;
     private GalleryControl Gallery => _mainWindow.PART_MainView.PART_Gallery;
+    private PhGridSplitter GalleryResizer => _mainWindow.PART_MainView.PART_GalleryResizer;
     private MessageControl Message => _mainWindow.PART_MainView.PART_Message;
 
 
@@ -1492,7 +1495,7 @@ public partial class AppAPIProvider
     /// Toggles window fit mode.
     /// </summary>
     /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
-    public static void IG_ToggleWindowFit(string? boolStr = null)
+    public void IG_ToggleWindowFit(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
         IG_ToggleWindowFit(enabled);
@@ -1502,13 +1505,139 @@ public partial class AppAPIProvider
     /// <summary>
     /// Toggles window fit mode.
     /// </summary>
-    public static void IG_ToggleWindowFit(bool? enabled = null)
+    public void IG_ToggleWindowFit(bool? enabled = null)
     {
         enabled ??= !Core.Config.EnableWindowFit;
         Core.Config.EnableWindowFit = enabled.Value;
 
-        // TODO:
+        if (Core.Config.EnableWindowFit)
+        {
+            // exit full screen
+            if (Core.Config.EnableFullScreen)
+            {
+                IG_ToggleFullScreen(false);
+            }
+        }
+
+
+        // set Window Fit mode
+        ApplyWindowFitMode(true);
     }
+
+
+    public void ApplyWindowFitMode(bool resetZoomMode = true)
+    {
+        if (!Core.Config.EnableWindowFit || Viewer.SourceKind == PhotoSource.None) return;
+
+        // 1. reset window state
+        _mainWindow.WindowState = WindowState.Normal;
+
+
+        // 2. get the size
+        var dpi = _mainWindow.DpiScale;
+        var toolbarPos = Config.GetControlLayout(LayoutControl.Toolbar);
+        var galleryPos = Config.GetControlLayout(LayoutControl.Gallery);
+
+        var frameSize = Core.Config.EnableFrameless ? new() : new Size(2, 32);
+        var gapW = 0d;
+        var gapH = Toolbar.Bounds.Height;
+
+        if (galleryPos is LayoutPosition.Left or LayoutPosition.Right)
+        {
+            gapW += Gallery.Bounds.Width + GalleryResizer.Bounds.Width;
+        }
+        else
+        {
+            gapH += Gallery.Bounds.Height + GalleryResizer.Bounds.Height;
+        }
+
+
+        // get current screen workarea
+        var screen = _mainWindow.Screens.ScreenFromWindow(_mainWindow)!;
+        var workArea = screen.WorkingArea.ToRect(dpi);
+
+        // get source image size
+        var srcImgW = Viewer.BitmapSize.Width;
+        var srcImgH = Viewer.BitmapSize.Height;
+
+
+        // 3. calculate zoom factor for the new size
+        var zoomFactor = Viewer.ZoomFactor;
+        if (resetZoomMode)
+        {
+            if (Core.Config.ZoomMode == ZoomMode.LockZoom)
+            {
+                Viewer.SetZoomFactor(Core.Config.ZoomLockValue / 100f, false);
+            }
+            else
+            {
+                var maxViewerWidth = workArea.Width - gapW;
+                var maxViewerHeight = workArea.Height - gapH;
+
+                // recalculate zoom factor for the new size
+                zoomFactor = Viewer.CalculateZoomFactor(Core.Config.ZoomMode, srcImgW, srcImgH, maxViewerWidth, maxViewerHeight);
+            }
+        }
+
+
+        // 4. apply zoom factor to the image size
+        var zoomImgW = (int)(srcImgW * zoomFactor / dpi);
+        var zoomImgH = (int)(srcImgH * zoomFactor / dpi);
+
+
+        // 5. adjust the viewer size to fit the entire image
+        // but not larger than desktop working area.
+        var viewerBounds = new Rect(0, 0,
+            Math.Min(zoomImgW, workArea.Width - gapW),
+            Math.Min(zoomImgH, workArea.Height - gapH));
+
+        var workAreaWithoutFrame = new Rect(
+            workArea.X + gapW / 2 + frameSize.Width / 2,
+            workArea.Y + gapH / 2 + frameSize.Height / 2,
+            workArea.Width - gapW - frameSize.Width,
+            workArea.Height - gapH - frameSize.Height);
+
+        // adjust viewer size and position to the desktop working area
+        viewerBounds = workAreaWithoutFrame.CenterRectEx(viewerBounds, true);
+
+        // add the gaps to make window bound
+        var winBounds = new Rect(
+            viewerBounds.X - gapW / 2 - frameSize.Width / 2,
+            viewerBounds.Y - gapH / 2 - frameSize.Height / 2,
+            viewerBounds.Width + gapW,
+            viewerBounds.Height + gapH);
+
+
+        // check center window to screen option
+        if (!Core.Config.CenterWindowFit)
+        {
+            winBounds = winBounds.WithX(_mainWindow.Position.X / dpi);
+            winBounds = winBounds.WithY(_mainWindow.Position.Y / dpi);
+        }
+
+
+        // 6. set min size for window
+        _mainWindow.MinWidth = gapW + 50;
+        _mainWindow.MinHeight = gapH + 50;
+
+        // update window position and size
+        _mainWindow.Position = new((int)(winBounds.X * dpi), (int)(winBounds.Y * dpi));
+        _mainWindow.Width = winBounds.Width;
+        _mainWindow.Height = winBounds.Height;
+
+        if (resetZoomMode)
+        {
+            Viewer.SetZoomFactor(zoomFactor, false);
+        }
+
+    }
+
+
+
+
+
+
+
 
 
     /// <summary>
@@ -1550,6 +1679,16 @@ public partial class AppAPIProvider
         else
         {
             _mainWindow.IsFrameless = false;
+        }
+
+
+        // update window fit
+        if (Core.Config.EnableWindowFit)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                ApplyWindowFitMode(!Viewer.IsManualZoom);
+            });
         }
 
 
@@ -1674,7 +1813,7 @@ public partial class AppAPIProvider
     /// Toggles visibility of toolbar.
     /// </summary>
     /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
-    public static void IG_ToggleToolbar(string? boolStr = null)
+    public void IG_ToggleToolbar(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
         IG_ToggleToolbar(enabled);
@@ -1684,12 +1823,19 @@ public partial class AppAPIProvider
     /// <summary>
     /// Toggles visibility of toolbar.
     /// </summary>
-    public static void IG_ToggleToolbar(bool? enabled = null)
+    public void IG_ToggleToolbar(bool? enabled = null)
     {
         enabled ??= !Core.Config.ShowToolbar;
         Core.Config.ShowToolbar = enabled.Value;
 
-        // TODO: update window fit
+        // update window fit
+        if (Core.Config.EnableWindowFit)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                ApplyWindowFitMode(!Viewer.IsManualZoom);
+            });
+        }
     }
 
 
@@ -1718,7 +1864,14 @@ public partial class AppAPIProvider
 
         _mainWindow.PART_MainView.ApplyAppLayout();
 
-        // TODO: update window fit
+        // update window fit
+        if (Core.Config.EnableWindowFit)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                ApplyWindowFitMode(!Viewer.IsManualZoom);
+            });
+        }
     }
 
 

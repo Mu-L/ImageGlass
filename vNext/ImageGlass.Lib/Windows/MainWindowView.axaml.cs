@@ -27,6 +27,7 @@ using ImageGlass.Common.ServiceProviders.FileSearchService;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
+using ImageGlass.UI.Viewer.ZoomAndPan;
 using ImageGlass.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -64,6 +65,7 @@ public partial class MainWindowView : PhControl
 
         Core.Config.PropertyChanged += Config_PropertyChanged;
         PART_Viewer.PhotoLoading += PART_Viewer_PhotoLoading;
+        PART_Viewer.ZoomChanged += PART_Viewer_ZoomChanged;
 
 
         // load image from command line arguments
@@ -81,6 +83,7 @@ public partial class MainWindowView : PhControl
 
         Core.Config.PropertyChanged -= Config_PropertyChanged;
         PART_Viewer.PhotoLoading -= PART_Viewer_PhotoLoading;
+        PART_Viewer.ZoomChanged -= PART_Viewer_ZoomChanged;
 
     }
 
@@ -173,6 +176,18 @@ public partial class MainWindowView : PhControl
         {
             // clear in-app message
             _ = PART_Message.ShowAsync(null);
+        }
+    }
+
+
+    private void PART_Viewer_ZoomChanged(ViewerControl sender, ViewerZoomEventArgs e)
+    {
+        // update window fit
+        if (Core.Config.EnableWindowFit
+            && e.ChangeSource != ZoomChangeSource.SizeChanged
+            && (e.IsManualZoom || e.IsZoomModeChange))
+        {
+            Core.API?.ApplyWindowFitMode(e.ChangeSource == ZoomChangeSource.ZoomMode);
         }
     }
 

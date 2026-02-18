@@ -159,6 +159,12 @@ public partial class ViewerControl
 
 
     /// <summary>
+    /// Gets a value indicating whether zooming is currently controlled manually by the user.
+    /// </summary>
+    public bool IsManualZoom => _zooming.IsManual;
+
+
+    /// <summary>
     /// Gets, sets the speed for manual panning. Min value is <c>0</c>.
     /// </summary>
     public double PanSpeed
@@ -169,6 +175,18 @@ public partial class ViewerControl
             _panSpeed = Math.Max(value, 0); // min 0
         }
     }
+
+
+    /// <summary>
+    /// Gets, sets if the window is on Window Fit mode.
+    /// </summary>
+    public bool IsWindowFitMode
+    {
+        get => GetValue(IsWindowFitModeProperty);
+        set => SetValue(IsWindowFitModeProperty, value);
+    }
+    public static readonly StyledProperty<bool> IsWindowFitModeProperty =
+        AvaloniaProperty.Register<ViewerControl, bool>(nameof(IsWindowFitMode));
 
 
     /// <summary>
@@ -185,6 +203,12 @@ public partial class ViewerControl
 
 
     /// <summary>
+    /// Gets a value indicating whether free panning is currently available.
+    /// </summary>
+    public bool CanUseFreePan => EnableFreePan && !IsWindowFitMode;
+
+
+    /// <summary>
     /// Gets, sets the maximum panning margin in screen pixels beyond the image edge.
     /// </summary>
     public double PanMargin
@@ -194,7 +218,6 @@ public partial class ViewerControl
     }
     public static readonly StyledProperty<double> PanMarginProperty =
         AvaloniaProperty.Register<ViewerControl, double>(nameof(PanMargin), 30);
-
 
     #endregion // Public Properies
 
@@ -287,7 +310,7 @@ public partial class ViewerControl
             srcWidth = BitmapSize.Width;
             destWidth = scaledImgWidth;
 
-            if (EnableFreePan)
+            if (CanUseFreePan)
             {
                 if (isZoomingToPoint)
                 {
@@ -327,7 +350,7 @@ public partial class ViewerControl
                 var rawImgX = SrcRect.X + (screenZoomX - DestRect.X) / oldZoomFactor;
                 var imgX = Math.Clamp(rawImgX, 0, BitmapSize.Width);
 
-                if (!EnableFreePan && rawImgX != imgX)
+                if (!CanUseFreePan && rawImgX != imgX)
                 {
                     // Cursor is in the PanMargin gap (outside the rendered image).
                     // Anchor to the image edge's current screen position instead of
@@ -360,7 +383,7 @@ public partial class ViewerControl
             srcHeight = BitmapSize.Height;
             destHeight = scaledImgHeight;
 
-            if (EnableFreePan)
+            if (CanUseFreePan)
             {
                 if (isZoomingToPoint)
                 {
@@ -392,7 +415,7 @@ public partial class ViewerControl
                 var rawImgY = SrcRect.Y + (screenZoomY - DestRect.Y) / oldZoomFactor;
                 var imgY = Math.Clamp(rawImgY, 0, BitmapSize.Height);
 
-                if (!EnableFreePan && rawImgY != imgY)
+                if (!CanUseFreePan && rawImgY != imgY)
                 {
                     var edgeScreenY = rawImgY < 0
                         ? DestRect.Y
@@ -419,24 +442,24 @@ public partial class ViewerControl
         // panMarginSrc is PanMargin (screen px) converted to source coordinates.
         //
         // Clamping is SKIPPED during zoom-to-cursor when:
-        //   - EnableFreePan is on: zoom-to-cursor must stay unconstrained for smooth
+        //   - CanUseFreePan is on: zoom-to-cursor must stay unconstrained for smooth
         //     overflow ↔ fits-within transitions.
         //   - The axis just transitioned from fits-within → overflow: skip for continuity
         //     even without FreePan.
-
-        var panMarginSrc = DpiScale(PanMargin) / currentZoomFactor;
+        var panMargin = IsWindowFitMode ? 0 : PanMargin;
+        var panMarginSrc = DpiScale(panMargin) / currentZoomFactor;
 
         // --- X-axis margin clamping ---
         var wasWidthFitting = BitmapSize.Width * oldZoomFactor <= controlW;
-        if (scaledImgWidth > controlW && !(isZoomingToPoint && (EnableFreePan || wasWidthFitting)))
+        if (scaledImgWidth > controlW && !(isZoomingToPoint && (CanUseFreePan || wasWidthFitting)))
         {
             // Compute per-side effective margins.
-            // When EnableFreePan is on, use the PREVIOUS frame's edge gap (from DestRect,
+            // When CanUseFreePan is on, use the PREVIOUS frame's edge gap (from DestRect,
             // which hasn't been overwritten yet) as a floor. This "ratchet" preserves the
             // over-pan established by zoom-to-cursor — the user can pan back but not further out.
             var effectiveLeftMarginX = panMarginSrc;
             var effectiveRightMarginX = panMarginSrc;
-            if (EnableFreePan)
+            if (CanUseFreePan)
             {
                 var prevLeftGap = Math.Max(0, DestRect.X - DrawingArea.Left) / currentZoomFactor;
                 var prevRightGap = Math.Max(0, DrawingArea.Left + controlW - (DestRect.X + DestRect.Width)) / currentZoomFactor;
@@ -456,11 +479,11 @@ public partial class ViewerControl
 
         // --- Y-axis margin clamping ---
         var wasHeightFitting = BitmapSize.Height * oldZoomFactor <= controlH;
-        if (scaledImgHeight > controlH && !(isZoomingToPoint && (EnableFreePan || wasHeightFitting)))
+        if (scaledImgHeight > controlH && !(isZoomingToPoint && (CanUseFreePan || wasHeightFitting)))
         {
             var effectiveTopMarginY = panMarginSrc;
             var effectiveBottomMarginY = panMarginSrc;
-            if (EnableFreePan)
+            if (CanUseFreePan)
             {
                 var prevTopGap = Math.Max(0, DestRect.Y - DrawingArea.Top) / currentZoomFactor;
                 var prevBottomGap = Math.Max(0, DrawingArea.Top + controlH - (DestRect.Y + DestRect.Height)) / currentZoomFactor;
@@ -497,7 +520,7 @@ public partial class ViewerControl
         {
             logicalX = srcX;
         }
-        else if (EnableFreePan)
+        else if (CanUseFreePan)
         {
             var halfGapX = (controlW - scaledImgWidth) / 2.0;
             logicalX = Math.Clamp(
@@ -515,7 +538,7 @@ public partial class ViewerControl
         {
             logicalY = srcY;
         }
-        else if (EnableFreePan)
+        else if (CanUseFreePan)
         {
             var halfGapY = (controlH - scaledImgHeight) / 2.0;
             logicalY = Math.Clamp(
