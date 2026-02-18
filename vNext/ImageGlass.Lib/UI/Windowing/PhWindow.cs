@@ -295,7 +295,6 @@ public partial class PhWindow : Window
     /// <summary>
     /// Occurs when the frameless mode is changed.
     /// </summary>
-    /// <param name="enable"></param>
     protected virtual void OnIgFramelessModeChanged(bool enable)
     {
         if (enable)

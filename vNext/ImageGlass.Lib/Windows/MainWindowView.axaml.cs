@@ -31,7 +31,6 @@ using ImageGlass.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -217,8 +216,6 @@ public partial class MainWindowView : PhControl
                 return;
             }
         }
-
-        if (!File.Exists(pathToLoad)) return;
 
         // start loading path with the foreground shell
         PrepareLoadPhotoList([pathToLoad],
