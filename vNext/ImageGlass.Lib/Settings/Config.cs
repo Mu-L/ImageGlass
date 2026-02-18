@@ -705,10 +705,10 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets the size and position of main window.
     /// </summary>
-    [JsonConverter(typeof(JsonArrayToRectConverter))]
-    public Rect MainWindowBounds
+    [JsonConverter(typeof(JsonArrayToPixelRectConverter))]
+    public PixelRect MainWindowBounds
     {
-        get => Get(ConfigId.MainWindowBounds, new Rect(200, 200, 1500, 1000));
+        get => Get(ConfigId.MainWindowBounds, new PixelRect(200, 200, 1500, 1000));
         set => Set(ConfigId.MainWindowBounds, value);
     }
 

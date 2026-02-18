@@ -26,6 +26,7 @@ using ImageGlass.UI.Windowing;
 using ImageGlass.ViewModels;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Windows;
 
@@ -41,17 +42,22 @@ public partial class MainWindow : PhWindow
     {
         InitializeComponent();
         CloseWindowHotkeys = [new(Key.Escape)];
-
         _status = new AppStatusInfo(PART_MainView.PART_Viewer);
 
 
-        // load window bounds & state
-        Position = new PixelPoint((int)Core.Config.MainWindowBounds.X, (int)Core.Config.MainWindowBounds.Y);
-        Width = Core.Config.MainWindowBounds.Width;
-        Height = Core.Config.MainWindowBounds.Height;
+        // load window size & position
+        var initClientSize = ClientSize;
+        var initFrameSize = FrameSize ?? new();
+        var sizeDiff = initFrameSize - initClientSize;
 
+        var winBounds = Core.Config.MainWindowBounds.ToRect(DpiScale);
+        ClientSize = winBounds.Size - sizeDiff;
+        Position = new PixelPoint((int)winBounds.X, (int)winBounds.Y);
+
+        // load window state
         if (Core.Config.IsMainWindowMaximized) WindowState = WindowState.Maximized;
         if (Core.Config.EnableFullScreen) WindowState = WindowState.FullScreen;
+
 
         // load color profile
         Core.UpdateDestColorProfile();
@@ -98,6 +104,19 @@ public partial class MainWindow : PhWindow
 
         PART_MainView.PART_Toolbar.ItemClicked -= PART_Toolbar_ItemClicked;
         PART_MainView.PART_Gallery.ItemClicked -= PART_Gallery_ItemClicked;
+
+
+        // Only save config here, do NOT dispose resources yet
+        await SaveConfigOnClosingAsync();
+    }
+
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+
+        // Dispose after the window (and its render loop) is fully closed
+        Core.Dispose();
     }
 
 
@@ -181,6 +200,48 @@ public partial class MainWindow : PhWindow
 
     #endregion Control Events
 
+
+
+
+    private async Task SaveConfigOnClosingAsync()
+    {
+        // save window maximized state
+        Core.Config.IsMainWindowMaximized = WindowState == Avalonia.Controls.WindowState.Maximized;
+        Core.Config.EnableFullScreen = WindowState == WindowState.FullScreen;
+
+        // save window bounds
+        if (WindowState == Avalonia.Controls.WindowState.Normal)
+        {
+            var size = FrameSize ?? ClientSize;
+            Core.Config.MainWindowBounds = new(Position,
+                new PixelSize((int)(size.Width * DpiScale), (int)(size.Height * DpiScale)));
+        }
+
+
+        // fullscreen mode: use the backup value
+        if (Core.Config.EnableFullScreen)
+        {
+            //Core.Config.ShowToolbar = _showToolbar;
+            //Core.Config.ShowGallery = _showGallery;
+        }
+
+
+        Core.Config.LastSeenImagePath = Core.Photos.CurrentFilePath;
+        //Core.Config.ZoomLockValue = Viewer.ZoomFactor * 100f;
+
+
+        // save config to file
+        await Core.Config.SaveAsync();
+
+
+        //// cleaning
+        //try
+        //{
+        //    // delete trash
+        //    Directory.Delete(Config.ConfigDir(PathType.Dir, Dir.Temporary), true);
+        //}
+        //catch { }
+    }
 
 
 

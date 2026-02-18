@@ -25,8 +25,6 @@ using ImageGlass.Common.Types;
 using ImageGlass.Common.Windows;
 using ImageGlass.Win32.Common;
 using ImageGlass.Win32.Common.ServiceProviders;
-using System;
-using System.Threading.Tasks;
 
 namespace ImageGlass.Win32.Windows;
 
@@ -53,28 +51,12 @@ public partial class MainWindow32 : MainWindow
         Core.ColorProfileProvider.Initialize(this);
     }
 
-    protected override void OnUnloaded(RoutedEventArgs e)
-    {
-        base.OnUnloaded(e);
 
-        Core.ColorProfileProvider?.Changed -= ColorProfileProvider_Changed;
-    }
-
-
-    protected override async void OnClosing(WindowClosingEventArgs e)
+    protected override void OnClosing(WindowClosingEventArgs e)
     {
         base.OnClosing(e);
 
-        // Only save config here, do NOT dispose resources yet
-        await SaveConfigOnClosingAsync();
-    }
-
-    protected override void OnClosed(EventArgs e)
-    {
-        base.OnClosed(e);
-
-        // Dispose after the window (and its render loop) is fully closed
-        Core.Dispose();
+        Core.ColorProfileProvider?.Changed -= ColorProfileProvider_Changed;
     }
 
 
@@ -96,13 +78,6 @@ public partial class MainWindow32 : MainWindow
     }
 
 
-
-
-
-
-
-
-
     private void ColorProfileProvider_Changed(IWindowColorProfileProvider sender, ColorProfileChangedEventArgs e)
     {
         VM.Title = $"{e.IsHdr} | {e.ProfilePath}";
@@ -115,43 +90,6 @@ public partial class MainWindow32 : MainWindow
     }
 
 
-    private async Task SaveConfigOnClosingAsync()
-    {
-        // save window maximized state
-        Core.Config.IsMainWindowMaximized = WindowState == Avalonia.Controls.WindowState.Maximized;
-        Core.Config.EnableFullScreen = WindowState == WindowState.FullScreen;
-
-        // save window bounds
-        if (WindowState == Avalonia.Controls.WindowState.Normal)
-        {
-            Core.Config.MainWindowBounds = new Avalonia.Rect(Position.X, Position.Y, Width, Height);
-        }
-
-
-        // fullscreen mode: use the backup value
-        if (Core.Config.EnableFullScreen)
-        {
-            //Core.Config.ShowToolbar = _showToolbar;
-            //Core.Config.ShowGallery = _showGallery;
-        }
-
-
-        Core.Config.LastSeenImagePath = Core.Photos.CurrentFilePath;
-        //Core.Config.ZoomLockValue = Viewer.ZoomFactor * 100f;
-
-
-        // save config to file
-        await Core.Config.SaveAsync();
-
-
-        //// cleaning
-        //try
-        //{
-        //    // delete trash
-        //    Directory.Delete(Config.ConfigDir(PathType.Dir, Dir.Temporary), true);
-        //}
-        //catch { }
-    }
 
 
 }
