@@ -338,24 +338,18 @@ public partial class MainWindowView : PhControl
     }
 
 
+
     /// <summary>
     /// Updates app layout.
     /// </summary>
     public void ApplyAppLayout()
     {
         // 1. read control's layouts from setting
-        var toolbarPos = Core.Config.Layout.GetValueOrDefault(LayoutControl.Toolbar, LayoutPosition.Top);
-        var galleryPos = Core.Config.Layout.GetValueOrDefault(LayoutControl.Gallery, LayoutPosition.Bottom);
+        var toolbarPos = Config.GetControlLayout(LayoutControl.Toolbar);
+        var galleryPos = Config.GetControlLayout(LayoutControl.Gallery);
 
 
-        // 2. standardize toolbar position
-        if (toolbarPos is LayoutPosition.Left or LayoutPosition.Right)
-        {
-            toolbarPos = LayoutPosition.Top;
-        }
-
-
-        // 3. create layout
+        // 2. create layout
         if (toolbarPos == LayoutPosition.Top)
         {
             PART_Toolbar.ItemTooltipPlacement = PlacementMode.Bottom;
@@ -521,7 +515,8 @@ public partial class MainWindowView : PhControl
             }
         }
 
-        // update gallery initial width
+
+        // 3. update gallery initial width
         UpdateGalleryWidth();
     }
 

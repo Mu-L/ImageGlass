@@ -91,6 +91,24 @@ public static class Rect_Exts
 
 
         /// <summary>
+        /// Centers another rectangle in this rectangle.
+        /// </summary>
+        public Rect CenterRectEx(Rect rect2, bool limitRect1Size = false)
+        {
+            var centeredRect = rect.CenterRect(rect2);
+            if (!limitRect1Size) return centeredRect;
+
+
+            var x = Math.Max(rect.X, centeredRect.X);
+            var y = Math.Max(rect.Y, centeredRect.Y);
+            var width = Math.Min(rect.Width, rect2.Width);
+            var height = Math.Min(rect.Height, rect2.Height);
+
+            return new Rect(x, y, width, height);
+        }
+
+
+        /// <summary>
         /// Converts the given rectangle to double array.
         /// </summary>
         public double[] ToArray()

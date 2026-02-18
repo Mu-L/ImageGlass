@@ -24,6 +24,7 @@ using ImageGlass.Common.Types;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -443,6 +444,33 @@ public partial class Config
         }
 
         return th;
+    }
+
+
+    /// <summary>
+    /// Gets control layout position.
+    /// </summary>
+    public static LayoutPosition GetControlLayout(LayoutControl control)
+    {
+        var defaultPos = control == LayoutControl.Toolbar
+            ? LayoutPosition.Top
+            : LayoutPosition.Bottom;
+
+
+        // 1. read control's layouts from setting
+        var pos = Core.Config.Layout.GetValueOrDefault(control, defaultPos);
+
+
+        // 2. standardize toolbar position
+        if (control == LayoutControl.Toolbar)
+        {
+            if (pos is LayoutPosition.Left or LayoutPosition.Right)
+            {
+                pos = LayoutPosition.Top;
+            }
+        }
+
+        return pos;
     }
 
 
