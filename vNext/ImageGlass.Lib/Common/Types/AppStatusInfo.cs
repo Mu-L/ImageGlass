@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Threading;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
@@ -131,13 +132,13 @@ public partial class AppStatusInfo : DisposableImpl
         {
             if (Core.Config.ImageInfoTags.Contains(nameof(Dimension)))
             {
-                if (Core.ClipboardImage is not null)
+                if (Core.ClipboardImage is not null && !Core.ClipboardImage.Size.IsEmpty)
                 {
                     return $"{Core.ClipboardImage.Width:n0}×{Core.ClipboardImage.Height:n0}";
                 }
-                else if (Core.Photos.CurrentMetadata is not null)
+                else if (!_viewer.BitmapSize.IsEmpty)
                 {
-                    return $"{Core.Photos.CurrentMetadata.Width:n0}×{Core.Photos.CurrentMetadata.Height:n0}";
+                    return $"{_viewer.BitmapSize.Width:n0}×{_viewer.BitmapSize.Height:n0}";
                 }
             }
 

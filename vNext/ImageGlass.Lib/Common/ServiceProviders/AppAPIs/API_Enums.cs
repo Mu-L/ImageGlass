@@ -74,6 +74,7 @@ public enum API
     IG_SetLoadingOrderType,
     IG_InvertColors,
     IG_ToggleImageAnimation,
+    IG_Rotate,
     IG_FlipImage,
     IG_SetDesktopBackground,
     IG_SetLockScreenImage,

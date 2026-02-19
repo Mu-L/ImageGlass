@@ -106,6 +106,8 @@ public partial class AppAPIProvider
         new(LangId.ImageOrderType_Desc,             API.IG_SetLoadingOrderType, nameof(ImageOrderType.Desc)),
         new(LangId.FrmMain_MnuInvertColors,         API.IG_InvertColors,            MKeys.Control, Key.I),
         new(LangId.FrmMain_MnuToggleImageAnimation, API.IG_ToggleImageAnimation,    MKeys.Control, Key.Space),
+        new(LangId.FrmMain_MnuRotateLeft,           API.IG_Rotate,              nameof(RotateOption.Left),          [new(MKeys.Control, Key.OemPeriod)]),
+        new(LangId.FrmMain_MnuRotateRight,          API.IG_Rotate,              nameof(RotateOption.Right),         [new(MKeys.Control, Key.OemQuestion)]),
         new(LangId.FrmMain_MnuFlipHorizontal,       API.IG_FlipImage,           nameof(FlipOptions.Horizontal),     [new(MKeys.Control, Key.OemSemicolon)]),
         new(LangId.FrmMain_MnuFlipVertical,         API.IG_FlipImage,           nameof(FlipOptions.Vertical),       [new(MKeys.Control, Key.OemQuotes)]),
         new(LangId.FrmMain_MnuSetDesktopBackground, API.IG_SetDesktopBackground),

@@ -854,7 +854,7 @@ public partial class ViewerControl : PhControl
             // do nothing for animated images or when there is no source
             if (_animator is not null) return false;
 
-            var srcImage = _imgSource?.Image;
+            var srcImage = _imgRender?.Image;
             if (srcImage.IsDisposed()) return false;
 
             // color matrix that inverts RGB and preserves alpha
@@ -878,9 +878,8 @@ public partial class ViewerControl : PhControl
             surface.Canvas.DrawImage(srcImage, 0, 0, paint);
             var invertedImage = surface.Snapshot();
 
-            // replace the source and clear cached render / mipmap
-            SKImageRef.Set(ref _imgSource, invertedImage);
-            SKImageRef.Set(ref _imgRender, null);
+            // update the render cache, keep _imgSource intact
+            SKImageRef.Set(ref _imgRender, invertedImage);
             _mipmapCache?.Dispose();
             _mipmapCache = null;
 
@@ -899,18 +898,78 @@ public partial class ViewerControl : PhControl
 
 
     /// <summary>
-    /// Flips the image.
+    /// Rotates the image.
     /// </summary>
-    public bool FlipImage(FlipOptions flips, bool requestRerender = true)
+    public bool RotateImage(double degree, bool requestRerender = true)
     {
-        if (flips == FlipOptions.None) return false;
+        // normalize to [0, 360)
+        degree = ((degree % 360) + 360) % 360;
+        if (degree == 0) return false;
 
         lock (_lock)
         {
             // do nothing for animated images or when there is no source
             if (_animator is not null) return false;
 
-            var srcImage = _imgSource?.Image;
+            var srcImage = _imgRender?.Image;
+            if (srcImage.IsDisposed()) return false;
+
+            var w = srcImage.Width;
+            var h = srcImage.Height;
+
+            // compute the bounding box of the rotated image
+            var rad = degree * Math.PI / 180.0;
+            var cos = Math.Abs(Math.Cos(rad));
+            var sin = Math.Abs(Math.Sin(rad));
+            var outW = (int)Math.Ceiling(w * cos + h * sin);
+            var outH = (int)Math.Ceiling(w * sin + h * cos);
+
+            var info = new SKImageInfo(outW, outH, srcImage.ColorType, srcImage.AlphaType, srcImage.ColorSpace);
+            using var surface = SKSurface.Create(info);
+            if (surface is null) return false;
+
+            var canvas = surface.Canvas;
+
+            // move origin to the center of the output, rotate, then draw centered
+            canvas.Translate(outW / 2f, outH / 2f);
+            canvas.RotateDegrees((float)degree);
+            canvas.Translate(-w / 2f, -h / 2f);
+            canvas.DrawImage(srcImage, 0, 0);
+
+            var rotatedImage = surface.Snapshot();
+
+            // update the render cache, keep _imgSource intact
+            SKImageRef.Set(ref _imgRender, rotatedImage);
+            _mipmapCache?.Dispose();
+            _mipmapCache = null;
+
+            // update source size
+            BitmapSize = new(outW, outH);
+        }
+
+        // render the transformation
+        if (requestRerender)
+        {
+            Refresh();
+        }
+
+        return true;
+    }
+
+
+    /// <summary>
+    /// Flips the image.
+    /// </summary>
+    public bool FlipImage(FlipOptions options, bool requestRerender = true)
+    {
+        if (options == FlipOptions.None) return false;
+
+        lock (_lock)
+        {
+            // do nothing for animated images or when there is no source
+            if (_animator is not null) return false;
+
+            var srcImage = _imgRender?.Image;
             if (srcImage.IsDisposed()) return false;
 
             var w = srcImage.Width;
@@ -922,11 +981,11 @@ public partial class ViewerControl : PhControl
             var canvas = surface.Canvas;
 
             // apply flip transformations
-            if (flips.HasFlag(FlipOptions.Horizontal))
+            if (options.HasFlag(FlipOptions.Horizontal))
             {
                 canvas.Scale(-1, 1, w / 2f, 0);
             }
-            if (flips.HasFlag(FlipOptions.Vertical))
+            if (options.HasFlag(FlipOptions.Vertical))
             {
                 canvas.Scale(1, -1, 0, h / 2f);
             }
@@ -935,9 +994,8 @@ public partial class ViewerControl : PhControl
 
             var flippedImage = surface.Snapshot();
 
-            // replace the source and clear cached render / mipmap
-            SKImageRef.Set(ref _imgSource, flippedImage);
-            SKImageRef.Set(ref _imgRender, null);
+            // update the render cache, keep _imgSource intact
+            SKImageRef.Set(ref _imgRender, flippedImage);
             _mipmapCache?.Dispose();
             _mipmapCache = null;
         }

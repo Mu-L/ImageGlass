@@ -1286,6 +1286,59 @@ public partial class AppAPIProvider
 
 
     /// <summary>
+    /// Rotate the current image according to the rotation options.
+    /// </summary>
+    public void IG_Rotate(string? optionStr)
+    {
+        if (!Enum.TryParse<RotateOption>(optionStr, out var options))
+        {
+            throw new ArgumentException($"""
+                '{optionStr}' is not a valid rotation option.
+                
+                ----------
+                👉🏼 Method: {nameof(IG_Rotate)}
+                """,
+                nameof(optionStr));
+        }
+
+        IG_Rotate(options);
+    }
+
+
+    /// <summary>
+    /// Rotate the current image according to the rotation options.
+    /// </summary>
+    public void IG_Rotate(RotateOption options)
+    {
+        if (Viewer.SourceKind == PhotoSource.None || Core.IsBusy) return;
+
+        var degree = options == RotateOption.Left ? -90 : 90;
+
+        // update rotation changes
+        if (Viewer.RotateImage(degree))
+        {
+            var currentRotation = Core.ImageTransform.Rotation + degree;
+            if (Math.Abs(currentRotation) >= 360)
+            {
+                currentRotation %= 360;
+            }
+
+            Core.ImageTransform.Rotation = currentRotation;
+        }
+        else
+        {
+            _ = Message.ShowAsync(
+                Core.Lang[LangId._InvalidAction_Transformation],
+                Core.Lang[LangId._InvalidAction]);
+        }
+    }
+
+
+
+
+
+
+    /// <summary>
     /// Flips the current image according to the flip options.
     /// </summary>
     public void IG_FlipImage(string? optionStr)
@@ -1346,7 +1399,6 @@ public partial class AppAPIProvider
                 Core.Lang[LangId._InvalidAction]);
         }
     }
-
 
 
     /// <summary>
