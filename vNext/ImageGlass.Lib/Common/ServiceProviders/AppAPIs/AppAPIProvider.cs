@@ -1241,6 +1241,29 @@ public partial class AppAPIProvider
 
 
     /// <summary>
+    /// Invert image colors.
+    /// </summary>
+    public void IG_InvertColors()
+    {
+        if (Viewer.SourceKind == PhotoSource.None || Core.IsBusy) return;
+
+        // invert image colors
+        if (Viewer.InvertColor(true))
+        {
+            Core.ImageTransform.IsColorInverted = Viewer.IsColorInverted;
+        }
+        else
+        {
+            _ = Message.ShowAsync(
+                Core.Lang[LangId._InvalidAction],
+                Core.Lang[LangId.FrmMain_MnuInvertColors]);
+        }
+    }
+
+
+
+
+    /// <summary>
     /// Sets the viewing photo as desktop wallpaper.
     /// </summary>
     public async Task IG_SetDesktopBackgroundAsync()

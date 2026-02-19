@@ -72,6 +72,7 @@ public enum API
     IG_ToggleUseExplorerSortOrder,
     IG_SetLoadingOrderBy,
     IG_SetLoadingOrderType,
+    IG_InvertColors,
     IG_SetDesktopBackground,
     IG_SetLockScreenImage,
 

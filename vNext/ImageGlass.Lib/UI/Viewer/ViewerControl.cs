@@ -86,6 +86,12 @@ public partial class ViewerControl : PhControl
     public bool IsImageAnimating { get; protected set; } = false;
 
 
+    /// <summary>
+    /// Gets the value indicates whether the color is inverted by <see cref="InvertColor(bool)"/>.
+    /// </summary>
+    public bool IsColorInverted { get; protected set; } = false;
+
+
     #endregion // Public Properties
 
 
@@ -376,6 +382,7 @@ public partial class ViewerControl : PhControl
 
             // reset
             AnimationSource = AnimationSources.None;
+            IsColorInverted = false;
             _enablePanningVelocity = false;
             SetSourceSelection(new Rect(), false);
             BitmapSize = new();
@@ -832,6 +839,60 @@ public partial class ViewerControl : PhControl
             _animator?.Pause();
             IsImageAnimating = false;
         }
+    }
+
+
+    /// <summary>
+    /// Inverts image colors.
+    /// </summary>
+    public bool InvertColor(bool requestRerender = true)
+    {
+        lock (_lock)
+        {
+            // do nothing for animated images or when there is no source
+            if (_animator is not null) return false;
+
+            var srcImage = _imgSource?.Image;
+            if (srcImage.IsDisposed()) return false;
+
+            // color matrix that inverts RGB and preserves alpha
+            float[] invertMatrix =
+            [
+                -1,  0,  0,  0,  1,
+                 0, -1,  0,  0,  1,
+                 0,  0, -1,  0,  1,
+                 0,  0,  0,  1,  0,
+            ];
+
+            using var paint = new SKPaint
+            {
+                ColorFilter = SKColorFilter.CreateColorMatrix(invertMatrix),
+            };
+
+            var info = new SKImageInfo(srcImage.Width, srcImage.Height, srcImage.ColorType, srcImage.AlphaType, srcImage.ColorSpace);
+            using var surface = SKSurface.Create(info);
+            if (surface is null) return false;
+
+            surface.Canvas.DrawImage(srcImage, 0, 0, paint);
+            var invertedImage = surface.Snapshot();
+
+            // replace the source and clear cached render / mipmap
+            SKImageRef.Set(ref _imgSource, invertedImage);
+            SKImageRef.Set(ref _imgRender, null);
+            _mipmapCache?.Dispose();
+            _mipmapCache = null;
+
+            IsColorInverted = !IsColorInverted;
+        }
+
+
+        // render the transformation
+        if (requestRerender)
+        {
+            Refresh(resetZoom: false);
+        }
+
+        return true;
     }
 
 
