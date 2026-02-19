@@ -73,9 +73,14 @@ public partial class PhotoManager
     /// <summary>
     /// Loads files from the input path, returns the initial photo.
     /// </summary>
-    /// <param name="path">Full path of file or directory</param>
+    /// <param name="paths">Full path of file or directory</param>
+    /// <param name="reloadInitPhoto">
+    /// If <c>false</c>, the currently viewed photo is preserved and reused as the
+    /// initial photo instead of being disposed during the list reset.
+    /// </param>
     public Photo? StartLoadingFiles(ICollection<string> paths, string? currentFilePath,
-        FileSearchOptions searchOptions, Action<FileSearchingEventArgs> progressFn)
+        FileSearchOptions searchOptions, Action<FileSearchingEventArgs> progressFn,
+        bool reloadInitPhoto)
     {
         if (Core.FileSearchProvider is null)
             throw new NullReferenceException(nameof(Core.FileSearchProvider));
@@ -87,25 +92,40 @@ public partial class PhotoManager
         var inputPaths = BHelper.GetDistinctDirsFromPaths(paths);
 
 
-        // 2. reset the list, MUST be after getting distinct dirs
-        Clear();
+        // 3. preserve the current photo if requested
+        Photo? preservedPhoto = null;
+        if (!reloadInitPhoto)
+        {
+            preservedPhoto = Current;
+        }
+
+
+        // 4. reset the list, MUST be after getting distinct dirs
+        Clear(excludeFromDisposal: preservedPhoto);
         DistinctDirs = inputPaths.DirPaths;
 
 
-        // 3. create init photo
+        // 5. create init photo
         var initFilePath = currentFilePath;
         if (string.IsNullOrWhiteSpace(initFilePath))
         {
             initFilePath = inputPaths.FilePaths.FirstOrDefault() ?? "";
         }
 
-        if (!string.IsNullOrWhiteSpace(initFilePath))
+        if (preservedPhoto is not null
+            && string.Equals(preservedPhoto.FilePath, initFilePath, StringComparison.OrdinalIgnoreCase))
         {
+            InitPhoto = preservedPhoto;
+        }
+        else if (!string.IsNullOrWhiteSpace(initFilePath))
+        {
+            // dispose the preserved photo if it doesn't match the init file path
+            preservedPhoto?.Dispose();
             InitPhoto = new Photo(initFilePath);
         }
 
 
-        // 4. start searching files in a new thread
+        // 6. start searching files in a new thread
         _ = Core.FileSearchProvider.SearchAsync(DistinctDirs, searchOptions, progressFn);
 
         return InitPhoto;

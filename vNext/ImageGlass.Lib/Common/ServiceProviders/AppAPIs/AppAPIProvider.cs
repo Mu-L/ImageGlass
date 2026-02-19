@@ -155,7 +155,7 @@ public partial class AppAPIProvider
         if (imageIndex == -1 || (Core.ShellProvider?.CanUseForegroundShell() ?? false))
         {
             _mainWindow.PART_MainView.PrepareLoadPhotoList([fullPath],
-                currentFilePath: null, disposeForegroundShell: false, loadInitPhoto: true);
+                currentFilePath: null, disposeForegroundShell: false, reloadInitPhoto: true);
         }
         // 2.2 The file is in current folder AND it is the viewing image
         else if (Core.Photos.CurrentIndex == imageIndex)
@@ -1113,7 +1113,7 @@ public partial class AppAPIProvider
     public void IG_ReloadList()
     {
         _mainWindow.PART_MainView.PrepareLoadPhotoList(Core.Photos.DistinctDirs,
-            Core.Photos.CurrentFilePath, disposeForegroundShell: false, loadInitPhoto: false);
+            Core.Photos.CurrentFilePath, disposeForegroundShell: false, reloadInitPhoto: false);
     }
 
 

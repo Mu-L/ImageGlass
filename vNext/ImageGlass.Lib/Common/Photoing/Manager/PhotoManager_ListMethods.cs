@@ -297,9 +297,11 @@ public partial class PhotoManager
 
     /// <summary>
     /// Clears all photos from the collection and releases any associated resources.
-    /// Option to keep the current photo.
     /// </summary>
-    public void Clear()
+    /// <param name="excludeFromDisposal">
+    /// A photo to exclude from disposal, allowing it to be reused after clearing.
+    /// </param>
+    public void Clear(Photo? excludeFromDisposal = null)
     {
         Photo? initPhoto;
         Photo[] snapshot;
@@ -319,9 +321,13 @@ public partial class PhotoManager
         }
 
         // dispose outside the lock to avoid blocking
-        initPhoto?.Dispose();
+        if (initPhoto is not null && !ReferenceEquals(initPhoto, excludeFromDisposal))
+        {
+            initPhoto.Dispose();
+        }
         foreach (var item in snapshot)
         {
+            if (ReferenceEquals(item, excludeFromDisposal)) continue;
             item.WithNoReactive(() => item.Dispose());
         }
     }

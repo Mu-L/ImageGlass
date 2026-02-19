@@ -138,7 +138,7 @@ public partial class MainWindowView : PhControl
         if (paths.Length > 1)
         {
             PrepareLoadPhotoList(paths,
-                currentFilePath: null, disposeForegroundShell: true, loadInitPhoto: true);
+                currentFilePath: null, disposeForegroundShell: true, reloadInitPhoto: true);
             return;
         }
 
@@ -474,11 +474,11 @@ public partial class MainWindowView : PhControl
 
         // start loading path with the foreground shell
         PrepareLoadPhotoList([pathToLoad],
-            currentFilePath: null, disposeForegroundShell: false, loadInitPhoto: true);
+            currentFilePath: null, disposeForegroundShell: false, reloadInitPhoto: true);
     }
 
 
-    public void PrepareLoadPhotoList(ICollection<string> inputPaths, string? currentFilePath, bool disposeForegroundShell, bool loadInitPhoto)
+    public void PrepareLoadPhotoList(ICollection<string> inputPaths, string? currentFilePath, bool disposeForegroundShell, bool reloadInitPhoto)
     {
         // dispose the foreground shell if requested
         if (disposeForegroundShell) Core.ShellProvider?.ForegroundShell = null;
@@ -505,10 +505,10 @@ public partial class MainWindowView : PhControl
                 OrderBy = Core.Config.ImageLoadingOrder,
                 OrderType = Core.Config.ImageLoadingOrderType,
             };
-            var initPhoto = Core.Photos.StartLoadingFiles(inputPaths, currentFilePath, searchOptions, Files_Searched);
+            var initPhoto = Core.Photos.StartLoadingFiles(inputPaths, currentFilePath, searchOptions, Files_Searched, reloadInitPhoto);
 
 
-            if (loadInitPhoto && initPhoto is not null)
+            if (reloadInitPhoto && initPhoto is not null)
             {
                 _ = ViewPhotoAsync(initPhoto);
             }
