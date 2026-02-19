@@ -45,6 +45,7 @@ public partial class ViewerControl : PhControl
 
     // events
     public event TEventHandler<ViewerControl, PhotoLoadingEventArgs>? PhotoLoading;
+    public event TEventHandler<ViewerControl, AnimatorFrameChangedEventArgs>? PhotoAnimatorFrameChanged;
 
 
 
@@ -752,6 +753,7 @@ public partial class ViewerControl : PhControl
         }
 
         InvalidateVisual();
+        PhotoAnimatorFrameChanged?.Invoke(this, e);
     }
 
 

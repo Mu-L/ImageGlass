@@ -1257,6 +1257,36 @@ public partial class AppAPIProvider
     }
 
 
+    /// <summary>
+    /// Sets whether to play or pause the image animation.
+    /// </summary>
+    public void IG_ToggleImageAnimation(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleImageAnimation(enabled);
+    }
+
+
+    /// <summary>
+    /// Sets whether to play or pause the image animation.
+    /// </summary>
+    public void IG_ToggleImageAnimation(bool? enabled)
+    {
+        enabled ??= !Viewer.IsImageAnimating;
+
+        if (enabled.Value)
+        {
+            Viewer.StartAnimator();
+        }
+        else
+        {
+            Viewer.StopAnimator();
+        }
+    }
+
+
+
+
 
 
     /// <summary>

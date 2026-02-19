@@ -103,7 +103,8 @@ public partial class AppAPIProvider
         new(LangId.ImageOrderBy_ExifRating,         API.IG_SetLoadingOrderBy,   nameof(ImageOrderBy.ExifRating)),
         new(LangId.ImageOrderType_Asc,              API.IG_SetLoadingOrderType, nameof(ImageOrderType.Asc)),
         new(LangId.ImageOrderType_Desc,             API.IG_SetLoadingOrderType, nameof(ImageOrderType.Desc)),
-        new(LangId.FrmMain_MnuInvertColors,         API.IG_InvertColors,        MKeys.Control, Key.I),
+        new(LangId.FrmMain_MnuInvertColors,         API.IG_InvertColors,            MKeys.Control, Key.I),
+        new(LangId.FrmMain_MnuToggleImageAnimation, API.IG_ToggleImageAnimation,    MKeys.Control, Key.Space),
         new(LangId.FrmMain_MnuSetDesktopBackground, API.IG_SetDesktopBackground),
         new(LangId.FrmMain_MnuSetLockScreen,        API.IG_SetLockScreenImage),
 

@@ -91,6 +91,7 @@ public partial class AppAPIProvider
         { API.IG_SetLoadingOrderBy,             PhCommands.Create(IG_SetLoadingOrderBy) },
         { API.IG_SetLoadingOrderType,           PhCommands.Create(IG_SetLoadingOrderType) },
         { API.IG_InvertColors,                  PhCommands.Create(IG_InvertColors) },
+        { API.IG_ToggleImageAnimation,          PhCommands.Create(IG_ToggleImageAnimation) },
         { API.IG_SetDesktopBackground,          PhCommands.Create(IG_SetDesktopBackgroundAsync) },
         { API.IG_SetLockScreenImage,            PhCommands.Create(IG_SetLockScreenImageAsync) },
 

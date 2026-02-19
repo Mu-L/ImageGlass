@@ -388,6 +388,7 @@ public partial class AppStatusInfo : DisposableImpl
         Core.Photos.PropertyChanged += Photos_PropertyChanged;
         Core.ImageTransform.Changed += ImageTransform_Changed;
         _viewer.ZoomChanged += Viewer_ZoomChanged;
+        _viewer.PhotoAnimatorFrameChanged += Viewer_PhotoAnimatorFrameChanged;
     }
 
 
@@ -398,6 +399,7 @@ public partial class AppStatusInfo : DisposableImpl
         Core.Photos.PropertyChanged -= Photos_PropertyChanged;
         Core.ImageTransform.Changed -= ImageTransform_Changed;
         _viewer.ZoomChanged -= Viewer_ZoomChanged;
+        _viewer.PhotoAnimatorFrameChanged -= Viewer_PhotoAnimatorFrameChanged;
     }
 
 
@@ -434,5 +436,17 @@ public partial class AppStatusInfo : DisposableImpl
             Changed?.Invoke(this, EventArgs.Empty);
         });
     }
+
+
+    private void Viewer_PhotoAnimatorFrameChanged(ViewerControl sender, AnimatorFrameChangedEventArgs e)
+    {
+        Core.Photos.CurrentMetadata?.FrameIndex = (uint)e.CurrentFrame;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            Changed?.Invoke(this, EventArgs.Empty);
+        });
+    }
+
 
 }
