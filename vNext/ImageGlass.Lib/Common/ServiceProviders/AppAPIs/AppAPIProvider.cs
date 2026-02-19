@@ -410,6 +410,8 @@ public partial class AppAPIProvider
         var destPhoto = Core.Photos.Get(destFilePath);
         if (destPhoto is not null)
         {
+            destPhoto.UnloadThumbnail();
+
             // reload thumbnail
             Gallery.LoadThumbnail(newPhotoIndex, false);
         }
@@ -1332,10 +1334,6 @@ public partial class AppAPIProvider
                 Core.Lang[LangId._InvalidAction]);
         }
     }
-
-
-
-
 
 
     /// <summary>

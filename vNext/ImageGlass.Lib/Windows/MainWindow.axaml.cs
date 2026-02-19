@@ -55,6 +55,12 @@ public partial class MainWindow : PhWindow
         ClientSize = winBounds.Size - sizeDiff;
         Position = new PixelPoint((int)Core.Config.MainWindowBounds.X, (int)Core.Config.MainWindowBounds.Y);
 
+        if (!Core.Config.EnableWindowFit)
+        {
+            // load window state
+            if (Core.Config.IsMainWindowMaximized) WindowState = WindowState.Maximized;
+        }
+
 
         // events
         Core.AppInstance.InstanceInvoked += AppInstance_InstanceInvoked;
@@ -76,9 +82,6 @@ public partial class MainWindow : PhWindow
         }
         else
         {
-            // load window state
-            if (Core.Config.IsMainWindowMaximized) WindowState = WindowState.Maximized;
-
             // load full screen
             if (Core.Config.EnableFullScreen) WindowState = WindowState.FullScreen;
         }

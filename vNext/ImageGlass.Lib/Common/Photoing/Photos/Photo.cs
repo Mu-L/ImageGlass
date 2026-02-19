@@ -810,24 +810,19 @@ public partial class Photo : DisposableImpl
 
 
     /// <summary>
-    /// Cancels any in-progress thumbnail loading.
-    /// </summary>
-    public void CancelThumbnailLoading()
-    {
-        _cancelThumbnailLoading?.Cancel();
-    }
-
-
-    /// <summary>
     /// Cancels pending thumbnail loading and disposes the cached thumbnail.
     /// </summary>
     public void UnloadThumbnail()
     {
-        _cancelThumbnailLoading?.Cancel();
-        _cancelThumbnailLoading?.Dispose();
-        _cancelThumbnailLoading = null;
+        lock (_thumbnailLock)
+        {
+            _cancelThumbnailLoading?.Cancel();
+            _cancelThumbnailLoading?.Dispose();
+            _cancelThumbnailLoading = null;
 
-        GalleryThumbnail = null;
+            GalleryThumbnail?.Dispose();
+            GalleryThumbnail = null;
+        }
     }
 
 

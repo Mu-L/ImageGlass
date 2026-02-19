@@ -248,7 +248,7 @@ public static partial class SkiaCodec
             // 2. use Magick to save
             if (MagickCodec.CanWrite(destFilePath))
             {
-                using var imgM = ToMagick(srcImg);
+                using var imgM = ToMagick(dstImg);
                 if (imgM is null) return;
 
                 // write image data to file
@@ -336,55 +336,134 @@ public static partial class SkiaCodec
 
 
     /// <summary>
-    /// Returns the new transformed bitmap.
+    /// Returns the new transformed image by applying flip, rotation, and color inversion.
     /// </summary>
     public static SKImage? TransformImage(SKImage? imgSrc, ImgTransform? transform)
     {
         if (imgSrc.IsDisposed() || transform is null || !transform.HasChanges) return null;
 
-        var surface = SKSurface.Create(imgSrc.Info);
-        var canvas = surface.Canvas;
-        canvas.Translate(imgSrc.Width * 0.5f, imgSrc.Height * 0.5f);
-
+        SKImage? result = null;
 
         // flip
-        var isFlipX = transform.Flips.HasFlag(FlipOptions.Horizontal);
-        var isFlipY = transform.Flips.HasFlag(FlipOptions.Vertical);
-        if (transform.Flips.HasFlag(FlipOptions.Horizontal) || transform.Flips.HasFlag(FlipOptions.Vertical))
+        if (transform.Flips != FlipOptions.None)
         {
-            canvas.Scale(isFlipX ? -1 : 1, isFlipY ? -1 : 1);
+            var flipped = FlipImage(result ?? imgSrc, transform.Flips);
+            result?.Dispose();
+            result = flipped;
         }
-
 
         // rotation
         if (transform.Rotation != 0)
         {
-            canvas.RotateDegrees(transform.Rotation);
+            var rotated = RotateImage(result ?? imgSrc, transform.Rotation);
+            result?.Dispose();
+            result = rotated;
         }
-
-        canvas.Translate(-imgSrc.Width * 0.5f, -imgSrc.Height * 0.5f);
-        canvas.DrawImage(imgSrc, 0, 0);
-
 
         // invert color
         if (transform.IsColorInverted)
         {
-            var colorMatrix = new float[]
-            {
-                -1,  0,  0,  0, 255,
-                 0, -1,  0,  0, 255,
-                 0,  0, -1,  0, 255,
-                 0,  0,  0,  1,   0
-            };
-
-            using var paint = new SKPaint
-            {
-                ColorFilter = SKColorFilter.CreateColorMatrix(colorMatrix),
-            };
-
-            canvas.DrawImage(imgSrc, 0, 0, paint);
+            var inverted = InvertImageColors(result ?? imgSrc);
+            result?.Dispose();
+            result = inverted;
         }
 
+        return result;
+    }
+
+
+    /// <summary>
+    /// Returns a new image with inverted RGB colors, preserving alpha.
+    /// </summary>
+    public static SKImage? InvertImageColors(SKImage? imgSrc)
+    {
+        if (imgSrc.IsDisposed()) return null;
+
+        float[] invertMatrix =
+        [
+            -1,  0,  0,  0,  1,
+             0, -1,  0,  0,  1,
+             0,  0, -1,  0,  1,
+             0,  0,  0,  1,  0,
+        ];
+
+        using var paint = new SKPaint
+        {
+            ColorFilter = SKColorFilter.CreateColorMatrix(invertMatrix),
+        };
+
+        var info = new SKImageInfo(imgSrc.Width, imgSrc.Height, imgSrc.ColorType, imgSrc.AlphaType, imgSrc.ColorSpace);
+        using var surface = SKSurface.Create(info);
+        if (surface.IsDisposed()) return null;
+
+        surface.Canvas.DrawImage(imgSrc, 0, 0, paint);
+        return surface.Snapshot();
+    }
+
+
+    /// <summary>
+    /// Returns a new image rotated by the specified degree.
+    /// Handles arbitrary angles by computing the bounding box and centering.
+    /// </summary>
+    public static SKImage? RotateImage(SKImage? imgSrc, double degree)
+    {
+        if (imgSrc.IsDisposed()) return null;
+
+        // normalize to [0, 360)
+        degree = ((degree % 360) + 360) % 360;
+        if (degree == 0) return null;
+
+        var w = imgSrc.Width;
+        var h = imgSrc.Height;
+
+        // compute the bounding box of the rotated image
+        var rad = degree * Math.PI / 180.0;
+        var cos = Math.Abs(Math.Cos(rad));
+        var sin = Math.Abs(Math.Sin(rad));
+        var outW = (int)Math.Ceiling(w * cos + h * sin);
+        var outH = (int)Math.Ceiling(w * sin + h * cos);
+
+        var info = new SKImageInfo(outW, outH, imgSrc.ColorType, imgSrc.AlphaType, imgSrc.ColorSpace);
+        using var surface = SKSurface.Create(info);
+        if (surface.IsDisposed()) return null;
+
+        var canvas = surface.Canvas;
+
+        // move origin to the center of the output, rotate, then draw centered
+        canvas.Translate(outW / 2f, outH / 2f);
+        canvas.RotateDegrees((float)degree);
+        canvas.Translate(-w / 2f, -h / 2f);
+        canvas.DrawImage(imgSrc, 0, 0);
+
+        return surface.Snapshot();
+    }
+
+
+    /// <summary>
+    /// Returns a new image flipped according to the specified options.
+    /// </summary>
+    public static SKImage? FlipImage(SKImage? imgSrc, FlipOptions options)
+    {
+        if (imgSrc.IsDisposed() || options == FlipOptions.None) return null;
+
+        var w = imgSrc.Width;
+        var h = imgSrc.Height;
+        var info = new SKImageInfo(w, h, imgSrc.ColorType, imgSrc.AlphaType, imgSrc.ColorSpace);
+        using var surface = SKSurface.Create(info);
+        if (surface.IsDisposed()) return null;
+
+        var canvas = surface.Canvas;
+
+        if (options.HasFlag(FlipOptions.Horizontal))
+        {
+            canvas.Scale(-1, 1, w / 2f, 0);
+        }
+        if (options.HasFlag(FlipOptions.Vertical))
+        {
+            canvas.Scale(1, -1, 0, h / 2f);
+        }
+
+        canvas.DrawImage(imgSrc, 0, 0);
         return surface.Snapshot();
     }
 
