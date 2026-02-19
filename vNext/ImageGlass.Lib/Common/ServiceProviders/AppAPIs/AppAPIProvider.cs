@@ -1285,7 +1285,67 @@ public partial class AppAPIProvider
     }
 
 
+    /// <summary>
+    /// Flips the current image according to the flip options.
+    /// </summary>
+    public void IG_FlipImage(string? optionStr)
+    {
+        if (!Enum.TryParse<FlipOptions>(optionStr, out var options))
+        {
+            throw new ArgumentException($"""
+                '{optionStr}' is not a valid flip option.
+                
+                ----------
+                👉🏼 Method: {nameof(IG_FlipImage)}
+                """,
+                nameof(optionStr));
+        }
 
+        IG_FlipImage(options);
+    }
+
+
+    /// <summary>
+    /// Flips the current image according to the flip options.
+    /// </summary>
+    public void IG_FlipImage(FlipOptions options)
+    {
+        if (Viewer.SourceKind == PhotoSource.None || Core.IsBusy) return;
+
+        // update flip changes
+        if (Viewer.FlipImage(options))
+        {
+            if (options.HasFlag(FlipOptions.Horizontal))
+            {
+                if (Core.ImageTransform.Flips.HasFlag(FlipOptions.Horizontal))
+                {
+                    Core.ImageTransform.Flips ^= FlipOptions.Horizontal;
+                }
+                else
+                {
+                    Core.ImageTransform.Flips |= FlipOptions.Horizontal;
+                }
+            }
+
+            if (options.HasFlag(FlipOptions.Vertical))
+            {
+                if (Core.ImageTransform.Flips.HasFlag(FlipOptions.Vertical))
+                {
+                    Core.ImageTransform.Flips ^= FlipOptions.Vertical;
+                }
+                else
+                {
+                    Core.ImageTransform.Flips |= FlipOptions.Vertical;
+                }
+            }
+        }
+        else
+        {
+            _ = Message.ShowAsync(
+                Core.Lang[LangId._InvalidAction_Transformation],
+                Core.Lang[LangId._InvalidAction]);
+        }
+    }
 
 
 

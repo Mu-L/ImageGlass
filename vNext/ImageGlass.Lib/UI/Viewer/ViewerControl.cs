@@ -898,6 +898,60 @@ public partial class ViewerControl : PhControl
     }
 
 
+    /// <summary>
+    /// Flips the image.
+    /// </summary>
+    public bool FlipImage(FlipOptions flips, bool requestRerender = true)
+    {
+        if (flips == FlipOptions.None) return false;
+
+        lock (_lock)
+        {
+            // do nothing for animated images or when there is no source
+            if (_animator is not null) return false;
+
+            var srcImage = _imgSource?.Image;
+            if (srcImage.IsDisposed()) return false;
+
+            var w = srcImage.Width;
+            var h = srcImage.Height;
+            var info = new SKImageInfo(w, h, srcImage.ColorType, srcImage.AlphaType, srcImage.ColorSpace);
+            using var surface = SKSurface.Create(info);
+            if (surface is null) return false;
+
+            var canvas = surface.Canvas;
+
+            // apply flip transformations
+            if (flips.HasFlag(FlipOptions.Horizontal))
+            {
+                canvas.Scale(-1, 1, w / 2f, 0);
+            }
+            if (flips.HasFlag(FlipOptions.Vertical))
+            {
+                canvas.Scale(1, -1, 0, h / 2f);
+            }
+
+            canvas.DrawImage(srcImage, 0, 0);
+
+            var flippedImage = surface.Snapshot();
+
+            // replace the source and clear cached render / mipmap
+            SKImageRef.Set(ref _imgSource, flippedImage);
+            SKImageRef.Set(ref _imgRender, null);
+            _mipmapCache?.Dispose();
+            _mipmapCache = null;
+        }
+
+        // render the transformation
+        if (requestRerender)
+        {
+            Refresh(resetZoom: false);
+        }
+
+        return true;
+    }
+
+
     #endregion // Control Methods
 
 
