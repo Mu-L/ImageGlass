@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common.Types;
 using System;
 
 namespace ImageGlass.Common.Photoing;
@@ -25,6 +26,12 @@ public class ImgTransform
     private float _rotation = 0;
     private FlipOptions _flipOptions = FlipOptions.None;
     private bool _isColorInverted = false;
+
+
+    /// <summary>
+    /// Occurs when there is a change.
+    /// </summary>
+    public event TEventHandler<ImgTransform, EventArgs>? Changed;
 
 
     /// <summary>
@@ -94,11 +101,6 @@ public class ImgTransform
         || Rotation != 0
         || IsColorInverted;
 
-
-    /// <summary>
-    /// Occurs when there is a change.
-    /// </summary>
-    public event EventHandler<EventArgs>? Changed;
 
 
     /// <summary>

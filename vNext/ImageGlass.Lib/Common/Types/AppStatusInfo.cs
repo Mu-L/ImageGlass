@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Threading;
 using ImageGlass.Common.Localization;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Viewer.ZoomAndPan;
@@ -60,7 +61,8 @@ public partial class AppStatusInfo : DisposableImpl
 
             if (Core.Config.ImageInfoTags.Contains(nameof(Name)))
             {
-                return System.IO.Path.GetFileName(_filePath);
+                var askterisk = Core.ImageTransform.HasChanges ? "*" : string.Empty;
+                return $"{System.IO.Path.GetFileName(_filePath)}{askterisk}";
             }
 
             return null;
@@ -77,7 +79,8 @@ public partial class AppStatusInfo : DisposableImpl
 
             if (Core.Config.ImageInfoTags.Contains(nameof(Path)))
             {
-                return _filePath;
+                var askterisk = Core.ImageTransform.HasChanges ? "*" : string.Empty;
+                return $"{_filePath}{askterisk}";
             }
 
             return null;
@@ -383,6 +386,7 @@ public partial class AppStatusInfo : DisposableImpl
         _viewer = viewer;
 
         Core.Photos.PropertyChanged += Photos_PropertyChanged;
+        Core.ImageTransform.Changed += ImageTransform_Changed;
         _viewer.ZoomChanged += Viewer_ZoomChanged;
     }
 
@@ -392,6 +396,7 @@ public partial class AppStatusInfo : DisposableImpl
         base.OnDisposing();
 
         Core.Photos.PropertyChanged -= Photos_PropertyChanged;
+        Core.ImageTransform.Changed -= ImageTransform_Changed;
         _viewer.ZoomChanged -= Viewer_ZoomChanged;
     }
 
@@ -406,6 +411,15 @@ public partial class AppStatusInfo : DisposableImpl
         }
 
 
+        Dispatcher.UIThread.Post(() =>
+        {
+            Changed?.Invoke(this, EventArgs.Empty);
+        });
+    }
+
+
+    private void ImageTransform_Changed(ImgTransform sender, EventArgs e)
+    {
         Dispatcher.UIThread.Post(() =>
         {
             Changed?.Invoke(this, EventArgs.Empty);

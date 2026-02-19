@@ -300,14 +300,6 @@ public partial class AppAPIProvider
     ///     </list>
     ///   </para>
     /// </summary>
-    /// <param name="destFilePath">Destination file path</param>
-    /// <param name="srcFilePath">
-    ///   Source file path.
-    ///   <para>
-    ///     <c>Note:**</c>
-    ///     If it's empty, ImageGlass will check for the selection and clipboard image.
-    ///   </para>
-    /// </param>
     public async Task<bool> SaveImageAsync(string destFilePath)
     {
         var saveSource = ImageSaveSource.Undefined;
@@ -401,22 +393,26 @@ public partial class AppAPIProvider
                 // reload to view the updated image
                 IG_Reload();
             }
+
+            // reset transformations
+            Core.ImageTransform.Clear();
         }
+
 
         _ = Message.ShowAsync(destFilePath, Core.Lang[LangId.FrmMain_MnuSave_Success]);
 
 
-        // 4. update thumbnail & metadata if file in the list was overriden
+        // 4. emits saved event
+        Core.OnPhotoSaved(new(Core.Photos.CurrentFilePath, destFilePath, saveSource));
+
+
+        // 5. update thumbnail & metadata if file in the list was overriden
         var destPhoto = Core.Photos.Get(destFilePath);
         if (destPhoto is not null)
         {
             // reload thumbnail
             Gallery.LoadThumbnail(newPhotoIndex, false);
         }
-
-
-        // 5. emits saved event
-        Core.OnPhotoSaved(new(Core.Photos.CurrentFilePath, destFilePath, saveSource));
 
         return true;
     }
