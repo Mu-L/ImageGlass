@@ -1155,6 +1155,92 @@ public partial class AppAPIProvider
 
 
     /// <summary>
+    /// Sets whether to use the Explorer sort order.
+    /// </summary>
+    public void IG_ToggleUseExplorerSortOrder(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleUseExplorerSortOrder(enabled);
+    }
+
+
+    /// <summary>
+    /// Sets whether to use the Explorer sort order.
+    /// </summary>
+    public void IG_ToggleUseExplorerSortOrder(bool? enabled)
+    {
+        enabled ??= !Core.Config.ShouldUseExplorerSortOrder;
+        Core.Config.ShouldUseExplorerSortOrder = enabled.Value;
+
+        IG_ReloadList();
+    }
+
+
+    /// <summary>
+    /// Sets the image loading order value.
+    /// </summary>
+    public void IG_SetLoadingOrderBy(string? orderByStr)
+    {
+        if (!Enum.TryParse<ImageOrderBy>(orderByStr, out var orderBy))
+        {
+            throw new ArgumentException($"""
+                '{orderByStr}' is not a valid loading order.
+                
+                ----------
+                👉🏼 Method: {nameof(IG_SetLoadingOrderBy)}
+                """,
+                nameof(orderByStr));
+        }
+
+        IG_SetLoadingOrderBy(orderBy);
+    }
+
+
+    /// <summary>
+    /// Sets the image loading order value.
+    /// </summary>
+    public void IG_SetLoadingOrderBy(ImageOrderBy orderBy)
+    {
+        if (orderBy == Core.Config.ImageLoadingOrder) return;
+
+        Core.Config.ImageLoadingOrder = orderBy;
+        IG_ReloadList();
+    }
+
+
+    /// <summary>
+    /// Sets the image loading order value.
+    /// </summary>
+    public void IG_SetLoadingOrderType(string? orderTypeStr)
+    {
+        if (!Enum.TryParse<ImageOrderType>(orderTypeStr, out var orderType))
+        {
+            throw new ArgumentException($"""
+                '{orderTypeStr}' is not a valid loading order.
+                
+                ----------
+                👉🏼 Method: {nameof(IG_SetLoadingOrderType)}
+                """,
+                nameof(orderTypeStr));
+        }
+
+        IG_SetLoadingOrderType(orderType);
+    }
+
+
+    /// <summary>
+    /// Sets the image loading order value.
+    /// </summary>
+    public void IG_SetLoadingOrderType(ImageOrderType orderType)
+    {
+        if (orderType == Core.Config.ImageLoadingOrderType) return;
+
+        Core.Config.ImageLoadingOrderType = orderType;
+        IG_ReloadList();
+    }
+
+
+    /// <summary>
     /// Sets the viewing photo as desktop wallpaper.
     /// </summary>
     public async Task IG_SetDesktopBackgroundAsync()

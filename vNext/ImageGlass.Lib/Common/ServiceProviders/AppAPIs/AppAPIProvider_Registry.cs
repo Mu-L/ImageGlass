@@ -83,12 +83,15 @@ public partial class AppAPIProvider
 
 
         // Image
-        { API.IG_Refresh,               PhCommands.Create(IG_Refresh) },
-        { API.IG_Reload,                PhCommands.Create(IG_Reload) },
-        { API.IG_ReloadList,            PhCommands.Create(IG_ReloadList) },
-        { API.IG_Unload,                PhCommands.Create(IG_UnloadAsync) },
-        { API.IG_SetDesktopBackground,  PhCommands.Create(IG_SetDesktopBackgroundAsync) },
-        { API.IG_SetLockScreenImage,    PhCommands.Create(IG_SetLockScreenImageAsync) },
+        { API.IG_Refresh,                   PhCommands.Create(IG_Refresh) },
+        { API.IG_Reload,                    PhCommands.Create(IG_Reload) },
+        { API.IG_ReloadList,                PhCommands.Create(IG_ReloadList) },
+        { API.IG_Unload,                    PhCommands.Create(IG_UnloadAsync) },
+        { API.IG_ToggleUseExplorerSortOrder,    PhCommands.Create(IG_ToggleUseExplorerSortOrder) },
+        { API.IG_SetLoadingOrderBy,         PhCommands.Create(IG_SetLoadingOrderBy) },
+        { API.IG_SetLoadingOrderType,       PhCommands.Create(IG_SetLoadingOrderType) },
+        { API.IG_SetDesktopBackground,      PhCommands.Create(IG_SetDesktopBackgroundAsync) },
+        { API.IG_SetLockScreenImage,        PhCommands.Create(IG_SetLockScreenImageAsync) },
 
 
         // Clipboard
@@ -217,6 +220,7 @@ public partial class AppAPIProvider
     public async Task<Exception?> RunActionAsync(SingleAction? ac, bool showError)
     {
         if (string.IsNullOrWhiteSpace(ac?.Executable)) return null;
+
 
         // 1. run the current action
         var acResults = await RunApiAsync(ac.Executable, ac.Argument);

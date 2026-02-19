@@ -69,6 +69,9 @@ public enum API
     IG_Reload,
     IG_ReloadList,
     IG_Unload,
+    IG_ToggleUseExplorerSortOrder,
+    IG_SetLoadingOrderBy,
+    IG_SetLoadingOrderType,
     IG_SetDesktopBackground,
     IG_SetLockScreenImage,
 

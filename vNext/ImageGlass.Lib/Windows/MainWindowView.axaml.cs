@@ -242,7 +242,6 @@ public partial class MainWindowView : PhControl
         #region Menu group: Loading orders
         if (!imageNotFound && !hasClipboardImage)
         {
-            // TODO:
             mnuContext.Items.Add("-");
             var mnuLoadingOrders = new PhMenuItem
             {
@@ -260,7 +259,7 @@ public partial class MainWindowView : PhControl
                     LangKey = LangId.FrmSettings_ShouldUseExplorerSortOrder,
                     ToggleType = MenuItemToggleType.CheckBox,
                     IsChecked = Core.Config.ShouldUseExplorerSortOrder,
-                    //Command = 
+                    Command = Core.API?.GetApiCommand(API.IG_ToggleUseExplorerSortOrder),
                     HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmSettings_ShouldUseExplorerSortOrder),
                 });
                 mnuLoadingOrders.Items.Add("-");
@@ -275,6 +274,8 @@ public partial class MainWindowView : PhControl
                     LangKey = Lang.GetKey($"{nameof(ImageOrderBy)}_{orderBy}"),
                     ToggleType = MenuItemToggleType.Radio,
                     IsChecked = Core.Config.ImageLoadingOrder == Enum.Parse<ImageOrderBy>(orderBy),
+                    Command = Core.API?.GetApiCommand(API.IG_SetLoadingOrderBy),
+                    CommandParameter = orderBy,
                 });
             }
 
@@ -287,6 +288,8 @@ public partial class MainWindowView : PhControl
                     LangKey = Lang.GetKey($"{nameof(ImageOrderType)}_{orderType}"),
                     ToggleType = MenuItemToggleType.Radio,
                     IsChecked = Core.Config.ImageLoadingOrderType == Enum.Parse<ImageOrderType>(orderType),
+                    Command = Core.API?.GetApiCommand(API.IG_SetLoadingOrderType),
+                    CommandParameter = orderType,
                 });
             }
         }
@@ -491,18 +494,18 @@ public partial class MainWindowView : PhControl
         Dispatcher.UIThread.Post(async () =>
         {
             // start loading files
-            var initPhoto = Core.Photos.StartLoadingFiles(inputPaths, currentFilePath,
-                new FileSearchOptions()
-                {
-                    AllowedExtensions = Core.Config.FileFormats,
-                    UseExplorerSortOrder = Core.Config.ShouldUseExplorerSortOrder,
-                    ForegroundShell = foregroundShell,
-                    SearchSubDirectories = Core.Config.EnableRecursiveLoading,
-                    GroupByDir = Core.Config.ShouldGroupImagesByDirectory,
-                    IncludeHidden = Core.Config.ShouldLoadHiddenImages,
-                    OrderBy = Core.Config.ImageLoadingOrder,
-                    OrderType = Core.Config.ImageLoadingOrderType,
-                }, Files_Searched);
+            var searchOptions = new FileSearchOptions()
+            {
+                AllowedExtensions = Core.Config.FileFormats,
+                UseExplorerSortOrder = Core.Config.ShouldUseExplorerSortOrder,
+                ForegroundShell = foregroundShell,
+                SearchSubDirectories = Core.Config.EnableRecursiveLoading,
+                GroupByDir = Core.Config.ShouldGroupImagesByDirectory,
+                IncludeHidden = Core.Config.ShouldLoadHiddenImages,
+                OrderBy = Core.Config.ImageLoadingOrder,
+                OrderType = Core.Config.ImageLoadingOrderType,
+            };
+            var initPhoto = Core.Photos.StartLoadingFiles(inputPaths, currentFilePath, searchOptions, Files_Searched);
 
 
             if (loadInitPhoto && initPhoto is not null)

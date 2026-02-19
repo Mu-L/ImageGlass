@@ -20,7 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -298,6 +297,7 @@ public partial class PhotoManager
 
     /// <summary>
     /// Clears all photos from the collection and releases any associated resources.
+    /// Option to keep the current photo.
     /// </summary>
     public void Clear()
     {

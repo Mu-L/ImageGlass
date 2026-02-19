@@ -86,19 +86,13 @@ public partial class PhotoManager
         // 2. get distinct dir paths for searching
         var inputPaths = BHelper.GetDistinctDirsFromPaths(paths);
 
-        // don't use foreground shell if no file paths
-        if (inputPaths.FilePaths.Count == 0)
-        {
-            searchOptions.UseExplorerSortOrder = false;
-        }
 
-
-        // 3. reset the list, MUST be after getting distinct dirs
+        // 2. reset the list, MUST be after getting distinct dirs
         Clear();
         DistinctDirs = inputPaths.DirPaths;
 
 
-        // 4. create init photo
+        // 3. create init photo
         var initFilePath = currentFilePath;
         if (string.IsNullOrWhiteSpace(initFilePath))
         {
@@ -111,7 +105,7 @@ public partial class PhotoManager
         }
 
 
-        // 5. start searching files in a new thread
+        // 4. start searching files in a new thread
         _ = Core.FileSearchProvider.SearchAsync(DistinctDirs, searchOptions, progressFn);
 
         return InitPhoto;
