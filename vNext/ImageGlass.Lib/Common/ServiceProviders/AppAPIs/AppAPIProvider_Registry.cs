@@ -90,6 +90,7 @@ public partial class AppAPIProvider
         { API.IG_ToggleUseExplorerSortOrder,    PhCommands.Create(IG_ToggleUseExplorerSortOrder) },
         { API.IG_SetLoadingOrderBy,             PhCommands.Create(IG_SetLoadingOrderBy) },
         { API.IG_SetLoadingOrderType,           PhCommands.Create(IG_SetLoadingOrderType) },
+        { API.IG_SetColorChannels,              PhCommands.Create(IG_SetColorChannels)},
         { API.IG_InvertColors,                  PhCommands.Create(IG_InvertColors) },
         { API.IG_ToggleImageAnimation,          PhCommands.Create(IG_ToggleImageAnimation) },
         { API.IG_Rotate,                        PhCommands.Create(IG_Rotate)},
@@ -212,22 +213,23 @@ public partial class AppAPIProvider
     /// <summary>
     /// Executes a single action, shows error popup.
     /// </summary>
-    public async Task RunActionAsync(SingleAction? ac)
+    public async Task RunActionAsync(SingleAction? ac, string? customArg = null)
     {
-        _ = await RunActionAsync(ac, true);
+        _ = await RunActionAsync(ac, true, customArg);
     }
 
 
     /// <summary>
     /// Executes a single action.
     /// </summary>
-    public async Task<Exception?> RunActionAsync(SingleAction? ac, bool showError)
+    public async Task<Exception?> RunActionAsync(SingleAction? ac, bool showError, string? customArg = null)
     {
         if (string.IsNullOrWhiteSpace(ac?.Executable)) return null;
 
 
         // 1. run the current action
-        var acResults = await RunApiAsync(ac.Executable, ac.Argument);
+        var acArgs = customArg ?? ac.Argument;
+        var acResults = await RunApiAsync(ac.Executable, acArgs);
 
 
         // 2. exit if the action was cancelled.
@@ -253,7 +255,7 @@ public partial class AppAPIProvider
         // try to run with Shell
         else if (acResults.ExitCode == ActionExitCode.ApiNotFound)
         {
-            var args = string.Join(string.Empty, ac.Argument) ?? string.Empty;
+            var args = string.Join(string.Empty, acArgs) ?? string.Empty;
             var exeInfo = BHelper.BuildExeArgs(ac.Executable, args, Core.Photos.CurrentFilePath);
 
             var exeCode = await BHelper.RunExeCmd(exeInfo.Executable, exeInfo.Args, false, false);

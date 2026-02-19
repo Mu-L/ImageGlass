@@ -75,4 +75,7 @@ public enum ColorChannels
 
     RGB = R | G | B,
     RGBA = RGB | A,
+    RA = R | A,
+    GA = G | A,
+    BA = B | A,
 }

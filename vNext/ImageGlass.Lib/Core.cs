@@ -194,7 +194,7 @@ public static class Core
     /// <summary>
     /// Gets the color channels setting.
     /// </summary>
-    public static ColorChannels ColorChannels { get; private set; } = ColorChannels.RGBA;
+    public static ColorChannels ColorChannels { get; set; } = ColorChannels.RGBA;
 
     #endregion // Public Properties
 

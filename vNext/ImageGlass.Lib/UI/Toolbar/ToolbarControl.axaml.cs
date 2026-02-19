@@ -260,7 +260,7 @@ public partial class ToolbarControl : PhControl
         if (sender is not PhMenuItem mnu) return;
 
         var action = AppAPIProvider.GetMenuAction(mnu.LangKey);
-        _ = Core.API?.RunActionAsync(action);
+        _ = Core.API?.RunActionAsync(action, mnu.CommandParameter?.ToString());
     }
 
 
@@ -268,13 +268,22 @@ public partial class ToolbarControl : PhControl
     {
         if (sender is not PhMenuItem mnu) return;
 
-        var channelType = mnu.Tag?.ToString();
+        var channelType = mnu.CommandParameter?.ToString();
         if (string.IsNullOrEmpty(channelType)) return;
 
         if (Enum.TryParse<ColorChannels>(channelType, out var channels))
         {
-            var isToggle = mnu.ToggleType == MenuItemToggleType.CheckBox;
-            SetColorChannels(channels, isToggle);
+            // toggle a channel
+            if (mnu.ToggleType == MenuItemToggleType.CheckBox)
+            {
+                SetColorChannels(channels, mnu.IsChecked);
+            }
+
+            // set channels
+            else
+            {
+                SetColorChannels(channels, null);
+            }
         }
     }
 
@@ -569,9 +578,30 @@ public partial class ToolbarControl : PhControl
     }
 
 
-    private void SetColorChannels(ColorChannels channels, bool isToggle)
+    private void SetColorChannels(ColorChannels channels, bool? isEnabled)
     {
-        // TODO:
+        var newChannels = Core.ColorChannels;
+
+        // toggle a channel
+        if (isEnabled is not null)
+        {
+            if (IsEnabled)
+            {
+                newChannels ^= channels;
+            }
+            else
+            {
+                newChannels |= channels;
+            }
+        }
+
+        // set channels
+        else
+        {
+            newChannels = channels;
+        }
+
+        Core.API?.IG_SetColorChannels(newChannels);
     }
 
 

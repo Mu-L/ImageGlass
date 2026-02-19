@@ -1239,6 +1239,57 @@ public partial class AppAPIProvider
 
 
     /// <summary>
+    /// Sets the image color channels.
+    /// </summary>
+    public void IG_SetColorChannels(string? channelsStr)
+    {
+        if (!Enum.TryParse<ColorChannels>(channelsStr, out var channels))
+        {
+            throw new ArgumentException($"""
+                '{channelsStr}' is not a valid color channel.
+                
+                ----------
+                👉🏼 Method: {nameof(IG_SetColorChannels)}
+                """,
+                nameof(channelsStr));
+        }
+
+        IG_SetColorChannels(channels);
+    }
+
+
+    /// <summary>
+    /// Sets the image color channels.
+    /// </summary>
+    public void IG_SetColorChannels(ColorChannels channels)
+    {
+        if (Viewer.SourceKind == PhotoSource.None || Core.IsBusy) return;
+
+        // apply color channel filter
+        if (Viewer.FilterColorChannels(channels, false))
+        {
+            Core.ColorChannels = channels;
+
+            // apply transforms
+            if (Core.ImageTransform.HasChanges)
+            {
+                _ = Viewer.RotateImage(Core.ImageTransform.Rotation, false);
+                _ = Viewer.FlipImage(Core.ImageTransform.Flips, false);
+            }
+
+            Viewer.Refresh(resetZoom: false);
+        }
+        else
+        {
+            _ = Message.ShowAsync(
+                Core.Lang[LangId._InvalidAction],
+                Core.Lang[LangId.FrmMain_MnuViewChannels]);
+        }
+    }
+
+
+
+    /// <summary>
     /// Invert image colors.
     /// </summary>
     public void IG_InvertColors()

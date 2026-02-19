@@ -402,6 +402,66 @@ public static partial class SkiaCodec
 
 
     /// <summary>
+    /// Returns a new image with the specified color channels filtered.
+    /// Single-channel views (R, G, or B only) are shown as grayscale.
+    /// Alpha-only shows the alpha channel as grayscale with opaque output.
+    /// </summary>
+    public static SKImage? FilterImageColorChannels(SKImage? imgSrc, ColorChannels colors)
+    {
+        if (imgSrc.IsDisposed()) return null;
+
+        var redOnly = colors.HasFlag(ColorChannels.R)
+            && !colors.HasFlag(ColorChannels.G)
+            && !colors.HasFlag(ColorChannels.B);
+        var greenOnly = colors.HasFlag(ColorChannels.G)
+            && !colors.HasFlag(ColorChannels.R)
+            && !colors.HasFlag(ColorChannels.B);
+        var blueOnly = colors.HasFlag(ColorChannels.B)
+            && !colors.HasFlag(ColorChannels.G)
+            && !colors.HasFlag(ColorChannels.R);
+        var alphaOnly = colors == ColorChannels.A;
+        var keepAlpha = colors.HasFlag(ColorChannels.A) && !alphaOnly;
+
+        var red = !alphaOnly && colors.HasFlag(ColorChannels.R) ? 1f : 0f;
+        var green = !alphaOnly && colors.HasFlag(ColorChannels.G) ? 1f : 0f;
+        var blue = !alphaOnly && colors.HasFlag(ColorChannels.B) ? 1f : 0f;
+
+        // for single-channel views, spread the channel value to all RGB outputs
+        var mRed = redOnly ? 1f : 0f;
+        var mGreen = greenOnly ? 1f : 0f;
+        var mBlue = blueOnly ? 1f : 0f;
+
+        // for alpha-only, map alpha to RGB for grayscale visualization
+        var fromAlpha = alphaOnly ? 1f : 0f;
+
+        var alphaScale = keepAlpha ? 1f : 0f;
+        var alphaOffset = keepAlpha ? 0f : 1f;
+
+        #pragma warning disable format
+        float[] matrix =
+        [
+            red,    mGreen, mBlue,  fromAlpha,  0,
+            mRed,   green,  mBlue,  fromAlpha,  0,
+            mRed,   mGreen, blue,   fromAlpha,  0,
+            0,      0,      0,      alphaScale, alphaOffset,
+        ];
+        #pragma warning restore format
+
+        using var paint = new SKPaint
+        {
+            ColorFilter = SKColorFilter.CreateColorMatrix(matrix),
+        };
+
+        var info = new SKImageInfo(imgSrc.Width, imgSrc.Height, imgSrc.ColorType, imgSrc.AlphaType, imgSrc.ColorSpace);
+        using var surface = SKSurface.Create(info);
+        if (surface.IsDisposed()) return null;
+
+        surface.Canvas.DrawImage(imgSrc, 0, 0, paint);
+        return surface.Snapshot();
+    }
+
+
+    /// <summary>
     /// Returns a new image rotated by the specified degree.
     /// Handles arbitrary angles by computing the bounding box and centering.
     /// </summary>

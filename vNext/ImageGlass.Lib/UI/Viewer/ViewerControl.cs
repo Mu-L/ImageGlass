@@ -940,6 +940,49 @@ public partial class ViewerControl : PhControl
     }
 
 
+    /// <summary>
+    /// Filters image color channels.
+    /// </summary>
+    public bool FilterColorChannels(ColorChannels colors, bool requestRerender = true)
+    {
+        lock (_lock)
+        {
+            // do nothing for animated images or when there is no source
+            if (_animator is not null) return false;
+
+            // reset render cache to start from original source
+            SKImageRef.Set(ref _imgRender, null);
+            _mipmapCache?.Dispose();
+            _mipmapCache = null;
+
+            var srcImage = _imgSource?.Image;
+            if (srcImage.IsDisposed()) return false;
+
+            // skip filtering when all channels (RGBA) are selected
+            var isAllChannels = colors.HasFlag(ColorChannels.R)
+                && colors.HasFlag(ColorChannels.G)
+                && colors.HasFlag(ColorChannels.B)
+                && colors.HasFlag(ColorChannels.A);
+
+            if (!isAllChannels)
+            {
+                var filteredImage = SkiaCodec.FilterImageColorChannels(srcImage, colors);
+                if (filteredImage.IsDisposed()) return false;
+
+                SKImageRef.Set(ref _imgRender, filteredImage);
+            }
+        }
+
+        // render the transformation
+        if (requestRerender)
+        {
+            Refresh(false);
+        }
+
+        return true;
+    }
+
+
     #endregion // Control Methods
 
 
