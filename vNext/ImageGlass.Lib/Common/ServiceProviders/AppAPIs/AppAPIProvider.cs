@@ -1308,10 +1308,17 @@ public partial class AppAPIProvider
 
 
             // 3.2 get photo from base64 string 
-            var photo = await MagickCodec.DecodeBase64Async(text);
-            if (photo is not null)
+            try
             {
-                await LoadClipboardPhotoAsync(photo);
+                var photo = await MagickCodec.DecodeBase64Async(text);
+                if (photo is not null)
+                {
+                    await LoadClipboardPhotoAsync(photo);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"❌❌❌ IG_PasteImageAsync: {ex.Message}");
             }
         }
 

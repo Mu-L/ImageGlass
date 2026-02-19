@@ -74,6 +74,14 @@ public class PhMenuItem : MenuItem
     #endregion // Public properties
 
 
+    public PhMenuItem() { }
+
+
+    public PhMenuItem(object? header = null)
+    {
+        Header = header;
+    }
+
 
     #region Control Methods
 

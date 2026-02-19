@@ -533,11 +533,7 @@ public partial class ToolbarControl : PhControl
             }
 
             // update hotkey text for menu items
-            var action = AppAPIProvider.GetMenuAction(mnuItem.LangKey);
-            if (action is null || action.Hotkeys.Length == 0) continue;
-
-            var hotkeyText = String.Join(", ", action.Hotkeys);
-            mnuItem.HotkeyText = hotkeyText;
+            mnuItem.HotkeyText = AppAPIProvider.GetMenuHotkeyText(mnuItem.LangKey);
         }
     }
 

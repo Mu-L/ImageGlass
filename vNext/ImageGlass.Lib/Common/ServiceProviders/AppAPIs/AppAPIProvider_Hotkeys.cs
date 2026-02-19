@@ -367,4 +367,17 @@ public partial class AppAPIProvider
     }
 
 
+    /// <summary>
+    /// Gets the hotkey text of menu.
+    /// </summary>
+    public static string GetMenuHotkeyText(LangId? langKey)
+    {
+        var action = GetMenuAction(langKey);
+        if (action is null) return string.Empty;
+
+        var hotkeyText = String.Join(", ", action.Hotkeys);
+        return hotkeyText;
+    }
+
+
 }

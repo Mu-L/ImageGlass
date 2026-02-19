@@ -23,6 +23,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.ServiceProviders.FileSearchService;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
@@ -32,6 +33,7 @@ using ImageGlass.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -45,6 +47,8 @@ public partial class MainWindowView : PhControl
     public MainWindowView()
     {
         InitializeComponent();
+
+        PART_Viewer.ContextMenu = new();
     }
 
 
@@ -66,6 +70,7 @@ public partial class MainWindowView : PhControl
         Core.Config.PropertyChanged += Config_PropertyChanged;
         PART_Viewer.PhotoLoading += PART_Viewer_PhotoLoading;
         PART_Viewer.ZoomChanged += PART_Viewer_ZoomChanged;
+        PART_Viewer.ContextMenu?.Opened += PART_Viewer_ContextMenu_Opened;
 
 
         // load image from command line arguments
@@ -84,6 +89,7 @@ public partial class MainWindowView : PhControl
         Core.Config.PropertyChanged -= Config_PropertyChanged;
         PART_Viewer.PhotoLoading -= PART_Viewer_PhotoLoading;
         PART_Viewer.ZoomChanged -= PART_Viewer_ZoomChanged;
+        PART_Viewer.ContextMenu?.Opened -= PART_Viewer_ContextMenu_Opened;
 
     }
 
@@ -200,6 +206,237 @@ public partial class MainWindowView : PhControl
         // save number of columns
         Core.Config.GalleryColumns = panelEl.ColumnsPerRow;
     }
+
+
+    private void PART_Viewer_ContextMenu_Opened(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not ContextMenu mnuContext) return;
+        mnuContext.Items.Clear();
+
+        var hasClipboardImage = Core.ClipboardImage != null;
+        var imageNotFound = !File.Exists(Core.Photos.CurrentFilePath);
+
+
+        #region Menu group: Layout
+        // menu toolbar
+        mnuContext.Items.Add(new PhMenuItem
+        {
+            LangKey = LangId.FrmMain_MnuToggleToolbar,
+            ToggleType = MenuItemToggleType.CheckBox,
+            IsChecked = Core.Config.ShowToolbar,
+            Command = Core.API?.GetApiCommand(API.IG_ToggleToolbar),
+            HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuToggleToolbar),
+        });
+        // menu Top most
+        mnuContext.Items.Add(new PhMenuItem
+        {
+            LangKey = LangId.FrmMain_MnuToggleTopMost,
+            ToggleType = MenuItemToggleType.CheckBox,
+            IsChecked = Core.Config.EnableWindowTopMost,
+            Command = Core.API?.GetApiCommand(API.IG_ToggleWindowTopMost),
+            HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuToggleTopMost),
+        });
+        #endregion // Menu group: Layout
+
+
+        #region Menu group: Loading orders
+        if (!imageNotFound && !hasClipboardImage)
+        {
+            // TODO:
+            mnuContext.Items.Add("-");
+            var mnuLoadingOrders = new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuLoadingOrders,
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuLoadingOrders),
+            };
+            mnuContext.Items.Add(mnuLoadingOrders);
+
+
+            // use Explorer sort order
+            if (Core.ShellProvider is not null)
+            {
+                mnuLoadingOrders.Items.Add(new PhMenuItem
+                {
+                    LangKey = LangId.FrmSettings_ShouldUseExplorerSortOrder,
+                    ToggleType = MenuItemToggleType.CheckBox,
+                    IsChecked = Core.Config.ShouldUseExplorerSortOrder,
+                    //Command = 
+                    HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmSettings_ShouldUseExplorerSortOrder),
+                });
+                mnuLoadingOrders.Items.Add("-");
+            }
+
+
+            // order by
+            foreach (var orderBy in Enum.GetNames<ImageOrderBy>())
+            {
+                mnuLoadingOrders.Items.Add(new PhMenuItem
+                {
+                    LangKey = Lang.GetKey($"{nameof(ImageOrderBy)}_{orderBy}"),
+                    ToggleType = MenuItemToggleType.Radio,
+                    IsChecked = Core.Config.ImageLoadingOrder == Enum.Parse<ImageOrderBy>(orderBy),
+                });
+            }
+
+            // order type
+            mnuLoadingOrders.Items.Add("-");
+            foreach (var orderType in Enum.GetNames<ImageOrderType>())
+            {
+                mnuLoadingOrders.Items.Add(new PhMenuItem
+                {
+                    LangKey = Lang.GetKey($"{nameof(ImageOrderType)}_{orderType}"),
+                    ToggleType = MenuItemToggleType.Radio,
+                    IsChecked = Core.Config.ImageLoadingOrderType == Enum.Parse<ImageOrderType>(orderType),
+                });
+            }
+        }
+        #endregion // Menu group: Loading orders
+
+
+        #region Menu group: View channels
+        if (!imageNotFound && !hasClipboardImage)
+        {
+            // TODO:
+            var mnuLoadingOrders = new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuViewChannels,
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuViewChannels),
+            };
+            mnuContext.Items.Add(mnuLoadingOrders);
+        }
+        #endregion // Menu group: View channels
+
+
+        #region Menu group: Edit
+        if (!imageNotFound)
+        {
+            mnuContext.Items.Add("-");
+
+            // TODO:
+            //UpdateEditAppInfoForMenu();
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuEdit,
+                //Command = Core.API?.GetApiCommand(API.IG_OpenWith),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuEdit),
+            });
+        }
+        #endregion // Menu group: Edit
+
+
+        #region Menu group: Desktop wallpaper, lock screen
+        if ((!imageNotFound && !Core.Photos.IsCurrentError) || Core.ClipboardImage != null)
+        {
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuSetDesktopBackground,
+                Command = Core.API?.GetApiCommand(API.IG_SetDesktopBackground),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuSetDesktopBackground),
+            });
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuSetLockScreen,
+                Command = Core.API?.GetApiCommand(API.IG_SetLockScreenImage),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuSetLockScreen),
+            });
+        }
+        #endregion // Menu group: Desktop wallpaper, lock screen
+
+
+        #region Menu group: Clipboard
+        mnuContext.Items.Add(new PhMenuItem("-")); //------------
+
+        mnuContext.Items.Add(new PhMenuItem
+        {
+            LangKey = LangId.FrmMain_MnuPasteImage,
+            Command = Core.API?.GetApiCommand(API.IG_PasteImage),
+            HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuPasteImage),
+        });
+        mnuContext.Items.Add(new PhMenuItem
+        {
+            LangKey = LangId.FrmMain_MnuCopyImagePixels,
+            Command = Core.API?.GetApiCommand(API.IG_CopyImagePixels),
+            HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCopyImagePixels),
+        });
+        mnuContext.Items.Add(new PhMenuItem
+        {
+            LangKey = LangId.FrmMain_MnuCopyPath,
+            Command = Core.API?.GetApiCommand(API.IG_CopyImagePath),
+            HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCopyPath),
+        });
+
+        if (!imageNotFound && Core.ClipboardImage == null)
+        {
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuCopyFile,
+                Command = Core.API?.GetApiCommand(API.IG_CopyFiles),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCopyFile),
+            });
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuCutFile,
+                Command = Core.API?.GetApiCommand(API.IG_CutFiles),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCutFile),
+            });
+        }
+
+        if (!imageNotFound && Core.ClipboardImage == null)
+        {
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuClearClipboard,
+                Command = Core.API?.GetApiCommand(API.IG_ClearClipboard),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuClearClipboard),
+            });
+        }
+        #endregion // Menu group: Clipboard
+
+
+        #region Menu group: File Operation
+        if (!imageNotFound && Core.ClipboardImage == null)
+        {
+            mnuContext.Items.Add(new PhMenuItem("-")); //------------
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuRename,
+                Command = Core.API?.GetApiCommand(API.IG_Rename),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuRename),
+            });
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuMoveToRecycleBin,
+                Command = Core.API?.GetApiCommand(API.IG_Delete),
+                CommandParameter = "true",
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuMoveToRecycleBin),
+            });
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuOpenLocation,
+                Command = Core.API?.GetApiCommand(API.IG_OpenLocation),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuOpenLocation),
+            });
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuImageProperties,
+                Command = Core.API?.GetApiCommand(API.IG_OpenProperties),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuImageProperties),
+            });
+        }
+        #endregion // Menu group: File Operation
+
+
+        // menu Exit
+        mnuContext.Items.Add("-"); //------------
+        mnuContext.Items.Add(new PhMenuItem
+        {
+            LangKey = LangId.FrmMain_MnuExit,
+            Command = Core.API?.GetApiCommand(API.IG_Exit),
+            HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuExit),
+        });
+    }
+
+
 
     #endregion // Control Events
 

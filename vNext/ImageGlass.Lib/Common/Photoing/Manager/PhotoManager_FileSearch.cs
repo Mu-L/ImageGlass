@@ -56,6 +56,12 @@ public partial class PhotoManager
 
 
     /// <summary>
+    /// Gets a value indicating whether the current photo contains an error.
+    /// </summary>
+    public bool IsCurrentError => Current?.Error != null;
+
+
+    /// <summary>
     /// The initial photo,
     /// can be the photo from the initial file path or the first photo of the directory.
     /// </summary>
