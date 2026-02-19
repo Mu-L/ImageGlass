@@ -86,7 +86,7 @@ public partial class PhWindow : Window
         set => SetValue(BackdropStyleProperty, value);
     }
     public static readonly StyledProperty<BackdropStyle> BackdropStyleProperty =
-        AvaloniaProperty.Register<Window, BackdropStyle>(nameof(BackdropStyle), BackdropStyle.Mica);
+        AvaloniaProperty.Register<Window, BackdropStyle>(nameof(BackdropStyle), BackdropStyle.None);
 
 
 
