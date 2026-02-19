@@ -80,6 +80,12 @@ public partial class ViewerControl : PhControl
     public InterlockedBool ShouldLoadFullResolution = new(true);
 
 
+    /// <summary>
+    /// Checks if the photo is animating.
+    /// </summary>
+    public bool IsImageAnimating { get; protected set; } = false;
+
+
     #endregion // Public Properties
 
 
@@ -363,6 +369,7 @@ public partial class ViewerControl : PhControl
         lock (_lock)
         {
             CancelPreview();
+            StopAnimator();
             SourceKind = PhotoSource.None;
             Photo?.CancelLoading();
             Photo?.Unload();
@@ -645,7 +652,7 @@ public partial class ViewerControl : PhControl
                         _animator?.FrameChanged -= Animator_FrameChanged;
                         _animator = animator;
                         _animator.FrameChanged += Animator_FrameChanged;
-                        _animator.Play();
+                        StartAnimator();
                     }
 
 
@@ -799,6 +806,33 @@ public partial class ViewerControl : PhControl
     }
 
 
+    /// <summary>
+    /// Start animating the image if it can animate, using GDI+.
+    /// </summary>
+    public void StartAnimator()
+    {
+        if (IsImageAnimating || _animator is null || SourceKind == PhotoSource.None)
+            return;
+
+        lock (_lock)
+        {
+            _animator.Play();
+            IsImageAnimating = true;
+        }
+    }
+
+
+    /// <summary>
+    /// Stop animating the image
+    /// </summary>
+    public void StopAnimator()
+    {
+        lock (_lock)
+        {
+            _animator?.Pause();
+            IsImageAnimating = false;
+        }
+    }
 
 
     #endregion // Control Methods
