@@ -299,13 +299,31 @@ public partial class MainWindowView : PhControl
         #region Menu group: View channels
         if (!imageNotFound && !hasClipboardImage)
         {
-            // TODO:
-            var mnuLoadingOrders = new PhMenuItem
+            var mnuChannels = new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuViewChannels,
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuViewChannels),
             };
-            mnuContext.Items.Add(mnuLoadingOrders);
+            mnuContext.Items.Add(mnuChannels);
+
+            foreach (var item in PART_Toolbar.PART_MnuViewChannels.Items)
+            {
+                if (item is not PhMenuItem oriItem) continue;
+
+                var mnuItem = new PhMenuItem
+                {
+                    Header = oriItem.Header,
+                    ToggleType = oriItem.ToggleType,
+                    HotkeyText = oriItem.HotkeyText,
+                    CommandParameter = oriItem.CommandParameter,
+                };
+                if (Enum.TryParse<ColorChannels>((string)oriItem.CommandParameter!, true, out var val))
+                {
+                    mnuItem.IsChecked = Core.ColorChannels.HasFlag(val);
+                }
+                mnuItem.Click += PART_Toolbar.MainMenu_ViewChannelItem_Click;
+                mnuChannels.Items.Add(mnuItem);
+            }
         }
         #endregion // Menu group: View channels
 

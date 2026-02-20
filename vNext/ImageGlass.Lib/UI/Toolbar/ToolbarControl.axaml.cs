@@ -264,7 +264,7 @@ public partial class ToolbarControl : PhControl
     }
 
 
-    private void MainMenu_ViewChannelItem_Click(object? sender, RoutedEventArgs e)
+    public void MainMenu_ViewChannelItem_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is not PhMenuItem mnu) return;
 

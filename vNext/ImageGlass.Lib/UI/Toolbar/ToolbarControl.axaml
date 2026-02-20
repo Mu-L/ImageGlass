@@ -285,7 +285,7 @@
                                                    Click="MainMenuItem_Click" />
                                 </ui:PhMenuItem>
 
-                                <ui:PhMenuItem LangKey="FrmMain_MnuViewChannels">
+                                <ui:PhMenuItem x:Name="PART_MnuViewChannels" LangKey="FrmMain_MnuViewChannels">
                                     <ui:PhMenuItem Header="R"
                                                    ToggleType="CheckBox"
                                                    IsChecked="{CompiledBinding IsColorChannelR}"
