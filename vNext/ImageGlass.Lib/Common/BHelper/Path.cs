@@ -113,7 +113,6 @@ public partial class BHelper
     }
 
 
-
     /// <summary>
     /// Check if the given path (file or directory) is writable. 
     /// </summary>
@@ -160,7 +159,6 @@ public partial class BHelper
     }
 
 
-
     /// <summary>
     /// Checks type of the path.
     /// </summary>
@@ -183,7 +181,6 @@ public partial class BHelper
 
         return PathType.Unknown;
     }
-
 
 
     /// <summary>
@@ -246,7 +243,6 @@ public partial class BHelper
     }
 
 
-
     /// <summary>
     /// Resolves a relative/protocol/link path to absolute path.
     /// </summary>
@@ -280,6 +276,18 @@ public partial class BHelper
         }
 
         return path;
+    }
+
+
+    /// <summary>
+    /// Builds the command line from config value.
+    /// Example: <c>/EnableFullScreen=True</c>
+    /// </summary>
+    public static string BuildConfigCmdLine(string configName, object? configValue)
+    {
+        if (configValue == null) return string.Empty;
+
+        return $"{Const.CONFIG_CMD_PREFIX}{configName}=\"{configValue}\"";
     }
 
 

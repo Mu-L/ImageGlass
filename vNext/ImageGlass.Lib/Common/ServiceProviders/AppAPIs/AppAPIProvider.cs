@@ -44,7 +44,7 @@ public partial class AppAPIProvider
 {
     private MainWindow _mainWindow;
 
-    // wallapaer formats
+    // wallpaper formats
     private static FrozenSet<string> _desktopNativeFormats => [".bmp", ".jpg", ".jpeg", ".png", ".gif"];
 
     // variable to back up / restore window layout when changing window mode
@@ -167,6 +167,35 @@ public partial class AppAPIProvider
         {
             IG_ViewByIndex(imageIndex);
         }
+    }
+
+
+    /// <summary>
+    /// Open the current image in a new window.
+    /// </summary>
+    public void IG_NewWindow()
+    {
+        if (!Core.Config.EnableMultiInstances)
+        {
+            _ = ModalWindow.ShowInfoAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[LangId.FrmMain_MnuNewWindow],
+                Heading = Core.Lang[LangId.FrmMain_MnuNewWindow],
+                Description = Core.Lang[LangId.FrmMain_MnuNewWindow_Error],
+            });
+            return;
+        }
+
+        var filePath = Core.Photos.CurrentFilePath;
+
+        // get position for new window
+        var posDiff = _mainWindow.DpiScale(10f);
+        var newBounds = Core.Config.MainWindowBounds.WithX(Core.Config.MainWindowBounds.X + posDiff);
+        newBounds = newBounds.WithY(Core.Config.MainWindowBounds.Y + posDiff);
+        var boundStr = newBounds.ToStringDelimiter();
+        var boundCmd = BHelper.BuildConfigCmdLine(nameof(Config.MainWindowBounds), boundStr);
+
+        _ = BHelper.RunExeAsync(BHelper.AppExePath, $"{boundCmd} \"{filePath}\"");
     }
 
 
@@ -456,7 +485,6 @@ public partial class AppAPIProvider
         await dialog.ShowAsync(_mainWindow);
         Viewer.StartAnimator();
     }
-
 
 
     /// <summary>
@@ -1938,6 +1966,9 @@ public partial class AppAPIProvider
     }
 
 
+    /// <summary>
+    /// Adjusts the main window size and position to fit the displayed image within the available screen area.
+    /// </summary>
     public void ApplyWindowFitMode(bool resetZoomMode = true)
     {
         if (!Core.Config.EnableWindowFit || Viewer.SourceKind == PhotoSource.None) return;
@@ -1947,7 +1978,7 @@ public partial class AppAPIProvider
 
 
         // 2. get the size
-        var dpi = _mainWindow.DpiScale;
+        var dpi = _mainWindow.Dpi;
         var toolbarPos = Config.GetControlLayout(LayoutControl.Toolbar);
         var galleryPos = Config.GetControlLayout(LayoutControl.Gallery);
 
@@ -2044,13 +2075,6 @@ public partial class AppAPIProvider
         }
 
     }
-
-
-
-
-
-
-
 
 
     /// <summary>

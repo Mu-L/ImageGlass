@@ -37,7 +37,7 @@ public class JsonArrayToPixelRectConverter : JsonConverter<PixelRect>
     public override void Write(Utf8JsonWriter writer, PixelRect rect, JsonSerializerOptions options)
     {
         // convert Rect to string
-        var str = string.Join(_delimiter, rect.ToRect(1).ToArray());
+        var str = rect.ToRect(1).ToStringDelimiter();
 
         writer.WriteStringValue(str);
     }

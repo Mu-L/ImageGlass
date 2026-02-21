@@ -42,9 +42,10 @@ public partial class AppAPIProvider
 
         // Main Menu
         { API.IG_OpenFile,              PhCommands.Create(IG_OpenFileAsync) },
+        { API.IG_NewWindow,             PhCommands.Create(IG_NewWindow) },
         { API.IG_Save,                  PhCommands.Create(IG_SaveAsync) },
         { API.IG_SaveAs,                PhCommands.Create(IG_SaveAsAsync) },
-        { API.IG_ExportImageFrames,     PhCommands.Create(IG_ExportImageFrames)},
+        { API.IG_ExportImageFrames,     PhCommands.Create(IG_ExportImageFrames) },
         { API.IG_OpenWith,              PhCommands.Create(IG_OpenWithAsync) },
         { API.IG_Share,                 PhCommands.Create(IG_ShareAsync) },
         { API.IG_OpenLocation,          PhCommands.Create(IG_OpenLocation) },
@@ -91,12 +92,12 @@ public partial class AppAPIProvider
         { API.IG_ToggleUseExplorerSortOrder,    PhCommands.Create(IG_ToggleUseExplorerSortOrder) },
         { API.IG_SetLoadingOrderBy,             PhCommands.Create(IG_SetLoadingOrderBy) },
         { API.IG_SetLoadingOrderType,           PhCommands.Create(IG_SetLoadingOrderType) },
-        { API.IG_SetColorChannels,              PhCommands.Create(IG_SetColorChannels)},
-        { API.IG_OpenEditingAppAsync,           PhCommands.Create(IG_OpenEditingAppAsync)},
+        { API.IG_SetColorChannels,              PhCommands.Create(IG_SetColorChannels) },
+        { API.IG_OpenEditingAppAsync,           PhCommands.Create(IG_OpenEditingAppAsync) },
         { API.IG_InvertColors,                  PhCommands.Create(IG_InvertColors) },
         { API.IG_ToggleImageAnimation,          PhCommands.Create(IG_ToggleImageAnimation) },
-        { API.IG_Rotate,                        PhCommands.Create(IG_Rotate)},
-        { API.IG_FlipImage,                     PhCommands.Create(IG_FlipImage)},
+        { API.IG_Rotate,                        PhCommands.Create(IG_Rotate) },
+        { API.IG_FlipImage,                     PhCommands.Create(IG_FlipImage) },
         { API.IG_SetDesktopBackground,          PhCommands.Create(IG_SetDesktopBackgroundAsync) },
         { API.IG_SetLockScreenImage,            PhCommands.Create(IG_SetLockScreenImageAsync) },
 
@@ -125,11 +126,11 @@ public partial class AppAPIProvider
 
 
         // Tools
-        { API.IG_GetMoreTool,           PhCommands.Create(IG_GetMoreTool)},
+        { API.IG_GetMoreTool,           PhCommands.Create(IG_GetMoreTool) },
 
 
         // Help
-        { API.IG_ReportIssue,           PhCommands.Create(IG_ReportIssue)},
+        { API.IG_ReportIssue,           PhCommands.Create(IG_ReportIssue) },
 
 
         // Exit

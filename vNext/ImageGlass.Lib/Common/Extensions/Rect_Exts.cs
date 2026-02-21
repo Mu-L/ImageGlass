@@ -24,6 +24,7 @@ namespace ImageGlass.Common.Extensions;
 
 public static class Rect_Exts
 {
+    private static readonly string _delimiter = ";";
 
     extension(Rect rect)
     {
@@ -114,6 +115,18 @@ public static class Rect_Exts
         public double[] ToArray()
         {
             return [rect.X, rect.Y, rect.Width, rect.Height];
+        }
+
+
+        /// <summary>
+        /// Converts the rectangle to delimiter string.
+        /// Example: <c>10;20;500;400</c>.
+        /// </summary>
+        public string ToStringDelimiter()
+        {
+            var str = string.Join(_delimiter, rect.ToArray());
+
+            return str;
         }
 
 

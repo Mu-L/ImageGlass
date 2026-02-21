@@ -62,7 +62,7 @@ public partial class PhWindow : Window
     /// <summary>
     /// Gets the DPI scale of this window.
     /// </summary>
-    public double DpiScale => VisualRoot?.RenderScaling ?? 1.0;
+    public double Dpi => VisualRoot?.RenderScaling ?? 1.0;
 
 
     /// <summary>
@@ -387,7 +387,7 @@ public partial class PhWindow : Window
 
         // 4. use theme icon as logo
         // decode the logo
-        var size = (int)DpiScale * 64;
+        var size = DpiScale(64);
         var bytes = await MagickCodec.QuickDecodeAsync(iconPath, ImageMagick.MagickFormat.Ico, size, size);
         if (bytes is null) return;
 
@@ -432,6 +432,29 @@ public partial class PhWindow : Window
     }
 
     #endregion // Internal Methods
+
+
+
+    #region Public Methods
+
+    /// <summary>
+    /// Scales the given number on the DPI scaling factor.
+    /// </summary>
+    public double DpiScale(double value, double? scaleFactor = null) => (scaleFactor ?? Dpi) * value;
+
+
+    /// <summary>
+    /// Scales the given size based on the DPI scaling factor.
+    /// </summary>
+    public Size DpiScale(Size value, double? scaleFactor = null) => new Size(DpiScale(value.Width, scaleFactor), DpiScale(value.Height, scaleFactor));
+
+
+    /// <summary>
+    /// Scales the given point on the DPI scaling factor.
+    /// </summary>
+    public Point DpiScale(Point value, double? scaleFactor = null) => new Point(DpiScale(value.X, scaleFactor), DpiScale(value.Y, scaleFactor));
+
+    #endregion // Public Methods
 
 
 }

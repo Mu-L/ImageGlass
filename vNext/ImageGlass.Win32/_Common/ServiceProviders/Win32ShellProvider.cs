@@ -212,7 +212,7 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
     {
         #region Windows 11
         if (Environment.OSVersion.Version.Major == 10
-            && Environment.OSVersion.Version.Build < 22000)
+            && Environment.OSVersion.Version.Build >= 22000)
         {
             var mspaint11 = @"%LocalAppData%\Microsoft\WindowsApps\mspaint.exe";
             var mspaint11Path = BHelper.ResolvePath(mspaint11);

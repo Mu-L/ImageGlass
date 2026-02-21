@@ -37,7 +37,7 @@ public class JsonArrayToRectConverter : JsonConverter<Rect>
     public override void Write(Utf8JsonWriter writer, Rect rect, JsonSerializerOptions options)
     {
         // convert Rect to string
-        var str = string.Join(_delimiter, rect.ToArray());
+        var str = rect.ToStringDelimiter();
 
         writer.WriteStringValue(str);
     }
