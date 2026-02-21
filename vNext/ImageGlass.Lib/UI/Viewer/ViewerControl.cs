@@ -126,10 +126,32 @@ public partial class ViewerControl : PhControl
     {
         lock (_lock)
         {
+            // skip animated images
+            if (_animator is not null) return;
+
             // dispose tile cache (will be rebuilt after next first draw)
             _mipmapCache?.Dispose();
             _mipmapCache = null;
 
+            SKImageRef.ImageLease? srcLease = null;
+
+            try
+            {
+                srcLease = _imgSource?.Acquire();
+                var srcImage = srcLease?.Image;
+
+                // apply new color space for source image
+                if (SkiaCodec.TryApplyColorSpace(srcImage, Core.DestColorProfile, out var imgFrameColored))
+                {
+                    SKImageRef.Set(ref _imgSource, imgFrameColored);
+                }
+            }
+            finally
+            {
+                srcLease?.Dispose();
+            }
+
+            // clear the render image
             SKImageRef.Set(ref _imgRender, null);
             InvalidateVisual();
         }
@@ -580,7 +602,7 @@ public partial class ViewerControl : PhControl
         if (!ShouldLoadFullResolution.Value) return;
 
 
-        // back up size of preview image
+        // 1. back up size of preview image
         var prevSize = BitmapSize;
 
         // source
@@ -590,7 +612,7 @@ public partial class ViewerControl : PhControl
 
         try
         {
-            // check if photo error
+            // 2. check if photo error
             if (e.Photo.Error is not null)
             {
                 HandleCancelLoaded(false);
@@ -606,7 +628,7 @@ public partial class ViewerControl : PhControl
             }
 
 
-            // create the native bitmap
+            // 3. create the native bitmap
             if (e.Photo.Bitmap is not null)
             {
                 // update bitmap size
@@ -623,7 +645,15 @@ public partial class ViewerControl : PhControl
                 // native bitmap is a single-frame bitmap
                 else
                 {
-                    imgFrame = e.Photo.GetFrame();
+                    imgFrame = e.Photo.GetFrame(0);
+
+                    // apply color space
+                    if (SkiaCodec.TryApplyColorSpace(imgFrame, Core.DestColorProfile, out var imgFrameColored))
+                    {
+                        imgFrame?.Dispose();
+                        imgFrame = imgFrameColored;
+                    }
+
                     hasSource = imgFrame != null;
                 }
             }
@@ -637,7 +667,7 @@ public partial class ViewerControl : PhControl
             }
 
 
-            // cancel the preview process
+            // 4. cancel the preview process
             CancelPreview();
 
 
@@ -646,15 +676,15 @@ public partial class ViewerControl : PhControl
                 // update bitmap size after the preview is cancelled
                 BitmapSize = e.Photo.Size;
 
-                // calculate the source viewport to match with the preview
+                // 5. calculate the source viewport to match with the preview
                 if (hasSource)
                 {
-                    // set the source
+                    // 5.1 set non-animated source
                     _isFirstDraw.Set();
                     SKImageRef.Set(ref _imgSource, imgFrame);
 
 
-                    // set animator
+                    // 5.2 set animator
                     if (animator is not null)
                     {
                         _animator?.FrameChanged -= Animator_FrameChanged;
@@ -664,7 +694,7 @@ public partial class ViewerControl : PhControl
                     }
 
 
-                    // if user zoomed and panned the preview
+                    // 5.3 if user zoomed and panned the preview
                     if (_isPreviewing.Value
                         && _zooming.IsManual
                         && ZoomMode != ZoomMode.LockZoom)
@@ -947,7 +977,7 @@ public partial class ViewerControl : PhControl
     {
         lock (_lock)
         {
-            // do nothing for animated images or when there is no source
+            // 1. do nothing for animated images or when there is no source
             if (_animator is not null) return false;
 
             // reset render cache to start from original source
@@ -973,7 +1003,8 @@ public partial class ViewerControl : PhControl
             }
         }
 
-        // render the transformation
+
+        // 4. render the transformation
         if (requestRerender)
         {
             Refresh(false);
