@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -47,13 +46,9 @@ public partial class MainWindow : PhWindow
 
 
         // load window size & position
-        var initClientSize = ClientSize;
-        var initFrameSize = FrameSize ?? ClientSize;
-        var sizeDiff = initFrameSize - initClientSize;
-        var winBounds = Core.Config.MainWindowBounds.ToRect(DpiScale);
-
-        ClientSize = winBounds.Size - sizeDiff;
-        Position = new PixelPoint((int)Core.Config.MainWindowBounds.X, (int)Core.Config.MainWindowBounds.Y);
+        Width = Core.Config.MainWindowBounds.Width;
+        Height = Core.Config.MainWindowBounds.Height;
+        Position = new((int)Core.Config.MainWindowBounds.X, (int)Core.Config.MainWindowBounds.Y);
 
         if (!Core.Config.EnableWindowFit)
         {
@@ -227,16 +222,17 @@ public partial class MainWindow : PhWindow
 
     private async Task SaveConfigOnClosingAsync()
     {
-        // save window maximized state
+        // 1. save window maximized state
         Core.Config.IsMainWindowMaximized = WindowState == Avalonia.Controls.WindowState.Maximized;
         Core.Config.EnableFullScreen = WindowState == WindowState.FullScreen;
 
-        // save window bounds
+        // 2. save window bounds
         if (WindowState == Avalonia.Controls.WindowState.Normal)
         {
-            var size = FrameSize ?? ClientSize;
-            Core.Config.MainWindowBounds = new(Position,
-                new PixelSize((int)(size.Width * DpiScale), (int)(size.Height * DpiScale)));
+            var size = ClientSize;
+            Core.Config.MainWindowBounds = new(Position.X, Position.Y,
+                (int)size.Width,
+                (int)size.Height);
         }
 
 
