@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
@@ -48,6 +49,9 @@ public partial class ViewerControl
         Gestures.AddScrollGestureHandler(this, OnTouchPanning);  // panning
         Gestures.AddScrollGestureEndedHandler(this, OnTouchPanningEnd);
 
+        // suppress context menu during multi-touch gestures
+        AddHandler(ContextRequestedEvent, OnContextRequestedForTouch, RoutingStrategies.Tunnel);
+
         // touchpad gestures
         Gestures.AddPointerTouchPadGestureMagnifyHandler(this, OnTouchPadPinched); // pinch
     }
@@ -62,6 +66,7 @@ public partial class ViewerControl
         _pinchGesture.Pinch -= OnTouchPinched; // pinch
         Gestures.RemoveScrollGestureHandler(this, OnTouchPanning); // panning
         Gestures.RemoveScrollGestureEndedHandler(this, OnTouchPanningEnd);
+        RemoveHandler(ContextRequestedEvent, OnContextRequestedForTouch);
 
         // touchpad gestures
         Gestures.RemovePointerTouchPadGestureMagnifyHandler(this, OnTouchPadPinched); // pinch
@@ -125,6 +130,17 @@ public partial class ViewerControl
         e.Handled = true;
     }
 
+
+    /// <summary>
+    /// Suppresses context menu when a multi-touch gesture (pinch, 2-finger tap) is active or was recently active.
+    /// </summary>
+    private void OnContextRequestedForTouch(object? sender, ContextRequestedEventArgs e)
+    {
+        if (_pinchGesture.IsPinchingOrRecentlyPinched)
+        {
+            e.Handled = true;
+        }
+    }
 
 
     /// <summary>

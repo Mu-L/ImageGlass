@@ -36,6 +36,15 @@ public class PhPinchGestureRecognizer : GestureRecognizer
     private Point _previousCenter;
     private double _previousAngle;
     private double _previousScale = 1.0;
+    private long _lastPinchStartTicks;
+
+
+    /// <summary>
+    /// Checks if a pinch gesture is active or was active recently.
+    /// </summary>
+    public bool IsPinchingOrRecentlyPinched =>
+        (_firstContact != null && _secondContact != null) ||
+        Environment.TickCount64 - _lastPinchStartTicks < 300;
 
 
     // events
@@ -76,6 +85,8 @@ public class PhPinchGestureRecognizer : GestureRecognizer
             _origin = new Point((_firstPoint.X + _secondPoint.X) / 2.0, (_firstPoint.Y + _secondPoint.Y) / 2.0);
             _previousCenter = _origin;
             _previousAngle = GetAngleDegreeFromPoints(_firstPoint, _secondPoint);
+
+            _lastPinchStartTicks = Environment.TickCount64;
 
             Capture(_firstContact);
             Capture(_secondContact);
