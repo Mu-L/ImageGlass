@@ -92,6 +92,7 @@ public partial class AppAPIProvider
         { API.IG_SetLoadingOrderBy,             PhCommands.Create(IG_SetLoadingOrderBy) },
         { API.IG_SetLoadingOrderType,           PhCommands.Create(IG_SetLoadingOrderType) },
         { API.IG_SetColorChannels,              PhCommands.Create(IG_SetColorChannels)},
+        { API.IG_OpenEditingAppAsync,           PhCommands.Create(IG_OpenEditingAppAsync)},
         { API.IG_InvertColors,                  PhCommands.Create(IG_InvertColors) },
         { API.IG_ToggleImageAnimation,          PhCommands.Create(IG_ToggleImageAnimation) },
         { API.IG_Rotate,                        PhCommands.Create(IG_Rotate)},

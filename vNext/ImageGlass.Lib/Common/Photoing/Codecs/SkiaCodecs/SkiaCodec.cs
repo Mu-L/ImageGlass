@@ -72,7 +72,7 @@ public static partial class SkiaCodec
             {
                 // get animation frames
                 var skiaFramesInfo = SkiaCodec.GetFramesMetadata(meta.FilePath);
-                meta.CanAnimate = skiaFramesInfo != null;
+                meta.CanAnimate = skiaFramesInfo?.Count > 0;
 
                 // get frame metadata
                 meta.Frames = skiaFramesInfo?.Select(aniInfo => new FrameMetadata

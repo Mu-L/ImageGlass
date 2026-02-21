@@ -252,6 +252,21 @@ public partial class ToolbarControl : PhControl
     private void PART_BtnMainMenu_DropdownOpened(ContextMenu sender, RoutedEventArgs e)
     {
         UpdateMenuTextIfNeeded();
+
+        // update editing app name
+        EditingApp.UpdateAppNameForMenuEdit(PART_MnuEdit);
+
+        // update menu state
+        var isAnimator = Core.Photos.Current?.Bitmap is AnimatorImpl;
+        PART_MnuToggleImageAnimation.IsEnabled = isAnimator;
+        PART_MnuViewChannels.IsEnabled
+            = PART_MnuInvertColors.IsEnabled
+            = PART_MnuRotateLeft.IsEnabled
+            = PART_MnuRotateRight.IsEnabled
+            = PART_MnuFlipHorizontal.IsEnabled
+            = PART_MnuFlipVertical.IsEnabled
+            = PART_MnuResizeTool.IsEnabled
+            = !isAnimator;
     }
 
 

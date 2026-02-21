@@ -18,10 +18,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using D2Phap;
 using ImageGlass.Common;
+using ImageGlass.Common.Localization;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
+using ImageGlass.UI.Windowing;
 using Microsoft.VisualBasic.FileIO;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -201,6 +204,101 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
         await LockScreen.SetImageFileAsync(sFile);
     }
 
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public async Task OpenDefaultEditingAppAsync(string filePath, Action? callbackFn = null)
+    {
+        #region Windows 11
+        if (Environment.OSVersion.Version.Major == 10
+            && Environment.OSVersion.Version.Build < 22000)
+        {
+            var mspaint11 = @"%LocalAppData%\Microsoft\WindowsApps\mspaint.exe";
+            var mspaint11Path = BHelper.ResolvePath(mspaint11);
+
+            if (!File.Exists(mspaint11Path))
+            {
+                _ = await ModalWindow.ShowInfoAsync(null, new ModalWindowOptions
+                {
+                    Title = Core.Lang[LangId.FrmMain_MnuEdit],
+                    Heading = Core.Lang[LangId.FrmMain_MnuEdit_AppNotFound],
+                    Description = filePath,
+                });
+                return;
+            }
+
+            using var p11 = new Process();
+            p11.StartInfo.FileName = mspaint11Path;
+            p11.StartInfo.Arguments = $"\"{filePath}\"";
+            p11.StartInfo.UseShellExecute = true;
+
+            try
+            {
+                p11.Start();
+                callbackFn?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                _ = await ModalWindow.ShowErrorAsync(null, new ModalWindowOptions
+                {
+                    Title = string.Format(Core.Lang[LangId.FrmMain_MnuEdit], "(Microsoft Paint)"),
+                    Description = ex.Message + $"\r\n\r\n{filePath}",
+                });
+            }
+
+            return;
+        }
+        #endregion // Windows 11
+
+
+        #region Windows 10 or earlier
+        var win32ErrorMsg = string.Empty;
+
+        using var p10 = new Process();
+        p10.StartInfo.FileName = $"\"{filePath}\"";
+        p10.StartInfo.Verb = "edit";
+
+        // first try: launch the associated app for editing
+        try
+        {
+            p10.Start();
+            callbackFn?.Invoke();
+        }
+        catch (Win32Exception ex)
+        {
+            // file does not have associated app
+            win32ErrorMsg = ex.Message;
+        }
+        catch { }
+
+        if (string.IsNullOrEmpty(win32ErrorMsg)) return;
+
+
+        // second try: use MS Paint to edit the file
+        using var p = new Process();
+        p.StartInfo.FileName = BHelper.ResolvePath("mspaint.exe");
+        p.StartInfo.Arguments = $"\"{filePath}\"";
+        p.StartInfo.UseShellExecute = true;
+
+
+        try
+        {
+            p.Start();
+            callbackFn?.Invoke();
+        }
+        catch (Win32Exception)
+        {
+            // show error: file does not have associated app
+            _ = await ModalWindow.ShowErrorAsync(null, new ModalWindowOptions
+            {
+                Title = string.Format(Core.Lang[LangId.FrmMain_MnuEdit]),
+                Description = win32ErrorMsg + $"\r\n\r\n{filePath}",
+            });
+        }
+        catch { }
+        #endregion // Windows 10 or earlier
+    }
 
     #endregion // Public Methods
 

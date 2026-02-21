@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+using ImageGlass.UI;
 using System;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -69,8 +70,10 @@ public class EditingApp
     /// Gets an editing app from the given extension.
     /// </summary>
     /// <param name="ext">An extension. E.g. <c>.jpg</c></param>
-    public static EditingApp? GetFromExtension(string ext)
+    public static EditingApp? GetFromExtension(string? ext)
     {
+        if (string.IsNullOrWhiteSpace(ext)) return null;
+
         var appItem = Core.Config.EditApps.FirstOrDefault(i =>
         {
             var exts = i.Key.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
@@ -78,6 +81,29 @@ public class EditingApp
         });
 
         return appItem.Value;
+    }
+
+
+    /// <summary>
+    /// Updates the app name of menu edit.
+    /// </summary>
+    public static void UpdateAppNameForMenuEdit(PhMenuItem mnuEdit)
+    {
+        var appName = string.Empty;
+        if (Core.ClipboardImage is null)
+        {
+            var ext = Core.Photos.Current?.Extension;
+            if (GetFromExtension(ext) is EditingApp app)
+            {
+                appName = $"({app.AppName})";
+            }
+            else if (BHelper.OS == OSType.Windows)
+            {
+                appName = "(Microsoft Paint)";
+            }
+        }
+
+        mnuEdit.LangParams = appName;
     }
 
 }

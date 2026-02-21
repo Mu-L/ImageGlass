@@ -325,19 +325,19 @@
                                                    CommandParameter="A" />
                                 </ui:PhMenuItem>
                                 <ui:PhMenuItem Header="-" />
-                                <ui:PhMenuItem LangKey="FrmMain_MnuEdit"
+                                <ui:PhMenuItem x:Name="PART_MnuEdit" LangKey="FrmMain_MnuEdit"
                                                Click="MainMenuItem_Click" />
-                                <ui:PhMenuItem LangKey="FrmMain_MnuInvertColors"
+                                <ui:PhMenuItem x:Name="PART_MnuToggleImageAnimation" LangKey="FrmMain_MnuToggleImageAnimation"
                                                Click="MainMenuItem_Click" />
-                                <ui:PhMenuItem LangKey="FrmMain_MnuToggleImageAnimation"
+                                <ui:PhMenuItem x:Name="PART_MnuInvertColors" LangKey="FrmMain_MnuInvertColors"
                                                Click="MainMenuItem_Click" />
-                                <ui:PhMenuItem LangKey="FrmMain_MnuRotateLeft"
+                                <ui:PhMenuItem x:Name="PART_MnuRotateLeft" LangKey="FrmMain_MnuRotateLeft"
                                                Click="MainMenuItem_Click" />
-                                <ui:PhMenuItem LangKey="FrmMain_MnuRotateRight"
+                                <ui:PhMenuItem x:Name="PART_MnuRotateRight" LangKey="FrmMain_MnuRotateRight"
                                                Click="MainMenuItem_Click" />
-                                <ui:PhMenuItem LangKey="FrmMain_MnuFlipHorizontal"
+                                <ui:PhMenuItem x:Name="PART_MnuFlipHorizontal" LangKey="FrmMain_MnuFlipHorizontal"
                                                Click="MainMenuItem_Click" />
-                                <ui:PhMenuItem LangKey="FrmMain_MnuFlipVertical"
+                                <ui:PhMenuItem x:Name="PART_MnuFlipVertical" LangKey="FrmMain_MnuFlipVertical"
                                                Click="MainMenuItem_Click" />
                                 <ui:PhMenuItem Header="-" />
 
@@ -421,7 +421,7 @@
                                                Click="MainMenuItem_Click" />
                                 <ui:PhMenuItem LangKey="FrmMain_MnuFrameNav"
                                                Click="MainMenuItem_Click" />
-                                <ui:PhMenuItem LangKey="FrmMain_MnuResizeTool"
+                                <ui:PhMenuItem x:Name="PART_MnuResizeTool" LangKey="FrmMain_MnuResizeTool"
                                                Click="MainMenuItem_Click" />
                                 <ui:PhMenuItem LangKey="FrmMain_MnuLosslessCompression"
                                                Click="MainMenuItem_Click" />

@@ -281,7 +281,7 @@ public static partial class MagickCodec
             {
                 // get animation frames
                 var skiaFramesInfo = SkiaCodec.GetFramesMetadata(meta.FilePath);
-                meta.CanAnimate = skiaFramesInfo != null;
+                meta.CanAnimate = skiaFramesInfo?.Count > 0;
                 meta.AnimationLoop = imgC[0].AnimationIterations;
 
                 // get frame metadata

@@ -82,4 +82,9 @@ public interface IShellProvider : IDisposable
     /// </summary>
     Task SetLockScreenAsync(string filePath);
 
+
+    /// <summary>
+    /// Opens the specified file in the system's default editing application.
+    /// </summary>
+    Task OpenDefaultEditingAppAsync(string filePath, Action? callbackFn = null);
 }

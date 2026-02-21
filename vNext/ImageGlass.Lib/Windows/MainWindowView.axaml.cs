@@ -332,14 +332,15 @@ public partial class MainWindowView : PhControl
         if (!imageNotFound) mnuContext.Items.Add("-");
         if (!imageNotFound || hasClipboardImage)
         {
-            // TODO:
-            //UpdateEditAppInfoForMenu();
-            mnuContext.Items.Add(new PhMenuItem
+            var mnuEdit = new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuEdit,
-                //Command = Core.API?.GetApiCommand(API.IG_OpenWith),
+                Command = Core.API?.GetApiCommand(API.IG_OpenEditingAppAsync),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuEdit),
-            });
+            };
+
+            EditingApp.UpdateAppNameForMenuEdit(mnuEdit);
+            mnuContext.Items.Add(mnuEdit);
         }
         #endregion // Menu group: Edit
 
@@ -451,7 +452,6 @@ public partial class MainWindowView : PhControl
             HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuExit),
         });
     }
-
 
 
     #endregion // Control Events

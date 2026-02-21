@@ -1327,6 +1327,77 @@ public partial class AppAPIProvider
     }
 
 
+    /// <summary>
+    /// Open app for edit action.
+    /// </summary>
+    public async Task IG_OpenEditingAppAsync()
+    {
+        // get file path to edit
+        string? filePath;
+        if (Core.ClipboardImage != null)
+        {
+            _ = Message.ShowAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
+            filePath = await Core.SavePhotoAsTempFileAsync();
+        }
+        else
+        {
+            filePath = Core.Photos.CurrentFilePath;
+        }
+        await Message.ClearAsync();
+
+
+        if (!File.Exists(filePath))
+        {
+            _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[LangId.FrmMain_MnuOpenWith],
+                Description = Core.Lang[LangId._CreatingFileError],
+            });
+            return;
+        }
+
+
+        // get extension
+        var ext = Path.GetExtension(filePath).ToLowerInvariant();
+
+
+        // get app from the extension
+        if (EditingApp.GetFromExtension(ext) is EditingApp app)
+        {
+            try
+            {
+                var args = BHelper.BuildExeArgs(app.Executable, app.Argument, filePath);
+
+                var result = await BHelper.RunExeCmd(args.Executable, args.Args, false, false, true);
+                if (result == IgExitCode.Done)
+                {
+                    RunActionAfterEditing__();
+                }
+            }
+            catch { }
+        }
+        else // edit by default associated app
+        {
+            Core.ShellProvider?.OpenDefaultEditingAppAsync(filePath, RunActionAfterEditing__);
+        }
+    }
+
+
+    /// <summary>
+    /// Runs the <see cref="Config.AfterEditingAction"/> action after done editing.
+    /// </summary>
+    private void RunActionAfterEditing__()
+    {
+        if (Core.Config.AfterEditingAction == AfterEditAppAction.Minimize)
+        {
+            _mainWindow.WindowState = WindowState.Minimized;
+        }
+        else if (Core.Config.AfterEditingAction == AfterEditAppAction.Close)
+        {
+            IG_Exit();
+        }
+    }
+
 
     /// <summary>
     /// Invert image colors.

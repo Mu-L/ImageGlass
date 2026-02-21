@@ -690,10 +690,14 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ImageInterpolationScaleUp, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets value indicates what happens after clicking Edit menu
-    ///// </summary>
-    //public AfterEditAppAction AfterEditingAction { get; set; } = AfterEditAppAction.Nothing;
+    /// <summary>
+    /// Gets, sets value indicates what happens after clicking Edit menu.
+    /// </summary>
+    public AfterEditAppAction AfterEditingAction
+    {
+        get => Get(ConfigId.AfterEditingAction, AfterEditAppAction.Nothing);
+        set => Set(ConfigId.AfterEditingAction, value);
+    }
 
     /// <summary>
     /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.

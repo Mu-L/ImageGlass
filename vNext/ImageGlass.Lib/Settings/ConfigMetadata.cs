@@ -130,7 +130,7 @@ public enum ConfigId
     ZoomMode,
     ImageInterpolationScaleDown,
     ImageInterpolationScaleUp,
-    // AfterEditingAction,
+    AfterEditingAction,
     WindowBackdrop,
 
     #endregion // Enum settings
