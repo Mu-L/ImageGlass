@@ -34,6 +34,7 @@ public enum API
     IG_SaveAs,
     IG_ExportImageFrames,
     IG_OpenWith,
+    IG_PrintAsync,
     IG_Share,
     IG_OpenLocation,
     IG_Rename,

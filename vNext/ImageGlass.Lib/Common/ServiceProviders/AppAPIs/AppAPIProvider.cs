@@ -564,6 +564,47 @@ public partial class AppAPIProvider
 
 
     /// <summary>
+    /// Opens Print dialog to print the current photo.
+    /// </summary>
+    public async Task IG_PrintAsync()
+    {
+        if (Core.PrintProvider is null) return;
+
+        var fileToPrint = Core.Photos.CurrentFilePath;
+        _ = Message.ShowAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
+
+
+        if (string.IsNullOrEmpty(fileToPrint))
+        {
+            _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[LangId.FrmMain_MnuOpenWith],
+                Description = Core.Lang[LangId._CreatingFileError],
+            });
+        }
+        else
+        {
+            try
+            {
+                await Core.PrintProvider.OpenPrintAsync(fileToPrint,
+                    Core.Photos.CurrentMetadata, Core.ClipboardImage != null);
+            }
+            catch (Exception ex)
+            {
+                _ = await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+                {
+                    Title = Core.Lang[LangId.FrmMain_MnuPrint],
+                    Heading = Core.Lang[LangId.FrmMain_MnuPrint_Error],
+                    Description = ex.Message,
+                });
+            }
+        }
+
+        _ = Message.ClearAsync();
+    }
+
+
+    /// <summary>
     /// Shows Share dialog.
     /// </summary>
     public async Task IG_ShareAsync()
