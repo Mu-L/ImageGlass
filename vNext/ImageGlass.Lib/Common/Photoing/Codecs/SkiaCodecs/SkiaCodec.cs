@@ -433,17 +433,20 @@ public static partial class SkiaCodec
 
         // for alpha-only, map alpha to RGB for grayscale visualization
         var fromAlpha = alphaOnly ? 1f : 0f;
+        var alphaScale = alphaOnly ? 0f : 1f;
+        var alphaOffset = alphaOnly ? 1f : 0f;
 
-        var alphaScale = keepAlpha ? 1f : 0f;
-        var alphaOffset = keepAlpha ? 0f : 1f;
+        // when alpha channel is not selected and not alpha-only,
+        // blend with black background instead of forcing opaque
+        var blendWithBlack = !keepAlpha && !alphaOnly;
 
         #pragma warning disable format
         float[] matrix =
         [
-            red,    mGreen, mBlue,  fromAlpha,  0,
-            mRed,   green,  mBlue,  fromAlpha,  0,
-            mRed,   mGreen, blue,   fromAlpha,  0,
-            0,      0,      0,      alphaScale, alphaOffset,
+            red,    mGreen, mBlue,  fromAlpha,      0,
+            mRed,   green,  mBlue,  fromAlpha,      0,
+            mRed,   mGreen, blue,   fromAlpha,      0,
+            0,      0,      0,      alphaScale,     alphaOffset,
         ];
         #pragma warning restore format
 
@@ -455,6 +458,12 @@ public static partial class SkiaCodec
         var info = new SKImageInfo(imgSrc.Width, imgSrc.Height, imgSrc.ColorType, imgSrc.AlphaType, imgSrc.ColorSpace);
         using var surface = SKSurface.Create(info);
         if (surface.IsDisposed()) return null;
+
+        // blend transparent pixels with black background
+        if (blendWithBlack)
+        {
+            surface.Canvas.Clear(SKColors.Black);
+        }
 
         surface.Canvas.DrawImage(imgSrc, 0, 0, paint);
         return surface.Snapshot();
