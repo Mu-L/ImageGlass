@@ -103,10 +103,12 @@ public enum API
     IG_ToggleWindowTopMost,
 
     // Menu > Tools
+    IG_GetMoreTool,
 
     // Menu > Settings
 
     // Menu > Help
+    IG_ReportIssue,
 
     // Menu > Exit
     IG_Exit,

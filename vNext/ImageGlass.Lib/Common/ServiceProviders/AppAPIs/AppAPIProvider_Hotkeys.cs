@@ -139,6 +139,15 @@ public partial class AppAPIProvider
         new(LangId.FrmMain_MnuToggleTopMost,        API.IG_ToggleWindowTopMost),
 
 
+        // Tools
+        new(LangId.FrmMain_MnuGetMoreTools,     API.IG_GetMoreTool),
+
+
+        // Help
+        new(LangId.FrmMain_MnuReportIssue,      API.IG_ReportIssue),
+
+
+        // Exit
         new(LangId.FrmMain_MnuExit,             API.IG_Exit,                [new(Key.Escape), new(MKeys.Control, Key.W)]),
     ];
 

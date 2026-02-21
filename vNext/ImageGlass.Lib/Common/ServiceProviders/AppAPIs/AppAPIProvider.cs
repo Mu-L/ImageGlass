@@ -2363,5 +2363,32 @@ public partial class AppAPIProvider
 
 
 
+    #region Tools APIs
+
+    /// <summary>
+    /// Opens website to download more tools.
+    /// </summary>
+    public void IG_GetMoreTool()
+    {
+        _ = BHelper.OpenUrlAsync(_mainWindow, "https://imageglass.org/tools", "from_get_more_tools");
+    }
+
+    #endregion // Tools APIs
+
+
+
+    #region Help APIs
+
+    /// <summary>
+    /// Opens website to report issue.
+    /// </summary>
+    public void IG_ReportIssue()
+    {
+        _ = BHelper.OpenUrlAsync(_mainWindow,
+            "https://github.com/d2phap/ImageGlass/issues?q=is%3Aissue+",
+            "from_report_issue");
+    }
+
+    #endregion // Help APIs
 
 }

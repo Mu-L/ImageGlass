@@ -124,6 +124,14 @@ public partial class AppAPIProvider
         { API.IG_ToggleWindowTopMost,   PhCommands.Create(IG_ToggleWindowTopMost) },
 
 
+        // Tools
+        { API.IG_GetMoreTool,           PhCommands.Create(IG_GetMoreTool)},
+
+
+        // Help
+        { API.IG_ReportIssue,           PhCommands.Create(IG_ReportIssue)},
+
+
         // Exit
         { API.IG_Exit,                  PhCommands.Create(IG_Exit) },
 
