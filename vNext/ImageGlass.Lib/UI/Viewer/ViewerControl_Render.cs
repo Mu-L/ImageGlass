@@ -333,8 +333,17 @@ public partial class ViewerControl
             // cache the proccessed image for next draw
             SKImageRef.Set(ref _imgRender, img, _imgSource);
 
+            // apply color channel filter
+            if (_loadingOptions.Channels != ColorChannels.RGBA)
+            {
+                _ = FilterColorChannels(_loadingOptions.Channels, false);
+            }
+
             // build mipmap tile cache for non-animated photos
             CreateMipmapTileCache();
+
+            // draw again
+            InvalidateVisual();
         }
     }
 

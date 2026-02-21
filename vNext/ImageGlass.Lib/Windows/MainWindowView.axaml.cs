@@ -606,7 +606,11 @@ public partial class MainWindowView : PhControl
                 PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex);
             }
 
-            await PART_Viewer.SetPhotoAsync(photo, useCache);
+            await PART_Viewer.SetPhotoAsync(photo, new PhotoLoadingOptions
+            {
+                UseCache = useCache,
+                Channels = Core.ColorChannels,
+            });
         });
     }
 

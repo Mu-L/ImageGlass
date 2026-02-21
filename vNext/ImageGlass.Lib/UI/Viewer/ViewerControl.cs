@@ -39,6 +39,7 @@ public partial class ViewerControl : PhControl
     private CancellationTokenSource? _cancelPreview;
     internal InterlockedBool _isPreviewing = new(false);
     internal InterlockedBool _isFirstDraw = new(false);
+    internal PhotoLoadingOptions _loadingOptions = new();
 
     private Point? _lastMousePanPoint = null; // mouse panning
 
@@ -406,6 +407,7 @@ public partial class ViewerControl : PhControl
             // reset
             AnimationSource = AnimationSources.None;
             IsColorInverted = false;
+            _loadingOptions = new();
             _enablePanningVelocity = false;
             SetSourceSelection(new Rect(), false);
             BitmapSize = new();
@@ -419,7 +421,7 @@ public partial class ViewerControl : PhControl
     /// <summary>
     /// Sets a photo to render.
     /// </summary>
-    public async Task SetPhotoAsync(Photo? inputPhoto, bool useCache)
+    public async Task SetPhotoAsync(Photo? inputPhoto, PhotoLoadingOptions? options = null)
     {
         // unload current photo resources
         UnloadPhoto();
@@ -433,19 +435,20 @@ public partial class ViewerControl : PhControl
 
 
         SourceKind = PhotoSource.Native;
+        _loadingOptions = options ?? new();
         _enablePanningVelocity = true;
         Photo = inputPhoto;
 
 
         // photo is loaded
-        if (useCache && inputPhoto.State == PhotoLoadingState.Loaded)
+        if (_loadingOptions.UseCache && inputPhoto.State == PhotoLoadingState.Loaded)
         {
             var token = inputPhoto.CancelToken ?? default;
             await HandlePhotoLoadedAsync(new(PhotoLoadingState.Loaded, inputPhoto, token));
         }
         else
         {
-            await LoadPhotoAsync(useCache, false);
+            await LoadPhotoAsync(_loadingOptions.UseCache, false);
         }
     }
 
@@ -457,7 +460,7 @@ public partial class ViewerControl : PhControl
     {
         if (Photo is null) return;
 
-        await Photo.LoadAsync(useCache, null, OnPhotoLoadingProgressAsync, skipLoadingEvent);
+        await Photo.LoadAsync(useCache, OnPhotoLoadingProgressAsync, skipLoadingEvent);
     }
 
 
@@ -980,21 +983,18 @@ public partial class ViewerControl : PhControl
             // 1. do nothing for animated images or when there is no source
             if (_animator is not null) return false;
 
-            // reset render cache to start from original source
+            var srcImage = _imgSource?.Image;
+            if (srcImage.IsDisposed()) return false;
+
+
+            // 2. reset render cache to start from original source
             SKImageRef.Set(ref _imgRender, null);
             _mipmapCache?.Dispose();
             _mipmapCache = null;
 
-            var srcImage = _imgSource?.Image;
-            if (srcImage.IsDisposed()) return false;
 
-            // skip filtering when all channels (RGBA) are selected
-            var isAllChannels = colors.HasFlag(ColorChannels.R)
-                && colors.HasFlag(ColorChannels.G)
-                && colors.HasFlag(ColorChannels.B)
-                && colors.HasFlag(ColorChannels.A);
-
-            if (!isAllChannels)
+            // 3. skip filtering when all channels (RGBA) are selected
+            if (!colors.HasFlag(ColorChannels.RGBA))
             {
                 var filteredImage = SkiaCodec.FilterImageColorChannels(srcImage, colors);
                 if (filteredImage.IsDisposed()) return false;
