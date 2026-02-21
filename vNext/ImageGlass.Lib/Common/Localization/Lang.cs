@@ -322,6 +322,7 @@ public class Lang
         new(LangId._Icon, "Icon"),
         new(LangId._Description, "Description"),
         new(LangId._GetHelp, "Get help"),
+        new(LangId._Start, "Start"),
 
         new(LangId._UnhandledException, "Unhandled exception"), // v9.0
         new(LangId._UnhandledException_Description, "Unhandled exception has occurred. If you click Continue, the application will ignore this error and attempt to continue. If you click Quit, the application will close immediately."), // v9.0
@@ -1015,7 +1016,6 @@ public class Lang
 
         #region FrmExportFrames
         new(LangId.FrmExportFrames_Title, "Export image frames" ), //v9.0
-        new(LangId.FrmExportFrames_FileNotExist, "Image file does not exist" ), //v7.5
         new(LangId.FrmExportFrames_FolderPickerTitle, "Select output folder for exporting image frames" ), //v9.0
         new(LangId.FrmExportFrames_Exporting, "Exporting {0}/{1} frames \r\n{2}…" ), //v9.0
         new(LangId.FrmExportFrames_ExportDone, "Exported {0} frames successfully to \r\n{1}" ), //v9.0

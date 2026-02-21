@@ -421,6 +421,45 @@ public partial class AppAPIProvider
 
 
     /// <summary>
+    /// Exports image frames from the current photo source.
+    /// </summary>
+    public async Task IG_ExportImageFrames()
+    {
+        if (Viewer.SourceKind == PhotoSource.None) return;
+
+        // 1. open folder picker
+        var results = await _mainWindow.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = Core.Lang[LangId.FrmExportFrames_FolderPickerTitle],
+        });
+
+        var destDirPath = results.ToArray().FirstOrDefault()?.TryGetLocalPath();
+        if (string.IsNullOrEmpty(destDirPath)) return;
+
+
+        // 2. get source file path
+        var srcFilePath = Core.Photos.CurrentFilePath;
+
+        // clipboard image
+        if (Core.ClipboardImage is not null)
+        {
+            // save image to temp file
+            srcFilePath = await Core.SavePhotoAsTempFileAsync();
+        }
+        if (string.IsNullOrEmpty(srcFilePath)) return;
+
+
+        // 3. export frames
+        var dialog = new ExportFramesWindow(srcFilePath, destDirPath);
+        Viewer.StopAnimator();
+
+        await dialog.ShowAsync(_mainWindow);
+        Viewer.StartAnimator();
+    }
+
+
+
+    /// <summary>
     /// Shows Open With window.
     /// </summary>
     public async Task IG_OpenWithAsync()

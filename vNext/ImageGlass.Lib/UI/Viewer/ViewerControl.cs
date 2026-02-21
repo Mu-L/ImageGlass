@@ -849,7 +849,7 @@ public partial class ViewerControl : PhControl
 
 
     /// <summary>
-    /// Start animating the image if it can animate, using GDI+.
+    /// Start animating the image if it can animate.
     /// </summary>
     public void StartAnimator()
     {
@@ -865,7 +865,7 @@ public partial class ViewerControl : PhControl
 
 
     /// <summary>
-    /// Stop animating the image
+    /// Stop animating the image.
     /// </summary>
     public void StopAnimator()
     {

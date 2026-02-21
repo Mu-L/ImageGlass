@@ -79,8 +79,8 @@ public partial class DialogWindow : PhWindow
     /// Gets the visibility of title bar.
     /// </summary>
     public bool IsTitleVisible => !string.IsNullOrWhiteSpace(Title);
-    public static readonly DirectProperty<ModalWindow, bool> IsTitleVisibleProperty =
-        AvaloniaProperty.RegisterDirect<ModalWindow, bool>(nameof(IsTitleVisible), i => i.IsTitleVisible);
+    public static readonly DirectProperty<DialogWindow, bool> IsTitleVisibleProperty =
+        AvaloniaProperty.RegisterDirect<DialogWindow, bool>(nameof(IsTitleVisible), i => i.IsTitleVisible);
 
 
     /// <summary>

@@ -740,13 +740,14 @@ public static partial class MagickCodec
     /// </summary>
     /// <param name="srcFilePath">The full path of source file</param>
     /// <param name="destFolder">The destination folder to save to</param>
-    public static async IAsyncEnumerable<(int FrameNumber, string FileName)> SaveFramesAsync(string srcFilePath,
+    public static async IAsyncEnumerable<(int FrameNumber, int FrameCount, string FileName)> SaveFramesAsync(string srcFilePath,
         string destFolder, [EnumeratorCancellation] CancellationToken token = default)
     {
         // create dirs unless it does not exist
         Directory.CreateDirectory(destFolder);
 
         using var imgColl = new MagickImageCollection(srcFilePath);
+        var frameCount = imgColl.Count;
         var index = 0;
 
         foreach (var imgM in imgColl)
@@ -767,7 +768,7 @@ public static partial class MagickCodec
             catch (OperationCanceledException) { break; }
             catch { }
 
-            yield return (index, newFilename);
+            yield return (index, frameCount, newFilename);
         }
     }
 

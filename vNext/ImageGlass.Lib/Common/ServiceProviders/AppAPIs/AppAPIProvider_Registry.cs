@@ -44,6 +44,7 @@ public partial class AppAPIProvider
         { API.IG_OpenFile,              PhCommands.Create(IG_OpenFileAsync) },
         { API.IG_Save,                  PhCommands.Create(IG_SaveAsync) },
         { API.IG_SaveAs,                PhCommands.Create(IG_SaveAsAsync) },
+        { API.IG_ExportImageFrames,     PhCommands.Create(IG_ExportImageFrames)},
         { API.IG_OpenWith,              PhCommands.Create(IG_OpenWithAsync) },
         { API.IG_Share,                 PhCommands.Create(IG_ShareAsync) },
         { API.IG_OpenLocation,          PhCommands.Create(IG_OpenLocation) },

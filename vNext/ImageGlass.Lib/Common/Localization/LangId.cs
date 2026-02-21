@@ -64,6 +64,7 @@ public enum LangId
     _Icon,
     _Description,
     _GetHelp,
+    _Start,
 
     _UnhandledException,
     _UnhandledException_Description,
@@ -748,7 +749,6 @@ public enum LangId
 
     #region FrmExportFrames
     FrmExportFrames_Title,
-    FrmExportFrames_FileNotExist,
     FrmExportFrames_FolderPickerTitle,
     FrmExportFrames_Exporting,
     FrmExportFrames_ExportDone,

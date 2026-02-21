@@ -46,6 +46,7 @@ public partial class AppAPIProvider
         new(LangId.FrmMain_MnuOpenFile,             API.IG_OpenFile,            MKeys.Control, Key.O),
         new(LangId.FrmMain_MnuSave,                 API.IG_Save,                MKeys.Control, Key.S),
         new(LangId.FrmMain_MnuSaveAs,               API.IG_SaveAs,              MKeys.Control | MKeys.Shift, Key.S),
+        new(LangId.FrmMain_MnuExportFrames,         API.IG_ExportImageFrames,   MKeys.Control, Key.J),
         new(LangId.FrmMain_MnuOpenWith,             API.IG_OpenWith,            Key.D),
         new(LangId.FrmMain_MnuShare,                API.IG_Share,               Key.S),
         new(LangId.FrmMain_MnuOpenLocation,         API.IG_OpenLocation,        Key.L),
