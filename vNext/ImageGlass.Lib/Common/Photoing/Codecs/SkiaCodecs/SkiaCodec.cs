@@ -714,22 +714,40 @@ public static partial class SkiaCodec
     /// <summary>
     /// Converts bitmap to image with optional source color space.
     /// </summary>
-    public static SKImage? ToSKImage(SKBitmap? bmp, SKColorSpace? srcColorSpace = null)
+    public static SKImage? ToSKImage(SKBitmap? bmp)
     {
         if (bmp.IsDisposed()) return null;
 
-        // convert color space
-        if (srcColorSpace is not null)
-        {
-            var info = bmp.Info.WithColorSpace(srcColorSpace);
-            return SKImage.FromPixels(info, bmp.GetPixels());
-        }
-
         var img = SKImage.FromBitmap(bmp);
-
         return img;
     }
 
+
+    /// <summary>
+    /// Attempts to apply the given color space to the source image and outputs a new image.
+    /// </summary>
+    public static bool TryApplyColorSpace(SKImage? imgSrc, SKColorSpace? destColorSpace, out SKImage? output)
+    {
+        output = null;
+        if (imgSrc.IsDisposed()) return false;
+
+        // convert color space
+        if (destColorSpace is not null)
+        {
+            var info = imgSrc.Info.WithColorSpace(destColorSpace);
+            using var colorBmp = new SKBitmap(info);
+            using (var canvas = new SKCanvas(colorBmp))
+            {
+                // performs the ICC conversion during this draw operation
+                canvas.DrawImage(imgSrc, 0, 0);
+            }
+
+            output = SKImage.FromBitmap(colorBmp);
+            return true;
+        }
+
+        return false;
+    }
 
 
     /// <summary>

@@ -518,7 +518,6 @@ public partial class Photo : DisposableImpl
     /// Loads photo from file.
     /// </summary>
     public virtual async Task LoadAsync(bool useCache,
-        PhotoReadOptions? newOptions = null,
         Func<PhotoLoadingEventArgs, Task>? handleProgressFn = null,
         bool skipLoadingEvent = false)
     {
@@ -532,7 +531,6 @@ public partial class Photo : DisposableImpl
             _isDisposed.Value = false;
             State = PhotoLoadingState.None;
             Error = null;
-            ReadOptions = newOptions ?? ReadOptions;
 
 
             // 1. load metadata ===================
@@ -670,7 +668,7 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Gets an image frame from the photo.
     /// </summary>
-    public SKImage? GetFrame(uint frameIndex = 0)
+    public SKImage? GetFrame(uint frameIndex)
     {
         // 1. native bitmap is a single-frame bitmap
         if (Bitmap is SKImage img) return img;
