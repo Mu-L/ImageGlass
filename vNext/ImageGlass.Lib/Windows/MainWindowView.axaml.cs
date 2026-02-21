@@ -240,9 +240,9 @@ public partial class MainWindowView : PhControl
 
 
         #region Menu group: Loading orders
+        if (!imageNotFound) mnuContext.Items.Add("-");
         if (!imageNotFound && !hasClipboardImage)
         {
-            mnuContext.Items.Add("-");
             var mnuLoadingOrders = new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuLoadingOrders,
@@ -297,7 +297,7 @@ public partial class MainWindowView : PhControl
 
 
         #region Menu group: View channels
-        if (!imageNotFound && !hasClipboardImage)
+        if (!PART_Viewer.IsImageAnimating && (!imageNotFound || hasClipboardImage))
         {
             var mnuChannels = new PhMenuItem
             {
@@ -329,10 +329,9 @@ public partial class MainWindowView : PhControl
 
 
         #region Menu group: Edit
-        if (!imageNotFound)
+        if (!imageNotFound) mnuContext.Items.Add("-");
+        if (!imageNotFound || hasClipboardImage)
         {
-            mnuContext.Items.Add("-");
-
             // TODO:
             //UpdateEditAppInfoForMenu();
             mnuContext.Items.Add(new PhMenuItem
@@ -346,7 +345,7 @@ public partial class MainWindowView : PhControl
 
 
         #region Menu group: Desktop wallpaper, lock screen
-        if ((!imageNotFound && !Core.Photos.IsCurrentError) || Core.ClipboardImage != null)
+        if ((!imageNotFound && !Core.Photos.IsCurrentError) || hasClipboardImage)
         {
             mnuContext.Items.Add(new PhMenuItem
             {
@@ -379,15 +378,15 @@ public partial class MainWindowView : PhControl
             Command = Core.API?.GetApiCommand(API.IG_CopyImagePixels),
             HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCopyImagePixels),
         });
-        mnuContext.Items.Add(new PhMenuItem
-        {
-            LangKey = LangId.FrmMain_MnuCopyPath,
-            Command = Core.API?.GetApiCommand(API.IG_CopyImagePath),
-            HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCopyPath),
-        });
 
-        if (!imageNotFound && Core.ClipboardImage == null)
+        if (!imageNotFound && !hasClipboardImage)
         {
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmMain_MnuCopyPath,
+                Command = Core.API?.GetApiCommand(API.IG_CopyImagePath),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCopyPath),
+            });
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuCopyFile,
@@ -400,10 +399,6 @@ public partial class MainWindowView : PhControl
                 Command = Core.API?.GetApiCommand(API.IG_CutFiles),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCutFile),
             });
-        }
-
-        if (!imageNotFound && Core.ClipboardImage == null)
-        {
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuClearClipboard,
@@ -415,7 +410,7 @@ public partial class MainWindowView : PhControl
 
 
         #region Menu group: File Operation
-        if (!imageNotFound && Core.ClipboardImage == null)
+        if (!imageNotFound && !hasClipboardImage)
         {
             mnuContext.Items.Add(new PhMenuItem("-")); //------------
             mnuContext.Items.Add(new PhMenuItem
