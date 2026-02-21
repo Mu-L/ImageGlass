@@ -76,6 +76,12 @@ public static class Core
 
 
     /// <summary>
+    /// Provides a singleton instance to manage Print service.
+    /// </summary>
+    public static IPrintProvider? PrintProvider { get; set; } = null;
+
+
+    /// <summary>
     /// Provides a singleton instance to manage Share dialog.
     /// </summary>
     public static IShareProvider? ShareProvider { get; set; } = null;

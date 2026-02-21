@@ -16,13 +16,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using ImageGlass.UI.Windowing;
 using System;
 using System.Collections.Generic;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 
-namespace ImageGlass.Common;
+namespace ImageGlass.Win32.Common;
 
 public static class Win32ShareApi
 {
@@ -90,7 +91,7 @@ public static class Win32ShareApi
         {
             await ModalWindow.ShowErrorAsync(null, new ModalWindowOptions
             {
-                Title = Core.Lang[Localization.LangId.FrmMain_MnuShare],
+                Title = Core.Lang[ImageGlass.Common.Localization.LangId.FrmMain_MnuShare],
                 Heading = ex.Message,
                 Details = ex.ToString(),
             });

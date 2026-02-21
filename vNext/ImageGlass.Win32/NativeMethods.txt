@@ -31,3 +31,7 @@ DwmSetWindowAttribute
 SystemParametersInfo
 SYSTEM_PARAMETERS_INFO_ACTION
 
+
+ShellExecuteEx
+SHELLEXECUTEINFOW
+
