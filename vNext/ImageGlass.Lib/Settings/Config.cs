@@ -732,10 +732,14 @@ public partial class Config : PhReactive
     }
 
 
-    ///// <summary>
-    ///// Gets, sets the list of apps for edit action.
-    ///// </summary>
-    //public Dictionary<string, EditApp?> EditApps { get; set; } = [];
+    /// <summary>
+    /// Gets, sets the list of apps for edit action.
+    /// </summary>
+    public Dictionary<string, EditingApp?> EditApps
+    {
+        get => Get(ConfigId.EditApps, new Dictionary<string, EditingApp?>());
+        set => Set(ConfigId.EditApps, value);
+    }
 
 
     /// <summary>

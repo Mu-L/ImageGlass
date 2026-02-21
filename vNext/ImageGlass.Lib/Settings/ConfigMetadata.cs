@@ -140,7 +140,7 @@ public enum ConfigId
 
     MainWindowBounds,
     ZoomLevels,
-    // EditApps,
+    EditApps,
     SingleFrameFormats,
     NativeCodecReadFormats,
     FileFormats,

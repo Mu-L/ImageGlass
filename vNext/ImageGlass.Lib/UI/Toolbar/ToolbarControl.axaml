@@ -93,8 +93,6 @@
                                                Click="MainMenuItem_Click" />
                                 <ui:PhMenuItem Header="-" />
 
-                                <ui:PhMenuItem LangKey="FrmMain_MnuEdit"
-                                               Click="MainMenuItem_Click" />
                                 <ui:PhMenuItem LangKey="FrmMain_MnuOpenWith"
                                                Click="MainMenuItem_Click" />
                                 <ui:PhMenuItem LangKey="FrmMain_MnuPrint"
@@ -327,7 +325,8 @@
                                                    CommandParameter="A" />
                                 </ui:PhMenuItem>
                                 <ui:PhMenuItem Header="-" />
-                                
+                                <ui:PhMenuItem LangKey="FrmMain_MnuEdit"
+                                               Click="MainMenuItem_Click" />
                                 <ui:PhMenuItem LangKey="FrmMain_MnuInvertColors"
                                                Click="MainMenuItem_Click" />
                                 <ui:PhMenuItem LangKey="FrmMain_MnuToggleImageAnimation"
