@@ -300,6 +300,15 @@ public class Win32ShellProvider : DisposableImpl, IShellProvider
         #endregion // Windows 10 or earlier
     }
 
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public async Task SetDefaultPhotoViewerAsync(string[] extensions, bool enable)
+    {
+        await Win32DefaultAppApi.SetDefaultPhotoViewerAsync(extensions, enable);
+    }
+
     #endregion // Public Methods
 
 

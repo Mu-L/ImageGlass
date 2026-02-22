@@ -50,6 +50,21 @@ sealed class Program
         Core.Config = Config.Load(Config.CONFIG_USER);
 
 
+        // initialize service providers
+        Core.ShellProvider = new Win32ShellProvider();
+        Core.PreviewProvider = new Win32PhotoPreviewProvider();
+        Core.FileSearchProvider = new Win32FileSearchProvider();
+        Core.ShareProvider = new Win32ShareProvider();
+        Core.PrintProvider = new Win32PrintProvider();
+
+
+        // handle app command lines
+        if (App.HandleCommandLineAsync(args).GetAwaiter().GetResult())
+        {
+            return 0;
+        }
+
+
         // handle single instance
         if (!Core.Config.EnableMultiInstances)
         {
@@ -85,14 +100,6 @@ sealed class Program
         .AfterSetup(builder =>
         {
             var app = (App?)builder.Instance;
-
-            // initialize service providers
-            Core.ShellProvider = new Win32ShellProvider();
-            Core.PreviewProvider = new Win32PhotoPreviewProvider();
-            Core.FileSearchProvider = new Win32FileSearchProvider();
-            Core.ShareProvider = new Win32ShareProvider();
-            Core.PrintProvider = new Win32PrintProvider();
-
 
             // create main window
             var mainWindow = new MainWindow32();

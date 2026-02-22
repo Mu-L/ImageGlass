@@ -34,7 +34,7 @@ public enum API
     IG_SaveAs,
     IG_ExportImageFrames,
     IG_OpenWith,
-    IG_PrintAsync,
+    IG_Print,
     IG_Share,
     IG_OpenLocation,
     IG_Rename,
@@ -75,7 +75,7 @@ public enum API
     IG_SetLoadingOrderBy,
     IG_SetLoadingOrderType,
     IG_SetColorChannels,
-    IG_OpenEditingAppAsync,
+    IG_OpenEditingApp,
     IG_InvertColors,
     IG_ToggleImageAnimation,
     IG_Rotate,
@@ -110,6 +110,8 @@ public enum API
 
     // Menu > Help
     IG_ReportIssue,
+    IG_SetDefaultPhotoViewer,
+    IG_RemoveDefaultPhotoViewer,
 
     // Menu > Exit
     IG_Exit,

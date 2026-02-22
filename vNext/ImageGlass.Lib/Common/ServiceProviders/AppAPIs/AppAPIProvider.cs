@@ -2454,6 +2454,67 @@ public partial class AppAPIProvider
             "from_report_issue");
     }
 
+
+    /// <summary>
+    /// Registers the app as the default photo viewer.
+    /// </summary>
+    public async Task IG_SetDefaultPhotoViewerAsync()
+    {
+        await SetDefaultPhotoViewerAsync(true);
+    }
+
+
+    /// <summary>
+    /// Unregisters the app from the default photo viewer.
+    /// </summary>
+    public async Task IG_RemoveDefaultPhotoViewerAsync()
+    {
+        await SetDefaultPhotoViewerAsync(false);
+    }
+
+
+    /// <summary>
+    /// Sets or removes the app as the default photo viewer for supported file formats.
+    /// </summary>
+    private async Task SetDefaultPhotoViewerAsync(bool enable)
+    {
+        if (Core.ShellProvider is null) return;
+
+        var extensions = Core.Config.FileFormats.ToArray();
+
+        try
+        {
+            await Core.ShellProvider.SetDefaultPhotoViewerAsync(extensions, enable);
+
+            await ModalWindow.ShowInfoAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[enable
+                    ? LangId.FrmMain_MnuSetDefaultPhotoViewer
+                    : LangId.FrmMain_MnuRemoveDefaultPhotoViewer],
+                Heading = Core.Lang[enable
+                    ? LangId.FrmMain_MnuSetDefaultPhotoViewer_Success
+                    : LangId.FrmMain_MnuRemoveDefaultPhotoViewer_Success],
+                Note = enable ? Core.Lang[LangId.FrmSettings_UnmanagedSettingReminder] : null,
+                NoteStyle = InfoBarSeverity.Warning,
+            });
+        }
+        catch (Exception ex)
+        {
+            await ModalWindow.ShowErrorAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[enable
+                    ? LangId.FrmMain_MnuSetDefaultPhotoViewer
+                    : LangId.FrmMain_MnuRemoveDefaultPhotoViewer],
+                Heading = Core.Lang[enable
+                    ? LangId.FrmMain_MnuSetDefaultPhotoViewer_Error
+                    : LangId.FrmMain_MnuRemoveDefaultPhotoViewer_Error],
+                Description = ex.Message,
+                Details = ex.ToString(),
+            });
+        }
+    }
+
+
     #endregion // Help APIs
 
 }

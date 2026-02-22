@@ -47,7 +47,7 @@ public partial class AppAPIProvider
         { API.IG_SaveAs,                PhCommands.Create(IG_SaveAsAsync) },
         { API.IG_ExportImageFrames,     PhCommands.Create(IG_ExportImageFrames) },
         { API.IG_OpenWith,              PhCommands.Create(IG_OpenWithAsync) },
-        { API.IG_PrintAsync,            PhCommands.Create(IG_PrintAsync) },
+        { API.IG_Print,            PhCommands.Create(IG_PrintAsync) },
         { API.IG_Share,                 PhCommands.Create(IG_ShareAsync) },
         { API.IG_OpenLocation,          PhCommands.Create(IG_OpenLocation) },
         { API.IG_Rename,                PhCommands.Create(IG_RenameAsync) },
@@ -94,7 +94,7 @@ public partial class AppAPIProvider
         { API.IG_SetLoadingOrderBy,             PhCommands.Create(IG_SetLoadingOrderBy) },
         { API.IG_SetLoadingOrderType,           PhCommands.Create(IG_SetLoadingOrderType) },
         { API.IG_SetColorChannels,              PhCommands.Create(IG_SetColorChannels) },
-        { API.IG_OpenEditingAppAsync,           PhCommands.Create(IG_OpenEditingAppAsync) },
+        { API.IG_OpenEditingApp,           PhCommands.Create(IG_OpenEditingAppAsync) },
         { API.IG_InvertColors,                  PhCommands.Create(IG_InvertColors) },
         { API.IG_ToggleImageAnimation,          PhCommands.Create(IG_ToggleImageAnimation) },
         { API.IG_Rotate,                        PhCommands.Create(IG_Rotate) },
@@ -131,7 +131,9 @@ public partial class AppAPIProvider
 
 
         // Help
-        { API.IG_ReportIssue,           PhCommands.Create(IG_ReportIssue) },
+        { API.IG_ReportIssue,               PhCommands.Create(IG_ReportIssue) },
+        { API.IG_SetDefaultPhotoViewer,     PhCommands.Create(IG_SetDefaultPhotoViewerAsync) },
+        { API.IG_RemoveDefaultPhotoViewer,  PhCommands.Create(IG_RemoveDefaultPhotoViewerAsync) },
 
 
         // Exit

@@ -25,6 +25,7 @@ using Avalonia.Threading;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
+using ImageGlass.Common.Types;
 using ImageGlass.UI.Windowing;
 using System;
 using System.Diagnostics;
@@ -92,6 +93,39 @@ public partial class App : Application
         if (_mainWindow is not null) return;
 
         _mainWindow = window;
+    }
+
+
+
+    /// <summary>
+    /// Handles app command-line arguments that should run without starting the UI.
+    /// Returns <c>true</c> if the command was handled and the process should exit.
+    /// </summary>
+    public static async Task<bool> HandleCommandLineAsync(string[] args)
+    {
+        if (args.Length < 1) return false;
+
+        var topCmd = args[0];
+
+        // set / remove default photo viewer
+        if (topCmd == ExeParams.SET_DEFAULT_PHOTO_VIEWER
+            || topCmd == ExeParams.REMOVE_DEFAULT_PHOTO_VIEWER)
+        {
+            if (args.Length < 2) return false;
+
+            var enable = topCmd == ExeParams.SET_DEFAULT_PHOTO_VIEWER;
+            var extensions = args[1]
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            if (Core.ShellProvider is not null)
+            {
+                await Core.ShellProvider.SetDefaultPhotoViewerAsync(extensions, enable);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
 

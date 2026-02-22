@@ -87,4 +87,10 @@ public interface IShellProvider : IDisposable
     /// Opens the specified file in the system's default editing application.
     /// </summary>
     Task OpenDefaultEditingAppAsync(string filePath, Action? callbackFn = null);
+
+
+    /// <summary>
+    /// Sets or removes this app as the default photo viewer for the specified file extensions.
+    /// </summary>
+    Task SetDefaultPhotoViewerAsync(string[] extensions, bool enable);
 }

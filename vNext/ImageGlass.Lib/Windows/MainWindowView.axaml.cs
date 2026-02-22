@@ -335,7 +335,7 @@ public partial class MainWindowView : PhControl
             var mnuEdit = new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuEdit,
-                Command = Core.API?.GetApiCommand(API.IG_OpenEditingAppAsync),
+                Command = Core.API?.GetApiCommand(API.IG_OpenEditingApp),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuEdit),
             };
 

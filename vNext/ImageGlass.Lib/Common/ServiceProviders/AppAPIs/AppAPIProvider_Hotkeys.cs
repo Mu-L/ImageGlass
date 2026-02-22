@@ -48,7 +48,7 @@ public partial class AppAPIProvider
         new(LangId.FrmMain_MnuSave,                 API.IG_Save,                MKeys.Control, Key.S),
         new(LangId.FrmMain_MnuSaveAs,               API.IG_SaveAs,              MKeys.Control | MKeys.Shift, Key.S),
         new(LangId.FrmMain_MnuExportFrames,         API.IG_ExportImageFrames,   MKeys.Control, Key.J),
-        new(LangId.FrmMain_MnuPrint,                API.IG_PrintAsync,          MKeys.Control, Key.P),
+        new(LangId.FrmMain_MnuPrint,                API.IG_Print,          MKeys.Control, Key.P),
         new(LangId.FrmMain_MnuOpenWith,             API.IG_OpenWith,            Key.D),
         new(LangId.FrmMain_MnuShare,                API.IG_Share,               Key.S),
         new(LangId.FrmMain_MnuOpenLocation,         API.IG_OpenLocation,        Key.L),
@@ -107,7 +107,7 @@ public partial class AppAPIProvider
         new(LangId.ImageOrderBy_ExifRating,         API.IG_SetLoadingOrderBy,   nameof(ImageOrderBy.ExifRating)),
         new(LangId.ImageOrderType_Asc,              API.IG_SetLoadingOrderType, nameof(ImageOrderType.Asc)),
         new(LangId.ImageOrderType_Desc,             API.IG_SetLoadingOrderType, nameof(ImageOrderType.Desc)),
-        new(LangId.FrmMain_MnuEdit,                 API.IG_OpenEditingAppAsync,     Key.E),
+        new(LangId.FrmMain_MnuEdit,                 API.IG_OpenEditingApp,     Key.E),
         new(LangId.FrmMain_MnuInvertColors,         API.IG_InvertColors,            MKeys.Control, Key.I),
         new(LangId.FrmMain_MnuToggleImageAnimation, API.IG_ToggleImageAnimation,    MKeys.Control, Key.Space),
         new(LangId.FrmMain_MnuRotateLeft,           API.IG_Rotate,              nameof(RotateOption.Left),          [new(MKeys.Control, Key.OemPeriod)]),
@@ -146,7 +146,9 @@ public partial class AppAPIProvider
 
 
         // Help
-        new(LangId.FrmMain_MnuReportIssue,      API.IG_ReportIssue),
+        new(LangId.FrmMain_MnuReportIssue,                  API.IG_ReportIssue),
+        new(LangId.FrmMain_MnuSetDefaultPhotoViewer,        API.IG_SetDefaultPhotoViewer),
+        new(LangId.FrmMain_MnuRemoveDefaultPhotoViewer,     API.IG_RemoveDefaultPhotoViewer),
 
 
         // Exit
