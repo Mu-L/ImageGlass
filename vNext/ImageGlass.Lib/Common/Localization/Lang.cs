@@ -637,7 +637,7 @@ public class Lang
         new(LangId.FrmAbout_LogoDesigner, "Logo designer:"),
         new(LangId.FrmAbout_Collaborator, "Collaborator:"),
         new(LangId.FrmAbout_Contact, "Contact"),
-        new(LangId.FrmAbout_Homepage, "Homepage:"),
+        new(LangId.FrmAbout_Homepage, "Homepage"),
         new(LangId.FrmAbout_Email, "Email:"),
         new(LangId.FrmAbout_Credits, "Credits"),
         new(LangId.FrmAbout_Donate, "Donate"),

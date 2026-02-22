@@ -2449,7 +2449,8 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_OpenAboutWindowAsync()
     {
-
+        var dialog = new AboutWindow();
+        _ = await dialog.ShowAsync(_mainWindow);
     }
 
 
