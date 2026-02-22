@@ -109,6 +109,7 @@ public enum API
     // Menu > Settings
 
     // Menu > Help
+    IG_OpenAboutWindow,
     IG_ReportIssue,
     IG_SetDefaultPhotoViewer,
     IG_RemoveDefaultPhotoViewer,

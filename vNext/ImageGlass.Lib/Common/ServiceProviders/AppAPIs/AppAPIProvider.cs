@@ -2445,6 +2445,15 @@ public partial class AppAPIProvider
     #region Help APIs
 
     /// <summary>
+    /// Open About window.
+    /// </summary>
+    public async Task IG_OpenAboutWindowAsync()
+    {
+
+    }
+
+
+    /// <summary>
     /// Opens website to report issue.
     /// </summary>
     public void IG_ReportIssue()

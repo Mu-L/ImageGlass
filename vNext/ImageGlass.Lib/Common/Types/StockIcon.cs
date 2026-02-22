@@ -20,6 +20,7 @@ using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using System;
+using System.IO;
 
 namespace ImageGlass.Common.Types;
 
@@ -52,8 +53,26 @@ public static class StockIcon
     {
         try
         {
-            using var stream = AssetLoader.Open(new Uri($"avares://ImageGlass.Lib/Assets/icon256.ico"));
+            using var stream = GetDefaultWindowIconAsStream();
+            if (stream is null) return null;
+
             return new WindowIcon(stream);
+        }
+        catch { }
+
+        return null;
+    }
+
+
+    /// <summary>
+    /// Gets default app icon.
+    /// </summary>
+    public static Stream? GetDefaultWindowIconAsStream()
+    {
+        try
+        {
+            var stream = AssetLoader.Open(new Uri($"avares://ImageGlass.Lib/Assets/icon256.ico"));
+            return stream;
         }
         catch { }
 

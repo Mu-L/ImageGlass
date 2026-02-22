@@ -135,17 +135,18 @@ public partial class AppAPIProvider
 
 
         // Layout
-        new(LangId.FrmMain_MnuToggleToolbar,        API.IG_ToggleToolbar,       Key.T),
-        new(LangId.FrmMain_MnuToggleGallery,        API.IG_ToggleGallery,       Key.G),
-        new(LangId.FrmMain_MnuToggleCheckerboard,   API.IG_ToggleCheckerboard,  Key.B),
+        new(LangId.FrmMain_MnuToggleToolbar,        API.IG_ToggleToolbar,           Key.T),
+        new(LangId.FrmMain_MnuToggleGallery,        API.IG_ToggleGallery,           Key.G),
+        new(LangId.FrmMain_MnuToggleCheckerboard,   API.IG_ToggleCheckerboard,      Key.B),
         new(LangId.FrmMain_MnuToggleTopMost,        API.IG_ToggleWindowTopMost),
 
 
         // Tools
-        new(LangId.FrmMain_MnuGetMoreTools,     API.IG_GetMoreTool),
+        new(LangId.FrmMain_MnuGetMoreTools,         API.IG_GetMoreTool),
 
 
         // Help
+        new(LangId.FrmMain_MnuAbout,                        API.IG_OpenAboutWindow,             Key.F1),
         new(LangId.FrmMain_MnuReportIssue,                  API.IG_ReportIssue),
         new(LangId.FrmMain_MnuSetDefaultPhotoViewer,        API.IG_SetDefaultPhotoViewer),
         new(LangId.FrmMain_MnuRemoveDefaultPhotoViewer,     API.IG_RemoveDefaultPhotoViewer),
