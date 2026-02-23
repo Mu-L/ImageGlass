@@ -218,15 +218,15 @@ public static class Core
 
         DisposeClipboardPhoto();
 
-        Photos.Dispose();
-        ColorProfileProvider?.Dispose();
-        ColorProfileProvider = null;
+        Core.Photos.Dispose();
+        Core.ColorProfileProvider?.Dispose();
+        Core.ColorProfileProvider = null;
 
-        FileSearchProvider?.Dispose();
-        FileSearchProvider = null;
+        Core.FileSearchProvider?.Dispose();
+        Core.FileSearchProvider = null;
 
-        ShellProvider?.Dispose();
-        ShellProvider = null;
+        Core.ShellProvider?.Dispose();
+        Core.ShellProvider = null;
     }
 
 

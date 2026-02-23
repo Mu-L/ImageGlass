@@ -219,6 +219,8 @@ public partial class GalleryControl : PhControl
     public void LoadThumbnail(int index, bool useCache)
     {
         var photo = Core.Photos.Get(index);
+        if (!useCache) photo?.UnloadThumbnail();
+
         _ = photo?.LoadThumbnailAsync(Dpi);
     }
 

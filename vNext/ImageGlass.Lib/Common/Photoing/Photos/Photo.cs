@@ -788,6 +788,7 @@ public partial class Photo : DisposableImpl
 
 
                 // 7. update the gallery thumbnail (triggers UI binding update)
+                GalleryThumbnail?.Dispose();
                 GalleryThumbnail = avBitmap;
             }
             catch (OperationCanceledException) { }

@@ -436,14 +436,7 @@ public partial class AppAPIProvider
 
 
         // 5. update thumbnail & metadata if file in the list was overriden
-        var destPhoto = Core.Photos.Get(destFilePath);
-        if (destPhoto is not null)
-        {
-            destPhoto.UnloadThumbnail();
-
-            // reload thumbnail
-            Gallery.LoadThumbnail(newPhotoIndex, false);
-        }
+        Gallery.LoadThumbnail(newPhotoIndex, false);
 
         return true;
     }
