@@ -116,5 +116,10 @@ public enum API
 
     // Menu > Exit
     IG_Exit,
+
+
+    // Other APIs,
+    IG_SetRealTimeFileUpdate,
+
 }
 

@@ -42,6 +42,7 @@
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Skia" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="D2Phap.FileWatcherEx" />
     <PackageReference Include="Magick.NET-Q8-OpenMP-x64" />
     <PackageReference Include="Svg.Controls.Skia.Avalonia" />
   </ItemGroup>

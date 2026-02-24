@@ -98,6 +98,10 @@ public partial class PhotoManager : DisposableImpl
     /// </summary>
     public PhotoManager(IEnumerable<string>? list = null)
     {
+        // stable delegate instances required by BHelper.Debounce
+        _processAddedFilesAction = ProcessPendingAdds;
+        _processChangedFilesAction = ProcessPendingChanges;
+
         if (list is not null) Add(list);
     }
 
@@ -113,6 +117,7 @@ public partial class PhotoManager : DisposableImpl
     {
         base.OnDisposing();
 
+        DisposeFileWatcher();
         Clear();
     }
 

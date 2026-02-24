@@ -58,6 +58,7 @@ public class PhotoLoadingEventArgs(PhotoLoadingState state, Photo photo, Cancell
 public class PhotoLoadingOptions
 {
     public bool UseCache { get; set; } = true;
+    public bool ResetZoom { get; set; } = true;
     public ColorChannels Channels { get; set; } = ColorChannels.RGBA;
 }
 

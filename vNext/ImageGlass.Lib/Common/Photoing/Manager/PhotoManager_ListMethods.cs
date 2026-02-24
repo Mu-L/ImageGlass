@@ -92,8 +92,11 @@ public partial class PhotoManager
     /// </summary>
     public Photo? Get(string filePath)
     {
-        var index = _dict.GetValueOrDefault(filePath, -1);
-        return Get(index);
+        lock (_lock)
+        {
+            var index = _dict.GetValueOrDefault(filePath, -1);
+            return Get(index);
+        }
     }
 
 

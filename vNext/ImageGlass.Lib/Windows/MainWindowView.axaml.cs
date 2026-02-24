@@ -21,6 +21,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using D2Phap.FileWatcherEx;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
@@ -68,6 +69,7 @@ public partial class MainWindowView : PhControl
         DragDrop.AddDropHandler(PART_Viewer, PART_Viewer_Drop);
 
         Core.Config.PropertyChanged += Config_PropertyChanged;
+        Core.Photos.FileWatcherChanged += Photos_FileWatcherChanged;
         PART_Viewer.PhotoLoading += PART_Viewer_PhotoLoading;
         PART_Viewer.ZoomChanged += PART_Viewer_ZoomChanged;
         PART_Viewer.ContextMenu?.Opened += PART_Viewer_ContextMenu_Opened;
@@ -87,6 +89,7 @@ public partial class MainWindowView : PhControl
         DragDrop.RemoveDropHandler(PART_Viewer, PART_Viewer_Drop);
 
         Core.Config.PropertyChanged -= Config_PropertyChanged;
+        Core.Photos.FileWatcherChanged -= Photos_FileWatcherChanged;
         PART_Viewer.PhotoLoading -= PART_Viewer_PhotoLoading;
         PART_Viewer.ZoomChanged -= PART_Viewer_ZoomChanged;
         PART_Viewer.ContextMenu?.Opened -= PART_Viewer_ContextMenu_Opened;
@@ -107,6 +110,11 @@ public partial class MainWindowView : PhControl
         if (e.PropertyName == nameof(Config.Layout))
         {
             ApplyAppLayout();
+        }
+        else if (e.PropertyName == nameof(Config.EnableRealTimeFileUpdate))
+        {
+            // set file watcher
+            AppAPIProvider.SetRealTimeFileWatcher(Core.Config.EnableRealTimeFileUpdate);
         }
     }
 
@@ -153,6 +161,167 @@ public partial class MainWindowView : PhControl
 
         // 3.2 open the path
         Core.API?.IG_OpenPath(paths[0]);
+    }
+
+
+    private void Photos_FileWatcherChanged(PhotoManager sender, FileWatcherChangedEventArgs e)
+    {
+        if (e.ChangeType == ChangeType.LOG) return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            switch (e.ChangeType)
+            {
+                case ChangeType.CREATED:
+                    HandleFileWatcher_FilesAdded(e);
+                    break;
+
+                case ChangeType.DELETED:
+                    HandleFileWatcher_FilesDeleted(e);
+                    break;
+
+                case ChangeType.CHANGED:
+                    HandleFileWatcher_FilesChanged(e);
+                    break;
+
+                case ChangeType.RENAMED:
+                    HandleFileWatcher_FilesRenamed(e);
+                    break;
+            }
+        });
+    }
+
+
+    private void HandleFileWatcher_FilesAdded(FileWatcherChangedEventArgs e)
+    {
+        // gallery is data-bound to Core.Photos.Items, so items are already added;
+        // we only need to scroll/display the last added file if the user opted in.
+        if (e.FilePaths.Count == 0) return;
+
+        // scroll gallery to the newly added file if configured
+        if (Core.Config.ShouldAutoOpenNewAddedImage)
+        {
+            var lastAdded = e.FilePaths[^1];
+            var newIndex = Core.Photos.IndexOf(lastAdded);
+
+            if (newIndex >= 0)
+            {
+                var photo = Core.Photos.Select(newIndex);
+                _ = ViewPhotoAsync(photo);
+            }
+        }
+        else
+        {
+            // re-select current photo to update its index (list shifted by inserts)
+            _ = Core.Photos.Select(Core.Photos.CurrentFilePath);
+            PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex);
+        }
+    }
+
+
+    private void HandleFileWatcher_FilesDeleted(FileWatcherChangedEventArgs e)
+    {
+        if (e.FilePaths.Count == 0) return;
+
+        // if the currently viewed photo was deleted
+        if (!string.IsNullOrEmpty(e.AffectedCurrentFilePath))
+        {
+            // navigate to the photo at the same index (or the last valid one)
+            if (Core.Photos.Count > 0)
+            {
+                var photo = Core.Photos.GetByStep(0, true);
+                _ = ViewPhotoAsync(photo);
+            }
+            else
+            {
+                // no photos left – clear the viewer
+                _ = ViewPhotoAsync(null);
+            }
+        }
+        else
+        {
+            // re-select current photo to fix its index after list shifted
+            _ = Core.Photos.Select(Core.Photos.CurrentFilePath);
+            PART_Gallery.ScrollToItem(Core.Photos.CurrentIndex);
+        }
+
+        // update init photo path if it was deleted
+        if (Core.Photos.InitPhoto is not null)
+        {
+            for (var i = 0; i < e.FilePaths.Count; i++)
+            {
+                if (string.Equals(e.FilePaths[i], Core.Photos.InitPhoto.FilePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    var dirPath = Path.GetDirectoryName(e.FilePaths[i]) ?? string.Empty;
+                    Core.Photos.InitPhoto = !string.IsNullOrEmpty(dirPath)
+                        ? new Photo(dirPath)
+                        : null;
+                    break;
+                }
+            }
+        }
+    }
+
+
+    private void HandleFileWatcher_FilesChanged(FileWatcherChangedEventArgs e)
+    {
+        if (e.FilePaths.Count == 0) return;
+
+        for (var i = 0; i < e.FilePaths.Count; i++)
+        {
+            var filePath = e.FilePaths[i];
+            var photoIndex = Core.Photos.IndexOf(filePath);
+            var photo = Core.Photos.Get(photoIndex);
+            if (photo is null) continue;
+
+            // force thumbnail reload
+            PART_Gallery.LoadThumbnail(photoIndex, false);
+
+            // if it's the currently viewed photo, reload it
+            if (Core.Photos.IsSelected(filePath))
+            {
+                _ = PART_Viewer.SetPhotoAsync(photo, new PhotoLoadingOptions
+                {
+                    ResetZoom = false,
+                    UseCache = false,
+                    Channels = Core.ColorChannels,
+                });
+            }
+        }
+    }
+
+
+    private void HandleFileWatcher_FilesRenamed(FileWatcherChangedEventArgs e)
+    {
+        if (e.FilePaths.Count == 0 || e.OldFilePaths is null) return;
+
+        var currentNeedsRefresh = false;
+        for (var i = 0; i < e.FilePaths.Count; i++)
+        {
+            var newPath = e.FilePaths[i];
+            var oldPath = i < e.OldFilePaths.Count ? e.OldFilePaths[i] : null;
+
+            // update init photo if it was renamed
+            if (Core.Photos.InitPhoto is not null
+                && oldPath is not null
+                && string.Equals(oldPath, Core.Photos.InitPhoto.FilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                Core.Photos.InitPhoto = new Photo(newPath);
+            }
+
+            // check if the currently viewed photo was renamed
+            if (Core.Photos.IsSelected(newPath))
+            {
+                currentNeedsRefresh = true;
+            }
+        }
+
+        // refresh the viewer title/info if the current photo was renamed
+        if (currentNeedsRefresh)
+        {
+            // re-select to refresh bindings for current photo name/path
+            _ = Core.Photos.Select(Core.Photos.CurrentIndex);
+        }
     }
 
 
@@ -562,6 +731,9 @@ public partial class MainWindowView : PhControl
         // Gallery: scroll to the selected item
         if (isEmptyList)
         {
+            // set file watcher
+            AppAPIProvider.SetRealTimeFileWatcher(Core.Config.EnableRealTimeFileUpdate);
+
             Dispatcher.UIThread.Post(async () =>
             {
                 // set photo to the viewer

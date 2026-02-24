@@ -127,7 +127,7 @@ public partial class AppAPIProvider
 
 
         // Tools
-        { API.IG_GetMoreTool,           PhCommands.Create(IG_GetMoreTool) },
+        { API.IG_GetMoreTool,               PhCommands.Create(IG_GetMoreTool) },
 
 
         // Help
@@ -138,7 +138,11 @@ public partial class AppAPIProvider
 
 
         // Exit
-        { API.IG_Exit,                  PhCommands.Create(IG_Exit) },
+        { API.IG_Exit,                      PhCommands.Create(IG_Exit) },
+
+
+        // Others
+        { API.IG_SetRealTimeFileUpdate,     PhCommands.Create(IG_SetRealTimeFileUpdate) },
 
     }.ToFrozenDictionary();
 

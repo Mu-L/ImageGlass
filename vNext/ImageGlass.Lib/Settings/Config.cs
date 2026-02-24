@@ -381,15 +381,23 @@ public partial class Config : PhReactive
         set => Set(ConfigId.EnableCutMultipleFiles, value);
     }
 
-    ///// <summary>
-    ///// Enables / Disables the file system watcher.
-    ///// </summary>
-    //public bool EnableRealTimeFileUpdate { get; set; } = true;
+    /// <summary>
+    /// Enables / Disables the file system watcher.
+    /// </summary>
+    public bool EnableRealTimeFileUpdate
+    {
+        get => Get(ConfigId.EnableRealTimeFileUpdate, true);
+        set => Set(ConfigId.EnableRealTimeFileUpdate, value);
+    }
 
-    ///// <summary>
-    ///// Gets, sets value indicates that ImageGlass should open the new image file added in the viewing folder.
-    ///// </summary>
-    //public bool ShouldAutoOpenNewAddedImage { get; set; } = false;
+    /// <summary>
+    /// Gets, sets value indicates that ImageGlass should open the new image file added in the viewing folder.
+    /// </summary>
+    public bool ShouldAutoOpenNewAddedImage
+    {
+        get => Get(ConfigId.ShouldAutoOpenNewAddedImage, false);
+        set => Set(ConfigId.ShouldAutoOpenNewAddedImage, value);
+    }
 
     ///// <summary>
     ///// Uses Webview2 for viewing SVG format.

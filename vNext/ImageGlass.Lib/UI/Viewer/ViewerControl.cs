@@ -423,21 +423,24 @@ public partial class ViewerControl : PhControl
     /// </summary>
     public async Task SetPhotoAsync(Photo? inputPhoto, PhotoLoadingOptions? options = null)
     {
-        // unload current photo resources
-        UnloadPhoto();
-
-        if (inputPhoto is null)
+        lock (_lock)
         {
-            Photo = null;
-            Refresh(true);
-            return;
+            // unload current photo resources
+            UnloadPhoto();
+
+            if (inputPhoto is null)
+            {
+                Photo = null;
+                Refresh(true);
+                return;
+            }
+
+
+            SourceKind = PhotoSource.Native;
+            _loadingOptions = options ?? new();
+            _enablePanningVelocity = true;
+            Photo = inputPhoto;
         }
-
-
-        SourceKind = PhotoSource.Native;
-        _loadingOptions = options ?? new();
-        _enablePanningVelocity = true;
-        Photo = inputPhoto;
 
 
         // photo is loaded
@@ -448,7 +451,9 @@ public partial class ViewerControl : PhControl
         }
         else
         {
-            await LoadPhotoAsync(_loadingOptions.UseCache, false);
+            await LoadPhotoAsync(
+                useCache: _loadingOptions.UseCache,
+                skipLoadingEvent: !_loadingOptions.ResetZoom);
         }
     }
 
@@ -736,7 +741,7 @@ public partial class ViewerControl : PhControl
                     else
                     {
                         _isPreviewing.Clear();
-                        Refresh(true);
+                        Refresh(_loadingOptions.ResetZoom);
                     }
                 }
             }

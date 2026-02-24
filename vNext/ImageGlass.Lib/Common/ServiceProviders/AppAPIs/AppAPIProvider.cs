@@ -703,17 +703,11 @@ public partial class AppAPIProvider
             }
 
 
-            // TODO:
-            Core.Photos.SetFilePath(Core.Photos.CurrentIndex, newFilePath);
-
-            //// manually update the change if FileWatcher is not enabled
-            //if (!Core.Config.EnableRealTimeFileUpdate)
-            //{
-            //    Core.Photos.SetFileName(Core.Photos.CurrentIndex, newFilePath);
-
-            //    Gallery.Items[Local.CurrentIndex].Rename(newFilePath);
-            //    LoadImageInfo(ImageInfoUpdateTypes.Name | ImageInfoUpdateTypes.Path);
-            //}
+            // manually update the change if FileWatcher is not enabled
+            if (!Core.Config.EnableRealTimeFileUpdate)
+            {
+                Core.Photos.SetFilePath(Core.Photos.CurrentIndex, newFilePath);
+            }
         }
         catch (Exception ex)
         {
@@ -2519,5 +2513,57 @@ public partial class AppAPIProvider
 
 
     #endregion // Help APIs
+
+
+
+    #region Other APIs
+
+    /// <summary>
+    /// Sets the real-time file update engine.
+    /// </summary>
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public static void IG_SetRealTimeFileUpdate(string? boolStr)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr) ?? false;
+        IG_SetRealTimeFileUpdate(enabled);
+    }
+
+
+    /// <summary>
+    /// Sets the real-time file update engine.
+    /// </summary>
+    public static void IG_SetRealTimeFileUpdate(bool enabled)
+    {
+        Core.Config.EnableRealTimeFileUpdate = enabled;
+    }
+
+
+    /// <summary>
+    /// Sets the real-time file update engine without updating the setting <see cref="Config.EnableRealTimeFileUpdate"/>.
+    /// </summary>
+    public static void SetRealTimeFileWatcher(bool enabled)
+    {
+        if (enabled)
+        {
+            // get current dir path
+            var dirPath = Core.Photos.FileWatcherFolderPath;
+            if (string.IsNullOrEmpty(dirPath))
+            {
+                // get the first dir in the list
+                dirPath = Core.Photos.DistinctDirs.FirstOrDefault();
+            }
+
+            if (!string.IsNullOrEmpty(dirPath))
+            {
+                Core.Photos.StartFileWatcher(dirPath);
+            }
+        }
+        else
+        {
+            Core.Photos.StopFileWatcher();
+        }
+    }
+
+    #endregion // Other APIs
 
 }

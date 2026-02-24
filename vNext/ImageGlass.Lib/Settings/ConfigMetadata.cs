@@ -74,8 +74,8 @@ public enum ConfigId
     // EnableImageAsyncLoading,
     EnableCopyMultipleFiles,
     EnableCutMultipleFiles,
-    // EnableRealTimeFileUpdate,
-    // ShouldAutoOpenNewAddedImage,
+    EnableRealTimeFileUpdate,
+    ShouldAutoOpenNewAddedImage,
     // UseWebview2ForSvg,
     EnableDebug,
 
