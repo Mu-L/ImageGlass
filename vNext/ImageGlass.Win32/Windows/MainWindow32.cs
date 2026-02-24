@@ -80,8 +80,6 @@ public partial class MainWindow32 : MainWindow
 
     private void ColorProfileProvider_Changed(IWindowColorProfileProvider sender, ColorProfileChangedEventArgs e)
     {
-        VM.Title = $"{e.IsHdr} | {e.ProfilePath}";
-
         // update the current color profile
         if (Core.Config.ColorProfile == nameof(ColorProfileOption.CurrentMonitorProfile))
         {

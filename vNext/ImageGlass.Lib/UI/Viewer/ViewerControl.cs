@@ -406,7 +406,7 @@ public partial class ViewerControl : PhControl
 
             // reset
             AnimationSource = AnimationSources.None;
-            IsColorInverted = false;
+            ClearPhotoTransforms();
             _loadingOptions = new();
             _enablePanningVelocity = false;
             SetSourceSelection(new Rect(), false);
@@ -415,6 +415,15 @@ public partial class ViewerControl : PhControl
             // dispose native resources of photo
             DisposeNativePhotoResources();
         }
+    }
+
+
+    /// <summary>
+    /// Resets all photo transformation settings to their default values.
+    /// </summary>
+    public void ClearPhotoTransforms()
+    {
+        IsColorInverted = false;
     }
 
 
@@ -642,7 +651,6 @@ public partial class ViewerControl : PhControl
                 // update bitmap size
                 BitmapSize = e.Photo.Size;
 
-
                 // native bitmap is a animated bitmap
                 if (e.Photo.Bitmap is SkiaAnimator wicAnimator)
                 {
@@ -658,7 +666,12 @@ public partial class ViewerControl : PhControl
                     // apply color space
                     if (SkiaCodec.TryApplyColorSpace(imgFrame, Core.DestColorProfile, out var imgFrameColored))
                     {
-                        imgFrame?.Dispose();
+                        // don't dispose the clipboard photo
+                        if (!e.Photo.IsClipboard)
+                        {
+                            imgFrame?.Dispose();
+                        }
+
                         imgFrame = imgFrameColored;
                     }
 

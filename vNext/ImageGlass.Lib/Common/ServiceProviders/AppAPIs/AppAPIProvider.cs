@@ -325,7 +325,7 @@ public partial class AppAPIProvider
     ///     <list type="number">
     ///       <item>Selected image area.</item>
     ///       <item><see cref="Core.ClipboardImage"/>.</item>
-    ///       <item>Source <paramref name="srcFilePath"/> file.</item>
+    ///       <item>Source <paramref name="destFilePath"/> file.</item>
     ///     </list>
     ///   </para>
     /// </summary>
@@ -425,6 +425,7 @@ public partial class AppAPIProvider
 
             // reset transformations
             Core.ImageTransform.Clear();
+            Viewer.ClearPhotoTransforms();
         }
 
 
@@ -1743,7 +1744,7 @@ public partial class AppAPIProvider
         // 2. if clipboard contains image pixels
         if (data.Contains(DataFormat.Bitmap))
         {
-            using var abmp = await data.TryGetBitmapAsync();
+            var abmp = await data.TryGetBitmapAsync();
             var skBmp = SkiaCodec.FromBitmap(abmp);
             if (skBmp is not null)
             {

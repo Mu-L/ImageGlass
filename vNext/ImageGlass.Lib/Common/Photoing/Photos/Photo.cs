@@ -704,13 +704,19 @@ public partial class Photo : DisposableImpl
             // 1. save clipboard photo to file
             if (IsClipboard && Bitmap is SKImage img)
             {
-                await SkiaCodec.SaveAsync(img, destFilePath, transforms, quality, token);
+                await Task.Factory.StartNew(async () =>
+                {
+                    await SkiaCodec.SaveAsync(img, destFilePath, transforms, quality, token);
+                }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
             }
 
             // 2. save photo file to file
             else
             {
-                await MagickCodec.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, quality, token);
+                await Task.Factory.StartNew(async () =>
+                {
+                    await MagickCodec.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, quality, token);
+                }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
             }
         }
         catch (OperationCanceledException) { }
