@@ -127,6 +127,7 @@ public partial class AppAPIProvider
 
 
         // Tools
+        { API.IG_LosslessCompression,       PhCommands.Create(IG_LosslessCompressionAsync) },
         { API.IG_GetMoreTool,               PhCommands.Create(IG_GetMoreTool) },
 
 

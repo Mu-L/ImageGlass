@@ -816,5 +816,40 @@ public static partial class MagickCodec
 
 
 
+    /// <summary>
+    /// Checks if the supplied file name is supported for lossless compression using Magick.NET.
+    /// </summary>
+    public static bool IsLosslessCompressSupported(string? filePath)
+    {
+        var opt = new ImageOptimizer()
+        {
+            OptimalCompression = true,
+        };
+
+        return opt.IsSupported(filePath ?? string.Empty);
+    }
+
+    /// <summary>
+    /// Performs lossless compression on the specified file using Magick.NET.
+    /// If the new file size is not smaller, the file won't be overwritten.
+    /// </summary>
+    /// <returns>True when the image could be compressed otherwise false.</returns>
+    /// <exception cref="NotSupportedException"></exception>
+    public static bool LosslessCompress(string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath)) return false;
+
+        var fi = new FileInfo(filePath);
+        var opt = new ImageOptimizer()
+        {
+            OptimalCompression = true,
+        };
+
+        // check if the format is supported
+        if (!opt.IsSupported(fi)) throw new NotSupportedException("IGE_002: Unsupported image format.");
+
+        return opt.LosslessCompress(fi);
+    }
+
 }
 

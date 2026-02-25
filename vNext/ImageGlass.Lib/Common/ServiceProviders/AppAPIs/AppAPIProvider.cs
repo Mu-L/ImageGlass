@@ -2419,6 +2419,60 @@ public partial class AppAPIProvider
     #region Tools APIs
 
     /// <summary>
+    /// Performs a lossless compression operation.
+    /// </summary>
+    public async Task IG_LosslessCompressionAsync()
+    {
+        if (Core.IsBusy || Core.Photos.Count == 0 || Core.ClipboardImage != null) return;
+
+        var filePath = Core.Photos.CurrentFilePath;
+
+        // 1. check if image format not supported
+        if (!MagickCodec.IsLosslessCompressSupported(filePath))
+        {
+            _ = await ModalWindow.ShowInfoAsync(_mainWindow, new ModalWindowOptions
+            {
+                Title = Core.Lang[LangId.FrmMain_MnuLosslessCompression],
+                Heading = Core.Lang[LangId._NotSupported],
+                Description = filePath,
+                Thumbnail = Core.Photos.Current?.GalleryThumbnail,
+            });
+
+            return;
+        }
+
+
+        // 2. perform lossless compression
+        Core.IsBusy = true;
+
+        var compressionWindow = new LosslessCompressionWindow(filePath)
+        {
+            Title = Core.Lang[LangId.FrmMain_MnuLosslessCompression],
+            Heading = Core.Lang[LangId.FrmMain_MnuLosslessCompression_Confirm],
+            Description = Core.Lang[LangId.FrmMain_MnuLosslessCompression_Description],
+            Note = $"""
+            {filePath}
+
+            {Core.Photos.CurrentMetadata?.FileSizeFormatted}
+            """,
+            NoteStyle = InfoBarSeverity.Info,
+            Thumbnail = Core.Photos.Current?.GalleryThumbnail,
+
+            Button1Text = Core.Lang[LangId._Yes],
+            Button2Text = Core.Lang[LangId._No],
+            IsButton1Visible = true,
+            IsButton2Visible = true,
+            IsButton3Visible = false,
+            DefaultButton = DialogButton.Button1,
+            DefaultFocus = DialogFocus.Button1,
+        };
+        _ = await compressionWindow.ShowAsync(_mainWindow);
+
+        Core.IsBusy = false;
+    }
+
+
+    /// <summary>
     /// Opens website to download more tools.
     /// </summary>
     public void IG_GetMoreTool()
