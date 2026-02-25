@@ -48,6 +48,7 @@ public partial class ToolbarControl : PhControl
     public readonly List<ToolbarItemModel> _groupSecondaryItemModels = [];
     public readonly List<ToolbarItemModel> _groupOverflowItemModels = [];
     private readonly List<Control> _itemElements = [];
+    private double _lastOverflowWidth;
 
     private bool _shouldUpdateMenuText = false;
 
@@ -113,6 +114,11 @@ public partial class ToolbarControl : PhControl
     protected override void OnSizeChanged(SizeChangedEventArgs e)
     {
         base.OnSizeChanged(e);
+
+        // skip overflow recalculation when only the height changed
+        if (Math.Abs(e.NewSize.Width - _lastOverflowWidth) < 0.5) return;
+        _lastOverflowWidth = e.NewSize.Width;
+
         HandleOverflow();
     }
 
@@ -495,12 +501,16 @@ public partial class ToolbarControl : PhControl
     {
         if (string.IsNullOrWhiteSpace(configName)) return;
         if (_configBindingsMap.GetValueOrDefault(configName) is not List<int> itemIndice) return;
-        if (ItemsSource is not IEnumerable<ToolbarItemModel> allItems) return;
 
-        var items = allItems.ToArray();
+        var items = ItemsSource;
+        if (items is null || items.Count == 0) return;
+
         foreach (var srcIndex in itemIndice)
         {
-            items[srcIndex].IsChecked = ComputeCheckState(items[srcIndex]);
+            if ((uint)srcIndex < (uint)items.Count)
+            {
+                items[srcIndex].IsChecked = ComputeCheckState(items[srcIndex]);
+            }
         }
     }
 

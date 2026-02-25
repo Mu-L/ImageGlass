@@ -50,24 +50,22 @@ public partial class BHelper
     /// <summary>
     /// Gets the app version.
     /// </summary>
-    public static Version AppVersion
+    public static Version AppVersion { get; } = GetAppVersion();
+    private static Version GetAppVersion()
     {
-        get
+        var defaultVersion = new Version();
+        if (string.IsNullOrWhiteSpace(AppExePath)) return defaultVersion;
+
+        try
         {
-            var defaultVersion = new Version();
-            if (string.IsNullOrWhiteSpace(AppExePath)) return defaultVersion;
-
-            try
+            if (Version.TryParse(FileVersionInfo.GetVersionInfo(AppExePath).FileVersion, out var fileVersion))
             {
-                if (Version.TryParse(FileVersionInfo.GetVersionInfo(AppExePath).FileVersion, out var fileVersion))
-                {
-                    return fileVersion;
-                }
+                return fileVersion;
             }
-            catch { }
-
-            return defaultVersion;
         }
+        catch { }
+
+        return defaultVersion;
     }
 
 
@@ -102,7 +100,7 @@ public partial class BHelper
     /// </summary>
     public static string ConfigDir(params string[] paths)
     {
-        // create the directory if not exists
+        // create the directory if not exist
         Directory.CreateDirectory(ConfigPath);
 
         var newPaths = paths.ToList();

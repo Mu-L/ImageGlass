@@ -184,8 +184,8 @@ public partial class App : Application
 
 
 
-        // initialize Magick decoder
-        MagickCodec.Initialize();
+        // initialize Magick decoder on background thread
+        _ = Task.Run(MagickCodec.Initialize);
 
         // load app language
         _ = Core.Config.LoadCurrentLanguageAsync();

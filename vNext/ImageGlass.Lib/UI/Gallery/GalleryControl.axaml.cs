@@ -37,6 +37,7 @@ namespace ImageGlass.UI;
 public partial class GalleryControl : PhControl
 {
     private CancellationTokenSource? _cancelScrollAnimation;
+    private ScrollViewer? _cachedScrollViewerEl;
     public static readonly Thickness GalleryItemMargin = new(1);
     public static readonly Thickness GalleryPadding = new(4, 4, 4, 8);
 
@@ -134,6 +135,7 @@ public partial class GalleryControl : PhControl
     {
         base.OnUnloaded(e);
 
+        _cachedScrollViewerEl = null;
         Core.Config.PropertyChanged -= Config_PropertyChanged;
     }
 
@@ -320,10 +322,12 @@ public partial class GalleryControl : PhControl
     /// </summary>
     public ScrollViewer? FindScrollViewer()
     {
-        return PART_ItemsControl
+        _cachedScrollViewerEl ??= PART_ItemsControl
             .GetVisualDescendants()
             .OfType<ScrollViewer>()
             .FirstOrDefault();
+
+        return _cachedScrollViewerEl;
     }
 
 

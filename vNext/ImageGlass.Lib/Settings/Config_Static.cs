@@ -68,7 +68,7 @@ public partial class Config
     /// Gets user settings from command line arguments
     /// </summary>
     [JsonIgnore]
-    public static string[] SettingsFromCmdLine => Environment.GetCommandLineArgs()
+    public static string[] SettingsFromCmdLine { get; } = Environment.GetCommandLineArgs()
         // filter the command lines begin with '/'
         // example: ImageGlass.exe /FrmMainWidth=900
         .Where(cmd => cmd.StartsWith(Const.CONFIG_CMD_PREFIX))
@@ -87,7 +87,7 @@ public partial class Config
     /// Gets the default image formats.
     /// </summary>
     [JsonIgnore]
-    public static ReadOnlyCollection<string> DefaultFileFormats => new(
+    public static ReadOnlyCollection<string> DefaultFileFormats { get; } = new(
         Const.IMAGE_FORMATS.Split(';',
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
         )
@@ -98,7 +98,7 @@ public partial class Config
     /// Gets the default image info tags.
     /// </summary>
     [JsonIgnore]
-    public static ReadOnlyCollection<string> DefaultImageInfoTags => [
+    public static ReadOnlyCollection<string> DefaultImageInfoTags { get; } = new([
         "Name",
         "ListCount",
         "FrameCount",
@@ -109,7 +109,7 @@ public partial class Config
         "ExifRating",
         "DateTimeAuto",
         "AppName",
-    ];
+    ]);
 
 
     /// <summary>

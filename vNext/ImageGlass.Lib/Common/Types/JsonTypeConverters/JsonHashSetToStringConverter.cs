@@ -45,6 +45,6 @@ public class JsonHashSetToStringConverter : JsonConverter<HashSet<string>>
         var str = reader.GetString();
         var arr = str?.Split(_delimiter, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        return new HashSet<string>(arr ?? []);
+        return new HashSet<string>(arr ?? [], StringComparer.OrdinalIgnoreCase);
     }
 }

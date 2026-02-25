@@ -760,7 +760,7 @@ public partial class Config : PhReactive
     [JsonConverter(typeof(JsonHashSetToStringConverter))]
     public HashSet<string> SingleFrameFormats
     {
-        get => Get(ConfigId.SingleFrameFormats, new HashSet<string> { ".avif", ".heic", ".heif", ".psd", ".jxl" });
+        get => Get(ConfigId.SingleFrameFormats, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".avif", ".heic", ".heif", ".psd", ".jxl" });
         set => Set(ConfigId.SingleFrameFormats, value);
     }
 
@@ -771,7 +771,7 @@ public partial class Config : PhReactive
     [JsonConverter(typeof(JsonHashSetToStringConverter))]
     public HashSet<string> NativeCodecReadFormats
     {
-        get => Get(ConfigId.NativeCodecReadFormats, new HashSet<string> { ".png", ".jpg", ".gif", ".gifv", ".webp", ".apng" });
+        get => Get(ConfigId.NativeCodecReadFormats, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".png", ".jpg", ".gif", ".gifv", ".webp", ".apng" });
         set => Set(ConfigId.NativeCodecReadFormats, value);
     }
 
@@ -782,7 +782,7 @@ public partial class Config : PhReactive
     [JsonConverter(typeof(JsonHashSetToStringConverter))]
     public HashSet<string> FileFormats
     {
-        get => Get(ConfigId.FileFormats, new HashSet<string>(DefaultFileFormats));
+        get => Get(ConfigId.FileFormats, new HashSet<string>(DefaultFileFormats, StringComparer.OrdinalIgnoreCase));
         set => Set(ConfigId.FileFormats, value);
     }
 
@@ -870,7 +870,7 @@ public partial class Config : PhReactive
     public void Set(ConfigId configName, object value)
     {
         var oldValue = Get<object?>(configName, null);
-        if (value == oldValue) return;
+        if (Equals(value, oldValue)) return;
 
         _values[configName] = value;
         _ = OnPropertyChanged(value, oldValue, configName.ToString());

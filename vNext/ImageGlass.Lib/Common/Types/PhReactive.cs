@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace ImageGlass.Common.Types;
 
@@ -33,6 +34,7 @@ public partial class PhReactive : INotifyPropertyChanged
     #region INotifyPropertyChanged Implementation
 
     // to manage PropertyChanged events
+    private readonly Lock _eventLock = new();
     private List<PropertyChangedEventHandler> _propertyChangedEvents = [];
     private event PropertyChangedEventHandler? _propertyChanged;
 
@@ -48,16 +50,22 @@ public partial class PhReactive : INotifyPropertyChanged
         {
             if (value is not null)
             {
-                _propertyChanged += value;
-                _propertyChangedEvents.Add(value);
+                lock (_eventLock)
+                {
+                    _propertyChanged += value;
+                    _propertyChangedEvents.Add(value);
+                }
             }
         }
         remove
         {
             if (value is not null)
             {
-                _propertyChanged -= value;
-                _propertyChangedEvents.Remove(value);
+                lock (_eventLock)
+                {
+                    _propertyChanged -= value;
+                    _propertyChangedEvents.Remove(value);
+                }
             }
         }
     }
@@ -102,12 +110,15 @@ public partial class PhReactive : INotifyPropertyChanged
     /// </summary>
     public void CleanUpPropertyChangedEvents()
     {
-        // remove PropertyChanged events
-        foreach (var eventHandler in _propertyChangedEvents)
+        lock (_eventLock)
         {
-            _propertyChanged -= eventHandler;
+            // remove PropertyChanged events
+            foreach (var eventHandler in _propertyChangedEvents)
+            {
+                _propertyChanged -= eventHandler;
+            }
+            _propertyChangedEvents.Clear();
         }
-        _propertyChangedEvents.Clear();
     }
 
 

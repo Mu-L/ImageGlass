@@ -98,7 +98,11 @@ public static partial class SkiaCodec
                 if (colorProfile.Size > 0)
                 {
                     var bytes = new byte[colorProfile.Size];
-                    Marshal.Copy(colorProfile.Buffer, bytes, 0, (int)colorProfile.Size);
+                    unsafe
+                    {
+                        new ReadOnlySpan<byte>((void*)colorProfile.Buffer, (int)colorProfile.Size)
+                            .CopyTo(bytes);
+                    }
 
                     // create photo profile
                     var photoProfile = new PhotoColorProfile(bytes);

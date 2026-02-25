@@ -22,7 +22,6 @@ using SkiaSharp;
 using System;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -207,16 +206,6 @@ public partial class PhotoMetadata : DisposableImpl
             FileLastWriteTimeUtc = DateTime.MinValue;
             FileLastAccessTimeUtc = DateTime.MinValue;
         }
-    }
-
-
-    /// <summary>
-    /// Checks if the file extension matches any of the specified extensions, ignoring case.
-    /// </summary>
-    /// <param name="exts">The file extension to compare, e.g. <c>.PNG</c>.</param>
-    public bool IsOneOfExtensions(params string[] exts)
-    {
-        return exts.Any(ext => FileExtension.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
 
 

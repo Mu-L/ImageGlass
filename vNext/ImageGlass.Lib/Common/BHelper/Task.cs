@@ -113,11 +113,13 @@ public partial class BHelper
     /// </summary>
     public static void GcCollect(int delayMs = 500)
     {
-        _cancelGcCollect?.Cancel();
-        _cancelGcCollect?.Dispose();
-        _cancelGcCollect = new();
+        var newCts = new CancellationTokenSource();
+        var oldCts = Interlocked.Exchange(ref _cancelGcCollect, newCts);
 
-        _ = GCCollectAsync(delayMs, _cancelGcCollect.Token);
+        oldCts?.Cancel();
+        oldCts?.Dispose();
+
+        _ = GCCollectAsync(delayMs, newCts.Token);
     }
 
 

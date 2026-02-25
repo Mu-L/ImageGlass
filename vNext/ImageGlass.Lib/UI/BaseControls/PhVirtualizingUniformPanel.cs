@@ -505,22 +505,18 @@ public class PhVirtualizingUniformPanel : VirtualizingPanel, IScrollSnapPointsIn
             }
         }
 
-        // 2) Realize missing elements in range
+        // 2) Build a set of already-realized indices for O(1) lookup
+        var realizedIndices = new HashSet<int>(_realizedElements.Count);
+        for (var i = 0; i < _realizedElements.Count; i++)
+        {
+            realizedIndices.Add(_realizedElements[i].Index);
+        }
+
+        // 3) Realize missing elements in range
         for (var idx = firstIndex; idx <= lastIndex; idx++)
         {
             if (idx < 0 || idx >= items.Count) continue;
-
-            // Check if already realized
-            var found = false;
-            for (var i = 0; i < _realizedElements.Count; i++)
-            {
-                if (_realizedElements[i].Index == idx)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (found) continue;
+            if (realizedIndices.Contains(idx)) continue;
 
             var element = GetOrCreateElement(items, idx);
             _realizedElements.Add(new RealizedElement(idx, element));

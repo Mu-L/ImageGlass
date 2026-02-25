@@ -19,12 +19,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using System;
+using System.Collections.Frozen;
+using System.Collections.Generic;
 
 namespace ImageGlass.Common.Types;
 
 
 public static class Resx
 {
+    /// <summary>
+    /// Cached mapping from <see cref="ResxId"/> to its string name.
+    /// </summary>
+    private static readonly FrozenDictionary<ResxId, string> _resxIdNameCache =
+        Enum.GetValues<ResxId>().ToFrozenDictionary(v => v, v => Enum.GetName(v) ?? string.Empty);
+
 
     /// <summary>
     /// Gets resource.
@@ -53,7 +61,7 @@ public static class Resx
     /// </summary>
     public static string GetResxName(ResxId resxId)
     {
-        return Enum.GetName(resxId) ?? string.Empty;
+        return _resxIdNameCache.GetValueOrDefault(resxId, string.Empty);
     }
 
 

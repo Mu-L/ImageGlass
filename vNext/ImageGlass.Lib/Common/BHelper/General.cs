@@ -36,16 +36,11 @@ public partial class BHelper
     /// <summary>
     /// Gets the type of operating system.
     /// </summary>
-    public static OSType OS
-    {
-        get
-        {
-            if (OperatingSystem.IsWindows()) return OSType.Windows;
-            if (OperatingSystem.IsMacCatalyst()) return OSType.Mac;
-            if (OperatingSystem.IsLinux()) return OSType.Linux;
-            return OSType.Unknown;
-        }
-    }
+    public static OSType OS { get; } =
+        OperatingSystem.IsWindows() ? OSType.Windows :
+        OperatingSystem.IsMacCatalyst() ? OSType.Mac :
+        OperatingSystem.IsLinux() ? OSType.Linux :
+        OSType.Unknown;
 
 
     /// <summary>

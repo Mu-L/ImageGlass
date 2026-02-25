@@ -374,7 +374,7 @@ public partial class Photo : DisposableImpl
     /// </summary>
     private async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var useNativeCodec = meta.IsOneOfExtensions(Core.Config.NativeCodecReadFormats.ToArray())
+        var useNativeCodec = Core.Config.NativeCodecReadFormats.Contains(meta.FileExtension)
             && SkiaCodec.CanRead(meta);
 
         // use native codec
@@ -819,7 +819,8 @@ public partial class Photo : DisposableImpl
     /// </summary>
     public void UnloadThumbnail()
     {
-        lock (_thumbnailLock)
+        _thumbnailLock.Wait();
+        try
         {
             _cancelThumbnailLoading?.Cancel();
             _cancelThumbnailLoading?.Dispose();
@@ -827,6 +828,10 @@ public partial class Photo : DisposableImpl
 
             GalleryThumbnail?.Dispose();
             GalleryThumbnail = null;
+        }
+        finally
+        {
+            _thumbnailLock.Release();
         }
     }
 

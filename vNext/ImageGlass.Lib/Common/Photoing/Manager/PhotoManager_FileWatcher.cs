@@ -163,9 +163,7 @@ public partial class PhotoManager
         var ext = Path.GetExtension(filePath);
         if (string.IsNullOrEmpty(ext)) return false;
 
-        var isSupported = Core.Config.FileFormats.Contains(ext, StringComparer.OrdinalIgnoreCase);
-
-        return isSupported;
+        return Core.Config.FileFormats.Contains(ext);
     }
 
 
@@ -264,18 +262,19 @@ public partial class PhotoManager
     /// </summary>
     private void ProcessPendingAdds()
     {
-        // drain queue
-        var newFiles = new List<string>();
+        // drain queue into a HashSet for O(1) dedup
+        var newFilesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         while (_pendingAdds.TryDequeue(out var path))
         {
             // avoid duplicates
-            if (IndexOf(path) < 0 && !newFiles.Contains(path))
+            if (IndexOf(path) < 0)
             {
-                newFiles.Add(path);
+                newFilesSet.Add(path);
             }
         }
 
-        if (newFiles.Count == 0) return;
+        if (newFilesSet.Count == 0) return;
+        var newFiles = new List<string>(newFilesSet);
 
         // determine sorted insertion index for each file
         var options = new FileSearchOptions()
@@ -298,7 +297,13 @@ public partial class PhotoManager
         {
             oldCurrentIndex = CurrentIndex;
             currentFilePath = CurrentFilePath;
-            currentPaths = Items.Select(p => p.FilePath).ToList();
+
+            // pre-allocate and copy paths without LINQ
+            currentPaths = new List<string>(Items.Count);
+            for (var i = 0; i < Items.Count; i++)
+            {
+                currentPaths.Add(Items[i].FilePath);
+            }
         }
 
         // build a combined list, sort it, then find each new file's position
@@ -343,16 +348,14 @@ public partial class PhotoManager
     /// </summary>
     private void ProcessPendingChanges()
     {
-        var changedList = new List<string>();
+        var changedSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         while (_pendingChanges.TryDequeue(out var path))
         {
-            if (!changedList.Contains(path))
-            {
-                changedList.Add(path);
-            }
+            changedSet.Add(path);
         }
 
-        if (changedList.Count == 0) return;
+        if (changedSet.Count == 0) return;
+        var changedList = new List<string>(changedSet);
 
 
         string currentFilePath;
@@ -390,14 +393,12 @@ public partial class PhotoManager
             // small delay to collect more items that may arrive in a burst
             Thread.Sleep(100);
 
-            var deletedList = new List<string>();
+            var deletedSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             while (_deleteQueue.TryDequeue(out var filePath))
             {
-                if (!deletedList.Contains(filePath))
-                {
-                    deletedList.Add(filePath);
-                }
+                deletedSet.Add(filePath);
             }
+            var deletedList = new List<string>(deletedSet);
 
             if (deletedList.Count == 0) continue;
 
