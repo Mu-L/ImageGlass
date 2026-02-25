@@ -155,6 +155,42 @@ public partial class ModalWindow : DialogWindow
 
 
     /// <summary>
+    /// Gets, sets the progress value.
+    /// </summary>
+    public double ProgressValue
+    {
+        get => GetValue(ProgressValueProperty);
+        set => SetValue(ProgressValueProperty, value);
+    }
+    public static readonly StyledProperty<double> ProgressValueProperty =
+        AvaloniaProperty.Register<ModalWindow, double>(nameof(ProgressValue));
+
+
+    /// <summary>
+    /// Gets, sets the progress visibility
+    /// </summary>
+    public bool IsProgressVisible
+    {
+        get => GetValue(IsProgressVisibleProperty);
+        set => SetValue(IsProgressVisibleProperty, value);
+    }
+    public static readonly StyledProperty<bool> IsProgressVisibleProperty =
+        AvaloniaProperty.Register<ModalWindow, bool>(nameof(IsProgressVisible));
+
+
+    /// <summary>
+    /// Gets, sets the progress indeterminate state.
+    /// </summary>
+    public bool IsProgressIndeterminate
+    {
+        get => GetValue(IsProgressIndeterminateProperty);
+        set => SetValue(IsProgressIndeterminateProperty, value);
+    }
+    public static readonly StyledProperty<bool> IsProgressIndeterminateProperty =
+        AvaloniaProperty.Register<ModalWindow, bool>(nameof(IsProgressIndeterminate));
+
+
+    /// <summary>
     /// Gets the visibility of heading control.
     /// </summary>
     public bool IsHeadingVisible => !string.IsNullOrWhiteSpace(Heading);
@@ -453,11 +489,24 @@ public partial class ModalWindow : DialogWindow
             }
         };
 
+
+        // progress bar
+        var progressEl = new ProgressBar
+        {
+            Minimum = 0,
+            Maximum = 100,
+            [!ProgressBar.ValueProperty] = this[!ProgressValueProperty],
+            [!ProgressBar.IsIndeterminateProperty] = this[!IsProgressIndeterminateProperty],
+            [!ProgressBar.IsVisibleProperty] = this[!IsProgressVisibleProperty],
+        };
+
         rightSection.Children.Add(lblHeading);
         rightSection.Children.Add(lblDescription);
         rightSection.Children.Add(_txtInput);
         rightSection.Children.Add(lblDetails);
         rightSection.Children.Add(_noteContainer);
+        rightSection.Children.Add(progressEl);
+
 
         Grid.SetColumn(leftSection, 0);
         Grid.SetColumn(rightSection, 1);
