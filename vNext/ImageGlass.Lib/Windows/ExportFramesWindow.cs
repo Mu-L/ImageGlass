@@ -16,8 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Threading;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
@@ -29,43 +27,13 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Windows;
 
-public partial class ExportFramesWindow : DialogWindow
+public partial class ExportFramesWindow : ModalWindow
 {
     private CancellationTokenSource _cancel = new();
 
     private string _srcFilePath;
     private string _destDirPath;
     private bool _isDone = false;
-
-
-    #region Public Properties
-
-    /// <summary>
-    /// Gets, sets the description.
-    /// </summary>
-    public string? Description
-    {
-        get => GetValue(DescriptionProperty);
-        set => SetValue(DescriptionProperty, value);
-    }
-    public static readonly StyledProperty<string?> DescriptionProperty =
-        AvaloniaProperty.Register<ExportFramesWindow, string?>(nameof(Description));
-
-
-    /// <summary>
-    /// Gets, sets the progress value.
-    /// </summary>
-    public double ProgressValue
-    {
-        get => GetValue(ProgressValueProperty);
-        set => SetValue(ProgressValueProperty, value);
-    }
-    public static readonly StyledProperty<double> ProgressValueProperty =
-        AvaloniaProperty.Register<ExportFramesWindow, double>(nameof(ProgressValue));
-
-
-    #endregion // Public Properties
-
 
 
     public ExportFramesWindow(string srcFilePath, string destDirPath)
@@ -75,29 +43,10 @@ public partial class ExportFramesWindow : DialogWindow
 
         _srcFilePath = srcFilePath;
         _destDirPath = destDirPath;
-
-        IsButton1Visible = true;
-        IsButton2Visible = true;
-        IsButton3Visible = false;
-        Width = 500;
-        MaxWidth = 500;
-        Description = destDirPath;
-
-        DialogContent = CreateDialogContentElement();
     }
 
 
     #region Override Methods
-
-    protected override void OnIgLanguageChanged()
-    {
-        base.OnIgLanguageChanged();
-
-        Title = Core.Lang[LangId.FrmExportFrames_Title];
-        Button1Text = Core.Lang[LangId._Start];
-        Button2Text = Core.Lang[LangId._Cancel];
-    }
-
 
     protected override void OnDialogSubmitted(DialogEventArgs e)
     {
@@ -107,7 +56,7 @@ public partial class ExportFramesWindow : DialogWindow
         }
         else
         {
-            _ = ExportAsync(_srcFilePath, _destDirPath);
+            _ = RunAsync(_srcFilePath, _destDirPath);
         }
     }
 
@@ -135,46 +84,23 @@ public partial class ExportFramesWindow : DialogWindow
 
     #region Private methods
 
-    /// <summary>
-    /// Creates dialog content element.
-    /// </summary>
-    private StackPanel CreateDialogContentElement()
-    {
-
-        // 1. create root element
-        var root = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
-            Spacing = 16,
-        };
-
-        root.Children.Add(new TextBlock
-        {
-            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-            [!TextBlock.TextProperty] = this[!DescriptionProperty],
-        });
-
-        root.Children.Add(new ProgressBar
-        {
-            Minimum = 0,
-            Maximum = 100,
-            [!ProgressBar.ValueProperty] = this[!ProgressValueProperty],
-        });
-
-        return root;
-    }
-
 
     /// <summary>
     /// Exports frames from the specified source file to the destination directory asynchronously.
     /// </summary>
-    private async Task ExportAsync(string srcFilePath, string destDirPath)
+    private async Task RunAsync(string srcFilePath, string destDirPath)
     {
         _isDone = false;
-        ProgressValue = 0;
+        _btn1.IsEnabled = false;
+        _btn2.Focus(Avalonia.Input.NavigationMethod.Tab);
+
         IsButton1Visible = false;
+        IsButton2Visible = true;
         Button2Text = Core.Lang[LangId._Cancel];
+
+        IsProgressVisible = true;
+        IsProgressIndeterminate = true;
+        ProgressValue = 0;
 
 
         _ = Task.Factory.StartNew(async () =>
@@ -186,19 +112,24 @@ public partial class ExportFramesWindow : DialogWindow
                 {
                     var percent = Math.Round((info.FrameNumber * 100f) / info.FrameCount, 0);
 
+                    IsProgressIndeterminate = false;
                     ProgressValue = percent;
                     Title = $"{Core.Lang[LangId.FrmExportFrames_Title]} ({percent}%)";
 
                     // done
                     if (info.FrameNumber == info.FrameCount)
                     {
+                        _btn1.IsEnabled = true;
+                        _btn1.Focus(Avalonia.Input.NavigationMethod.Tab);
                         IsButton1Visible = true;
                         Button1Text = Core.Lang[LangId.FrmExportFrames_OpenOutputFolder];
+
                         Button2Text = Core.Lang[LangId._Close];
                         Description = string.Format(Core.Lang[LangId.FrmExportFrames_ExportDone],
                             info.FrameNumber,
                             $"\"{destDirPath}\"");
 
+                        IsProgressVisible = false;
                         _isDone = true;
                     }
 

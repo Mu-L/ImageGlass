@@ -473,11 +473,30 @@ public partial class AppAPIProvider
 
 
         // 3. export frames
-        var dialog = new ExportFramesWindow(srcFilePath, destDirPath);
+        Core.IsBusy = true;
         Viewer.StopAnimator();
 
-        await dialog.ShowAsync(_mainWindow);
+        var exportWindow = new ExportFramesWindow(srcFilePath, destDirPath)
+        {
+            Title = Core.Lang[LangId.FrmExportFrames_Title],
+            Heading = Core.Lang[LangId.FrmExportFrames_Title],
+            Description = srcFilePath,
+            NoteStyle = InfoBarSeverity.Info,
+            Thumbnail = Core.Photos.Current?.GalleryThumbnail,
+
+            Button1Text = Core.Lang[LangId._Start],
+            Button2Text = Core.Lang[LangId._Cancel],
+            IsButton1Visible = true,
+            IsButton2Visible = true,
+            IsButton3Visible = false,
+            DefaultButton = DialogButton.Button1,
+            DefaultFocus = DialogFocus.Button1,
+        };
+
+
+        await exportWindow.ShowAsync(_mainWindow);
         Viewer.StartAnimator();
+        Core.IsBusy = false;
     }
 
 
