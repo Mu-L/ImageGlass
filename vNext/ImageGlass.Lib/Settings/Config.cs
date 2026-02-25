@@ -66,6 +66,7 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets value indicating whether the slideshow mode is enabled or not.
     /// </summary>
+    [JsonIgnore]
     public bool EnableSlideshow
     {
         get => Get(ConfigId.EnableSlideshow, false);
@@ -77,25 +78,41 @@ public partial class Config : PhReactive
     ///// </summary>
     //public bool HideMainWindowInSlideshow { get; set; } = true;
 
-    ///// <summary>
-    ///// Gets, sets value if the countdown timer is shown or not.
-    ///// </summary>
-    //public bool ShowSlideshowCountdown { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value if the countdown timer is shown or not.
+    /// </summary>
+    public bool ShowSlideshowCountdown
+    {
+        get => Get(ConfigId.ShowSlideshowCountdown, true);
+        set => Set(ConfigId.ShowSlideshowCountdown, value);
+    }
 
-    ///// <summary>
-    ///// Gets, sets value indicates whether the slide show interval is random.
-    ///// </summary>
-    //public bool UseRandomIntervalForSlideshow { get; set; } = false;
+    /// <summary>
+    /// Gets, sets value indicates whether the slide show interval is random.
+    /// </summary>
+    public bool UseRandomIntervalForSlideshow
+    {
+        get => Get(ConfigId.UseRandomIntervalForSlideshow, false);
+        set => Set(ConfigId.UseRandomIntervalForSlideshow, value);
+    }
 
-    ///// <summary>
-    ///// Gets, sets value indicates that slideshow will loop back to the first image when reaching the end of list.
-    ///// </summary>
-    //public bool EnableLoopSlideshow { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value indicates that slideshow will loop back to the first image when reaching the end of list.
+    /// </summary>
+    public bool EnableLoopSlideshow
+    {
+        get => Get(ConfigId.EnableLoopSlideshow, true);
+        set => Set(ConfigId.EnableLoopSlideshow, value);
+    }
 
-    ///// <summary>
-    ///// Gets, sets value indicates that slideshow is played in full screen, not window mode.
-    ///// </summary>
-    //public bool EnableFullscreenSlideshow { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value indicates that slideshow is played in full screen, not window mode.
+    /// </summary>
+    public bool EnableFullscreenSlideshow
+    {
+        get => Get(ConfigId.EnableFullscreenSlideshow, true);
+        set => Set(ConfigId.EnableFullscreenSlideshow, value);
+    }
 
     /// <summary>
     /// Gets, sets value of FrmMain's frameless mode.
@@ -452,27 +469,39 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ZoomSpeed, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets slide show interval (minimum value if it's random)
-    ///// </summary>
-    //public double SlideshowInterval { get; set; } = 5;
+    /// <summary>
+    /// Gets, sets slide show interval (minimum value if it's random)
+    /// </summary>
+    public double SlideshowInterval
+    {
+        get => Get(ConfigId.SlideshowInterval, 5d);
+        set => Set(ConfigId.SlideshowInterval, value);
+    }
 
-    ///// <summary>
-    ///// Gets, sets the maximum slide show interval value
-    ///// </summary>
-    //public double SlideshowIntervalTo { get; set; } = 5;
+    /// <summary>
+    /// Gets, sets the maximum slide show interval value
+    /// </summary>
+    public double SlideshowIntervalTo
+    {
+        get => Get(ConfigId.SlideshowIntervalTo, 5d);
+        set => Set(ConfigId.SlideshowIntervalTo, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the number of image changes to notify <see cref="SlideshowNotificationSound"/> sound in slideshow mode.
     ///// </summary>
-    //public int SlideshowImagesToNotifySound { get; set; } = 0;
+    //public uint SlideshowImagesToNotifySound
+    //{
+    //    get => Get(ConfigId.SlideshowImagesToNotifySound, 0u);
+    //    set => Set(ConfigId.SlideshowImagesToNotifySound, value);
+    //}
 
     /// <summary>
     /// Gets, sets value of thumbnail dimension in pixel
     /// </summary>
-    public int ThumbnailSize
+    public uint ThumbnailSize
     {
-        get => Get(ConfigId.ThumbnailSize, 70);
+        get => Get(ConfigId.ThumbnailSize, 70u);
         set => Set(ConfigId.ThumbnailSize, value);
     }
 
