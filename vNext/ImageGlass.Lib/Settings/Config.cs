@@ -487,14 +487,14 @@ public partial class Config : PhReactive
         set => Set(ConfigId.SlideshowIntervalTo, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets the number of image changes to notify <see cref="SlideshowNotificationSound"/> sound in slideshow mode.
-    ///// </summary>
-    //public uint SlideshowImagesToNotifySound
-    //{
-    //    get => Get(ConfigId.SlideshowImagesToNotifySound, 0u);
-    //    set => Set(ConfigId.SlideshowImagesToNotifySound, value);
-    //}
+    /// <summary>
+    /// Gets, sets the number of image changes to play a beep sound in slideshow mode.
+    /// </summary>
+    public uint SlideshowImagesToNotifySound
+    {
+        get => Get(ConfigId.SlideshowImagesToNotifySound, 0u);
+        set => Set(ConfigId.SlideshowImagesToNotifySound, value);
+    }
 
     /// <summary>
     /// Gets, sets value of thumbnail dimension in pixel

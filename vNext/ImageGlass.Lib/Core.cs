@@ -92,6 +92,12 @@ public static class Core
     /// </summary>
     public static AppAPIProvider? API { get; set; } = null;
 
+
+    /// <summary>
+    /// Provides the slideshow service for managing slideshow playback.
+    /// </summary>
+    public static SlideshowProvider? Slideshow { get; set; } = null;
+
     #endregion // Platform Service Provider
 
 
@@ -217,6 +223,9 @@ public static class Core
         Config.CleanUpPropertyChangedEvents();
 
         DisposeClipboardPhoto();
+
+        Core.Slideshow?.Dispose();
+        Core.Slideshow = null;
 
         Core.Photos.Dispose();
         Core.ColorProfileProvider?.Dispose();
