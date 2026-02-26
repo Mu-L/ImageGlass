@@ -113,10 +113,11 @@ public partial class AppAPIProvider
 
 
         // Window modes
-        { API.IG_ToggleWindowFit,       PhCommands.Create(IG_ToggleWindowFit) },
-        { API.IG_ToggleFrameless,       PhCommands.Create(IG_ToggleFrameless) },
-        { API.IG_ToggleFullScreen,      PhCommands.Create(IG_ToggleFullScreen) },
-        { API.IG_ToggleSlideshow,       PhCommands.Create(IG_ToggleSlideshow) },
+        { API.IG_ToggleWindowFit,           PhCommands.Create(IG_ToggleWindowFit) },
+        { API.IG_ToggleFrameless,           PhCommands.Create(IG_ToggleFrameless) },
+        { API.IG_ToggleFullScreen,          PhCommands.Create(IG_ToggleFullScreen) },
+        { API.IG_ToggleSlideshow,           PhCommands.Create(IG_ToggleSlideshow) },
+        { API.IG_ToggleSlideshowPlayback,   PhCommands.Create(IG_ToggleSlideshowPlayback) },
 
 
         // Layout

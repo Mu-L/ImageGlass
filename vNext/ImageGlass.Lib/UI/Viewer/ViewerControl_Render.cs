@@ -21,6 +21,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
 using Avalonia.Threading;
+using ImageGlass.Common;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer.Checkerboard;
@@ -189,9 +190,60 @@ public partial class ViewerControl
             OnDrawCheckerboard(c);      // draw checkerboard
             OnDrawImage(c);             // draw image
             OnDrawSelection(c);         // draw selection
+
+            OnDrawSlideshowCountdown(c); // draw slideshow countdown
         }
 
         OnDrawDebugInfo(c);         // draw debug info
+    }
+
+
+    /// <summary>
+    /// Draws slideshow countdown at the bottom-right corner.
+    /// </summary>
+    protected virtual void OnDrawSlideshowCountdown(DrawingContext c)
+    {
+        if (!Core.Config.EnableSlideshow || !Core.Config.ShowSlideshowCountdown) return;
+        if (Core.Slideshow is null || !Core.Slideshow.IsRunning) return;
+
+        // 1. format countdown
+        var totalSeconds = Core.Slideshow.CountdownSeconds;
+        var minutes = (int)(totalSeconds / 60);
+        var seconds = (int)(totalSeconds % 60);
+        var tenths = (int)(totalSeconds * 10 % 10);
+
+        var text = $"{minutes:D2}:{seconds:D2}.{tenths}";
+        if (Core.Slideshow.IsPaused) text = $"▮▮ {text}";
+
+        var typeface = new Typeface(Const.FONT_CODE);
+        var fontSize = DpiScale(FontSize);
+        var padding = 20d;
+
+
+        // 2. draw countdown shadow
+        var countDownShadow = new FormattedText(
+            text,
+            CultureInfo.InvariantCulture,
+            FlowDirection,
+            typeface,
+            fontSize,
+            Brushes.Black);
+
+        var x = DrawingArea.Right - countDownShadow.Width - padding;
+        var y = DrawingArea.Bottom - countDownShadow.Height - padding;
+        c.DrawText(countDownShadow, new Point(x + DpiScale(1d), y + DpiScale(1d)));
+
+
+        // 3. draw countdown
+        var countDownText = new FormattedText(
+            text,
+            CultureInfo.InvariantCulture,
+            FlowDirection,
+            typeface,
+            fontSize,
+            Brushes.White);
+
+        c.DrawText(countDownText, new Point(x, y));
     }
 
 
@@ -341,10 +393,10 @@ public partial class ViewerControl
 
             // build mipmap tile cache for non-animated photos
             CreateMipmapTileCache();
-
-            // draw again
-            InvalidateVisual();
         }
+
+        // draw again
+        InvalidateVisual();
     }
 
 

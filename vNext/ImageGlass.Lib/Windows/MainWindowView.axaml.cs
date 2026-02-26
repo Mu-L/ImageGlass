@@ -386,6 +386,16 @@ public partial class MainWindowView : PhControl
         var imageNotFound = !File.Exists(Core.Photos.CurrentFilePath);
 
 
+        #region Menu group: Slideshow
+        mnuContext.Items.Add(new PhMenuItem
+        {
+            LangKey = LangId.FrmSlideshow_MnuPauseResumeSlideshow,
+            Command = Core.API?.GetApiCommand(API.IG_ToggleSlideshowPlayback),
+        });
+        mnuContext.Items.Add("-"); //------------
+        #endregion // Menu group: Slideshow
+
+
         #region Menu group: Layout
         // menu toolbar
         mnuContext.Items.Add(new PhMenuItem

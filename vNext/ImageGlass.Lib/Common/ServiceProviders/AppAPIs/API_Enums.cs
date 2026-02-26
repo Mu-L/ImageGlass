@@ -96,6 +96,7 @@ public enum API
     IG_ToggleFrameless,
     IG_ToggleFullScreen,
     IG_ToggleSlideshow,
+    IG_ToggleSlideshowPlayback,
 
     // Menu > Layout
     IG_ToggleToolbar,

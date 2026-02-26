@@ -41,7 +41,6 @@ public partial class MainWindow : PhWindow
     public MainWindow()
     {
         InitializeComponent();
-        CloseWindowHotkeys = [new(Key.Escape)];
         _status = new AppStatusInfo(PART_MainView.PART_Viewer);
 
 
@@ -123,6 +122,9 @@ public partial class MainWindow : PhWindow
         PART_MainView.PART_Gallery.ItemClicked -= PART_Gallery_ItemClicked;
 
 
+        // stop slideshow so pre-slideshow config values are restored before saving
+        Core.API?.IG_ToggleSlideshow(false);
+
         // Only save config here, do NOT dispose resources yet
         await SaveConfigOnClosingAsync();
     }
@@ -145,6 +147,16 @@ public partial class MainWindow : PhWindow
         // process app hotkeys
         if (Core.API is not null)
         {
+            // press ESC: exit slideshow if it is running
+            var hk = new Hotkey(e);
+            if (hk.IsSame(Key.Escape) && Core.Slideshow is { IsRunning: true })
+            {
+                Core.API?.IG_ToggleSlideshow(false);
+                e.Handled = true;
+                return;
+            }
+
+
             await Core.API.HandleKeyDownAsync(e);
             if (e.Handled) return;
         }

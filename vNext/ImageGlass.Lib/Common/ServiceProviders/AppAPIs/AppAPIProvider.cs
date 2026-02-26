@@ -55,6 +55,17 @@ public partial class AppAPIProvider
     private Rect _windowBound;
     private bool _windowMaximized = false;
 
+    // slideshow state backup
+    private bool _isFullScreenBeforeSlideshow;
+    private bool _isFramelessBeforeSlideshow;
+    private bool _isWindowFitBeforeSlideshow;
+    private bool _showToolbarBeforeSlideshow = true;
+    private bool _showGalleryBeforeSlideshow = true;
+    private Rect _windowBoundBeforeSlideshow;
+    private bool _windowMaximizedBeforeSlideshow;
+    private DispatcherTimer? _slideshowCountdownTimer;
+    private bool _slideshowIsAdvancing;
+
 
     private ViewerControl Viewer => _mainWindow.PART_MainView.PART_Viewer;
     private ToolbarControl Toolbar => _mainWindow.PART_MainView.PART_Toolbar;
@@ -887,6 +898,21 @@ public partial class AppAPIProvider
     {
         var photo = Core.Photos.GetByStep(step, true);
         _ = _mainWindow.PART_MainView.ViewPhotoAsync(photo);
+
+        // reset slideshow interval on manual navigation
+        if (Core.Config.EnableSlideshow && !_slideshowIsAdvancing)
+        {
+            if (Core.Slideshow is { } slideshow)
+            {
+                // resume if auto-paused (e.g. at end of list)
+                if (slideshow.IsPaused)
+                {
+                    slideshow.Resume();
+                }
+
+                slideshow.ResetInterval();
+            }
+        }
     }
 
 
@@ -2269,7 +2295,7 @@ public partial class AppAPIProvider
     /// Toggles slideshow mode.
     /// </summary>
     /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
-    public static void IG_ToggleSlideshow(string? boolStr = null)
+    public void IG_ToggleSlideshow(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
         IG_ToggleSlideshow(enabled);
@@ -2279,14 +2305,142 @@ public partial class AppAPIProvider
     /// <summary>
     /// Toggles slideshow mode.
     /// </summary>
-    public static void IG_ToggleSlideshow(bool? enabled = null)
+    public void IG_ToggleSlideshow(bool? enabled = null)
     {
         enabled ??= !Core.Config.EnableSlideshow;
-        Core.Config.EnableSlideshow = enabled.Value;
 
-        // TODO:
+        if (enabled.Value)
+        {
+            StartSlideshow__();
+        }
+        else
+        {
+            StopSlideshow__();
+        }
+    }
+    private void StartSlideshow__()
+    {
+        if (Core.Config.EnableSlideshow) return;
+        if (Core.Photos.Count == 0) return;
+
+        // 1. back up current window state
+        _isFullScreenBeforeSlideshow = Core.Config.EnableFullScreen;
+        _isFramelessBeforeSlideshow = Core.Config.EnableFrameless;
+        _isWindowFitBeforeSlideshow = Core.Config.EnableWindowFit;
+        _showToolbarBeforeSlideshow = Core.Config.ShowToolbar;
+        _showGalleryBeforeSlideshow = Core.Config.ShowGallery;
+        _windowBoundBeforeSlideshow = _mainWindow.Bounds;
+        _windowMaximizedBeforeSlideshow = _mainWindow.WindowState == WindowState.Maximized;
+
+
+        // 2. enter full screen if configured
+        if (Core.Config.EnableFullscreenSlideshow && !Core.Config.EnableFullScreen)
+        {
+            // exit window fit and frameless first
+            if (Core.Config.EnableWindowFit) IG_ToggleWindowFit(false);
+            if (Core.Config.EnableFrameless) SetFramelessMode__(false, false);
+
+            _mainWindow.WindowState = WindowState.FullScreen;
+            Core.Config.EnableFullScreen = true;
+        }
+
+        // hide toolbar and gallery
+        IG_ToggleToolbar(false);
+        _ = IG_ToggleGalleryAsync(false);
+
+
+        // 3. create and start the slideshow service
+        var slideshow = new SlideshowProvider();
+        slideshow.NextPhotoRequested += OnSlideshowNextPhoto__;
+        Core.Slideshow = slideshow;
+
+        Core.Config.EnableSlideshow = true;
+        slideshow.Start();
+
+
+        // 4. start countdown refresh timer for the viewer overlay
+        if (Core.Config.ShowSlideshowCountdown)
+        {
+            _slideshowCountdownTimer = new DispatcherTimer(
+                TimeSpan.FromMilliseconds(100),
+                DispatcherPriority.Render,
+                (_, _) => Viewer.InvalidateVisual());
+            _slideshowCountdownTimer.Start();
+        }
     }
 
+    private void StopSlideshow__()
+    {
+        if (!Core.Config.EnableSlideshow) return;
+
+        Core.Config.EnableSlideshow = false;
+
+        // 1. stop countdown timer
+        _slideshowCountdownTimer?.Stop();
+        _slideshowCountdownTimer = null;
+
+
+        // 2. stop and dispose the slideshow service
+        if (Core.Slideshow is { } service)
+        {
+            service.NextPhotoRequested -= OnSlideshowNextPhoto__;
+            service.Dispose();
+            Core.Slideshow = null;
+        }
+
+        // refresh viewer to clear the countdown overlay
+        Viewer.InvalidateVisual();
+
+
+        // 3. restore window state
+        if (Core.Config.EnableFullscreenSlideshow && !_isFullScreenBeforeSlideshow)
+        {
+            Core.Config.EnableFullScreen = false;
+
+            Core.Config.IsMainWindowMaximized = _windowMaximizedBeforeSlideshow;
+            _mainWindow.WindowState = _windowMaximizedBeforeSlideshow
+                ? WindowState.Maximized
+                : WindowState.Normal;
+        }
+
+        // restore toolbar and gallery
+        IG_ToggleToolbar(_showToolbarBeforeSlideshow);
+        _ = IG_ToggleGalleryAsync(_showGalleryBeforeSlideshow);
+
+        // restore frameless and window fit
+        if (_isFramelessBeforeSlideshow) SetFramelessMode__(true, false);
+        if (_isWindowFitBeforeSlideshow) IG_ToggleWindowFit(true);
+    }
+
+    private void OnSlideshowNextPhoto__()
+    {
+        _slideshowIsAdvancing = true;
+        IG_ViewNext();
+        _slideshowIsAdvancing = false;
+    }
+
+
+    /// <summary>
+    /// Plays or pauses the current slideshow.
+    /// </summary>
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public static void IG_ToggleSlideshowPlayback(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleSlideshowPlayback(enabled);
+    }
+
+
+    /// <summary>
+    /// Plays or pauses the current slideshow.
+    /// </summary>
+    public static void IG_ToggleSlideshowPlayback(bool? enabled = null)
+    {
+        var isPaused = Core.Slideshow?.IsPaused ?? false;
+
+        if (isPaused) Core.Slideshow?.Resume();
+        else Core.Slideshow?.Pause();
+    }
 
     #endregion // Window Modes APIs
 
