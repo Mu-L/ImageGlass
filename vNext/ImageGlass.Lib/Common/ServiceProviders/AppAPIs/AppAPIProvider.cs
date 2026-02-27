@@ -72,6 +72,7 @@ public partial class AppAPIProvider
     private GalleryControl Gallery => _mainWindow.PART_MainView.PART_Gallery;
     private PhGridSplitter GalleryResizer => _mainWindow.PART_MainView.PART_GalleryResizer;
     private MessageControl Message => _mainWindow.PART_MainView.PART_Message;
+    private SlideshowCountdownOverlay SlideshowCountdown => _mainWindow.PART_MainView.PART_SlideshowCountdown;
 
 
     public AppAPIProvider(MainWindow mainWindow)
@@ -2364,7 +2365,7 @@ public partial class AppAPIProvider
             _slideshowCountdownTimer = new DispatcherTimer(
                 TimeSpan.FromMilliseconds(100),
                 DispatcherPriority.Render,
-                (_, _) => Viewer.InvalidateVisual());
+                (_, _) => SlideshowCountdown.InvalidateVisual());
             _slideshowCountdownTimer.Start();
         }
     }
@@ -2388,8 +2389,8 @@ public partial class AppAPIProvider
             Core.Slideshow = null;
         }
 
-        // refresh viewer to clear the countdown overlay
-        Viewer.InvalidateVisual();
+        // clear the countdown overlay
+        SlideshowCountdown.InvalidateVisual();
 
 
         // 3. restore window state
