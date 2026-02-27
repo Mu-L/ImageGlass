@@ -387,12 +387,34 @@ public partial class MainWindowView : PhControl
 
 
         #region Menu group: Slideshow
-        mnuContext.Items.Add(new PhMenuItem
+        if (Core.Slideshow?.IsRunning == true)
         {
-            LangKey = LangId.FrmSlideshow_MnuPauseResumeSlideshow,
-            Command = Core.API?.GetApiCommand(API.IG_ToggleSlideshowPlayback),
-        });
-        mnuContext.Items.Add("-"); //------------
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmSlideshow_MnuPauseResumeSlideshow,
+                Command = Core.API?.GetApiCommand(API.IG_ToggleSlideshowPlayback),
+                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmSlideshow_MnuPauseResumeSlideshow),
+            });
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                LangKey = LangId.FrmSlideshow_MnuExitSlideshow,
+                Command = Core.API?.GetApiCommand(API.IG_ToggleSlideshow),
+                CommandParameter = false,
+                HotkeyText = string.Join(", ", [
+                    new Hotkey(Key.Escape),
+                    AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuSlideshow)
+                ]),
+            });
+            mnuContext.Items.Add(new PhMenuItem
+            {
+                ToggleType = MenuItemToggleType.CheckBox,
+                IsChecked = Core.Config.ShowSlideshowCountdown,
+                LangKey = LangId.FrmSlideshow_MnuToggleCountdown,
+                Command = Core.API?.GetApiCommand(API.IG_ToggleSlideshowCountdown),
+                CommandParameter = !Core.Config.ShowSlideshowCountdown,
+            });
+            mnuContext.Items.Add("-"); //------------
+        }
         #endregion // Menu group: Slideshow
 
 

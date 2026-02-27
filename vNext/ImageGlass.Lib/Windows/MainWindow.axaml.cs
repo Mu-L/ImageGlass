@@ -149,7 +149,7 @@ public partial class MainWindow : PhWindow
         {
             // press ESC: exit slideshow if it is running
             var hk = new Hotkey(e);
-            if (hk.IsSame(Key.Escape) && Core.Slideshow is { IsRunning: true })
+            if (hk.IsSame(Key.Escape) && Core.Slideshow?.IsRunning == true)
             {
                 Core.API?.IG_ToggleSlideshow(false);
                 e.Handled = true;

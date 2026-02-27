@@ -2360,14 +2360,7 @@ public partial class AppAPIProvider
 
 
         // 4. start countdown refresh timer for the viewer overlay
-        if (Core.Config.ShowSlideshowCountdown)
-        {
-            _slideshowCountdownTimer = new DispatcherTimer(
-                TimeSpan.FromMilliseconds(100),
-                DispatcherPriority.Render,
-                (_, _) => SlideshowCountdown.InvalidateVisual());
-            _slideshowCountdownTimer.Start();
-        }
+        SetSlideshowCountdown(Core.Config.ShowSlideshowCountdown);
     }
 
     private void StopSlideshow__()
@@ -2377,8 +2370,7 @@ public partial class AppAPIProvider
         Core.Config.EnableSlideshow = false;
 
         // 1. stop countdown timer
-        _slideshowCountdownTimer?.Stop();
-        _slideshowCountdownTimer = null;
+        SetSlideshowCountdown(false);
 
 
         // 2. stop and dispose the slideshow service
@@ -2388,9 +2380,6 @@ public partial class AppAPIProvider
             service.Dispose();
             Core.Slideshow = null;
         }
-
-        // clear the countdown overlay
-        SlideshowCountdown.InvalidateVisual();
 
 
         // 3. restore window state
@@ -2421,11 +2410,54 @@ public partial class AppAPIProvider
     }
 
 
+
+    /// <summary>
+    /// Toggle slideshow countdown.
+    /// </summary>
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public void IG_ToggleSlideshowCountdown(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleSlideshowCountdown(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggle slideshow countdown.
+    /// </summary>
+    public void IG_ToggleSlideshowCountdown(bool? enabled = null)
+    {
+        enabled ??= !Core.Config.ShowSlideshowCountdown;
+        Core.Config.ShowSlideshowCountdown = enabled.Value;
+
+        SetSlideshowCountdown(enabled.Value);
+    }
+    private void SetSlideshowCountdown(bool enabled)
+    {
+        if (enabled)
+        {
+            // start countdown timer
+            _slideshowCountdownTimer = new DispatcherTimer(
+                TimeSpan.FromMilliseconds(100),
+                DispatcherPriority.Render,
+                (_, _) => SlideshowCountdown.InvalidateVisual());
+            _slideshowCountdownTimer.Start();
+        }
+        else
+        {
+            // stop countdown timer
+            _slideshowCountdownTimer?.Stop();
+            _slideshowCountdownTimer = null;
+            SlideshowCountdown.InvalidateVisual();
+        }
+    }
+
+
     /// <summary>
     /// Plays or pauses the current slideshow.
     /// </summary>
     /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
-    public static void IG_ToggleSlideshowPlayback(string? boolStr = null)
+    public void IG_ToggleSlideshowPlayback(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
         IG_ToggleSlideshowPlayback(enabled);
@@ -2435,12 +2467,16 @@ public partial class AppAPIProvider
     /// <summary>
     /// Plays or pauses the current slideshow.
     /// </summary>
-    public static void IG_ToggleSlideshowPlayback(bool? enabled = null)
+    public void IG_ToggleSlideshowPlayback(bool? enabled = null)
     {
         var isPaused = Core.Slideshow?.IsPaused ?? false;
 
         if (isPaused) Core.Slideshow?.Resume();
         else Core.Slideshow?.Pause();
+
+        _ = Message.ShowAsync(Core.Lang[isPaused
+            ? LangId.FrmSlideshow_ResumeSlideshow
+            : LangId.FrmSlideshow_PauseSlideshow]);
     }
 
     #endregion // Window Modes APIs

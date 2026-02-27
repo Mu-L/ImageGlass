@@ -33,7 +33,6 @@ public enum ConfigId
 
     IsMainWindowMaximized,
     EnableSlideshow,
-    // HideMainWindowInSlideshow,
     ShowSlideshowCountdown,
     UseRandomIntervalForSlideshow,
     EnableLoopSlideshow,
@@ -114,7 +113,7 @@ public enum ConfigId
     LastSeenImagePath,
     // LastOpenedSetting,
     BackgroundColor,
-    // SlideshowBackgroundColor,
+    SlideshowBackgroundColor,
     DarkTheme,
     LightTheme,
     Language,

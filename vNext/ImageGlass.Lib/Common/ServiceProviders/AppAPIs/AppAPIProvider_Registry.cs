@@ -118,6 +118,7 @@ public partial class AppAPIProvider
         { API.IG_ToggleFullScreen,          PhCommands.Create(IG_ToggleFullScreen) },
         { API.IG_ToggleSlideshow,           PhCommands.Create(IG_ToggleSlideshow) },
         { API.IG_ToggleSlideshowPlayback,   PhCommands.Create(IG_ToggleSlideshowPlayback) },
+        { API.IG_ToggleSlideshowCountdown,  PhCommands.Create(IG_ToggleSlideshowCountdown) },
 
 
         // Layout

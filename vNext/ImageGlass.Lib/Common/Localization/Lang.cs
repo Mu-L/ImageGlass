@@ -739,7 +739,6 @@ public class Lang
 
         #region FrmSettings > Tab Slideshow
         // Slideshow > Slideshow
-        new(LangId.FrmSettings_HideMainWindowInSlideshow, "Automatically hide main window"),
         new(LangId.FrmSettings_ShowSlideshowCountdown, "Show slideshow countdown"),
         new(LangId.FrmSettings_EnableFullscreenSlideshow, "Start slideshow in Full Screen mode"),
         new(LangId.FrmSettings_UseRandomIntervalForSlideshow, "Use random interval"),
@@ -1003,13 +1002,9 @@ public class Lang
 
         new(LangId.FrmSlideshow_PauseSlideshow, "Slideshow is paused." ), // v9.0
         new(LangId.FrmSlideshow_ResumeSlideshow, "Slideshow is resumed." ), // v9.0
-
-        // menu
         new(LangId.FrmSlideshow_MnuPauseResumeSlideshow, "Pause/resume slideshow" ), // v9.0
-        new(LangId.FrmSlideshow_MnuExitSlideshow, "Exit slideshow" ), // v9.0
-
         new(LangId.FrmSlideshow_MnuToggleCountdown, "Show slideshow countdown" ), // v9.0
-        new(LangId.FrmSlideshow_MnuZoomModes, "Zoom modes" ), // v9.0
+        new(LangId.FrmSlideshow_MnuExitSlideshow, "Exit slideshow" ), // v9.0
 
         #endregion // FrmSlideshow
 

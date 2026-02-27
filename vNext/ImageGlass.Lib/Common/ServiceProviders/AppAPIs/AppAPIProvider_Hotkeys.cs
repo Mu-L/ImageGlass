@@ -128,10 +128,11 @@ public partial class AppAPIProvider
 
 
         // Window modes
-        new(LangId.FrmMain_MnuWindowFit,        API.IG_ToggleWindowFit,     Key.F9),
-        new(LangId.FrmMain_MnuFrameless,        API.IG_ToggleFrameless,     Key.F10),
-        new(LangId.FrmMain_MnuFullScreen,       API.IG_ToggleFullScreen,    Key.F11),
-        new(LangId.FrmMain_MnuSlideshow,        API.IG_ToggleSlideshow,     Key.F12),
+        new(LangId.FrmMain_MnuWindowFit,            API.IG_ToggleWindowFit,             Key.F9),
+        new(LangId.FrmMain_MnuFrameless,            API.IG_ToggleFrameless,             Key.F10),
+        new(LangId.FrmMain_MnuFullScreen,           API.IG_ToggleFullScreen,            Key.F11),
+        new(LangId.FrmMain_MnuSlideshow,            API.IG_ToggleSlideshow,             Key.F12),
+        new(LangId.FrmSlideshow_MnuPauseResumeSlideshow,    API.IG_ToggleSlideshowPlayback,     [new(Key.Space)]),
 
 
         // Layout

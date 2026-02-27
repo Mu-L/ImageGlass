@@ -91,12 +91,13 @@ public enum API
     IG_CutFiles,
     IG_ClearClipboard,
 
-    // Menu > Window Fit
+    // Menu > Window mode
     IG_ToggleWindowFit,
     IG_ToggleFrameless,
     IG_ToggleFullScreen,
     IG_ToggleSlideshow,
     IG_ToggleSlideshowPlayback,
+    IG_ToggleSlideshowCountdown,
 
     // Menu > Layout
     IG_ToggleToolbar,

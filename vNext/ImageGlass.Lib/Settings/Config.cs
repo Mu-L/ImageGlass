@@ -73,11 +73,6 @@ public partial class Config : PhReactive
         set => Set(ConfigId.EnableSlideshow, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets value indicating whether the FrmMain should be hidden when <see cref="EnableSlideshow"/> is on.
-    ///// </summary>
-    //public bool HideMainWindowInSlideshow { get; set; } = true;
-
     /// <summary>
     /// Gets, sets value if the countdown timer is shown or not.
     /// </summary>
@@ -626,10 +621,14 @@ public partial class Config : PhReactive
         set => Set(ConfigId.BackgroundColor, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets background color of slideshow
-    ///// </summary>
-    //public Color SlideshowBackgroundColor { get; set; } = Color.Black;
+    /// <summary>
+    /// Gets, sets background color of slideshow
+    /// </summary>
+    public string SlideshowBackgroundColor
+    {
+        get => Get(ConfigId.SlideshowBackgroundColor, "#000000");
+        set => Set(ConfigId.SlideshowBackgroundColor, value);
+    }
 
     /// <summary>
     /// Gets, sets the theme name for dark mode.
@@ -893,6 +892,8 @@ public partial class Config : PhReactive
 
 
 
+    #region Public Methods
+
     /// <summary>
     /// Sets setting value.
     /// </summary>
@@ -937,6 +938,10 @@ public partial class Config : PhReactive
         var value = _values.GetValueOrDefault(configName) ?? defaultValue;
         return (T)value!;
     }
+
+    #endregion // Public Methods
+
+
 
 }
 

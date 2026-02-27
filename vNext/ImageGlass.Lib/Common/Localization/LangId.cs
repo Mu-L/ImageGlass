@@ -480,7 +480,6 @@ public enum LangId
 
     #region FrmSettings > Tab Slideshow
     // Slideshow > Slideshow
-    FrmSettings_HideMainWindowInSlideshow,
     FrmSettings_ShowSlideshowCountdown,
     FrmSettings_EnableFullscreenSlideshow,
     FrmSettings_UseRandomIntervalForSlideshow,
@@ -737,13 +736,9 @@ public enum LangId
     #region FrmSlideshow
     FrmSlideshow_PauseSlideshow,
     FrmSlideshow_ResumeSlideshow,
-
-    // menu
     FrmSlideshow_MnuPauseResumeSlideshow,
-    FrmSlideshow_MnuExitSlideshow,
-
     FrmSlideshow_MnuToggleCountdown,
-    FrmSlideshow_MnuZoomModes,
+    FrmSlideshow_MnuExitSlideshow,
     #endregion // FrmSlideshow
 
 
