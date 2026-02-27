@@ -25,7 +25,7 @@ namespace ImageGlass.Common.Types;
 // https://github.com/jiripolasek/PowerToys/blob/3bfa0a0cf8f98a6b5d8c753331c0b35dc3f2a41a/src/modules/cmdpal/Core/Microsoft.CmdPal.Core.Common/Helpers/InterlockedBoolean.cs
 
 /// <summary>
-/// Thread-safe boolean implementation using atomic operations.
+/// Thread-safe boolean using atomic operations.
 /// </summary>
 public struct InterlockedBool(bool initialValue = false)
 {
@@ -33,7 +33,7 @@ public struct InterlockedBool(bool initialValue = false)
 
 
     /// <summary>
-    /// Gets or sets the boolean value atomically
+    /// Gets or sets the boolean value atomically.
     /// </summary>
     public bool Value
     {
@@ -43,24 +43,23 @@ public struct InterlockedBool(bool initialValue = false)
 
 
     /// <summary>
-    /// Atomically sets the value to true
+    /// Atomically sets to <c>true</c>.
     /// </summary>
-    /// <returns>True if the value was previously false, false if it was already true</returns>
-    public bool Set()
-    {
-        return Interlocked.Exchange(ref _value, 1) == 0;
-    }
+    /// <returns><c>true</c> if the value was changed (was previously <c>false</c>).</returns>
+    public bool SetTrue() => Interlocked.Exchange(ref _value, 1) == 0;
 
 
     /// <summary>
-    /// Atomically sets the value to false
+    /// Atomically sets to <c>false</c>.
     /// </summary>
-    /// <returns>True if the value was previously true, false if it was already false</returns>
-    public bool Clear()
-    {
-        return Interlocked.Exchange(ref _value, 0) == 1;
-    }
+    /// <returns><c>true</c> if the value was changed (was previously <c>true</c>).</returns>
+    public bool SetFalse() => Interlocked.Exchange(ref _value, 0) == 1;
 
+
+    /// <summary>
+    /// Reads as <see cref="bool"/>.
+    /// </summary>
+    public static implicit operator bool(InterlockedBool b) => b.Value;
 
     public override int GetHashCode() => Value.GetHashCode();
 

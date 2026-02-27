@@ -118,9 +118,17 @@ public partial class PhotoRenderer : ICustomDrawOperation
             _destRect = viewer.DestRect.ToSKRect();
             _interpolation = viewer.CurrentInterpolation;
             _hasSrcColorProfile = viewer.Photo?.Metadata?.ColorProfileData is not null;
-            _isFirstDraw = viewer._isFirstDraw.Value;
             _tileCache = viewer._mipmapCache;
             _zoomFactor = viewer.ZoomFactor;
+
+            // Atomically claim first-draw ownership so that concurrent
+            // InvalidateVisual() calls cannot trigger duplicate
+            // OnDrawnImageFirstTime processing.
+            _isFirstDraw = viewer._isFirstDraw.Value;
+            if (_isFirstDraw)
+            {
+                viewer._isFirstDraw.SetFalse();
+            }
         }
     }
 

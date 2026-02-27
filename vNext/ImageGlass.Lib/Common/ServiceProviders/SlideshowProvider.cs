@@ -160,6 +160,7 @@ public sealed class SlideshowProvider : DisposableImpl
         lock (_lock)
         {
             _beepImageCount = 1; // the navigated-to image counts as #1
+            _remainingMsOnPause = 0; // force a fresh interval
             _intervalCts?.Cancel();
         }
     }
@@ -329,7 +330,7 @@ public sealed class SlideshowProvider : DisposableImpl
 
         if (Core.Config.UseRandomIntervalForSlideshow && intervalTo > intervalFrom)
         {
-            // Random.Shared is thread-safe and AOT-friendly
+            // Random.Shared is thread-safe
             var range = intervalTo - intervalFrom;
             var randomOffset = Random.Shared.NextDouble() * range;
 

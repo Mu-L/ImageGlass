@@ -380,8 +380,6 @@ public partial class ViewerControl
     {
         lock (_lock)
         {
-            _isFirstDraw.Value = false;
-
             // cache the proccessed image for next draw
             SKImageRef.Set(ref _imgRender, img, _imgSource);
 

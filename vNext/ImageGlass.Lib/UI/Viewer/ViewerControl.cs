@@ -507,7 +507,7 @@ public partial class ViewerControl : PhControl
         if (!EnableImagePreview || ZoomMode == ZoomMode.LockZoom)
         {
             // raise event
-            _isPreviewing.Clear();
+            _isPreviewing.SetFalse();
             OnPhotoLoading(e);
             return;
         }
@@ -701,7 +701,7 @@ public partial class ViewerControl : PhControl
                 if (hasSource)
                 {
                     // 5.1 set non-animated source
-                    _isFirstDraw.Set();
+                    _isFirstDraw.SetTrue();
                     SKImageRef.Set(ref _imgSource, imgFrame);
 
 
@@ -720,7 +720,7 @@ public partial class ViewerControl : PhControl
                         && _zooming.IsManual
                         && ZoomMode != ZoomMode.LockZoom)
                     {
-                        _isPreviewing.Clear();
+                        _isPreviewing.SetFalse();
 
                         var diffRatio = new Size(
                             prevSize.Width / BitmapSize.Width,
@@ -753,7 +753,7 @@ public partial class ViewerControl : PhControl
                     }
                     else
                     {
-                        _isPreviewing.Clear();
+                        _isPreviewing.SetFalse();
                         Refresh(_loadingOptions.ResetZoom);
                     }
                 }
