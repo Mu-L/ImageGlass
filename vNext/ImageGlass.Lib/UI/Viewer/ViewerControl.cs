@@ -452,16 +452,18 @@ public partial class ViewerControl : PhControl
         }
 
 
-        // photo is loaded
-        if (_loadingOptions.UseCache && inputPhoto.State == PhotoState.Loaded)
+        // photo is loaded, render full resolution directly from cache
+        if (_loadingOptions.UseCache && inputPhoto.State == PhotoState.Loaded && ShouldLoadFullResolution)
         {
             var token = inputPhoto.CancelToken ?? default;
             await HandlePhotoLoadedAsync(new(PhotoState.Loaded, inputPhoto, token));
         }
         else
         {
+            // force reload when quick browsing to render preview instead of full photo
+            var useCache = _loadingOptions.UseCache && ShouldLoadFullResolution;
             await LoadPhotoAsync(
-                useCache: _loadingOptions.UseCache,
+                useCache: useCache,
                 skipLoadingEvent: !_loadingOptions.ResetZoom);
         }
     }
