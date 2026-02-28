@@ -1,34 +1,35 @@
-<Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="using:ImageGlass.UI"
-             x:Class="ImageGlass.Common.App"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+<Application
+    x:Class="ImageGlass.Common.App"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ImageGlass.UI"
+    RequestedThemeVariant="Default">
+    <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
 
 
     <Application.Styles>
         <FluentTheme />
 
 
-        <!-- Menu animation -->
+        <!--  Menu animation  -->
         <Style Selector="MenuFlyoutPresenter, ContextMenu, ToolTip, Popup">
-            <!-- 1. Initialize the transform so the animator has something to target -->
+            <!--  1. Initialize the transform so the animator has something to target  -->
             <Setter Property="RenderTransform">
                 <ScaleTransform ScaleX="0.95" ScaleY="0.95" />
             </Setter>
-    
+
             <Style.Animations>
-                <Animation Duration="0:0:0.15" Easing="CubicEaseOut">
+                <Animation Easing="CubicEaseOut" Duration="0:0:0.15">
                     <KeyFrame Cue="0%">
-                        <Setter Property="Opacity" Value="0.0"/>
-                        <!-- 2. Target the specific properties of the ScaleTransform -->
-                        <Setter Property="ScaleTransform.ScaleX" Value="0.95"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="0.95"/>
+                        <Setter Property="Opacity" Value="0.0" />
+                        <!--  2. Target the specific properties of the ScaleTransform  -->
+                        <Setter Property="ScaleTransform.ScaleX" Value="0.95" />
+                        <Setter Property="ScaleTransform.ScaleY" Value="0.95" />
                     </KeyFrame>
                     <KeyFrame Cue="100%">
-                        <Setter Property="Opacity" Value="1.0"/>
-                        <Setter Property="ScaleTransform.ScaleX" Value="1.0"/>
-                        <Setter Property="ScaleTransform.ScaleY" Value="1.0"/>
+                        <Setter Property="Opacity" Value="1.0" />
+                        <Setter Property="ScaleTransform.ScaleX" Value="1.0" />
+                        <Setter Property="ScaleTransform.ScaleY" Value="1.0" />
                     </KeyFrame>
                 </Animation>
             </Style.Animations>
@@ -36,24 +37,21 @@
 
 
 
-        <!-- Context Menu shadow -->
-        <Style Selector="MenuFlyoutPresenter > Border,
-            ContextMenu > Border,
-            ToolTip > Border,
-            Popup > Border">
+        <!--  Context Menu shadow  -->
+        <Style Selector="MenuFlyoutPresenter > Border, ContextMenu > Border, ToolTip > Border,             Popup > Border">
             <Setter Property="Margin" Value="6, 1, 6, 12" />
             <Setter Property="BoxShadow" Value="{DynamicResource MenuShadow}" />
         </Style>
 
 
-        
-        <!-- Menu separator -->
+
+        <!--  Menu separator  -->
         <Style Selector="Separator">
             <Setter Property="Background" Value="{DynamicResource IG_MenuSeparatorBackground}" />
         </Style>
 
 
-        <!-- Menu item -->
+        <!--  Menu item  -->
         <Style Selector="MenuItem">
             <Setter Property="Margin" Value="4, 0" />
             <Setter Property="BorderBrush" Value="Transparent" />
@@ -61,7 +59,7 @@
             <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
 
 
-            <!-- Menu item content -->
+            <!--  Menu item content  -->
             <Style Selector="^ /template/ Border#PART_LayoutRoot">
                 <Setter Property="Transitions">
                     <Transitions>
@@ -71,7 +69,7 @@
                 </Setter>
             </Style>
 
-            <!-- Fixed: check mark is cut -->
+            <!--  Fixed: check mark is cut  -->
             <Style Selector="^:checked:toggle /template/ ContentControl#PART_ToggleIconPresenter Path">
                 <Setter Property="Width" Value="18" />
             </Style>
@@ -90,18 +88,20 @@
                 </Setter>
             </Style>
         </Style>
-        
 
-        <!-- Fixed: focus style -->
+
+        <!--  Fixed: focus style  -->
         <Style Selector="Button, CheckBox, TextBox, SelectableTextBlock, RadioButton, ContextMenu, MenuItem">
             <Setter Property="FocusAdorner">
                 <FocusAdornerTemplate>
-                    <Border BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}"
-                            CornerRadius="{DynamicResource ControlCornerRadius}"
-                            BorderThickness="2">
-                        <Border BorderBrush="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                            CornerRadius="{DynamicResource ControlCornerRadius}"
-                            BorderThickness="1" />
+                    <Border
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                        BorderThickness="2"
+                        CornerRadius="{DynamicResource ControlCornerRadius}">
+                        <Border
+                            BorderBrush="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource ControlCornerRadius}" />
                     </Border>
                 </FocusAdornerTemplate>
             </Setter>
@@ -123,17 +123,18 @@
             </ResourceDictionary.ThemeDictionaries>
 
 
-            <!-- Menu item padding -->
+            <!--  Menu item padding  -->
             <Thickness x:Key="MenuFlyoutItemThemePaddingNarrow">8,4,8,4</Thickness>
 
-            <!-- Tooltip -->
+            <!--  Tooltip  -->
             <x:Double x:Key="ToolTipContentThemeFontSize">13</x:Double>
             <x:Double x:Key="ToolTipContentMaxWidth">500</x:Double>
 
-            <!-- Text selection color -->
-            <SolidColorBrush x:Key="TextControlSelectionHighlightColor" 
-                         Color="{DynamicResource SystemAccentColor}" 
-                         Opacity="0.4"/>
+            <!--  Text selection color  -->
+            <SolidColorBrush
+                x:Key="TextControlSelectionHighlightColor"
+                Opacity="0.4"
+                Color="{DynamicResource SystemAccentColor}" />
         </ResourceDictionary>
     </Application.Resources>
 
