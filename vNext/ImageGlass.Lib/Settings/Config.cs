@@ -508,28 +508,40 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets number of thumbnail columns displayed in vertical gallery.
     /// </summary>
-    public int GalleryColumns
+    public uint GalleryColumns
     {
-        get => Get(ConfigId.GalleryColumns, 3);
+        get => Get(ConfigId.GalleryColumns, 3u);
         set => Set(ConfigId.GalleryColumns, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets the number of images cached by <see cref="Base.Services.ImageBooster"/>.
-    ///// </summary>
-    //public int ImageBoosterCacheCount { get; set; } = 1;
+    /// <summary>
+    /// Gets, sets the maximum memory for image caching (in MB).
+    /// </summary>
+    public uint MaxMemoryCacheInMb
+    {
+        get => Get(ConfigId.MaxMemoryCacheInMb, 2048u);
+        set => Set(ConfigId.MaxMemoryCacheInMb, value);
+    }
 
-    ///// <summary>
-    ///// Gets, sets the maximum image dimension when caching by <see cref="Base.Services.ImageBooster"/>.
-    ///// If this value is <c>less than or equals 0</c>, the option will be ignored.
-    ///// </summary>
-    //public int ImageBoosterCacheMaxDimension { get; set; } = 8_000;
+    /// <summary>
+    /// Gets, sets the maximum image file size (in MB) for caching.
+    /// If value is <c>0</c>, the option will be ignored.
+    /// </summary>
+    public double MaxFileSizeCacheInMb
+    {
+        get => Get(ConfigId.MaxFileSizeCacheInMb, 100d);
+        set => Set(ConfigId.MaxFileSizeCacheInMb, value);
+    }
 
-    ///// <summary>
-    ///// Gets, sets the maximum image file size (in MB) when caching by <see cref="Base.Services.ImageBooster"/>.
-    ///// If this value is <c>less than or equals 0</c>, the option will be ignored.
-    ///// </summary>
-    //public double ImageBoosterCacheMaxFileSizeInMb { get; set; } = 100;
+    /// <summary>
+    /// Gets, sets the maximum image dimension for caching.
+    /// If value is <c>0</c>, the option will be ignored.
+    /// </summary>
+    public uint MaxDimensionCache
+    {
+        get => Get(ConfigId.MaxDimensionCache, 8_000u);
+        set => Set(ConfigId.MaxDimensionCache, value);
+    }
 
     /// <summary>
     /// Gets, sets fixed width on zooming

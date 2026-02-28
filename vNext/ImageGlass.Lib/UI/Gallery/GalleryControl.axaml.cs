@@ -375,7 +375,7 @@ public partial class GalleryControl : PhControl
     /// Calculates the total width required to display a gallery view
     /// with the specified number of item columns.
     /// </summary>
-    public static double CalculateWidthForGalleryView(int itemColumns)
+    public static double CalculateWidthForGalleryView(uint itemColumns)
     {
         var itemWidth = Core.Config.ThumbnailSize
             + GalleryItemMargin.Left + GalleryItemMargin.Right

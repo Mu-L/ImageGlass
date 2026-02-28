@@ -373,7 +373,7 @@ public partial class MainWindowView : PhControl
         if (panelEl is null) return;
 
         // save number of columns
-        Core.Config.GalleryColumns = panelEl.ColumnsPerRow;
+        Core.Config.GalleryColumns = (uint)panelEl.ColumnsPerRow;
     }
 
 
@@ -810,6 +810,10 @@ public partial class MainWindowView : PhControl
                 UseCache = useCache,
                 Channels = Core.ColorChannels,
             });
+
+            // trigger background caching of adjacent photos
+            // after the current photo finishes loading
+            Core.Photos.RequestCacheAround(Core.Photos.CurrentIndex);
         });
     }
 

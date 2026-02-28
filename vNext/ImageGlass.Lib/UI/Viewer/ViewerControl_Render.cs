@@ -20,14 +20,15 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
+using Avalonia.Media.TextFormatting;
 using Avalonia.Threading;
 using ImageGlass.Common;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer.Checkerboard;
 using SkiaSharp;
 using System;
-using System.Globalization;
 using System.Threading;
 
 namespace ImageGlass.UI.Viewer;
@@ -203,8 +204,12 @@ public partial class ViewerControl
     {
         if (!EnableDebug) return;
 
-        var ft = new FormattedText(
-            $"""
+        var cacheIndexes = Core.Photos.CachedIndexSnapshot;
+        var cacheIndexStr = cacheIndexes.Length > 0
+            ? string.Join(", ", cacheIndexes)
+            : "(none)";
+
+        var text = $"""
             DPI = {Dpi}, FPS = {_fps}
             Control Bounds = {Bounds}
             DrawingArea = {DrawingArea}
@@ -215,17 +220,30 @@ public partial class ViewerControl
             _destRect = {DestRect}
             _zoomFactor = {_zooming.Factor}
             _zoomedPoint = {_zooming.ZoomedPoint}
-            
+
             SourceRect = {_selection.SourceRect}
             ClientSelection = {ClientSelection}
-            """,
-            CultureInfo.InvariantCulture,
-            FlowDirection.LeftToRight,
-            new Typeface("Consolas"),
-            13, Brushes.HotPink);
 
-        // draw text info
-        c.DrawText(ft, new Point(DrawingArea.X + 20, DrawingArea.Y + 20));
+            Cache: {Core.Photos.CachedCount} photos, {Core.Photos.CachedMemoryMb} MB
+            Cached indexes = [{cacheIndexStr}]
+            """;
+
+        var textLayout = new TextLayout(text, new Typeface("Consolas"), FontSize, Brushes.HotPink);
+        var textOrigin = new Point(DrawingArea.X + 20, DrawingArea.Y + 20);
+        for (int i = 0; i < textLayout.TextLines.Count; i++)
+        {
+            var line = textLayout.TextLines[i];
+            var bounds = line.GetTextBounds(line.FirstTextSourceIndex, line.Length);
+            if (bounds.Count == 0) continue;
+
+            var lineRect = bounds[0].Rectangle;
+            lineRect = lineRect.WithX(lineRect.X + textOrigin.X).WithY(lineRect.Y + line.Height * i + textOrigin.Y);
+
+            c.FillRectangle(Colors.Black.A(180).ToBrush(), lineRect);
+        }
+
+        // draw text
+        textLayout.Draw(c, textOrigin);
 
         // draw image bounds
         c.DrawRectangle(new Pen(Brushes.LightGreen, 2, DashStyle.Dash, PenLineCap.Round, PenLineJoin.Round), DestRect);

@@ -330,6 +330,14 @@ public partial class PhotoManager
             Add(filePath, insertIndex);
         }
 
+        // insertions shifted indexes, so clear cache index tracking;
+        // the bitmap data in Photo objects is still valid and will be
+        // re-discovered by the next caching pass
+        lock (_cacheLock)
+        {
+            _cachedIndexes.Clear();
+        }
+
         // restore the original index
         _currentIndex = IndexOf(currentFilePath);
         var affectedCurrentFilePath = CurrentIndex != oldCurrentIndex ? currentFilePath : null;
@@ -357,6 +365,11 @@ public partial class PhotoManager
         if (changedSet.Count == 0) return;
         var changedList = new List<string>(changedSet);
 
+        // invalidate cached data for changed files so stale bitmaps are not reused
+        foreach (var path in changedList)
+        {
+            InvalidateCacheAt(path);
+        }
 
         string currentFilePath;
         lock (_lock)

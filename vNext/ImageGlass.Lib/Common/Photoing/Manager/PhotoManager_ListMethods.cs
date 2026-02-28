@@ -259,6 +259,9 @@ public partial class PhotoManager
     /// </summary>
     public void Remove(string filePath)
     {
+        // remove from cache tracking before modifying the list
+        InvalidateCacheAt(filePath);
+
         bool isCurrentPhoto;
         Photo? removed;
 
@@ -306,6 +309,9 @@ public partial class PhotoManager
     /// </param>
     public void Clear(Photo? excludeFromDisposal = null)
     {
+        // cancel and clear all cached photos first
+        ClearCache();
+
         Photo? initPhoto;
         Photo[] snapshot;
 

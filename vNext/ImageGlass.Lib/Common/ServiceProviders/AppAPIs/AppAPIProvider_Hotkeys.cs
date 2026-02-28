@@ -37,6 +37,12 @@ public partial class AppAPIProvider
     private Hotkey? _lastHotkeyPressed = null;
     private bool _isQuickBrowsingPhotos = false;
 
+    /// <summary>
+    /// Gets a value indicating whether the user is holding a navigation key
+    /// for rapid browsing (quick browse mode).
+    /// </summary>
+    public bool IsQuickBrowsing => _isQuickBrowsingPhotos;
+
 
     // list of all menu items & default action, hotkeys
     private static IReadOnlyCollection<HotkeySingleAction> _defaultMenuList => [
@@ -383,7 +389,10 @@ public partial class AppAPIProvider
             Viewer.ShouldLoadFullResolution.Value = true;
 
             await Task.Delay(50);
-            await Viewer.LoadPhotoAsync(true, true);
+            await Viewer.LoadPhotoAsync(false, true);
+
+            // start caching adjacent photos now that quick browsing ended
+            Core.Photos.RequestCacheAround(Core.Photos.CurrentIndex);
         }
 
 
