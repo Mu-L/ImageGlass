@@ -127,10 +127,12 @@ public partial class ViewerControl : PhControl
     {
         lock (_lock)
         {
+            // 1. check if we can apply color profile
             // skip animated images
             if (_animator is not null) return;
+            if (!CanApplySkiaColorSpace()) return;
 
-            // dispose tile cache (will be rebuilt after next first draw)
+            // 2. dispose tile cache (will be rebuilt after next first draw)
             _mipmapCache?.Dispose();
             _mipmapCache = null;
 
@@ -141,7 +143,7 @@ public partial class ViewerControl : PhControl
                 srcLease = _imgSource?.Acquire();
                 var srcImage = srcLease?.Image;
 
-                // apply new color space for source image
+                // 3. apply new color space for source image
                 if (TryApplySkiaColorSpace(srcImage, out var imgFrameColored))
                 {
                     SKImageRef.Set(ref _imgSource, imgFrameColored);
@@ -152,7 +154,7 @@ public partial class ViewerControl : PhControl
                 srcLease?.Dispose();
             }
 
-            // clear the render image
+            // 4. clear the render image
             SKImageRef.Set(ref _imgRender, null);
             InvalidateVisual();
         }

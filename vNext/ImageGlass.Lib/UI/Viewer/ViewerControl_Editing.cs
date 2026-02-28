@@ -94,18 +94,31 @@ public partial class ViewerControl
     private bool TryApplySkiaColorSpace(SKImage? srcImage, out SKImage? output)
     {
         output = null;
+        if (!CanApplySkiaColorSpace()) return false;
+
+        // apply new color space for source image
+        if (SkiaCodec.TryApplyColorSpace(srcImage, Core.DestColorProfile, out var imgFrameColored))
+        {
+            output = imgFrameColored;
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /// <summary>
+    /// Checks if Skia color space profile can be applied to the current photo.
+    /// </summary>
+    private bool CanApplySkiaColorSpace()
+    {
+        // 1. check if the destination profile is supported
         if (!Core.IsDestColorProfileSupported) return false;
 
-        // if always apply color profile
-        // or only apply color profile if there is an embedded profile
+        // 2. check user configs
         if (Core.Config.ShouldUseColorProfileForAll || Photo?.Metadata?.SkiaColorSpace is not null)
         {
-            // apply new color space for source image
-            if (SkiaCodec.TryApplyColorSpace(srcImage, Core.DestColorProfile, out var imgFrameColored))
-            {
-                output = imgFrameColored;
-                return true;
-            }
+            return true;
         }
 
         return false;

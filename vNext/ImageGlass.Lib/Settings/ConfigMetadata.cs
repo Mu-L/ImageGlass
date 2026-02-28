@@ -121,7 +121,7 @@ public enum ConfigId
     #endregion // String settings
 
 
-    #region Enum settings,
+    #region Enum settings
 
     CheckerboardMode,
     ImageLoadingOrder,
