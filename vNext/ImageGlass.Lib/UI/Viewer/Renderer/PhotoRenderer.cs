@@ -81,7 +81,6 @@ public partial class PhotoRenderer : ICustomDrawOperation
     private readonly SKImageRef? _imgRender;
     private readonly SKRect _srcRect;
     private readonly SKRect _destRect;
-    private readonly bool _hasSrcColorProfile;
     private readonly ImageInterpolation _interpolation;
     private readonly MipmapTileCache? _tileCache;
     private readonly double _zoomFactor;
@@ -117,7 +116,6 @@ public partial class PhotoRenderer : ICustomDrawOperation
             _srcRect = viewer.SrcRect.ToSKRect();
             _destRect = viewer.DestRect.ToSKRect();
             _interpolation = viewer.CurrentInterpolation;
-            _hasSrcColorProfile = viewer.Photo?.Metadata?.ColorProfileData is not null;
             _tileCache = viewer._mipmapCache;
             _zoomFactor = viewer.ZoomFactor;
 

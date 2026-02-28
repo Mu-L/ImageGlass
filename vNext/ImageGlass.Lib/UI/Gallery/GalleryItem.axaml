@@ -45,6 +45,7 @@
         <!--  Gallery Item: Thumbnail Image  -->
         <Image
             Grid.Row="0"
+            RenderOptions.BitmapInterpolationMode="LowQuality"
             Source="{CompiledBinding GalleryThumbnail}"
             Stretch="Uniform" />
 

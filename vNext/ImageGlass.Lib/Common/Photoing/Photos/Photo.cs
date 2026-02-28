@@ -451,7 +451,7 @@ public partial class Photo : DisposableImpl
         // single-frame formats
         else
         {
-            var img = SkiaCodec.FromMagick(data.SingleFrame);
+            var img = SkiaCodec.FromMagick(data.SingleFrame, meta.SkiaColorSpace);
 
             Bitmap = img;
             _width = (uint)(img?.Width ?? 0);

@@ -110,7 +110,17 @@ public partial class PhotoMetadata : DisposableImpl
     public ColorSpace ColorSpace { get; set; } = ColorSpace.Undefined;
     public string ColorProfileName { get; set; } = string.Empty;
 
-    public byte[]? ColorProfileData { get; set; } = null;
+
+    /// <summary>
+    /// Gets the Magick color profile.
+    /// </summary>
+    public IColorProfile? MagickColorProfile { get; set; } = null;
+
+    /// <summary>
+    /// Gets the Skia color space converted from <see cref="MagickColorProfile"/>.
+    /// Returns <c>null</c> if unsupported color space.
+    /// </summary>
+    public SKColorSpace? SkiaColorSpace { get; set; } = null;
 
     public IImageProfile? RawThumbnail { get; set; } = null;
 
@@ -162,11 +172,9 @@ public partial class PhotoMetadata : DisposableImpl
     {
         base.OnDisposing();
 
-        if (ColorProfileData != null)
-        {
-            Array.Clear(ColorProfileData);
-            ColorProfileData = null;
-        }
+        SkiaColorSpace?.Dispose();
+        SkiaColorSpace = null;
+        MagickColorProfile = null;
 
         RawThumbnail = null;
         ExifProfile = null;

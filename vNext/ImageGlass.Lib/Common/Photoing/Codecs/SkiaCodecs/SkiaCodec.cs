@@ -94,7 +94,9 @@ public static partial class SkiaCodec
             try
             {
                 // get embedded color profile
+                meta.SkiaColorSpace = decoder.Info.ColorSpace;
                 using var colorProfile = decoder.Info.ColorSpace.ToProfile();
+
                 if (colorProfile.Size > 0)
                 {
                     var bytes = new byte[colorProfile.Size];
@@ -108,7 +110,10 @@ public static partial class SkiaCodec
                     var photoProfile = new PhotoColorProfile(bytes);
 
                     meta.ColorProfileName = photoProfile.GetIccDescription();
-                    meta.ColorProfileData = photoProfile.ProfileData;
+                    if (photoProfile.ProfileData is not null)
+                    {
+                        meta.MagickColorProfile = new ColorProfile(photoProfile.ProfileData);
+                    }
                 }
 
                 // save to meta
@@ -651,13 +656,17 @@ public static partial class SkiaCodec
     /// <summary>
     /// Converts Magick image to SKBitmap.
     /// </summary>
-    public static unsafe SKImage? FromMagick(MagickImage? imgM)
+    public static SKImage? FromMagick(MagickImage? imgM, SKColorSpace? srcColorSpace = null)
     {
         if (imgM is null) return null;
 
         // prepare image info
         var alphaType = imgM.HasAlpha ? SKAlphaType.Unpremul : SKAlphaType.Opaque;
         var info = new SKImageInfo((int)imgM.Width, (int)imgM.Height, SKColorType.Rgba8888, alphaType);
+        if (srcColorSpace is not null)
+        {
+            info = info.WithColorSpace(srcColorSpace);
+        }
 
         // get pixels array
         using var pixels = imgM.GetPixelsUnsafe();

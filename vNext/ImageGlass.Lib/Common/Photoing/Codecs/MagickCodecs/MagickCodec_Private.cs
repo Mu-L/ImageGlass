@@ -74,10 +74,9 @@ public static partial class MagickCodec
 
 
             // make sure the output color space is not CMYK
-            if (meta.ColorSpace == ColorSpace.CMYK && meta.ColorProfileData is not null)
+            if (meta.ColorSpace == ColorSpace.CMYK && meta.MagickColorProfile is not null)
             {
-                var colorProfile = new ColorProfile(meta.ColorProfileData);
-                refImgM.TransformColorSpace(colorProfile, ColorProfiles.SRGB);
+                refImgM.TransformColorSpace(meta.MagickColorProfile, ColorProfiles.SRGB);
             }
         }
 

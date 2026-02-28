@@ -389,8 +389,17 @@ public static partial class MagickCodec
                 if (imgC[frameIndex].GetColorProfile() is IColorProfile colorProfile)
                 {
                     meta.ColorSpace = colorProfile.ColorSpace;
-                    meta.ColorProfileName = colorProfile.Description ?? "";
-                    meta.ColorProfileData = colorProfile.ToByteArray();
+                    if (string.IsNullOrEmpty(colorProfile.Description))
+                    {
+                        meta.ColorProfileName = colorProfile.ColorSpace.ToString();
+                    }
+                    else
+                    {
+                        meta.ColorProfileName = $"{colorProfile.Description} ({colorProfile.ColorSpace})";
+                    }
+
+                    meta.MagickColorProfile = colorProfile;
+                    meta.SkiaColorSpace = SKColorSpace.CreateIcc(colorProfile.ToByteArray());
                 }
             }
             catch { }
