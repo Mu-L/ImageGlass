@@ -55,6 +55,11 @@ public partial class MainWindow : PhWindow
             if (Core.Config.IsMainWindowMaximized) WindowState = WindowState.Maximized;
         }
 
+        // set zoom lock
+        if (Core.Config.ZoomMode == UI.Viewer.ZoomMode.LockZoom)
+        {
+            PART_MainView.PART_Viewer.ZoomFactor = Core.Config.ZoomLockValue / 100f;
+        }
 
         // events
         Core.AppInstance.InstanceInvoked += AppInstance_InstanceInvoked;
@@ -79,7 +84,6 @@ public partial class MainWindow : PhWindow
             // load full screen
             if (Core.Config.EnableFullScreen) WindowState = WindowState.FullScreen;
         }
-
 
         // load color profile
         Core.UpdateDestColorProfile();

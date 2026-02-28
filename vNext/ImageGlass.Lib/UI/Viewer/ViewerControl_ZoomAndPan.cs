@@ -649,11 +649,16 @@ public partial class ViewerControl
     /// </summary>
     public void SetZoomMode(ZoomMode? mode = null, bool isManualZoom = false, bool zoomedByResizing = false)
     {
-        // get zoom factor after applying the zoom mode
-        _logicalSrcPoint = default;
+        var effectiveMode = mode ?? _zooming.Mode;
+
+        // preserve pan position for LockZoom to maintain viewport across photo changes
+        if (effectiveMode != ZoomMode.LockZoom)
+        {
+            _logicalSrcPoint = default;
+        }
         _zooming.ZoomedPoint = new();
 
-        _zooming.Mode = mode ?? _zooming.Mode;
+        _zooming.Mode = effectiveMode;
         _zooming.Factor = CalculateZoomFactor(_zooming.Mode, BitmapSize.Width, BitmapSize.Height);
         _zooming.IsManual = isManualZoom;
 
