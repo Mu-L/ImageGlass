@@ -229,7 +229,7 @@ public partial class PhotoManager
     public bool IsCached(int index)
     {
         var photo = Get(index);
-        return photo?.State == PhotoLoadingState.Loaded;
+        return photo?.State == PhotoState.Loaded;
     }
 
 

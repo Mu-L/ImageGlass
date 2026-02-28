@@ -22,20 +22,31 @@ using System.Threading;
 namespace ImageGlass.Common.Photoing;
 
 
-public enum PhotoLoadingState
+public enum PhotoState
 {
+    /// <summary>
+    /// Photo is not loaded, metadata may be null.
+    /// </summary>
     None,
-    Loading,
+
+    /// <summary>
+    /// When photo metadata and preview are loaded.
+    /// </summary>
+    Preview,
+
+    /// <summary>
+    /// When photo bitmap is fully decoded.
+    /// </summary>
     Loaded,
 }
 
 
-public class PhotoLoadingEventArgs(PhotoLoadingState state, Photo photo, CancellationToken token) : EventArgs
+public class PhotoLoadingEventArgs(PhotoState state, Photo photo, CancellationToken token) : EventArgs
 {
     /// <summary>
-    /// Checks if the event is fired when photo is loaded.
+    /// Gets the loading state of photo.
     /// </summary>
-    public PhotoLoadingState State => state;
+    public PhotoState State => state;
 
     /// <summary>
     /// Gets the current photo instance.

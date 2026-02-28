@@ -87,7 +87,7 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Gets the loading state of the photo.
     /// </summary>
-    public PhotoLoadingState State { get; set; } = PhotoLoadingState.None;
+    public PhotoState State { get; set; } = PhotoState.None;
 
     /// <summary>
     /// Gets the codec used to decode the photo.
@@ -264,7 +264,7 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Initializes a new single-frame photo using a bitmap source for rendering.
     /// </summary>
-    public Photo(SKBitmap? bmp, PhotoLoadingState state = PhotoLoadingState.Loaded)
+    public Photo(SKBitmap? bmp, PhotoState state = PhotoState.Loaded)
     {
         InitializePhoto(bmp, bmp?.Width ?? 0, bmp?.Height ?? 0, null, state);
     }
@@ -273,7 +273,7 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Initializes a new single-frame photo using a image source for rendering.
     /// </summary>
-    public Photo(SKImage? img, PhotoLoadingState state = PhotoLoadingState.Loaded)
+    public Photo(SKImage? img, PhotoState state = PhotoState.Loaded)
     {
         InitializePhoto(img, img?.Width ?? 0, img?.Height ?? 0, null, state);
     }
@@ -282,7 +282,7 @@ public partial class Photo : DisposableImpl
     /// <summary>
     /// Initializes a new single-frame using a image source for rendering.
     /// </summary>
-    public Photo(SKImage? img, PhotoMetadata? meta, PhotoLoadingState state = PhotoLoadingState.Loaded)
+    public Photo(SKImage? img, PhotoMetadata? meta, PhotoState state = PhotoState.Loaded)
     {
         InitializePhoto(img, 0, 0, meta, state);
     }
@@ -343,7 +343,7 @@ public partial class Photo : DisposableImpl
 
     #region Private Functions
 
-    private void InitializePhoto(IDisposable? src, int width, int height, PhotoMetadata? meta, PhotoLoadingState state = PhotoLoadingState.Loaded)
+    private void InitializePhoto(IDisposable? src, int width, int height, PhotoMetadata? meta, PhotoState state = PhotoState.Loaded)
     {
         // set Bitmap
         if (src is null) Bitmap = null;
@@ -478,7 +478,7 @@ public partial class Photo : DisposableImpl
         }
 
         // reset info
-        State = PhotoLoadingState.None;
+        State = PhotoState.None;
         Error = null;
 
         // unload image
@@ -521,14 +521,14 @@ public partial class Photo : DisposableImpl
         bool skipLoadingEvent = false)
     {
         // use cached data
-        if (useCache && State != PhotoLoadingState.None) return;
+        if (useCache && State != PhotoState.None) return;
         var token = CancelLoading();
 
         try
         {
             // reset dispose status
             _isDisposed.SetFalse();
-            State = PhotoLoadingState.None;
+            State = PhotoState.None;
             Error = null;
 
 
@@ -544,7 +544,7 @@ public partial class Photo : DisposableImpl
             {
                 if (handleProgressFn is not null)
                 {
-                    await handleProgressFn(new(PhotoLoadingState.Loading, this, token));
+                    await handleProgressFn(new(PhotoState.Preview, this, token));
                 }
             }
 
@@ -573,19 +573,19 @@ public partial class Photo : DisposableImpl
 
 
             // done loading
-            State = PhotoLoadingState.Loaded;
+            State = PhotoState.Loaded;
             if (handleProgressFn is not null)
             {
-                await handleProgressFn(new(PhotoLoadingState.Loaded, this, token));
+                await handleProgressFn(new(PhotoState.Loaded, this, token));
             }
         }
         catch (Exception ex)
         {
             Error = ex;
-            State = PhotoLoadingState.Loaded;
+            State = PhotoState.Loaded;
             if (handleProgressFn is not null)
             {
-                await handleProgressFn(new(PhotoLoadingState.Loaded, this, token));
+                await handleProgressFn(new(PhotoState.Loaded, this, token));
             }
         }
         finally

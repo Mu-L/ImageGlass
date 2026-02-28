@@ -205,7 +205,7 @@ public partial class PhotoManager
                 if (photo is null) continue;
 
                 // already loaded (either by a previous cache pass or by the viewer)
-                if (photo.State == PhotoLoadingState.Loaded)
+                if (photo.State == PhotoState.Loaded)
                 {
                     var photoMem = EstimatePhotoMemory(photo);
                     if (usedMemory + photoMem > maxMemoryBytes) break;
@@ -330,7 +330,7 @@ public partial class PhotoManager
     /// </summary>
     private static long EstimatePhotoMemory(Photo photo)
     {
-        if (photo.State != PhotoLoadingState.Loaded) return 0;
+        if (photo.State != PhotoState.Loaded) return 0;
 
         return (long)photo.Width * photo.Height * 4;
     }

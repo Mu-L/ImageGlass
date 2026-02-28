@@ -340,14 +340,14 @@ public partial class MainWindowView : PhControl
         }
 
         // 2. handle photo loading
-        else if (e.State == PhotoLoadingState.Loading)
+        else if (e.State == PhotoState.Preview)
         {
             // show loading message after 2s
             _ = PART_Message.ShowAsync(Core.Lang[LangId.FrmMain_Loading], durationMs: 0, delayMs: 2000);
         }
 
         // 3. handle photo loaded
-        else if (e.State == PhotoLoadingState.Loaded)
+        else if (e.State == PhotoState.Loaded)
         {
             // clear in-app message
             _ = PART_Message.ShowAsync(null);
@@ -793,12 +793,11 @@ public partial class MainWindowView : PhControl
             };
         }
 
-        // apply user settings to the viewer
-        PART_Viewer.EnableImagePreview = Core.Config.ShowImagePreview;
-
-
         Dispatcher.UIThread.Post(async () =>
         {
+            // apply user settings to the viewer
+            PART_Viewer.EnableImagePreview = Core.Config.ShowImagePreview;
+
             if (scrollToThumbnail)
             {
                 // set photo to the viewer

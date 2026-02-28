@@ -453,10 +453,10 @@ public partial class ViewerControl : PhControl
 
 
         // photo is loaded
-        if (_loadingOptions.UseCache && inputPhoto.State == PhotoLoadingState.Loaded)
+        if (_loadingOptions.UseCache && inputPhoto.State == PhotoState.Loaded)
         {
             var token = inputPhoto.CancelToken ?? default;
-            await HandlePhotoLoadedAsync(new(PhotoLoadingState.Loaded, inputPhoto, token));
+            await HandlePhotoLoadedAsync(new(PhotoState.Loaded, inputPhoto, token));
         }
         else
         {
@@ -484,7 +484,7 @@ public partial class ViewerControl : PhControl
     private async Task OnPhotoLoadingProgressAsync(PhotoLoadingEventArgs e)
     {
         // previewing
-        if (e.State == PhotoLoadingState.Loading)
+        if (e.State == PhotoState.Preview)
         {
             await HandlePhotoPreviewAsync(e);
         }
@@ -497,7 +497,7 @@ public partial class ViewerControl : PhControl
 
 
     /// <summary>
-    /// Handles previewing photo.
+    /// Handles previewing the current photo.
     /// </summary>
     private async Task HandlePhotoPreviewAsync(PhotoLoadingEventArgs e)
     {
@@ -612,7 +612,7 @@ public partial class ViewerControl : PhControl
 
 
     /// <summary>
-    /// Handles loading photo.
+    /// Handles rendering the current photo.
     /// </summary>
     private async Task HandlePhotoLoadedAsync(PhotoLoadingEventArgs e)
     {
