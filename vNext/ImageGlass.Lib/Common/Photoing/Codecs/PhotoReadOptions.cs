@@ -38,25 +38,6 @@ public record PhotoReadOptions
 
 
     /// <summary>
-    /// Gets, sets the value indicates whether the color profile should be ignored.
-    /// </summary>
-    public bool IgnoreColorProfile { get; set; } = false;
-
-
-    /// <summary>
-    /// Gets sets ColorProfile name of path
-    /// </summary>
-    public string ColorProfileName { get; set; } = nameof(ColorProfileOption.CurrentMonitorProfile);
-
-
-    /// <summary>
-    /// Gets, sets the value indicates if the <see cref="ColorProfileName"/>
-    /// should apply to all image files
-    /// </summary>
-    public bool ApplyColorProfileForAll { get; set; } = false;
-
-
-    /// <summary>
     /// Gets, sets the value indicates the embedded thumbnail of the RAW formats should be returned (if found).
     /// </summary>
     public bool UseEmbeddedThumbnailRawFormats { get; set; } = false;

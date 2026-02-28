@@ -375,7 +375,8 @@ public partial class Photo : DisposableImpl
     private async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
         var useNativeCodec = Core.Config.NativeCodecReadFormats.Contains(meta.FileExtension)
-            && SkiaCodec.CanRead(meta);
+            && SkiaCodec.CanRead(meta)
+            && Core.IsDestColorProfileSupported;
 
         // use native codec
         if (useNativeCodec)

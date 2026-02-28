@@ -654,6 +654,86 @@ public static partial class SkiaCodec
 
 
     /// <summary>
+    /// Attempts to apply the given color space to the source image and outputs a new image.
+    /// </summary>
+    public static bool TryApplyColorSpace(SKImage? imgSrc, SKColorSpace? destColorSpace, out SKImage? output)
+    {
+        output = null;
+        if (imgSrc.IsDisposed()) return false;
+
+        // convert color space
+        if (destColorSpace is not null)
+        {
+            var info = imgSrc.Info.WithColorSpace(destColorSpace);
+            using var colorBmp = new SKBitmap(info);
+            using (var canvas = new SKCanvas(colorBmp))
+            {
+                // performs the ICC conversion during this draw operation
+                canvas.DrawImage(imgSrc, 0, 0);
+            }
+
+            output = SKImage.FromBitmap(colorBmp);
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /// <summary>
+    /// Gets Skia color profile.
+    /// </summary>
+    /// <param name="name">Name or Full path of color profile</param>
+    public static (SKColorSpace? ColorSpace, bool IsSupported) GetColorProfileByName(string name)
+    {
+        (SKColorSpace? ColorSpace, bool IsSupported) results = new(null, true);
+
+
+        // 1. don't use color profile
+        if (name.Equals(nameof(ColorProfileOption.None))) return results;
+
+
+        // 2. use current monitor profile
+        if (name.Equals(nameof(ColorProfileOption.CurrentMonitorProfile)))
+        {
+            if (string.IsNullOrEmpty(Core.ColorProfileProvider?.ProfilePath))
+                return results;
+
+            using var data = SKData.Create(Core.ColorProfileProvider.ProfilePath);
+            results.ColorSpace = SKColorSpace.CreateIcc(data);
+            results.IsSupported = results.ColorSpace is not null; // Skia does not support all profiles
+
+            return results;
+        }
+
+
+        // 3. use built-in color profile
+        var magickProfile = MagickCodec.GetBuiltinColorProfile(name);
+        if (magickProfile is not null)
+        {
+            results.ColorSpace = SKColorSpace.CreateIcc(magickProfile.ToReadOnlySpan());
+            results.IsSupported = results.ColorSpace is not null;
+
+            return results;
+        }
+
+
+        // 4. use custom color profile
+        if (Path.Exists(name))
+        {
+            using var data = SKData.Create(name);
+            results.ColorSpace = SKColorSpace.CreateIcc(data);
+            results.IsSupported = results.ColorSpace is not null;
+
+            return results;
+        }
+
+
+        return results;
+    }
+
+
+    /// <summary>
     /// Converts Magick image to SKBitmap.
     /// </summary>
     public static SKImage? FromMagick(MagickImage? imgM, SKColorSpace? srcColorSpace = null)
@@ -733,33 +813,6 @@ public static partial class SkiaCodec
 
         var img = SKImage.FromBitmap(bmp);
         return img;
-    }
-
-
-    /// <summary>
-    /// Attempts to apply the given color space to the source image and outputs a new image.
-    /// </summary>
-    public static bool TryApplyColorSpace(SKImage? imgSrc, SKColorSpace? destColorSpace, out SKImage? output)
-    {
-        output = null;
-        if (imgSrc.IsDisposed()) return false;
-
-        // convert color space
-        if (destColorSpace is not null)
-        {
-            var info = imgSrc.Info.WithColorSpace(destColorSpace);
-            using var colorBmp = new SKBitmap(info);
-            using (var canvas = new SKCanvas(colorBmp))
-            {
-                // performs the ICC conversion during this draw operation
-                canvas.DrawImage(imgSrc, 0, 0);
-            }
-
-            output = SKImage.FromBitmap(colorBmp);
-            return true;
-        }
-
-        return false;
     }
 
 

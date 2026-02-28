@@ -73,6 +73,20 @@ public static partial class MagickCodec
             if (options.CorrectRotation) refImgM.AutoOrient();
 
 
+            // if always apply color profile
+            // or only apply color profile if there is an embedded profile
+            if (Core.Config.ShouldUseColorProfileForAll || meta.MagickColorProfile is not null)
+            {
+                if (GetColorProfileByName(Core.Config.ColorProfile) is { } destIccProfile)
+                {
+                    refImgM.TransformColorSpace(
+                        //set default color profile to sRGB
+                        meta.MagickColorProfile ?? ColorProfiles.SRGB,
+                        destIccProfile);
+                }
+            }
+
+
             // make sure the output color space is not CMYK
             if (meta.ColorSpace == ColorSpace.CMYK && meta.MagickColorProfile is not null)
             {
@@ -195,6 +209,5 @@ public static partial class MagickCodec
 
         return exifValue.Value;
     }
-
 
 }

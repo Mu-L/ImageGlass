@@ -142,7 +142,7 @@ public partial class ViewerControl : PhControl
                 var srcImage = srcLease?.Image;
 
                 // apply new color space for source image
-                if (SkiaCodec.TryApplyColorSpace(srcImage, Core.DestColorProfile, out var imgFrameColored))
+                if (TryApplySkiaColorSpace(srcImage, out var imgFrameColored))
                 {
                     SKImageRef.Set(ref _imgSource, imgFrameColored);
                 }
@@ -666,7 +666,7 @@ public partial class ViewerControl : PhControl
                     imgFrame = e.Photo.GetFrame(0);
 
                     // apply color space
-                    if (SkiaCodec.TryApplyColorSpace(imgFrame, Core.DestColorProfile, out var imgFrameColored))
+                    if (TryApplySkiaColorSpace(imgFrame, out var imgFrameColored))
                     {
                         // don't dispose the clipboard photo
                         if (!e.Photo.IsClipboard)
@@ -894,6 +894,30 @@ public partial class ViewerControl : PhControl
             _animator?.Pause();
             IsImageAnimating = false;
         }
+    }
+
+
+    /// <summary>
+    /// Attempts to apply the destination Skia color profile to the current photo.
+    /// </summary>
+    private bool TryApplySkiaColorSpace(SKImage? srcImage, out SKImage? output)
+    {
+        output = null;
+        if (!Core.IsDestColorProfileSupported) return false;
+
+        // if always apply color profile
+        // or only apply color profile if there is an embedded profile
+        if (Core.Config.ShouldUseColorProfileForAll || Photo?.Metadata?.SkiaColorSpace is not null)
+        {
+            // apply new color space for source image
+            if (SkiaCodec.TryApplyColorSpace(srcImage, Core.DestColorProfile, out var imgFrameColored))
+            {
+                output = imgFrameColored;
+                return true;
+            }
+        }
+
+        return false;
     }
 
 

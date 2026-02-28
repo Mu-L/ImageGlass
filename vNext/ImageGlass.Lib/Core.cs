@@ -524,7 +524,7 @@ public static class Core
     /// </summary>
     public static void UpdateDestColorProfile()
     {
-        var results = GetColorProfileFromSettings();
+        var results = SkiaCodec.GetColorProfileByName(Core.Config.ColorProfile);
 
         Core.IsDestColorProfileSupported = results.IsSupported;
 
@@ -535,58 +535,6 @@ public static class Core
         Core.DestColorProfile?.Dispose();
         Core.DestColorProfile = results.ColorSpace;
         Core.OnColorProfileChanged();
-    }
-
-
-    /// <summary>
-    /// Gets SKColorSpace from settings.
-    /// </summary>
-    private static (SKColorSpace? ColorSpace, bool IsSupported) GetColorProfileFromSettings()
-    {
-        (SKColorSpace? ColorSpace, bool IsSupported) results = new(null, true);
-
-
-        // 1. don't use color profile
-        if (Config.ColorProfile.Equals(nameof(ColorProfileOption.None))) return results;
-
-
-        // 2. use current monitor profile
-        if (Config.ColorProfile.Equals(nameof(ColorProfileOption.CurrentMonitorProfile)))
-        {
-            if (string.IsNullOrEmpty(ColorProfileProvider?.ProfilePath))
-                return results;
-
-            using var data = SKData.Create(ColorProfileProvider.ProfilePath);
-            results.ColorSpace = SKColorSpace.CreateIcc(data);
-            results.IsSupported = results.ColorSpace is not null; // Skia does not support all profiles
-
-            return results;
-        }
-
-
-        // 3. use built-in color profile
-        var magickProfile = MagickCodec.GetBuiltinColorProfile(Config.ColorProfile);
-        if (magickProfile is not null)
-        {
-            results.ColorSpace = SKColorSpace.CreateIcc(magickProfile.ToReadOnlySpan());
-            results.IsSupported = results.ColorSpace is not null;
-
-            return results;
-        }
-
-
-        // 4. use custom color profile
-        if (Path.Exists(Config.ColorProfile))
-        {
-            using var data = SKData.Create(Config.ColorProfile);
-            results.ColorSpace = SKColorSpace.CreateIcc(data);
-            results.IsSupported = results.ColorSpace is not null;
-
-            return results;
-        }
-
-
-        return results;
     }
 
 

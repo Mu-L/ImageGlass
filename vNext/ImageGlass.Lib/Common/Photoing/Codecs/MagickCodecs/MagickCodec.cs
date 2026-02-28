@@ -803,6 +803,43 @@ public static partial class MagickCodec
 
 
     /// <summary>
+    /// Get Magick color profile.
+    /// </summary>
+    /// <param name="name">Name or Full path of color profile</param>
+    public static ColorProfile? GetColorProfileByName(string name)
+    {
+        // 1. don't use color profile
+        if (name.Equals(nameof(ColorProfileOption.None))) return null;
+
+
+        // 2. use built-in color profile
+        var magickProfile = MagickCodec.GetBuiltinColorProfile(name);
+        if (magickProfile is not null)
+        {
+            return magickProfile;
+        }
+
+
+        var profilePath = name;
+
+        // 3. use current monitor profile
+        if (name.Equals(nameof(ColorProfileOption.CurrentMonitorProfile)))
+        {
+            profilePath = Core.ColorProfileProvider?.ProfilePath;
+        }
+
+
+        // 4. use custom color profile
+        if (Path.Exists(profilePath))
+        {
+            return new ColorProfile(profilePath);
+        }
+
+        return null;
+    }
+
+
+    /// <summary>
     /// Get built-in color profile by name.
     /// </summary>
     /// <param name="magickProfileName">Magick's color profile name</param>
