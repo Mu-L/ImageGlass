@@ -21,6 +21,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using ImageGlass.Common;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.OsApi;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
@@ -47,7 +48,8 @@ public partial class ViewerControl : PhControl
     // events
     public event TEventHandler<ViewerControl, PhotoLoadingEventArgs>? PhotoLoading;
     public event TEventHandler<ViewerControl, AnimatorFrameChangedEventArgs>? PhotoAnimatorFrameChanged;
-
+    public event TEventHandler<ViewerControl, ViewerPointerEventArgs>? ViewerPointerMoved;
+    public event TEventHandler<ViewerControl, ViewerPointerEventArgs>? ViewerPointerPressed;
 
 
     #region Public Properties
@@ -214,6 +216,10 @@ public partial class ViewerControl : PhControl
 
         // request re-render control
         if (requestRerender) InvalidateVisual();
+
+
+        // trigger event
+        OnViewerPointerPressed(e, p);
     }
 
 
@@ -280,6 +286,10 @@ public partial class ViewerControl : PhControl
 
         // request re-render control
         if (requestRerender) InvalidateVisual();
+
+
+        // trigger event
+        OnViewerPointerMoved(e, p);
     }
 
 
@@ -322,6 +332,41 @@ public partial class ViewerControl : PhControl
     protected virtual void OnPhotoLoading(PhotoLoadingEventArgs e)
     {
         PhotoLoading?.Invoke(this, e);
+    }
+
+
+    /// <summary>
+    /// Raises <see cref="PhotoAnimatorFrameChanged"/> event.
+    /// </summary>
+    protected virtual void OnPhotoAnimatorFrameChanged(AnimatorFrameChangedEventArgs e)
+    {
+        PhotoAnimatorFrameChanged?.Invoke(this, e);
+    }
+
+
+    /// <summary>
+    /// Raises <see cref="ViewerPointerPressed"/> event.
+    /// </summary>
+    protected virtual void OnViewerPointerPressed(PointerEventArgs e, PointerPoint p)
+    {
+        if (ViewerPointerPressed is not null)
+        {
+            var srcPoint = PointClientToSource(p.Position).ToPixelPoint();
+            ViewerPointerPressed.Invoke(this, new ViewerPointerEventArgs(e, p, srcPoint));
+        }
+    }
+
+
+    /// <summary>
+    /// Raises <see cref="ViewerPointerMoved"/> event.
+    /// </summary>
+    protected virtual void OnViewerPointerMoved(PointerEventArgs e, PointerPoint p)
+    {
+        if (ViewerPointerMoved is not null)
+        {
+            var srcPoint = PointClientToSource(p.Position).ToPixelPoint();
+            ViewerPointerMoved.Invoke(this, new ViewerPointerEventArgs(e, p, srcPoint));
+        }
     }
 
     #endregion // Override Methods
@@ -819,7 +864,7 @@ public partial class ViewerControl : PhControl
         }
 
         InvalidateVisual();
-        PhotoAnimatorFrameChanged?.Invoke(this, e);
+        OnPhotoAnimatorFrameChanged(e);
     }
 
 

@@ -17,28 +17,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
-using Avalonia.Input;
-using System;
 
-namespace ImageGlass.UI.Viewer;
+namespace ImageGlass.Common.Extensions;
 
-public class ViewerPointerEventArgs(PointerEventArgs e, PointerPoint p, PixelPoint srcPoint) : EventArgs
+public static class Point_Exts
 {
-    /// <summary>
-    /// Gets the pointer event data associated with the current input event.
-    /// </summary>
-    public PointerEventArgs Event => e;
+    extension(Point p)
+    {
 
-    /// <summary>
-    /// Gets pointer point.
-    /// </summary>
-    public PointerPoint Point => p;
+        /// <summary>
+        /// Converts the current point to a PixelPoint with integer coordinates.
+        /// </summary>
+        public PixelPoint ToPixelPoint()
+        {
+            return new PixelPoint((int)p.X, (int)p.Y);
+        }
 
-    /// <summary>
-    /// Gets the corresponding source image coordinates
-    /// for the current position within the viewer control.
-    /// It can be out of the image bounds.
-    /// </summary>
-    public PixelPoint SourcePoint => srcPoint;
 
+    }
 }
