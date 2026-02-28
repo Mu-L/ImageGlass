@@ -33,12 +33,19 @@ public struct InterlockedBool(bool initialValue = false)
 
 
     /// <summary>
-    /// Gets or sets the boolean value atomically.
+    /// Gets the boolean value atomically.
     /// </summary>
-    public bool Value
+    public bool Value => Volatile.Read(ref _value) == 1;
+
+
+    /// <summary>
+    /// Atomically sets value.
+    /// </summary>
+    /// <returns><c>true</c> if the value was changed.</returns>
+    public bool Set(bool value)
     {
-        get => Volatile.Read(ref _value) == 1;
-        set => Interlocked.Exchange(ref _value, value ? 1 : 0);
+        if (value) return SetTrue();
+        else return SetFalse();
     }
 
 

@@ -35,7 +35,7 @@ namespace ImageGlass.Common.ServiceProviders;
 public partial class AppAPIProvider
 {
     private Hotkey? _lastHotkeyPressed = null;
-    private bool _isQuickBrowsingPhotos = false;
+    private InterlockedBool _isQuickBrowsingPhotos = new(false);
 
     /// <summary>
     /// Gets a value indicating whether the user is holding a navigation key
@@ -327,10 +327,10 @@ public partial class AppAPIProvider
         var isBrowsingAction = executable.Equals(nameof(API.IG_ViewByStep), StringComparison.Ordinal)
             || executable.Equals(nameof(API.IG_ViewNext), StringComparison.Ordinal)
             || executable.Equals(nameof(API.IG_ViewPrevious), StringComparison.Ordinal);
-        _isQuickBrowsingPhotos = isBrowsingAction && isHotkeyPressMultiTimes;
+        _isQuickBrowsingPhotos.Set(isBrowsingAction && isHotkeyPressMultiTimes);
         if (_isQuickBrowsingPhotos)
         {
-            Viewer.ShouldLoadFullResolution.Value = false;
+            Viewer.ShouldLoadFullResolution.SetFalse();
         }
 
 
@@ -383,10 +383,10 @@ public partial class AppAPIProvider
         // 2. handle quick browsing end: start loading full resolution
         if (_isQuickBrowsingPhotos)
         {
-            _isQuickBrowsingPhotos = false;
+            _isQuickBrowsingPhotos.SetFalse();
 
             Viewer.Photo?.CancelLoading();
-            Viewer.ShouldLoadFullResolution.Value = true;
+            Viewer.ShouldLoadFullResolution.SetTrue();
 
             await Task.Delay(50);
             await Viewer.LoadPhotoAsync(false, true);

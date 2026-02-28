@@ -501,7 +501,7 @@ public partial class ViewerControl : PhControl
     /// </summary>
     private async Task HandlePhotoPreviewAsync(PhotoLoadingEventArgs e)
     {
-        if (!ShouldLoadFullResolution.Value) e.Photo.CancelLoading();
+        if (!ShouldLoadFullResolution) e.Photo.CancelLoading();
 
         // 1. skip the preview if it's not enable or in zoom lock mode
         if (!EnableImagePreview || ZoomMode == ZoomMode.LockZoom)
@@ -598,7 +598,7 @@ public partial class ViewerControl : PhControl
 
 
         // raise event
-        _isPreviewing.Value = hasPreview;
+        _isPreviewing.Set(hasPreview);
         OnPhotoLoading(e);
 
 
@@ -616,7 +616,7 @@ public partial class ViewerControl : PhControl
     /// </summary>
     private async Task HandlePhotoLoadedAsync(PhotoLoadingEventArgs e)
     {
-        if (!ShouldLoadFullResolution.Value) return;
+        if (!ShouldLoadFullResolution) return;
 
 
         // 1. back up size of preview image
@@ -716,7 +716,7 @@ public partial class ViewerControl : PhControl
 
 
                     // 5.3 if user zoomed and panned the preview
-                    if (_isPreviewing.Value
+                    if (_isPreviewing
                         && _zooming.IsManual
                         && ZoomMode != ZoomMode.LockZoom)
                     {
@@ -745,7 +745,7 @@ public partial class ViewerControl : PhControl
                             ZoomFactor = _zooming.Factor,
                             IsManualZoom = false,
                             IsZoomModeChange = false,
-                            IsPreviewingImage = _isPreviewing.Value,
+                            IsPreviewingImage = _isPreviewing,
                             ChangeSource = ZoomChangeSource.Unknown,
                         });
 

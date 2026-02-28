@@ -37,7 +37,7 @@ public partial class DisposableImpl : PhReactive, IDisposable
     /// <summary>
     /// Gets a value indicating whether the object has been disposed.
     /// </summary>
-    public bool IsDisposed => _isDisposed.Value;
+    public bool IsDisposed => _isDisposed;
 
     protected virtual void Dispose(bool disposing)
     {
@@ -53,7 +53,7 @@ public partial class DisposableImpl : PhReactive, IDisposable
         }
 
         // Free any unmanaged objects here.
-        _isDisposed.Value = true;
+        _isDisposed.SetTrue();
     }
 
     public virtual void Dispose()

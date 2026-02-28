@@ -41,7 +41,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// <summary>
     /// Gets a value indicating whether the object has been disposed.
     /// </summary>
-    public bool IsDisposed => _isDisposed.Value;
+    public bool IsDisposed => _isDisposed;
 
     protected virtual void Dispose(bool disposing)
     {
@@ -54,7 +54,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
         }
 
         // Free any unmanaged objects here.
-        _isDisposed.Value = true;
+        _isDisposed.SetTrue();
     }
 
     public virtual void Dispose()
@@ -124,7 +124,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
             // Atomically claim first-draw ownership so that concurrent
             // InvalidateVisual() calls cannot trigger duplicate
             // OnDrawnImageFirstTime processing.
-            _isFirstDraw = viewer._isFirstDraw.Value;
+            _isFirstDraw = viewer._isFirstDraw;
             if (_isFirstDraw)
             {
                 viewer._isFirstDraw.SetFalse();

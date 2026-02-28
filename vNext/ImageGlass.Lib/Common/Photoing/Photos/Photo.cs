@@ -27,7 +27,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -528,7 +527,7 @@ public partial class Photo : DisposableImpl
         try
         {
             // reset dispose status
-            _isDisposed.Value = false;
+            _isDisposed.SetFalse();
             State = PhotoLoadingState.None;
             Error = null;
 

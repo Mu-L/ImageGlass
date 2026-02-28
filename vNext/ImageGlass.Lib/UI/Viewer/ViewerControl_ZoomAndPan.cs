@@ -637,7 +637,7 @@ public partial class ViewerControl
             ZoomFactor = _zooming.Factor,
             IsManualZoom = _zooming.IsManual,
             IsZoomModeChange = false,
-            IsPreviewingImage = _isPreviewing.Value,
+            IsPreviewingImage = _isPreviewing,
             ChangeSource = ZoomChangeSource.Unknown,
         });
     }
@@ -667,7 +667,7 @@ public partial class ViewerControl
             ZoomFactor = _zooming.Factor,
             IsManualZoom = _zooming.IsManual,
             IsZoomModeChange = mode != _zooming.Mode,
-            IsPreviewingImage = _isPreviewing.Value,
+            IsPreviewingImage = _isPreviewing,
             ChangeSource = zoomedByResizing ? ZoomChangeSource.SizeChanged : ZoomChangeSource.ZoomMode,
         });
     }
@@ -837,7 +837,7 @@ public partial class ViewerControl
                 ZoomFactor = _zooming.Factor,
                 IsManualZoom = _zooming.IsManual,
                 IsZoomModeChange = false,
-                IsPreviewingImage = _isPreviewing.Value,
+                IsPreviewingImage = _isPreviewing,
                 ChangeSource = ZoomChangeSource.Unknown,
             });
 
@@ -944,7 +944,7 @@ public partial class ViewerControl
             ZoomFactor = _zooming.Factor,
             IsManualZoom = _zooming.IsManual,
             IsZoomModeChange = false,
-            IsPreviewingImage = _isPreviewing.Value,
+            IsPreviewingImage = _isPreviewing,
             ChangeSource = ZoomChangeSource.Unknown,
         });
 
