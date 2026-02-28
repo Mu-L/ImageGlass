@@ -215,6 +215,14 @@ public partial class PhotoManager
                     continue;
                 }
 
+                // skip the photo currently being loaded by the viewer
+                // to avoid cancelling its ongoing load via CancelLoading()
+                if (idx == CurrentIndex)
+                {
+                    newCachedSet.Add(idx);
+                    continue;
+                }
+
                 // check file size constraint
                 if (maxFileSizeBytes > 0 && !SatisfiesFileSizeLimit(photo.FilePath, maxFileSizeBytes))
                 {

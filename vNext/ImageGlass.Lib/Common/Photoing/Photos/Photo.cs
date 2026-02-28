@@ -41,6 +41,7 @@ public partial class Photo : DisposableImpl
     private Task<PhotoMetadata>? _taskMetadata;
     private CancellationTokenSource? _cancelPhotoLoading;
     private readonly Lock _lock = new();
+    private int _loadGeneration;
 
     // track pending tasks
     private ConcurrentDictionary<Guid, bool> _taskRefs = new();
@@ -523,6 +524,7 @@ public partial class Photo : DisposableImpl
         // use cached data
         if (useCache && State != PhotoState.None) return;
         var token = CancelLoading();
+        var myGeneration = Interlocked.Increment(ref _loadGeneration);
 
         try
         {
@@ -590,7 +592,14 @@ public partial class Photo : DisposableImpl
         }
         finally
         {
-            if (token.IsCancellationRequested) Unload();
+            // only unload if no newer load has started on this Photo;
+            // a newer LoadAsync increments _loadGeneration, so if ours
+            // is stale, calling Unload would cancel the newer load
+            if (token.IsCancellationRequested
+                && Volatile.Read(ref _loadGeneration) == myGeneration)
+            {
+                Unload();
+            }
         }
     }
 

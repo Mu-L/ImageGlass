@@ -344,8 +344,13 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task HandleKeyUpAsync(KeyEventArgs e)
     {
-        // 1. stop animation source
-        // 1.1 Zoom In/Out
+        // 1. clear early to prevent a subsequent key press from being
+        // falsely detected as quick browsing while we await below
+        _lastHotkeyPressed = null;
+
+
+        // 2. stop animation source
+        // 2.1 Zoom In/Out
         if (Viewer.AnimationSource.HasFlag(AnimationSources.ZoomIn))
         {
             Viewer.StopDrawingAnimation(AnimationSources.ZoomIn);
@@ -357,7 +362,7 @@ public partial class AppAPIProvider
             return;
         }
 
-        // 1.2 Panning
+        // 2.2 Panning
         if (Viewer.AnimationSource.HasFlag(AnimationSources.PanLeft))
         {
             Viewer.StopDrawingAnimation(AnimationSources.PanLeft);
@@ -380,11 +385,10 @@ public partial class AppAPIProvider
         }
 
 
-        // 2. handle quick browsing end: start loading full resolution
+        // 3. handle quick browsing end: start loading full resolution
         if (_isQuickBrowsingPhotos)
         {
             _isQuickBrowsingPhotos.SetFalse();
-
             Viewer.Photo?.CancelLoading();
             Viewer.ShouldLoadFullResolution.SetTrue();
 
@@ -394,9 +398,6 @@ public partial class AppAPIProvider
             // start caching adjacent photos now that quick browsing ended
             Core.Photos.RequestCacheAround(Core.Photos.CurrentIndex);
         }
-
-
-        _lastHotkeyPressed = null;
     }
 
 
