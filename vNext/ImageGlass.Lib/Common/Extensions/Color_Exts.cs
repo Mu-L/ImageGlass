@@ -26,20 +26,15 @@ public static class Color_Exts
 {
     extension(Color c)
     {
+        /// <summary>
+        /// Checks if this color is empty (all values are <c>0</c>).
+        /// </summary>
+        public bool IsEmpty => c.R == 0 && c.G == 0 && c.B == 0 && c.A == 0;
+
         public Color A(byte a) => Color.FromArgb(a, c.R, c.G, c.B);
         public Color R(byte r) => Color.FromArgb(c.A, r, c.G, c.B);
         public Color G(byte g) => Color.FromArgb(c.A, c.R, g, c.B);
         public Color B(byte b) => Color.FromArgb(c.A, c.R, c.G, b);
-    }
-
-
-
-    /// <summary>
-    /// Checks if this color is empty (all values are <c>0</c>).
-    /// </summary>
-    public static bool IsEmpty(this Color c)
-    {
-        return c.R == 0 && c.G == 0 && c.B == 0 && c.A == 0;
     }
 
 
@@ -193,15 +188,6 @@ public static class Color_Exts
     }
 
 
-    ///// <summary>
-    ///// Converts this color <see cref="c"/> to COLORREF (Win32).
-    ///// </summary>
-    //public static uint ToCOLORREF(this Color c)
-    //{
-    //    return (uint)(ColorTranslator.ToWin32(c));
-    //}
-
-
     /// <summary>
     /// Converts this color <see cref="c"/> to RGBA array.
     /// </summary>
@@ -233,37 +219,6 @@ public static class Color_Exts
             (int)Math.Round(black * 100)
         ];
     }
-
-
-    ///// <summary>
-    ///// Converts this color <see cref="c"/> to HSLA values.
-    ///// </summary>
-    //public static float[] ToHsla(this Color c)
-    //{
-    //    var h = (float)Math.Round(c.GetHue());
-    //    var s = (float)Math.Round(c.GetSaturation() * 100);
-    //    var l = (float)Math.Round(c.GetBrightness() * 100);
-    //    var a = (float)Math.Round(c.A / 255.0, 3);
-
-    //    return [h, s, l, a];
-    //}
-
-
-    ///// <summary>
-    ///// Converts this color <see cref="c"/> to HSVA values.
-    ///// </summary>
-    //public static float[] ToHsva(this Color c)
-    //{
-    //    int max = Math.Max(c.R, Math.Max(c.G, c.B));
-    //    int min = Math.Min(c.R, Math.Min(c.G, c.B));
-
-    //    var hue = (float)Math.Round(c.GetHue());
-    //    var saturation = (float)Math.Round(100 * ((max == 0) ? 0 : 1f - (1f * min / max)));
-    //    var value = (float)Math.Round(max * 100f / 255);
-    //    var alpha = (float)Math.Round(c.A / 255.0, 3);
-
-    //    return [hue, saturation, value, alpha];
-    //}
 
 
     /// <summary>

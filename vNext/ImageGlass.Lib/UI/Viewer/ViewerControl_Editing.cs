@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Media;
 using ImageGlass.Common;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
@@ -80,6 +81,49 @@ public partial class ViewerControl
             }
 
             return bmpOutput;
+        }
+        finally
+        {
+            imgLease?.Dispose();
+        }
+    }
+
+
+    /// <summary>
+    /// Gets the color of the pixel at the specified coordinates from the image source.
+    /// </summary>
+    /// <returns>
+    /// Empty color (<c>#0000</c>) if the photo source is none.
+    /// </returns>
+    public Color GetColorAt(int x, int y)
+    {
+        SKImageRef.ImageLease? imgLease = null;
+        var colorEmpty = new Color(0, 0, 0, 0);
+
+        try
+        {
+            lock (_lock)
+            {
+                var imageRef = _imgRender ?? _imgSource;
+                if (imageRef is null) return colorEmpty;
+
+                imgLease = imageRef.Acquire();
+            }
+
+            var img = imgLease?.Image;
+            if (img.IsDisposed()) return colorEmpty;
+
+            if (x < 0 || x >= img.Width || y < 0 || y >= img.Height)
+                return colorEmpty;
+
+            // read a single pixel using a 1x1 bitmap to avoid allocating a full copy
+            var info = new SKImageInfo(1, 1, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+            using var pixel = new SKBitmap(info);
+            if (!img.ReadPixels(info, pixel.GetPixels(), info.RowBytes, x, y))
+                return colorEmpty;
+
+            var skColor = pixel.GetPixel(0, 0);
+            return new Color(skColor.Alpha, skColor.Red, skColor.Green, skColor.Blue);
         }
         finally
         {
