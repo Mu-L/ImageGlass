@@ -102,6 +102,8 @@ public partial class ToolHostControl : PhControl
             throw new InvalidOperationException($"IGE: The current tool (ID = {tool.ToolId}) must be close before opening another tool");
         }
 
+        // load tool settings
+        newTool.LoadSettings(Core.Config);
 
         // open the tool
         ToolContent = newTool;
@@ -134,7 +136,7 @@ public partial class ToolHostControl : PhControl
         try
         {
             // save tool settings
-            tool.Settings.SaveToAppConfig(Core.Config);
+            tool.SaveSettings(Core.Config);
 
             // close the tool
             ToolContent = null;

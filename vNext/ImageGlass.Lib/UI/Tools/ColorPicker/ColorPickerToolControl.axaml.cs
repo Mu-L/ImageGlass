@@ -25,13 +25,15 @@ using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer;
+using System.Collections.Generic;
 
 namespace ImageGlass.UI;
 
 public partial class ColorPickerToolControl : PhControl, IToolControl
 {
     public string ToolId => "ColorPicker";
-    public IToolConfig Settings { get; set; }
+    public object Settings => new ColorPickerConfig();
+    public ColorPickerConfig Options => (ColorPickerConfig)Settings;
     public ViewerControl Viewer { get; init; } = null!;
 
 
@@ -120,7 +122,7 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
     /// <summary>
     /// Gets the selected color in RGB format.
     /// </summary>
-    public string? ColorRGB => FormatColor(ColorFormat.RGB);
+    public string? ColorRGB => FormatColor(ColorFormat.RGB, Options.ShowRgbWithAlpha);
     public static readonly DirectProperty<ColorPickerToolControl, string?> ColorRGBProperty =
         AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorRGB), i => i.ColorRGB);
 
@@ -128,7 +130,7 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
     /// <summary>
     /// Gets the selected color in HEX format.
     /// </summary>
-    public string? ColorHEX => FormatColor(ColorFormat.HEX);
+    public string? ColorHEX => FormatColor(ColorFormat.HEX, Options.ShowHexWithAlpha);
     public static readonly DirectProperty<ColorPickerToolControl, string?> ColorHEXProperty =
         AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorHEX), i => i.ColorHEX);
 
@@ -136,7 +138,7 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
     /// <summary>
     /// Gets the selected color in HSL format.
     /// </summary>
-    public string? ColorHSL => FormatColor(ColorFormat.HSL);
+    public string? ColorHSL => FormatColor(ColorFormat.HSL, Options.ShowHslWithAlpha);
     public static readonly DirectProperty<ColorPickerToolControl, string?> ColorHSLProperty =
         AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorHSL), i => i.ColorHSL);
 
@@ -144,7 +146,7 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
     /// <summary>
     /// Gets the selected color in HSV format.
     /// </summary>
-    public string? ColorHSV => FormatColor(ColorFormat.HSV);
+    public string? ColorHSV => FormatColor(ColorFormat.HSV, Options.ShowHsvWithAlpha);
     public static readonly DirectProperty<ColorPickerToolControl, string?> ColorHSVProperty =
         AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorHSV), i => i.ColorHSV);
 
@@ -152,7 +154,7 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
     /// <summary>
     /// Gets the selected color in CMYK format.
     /// </summary>
-    public string? ColorCMYK => FormatColor(ColorFormat.CMYK);
+    public string? ColorCMYK => FormatColor(ColorFormat.CMYK, Options.ShowCmykWithAlpha);
     public static readonly DirectProperty<ColorPickerToolControl, string?> ColorCMYKProperty =
         AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorCMYK), i => i.ColorCMYK);
 
@@ -160,7 +162,7 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
     /// <summary>
     /// Gets the selected color in CIELAB format.
     /// </summary>
-    public string? ColorCIELAB => FormatColor(ColorFormat.CIELAB);
+    public string? ColorCIELAB => FormatColor(ColorFormat.CIELAB, Options.ShowCIELabWithAlpha);
     public static readonly DirectProperty<ColorPickerToolControl, string?> ColorCIELABProperty =
         AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorCIELAB), i => i.ColorCIELAB);
 
@@ -172,8 +174,6 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
     public ColorPickerToolControl()
     {
         InitializeComponent();
-
-        Settings = new ColorPickerConfig(ToolId);
     }
 
 
@@ -281,11 +281,12 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
     /// <summary>
     /// Formats the currently selected color as a string in the specified color format.
     /// </summary>
-    private string FormatColor(ColorFormat format, bool skipAlpha = false)
+    private string FormatColor(ColorFormat format, bool includeAlpha = true)
     {
+        var skipAlpha = !includeAlpha;
         var code = format switch
         {
-            ColorFormat.RGB => SelectedColor.ToRgbaString(),
+            ColorFormat.RGB => SelectedColor.ToRgbaString(skipAlpha),
             ColorFormat.HEX => SelectedColor.ToHex(skipAlpha),
             ColorFormat.HSL => SelectedColor.ToHslString(skipAlpha),
             ColorFormat.HSV => SelectedColor.ToHsvString(skipAlpha),
@@ -295,6 +296,23 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
         };
 
         return code;
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void LoadSettings(Config config)
+    {
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void SaveSettings(Config config)
+    {
+        // TODO
     }
 
     #endregion // Control Methods
@@ -312,70 +330,5 @@ public enum ColorFormat
     HSV,
     CMYK,
     CIELAB,
-}
-
-
-
-/// <summary>
-/// Provides settings for Color Picker tool.
-/// </summary>
-public class ColorPickerConfig(string toolId) : IToolConfig
-{
-    public string ToolId { get; init; } = toolId;
-
-
-    /// <summary>
-    /// Shows alpha value of RGB code.
-    /// </summary>
-    public bool ShowRgbWithAlpha { get; set; } = true;
-
-    /// <summary>
-    /// Shows alpha value of HEX code.
-    /// </summary>
-    public bool ShowHexWithAlpha { get; set; } = true;
-
-    /// <summary>
-    /// Shows alpha value of HSL code.
-    /// </summary>
-    public bool ShowHslWithAlpha { get; set; } = true;
-
-    /// <summary>
-    /// Shows alpha value of HSV code.
-    /// </summary>
-    public bool ShowHsvWithAlpha { get; set; } = true;
-
-    /// <summary>
-    /// Shows alpha value of CIELAB code.
-    /// </summary>
-    public bool ShowCIELabWithAlpha { get; set; } = true;
-
-
-    public void LoadFromAppConfig(Config config)
-    {
-        //var toolConfig = Config.ToolSettings.GetValue(ToolId);
-        //if (toolConfig is not ExpandoObject config) return;
-
-        //// load configs
-        //ShowRgbWithAlpha = config.GetValue(nameof(ShowRgbWithAlpha), ShowRgbWithAlpha);
-        //ShowHexWithAlpha = config.GetValue(nameof(ShowHexWithAlpha), ShowHexWithAlpha);
-        //ShowHslWithAlpha = config.GetValue(nameof(ShowHslWithAlpha), ShowHslWithAlpha);
-        //ShowHsvWithAlpha = config.GetValue(nameof(ShowHsvWithAlpha), ShowHsvWithAlpha);
-        //ShowCIELabWithAlpha = config.GetValue(nameof(ShowCIELabWithAlpha), ShowCIELabWithAlpha);
-    }
-
-
-    public void SaveToAppConfig(Config config)
-    {
-        //var settings = new ExpandoObject();
-
-        //_ = settings.TryAdd(nameof(ShowRgbWithAlpha), ShowRgbWithAlpha);
-        //_ = settings.TryAdd(nameof(ShowHexWithAlpha), ShowHexWithAlpha);
-        //_ = settings.TryAdd(nameof(ShowHslWithAlpha), ShowHslWithAlpha);
-        //_ = settings.TryAdd(nameof(ShowHsvWithAlpha), ShowHsvWithAlpha);
-        //_ = settings.TryAdd(nameof(ShowCIELabWithAlpha), ShowCIELabWithAlpha);
-
-        //// save to app config
-        //Config.ToolSettings.Set(ToolId, settings);
-    }
 }
 

@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using ImageGlass.UI.Viewer;
 
 namespace ImageGlass.UI;
@@ -31,12 +32,24 @@ public interface IToolControl
     /// <summary>
     /// Gets, sets settings for this tool, written in app's config file.
     /// </summary>
-    IToolConfig Settings { get; set; }
+    object Settings { get; }
 
 
     /// <summary>
     /// Gets the instance of Viewer control.
     /// </summary>
     ViewerControl Viewer { get; init; }
+
+
+    /// <summary>
+    /// Loads and parses tool settings from app config.
+    /// </summary>
+    void LoadSettings(Config config);
+
+
+    /// <summary>
+    /// Saves the tool settings to app config.
+    /// </summary>
+    void SaveSettings(Config config);
 
 }
