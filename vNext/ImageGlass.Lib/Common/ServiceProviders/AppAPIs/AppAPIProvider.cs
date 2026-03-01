@@ -32,6 +32,7 @@ using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
 using System;
 using System.Collections.Frozen;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
@@ -72,6 +73,7 @@ public partial class AppAPIProvider
     private GalleryControl Gallery => _mainWindow.PART_MainView.PART_Gallery;
     private PhGridSplitter GalleryResizer => _mainWindow.PART_MainView.PART_GalleryResizer;
     private MessageControl Message => _mainWindow.PART_MainView.PART_Message;
+    private ToolHostControl ToolHost => _mainWindow.PART_MainView.PART_ToolHost;
     private SlideshowCountdownOverlay SlideshowCountdown => _mainWindow.PART_MainView.PART_SlideshowCountdown;
 
 
@@ -2627,6 +2629,45 @@ public partial class AppAPIProvider
 
 
     #region Tools APIs
+
+    /// <summary>
+    /// Toggles visibility of Color picker tool.
+    /// </summary>
+    public void IG_ToggleToolColorPicker(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleToolColorPicker(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggles visibility of Color picker tool
+    /// </summary>
+    public void IG_ToggleToolColorPicker(bool? enabled = null)
+    {
+        var toolId = "ColorPicker";
+        var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
+
+        enabled ??= !isOpen;
+        isOpen = enabled.Value;
+        Core.ToolMap[toolId] = isOpen;
+
+        if (enabled.Value)
+        {
+            if (ToolHost.CloseCurrentTool())
+            {
+                ToolHost.OpenTool(new ColorPickerToolControl()
+                {
+                    Viewer = Viewer,
+                });
+            }
+        }
+        else
+        {
+            ToolHost.CloseTool(toolId);
+        }
+    }
+
 
     /// <summary>
     /// Performs a lossless compression operation.
