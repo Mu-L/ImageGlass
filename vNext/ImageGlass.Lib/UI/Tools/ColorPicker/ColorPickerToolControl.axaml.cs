@@ -33,8 +33,8 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
 {
     public static string TOOL_ID => "ColorPicker";
     public string ToolId => TOOL_ID;
-    public object Settings { get; private set; } = new ColorPickerConfig();
-    public ColorPickerConfig Options => (ColorPickerConfig)Settings;
+    public object? Settings { get; private set; } = new ColorPickerConfig();
+    public ColorPickerConfig Options => (ColorPickerConfig)Settings!;
     public ViewerControl Viewer { get; init; } = null!;
 
 

@@ -57,6 +57,30 @@ public partial class ToolHostControl : PhControl
         AvaloniaProperty.Register<ColorPickerToolControl, string>(nameof(CloseButtonTooltipText));
 
 
+    /// <summary>
+    /// Gets the tooltip text displayed for the settings button.
+    /// </summary>
+    public string SettingsButtonTooltipText
+    {
+        get => GetValue(SettingsButtonTooltipTextProperty);
+        private set => SetValue(SettingsButtonTooltipTextProperty, value);
+    }
+    public static readonly StyledProperty<string> SettingsButtonTooltipTextProperty =
+        AvaloniaProperty.Register<ColorPickerToolControl, string>(nameof(SettingsButtonTooltipText));
+
+
+    /// <summary>
+    /// Gets the value indicates if the tool contains settings.
+    /// </summary>
+    public bool HasSettings
+    {
+        get => GetValue(HasSettingsProperty);
+        private set => SetValue(HasSettingsProperty, value);
+    }
+    public static readonly StyledProperty<bool> HasSettingsProperty =
+        AvaloniaProperty.Register<ColorPickerToolControl, bool>(nameof(HasSettings));
+
+
     #endregion // Public Properties
 
 
@@ -76,6 +100,7 @@ public partial class ToolHostControl : PhControl
         base.OnIgLanguageChanged();
 
         CloseButtonTooltipText = Core.Lang[LangId._Close];
+        SettingsButtonTooltipText = Core.Lang[LangId.FrmMain_MnuSettings];
     }
 
 
@@ -83,6 +108,13 @@ public partial class ToolHostControl : PhControl
     {
         CloseCurrentTool();
     }
+
+
+    private void PART_BtnSettings_Click(object? sender, RoutedEventArgs e)
+    {
+        // TODO:
+    }
+
 
     #endregion // Control Events
 
@@ -108,6 +140,8 @@ public partial class ToolHostControl : PhControl
             // load tool settings
             var jsonEl = Core.Config.ToolSettings.GetValueOrDefault(newTool.ToolId);
             newTool.LoadSettings(jsonEl);
+
+            HasSettings = newTool.Settings is not null;
         }
         catch { }
 
@@ -180,6 +214,7 @@ public partial class ToolHostControl : PhControl
         }
         catch { }
     }
+
 
     #endregion // Public Methods
 

@@ -32,7 +32,7 @@ public interface IToolControl
     /// <summary>
     /// Gets, sets settings for this tool, written in app's config file.
     /// </summary>
-    object Settings { get; }
+    object? Settings { get; }
 
 
     /// <summary>
