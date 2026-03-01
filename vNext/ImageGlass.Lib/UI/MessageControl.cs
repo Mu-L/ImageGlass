@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
 
-public class MessageControl : ContentControl
+public class MessageControl : PhControl
 {
     private CancellationTokenSource? _cancelMessage;
     private readonly Lock _lock = new();

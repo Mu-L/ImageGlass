@@ -98,29 +98,28 @@ public partial class ViewerControl
     public Color GetColorAt(int x, int y)
     {
         SKImageRef.ImageLease? imgLease = null;
-        var colorEmpty = new Color(0, 0, 0, 0);
 
         try
         {
             lock (_lock)
             {
                 var imageRef = _imgRender ?? _imgSource;
-                if (imageRef is null) return colorEmpty;
+                if (imageRef is null) return Const.COLOR_EMPTY;
 
                 imgLease = imageRef.Acquire();
             }
 
             var img = imgLease?.Image;
-            if (img.IsDisposed()) return colorEmpty;
+            if (img.IsDisposed()) return Const.COLOR_EMPTY;
 
             if (x < 0 || x >= img.Width || y < 0 || y >= img.Height)
-                return colorEmpty;
+                return Const.COLOR_EMPTY;
 
             // read a single pixel using a 1x1 bitmap to avoid allocating a full copy
             var info = new SKImageInfo(1, 1, SKColorType.Bgra8888, SKAlphaType.Unpremul);
             using var pixel = new SKBitmap(info);
             if (!img.ReadPixels(info, pixel.GetPixels(), info.RowBytes, x, y))
-                return colorEmpty;
+                return Const.COLOR_EMPTY;
 
             var skColor = pixel.GetPixel(0, 0);
             return new Color(skColor.Alpha, skColor.Red, skColor.Green, skColor.Blue);

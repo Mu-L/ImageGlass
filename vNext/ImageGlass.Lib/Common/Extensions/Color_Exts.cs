@@ -189,7 +189,7 @@ public static class Color_Exts
 
 
     /// <summary>
-    /// Converts this color <see cref="c"/> to RGBA array.
+    /// Converts this color to RGBA array.
     /// </summary>
     public static byte[] ToRgbaArray(this Color c)
     {
@@ -198,33 +198,106 @@ public static class Color_Exts
 
 
     /// <summary>
-    /// Converts this color <see cref="c"/> to CMYK values.
+    /// Converts this color to RGBA values.
     /// </summary>
-    public static int[] ToCmyk(this Color c)
+    public static string ToRgbaString(this Color c, bool skipAlpha = false)
     {
-        if (c.R == 0 && c.G == 0 && c.B == 0)
-        {
-            return [0, 0, 0, 1];
-        }
+        var arr = c.ToRgbaArray();
+        var alpha = (double)Math.Round(c.A / 255f, 2);
+
+        var str = $"{arr[0]}, {arr[1]}, {arr[2]}";
+        if (!skipAlpha) str += $", {alpha}";
+
+        return str;
+    }
+
+
+    /// <summary>
+    /// Converts this color to CMYK values.
+    /// </summary>
+    public static double[] ToCmyk(this Color c)
+    {
+        if (c.R == 0 && c.G == 0 && c.B == 0) return [0, 0, 0, 1, 0];
 
         var black = Math.Min(1.0 - (c.R / 255.0), Math.Min(1.0 - (c.G / 255.0), 1.0 - (c.B / 255.0)));
         var cyan = (1.0 - (c.R / 255.0) - black) / (1.0 - black);
         var magenta = (1.0 - (c.G / 255.0) - black) / (1.0 - black);
         var yellow = (1.0 - (c.B / 255.0) - black) / (1.0 - black);
 
-        return [
-            (int)Math.Round(cyan * 100),
-            (int)Math.Round(magenta * 100),
-            (int)Math.Round(yellow * 100),
-            (int)Math.Round(black * 100)
-        ];
+        var _c = (int)Math.Round(cyan * 100);
+        var _m = (int)Math.Round(magenta * 100);
+        var _y = (int)Math.Round(yellow * 100);
+        var _k = (int)Math.Round(black * 100);
+        var alpha = (double)Math.Round(c.A / 255f, 2);
+
+        return [_c, _m, _y, _k, alpha];
     }
 
 
     /// <summary>
-    /// Converts this color <see cref="c"/> to HEXA values.
+    /// Converts this color to CMYK string.
     /// </summary>
-    /// <param name="skipAlpha"></param>
+    public static string ToCmykString(this Color c, bool skipAlpha = false)
+    {
+        var arr = c.ToCmyk();
+        var str = $"{arr[0]}%, {arr[1]}%, {arr[2]}%, {arr[3]}%";
+
+        if (!skipAlpha) str += $", {arr[4]}";
+
+        return str;
+    }
+
+
+    /// <summary>
+    /// Converts this color to HSL string.
+    /// </summary>
+    public static string ToHslString(this Color c, bool skipAlpha = false)
+    {
+        var c2 = c.ToHsl();
+        var h = Math.Round(c2.H);
+        var s = Math.Round(c2.S * 100);
+        var l = Math.Round(c2.L * 100);
+        var alpha = Math.Round(c2.A, 2);
+
+        var str = $"{h}, {s}%, {l}%";
+        if (!skipAlpha) str += $", {alpha}";
+
+        return str;
+    }
+
+
+    /// <summary>
+    /// Converts this color to HSV string.
+    /// </summary>
+    public static string ToHsvString(this Color c, bool skipAlpha = false)
+    {
+        var c2 = c.ToHsv();
+        var h = Math.Round(c2.H);
+        var s = Math.Round(c2.S * 100);
+        var v = Math.Round(c2.V * 100);
+        var alpha = Math.Round(c2.A, 2);
+
+        var str = $"{h}, {s}%, {v}%";
+        if (!skipAlpha) str += $", {alpha}";
+
+        return str;
+    }
+
+
+    /// <summary>
+    /// Converts this color to CIELAB string.
+    /// </summary>
+    public static string ToCIELABString(this Color c, bool skipAlpha = false)
+    {
+        var arr = c.ToCIELAB(skipAlpha);
+
+        return string.Join(", ", arr);
+    }
+
+
+    /// <summary>
+    /// Converts this color to HEXA values.
+    /// </summary>
     public static string ToHex(this Color c, bool skipAlpha = false)
     {
         if (skipAlpha)
@@ -237,14 +310,12 @@ public static class Color_Exts
 
 
     /// <summary>
-    /// Converts this color <see cref="c"/> to CIELAB.
+    /// Converts this color to CIELAB.
     /// </summary>
-    public static (float L, float A, float B, float Alpha) ToCIELAB(this Color c)
+    public static double[] ToCIELAB(this Color c, bool skipAlpha = false)
     {
         var xyz = new double[3];
         var rgb = new double[3] { c.R / 255d, c.G / 255d, c.B / 255d };
-        var alpha = (float)Math.Round(c.A / 255f, 2);
-
 
         if (rgb[0] > .04045f) rgb[0] = Math.Pow((rgb[0] + 0.055) / 1.055, 2.4);
         else rgb[0] = rgb[0] / 12.92f;
@@ -281,12 +352,17 @@ public static class Color_Exts
         else xyz[2] = (xyz[2] * 7.787f) + (16.0f / 116.0f);
 
 
-        var l = (float)Math.Round((116.0f * xyz[1]) - 16.0f, 2);
-        var a = (float)Math.Round(500.0f * (xyz[0] - xyz[1]), 2);
-        var b = (float)Math.Round(200.0f * (xyz[1] - xyz[2]), 2);
+        var l = (double)Math.Round((116.0f * xyz[1]) - 16.0f, 2);
+        var a = (double)Math.Round(500.0f * (xyz[0] - xyz[1]), 2);
+        var b = (double)Math.Round(200.0f * (xyz[1] - xyz[2]), 2);
 
 
-        return (l, a, b, alpha);
+        if (skipAlpha) return [l, a, b];
+        else
+        {
+            var alpha = (double)Math.Round(c.A / 255f, 2);
+            return [l, a, b, alpha];
+        }
     }
 
 }

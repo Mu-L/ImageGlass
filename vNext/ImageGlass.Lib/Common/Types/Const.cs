@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Media;
 using System.Globalization;
 
 namespace ImageGlass.Common.Types;
@@ -49,6 +50,9 @@ public static class Const
     public static readonly string SIGN_POSITIVE = NumberFormatInfo.CurrentInfo.PositiveSign;
     public static readonly string SIGN_NEGATIVE = NumberFormatInfo.CurrentInfo.NegativeSign;
     public static readonly string DECIMAL_SEPARATOR = NumberFormatInfo.CurrentInfo.NumberDecimalSeparator;
+
+    public static readonly Color COLOR_EMPTY = new Color(0, 0, 0, 0);
+
 
     /// <summary>
     /// A file macro to replace with the current viewing image file path in double quotes.
