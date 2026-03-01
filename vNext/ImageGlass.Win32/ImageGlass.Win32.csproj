@@ -21,7 +21,7 @@
   <PropertyGroup Label="Avalonia">
     <AvaloniaUseCompiledBindingsByDefault>True</AvaloniaUseCompiledBindingsByDefault>
     <AvaloniaNameGeneratorDefaultFieldModifier>Public</AvaloniaNameGeneratorDefaultFieldModifier>
-    <FileVersion>10.0.0.225</FileVersion>
+    <FileVersion>10.0.0.301</FileVersion>
   </PropertyGroup>
   
   

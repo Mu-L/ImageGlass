@@ -2,16 +2,17 @@
     x:Class="ImageGlass.Common.Windows.MainWindowView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cm="using:ImageGlass.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:cm="using:ImageGlass.Common"
     xmlns:ui="using:ImageGlass.UI"
     xmlns:viewer="using:ImageGlass.UI.Viewer"
     xmlns:vm="using:ImageGlass.ViewModels"
     mc:Ignorable="d"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    x:DataType="vm:MainWindowViewModel">
+    x:DataType="vm:MainWindowViewModel"
+    x:Name="Root">
 
     <Grid x:Name="PART_Layout" RowDefinitions="Auto, *, Auto, Auto">
 
@@ -27,12 +28,14 @@
 
 
         <!--  Viewer  -->
-        <Border
+        <Grid
             x:Name="PART_ViewerWrapper"
             Grid.Row="1"
+            RowDefinitions="*, Auto"
             Background="{DynamicResource IG_ThemeBackgroundBrush}">
             <viewer:ViewerControl
                 x:Name="PART_Viewer"
+                Grid.Row="0"
                 CheckerboardMode="{CompiledBinding CheckerboardMode, Source={x:Static cm:Core.Config}}"
                 EnableDebug="{CompiledBinding EnableDebug, Source={x:Static cm:Core.Config}}"
                 EnableFreePan="{CompiledBinding EnableFreePan, Source={x:Static cm:Core.Config}}"
@@ -46,7 +49,9 @@
                     <viewer:SlideshowCountdownOverlay x:Name="PART_SlideshowCountdown" IsHitTestVisible="False" />
                 </Panel>
             </viewer:ViewerControl>
-        </Border>
+
+            <ui:ToolHostControl x:Name="PART_ToolHost" Grid.Row="1" />
+        </Grid>
 
 
         <!--  Gallery  -->

@@ -1,0 +1,59 @@
+<ui:PhControl
+    x:Class="ImageGlass.UI.ToolHostControl"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:ImageGlass.UI"
+    mc:Ignorable="d"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:Name="Root"
+    BorderBrush="{DynamicResource IG_BorderNeutralBrush}"
+    BorderThickness="0,1,0,0">
+
+    <ui:PhControl.Styles>
+        <!--  Target the Path inside the CloseButton  -->
+        <Style Selector="#PART_BtnClose Path">
+            <Setter Property="Opacity" Value="0.5" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.1" />
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="#PART_BtnClose:pointerover Path">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+    </ui:PhControl.Styles>
+
+
+    <ui:PhControl.Content>
+        <Grid ColumnDefinitions="*,Auto">
+            <!--  The slot for hosted tool content  -->
+            <ContentControl Grid.Column="0" Content="{CompiledBinding #Root.ToolContent}" />
+
+
+            <!--  Close button  -->
+            <StackPanel Grid.Column="1">
+                <ui:PhToolButton
+                    x:Name="PART_BtnClose"
+                    Margin="4"
+                    Padding="6"
+                    Click="PART_BtnClose_Click"
+                    ToolTip.Tip="{CompiledBinding #Root.CloseButtonTooltipText}">
+                    <Path
+                        Width="10"
+                        Height="10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Data="M 0,0 L 10,10 M 10,0 L 0,10"
+                        Stretch="Uniform"
+                        Stroke="{DynamicResource IG_ThemeForegroundBrush}"
+                        StrokeThickness="1" />
+                </ui:PhToolButton>
+            </StackPanel>
+        </Grid>
+    </ui:PhControl.Content>
+</ui:PhControl>

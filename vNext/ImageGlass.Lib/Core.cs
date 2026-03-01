@@ -162,6 +162,12 @@ public static class Core
 
 
     /// <summary>
+    /// Gets the tools manager where save the state of the tool.
+    /// </summary>
+    public static Dictionary<string, bool> ToolMap { get; private set; } = new();
+
+
+    /// <summary>
     /// Gets the path of the image file from the arguments.
     /// </summary>
     public static string InputImagePathFromArgs => _initImagePathFromArgs;
