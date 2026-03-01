@@ -155,11 +155,11 @@ public enum ConfigId
     #endregion // Array settings
 
 
-    #region ExpandoObject settings
+    #region Dynamic settings
 
     ToolSettings,
 
-    #endregion // ExpandoObject settings
+    #endregion // Dynamic settings
 
 }
 

@@ -17,8 +17,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Types;
+using System.Text.Json.Serialization;
 
 namespace ImageGlass.UI;
+
+
+[JsonSerializable(typeof(ColorPickerConfig))]
+public partial class ColorPickerConfigJsonContext : JsonSerializerContext { }
+
 
 /// <summary>
 /// Provides settings for Color Picker tool.
@@ -27,7 +33,7 @@ public class ColorPickerConfig() : PhReactive
 {
 
     /// <summary>
-    /// Shows alpha value of RGB code.
+    /// Gets, sets option to show alpha value of RGB code.
     /// </summary>
     public bool ShowRgbWithAlpha
     {
@@ -41,7 +47,7 @@ public class ColorPickerConfig() : PhReactive
 
 
     /// <summary>
-    /// Shows alpha value of HEX code.
+    /// Gets, sets option to show alpha value of HEX code.
     /// </summary>
     public bool ShowHexWithAlpha
     {
@@ -55,7 +61,7 @@ public class ColorPickerConfig() : PhReactive
 
 
     /// <summary>
-    /// Shows alpha value of HSL code.
+    /// Gets, sets option to show alpha value of HSL code.
     /// </summary>
     public bool ShowHslWithAlpha
     {
@@ -69,7 +75,7 @@ public class ColorPickerConfig() : PhReactive
 
 
     /// <summary>
-    /// Shows alpha value of HSV code.
+    /// Gets, sets option to show alpha value of HSV code.
     /// </summary>
     public bool ShowHsvWithAlpha
     {
@@ -83,7 +89,7 @@ public class ColorPickerConfig() : PhReactive
 
 
     /// <summary>
-    /// Shows alpha value of HSV code.
+    /// Gets, sets option to show alpha value of HSV code.
     /// </summary>
     public bool ShowCmykWithAlpha
     {
@@ -97,7 +103,7 @@ public class ColorPickerConfig() : PhReactive
 
 
     /// <summary>
-    /// Shows alpha value of CIELAB code.
+    /// Gets, sets option to show alpha value of CIELAB code.
     /// </summary>
     public bool ShowCIELabWithAlpha
     {

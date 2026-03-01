@@ -16,8 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
 using ImageGlass.UI.Viewer;
+using System.Text.Json;
 
 namespace ImageGlass.UI;
 
@@ -42,14 +42,14 @@ public interface IToolControl
 
 
     /// <summary>
-    /// Loads and parses tool settings from app config.
+    /// Loads and parses tool settings from JSON element.
     /// </summary>
-    void LoadSettings(Config config);
+    void LoadSettings(JsonElement? jsonEl);
 
 
     /// <summary>
-    /// Saves the tool settings to app config.
+    /// Saves the tool settings as JSON element.
     /// </summary>
-    void SaveSettings(Config config);
+    JsonElement? SaveSettings();
 
 }

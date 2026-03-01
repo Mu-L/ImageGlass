@@ -26,6 +26,7 @@ using ImageGlass.UI.Viewer;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace ImageGlass.Common;
@@ -45,12 +46,6 @@ public partial class Config : PhReactive
 
 
     #region Setting items
-
-    ///// <summary>
-    ///// Gets, sets the config section of tool settings.
-    ///// </summary>
-    //public ExpandoObject ToolSettings { get; set; } = new();
-
 
     #region Boolean items
 
@@ -882,6 +877,16 @@ public partial class Config : PhReactive
     //        Hotkeys = [new Hotkey(Keys.X)],
     //    },
     //];
+
+    /// <summary>
+    /// Gets, sets the config section of tool settings.
+    /// Each tool serializes/deserializes its own <see cref="JsonElement"/> using its source-generated <see cref="JsonSerializerContext"/>.
+    /// </summary>
+    public Dictionary<string, JsonElement> ToolSettings
+    {
+        get => Get(ConfigId.ToolSettings, new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase));
+        set => Set(ConfigId.ToolSettings, value);
+    }
 
     ///// <summary>
     ///// Gets, sets the list of disabled menus

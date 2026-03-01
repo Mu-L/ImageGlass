@@ -25,14 +25,15 @@ using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer;
-using System.Collections.Generic;
+using System.Text.Json;
 
 namespace ImageGlass.UI;
 
 public partial class ColorPickerToolControl : PhControl, IToolControl
 {
-    public string ToolId => "ColorPicker";
-    public object Settings => new ColorPickerConfig();
+    public static string TOOL_ID => "ColorPicker";
+    public string ToolId => TOOL_ID;
+    public object Settings { get; private set; } = new ColorPickerConfig();
     public ColorPickerConfig Options => (ColorPickerConfig)Settings;
     public ViewerControl Viewer { get; init; } = null!;
 
@@ -302,17 +303,24 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void LoadSettings(Config config)
+    public void LoadSettings(JsonElement? jsonEl)
     {
+        var settings = jsonEl?.Deserialize(ColorPickerConfigJsonContext.Default.ColorPickerConfig);
+        if (settings is not null)
+        {
+            Settings = settings;
+        }
     }
 
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void SaveSettings(Config config)
+    public JsonElement? SaveSettings()
     {
-        // TODO
+        var jsonEl = JsonSerializer.SerializeToElement(Options, ColorPickerConfigJsonContext.Default.ColorPickerConfig);
+
+        return jsonEl;
     }
 
     #endregion // Control Methods

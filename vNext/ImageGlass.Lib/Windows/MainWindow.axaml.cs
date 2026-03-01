@@ -263,6 +263,8 @@ public partial class MainWindow : PhWindow
         Core.Config.LastSeenImagePath = Core.Photos.CurrentFilePath;
         Core.Config.ZoomLockValue = PART_MainView.PART_Viewer.ZoomFactor * 100f;
 
+        // save current tool setting if it's open
+        PART_MainView.PART_ToolHost.SaveCurrentToolSettings();
 
         // save config to file
         await Core.Config.SaveAsync();

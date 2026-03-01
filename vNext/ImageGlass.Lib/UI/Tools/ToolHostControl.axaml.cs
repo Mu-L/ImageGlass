@@ -22,6 +22,7 @@ using Avalonia.Metadata;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using System;
+using System.Collections.Generic;
 
 namespace ImageGlass.UI;
 
@@ -102,8 +103,13 @@ public partial class ToolHostControl : PhControl
             throw new InvalidOperationException($"IGE: The current tool (ID = {tool.ToolId}) must be close before opening another tool");
         }
 
-        // load tool settings
-        newTool.LoadSettings(Core.Config);
+        try
+        {
+            // load tool settings
+            var jsonEl = Core.Config.ToolSettings.GetValueOrDefault(newTool.ToolId);
+            newTool.LoadSettings(jsonEl);
+        }
+        catch { }
 
         // open the tool
         ToolContent = newTool;
@@ -136,7 +142,7 @@ public partial class ToolHostControl : PhControl
         try
         {
             // save tool settings
-            tool.SaveSettings(Core.Config);
+            SaveCurrentToolSettings();
 
             // close the tool
             ToolContent = null;
@@ -148,6 +154,31 @@ public partial class ToolHostControl : PhControl
         catch { }
 
         return false;
+    }
+
+
+    /// <summary>
+    /// Saves the current tool's settings to the app config.
+    /// </summary>
+    public void SaveCurrentToolSettings()
+    {
+        if (ToolContent is not IToolControl tool) return;
+
+        try
+        {
+            // save tool settings
+            var jsonEl = tool.SaveSettings();
+
+            if (jsonEl is null)
+            {
+                Core.Config.ToolSettings.Remove(tool.ToolId);
+            }
+            else
+            {
+                Core.Config.ToolSettings[tool.ToolId] = jsonEl.Value;
+            }
+        }
+        catch { }
     }
 
     #endregion // Public Methods

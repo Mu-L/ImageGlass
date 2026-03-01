@@ -2645,7 +2645,7 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_ToggleToolColorPicker(bool? enabled = null)
     {
-        var toolId = "ColorPicker";
+        var toolId = ColorPickerToolControl.TOOL_ID;
         var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
 
         enabled ??= !isOpen;
