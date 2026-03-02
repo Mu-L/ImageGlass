@@ -25,7 +25,7 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// The output of decoding with Magick.NET.
 /// </summary>
-public partial class MagickDecoderOutput : DisposableImpl
+public partial class MagickDecoderOutput : PhDisposable
 {
     public MagickImageCollection? MultiFrames { get; set; } = null;
     public MagickImage? SingleFrame { get; set; } = null;

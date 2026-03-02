@@ -24,7 +24,7 @@ using SkiaSharp;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class SkiaDecoderOutput : DisposableImpl
+public partial class SkiaDecoderOutput : PhDisposable
 {
     public SKImage? SingleFrame { get; set; } = null;
     public SKCodec? MultiFrames { get; set; } = null;

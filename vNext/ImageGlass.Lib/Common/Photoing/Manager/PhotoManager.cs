@@ -28,7 +28,7 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// Class for managing a collection of photos.
 /// </summary>
-public partial class PhotoManager : DisposableImpl
+public partial class PhotoManager : PhDisposable
 {
     // photo list
     protected AvaloniaList<Photo> _items = [];

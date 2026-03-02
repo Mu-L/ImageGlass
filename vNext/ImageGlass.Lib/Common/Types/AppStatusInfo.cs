@@ -29,7 +29,7 @@ using System.Text;
 
 namespace ImageGlass.Common;
 
-public partial class AppStatusInfo : DisposableImpl
+public partial class AppStatusInfo : PhDisposable
 {
     private ViewerControl _viewer;
     private string? _filePath = null;

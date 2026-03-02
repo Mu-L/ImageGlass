@@ -37,7 +37,7 @@ namespace ImageGlass.UI.Viewer;
 /// </para>
 /// For animated images, this cache should NOT be used.
 /// </summary>
-internal sealed class MipmapTileCache : DisposableImpl
+internal sealed class MipmapTileCache : PhDisposable
 {
     public const int TILE_SIZE = 512;
     private const int MAX_CACHED_TILES = 100;

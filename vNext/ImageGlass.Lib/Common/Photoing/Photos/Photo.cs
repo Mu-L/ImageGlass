@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Photoing;
 
-public partial class Photo : DisposableImpl
+public partial class Photo : PhDisposable
 {
     // private properties
     private uint _width = 0;

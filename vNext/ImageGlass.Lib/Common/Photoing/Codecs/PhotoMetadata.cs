@@ -26,7 +26,7 @@ using System.IO;
 namespace ImageGlass.Common.Photoing;
 
 
-public partial class PhotoMetadata : DisposableImpl
+public partial class PhotoMetadata : PhDisposable
 {
 
     #region Public Properties

@@ -29,7 +29,7 @@ using Windows.Win32.Graphics.Gdi;
 
 namespace ImageGlass.Win32.Common.ServiceProviders;
 
-public partial class Win32ColorProfileProvider : DisposableImpl, IWindowColorProfileProvider
+public partial class Win32ColorProfileProvider : PhDisposable, IWindowColorProfileProvider
 {
     private Window? _window;
     private nint _windowHandle;

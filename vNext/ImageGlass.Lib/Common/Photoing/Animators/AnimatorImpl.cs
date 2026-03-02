@@ -27,7 +27,7 @@ namespace ImageGlass.Common.Photoing;
 /// <summary>
 /// Provides functionality for animating image frames with customizable frame delays and looping behavior.
 /// </summary>
-public abstract class AnimatorImpl : DisposableImpl
+public abstract class AnimatorImpl : PhDisposable
 {
     protected SKCodecFrameInfo[] _frames;
     protected int _frameCount = 0;

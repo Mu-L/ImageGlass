@@ -27,7 +27,7 @@ namespace ImageGlass.Common.ServiceProviders;
 /// <summary>
 /// Manages the slideshow timer and countdown state.
 /// </summary>
-public sealed class SlideshowProvider : DisposableImpl
+public sealed class SlideshowProvider : PhDisposable
 {
     private CancellationTokenSource? _cts;
     private CancellationTokenSource? _intervalCts;

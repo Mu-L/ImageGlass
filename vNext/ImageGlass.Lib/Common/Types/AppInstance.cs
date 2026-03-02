@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Types;
 
-public partial class AppInstance : DisposableImpl
+public partial class AppInstance : PhDisposable
 {
     private readonly string _id;
     private readonly string _pipeName;

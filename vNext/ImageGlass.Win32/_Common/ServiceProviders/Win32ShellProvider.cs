@@ -33,7 +33,7 @@ using Windows.System.UserProfile;
 
 namespace ImageGlass.Win32.Common.ServiceProviders;
 
-public class Win32ShellProvider : DisposableImpl, IShellProvider
+public class Win32ShellProvider : PhDisposable, IShellProvider
 {
     private readonly EggShell _shell = new();
     private static ExplorerView? _foregroundShell = null;
