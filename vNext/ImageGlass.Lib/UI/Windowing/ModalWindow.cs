@@ -651,12 +651,14 @@ public partial class ModalWindow : DialogWindow
         {
             case ModalWindowButton.OK:
                 modal.Button1Text = Core.Lang[LangId._OK];
+                modal.DefaultFocus = DialogFocus.Button1;
                 modal.IsButton1Visible = true;
                 modal.IsButton2Visible = modal.IsButton3Visible = false;
                 break;
 
             case ModalWindowButton.Close:
                 modal.Button1Text = Core.Lang[LangId._Close];
+                modal.DefaultFocus = DialogFocus.Button1;
                 modal.IsButton1Visible = true;
                 modal.IsButton2Visible = modal.IsButton3Visible = false;
                 break;
@@ -664,6 +666,7 @@ public partial class ModalWindow : DialogWindow
             case ModalWindowButton.Yes_No:
                 modal.Button1Text = Core.Lang[LangId._Yes];
                 modal.Button2Text = Core.Lang[LangId._No];
+                modal.DefaultFocus = DialogFocus.Button1;
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
@@ -671,6 +674,7 @@ public partial class ModalWindow : DialogWindow
             case ModalWindowButton.OK_Cancel:
                 modal.Button1Text = Core.Lang[LangId._OK];
                 modal.Button2Text = Core.Lang[LangId._Cancel];
+                modal.DefaultFocus = DialogFocus.Button1;
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
@@ -678,6 +682,7 @@ public partial class ModalWindow : DialogWindow
             case ModalWindowButton.OK_Close:
                 modal.Button1Text = Core.Lang[LangId._OK];
                 modal.Button2Text = Core.Lang[LangId._Close];
+                modal.DefaultFocus = DialogFocus.Button1;
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
@@ -685,6 +690,7 @@ public partial class ModalWindow : DialogWindow
             case ModalWindowButton.LearnMore_Close:
                 modal.Button1Text = Core.Lang[LangId._LearnMore];
                 modal.Button2Text = Core.Lang[LangId._Close];
+                modal.DefaultFocus = DialogFocus.Button1;
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
@@ -692,6 +698,7 @@ public partial class ModalWindow : DialogWindow
             case ModalWindowButton.Continue_Quit:
                 modal.Button1Text = Core.Lang[LangId._Continue];
                 modal.Button2Text = Core.Lang[LangId._Quit];
+                modal.DefaultFocus = DialogFocus.Button1;
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
                 break;
