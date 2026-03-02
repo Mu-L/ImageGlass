@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.UI.Viewer;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
 
@@ -36,9 +37,22 @@ public interface IToolControl
 
 
     /// <summary>
+    /// Gets the value indicates that the tool contains settings UI,
+    /// that can be open with <see cref="ShowSettingsWindowAsync"/>.
+    /// </summary>
+    bool HasSettingsUI { get; }
+
+
+    /// <summary>
     /// Gets the instance of Viewer control.
     /// </summary>
     ViewerControl Viewer { get; init; }
+
+
+    /// <summary>
+    /// Shows the tool settings window.
+    /// </summary>
+    Task ShowSettingsWindowAsync();
 
 
     /// <summary>

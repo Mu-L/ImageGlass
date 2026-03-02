@@ -700,6 +700,7 @@ public enum LangId
     FrmColorPickerSettings_ChkShowHexA,
     FrmColorPickerSettings_ChkShowHslA,
     FrmColorPickerSettings_ChkShowHsvA,
+    FrmColorPickerSettings_ChkShowCmykA,
     FrmColorPickerSettings_ChkShowCIELabA,
     #endregion // FrmColorPicker
 

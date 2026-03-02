@@ -25,7 +25,9 @@ using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer;
+using ImageGlass.UI.Windowing;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
 
@@ -33,6 +35,7 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
 {
     public static string TOOL_ID => "ColorPicker";
     public string ToolId => TOOL_ID;
+    public bool HasSettingsUI => true;
     public object? Settings { get; private set; } = new ColorPickerConfig();
     public ColorPickerConfig Options => (ColorPickerConfig)Settings!;
     public ViewerControl Viewer { get; init; } = null!;
@@ -184,6 +187,8 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
+        RaiseColorFormatPropertiesChanged();
+
         Viewer.ViewerPointerMoved += Viewer_ViewerPointerMoved;
         Viewer.ViewerPointerPressed += Viewer_ViewerPointerPressed;
     }
@@ -208,13 +213,7 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
         else if (e.Property == SelectedColorProperty)
         {
             RaisePropertyChanged(SelectedTextColorProperty, default, SelectedTextColor);
-
-            RaisePropertyChanged(ColorRGBProperty, default, ColorRGB);
-            RaisePropertyChanged(ColorHEXProperty, default, ColorHEX);
-            RaisePropertyChanged(ColorHSLProperty, default, ColorHSL);
-            RaisePropertyChanged(ColorHSVProperty, default, ColorHSV);
-            RaisePropertyChanged(ColorCMYKProperty, default, ColorCMYK);
-            RaisePropertyChanged(ColorCIELABProperty, default, ColorCIELAB);
+            RaiseColorFormatPropertiesChanged();
         }
     }
 
@@ -301,6 +300,20 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
 
 
     /// <summary>
+    /// Raises property changed notifications for all color format properties.
+    /// </summary>
+    private void RaiseColorFormatPropertiesChanged()
+    {
+        RaisePropertyChanged(ColorRGBProperty, default, ColorRGB);
+        RaisePropertyChanged(ColorHEXProperty, default, ColorHEX);
+        RaisePropertyChanged(ColorHSLProperty, default, ColorHSL);
+        RaisePropertyChanged(ColorHSVProperty, default, ColorHSV);
+        RaisePropertyChanged(ColorCMYKProperty, default, ColorCMYK);
+        RaisePropertyChanged(ColorCIELABProperty, default, ColorCIELAB);
+    }
+
+
+    /// <summary>
     /// <inheritdoc/>
     /// </summary>
     public void LoadSettings(JsonElement? jsonEl)
@@ -321,6 +334,23 @@ public partial class ColorPickerToolControl : PhControl, IToolControl
         var jsonEl = JsonSerializer.SerializeToElement(Options, ColorPickerConfigJsonContext.Default.ColorPickerConfig);
 
         return jsonEl;
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public async Task ShowSettingsWindowAsync()
+    {
+        var window = new ColorPickerSettingsWindow(Options);
+        var owner = TopLevel.GetTopLevel(this) as PhWindow;
+        var result = await window.ShowAsync(owner);
+
+        if (result == DialogExitCode.OK)
+        {
+            Settings = window.ResultConfig;
+            RaiseColorFormatPropertiesChanged();
+        }
     }
 
     #endregion // Control Methods

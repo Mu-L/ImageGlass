@@ -963,6 +963,7 @@ public class Lang
         new(LangId.FrmColorPickerSettings_ChkShowHexA, "Use HEX format with alpha value"), //v5.0
         new(LangId.FrmColorPickerSettings_ChkShowHslA, "Use HSL format with alpha value"), //v5.0
         new(LangId.FrmColorPickerSettings_ChkShowHsvA, "Use HSV format with alpha value"), //v8.0
+        new(LangId.FrmColorPickerSettings_ChkShowCmykA, "Use CMYK format with alpha value"), //v10.0
         new(LangId.FrmColorPickerSettings_ChkShowCIELabA, "Use CIELAB format with alpha value"), //v9.0
 
         #endregion // FrmColorPicker

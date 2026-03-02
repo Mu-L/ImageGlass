@@ -110,9 +110,12 @@ public partial class ToolHostControl : PhControl
     }
 
 
-    private void PART_BtnSettings_Click(object? sender, RoutedEventArgs e)
+    private async void PART_BtnSettings_Click(object? sender, RoutedEventArgs e)
     {
-        // TODO:
+        if (ToolContent is not IToolControl tool) return;
+        if (!tool.HasSettingsUI) return;
+
+        await tool.ShowSettingsWindowAsync();
     }
 
 
@@ -141,7 +144,7 @@ public partial class ToolHostControl : PhControl
             var jsonEl = Core.Config.ToolSettings.GetValueOrDefault(newTool.ToolId);
             newTool.LoadSettings(jsonEl);
 
-            HasSettings = newTool.Settings is not null;
+            HasSettings = newTool.HasSettingsUI;
         }
         catch { }
 
