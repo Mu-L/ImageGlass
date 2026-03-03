@@ -108,9 +108,6 @@ public class FileFinder
                     includeHidden,
                     filterFn,
                     nonShellSortFn);
-
-                // dispose shell object
-                folderShellView.Dispose();
             }
 
             // without shell
@@ -233,7 +230,7 @@ public class FileFinder
     {
         var folderPath = "";
         ExplorerFolderView? folderView = null;
-        using var shell = new EggShell();
+        var shell = new EggShell();
 
 
         // if no dir path, get the explorer's folder view where the application opened from
