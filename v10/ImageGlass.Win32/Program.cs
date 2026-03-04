@@ -38,8 +38,8 @@ sealed class Program
         {
             // initialize service providers
             Core.FileSearchProvider = new Win32FileSearchProvider();
-            Core.ShellProvider = new Win32ShellProvider();
             Core.PreviewProvider = new Win32PhotoPreviewProvider();
+            Core.ShellProvider = new Win32ShellProvider();
             Core.ShareProvider = new Win32ShareProvider();
             Core.PrintProvider = new Win32PrintProvider();
         });
