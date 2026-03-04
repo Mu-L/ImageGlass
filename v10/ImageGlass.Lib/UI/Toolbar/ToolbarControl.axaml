@@ -47,7 +47,7 @@
                         Width="{CompiledBinding Config.ToolbarIconHeight}"
                         Height="{CompiledBinding Config.ToolbarIconHeight}"
                         VerticalAlignment="Center">
-                        <Grid ColumnDefinitions="0.25*,1*,0.25*" RowDefinitions="1*,0.25*,0.5*">
+                        <Grid RowDefinitions="1*,0.25*,0.5*" ColumnDefinitions="0.25*,1*,0.25*">
                             <Viewbox
                                 Grid.Row="1"
                                 Grid.Column="1"
@@ -101,7 +101,10 @@
 
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuOpenWith" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuPrint" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuShare" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="False"
+                                    LangKey="FrmMain_MnuShare" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuOpenLocation" />
                                 <ui:PhMenuItem Header="-" />
 
@@ -125,10 +128,22 @@
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuGoToLast" />
                                 <ui:PhMenuItem Header="-" />
 
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuViewNextFrame" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuViewPreviousFrame" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuViewFirstFrame" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuViewLastFrame" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="False"
+                                    LangKey="FrmMain_MnuViewNextFrame" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="False"
+                                    LangKey="FrmMain_MnuViewPreviousFrame" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="False"
+                                    LangKey="FrmMain_MnuViewFirstFrame" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="False"
+                                    LangKey="FrmMain_MnuViewLastFrame" />
                             </ui:PhMenuItem>
 
 
@@ -428,17 +443,27 @@
                             <!--  Tools  -->
                             <ui:PhMenuItem LangKey="FrmMain_MnuTools">
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuColorPicker" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuCropTool" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuFrameNav" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="False"
+                                    LangKey="FrmMain_MnuCropTool" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="False"
+                                    LangKey="FrmMain_MnuFrameNav" />
                                 <ui:PhMenuItem
                                     x:Name="PART_MnuResizeTool"
                                     Click="MainMenuItem_Click"
+                                    IsVisible="False"
                                     LangKey="FrmMain_MnuResizeTool" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuLosslessCompression" />
-                                <ui:PhMenuItem Header="-" />
+                                <ui:PhMenuItem Header="-" IsVisible="False" />
 
-                                <ui:PhMenuItem Header="-" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuGetMoreTools" />
+                                <ui:PhMenuItem Header="-" IsVisible="False" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="False"
+                                    LangKey="FrmMain_MnuGetMoreTools" />
                             </ui:PhMenuItem>
 
 
@@ -452,7 +477,10 @@
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuAbout" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="_CheckForUpdate" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuReportIssue" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuQuickSetup" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="False"
+                                    LangKey="FrmMain_MnuQuickSetup" />
                                 <ui:PhMenuItem Header="-" />
 
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuSetDefaultPhotoViewer" />

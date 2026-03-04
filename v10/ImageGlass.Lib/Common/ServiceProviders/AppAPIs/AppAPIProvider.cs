@@ -2748,6 +2748,17 @@ public partial class AppAPIProvider
 
 
     /// <summary>
+    /// Checks for new update.
+    /// </summary>
+    public void IG_CheckForUpdate()
+    {
+        _ = BHelper.OpenUrlAsync(_mainWindow,
+            "https://github.com/d2phap/ImageGlass/releases",
+            "from_report_issue");
+    }
+
+
+    /// <summary>
     /// Opens website to report issue.
     /// </summary>
     public void IG_ReportIssue()
