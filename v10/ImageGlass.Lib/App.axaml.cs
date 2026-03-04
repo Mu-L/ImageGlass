@@ -25,23 +25,27 @@ using Avalonia.Threading;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
+using ImageGlass.Common.Windows;
 using ImageGlass.UI.Windowing;
 using System;
 using System.Diagnostics;
+using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ImageGlass.Common;
 
 public partial class App : Application
 {
-    private PhWindow? _mainWindow = null;
+    private MainWindow? _mainWindow = null;
 
 
     /// <summary>
     /// Gets the main window.
     /// </summary>
-    public PhWindow MainWindow => _mainWindow!;
+    public MainWindow MainWindow => _mainWindow!;
 
 
     /// <summary>
@@ -88,11 +92,14 @@ public partial class App : Application
     /// <summary>
     /// Create a new main window.
     /// </summary>
-    public void CreateMainWindowIfNotExist(PhWindow window)
+    public void CreateMainWindowIfNotExist(MainWindow window)
     {
         if (_mainWindow is not null) return;
 
         _mainWindow = window;
+
+        // initialize service providers
+        Core.API = new AppAPIProvider(_mainWindow);
     }
 
 
@@ -127,6 +134,51 @@ public partial class App : Application
 
         return false;
     }
+
+
+    /// <summary>
+    /// Initializes the application instance, loads configuration,
+    /// sets up service providers, and enforces single-instance behavior as configured.
+    /// </summary>
+    /// <returns><c>true</c> if the application should exit immediately.</returns>
+    public static bool InitializeAppInstance(string[] args, Action onInitServicesFn)
+    {
+        // use independent culture for formatting or parsing a string
+        CultureInfo.DefaultThreadCurrentCulture =
+            CultureInfo.DefaultThreadCurrentUICulture =
+            Thread.CurrentThread.CurrentCulture =
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+
+        // load app configs
+        Core.Args = Environment.GetCommandLineArgs();
+        Core.Config = Config.Load(Config.CONFIG_USER);
+
+
+        // initialize service providers
+        onInitServicesFn();
+
+
+        // handle app command lines
+        if (App.HandleCommandLineAsync(args).GetAwaiter().GetResult())
+        {
+            return true;
+        }
+
+
+        // handle single instance
+        if (!Core.Config.EnableMultiInstances)
+        {
+            if (!Core.AppInstance.IsFirstInstance)
+            {
+                Core.AppInstance.SendArgsToExistingInstances(ExeParams.SINGLE_INSTANCE, args);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 
 
 

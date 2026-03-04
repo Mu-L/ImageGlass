@@ -19,14 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Input;
 using ImageGlass.Common;
-using ImageGlass.Common.ServiceProviders;
-using ImageGlass.Common.Types;
 using ImageGlass.ViewModels;
 using ImageGlass.Win32.Common.ServiceProviders;
 using ImageGlass.Win32.Windows;
 using System;
-using System.Globalization;
-using System.Threading;
 
 namespace ImageGlass.Win32;
 
@@ -38,42 +34,17 @@ sealed class Program
     [STAThread]
     public static int Main(string[] args)
     {
-        // use independent culture for formatting or parsing a string
-        CultureInfo.DefaultThreadCurrentCulture =
-            CultureInfo.DefaultThreadCurrentUICulture =
-            Thread.CurrentThread.CurrentCulture =
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-
-
-        // load app configs
-        Core.Args = Environment.GetCommandLineArgs();
-        Core.Config = Config.Load(Config.CONFIG_USER);
-
-
-        // initialize service providers
-        Core.ShellProvider = new Win32ShellProvider();
-        Core.PreviewProvider = new Win32PhotoPreviewProvider();
-        Core.FileSearchProvider = new Win32FileSearchProvider();
-        Core.ShareProvider = new Win32ShareProvider();
-        Core.PrintProvider = new Win32PrintProvider();
-
-
-        // handle app command lines
-        if (App.HandleCommandLineAsync(args).GetAwaiter().GetResult())
+        var isHandled = App.InitializeAppInstance(args, () =>
         {
-            return 0;
-        }
+            // initialize service providers
+            Core.FileSearchProvider = new Win32FileSearchProvider();
+            Core.ShellProvider = new Win32ShellProvider();
+            Core.PreviewProvider = new Win32PhotoPreviewProvider();
+            Core.ShareProvider = new Win32ShareProvider();
+            Core.PrintProvider = new Win32PrintProvider();
+        });
 
-
-        // handle single instance
-        if (!Core.Config.EnableMultiInstances)
-        {
-            if (!Core.AppInstance.IsFirstInstance)
-            {
-                Core.AppInstance.SendArgsToExistingInstances(ExeParams.SINGLE_INSTANCE, args);
-                return 0;
-            }
-        }
+        if (isHandled) return 0;
 
         return BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
@@ -105,12 +76,6 @@ sealed class Program
             var mainWindow = new MainWindow32();
             mainWindow.DataContext = new MainWindowModel(mainWindow);
 
-
-            // initialize service providers
-            Core.API = new AppAPIProvider(mainWindow);
-
             app?.CreateMainWindowIfNotExist(mainWindow);
         });
-
-
 }
