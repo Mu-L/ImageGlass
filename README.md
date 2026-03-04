@@ -14,7 +14,7 @@ ImageGlass is a lightweight software designed for seamless viewing of images in 
 
 
 ## ImageGlass Roadmap Update – 2026
-[![ig_timeline](https://github.com/user-attachments/assets/9cf2a8a4-18f4-4852-ad83-5df79239d93f)](https://www.patreon.com/posts/152137647)
+[![ig_timeline](https://github.com/user-attachments/assets/9cf2a8a4-18f4-4852-ad83-5df79239d93f)](https://github.com/d2phap/ImageGlass/discussions/2287)
 
 
 ## 📥 Download
