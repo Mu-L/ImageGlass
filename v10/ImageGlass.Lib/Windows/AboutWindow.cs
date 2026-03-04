@@ -163,7 +163,7 @@ public partial class AboutWindow : DialogWindow
         // 2. App name
         var lblAppName = new TextBlock
         {
-            Text = BHelper.AppName,
+            Text = "ImageGlass 10",
             FontSize = 26,
             FontWeight = Avalonia.Media.FontWeight.SemiBold,
             HorizontalAlignment = HorizontalAlignment.Center,

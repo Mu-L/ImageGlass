@@ -48,20 +48,25 @@ public partial class BHelper
 
 
     /// <summary>
-    /// Gets the app version.
+    /// Gets the app version string. e.g. <c>10.0.0.304-beta</c>.
     /// </summary>
-    public static Version AppVersion { get; } = GetAppVersion();
-    private static Version GetAppVersion()
+    public static string AppVersion { get; } = GetAppVersion();
+    private static string GetAppVersion()
     {
-        var defaultVersion = new Version();
+        var defaultVersion = new Version().ToString();
         if (string.IsNullOrWhiteSpace(AppExePath)) return defaultVersion;
 
         try
         {
-            if (Version.TryParse(FileVersionInfo.GetVersionInfo(AppExePath).FileVersion, out var fileVersion))
-            {
-                return fileVersion;
-            }
+            // 10.0.0.304-beta+hash
+            var fullVersionStr = FileVersionInfo.GetVersionInfo(AppExePath)
+                .ProductVersion ?? defaultVersion;
+
+            // 10.0.0.304-beta
+            var versionNumberStr = fullVersionStr.Split('+',
+                StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)[0];
+
+            return versionNumberStr;
         }
         catch { }
 
