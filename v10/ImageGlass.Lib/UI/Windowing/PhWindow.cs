@@ -332,9 +332,6 @@ public partial class PhWindow : Window
             return;
         }
 
-        // update background color for transparency
-        Background = WindowInactivatedBackgroundColor.A(0).ToBrush();
-
 
         // map the built-in backdrop styles
         if (!UseCustomBackdrop)
@@ -348,6 +345,17 @@ public partial class PhWindow : Window
             };
 
             TransparencyLevelHint = levels;
+        }
+
+
+        // update background color for transparency
+        if (ActualTransparencyLevel.Equals(WindowTransparencyLevel.None))
+        {
+            Background = WindowInactivatedBackgroundColor.A(255).ToBrush();
+        }
+        else
+        {
+            Background = WindowInactivatedBackgroundColor.A(0).ToBrush();
         }
     }
 
