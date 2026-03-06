@@ -43,7 +43,7 @@ sealed class Program
             Core.PreviewProvider = new PhotoPreviewProvider();
             Core.ShellProvider = new MacShellProvider();
             //Core.ShareProvider = new Win32ShareProvider();
-            //Core.PrintProvider = new Win32PrintProvider();
+            Core.PrintProvider = new MacPrintProvider();
         });
 
         if (isHandled) return 0;

@@ -25,11 +25,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Linux.Common.ServiceProviders;
+namespace ImageGlass.Mac.Common.ServiceProviders;
 
-internal class LinuxPrintProvider : IPrintProvider
+internal class MacPrintProvider : IPrintProvider
 {
-    private readonly HashSet<string> _nativeLinuxFormats = [".bmp", ".jpg", ".jpeg", ".png", ".gif", ".tif", ".tiff"];
+    private readonly HashSet<string> _nativeMacFormats = [".bmp", ".jpg", ".jpeg", ".png", ".gif", ".tif", ".tiff", ".heic", ".pdf"];
 
 
     /// <summary>
@@ -40,16 +40,15 @@ internal class LinuxPrintProvider : IPrintProvider
         var fileToPrint = filePath;
         var srcFilePath = meta?.FilePath ?? string.Empty;
         var ext = meta?.FileExtension.ToLowerInvariant() ?? string.Empty;
-        var isNativeSingleFrameFormat = meta?.FrameCount == 1 && !_nativeLinuxFormats.Contains(ext);
+        var isNativeSingleFrameFormat = meta?.FrameCount == 1 && !_nativeMacFormats.Contains(ext);
 
 
-        // print clipboard image
+        // print clipboard image or convert non-native single-frame formats
         if (Core.ClipboardImage != null || isNativeSingleFrameFormat)
         {
-            // save image to temp file
             fileToPrint = await Core.SavePhotoAsTempFileAsync();
         }
-        // rename ext FAX -> TIFF to multi-frame printing
+        // rename .fax -> .tiff for multi-frame printing
         else if (ext.Equals(".fax", StringComparison.OrdinalIgnoreCase))
         {
             var tempDir = BHelper.ConfigDir(Dir.Temporary);
@@ -63,15 +62,20 @@ internal class LinuxPrintProvider : IPrintProvider
             && !ext.Equals(".tif", StringComparison.OrdinalIgnoreCase)
             && !ext.Equals(".tiff", StringComparison.OrdinalIgnoreCase))
         {
-            // save image to temp file
             fileToPrint = await Core.SavePhotoAsTempFileAsync();
         }
 
         if (string.IsNullOrEmpty(fileToPrint)) return;
 
 
-        // print via CUPS lp command, scaling the image to fit the page
-        BHelper.RunProcess("lp", $"-o fit-to-page -- \"{fileToPrint}\"");
+        // open the macOS system print dialog via Preview's print command
+        BHelper.RunProcess("osascript", "-e '" +
+            $"set theFile to POSIX file \"{fileToPrint}\"' " +
+            "-e 'tell application \"Preview\"' " +
+            "-e 'open theFile' " +
+            "-e 'activate' " +
+            "-e 'tell application \"System Events\" to keystroke \"p\" using command down' " +
+            "-e 'end tell'");
 
     }
 }
