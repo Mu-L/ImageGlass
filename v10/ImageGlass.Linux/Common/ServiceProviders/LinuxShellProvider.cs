@@ -20,7 +20,6 @@ using ImageGlass.Common;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -62,7 +61,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
         if (moveToRecycleBin)
         {
             // use 'gio trash' to move file to the FreeDesktop trash
-            RunProcess("gio", $"trash \"{filePath}\"");
+            BHelper.RunProcess("gio", $"trash \"{filePath}\"");
         }
         else
         {
@@ -137,7 +136,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     public Task OpenDefaultEditingAppAsync(string filePath, Action? callbackFn = null)
     {
         // xdg-open launches the file in its associated application
-        RunProcess("xdg-open", $"\"{filePath}\"");
+        BHelper.RunProcess("xdg-open", $"\"{filePath}\"");
         callbackFn?.Invoke();
 
         return Task.CompletedTask;
@@ -154,7 +153,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
         // try DBus call to select the file in the default file manager
         try
         {
-            RunProcess("dbus-send",
+            BHelper.RunProcess("dbus-send",
                 "--session --type=method_call --dest=org.freedesktop.FileManager1 " +
                 "/org/freedesktop/FileManager1 org.freedesktop.FileManager1.ShowItems " +
                 $"array:string:\"file://{filePath}\" string:\"\"");
@@ -166,7 +165,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
         var dirPath = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(dirPath))
         {
-            RunProcess("xdg-open", $"\"{dirPath}\"");
+            BHelper.RunProcess("xdg-open", $"\"{dirPath}\"");
         }
     }
 
@@ -184,7 +183,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
         }
         catch { }
 
-        RunProcess("xdg-open", $"\"{dirPath}\"");
+        BHelper.RunProcess("xdg-open", $"\"{dirPath}\"");
     }
 
 
@@ -196,14 +195,14 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
         foreach (var ext in extensions)
         {
             // query the MIME type for this extension
-            var mimeType = RunProcessAndReadOutput("xdg-mime", $"query filetype dummy{ext}");
+            var mimeType = BHelper.RunProcessAndReadOutput("xdg-mime", $"query filetype dummy{ext}");
             if (string.IsNullOrWhiteSpace(mimeType)) continue;
 
             mimeType = mimeType.Trim();
 
             if (enable)
             {
-                RunProcess("xdg-mime", $"default {_desktopFileId} {mimeType}");
+                BHelper.RunProcess("xdg-mime", $"default {_desktopFileId} {mimeType}");
             }
             else
             {
@@ -226,7 +225,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     public Task SetLockScreenAsync(string filePath)
     {
         // GNOME lock screen background
-        RunProcess("gsettings",
+        BHelper.RunProcess("gsettings",
             $"set org.gnome.desktop.screensaver picture-uri \"file://{filePath}\"");
 
         return Task.CompletedTask;
@@ -239,9 +238,9 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     public void SetWallpaper(string filePath)
     {
         // GNOME desktop wallpaper (light and dark)
-        RunProcess("gsettings",
+        BHelper.RunProcess("gsettings",
             $"set org.gnome.desktop.background picture-uri \"file://{filePath}\"");
-        RunProcess("gsettings",
+        BHelper.RunProcess("gsettings",
             $"set org.gnome.desktop.background picture-uri-dark \"file://{filePath}\"");
     }
 
@@ -254,7 +253,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
         // try DBus call to show the properties dialog in the file manager
         try
         {
-            RunProcess("dbus-send",
+            BHelper.RunProcess("dbus-send",
                 "--session --type=method_call --dest=org.freedesktop.FileManager1 " +
                 "/org/freedesktop/FileManager1 org.freedesktop.FileManager1.ShowItemProperties " +
                 $"array:string:\"file://{filePath}\" string:\"\"");
@@ -265,47 +264,6 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
 
 
     #region Private helpers
-
-    /// <summary>
-    /// Starts a process with the given command and arguments.
-    /// </summary>
-    private static void RunProcess(string fileName, string arguments)
-    {
-        using var proc = new Process();
-        proc.StartInfo.FileName = fileName;
-        proc.StartInfo.Arguments = arguments;
-        proc.StartInfo.UseShellExecute = false;
-        proc.StartInfo.CreateNoWindow = true;
-        proc.Start();
-    }
-
-
-    /// <summary>
-    /// Runs a process and reads its standard output.
-    /// </summary>
-    private static string RunProcessAndReadOutput(string fileName, string arguments)
-    {
-        try
-        {
-            using var proc = new Process();
-            proc.StartInfo.FileName = fileName;
-            proc.StartInfo.Arguments = arguments;
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.CreateNoWindow = true;
-            proc.StartInfo.RedirectStandardOutput = true;
-            proc.Start();
-
-            var output = proc.StandardOutput.ReadToEnd();
-            proc.WaitForExit();
-
-            return output;
-        }
-        catch
-        {
-            return string.Empty;
-        }
-    }
-
 
     /// <summary>
     /// Removes a MIME type association from the mimeapps.list file.

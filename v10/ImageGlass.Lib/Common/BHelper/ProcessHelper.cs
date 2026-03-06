@@ -36,6 +36,47 @@ public partial class BHelper
 
 
     /// <summary>
+    /// Starts a process with the given command and arguments.
+    /// </summary>
+    public static void RunProcess(string fileName, string arguments)
+    {
+        using var proc = new Process();
+        proc.StartInfo.FileName = fileName;
+        proc.StartInfo.Arguments = arguments;
+        proc.StartInfo.UseShellExecute = false;
+        proc.StartInfo.CreateNoWindow = true;
+        proc.Start();
+    }
+
+
+    /// <summary>
+    /// Runs a process and reads its standard output.
+    /// </summary>
+    public static string RunProcessAndReadOutput(string fileName, string arguments)
+    {
+        try
+        {
+            using var proc = new Process();
+            proc.StartInfo.FileName = fileName;
+            proc.StartInfo.Arguments = arguments;
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.CreateNoWindow = true;
+            proc.StartInfo.RedirectStandardOutput = true;
+            proc.Start();
+
+            var output = proc.StandardOutput.ReadToEnd();
+            proc.WaitForExit();
+
+            return output;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+
+    /// <summary>
     /// Builds correct file path for executable and app protocol.
     /// </summary>
     public static (string Executable, string Args) BuildExeArgs(string executable, string arguments, string currentFilePath = "")
