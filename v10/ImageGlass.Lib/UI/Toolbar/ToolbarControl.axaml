@@ -215,9 +215,12 @@
                                     <ui:PhMenuItem
                                         Click="MainMenuItem_Click"
                                         IsChecked="{CompiledBinding Config.ShouldUseExplorerSortOrder}"
+                                        IsVisible="{OnPlatform False,
+                                                               Windows=True,
+                                                               x:TypeArguments=x:Boolean}"
                                         LangKey="FrmSettings_ShouldUseExplorerSortOrder"
                                         ToggleType="CheckBox" />
-                                    <ui:PhMenuItem Header="-" />
+                                    <ui:PhMenuItem Header="-" IsVisible="{OnPlatform False, Windows=True, x:TypeArguments=x:Boolean}" />
 
                                     <ui:PhMenuItem
                                         Click="MainMenuItem_Click"

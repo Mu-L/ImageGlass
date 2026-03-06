@@ -453,7 +453,7 @@ public partial class MainWindowView : PhControl
 
 
             // use Explorer sort order
-            if (Core.ShellProvider is not null)
+            if (Core.ShellProvider is not null && BHelper.OS == OSType.Windows)
             {
                 mnuLoadingOrders.Items.Add(new PhMenuItem
                 {
