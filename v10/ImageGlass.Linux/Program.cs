@@ -22,6 +22,7 @@ using ImageGlass.Common;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.ServiceProviders.FileSearchService;
 using ImageGlass.Common.Windows;
+using ImageGlass.Linux.Common.ServiceProviders;
 using ImageGlass.ViewModels;
 using System;
 
@@ -40,7 +41,7 @@ sealed class Program
             // initialize service providers
             Core.FileSearchProvider = new FileSearchProvider();
             Core.PreviewProvider = new PhotoPreviewProvider();
-            //Core.ShellProvider = new Win32ShellProvider();
+            Core.ShellProvider = new LinuxShellProvider();
             //Core.ShareProvider = new Win32ShareProvider();
             //Core.PrintProvider = new Win32PrintProvider();
         });
