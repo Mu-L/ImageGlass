@@ -271,16 +271,12 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     /// </summary>
     private static void RunProcess(string fileName, string arguments)
     {
-        try
-        {
-            using var proc = new Process();
-            proc.StartInfo.FileName = fileName;
-            proc.StartInfo.Arguments = arguments;
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.CreateNoWindow = true;
-            proc.Start();
-        }
-        catch { }
+        using var proc = new Process();
+        proc.StartInfo.FileName = fileName;
+        proc.StartInfo.Arguments = arguments;
+        proc.StartInfo.UseShellExecute = false;
+        proc.StartInfo.CreateNoWindow = true;
+        proc.Start();
     }
 
 

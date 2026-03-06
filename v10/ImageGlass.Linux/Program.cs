@@ -43,7 +43,7 @@ sealed class Program
             Core.PreviewProvider = new PhotoPreviewProvider();
             Core.ShellProvider = new LinuxShellProvider();
             //Core.ShareProvider = new Win32ShareProvider();
-            //Core.PrintProvider = new Win32PrintProvider();
+            Core.PrintProvider = new LinuxPrintProvider();
         });
 
         if (isHandled) return 0;
