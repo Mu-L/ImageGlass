@@ -23,6 +23,7 @@ using Avalonia.Media;
 using ImageGlass.Common;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
+using ImageGlass.Common.Types;
 using System;
 
 namespace ImageGlass.UI;
@@ -114,16 +115,16 @@ public class PhGridSplitter : GridSplitter
 
     private void UploadThemeColors()
     {
-        _bgNormal = AppThemeColors.GalleryBgBrush.Color
-            .Blend(Core.Theme.InvertedBaseColor, 0.9, AppThemeColors.GalleryBgBrush.A)
-            .ToBrush();
+        var alpha = (byte)Math.Max(50d, AppThemeColors.GalleryBgBrush.A);
+
+        _bgNormal = Resx.Get<IBrush>(ResxId.IG_BorderNeutralBrush);
 
         _bgHover = AppThemeColors.GalleryBgBrush.Color
-            .Blend(Core.Theme.InvertedBaseColor, 0.8, AppThemeColors.GalleryBgBrush.A)
+            .Blend(Core.Theme.InvertedBaseColor, 0.8, alpha)
             .ToBrush();
 
         _bgPressed = AppThemeColors.GalleryBgBrush.Color
-            .Blend(Core.Theme.InvertedBaseColor, 0.7, AppThemeColors.GalleryBgBrush.A)
+            .Blend(Core.Theme.InvertedBaseColor, 0.7, alpha)
             .ToBrush();
     }
 
