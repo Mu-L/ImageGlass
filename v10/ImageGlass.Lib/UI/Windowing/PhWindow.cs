@@ -179,7 +179,7 @@ public partial class PhWindow : Window
         if (UseCustomBackdrop) return;
         if (BackdropStyle != BackdropStyle.None && !IsWindows10)
         {
-            await AnimateBackgroundColorAsync(WindowInactivatedBackgroundColor.A(0));
+            await AnimateBackgroundColorAsync(WindowInactivatedBackgroundColor.A(200));
         }
     }
 
@@ -348,14 +348,14 @@ public partial class PhWindow : Window
         }
 
 
-        // update background color for transparency
+        // update background color for non-transparency
         if (ActualTransparencyLevel.Equals(WindowTransparencyLevel.None))
         {
-            Background = WindowInactivatedBackgroundColor.A(255).ToBrush();
+            Background = null;
         }
         else
         {
-            Background = WindowInactivatedBackgroundColor.A(0).ToBrush();
+            Background = WindowInactivatedBackgroundColor.A(200).ToBrush();
         }
     }
 

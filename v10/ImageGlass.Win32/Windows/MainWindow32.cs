@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ImageGlass.Common;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
@@ -72,6 +73,16 @@ public partial class MainWindow32 : MainWindow
             BackdropStyle.None => SystemBackdropType.None,
             _ => SystemBackdropType.Auto,
         };
+
+        // update background color for non-transparency
+        if (ActualTransparencyLevel.Equals(WindowTransparencyLevel.None))
+        {
+            Background = null;
+        }
+        else
+        {
+            Background = WindowInactivatedBackgroundColor.A(0).ToBrush();
+        }
 
         // use Win32 API for the backdrop
         Win32WindowApi.SetWindowBackdrop(Handle, type);
