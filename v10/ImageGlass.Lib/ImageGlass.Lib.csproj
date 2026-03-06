@@ -3,7 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <Platforms>x64</Platforms>
+    <Platforms>x64;ARM64</Platforms>
 
     <LangVersion>Preview</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -43,7 +43,8 @@
     <PackageReference Include="Avalonia.Skia" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="D2Phap.FileWatcherEx" />
-    <PackageReference Include="Magick.NET-Q8-OpenMP-x64" />
+    <PackageReference Include="Magick.NET-Q8-OpenMP-x64" Condition="'$(Platform)' == 'X64'" />
+    <PackageReference Include="Magick.NET-Q8-OpenMP-arm64" Condition="'$(Platform)' == 'ARM64'" />
     <PackageReference Include="Svg.Controls.Skia.Avalonia" />
   </ItemGroup>
 
