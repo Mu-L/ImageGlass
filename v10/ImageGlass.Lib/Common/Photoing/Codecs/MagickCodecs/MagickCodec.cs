@@ -50,10 +50,15 @@ public static partial class MagickCodec
         MagickNET.SetLogEvents(LogEventTypes.Exception);
 #endif
 
-        if (!ImageMagick.OpenCL.IsEnabled)
+        try
         {
-            ImageMagick.OpenCL.IsEnabled = true;
+            if (!ImageMagick.OpenCL.IsEnabled)
+            {
+                // this can throw exception
+                ImageMagick.OpenCL.IsEnabled = true;
+            }
         }
+        catch { }
 
         IsInitialized = true;
     }
