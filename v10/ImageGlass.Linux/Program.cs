@@ -42,7 +42,7 @@ sealed class Program
             Core.FileSearchProvider = new FileSearchProvider();
             Core.PreviewProvider = new PhotoPreviewProvider();
             Core.ShellProvider = new LinuxShellProvider();
-            //Core.ShareProvider = new Win32ShareProvider();
+            Core.ShareProvider = new LinuxShareProvider();
             Core.PrintProvider = new LinuxPrintProvider();
         });
 

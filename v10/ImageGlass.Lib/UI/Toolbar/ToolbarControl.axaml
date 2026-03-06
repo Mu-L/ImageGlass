@@ -103,7 +103,9 @@
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuPrint" />
                                 <ui:PhMenuItem
                                     Click="MainMenuItem_Click"
-                                    IsVisible="False"
+                                    IsVisible="{OnPlatform True,
+                                                           Windows=False,
+                                                           x:TypeArguments=x:Boolean}"
                                     LangKey="FrmMain_MnuShare" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuOpenLocation" />
                                 <ui:PhMenuItem Header="-" />
