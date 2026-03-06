@@ -19,7 +19,7 @@
     <AvaloniaUseCompiledBindingsByDefault>True</AvaloniaUseCompiledBindingsByDefault>
     <AvaloniaNameGeneratorDefaultFieldModifier>Public</AvaloniaNameGeneratorDefaultFieldModifier>
     <FileVersion>10.0.0.304</FileVersion>
-    <Version>10.0.0.304-beta-M</Version>
+    <Version>10.0.0.304-beta-m-$(Platform)</Version>
   </PropertyGroup>
 
 

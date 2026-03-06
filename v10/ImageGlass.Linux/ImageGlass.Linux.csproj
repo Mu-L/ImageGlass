@@ -1,10 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <!--If you are willing to use platform-specific APIs, use conditional compilation.
-    See https://docs.avaloniaui.net/docs/guides/platforms/platform-specific-code/dotnet for more details.-->
-    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <Platforms>x64;ARM64</Platforms>
 
@@ -16,16 +13,16 @@
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
   </PropertyGroup>
-
   
+
   <PropertyGroup Label="Avalonia">
     <AvaloniaUseCompiledBindingsByDefault>True</AvaloniaUseCompiledBindingsByDefault>
     <AvaloniaNameGeneratorDefaultFieldModifier>Public</AvaloniaNameGeneratorDefaultFieldModifier>
     <FileVersion>10.0.0.304</FileVersion>
-    <Version>10.0.0.304-beta-w-$(Platform)</Version>
+    <Version>10.0.0.304-beta-l-$(Platform)</Version>
   </PropertyGroup>
-  
-  
+
+
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>icon256.ico</ApplicationIcon>
@@ -37,18 +34,6 @@
   </PropertyGroup>
 
 
-  <PropertyGroup>
-    <!-- AOT support for GeneratedComInterface and LibraryImport -->
-    <CsWin32RunAsBuildTask>true</CsWin32RunAsBuildTask>
-    <DisableRuntimeMarshalling>true</DisableRuntimeMarshalling>
-  </PropertyGroup>
-
-  
-  <ItemGroup>
-    <AdditionalFiles Remove="NativeMethods.json" />
-  </ItemGroup>
-
-  
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
@@ -56,21 +41,10 @@
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="D2Phap.EggShell-ARM64" Condition="'$(Platform)' == 'ARM64'" />
-    <PackageReference Include="D2Phap.EggShell-x64" Condition="'$(Platform)' == 'X64'" />
-    <PackageReference Include="Microsoft.Windows.CsWin32">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
+
 
   <ItemGroup>
     <ProjectReference Include="..\ImageGlass.Lib\ImageGlass.Lib.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="NativeMethods.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>

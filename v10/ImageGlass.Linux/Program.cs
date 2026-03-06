@@ -25,7 +25,7 @@ using ImageGlass.Common.Windows;
 using ImageGlass.ViewModels;
 using System;
 
-namespace ImageGlass.Mac;
+namespace ImageGlass.Linux;
 
 sealed class Program
 {
@@ -64,7 +64,7 @@ sealed class Program
         })
         .UsePlatformDetect()
 #else
-        .UseAvaloniaNative()
+        .UseX11()
 #endif
         .UseSkia()
         .With(new SkiaOptions
