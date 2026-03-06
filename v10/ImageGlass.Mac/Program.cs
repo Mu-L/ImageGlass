@@ -42,7 +42,7 @@ sealed class Program
             Core.FileSearchProvider = new FileSearchProvider();
             Core.PreviewProvider = new PhotoPreviewProvider();
             Core.ShellProvider = new MacShellProvider();
-            //Core.ShareProvider = new Win32ShareProvider();
+            Core.ShareProvider = new MacShareProvider();
             Core.PrintProvider = new MacPrintProvider();
         });
 
