@@ -97,6 +97,27 @@ public partial class AppAPIProvider
 
 
     /// <summary>
+    /// Open app settings.
+    /// </summary>
+    public static void IG_OpenSettings()
+    {
+        var configPath = BHelper.ConfigDir(Config.CONFIG_USER);
+
+        if (BHelper.OS == OSType.Windows)
+        {
+            var proc = new Process();
+            proc.StartInfo.FileName = configPath;
+            proc.StartInfo.UseShellExecute = true;
+            proc.Start();
+        }
+        else
+        {
+            _ = Core.ShellProvider?.OpenDefaultEditingAppAsync(configPath);
+        }
+    }
+
+
+    /// <summary>
     /// Exit the app.
     /// </summary>
     public static void IG_Exit()

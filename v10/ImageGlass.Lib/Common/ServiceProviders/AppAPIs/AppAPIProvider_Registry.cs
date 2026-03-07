@@ -134,6 +134,10 @@ public partial class AppAPIProvider
         { API.IG_GetMoreTool,               PhCommands.Create(IG_GetMoreTool) },
 
 
+        // Settings
+        { API.IG_OpenSettings,              PhCommands.Create(IG_OpenSettings) },
+
+
         // Help
         { API.IG_OpenAboutWindow,           PhCommands.Create(IG_OpenAboutWindowAsync) },
         { API.IG_CheckForUpdate,            PhCommands.Create(IG_CheckForUpdate) },

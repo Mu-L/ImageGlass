@@ -154,6 +154,10 @@ public partial class AppAPIProvider
         new(LangId.FrmMain_MnuGetMoreTools,         API.IG_GetMoreTool),
 
 
+        // Settings
+        new(LangId.FrmMain_MnuSettings,             API.IG_OpenSettings,            MKeys.Control, Key.OemComma),
+
+
         // Help
         new(LangId.FrmMain_MnuAbout,                        API.IG_OpenAboutWindow,             Key.F1),
         new(LangId._CheckForUpdate,                         API.IG_CheckForUpdate),
