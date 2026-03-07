@@ -83,6 +83,9 @@ public partial class App : Application
             {
                 Core.ShellProvider?.ForegroundShell = Core.ShellProvider.GetForegroundWindowView();
             }
+
+            // set init image path
+            Core.UpdateInitImagePath();
         }
 
         base.OnFrameworkInitializationCompleted();

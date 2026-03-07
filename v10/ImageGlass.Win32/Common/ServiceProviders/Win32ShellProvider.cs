@@ -57,7 +57,6 @@ public class Win32ShellProvider : PhDisposable, IShellProvider
             try
             {
                 _foregroundShellPath = _foregroundShell?.GetTabViewPath() ?? string.Empty;
-                Core.UpdateInitImagePath();
             }
             catch
             {

@@ -33,7 +33,7 @@ public static class Const
     public const float VIEWER_GRID_SIZE = 9f;
     public const int TOOLBAR_ICON_HEIGHT = 24;
     public const int THUMBNAIL_HEIGHT = 70;
-    public const string CONFIG_CMD_PREFIX = "/";
+    public const string CONFIG_CMD_PREFIX = ":";
     public const string DATETIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
     public const string DATE_FORMAT = "yyyy/MM/dd";
     public const string APP_PROTOCOL = "imageglass";

@@ -451,7 +451,7 @@ public static class Core
     /// </summary>
     public static void UpdateInitImagePath(string? path = null)
     {
-        var pathToLoad = path ?? string.Empty;
+        var pathToLoad = path;
 
         if (string.IsNullOrWhiteSpace(pathToLoad) && Core.Args.Length >= 2)
         {
