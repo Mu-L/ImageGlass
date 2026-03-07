@@ -52,6 +52,16 @@ public static class Core
     #region Platform Service Provider
 
     /// <summary>
+    /// Gets the build information.
+    /// </summary>
+    /// <remarks>
+    /// <c>**NOTE:</c> Set this from the platform project's <c>Program.Main()</c>
+    /// using the MSBuild-generated <c>AppBuildInfo</c> class.
+    /// </remarks>
+    public static IAppBuildInfo BuildInfo { get; set; } = null!;
+
+
+    /// <summary>
     /// Provides a singleton instance to detect color profile of monitor.
     /// </summary>
     public static IWindowColorProfileProvider? ColorProfileProvider { get; set; } = null;
@@ -466,7 +476,7 @@ public static class Core
             }
         }
 
-        _initImagePathFromArgs = pathToLoad;
+        _initImagePathFromArgs = pathToLoad ?? string.Empty;
     }
 
 

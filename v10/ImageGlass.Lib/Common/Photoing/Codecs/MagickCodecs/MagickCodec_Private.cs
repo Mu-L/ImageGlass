@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
-using ImageGlass.Common.Types;
 using ImageMagick;
 using System;
 using System.Text.RegularExpressions;
@@ -148,7 +147,7 @@ public static partial class MagickCodec
     /// <summary>
     /// Gets maximum image dimention.
     /// </summary>
-    private static Size GetMaxImageRenderSize__(uint srcWidth, uint srcHeight, uint maxSize = Const.MAX_IMAGE_DIMENSION)
+    private static Size GetMaxImageRenderSize__(uint srcWidth, uint srcHeight, uint maxSize)
     {
         var widthScale = 1f;
         var heightScale = 1f;

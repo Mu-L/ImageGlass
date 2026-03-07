@@ -47,7 +47,7 @@ public partial class AboutWindow : DialogWindow
     private Button _btnCheckForUpdate = null!;
 
 
-    private readonly string _creditContent = $"""
+    private const string _creditContent = $"""
         ◍ Avalonia                                      MIT licence 
           https://github.com/AvaloniaUI/Avalonia
           Copyright (c) AvaloniaUI OÜ All Rights Reserved
@@ -131,13 +131,11 @@ public partial class AboutWindow : DialogWindow
 
     private void UpdateVersionText()
     {
-        var version = BHelper.AppVersion;
-        var channel = Const.UPDATE_CHANNEL;
         var magickVersion = MagickNET.Version;
         var dotnetVersion = RuntimeInformation.FrameworkDescription;
 
         _lblVersion.Text = $"""
-            {Core.Lang[LangId.FrmAbout_Version]} {version} {Const.APP_CODE} ({channel})
+            {Core.Lang[LangId.FrmAbout_Version]} {Core.BuildInfo.AppVersion}
             {magickVersion}
             {dotnetVersion}
             """;

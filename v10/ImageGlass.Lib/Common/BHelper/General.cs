@@ -16,12 +16,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 using ImageGlass.Common.Types;
 using ImageMagick;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -32,6 +30,17 @@ namespace ImageGlass.Common;
 
 public partial class BHelper
 {
+    /// <summary>
+    /// Gets app name.
+    /// </summary>
+    public static string AppName => "ImageGlass_10";
+
+
+    /// <summary>
+    /// Gets the app executable file path.
+    /// </summary>
+    public static string AppExePath => Environment.ProcessPath ?? "";
+
 
     /// <summary>
     /// Gets the type of operating system.
@@ -185,11 +194,9 @@ public partial class BHelper
     {
         // get system info
         var osArch = Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit";
-        var exeVersion = FileVersionInfo.GetVersionInfo(BHelper.AppExePath).FileVersion;
 
         var details = $"""
-            Version: {BHelper.AppName} v{exeVersion}
-            Release code: {Const.APP_CODE}
+            Version: {BHelper.AppName} v{Core.BuildInfo.AppVersion}
             Magick.NET: {MagickNET.Version}
             Runtime: .NET {Environment.Version}
             OS: {OS} {Environment.OSVersion.VersionString} {osArch}
@@ -213,10 +220,9 @@ public partial class BHelper
     {
         // get system info
         var osArch = Environment.Is64BitOperatingSystem ? "64" : "32";
-        var exeVersion = FileVersionInfo.GetVersionInfo(BHelper.AppExePath).FileVersion;
 
         var debugInfo = $"""
-            {BHelper.AppName} {Const.APP_CODE} v{exeVersion}
+            {BHelper.AppName} {Core.BuildInfo.AppVersion}
             {MagickNET.Version}
             {OS} {osArch} {Environment.OSVersion.Version}, .NET {Environment.Version}
             """;

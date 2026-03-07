@@ -21,7 +21,6 @@ using Avalonia.Controls;
 using ImageGlass.Common.Types;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,45 +32,6 @@ namespace ImageGlass.Common;
 public partial class BHelper
 {
     private static string Win32ShortcutExtension => ".lnk";
-
-
-    /// <summary>
-    /// Gets app name.
-    /// </summary>
-    public static string AppName => "ImageGlass_10";
-
-
-    /// <summary>
-    /// Gets the app executable file path.
-    /// </summary>
-    public static string AppExePath => Environment.ProcessPath ?? "";
-
-
-    /// <summary>
-    /// Gets the app version string. e.g. <c>10.0.0.304-beta</c>.
-    /// </summary>
-    public static string AppVersion { get; } = GetAppVersion();
-    private static string GetAppVersion()
-    {
-        var defaultVersion = new Version().ToString();
-        if (string.IsNullOrWhiteSpace(AppExePath)) return defaultVersion;
-
-        try
-        {
-            // 10.0.0.304-beta+hash
-            var fullVersionStr = FileVersionInfo.GetVersionInfo(AppExePath)
-                .ProductVersion ?? defaultVersion;
-
-            // 10.0.0.304-beta
-            var versionNumberStr = fullVersionStr.Split('+',
-                StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)[0];
-
-            return versionNumberStr;
-        }
-        catch { }
-
-        return defaultVersion;
-    }
 
 
     /// <summary>
@@ -306,7 +266,7 @@ public partial class BHelper
         {
             var ub = new UriBuilder(url);
             var queries = HttpUtility.ParseQueryString(ub.Query);
-            queries["utm_source"] = $"app_{AppVersion}";
+            queries["utm_source"] = $"app_{Core.BuildInfo.AppVersion}";
             queries["utm_medium"] = "app_click";
             queries["utm_campaign"] = campaign;
 

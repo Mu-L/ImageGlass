@@ -36,6 +36,8 @@ sealed class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        Core.BuildInfo = new AppBuildInfo();
+
         var isHandled = App.InitializeAppInstance(args, () =>
         {
             // initialize service providers
@@ -83,3 +85,4 @@ sealed class Program
             app?.CreateMainWindowIfNotExist(mainWindow);
         });
 }
+
