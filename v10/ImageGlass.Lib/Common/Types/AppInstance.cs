@@ -47,7 +47,7 @@ public partial class AppInstance : PhDisposable
     public AppInstance(string id)
     {
         _id = id;
-        _pipeName = $"IG_Pipe_{id}";
+        _pipeName = id;
         _mutex = new Mutex(true, id, out var isFirstInstance);
         IsFirstInstance = isFirstInstance;
 
