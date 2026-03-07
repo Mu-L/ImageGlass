@@ -45,11 +45,20 @@ public partial class BHelper
     /// <summary>
     /// Gets the type of operating system.
     /// </summary>
-    public static OSType OS { get; } =
-        OperatingSystem.IsWindows() ? OSType.Windows :
-        OperatingSystem.IsMacCatalyst() ? OSType.Mac :
-        OperatingSystem.IsLinux() ? OSType.Linux :
-        OSType.Unknown;
+    public static OSType OS { get; } = GetOS();
+    private static OSType GetOS()
+    {
+        if (OperatingSystem.IsLinux()) return OSType.Linux;
+        if (OperatingSystem.IsMacCatalyst()) return OSType.Mac;
+        if (OperatingSystem.IsWindows()) return OSType.Windows;
+        return OSType.Unknown;
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the current operating system is Windows 10.
+    /// </summary>
+    public static bool IsWindows10 { get; } = Environment.OSVersion.Version.Major == 10
+        && Environment.OSVersion.Version.Build < 22000;
 
 
     /// <summary>

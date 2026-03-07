@@ -37,7 +37,7 @@ public partial class MainWindow32 : MainWindow
 
     public MainWindow32()
     {
-
+        OnIgBackdropStyleChanged(BackdropStyle.None);
     }
 
 
@@ -63,26 +63,27 @@ public partial class MainWindow32 : MainWindow
 
     protected override void OnIgBackdropStyleChanged(BackdropStyle style)
     {
-        base.OnIgBackdropStyleChanged(style);
+        // check if we can apply window backdrop
+        _canUseBackdrop = !BHelper.IsWindows10 && style != BackdropStyle.None;
+
+        if (_canUseBackdrop)
+        {
+            Background = DefaultActivateBg.A(0).ToBrush();
+        }
+        else
+        {
+            Background = DefaultActivateBg.ToBrush();
+        }
+
 
         var type = style switch
         {
             BackdropStyle.Mica => SystemBackdropType.Mica,
             BackdropStyle.MicaAlt => SystemBackdropType.MicaAlt,
             BackdropStyle.Acrylic => SystemBackdropType.Acrylic,
-            BackdropStyle.None => SystemBackdropType.None,
+            BackdropStyle.None => SystemBackdropType.Auto,
             _ => SystemBackdropType.Auto,
         };
-
-        // update background color for non-transparency
-        if (ActualTransparencyLevel.Equals(WindowTransparencyLevel.None))
-        {
-            Background = null;
-        }
-        else
-        {
-            Background = WindowInactivatedBackgroundColor.A(0).ToBrush();
-        }
 
         // use Win32 API for the backdrop
         Win32WindowApi.SetWindowBackdrop(Handle, type);

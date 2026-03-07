@@ -38,16 +38,17 @@ namespace ImageGlass.UI.Windowing;
 
 public partial class PhWindow : Window
 {
-    protected static readonly Color InactivatedColorDark = Color.FromRgb(32, 32, 32);
-    protected static readonly Color InactivatedColorLight = Color.FromRgb(243, 243, 243);
+    protected bool _canUseBackdrop = false;
 
-    protected static bool IsWindows10 => Environment.OSVersion.Version.Major == 10
-        && Environment.OSVersion.Version.Build < 22000;
-
-    protected static Color WindowInactivatedBackgroundColor => Application.Current
+    protected static Color DefaultActivateBg => Application.Current
         ?.ActualThemeVariant == ThemeVariant.Dark
-            ? InactivatedColorDark
-            : InactivatedColorLight;
+            ? AppThemeColors.BackgroundActivateDark
+            : AppThemeColors.BackgroundActivateLight;
+
+    protected static Color DefaultInactivateBg => Application.Current
+        ?.ActualThemeVariant == ThemeVariant.Dark
+            ? AppThemeColors.BackgroundInactivateDark
+            : AppThemeColors.BackgroundInactivateLight;
 
 
 
@@ -121,6 +122,7 @@ public partial class PhWindow : Window
 
     public PhWindow()
     {
+        OnIgBackdropStyleChanged(BackdropStyle.None);
         OnIgFramelessModeChanged(IsFrameless);
 
         Core.ThemeChanged += Core_ThemeChanged;
@@ -177,9 +179,9 @@ public partial class PhWindow : Window
 
         // handle built-in backdrop style
         if (UseCustomBackdrop) return;
-        if (BackdropStyle != BackdropStyle.None && !IsWindows10)
+        if (_canUseBackdrop)
         {
-            await AnimateBackgroundColorAsync(WindowInactivatedBackgroundColor.A(200));
+            await AnimateBackgroundColorAsync(DefaultActivateBg.A(200));
         }
     }
 
@@ -191,7 +193,10 @@ public partial class PhWindow : Window
 
         // handle built-in backdrop style
         if (UseCustomBackdrop) return;
-        await AnimateBackgroundColorAsync(WindowInactivatedBackgroundColor);
+        if (_canUseBackdrop)
+        {
+            await AnimateBackgroundColorAsync(DefaultInactivateBg);
+        }
     }
 
 
@@ -326,36 +331,38 @@ public partial class PhWindow : Window
     /// </summary>
     protected virtual void OnIgBackdropStyleChanged(BackdropStyle style)
     {
-        if (style == BackdropStyle.None)
+        if (style != BackdropStyle.None)
         {
-            Background = null;
-            return;
-        }
-
-
-        // map the built-in backdrop styles
-        if (!UseCustomBackdrop)
-        {
-            WindowTransparencyLevel[] levels = style switch
+            // map the built-in backdrop styles
+            if (!UseCustomBackdrop)
             {
-                BackdropStyle.Mica => [WindowTransparencyLevel.Mica, WindowTransparencyLevel.None],
-                BackdropStyle.MicaAlt => [WindowTransparencyLevel.Mica, WindowTransparencyLevel.None],
-                BackdropStyle.Acrylic => [WindowTransparencyLevel.AcrylicBlur, WindowTransparencyLevel.None],
-                _ => [WindowTransparencyLevel.None],
-            };
+                WindowTransparencyLevel[] levels = style switch
+                {
+                    BackdropStyle.Mica => [WindowTransparencyLevel.Mica, WindowTransparencyLevel.None],
+                    BackdropStyle.MicaAlt => [WindowTransparencyLevel.Mica, WindowTransparencyLevel.None],
+                    BackdropStyle.Acrylic => [WindowTransparencyLevel.AcrylicBlur, WindowTransparencyLevel.None],
+                    _ => [WindowTransparencyLevel.None],
+                };
 
-            TransparencyLevelHint = levels;
+                TransparencyLevelHint = levels;
+            }
         }
 
 
-        // update background color for non-transparency
-        if (ActualTransparencyLevel.Equals(WindowTransparencyLevel.None))
+        // check if we can apply window backdrop
+        _canUseBackdrop = !BHelper.IsWindows10
+            && !ActualTransparencyLevel.Equals(WindowTransparencyLevel.None)
+            && !ActualTransparencyLevel.Equals(WindowTransparencyLevel.Transparent);
+
+
+        // update background color for transparency
+        if (_canUseBackdrop)
         {
-            Background = null;
+            Background = DefaultActivateBg.A(200).ToBrush();
         }
         else
         {
-            Background = WindowInactivatedBackgroundColor.A(200).ToBrush();
+            Background = DefaultActivateBg.ToBrush();
         }
     }
 

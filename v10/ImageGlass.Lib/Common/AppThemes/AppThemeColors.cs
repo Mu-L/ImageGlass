@@ -40,19 +40,26 @@ public static class AppThemeColors
         && AppThemeColors.GalleryBgBrush.A == 0;
 
 
+    // Static window background Colors
+    public static Color BackgroundActivateDark { get; } = BHelper.ColorFromHex("#151b1f");
+    public static Color BackgroundActivateLight { get; } = Colors.White;
+    public static Color BackgroundInactivateDark { get; } = BHelper.ColorFromHex("#212121");
+    public static Color BackgroundInactivateLight { get; } = BHelper.ColorFromHex("#f3f3f3");
+
+
     // Static Situational Colors
     // Light theme
-    public static Color BackgroundInfoLight => BHelper.ColorFromHex("#C2DAECBB");
-    public static Color BackgroundSuccessLight => BHelper.ColorFromHex("#DFF6DDBB");
-    public static Color BackgroundWarningLight => BHelper.ColorFromHex("#FFF4CEBB");
-    public static Color BackgroundDangerLight => BHelper.ColorFromHex("#FDE7E9BB");
+    public static Color BackgroundInfoLight { get; } = BHelper.ColorFromHex("#C2DAECBB");
+    public static Color BackgroundSuccessLight { get; } = BHelper.ColorFromHex("#DFF6DDBB");
+    public static Color BackgroundWarningLight { get; } = BHelper.ColorFromHex("#FFF4CEBB");
+    public static Color BackgroundDangerLight { get; } = BHelper.ColorFromHex("#FDE7E9BB");
 
 
     // Dark theme
-    public static Color BackgroundInfoDark => BHelper.ColorFromHex("#1A3244BB");
-    public static Color BackgroundSuccessDark => BHelper.ColorFromHex("#393D1BBB");
-    public static Color BackgroundWarningDark => BHelper.ColorFromHex("#433519BB");
-    public static Color BackgroundDangerDark => BHelper.ColorFromHex("#442726BB");
+    public static Color BackgroundInfoDark { get; } = BHelper.ColorFromHex("#1A3244BB");
+    public static Color BackgroundSuccessDark { get; } = BHelper.ColorFromHex("#393D1BBB");
+    public static Color BackgroundWarningDark { get; } = BHelper.ColorFromHex("#433519BB");
+    public static Color BackgroundDangerDark { get; } = BHelper.ColorFromHex("#442726BB");
 
 
 
