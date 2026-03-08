@@ -108,7 +108,7 @@ public partial class AboutWindow : DialogWindow
     {
         base.OnIgLanguageChanged();
 
-        Title = string.Empty;
+        Title = Core.Lang[LangId.FrmMain_MnuAbout];
         Button1Text = Core.Lang[LangId._Close];
 
         _lblSlogan.Text = Core.Lang[LangId.FrmAbout_Slogan];

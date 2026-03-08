@@ -81,12 +81,6 @@ public partial class MainWindow32 : MainWindow
     }
 
 
-    protected override void UpdateBackground(bool isActive)
-    {
-        if (isActive) base.UpdateBackground(isActive);
-    }
-
-
     private void ColorProfileProvider_Changed(IWindowColorProfileProvider sender, ColorProfileChangedEventArgs e)
     {
         // update the current color profile

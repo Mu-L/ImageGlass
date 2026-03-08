@@ -209,6 +209,7 @@ public partial class PhWindow : Window
             _ = UpdateWindowIconAsync();
         }
 
+        UpdateBackground(IsActive);
         OnIgThemeChanged(e);
     }
 
@@ -366,21 +367,16 @@ public partial class PhWindow : Window
     /// </summary>
     protected virtual void UpdateBackground(bool isActive)
     {
-        if (isActive)
+        var windowBg = isActive ? DefaultActivateBg : DefaultInactivateBg;
+
+        // update background color for transparency
+        if (_canUseBackdrop)
         {
-            // update background color for transparency
-            if (_canUseBackdrop)
-            {
-                Background = DefaultActivateBg.A(0).ToBrush();
-            }
-            else
-            {
-                Background = DefaultActivateBg.ToBrush();
-            }
+            Background = windowBg.A(0).ToBrush();
         }
         else
         {
-            Background = DefaultInactivateBg.ToBrush();
+            Background = windowBg.ToBrush();
         }
     }
 
