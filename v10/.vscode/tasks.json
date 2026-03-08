@@ -1,0 +1,79 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-linux-x64",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/ImageGlass.Linux/ImageGlass.Linux.csproj",
+        "-c",
+        "Debug",
+        "-p:Platform=x64"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "build-mac-arm64",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/ImageGlass.Mac/ImageGlass.Mac.csproj",
+        "-c",
+        "Debug",
+        "-p:Platform=ARM64"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "publish-linux-x64",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "publish",
+        "${workspaceFolder}/ImageGlass.Linux/ImageGlass.Linux.csproj",
+        "-c",
+        "Release",
+        "-r",
+        "linux-x64",
+        "-p:Platform=x64",
+        "-p:PublishAot=true",
+        "-p:PublishSingleFile=true",
+        "-p:PublishTrimmed=true",
+        "-o",
+        "${workspaceFolder}/artifacts/publish/linux-x64",
+        "--self-contained",
+        "true"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "publish-mac-arm64",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "publish",
+        "${workspaceFolder}/ImageGlass.Mac/ImageGlass.Mac.csproj",
+        "-c",
+        "Release",
+        "-r",
+        "osx-arm64",
+        "-p:Platform=ARM64",
+        "-p:PublishAot=true",
+        "-p:PublishSingleFile=true",
+        "-p:PublishTrimmed=true",
+        "-o",
+        "${workspaceFolder}/artifacts/publish/osx-arm64",
+        "--self-contained",
+        "true"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+  ],
+}
