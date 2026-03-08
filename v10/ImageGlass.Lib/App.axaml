@@ -11,7 +11,7 @@
         <FluentTheme />
 
 
-        <!--  Menu animation  -->
+        <!--  Menu Dropdown animation  -->
         <Style Selector="MenuFlyoutPresenter, ContextMenu, ToolTip, Popup">
             <!--  1. Initialize the transform so the animator has something to target  -->
             <Setter Property="RenderTransform">
@@ -38,7 +38,7 @@
 
 
         <!--  Context Menu shadow  -->
-        <Style Selector="MenuFlyoutPresenter > Border, ContextMenu > Border, ToolTip > Border,             Popup > Border">
+        <Style Selector="MenuFlyoutPresenter > Border, ContextMenu > Border, ToolTip > Border, Popup > Border">
             <Setter Property="Margin" Value="6, 1, 6, 12" />
             <Setter Property="BoxShadow" Value="{DynamicResource MenuShadow}" />
         </Style>
@@ -69,9 +69,10 @@
                 </Setter>
             </Style>
 
-            <!--  Fixed: check mark is cut  -->
+            <!--  Fixed: check mark is cut off  -->
             <Style Selector="^:checked:toggle /template/ ContentControl#PART_ToggleIconPresenter Path">
-                <Setter Property="Width" Value="18" />
+                <Setter Property="Width" Value="14" />
+                <Setter Property="Stretch" Value="Uniform" />
             </Style>
 
             <Style Selector="^:selected /template/ Border#PART_LayoutRoot">
@@ -113,8 +114,11 @@
             </ResourceDictionary.ThemeDictionaries>
 
 
-            <!--  Menu item padding  -->
+            <!--  Menu item spacing  -->
             <Thickness x:Key="MenuFlyoutItemThemePaddingNarrow">8,4,8,4</Thickness>
+            <Thickness x:Key="MenuInputGestureTextMargin">6,0,0,0</Thickness>
+            <Thickness x:Key="MenuIconPresenterMargin">0,0,6,0</Thickness>
+            <Thickness x:Key="MenuFlyoutItemChevronMargin">6,0,0,0</Thickness>
 
             <!--  Tooltip  -->
             <x:Double x:Key="ToolTipContentThemeFontSize">13</x:Double>

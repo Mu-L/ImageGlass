@@ -128,7 +128,7 @@
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuGoTo" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuGoToFirst" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuGoToLast" />
-                                <ui:PhMenuItem Header="-" />
+                                <ui:PhMenuItem Header="-" IsVisible="False" />
 
                                 <ui:PhMenuItem
                                     Click="MainMenuItem_Click"
