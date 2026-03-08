@@ -42,6 +42,7 @@ namespace ImageGlass.Common;
 public partial class App : Application
 {
     private MainWindow? _mainWindow = null;
+    private TaskCompletionSource _taskUi = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 
     #region Public Properties
@@ -85,18 +86,13 @@ public partial class App : Application
     /// </summary>
     public override async void OnFrameworkInitializationCompleted()
     {
-        await ApplyUIConfigsAsync();
+        _ = ApplyUIConfigsAsync();
         PlatformSettings?.ColorValuesChanged += PlatformSettings_ColorValuesChanged;
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // set shutdown mode
             desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
-
-            // set main window
-            CreateMainWindowIfNotExist();
-            desktop.MainWindow = MainWindow;
-
 
             // get foreground shell
             if (Core.Config.ShouldUseExplorerSortOrder)
@@ -107,6 +103,14 @@ public partial class App : Application
             // set init image path
             Core.UpdateInitImagePath();
 
+            // set main window
+            CreateMainWindowIfNotExist();
+
+            // wait for UI settings ready
+            await _taskUi.Task;
+
+            // show main window
+            desktop.MainWindow = MainWindow;
             MainWindow.Show();
         }
 
@@ -281,17 +285,22 @@ public partial class App : Application
 
 
         // load theme for the first time
-        var info = PlatformSettings!.GetColorValues();
-        var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;
+        // NOTE: on Linux, we skip this because we need to wait for the first ColorValuesChanged event
+        // to get the system dark mode.
+        if (BHelper.OS != OSType.Linux)
+        {
+            var info = PlatformSettings!.GetColorValues();
+            var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;
 
-        try
-        {
-            await ApplyThemePackAsync(isSystemDarkMode, info.AccentColor1);
-        }
-        catch (Exception ex)
-        {
-            var isContinue = await ModalWindow.ShowUnhandledErrorAsync(ex);
-            if (!isContinue) return;
+            try
+            {
+                await ApplyThemePackAsync(isSystemDarkMode, info.AccentColor1);
+            }
+            catch (Exception ex)
+            {
+                var isContinue = await ModalWindow.ShowUnhandledErrorAsync(ex);
+                if (!isContinue) return;
+            }
         }
 
 
@@ -306,7 +315,7 @@ public partial class App : Application
     /// <summary>
     /// Applies the current theme pack and accent color to the app, updating UI resources as needed.
     /// </summary>
-    private static async Task ApplyThemePackAsync(bool isSystemDarkMode, Color systemAccentColor)
+    private async Task ApplyThemePackAsync(bool isSystemDarkMode, Color systemAccentColor)
     {
         // load theme pack
         var hasThemeChanged = await Core.Config.LoadCurrentThemeAsync(isSystemDarkMode,
@@ -335,6 +344,8 @@ public partial class App : Application
         {
             Core.OnThemeChanged();
         }
+
+        _ = _taskUi.TrySetResult();
     }
 
 
