@@ -2191,6 +2191,12 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_ToggleFrameless(bool? enabled = null)
     {
+        if (BHelper.OS == OSType.Linux)
+        {
+            throw new NotSupportedException($"IGE: This feature is not supported on {BHelper.OS}.");
+        }
+
+
         enabled ??= !Core.Config.EnableFrameless;
 
         // set frameless mode

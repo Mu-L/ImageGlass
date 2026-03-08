@@ -406,6 +406,9 @@
                             <ui:PhMenuItem
                                 Click="MainMenuItem_Click"
                                 IsChecked="{CompiledBinding Config.EnableFrameless}"
+                                IsVisible="{OnPlatform True,
+                                                       Linux=False,
+                                                       x:TypeArguments=x:Boolean}"
                                 LangKey="FrmMain_MnuFrameless"
                                 ToggleType="CheckBox" />
                             <ui:PhMenuItem
