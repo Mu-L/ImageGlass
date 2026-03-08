@@ -78,7 +78,7 @@ public partial class DialogWindow : PhWindow
     /// <summary>
     /// Gets the visibility of title bar.
     /// </summary>
-    public bool IsTitleVisible => !string.IsNullOrWhiteSpace(Title);
+    public bool IsTitleVisible => !string.IsNullOrWhiteSpace(Title) && BHelper.OS != OSType.Linux;
     public static readonly DirectProperty<DialogWindow, bool> IsTitleVisibleProperty =
         AvaloniaProperty.RegisterDirect<DialogWindow, bool>(nameof(IsTitleVisible), i => i.IsTitleVisible);
 
@@ -180,11 +180,15 @@ public partial class DialogWindow : PhWindow
     {
         CanResize = false;
         ShowInTaskbar = false;
-        ExtendClientAreaToDecorationsHint = true;
-        ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.NoChrome;
+
+        if (BHelper.OS != OSType.Linux)
+        {
+            ExtendClientAreaToDecorationsHint = true;
+            ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.NoChrome;
+        }
+
         SizeToContent = SizeToContent.WidthAndHeight;
         BackdropStyle = BackdropStyle.MicaAlt;
-
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         CloseWindowHotkeys = [new(Avalonia.Input.Key.Escape)];
 
