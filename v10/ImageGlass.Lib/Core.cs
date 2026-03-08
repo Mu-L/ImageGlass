@@ -443,7 +443,7 @@ public static class Core
     /// <summary>
     /// Sets dark mode.
     /// </summary>
-    public static void SetDarkMode(bool enable)
+    public static void SetAppDarkThemeVariant(bool enable)
     {
         if (enable)
         {

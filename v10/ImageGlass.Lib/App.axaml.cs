@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
@@ -29,6 +30,7 @@ using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Windows;
 using ImageGlass.UI.Windowing;
+using ImageGlass.ViewModels;
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -42,11 +44,24 @@ public partial class App : Application
     private MainWindow? _mainWindow = null;
 
 
+    #region Public Properties
+
     /// <summary>
     /// Gets the main window.
     /// </summary>
     public MainWindow MainWindow => _mainWindow!;
 
+
+    /// <summary>
+    /// Gets or sets the delegate used to create a new instance of the main application window.
+    /// </summary>
+    public Func<MainWindow>? CreateMainWindowFn = null;
+
+    #endregion // Public Properties
+
+
+
+    #region Instance Initialization
 
     /// <summary>
     /// <inheritdoc/>
@@ -70,13 +85,18 @@ public partial class App : Application
     /// </summary>
     public override async void OnFrameworkInitializationCompleted()
     {
-        ApplyUIConfigs();
-
+        await ApplyUIConfigsAsync();
         PlatformSettings?.ColorValuesChanged += PlatformSettings_ColorValuesChanged;
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            // set shutdown mode
+            desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
+
+            // set main window
+            CreateMainWindowIfNotExist();
             desktop.MainWindow = MainWindow;
+
 
             // get foreground shell
             if (Core.Config.ShouldUseExplorerSortOrder)
@@ -86,32 +106,116 @@ public partial class App : Application
 
             // set init image path
             Core.UpdateInitImagePath();
+
+            MainWindow.Show();
         }
 
         base.OnFrameworkInitializationCompleted();
     }
 
+    #endregion // Instance Initialization
 
-    /// <summary>
-    /// Create a new main window.
-    /// </summary>
-    public void CreateMainWindowIfNotExist(MainWindow window)
+
+
+    #region Instance Events
+
+    private static async void UIThread_UnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        if (_mainWindow is not null) return;
+        e.Handled = await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
 
-        _mainWindow = window;
-
-        // initialize service providers
-        Core.API = new AppAPIProvider(_mainWindow);
+#if DEBUG
+        throw e.Exception;
+#endif
     }
 
+
+    private static async void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
+
+#if DEBUG
+        throw e.Exception;
+#endif
+    }
+
+
+    private async void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        var ex = (Exception)e.ExceptionObject;
+        _ = await ModalWindow.ShowUnhandledErrorAsync(ex);
+
+#if DEBUG
+        throw ex;
+#endif
+    }
+
+
+    private void PlatformSettings_ColorValuesChanged(object? sender, PlatformColorValues e)
+    {
+        Core.IsSystemDarkMode = e.ThemeVariant == PlatformThemeVariant.Dark;
+
+        Dispatcher.UIThread.Post(async () =>
+        {
+            // update color mode for app level
+            await ApplyThemePackAsync(Core.IsSystemDarkMode, e.AccentColor1);
+        }, DispatcherPriority.Send);
+    }
+
+    #endregion // Instance Events
+
+
+
+    #region Instance Methods
+
+    /// <summary>
+    /// Initializes the application instance, loads configuration,
+    /// sets up service providers, and enforces single-instance behavior as configured.
+    /// </summary>
+    /// <returns><c>true</c> if the application should exit immediately.</returns>
+    public static bool InitializeAppInstance(string[] args, Action installServicesFn)
+    {
+        // 1. use independent culture for formatting or parsing a string
+        CultureInfo.DefaultThreadCurrentCulture =
+            CultureInfo.DefaultThreadCurrentUICulture =
+            Thread.CurrentThread.CurrentCulture =
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+
+        // 2. load app configs
+        Core.Args = Environment.GetCommandLineArgs();
+        Core.Config = Config.Load(Config.CONFIG_USER);
+
+
+        // 3. initialize service providers
+        installServicesFn();
+
+
+        // 4. handle app command lines
+        if (App.HandleCommandLineAsync(args).GetAwaiter().GetResult())
+        {
+            return true;
+        }
+
+
+        // 5. handle single instance
+        if (!Core.Config.EnableMultiInstances)
+        {
+            if (!Core.AppInstance.IsFirstInstance)
+            {
+                Core.AppInstance.SendArgsToExistingInstances(ExeParams.SINGLE_INSTANCE, args);
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 
     /// <summary>
     /// Handles app command-line arguments that should run without starting the UI.
     /// Returns <c>true</c> if the command was handled and the process should exit.
     /// </summary>
-    public static async Task<bool> HandleCommandLineAsync(string[] args)
+    private static async Task<bool> HandleCommandLineAsync(string[] args)
     {
         if (args.Length < 1) return false;
 
@@ -140,90 +244,37 @@ public partial class App : Application
 
 
     /// <summary>
-    /// Initializes the application instance, loads configuration,
-    /// sets up service providers, and enforces single-instance behavior as configured.
+    /// Set a new main window.
     /// </summary>
-    /// <returns><c>true</c> if the application should exit immediately.</returns>
-    public static bool InitializeAppInstance(string[] args, Action onInitServicesFn)
+    private void CreateMainWindowIfNotExist()
     {
-        // use independent culture for formatting or parsing a string
-        CultureInfo.DefaultThreadCurrentCulture =
-            CultureInfo.DefaultThreadCurrentUICulture =
-            Thread.CurrentThread.CurrentCulture =
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+        if (_mainWindow is not null) return;
 
 
-        // load app configs
-        Core.Args = Environment.GetCommandLineArgs();
-        Core.Config = Config.Load(Config.CONFIG_USER);
+        // create custom main window
+        if (CreateMainWindowFn is not null)
+        {
+            _mainWindow = CreateMainWindowFn();
+        }
+        // create default main window
+        else
+        {
+            var mainWin = new MainWindow();
+            mainWin.DataContext = new MainWindowModel(mainWin);
+
+            _mainWindow = mainWin;
+        }
 
 
         // initialize service providers
-        onInitServicesFn();
-
-
-        // handle app command lines
-        if (App.HandleCommandLineAsync(args).GetAwaiter().GetResult())
-        {
-            return true;
-        }
-
-
-        // handle single instance
-        if (!Core.Config.EnableMultiInstances)
-        {
-            if (!Core.AppInstance.IsFirstInstance)
-            {
-                Core.AppInstance.SendArgsToExistingInstances(ExeParams.SINGLE_INSTANCE, args);
-                return true;
-            }
-        }
-
-        return false;
+        Core.API = new AppAPIProvider(_mainWindow);
     }
 
 
-
-
-    private static async void UIThread_UnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-    {
-        e.Handled = await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
-
-#if DEBUG
-        throw e.Exception;
-#endif
-    }
-
-
-    private static async void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
-    {
-        await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
-
-#if DEBUG
-        throw e.Exception;
-#endif
-    }
-
-    private async void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-    {
-        var ex = (Exception)e.ExceptionObject;
-        _ = await ModalWindow.ShowUnhandledErrorAsync(ex);
-
-#if DEBUG
-        throw ex;
-#endif
-    }
-
-
-    private async void PlatformSettings_ColorValuesChanged(object? sender, PlatformColorValues e)
-    {
-        Core.IsSystemDarkMode = e.ThemeVariant == PlatformThemeVariant.Dark;
-
-        await ApplyThemePackAsync(Core.IsSystemDarkMode, e.AccentColor1);
-    }
-
-
-    private void ApplyUIConfigs()
+    /// <summary>
+    /// Applies user interface settings, including base styles, theme, and language preferences.
+    /// </summary>
+    private async Task ApplyUIConfigsAsync()
     {
         // update the base styles
         Core.UpdateBaseResources();
@@ -232,11 +283,7 @@ public partial class App : Application
         // load theme for the first time
         var info = PlatformSettings!.GetColorValues();
         var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;
-        _ = Task.Run(async () =>
-        {
-            await ApplyThemePackAsync(isSystemDarkMode, info.AccentColor1);
-        });
-
+        await ApplyThemePackAsync(isSystemDarkMode, info.AccentColor1);
 
 
         // initialize Magick decoder on background thread
@@ -247,6 +294,9 @@ public partial class App : Application
     }
 
 
+    /// <summary>
+    /// Applies the current theme pack and accent color to the app, updating UI resources as needed.
+    /// </summary>
     private static async Task ApplyThemePackAsync(bool isSystemDarkMode, Color systemAccentColor)
     {
         // load theme pack
@@ -262,24 +312,25 @@ public partial class App : Application
         var hasAccentChanged = Core.SetAccentColor(accent.WithBrightness(-0.125f));
 
 
-        Dispatcher.UIThread.Post(() =>
+        // set UI according to theme pack
+        Core.SetAppDarkThemeVariant(Core.Theme.Settings.IsDarkMode);
+
+        if (hasAccentChanged || hasThemeChanged)
         {
-            // update color mode for app level
-            Core.SetDarkMode(Core.Theme.Settings.IsDarkMode);
+            Core.UpdateAccentColorResources();
+            AppThemeColors.Load(Core.Theme.Colors, accent);
+            Core.UpdateAppThemedColorResources();
+        }
 
-            if (hasAccentChanged || hasThemeChanged)
-            {
-                Core.UpdateAccentColorResources();
-                AppThemeColors.Load(Core.Theme.Colors, accent);
-                Core.UpdateAppThemedColorResources();
-            }
-
-            if (hasThemeChanged)
-            {
-                Core.OnThemeChanged();
-            }
-        });
-
+        if (hasThemeChanged)
+        {
+            Core.OnThemeChanged();
+        }
     }
+
+
+    #endregion // Instance Methods
+
+
 
 }

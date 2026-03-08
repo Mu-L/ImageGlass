@@ -21,9 +21,7 @@ using Avalonia.Input;
 using ImageGlass.Common;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.ServiceProviders.FileSearchService;
-using ImageGlass.Common.Windows;
 using ImageGlass.Linux.Common.ServiceProviders;
-using ImageGlass.ViewModels;
 using System;
 
 namespace ImageGlass.Linux;
@@ -73,16 +71,6 @@ sealed class Program
         .With(new SkiaOptions
         {
             MaxGpuResourceSizeBytes = long.MaxValue,
-        })
-        .AfterSetup(builder =>
-        {
-            var app = (App?)builder.Instance;
-
-            // create main window
-            var mainWindow = new MainWindow();
-            mainWindow.DataContext = new MainWindowModel(mainWindow);
-
-            app?.CreateMainWindowIfNotExist(mainWindow);
         });
 }
 

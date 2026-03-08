@@ -73,11 +73,13 @@ sealed class Program
         .AfterSetup(builder =>
         {
             var app = (App?)builder.Instance;
+            app?.CreateMainWindowFn = () =>
+            {
+                // create main window
+                var mainWindow = new MainWindow32();
+                mainWindow.DataContext = new MainWindowModel(mainWindow);
 
-            // create main window
-            var mainWindow = new MainWindow32();
-            mainWindow.DataContext = new MainWindowModel(mainWindow);
-
-            app?.CreateMainWindowIfNotExist(mainWindow);
+                return mainWindow;
+            };
         });
 }
