@@ -40,15 +40,13 @@ public partial class PhWindow : Window
 {
     protected bool _canUseBackdrop = false;
 
-    protected static Color DefaultActivateBg => Application.Current
-        ?.ActualThemeVariant == ThemeVariant.Dark
-            ? AppThemeColors.BackgroundActivateDark
-            : AppThemeColors.BackgroundActivateLight;
+    protected static Color DefaultActivateBg => Core.Theme.Settings.IsDarkMode
+        ? AppThemeColors.BackgroundActivateDark
+        : AppThemeColors.BackgroundActivateLight;
 
-    protected static Color DefaultInactivateBg => Application.Current
-        ?.ActualThemeVariant == ThemeVariant.Dark
-            ? AppThemeColors.BackgroundInactivateDark
-            : AppThemeColors.BackgroundInactivateLight;
+    protected static Color DefaultInactivateBg => Core.Theme.Settings.IsDarkMode
+        ? AppThemeColors.BackgroundInactivateDark
+        : AppThemeColors.BackgroundInactivateLight;
 
 
 
@@ -122,8 +120,11 @@ public partial class PhWindow : Window
 
     public PhWindow()
     {
-        OnIgBackdropStyleChanged(BackdropStyle.None);
         OnIgFramelessModeChanged(IsFrameless);
+        if (BackdropStyle == BackdropStyle.None)
+        {
+            UpdateBackground(true);
+        }
 
         Core.ThemeChanged += Core_ThemeChanged;
         Core.LanguageChanged += Core_LanguageChanged;
@@ -181,7 +182,7 @@ public partial class PhWindow : Window
         if (UseCustomBackdrop) return;
         if (_canUseBackdrop)
         {
-            await AnimateBackgroundColorAsync(DefaultActivateBg.A(200));
+            await AnimateBackgroundColorAsync(DefaultActivateBg.A(0));
         }
     }
 
@@ -355,14 +356,31 @@ public partial class PhWindow : Window
             && !ActualTransparencyLevel.Equals(WindowTransparencyLevel.Transparent);
 
 
-        // update background color for transparency
-        if (_canUseBackdrop)
+        // update background according to the backdrop
+        UpdateBackground(true);
+    }
+
+
+    /// <summary>
+    /// Updates the background color to reflect the current transparency and activation state.
+    /// </summary>
+    protected virtual void UpdateBackground(bool isActive)
+    {
+        if (isActive)
         {
-            Background = DefaultActivateBg.A(200).ToBrush();
+            // update background color for transparency
+            if (_canUseBackdrop)
+            {
+                Background = DefaultActivateBg.A(0).ToBrush();
+            }
+            else
+            {
+                Background = DefaultActivateBg.ToBrush();
+            }
         }
         else
         {
-            Background = DefaultActivateBg.ToBrush();
+            Background = DefaultInactivateBg.ToBrush();
         }
     }
 
@@ -371,6 +389,7 @@ public partial class PhWindow : Window
 
 
     #region Internal Methods
+
 
     /// <summary>
     /// Updates icon for window and taskbar.

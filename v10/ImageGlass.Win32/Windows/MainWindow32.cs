@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ImageGlass.Common;
-using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
@@ -37,7 +36,7 @@ public partial class MainWindow32 : MainWindow
 
     public MainWindow32()
     {
-        OnIgBackdropStyleChanged(BackdropStyle.None);
+
     }
 
 
@@ -66,15 +65,7 @@ public partial class MainWindow32 : MainWindow
         // check if we can apply window backdrop
         _canUseBackdrop = !BHelper.IsWindows10 && style != BackdropStyle.None;
 
-        if (_canUseBackdrop)
-        {
-            Background = DefaultActivateBg.A(0).ToBrush();
-        }
-        else
-        {
-            Background = DefaultActivateBg.ToBrush();
-        }
-
+        UpdateBackground(true);
 
         var type = style switch
         {
@@ -87,6 +78,12 @@ public partial class MainWindow32 : MainWindow
 
         // use Win32 API for the backdrop
         Win32WindowApi.SetWindowBackdrop(Handle, type);
+    }
+
+
+    protected override void UpdateBackground(bool isActive)
+    {
+        if (isActive) base.UpdateBackground(isActive);
     }
 
 
