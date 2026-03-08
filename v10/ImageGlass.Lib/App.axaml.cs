@@ -283,7 +283,16 @@ public partial class App : Application
         // load theme for the first time
         var info = PlatformSettings!.GetColorValues();
         var isSystemDarkMode = info.ThemeVariant == PlatformThemeVariant.Dark;
-        await ApplyThemePackAsync(isSystemDarkMode, info.AccentColor1);
+
+        try
+        {
+            await ApplyThemePackAsync(isSystemDarkMode, info.AccentColor1);
+        }
+        catch (Exception ex)
+        {
+            var isContinue = await ModalWindow.ShowUnhandledErrorAsync(ex);
+            if (!isContinue) return;
+        }
 
 
         // initialize Magick decoder on background thread

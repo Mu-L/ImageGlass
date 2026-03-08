@@ -219,24 +219,20 @@ public partial class BHelper
     /// </summary>
     public static void ExitApp(bool forced, int exitCode = 0)
     {
+        // force exit
+        if (forced)
+        {
+            Environment.Exit(exitCode);
+            return;
+        }
+
         var appLf = Application.Current?.ApplicationLifetime;
-        var succeed = false;
 
         // try to exit the app
         if (appLf is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            succeed = desktop.TryShutdown(exitCode);
-
-            if (forced && !succeed)
-            {
-                desktop.Shutdown(exitCode);
-            }
-
-            return;
+            _ = desktop.TryShutdown(exitCode);
         }
-
-        // force exit
-        Environment.Exit(exitCode);
     }
 
 }

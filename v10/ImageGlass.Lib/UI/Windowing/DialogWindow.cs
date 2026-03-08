@@ -604,7 +604,7 @@ public partial class DialogWindow : PhWindow
     {
         if (DefaultFocus == DialogFocus.Button1)
         {
-            _btn1.Focus(Avalonia.Input.NavigationMethod.Directional);
+            _btn1.Focus(Avalonia.Input.NavigationMethod.Tab);
         }
         else if (DefaultFocus == DialogFocus.Button2)
         {

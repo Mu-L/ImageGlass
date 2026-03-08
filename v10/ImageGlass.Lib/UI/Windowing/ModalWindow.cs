@@ -647,6 +647,12 @@ public partial class ModalWindow : DialogWindow
         };
 
 
+        // set default focus button
+        if (!modal.IsInputVisible)
+        {
+            modal.DefaultFocus = DialogFocus.Button1;
+        }
+
         switch (buttons)
         {
             case ModalWindowButton.OK:
@@ -694,6 +700,9 @@ public partial class ModalWindow : DialogWindow
                 modal.Button2Text = Core.Lang[LangId._Quit];
                 modal.IsButton1Visible = modal.IsButton2Visible = true;
                 modal.IsButton3Visible = false;
+
+                modal.DefaultButton = DialogButton.Button2;
+                modal.DefaultFocus = DialogFocus.Button2;
                 break;
 
             default:
@@ -701,11 +710,7 @@ public partial class ModalWindow : DialogWindow
         }
 
 
-        // set default focus button
-        if (!modal.IsInputVisible)
-        {
-            modal.DefaultFocus = DialogFocus.Button1;
-        }
+
 
 
         // show modal window
