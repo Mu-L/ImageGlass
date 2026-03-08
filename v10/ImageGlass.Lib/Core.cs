@@ -435,6 +435,7 @@ public static class Core
         Resx.Set(ResxId.IG_ToolButtonBackgroundChecked, btnBgChecked);
 
         // menu item background
+        Resx.Set(ResxId.MenuFlyoutItemBackground, btnBg);
         Resx.Set(ResxId.MenuFlyoutItemBackgroundPointerOver, btnBgHover);
         Resx.Set(ResxId.MenuFlyoutItemBackgroundPressed, btnBgPressed);
     }

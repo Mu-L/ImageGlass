@@ -117,6 +117,7 @@ public enum ResxId
 
     MenuFlyoutSeparatorThemePadding,
     IG_MenuSeparatorBackground,
+    MenuFlyoutItemBackground,
     MenuFlyoutItemBackgroundPointerOver,
     MenuFlyoutItemBackgroundPressed,
 

@@ -77,16 +77,6 @@
             <Style Selector="^:selected /template/ Border#PART_LayoutRoot">
                 <Setter Property="BorderBrush" Value="{DynamicResource IG_ToolButtonBackgroundHover}" />
             </Style>
-
-            <Style Selector="^:pressed /template/ Border#PART_LayoutRoot:pointerover">
-                <Setter Property="BorderBrush" Value="{DynamicResource IG_ToolButtonBackgroundPressed}" />
-                <Setter Property="Transitions">
-                    <Transitions>
-                        <BrushTransition Property="Background" Duration="0:0:0.03" />
-                        <BrushTransition Property="BorderBrush" Duration="0:0:0.03" />
-                    </Transitions>
-                </Setter>
-            </Style>
         </Style>
 
 
