@@ -258,7 +258,7 @@ internal class MacShellProvider : PhDisposable, IShellProvider
     /// Uses <see cref="ProcessStartInfo.ArgumentList"/> to avoid
     /// shell-quoting issues with .NET on Unix.
     /// </summary>
-    private static void RunAppleScript(string script)
+    internal static void RunAppleScript(string script)
     {
         using var proc = new Process();
         proc.StartInfo.FileName = "osascript";
@@ -273,7 +273,7 @@ internal class MacShellProvider : PhDisposable, IShellProvider
     /// <summary>
     /// Executes an AppleScript expression and returns its output.
     /// </summary>
-    private static string RunAppleScriptAndReadOutput(string script)
+    internal static string RunAppleScriptAndReadOutput(string script)
     {
         try
         {

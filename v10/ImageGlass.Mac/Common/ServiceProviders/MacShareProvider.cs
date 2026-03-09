@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
 using ImageGlass.Common.ServiceProviders;
 using System;
 using System.Linq;
@@ -36,20 +35,19 @@ internal class MacShareProvider : IShareProvider
 
         // build a comma-separated list of POSIX file references for AppleScript
         var fileList = string.Join(", ",
-            filePaths.Select(f => $"POSIX file \"{f}\""));
+            filePaths.Select(f => $"(POSIX file \"{f}\" as alias)"));
 
-        // use NSSharingServicePicker via AppleScript to open the macOS Share sheet
-        var script =
-            "use framework \"AppKit\" " +
-            "use scripting additions " +
-            $"set shareItems to {{{fileList}}} " +
-            "set picker to current application's NSSharingServicePicker's alloc()'s initWithItems:shareItems " +
-            "tell application \"System Events\" " +
-            "set frontApp to first application process whose frontmost is true " +
-            "end tell " +
-            "picker's showRelativeToRect:(current application's NSZeroRect) ofView:(missing value) preferredEdge:0";
-
-        BHelper.RunProcess("osascript", $"-e '{script}'");
+        // reveal and select the files in Finder, then trigger the Share menu
+        MacShellProvider.RunAppleScript(
+            "tell application \"Finder\"\n" +
+            $"select {{{fileList}}}\n" +
+            "activate\n" +
+            "end tell\n" +
+            "tell application \"System Events\"\n" +
+            "tell process \"Finder\"\n" +
+            "click menu item \"Share…\" of menu \"File\" of menu bar 1\n" +
+            "end tell\n" +
+            "end tell");
     }
 
 }

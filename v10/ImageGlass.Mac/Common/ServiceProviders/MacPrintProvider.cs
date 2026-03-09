@@ -69,13 +69,13 @@ internal class MacPrintProvider : IPrintProvider
 
 
         // open the macOS system print dialog via Preview's print command
-        BHelper.RunProcess("osascript", "-e '" +
-            $"set theFile to POSIX file \"{fileToPrint}\"' " +
-            "-e 'tell application \"Preview\"' " +
-            "-e 'open theFile' " +
-            "-e 'activate' " +
-            "-e 'tell application \"System Events\" to keystroke \"p\" using command down' " +
-            "-e 'end tell'");
+        MacShellProvider.RunAppleScript(
+            $"set theFile to POSIX file \"{fileToPrint}\"\n" +
+            "tell application \"Preview\"\n" +
+            "open theFile\n" +
+            "activate\n" +
+            "tell application \"System Events\" to keystroke \"p\" using command down\n" +
+            "end tell");
 
     }
 }
