@@ -12,7 +12,6 @@
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
   </PropertyGroup>
   
 

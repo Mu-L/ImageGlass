@@ -13,7 +13,9 @@
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
+
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   

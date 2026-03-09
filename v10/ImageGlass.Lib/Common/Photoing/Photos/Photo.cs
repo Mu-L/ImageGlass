@@ -667,7 +667,7 @@ public partial class Photo : PhDisposable
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"❌❌❌ {nameof(LoadMetadataAsync)}: {ex.Message}");
+            Debug.WriteLine($"❌❌❌ {nameof(LoadMetadataAsync__)}: {ex.Message}");
         }
 
         return null;
