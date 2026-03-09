@@ -20,6 +20,7 @@ using ImageGlass.Common;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -172,29 +173,38 @@ internal class MacShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public Task SetDefaultPhotoViewerAsync(string[] extensions, bool enable)
     {
-        // 'duti' manages default application associations on macOS;
-        // it must be installed separately (e.g., via Homebrew).
+        var handlerBundleId = enable ? _bundleId : "com.apple.Preview";
+
         foreach (var ext in extensions)
         {
-            // map file extension to a macOS UTI
-            var uti = BHelper.RunProcessAndReadOutput("mdls",
-                $"-name kMDItemContentType -raw /dev/null{ext}").Trim();
+            var cleanExt = ext.TrimStart('.');
+            if (string.IsNullOrEmpty(cleanExt)) continue;
 
-            // fallback to a generic dynamic UTI
-            if (string.IsNullOrWhiteSpace(uti) || uti.Contains("(null)"))
-            {
-                uti = $"public.{ext.TrimStart('.')}";
-            }
+            // sanitize extension to prevent script injection
+            cleanExt = cleanExt.Replace("'", "").Replace("\"", "").Replace("\\", "");
 
-            if (enable)
-            {
-                BHelper.RunProcess("duti", $"-s {_bundleId} {uti} all");
-            }
-            else
-            {
-                // reset by removing the override; macOS will fall back to its default
-                BHelper.RunProcess("duti", $"-s com.apple.Preview {uti} all");
-            }
+            // Use JXA (JavaScript for Automation) with CoreServices to resolve
+            // the UTI from the file extension and set the default handler via
+            // Launch Services. No external tools (e.g. 'duti') required.
+            var jxa =
+                "ObjC.import(\"CoreServices\"); " +
+                "var uti = $.UTTypeCreatePreferredIdentifierForTag(" +
+                $"\"public.filename-extension\", \"{cleanExt}\", $()).js; " +
+                "$.LSSetDefaultRoleHandlerForContentType(" +
+                $"uti, 0xFFFFFFFF, \"{handlerBundleId}\");";
+
+            using var proc = new Process();
+            proc.StartInfo.FileName = "osascript";
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.CreateNoWindow = true;
+            proc.StartInfo.RedirectStandardOutput = true;
+            proc.StartInfo.ArgumentList.Add("-l");
+            proc.StartInfo.ArgumentList.Add("JavaScript");
+            proc.StartInfo.ArgumentList.Add("-e");
+            proc.StartInfo.ArgumentList.Add(jxa);
+            proc.Start();
+            proc.StandardOutput.ReadToEnd();
+            proc.WaitForExit();
         }
 
         return Task.CompletedTask;
@@ -206,15 +216,11 @@ internal class MacShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public Task SetLockScreenAsync(string filePath)
     {
-        // macOS lock screen image is stored at a fixed system path;
-        // writing requires elevated privileges on recent macOS versions.
-        var lockScreenPath = "/Library/Caches/Desktop Pictures/lockscreen.png";
-
-        try
-        {
-            File.Copy(filePath, lockScreenPath, overwrite: true);
-        }
-        catch { }
+        // On modern macOS (Ventura+), the lock screen uses the desktop wallpaper.
+        // Setting the desktop picture via System Events also updates the lock screen.
+        RunAppleScript(
+            "tell application \"System Events\" to tell every desktop " +
+            $"to set picture to \"{filePath}\"");
 
         return Task.CompletedTask;
     }
@@ -225,10 +231,10 @@ internal class MacShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public void SetWallpaper(string filePath)
     {
-        // use AppleScript to set the desktop wallpaper via Finder
+        // use AppleScript via System Events (works on macOS Ventura+)
         RunAppleScript(
-            "tell application \"Finder\" to set desktop picture to POSIX file " +
-            $"\"{filePath}\"");
+            "tell application \"System Events\" to tell every desktop " +
+            $"to set picture to \"{filePath}\"");
     }
 
 
@@ -249,10 +255,18 @@ internal class MacShellProvider : PhDisposable, IShellProvider
 
     /// <summary>
     /// Executes an AppleScript expression via <c>osascript</c>.
+    /// Uses <see cref="ProcessStartInfo.ArgumentList"/> to avoid
+    /// shell-quoting issues with .NET on Unix.
     /// </summary>
     private static void RunAppleScript(string script)
     {
-        BHelper.RunProcess("osascript", $"-e '{script}'");
+        using var proc = new Process();
+        proc.StartInfo.FileName = "osascript";
+        proc.StartInfo.UseShellExecute = false;
+        proc.StartInfo.CreateNoWindow = true;
+        proc.StartInfo.ArgumentList.Add("-e");
+        proc.StartInfo.ArgumentList.Add(script);
+        proc.Start();
     }
 
 
@@ -261,7 +275,26 @@ internal class MacShellProvider : PhDisposable, IShellProvider
     /// </summary>
     private static string RunAppleScriptAndReadOutput(string script)
     {
-        return BHelper.RunProcessAndReadOutput("osascript", $"-e '{script}'");
+        try
+        {
+            using var proc = new Process();
+            proc.StartInfo.FileName = "osascript";
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.CreateNoWindow = true;
+            proc.StartInfo.RedirectStandardOutput = true;
+            proc.StartInfo.ArgumentList.Add("-e");
+            proc.StartInfo.ArgumentList.Add(script);
+            proc.Start();
+
+            var output = proc.StandardOutput.ReadToEnd();
+            proc.WaitForExit();
+
+            return output;
+        }
+        catch
+        {
+            return string.Empty;
+        }
     }
 
     #endregion // Private helpers
