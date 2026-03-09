@@ -75,5 +75,19 @@
       "problemMatcher": "$msCompile",
       "group": "build"
     },
+    {
+      "label": "bundle-mac-arm64",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/.vscode/bundle-mac.sh"
+      ],
+      "problemMatcher": [],
+      "dependsOn": [
+        "publish-mac-arm64"
+      ],
+      "dependsOrder": "sequence",
+      "group": "build"
+    },
   ],
 }
