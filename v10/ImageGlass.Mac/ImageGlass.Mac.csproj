@@ -12,6 +12,9 @@
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
 

@@ -22,6 +22,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Platform;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
@@ -89,6 +90,10 @@ public partial class App : Application
         _ = ApplyUIConfigsAsync();
         PlatformSettings?.ColorValuesChanged += PlatformSettings_ColorValuesChanged;
 
+        // subscribe to activated event to handle app activation from file associations
+        var activable = this.TryGetFeature<IActivatableLifetime>();
+        activable?.Activated += App_Activated;
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // set shutdown mode
@@ -123,6 +128,49 @@ public partial class App : Application
 
     #region Instance Events
 
+    private void App_Activated(object? sender, ActivatedEventArgs e)
+    {
+        // When the user double-clicks a photo or uses "Open With" on macOS
+        if (e is FileActivatedEventArgs fileArgs && fileArgs.Files.Count > 0)
+        {
+            var filePath = fileArgs.Files[0].TryGetLocalPath();
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    Core.UpdateInitImagePath(filePath);
+                    Core.API?.IG_OpenPath(filePath);
+
+                    MainWindow?.Activate();
+                });
+            }
+        }
+
+        // When the user reopens the app from the dock on macOS
+        else if (e.Kind == ActivationKind.Reopen)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                MainWindow?.Activate();
+            });
+        }
+    }
+
+
+    private void PlatformSettings_ColorValuesChanged(object? sender, PlatformColorValues e)
+    {
+        Core.IsSystemDarkMode = e.ThemeVariant == PlatformThemeVariant.Dark;
+
+        Dispatcher.UIThread.Post(async () =>
+        {
+            // update color mode for app level
+            await ApplyThemePackAsync(Core.IsSystemDarkMode, e.AccentColor1);
+        }, DispatcherPriority.Send);
+    }
+
+
+    #region Unhandled Exception Handlers
+
     private static async void UIThread_UnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         e.Handled = await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
@@ -153,17 +201,7 @@ public partial class App : Application
 #endif
     }
 
-
-    private void PlatformSettings_ColorValuesChanged(object? sender, PlatformColorValues e)
-    {
-        Core.IsSystemDarkMode = e.ThemeVariant == PlatformThemeVariant.Dark;
-
-        Dispatcher.UIThread.Post(async () =>
-        {
-            // update color mode for app level
-            await ApplyThemePackAsync(Core.IsSystemDarkMode, e.AccentColor1);
-        }, DispatcherPriority.Send);
-    }
+    #endregion // Unhandled Exception Handlers
 
     #endregion // Instance Events
 
