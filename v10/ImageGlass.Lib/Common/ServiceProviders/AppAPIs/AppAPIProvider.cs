@@ -2460,6 +2460,7 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_ToggleSlideshowPlayback(bool? enabled = null)
     {
+        if (Core.Slideshow?.IsRunning != true) return;
         var isPaused = Core.Slideshow?.IsPaused ?? false;
 
         if (isPaused) Core.Slideshow?.Resume();
