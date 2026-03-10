@@ -49,18 +49,18 @@ public partial class AppAPIProvider
         new(LangId.FrmMain_MnuMain,                 API.IG_OpenMainMenu,        MKeys.Alt, Key.F),
 
         // File
-        new(LangId.FrmMain_MnuOpenFile,             API.IG_OpenFile,            MKeys.Control, Key.O),
-        new(LangId.FrmMain_MnuNewWindow,            API.IG_NewWindow,           MKeys.Control, Key.N),
-        new(LangId.FrmMain_MnuSave,                 API.IG_Save,                MKeys.Control, Key.S),
-        new(LangId.FrmMain_MnuSaveAs,               API.IG_SaveAs,              MKeys.Control | MKeys.Shift, Key.S),
-        new(LangId.FrmMain_MnuExportFrames,         API.IG_ExportImageFrames,   MKeys.Control, Key.J),
-        new(LangId.FrmMain_MnuPrint,                API.IG_Print,          MKeys.Control, Key.P),
+        new(LangId.FrmMain_MnuOpenFile,             API.IG_OpenFile,            Hotkey.Ctrl, Key.O),
+        new(LangId.FrmMain_MnuNewWindow,            API.IG_NewWindow,           Hotkey.Ctrl, Key.N),
+        new(LangId.FrmMain_MnuSave,                 API.IG_Save,                Hotkey.Ctrl, Key.S),
+        new(LangId.FrmMain_MnuSaveAs,               API.IG_SaveAs,              Hotkey.Ctrl | MKeys.Shift, Key.S),
+        new(LangId.FrmMain_MnuExportFrames,         API.IG_ExportImageFrames,   Hotkey.Ctrl, Key.J),
+        new(LangId.FrmMain_MnuPrint,                API.IG_Print,               Hotkey.Ctrl, Key.P),
         new(LangId.FrmMain_MnuOpenWith,             API.IG_OpenWith,            Key.D),
         new(LangId.FrmMain_MnuShare,                API.IG_Share,               Key.S),
         new(LangId.FrmMain_MnuOpenLocation,         API.IG_OpenLocation,        Key.L),
         new(LangId.FrmMain_MnuRename,               API.IG_Rename,              Key.F2),
-        new(LangId.FrmMain_MnuMoveToRecycleBin,     API.IG_Delete, "true",      [new(Key.Delete)]),
-        new(LangId.FrmMain_MnuDeleteFromHardDisk,   API.IG_Delete, "false",     [new(MKeys.Shift, Key.Delete)]),
+        new(LangId.FrmMain_MnuMoveToRecycleBin,     API.IG_Delete, "true",      [new(Hotkey.Delete)]),
+        new(LangId.FrmMain_MnuDeleteFromHardDisk,   API.IG_Delete, "false",     [new(MKeys.Shift, Hotkey.Delete)]),
         new(LangId.FrmMain_MnuImageProperties,      API.IG_OpenProperties,      MKeys.Alt, Key.Enter),
 
 
@@ -90,16 +90,16 @@ public partial class AppAPIProvider
         new(LangId.FrmMain_MnuPanRight,         API.IG_PanRight,            [new(MKeys.Alt, Key.Right)]),
         new(LangId.FrmMain_MnuPanUp,            API.IG_PanUp,               [new(MKeys.Alt, Key.Up)]),
         new(LangId.FrmMain_MnuPanDown,          API.IG_PanDown,             [new(MKeys.Alt, Key.Down)]),
-        new(LangId.FrmMain_MnuPanToLeftSide,    API.IG_PanToLeft,           [new(MKeys.Control | MKeys.Alt, Key.Left)]),
-        new(LangId.FrmMain_MnuPanToRightSide,   API.IG_PanToRight,          [new(MKeys.Control | MKeys.Alt, Key.Right)]),
-        new(LangId.FrmMain_MnuPanToTop,         API.IG_PanToTop,            [new(MKeys.Control | MKeys.Alt, Key.Up)]),
-        new(LangId.FrmMain_MnuPanToBottom,      API.IG_PanToBottom,         [new(MKeys.Control | MKeys.Alt, Key.Down)]),
+        new(LangId.FrmMain_MnuPanToLeftSide,    API.IG_PanToLeft,           [new(Hotkey.Ctrl | MKeys.Alt, Key.Left)]),
+        new(LangId.FrmMain_MnuPanToRightSide,   API.IG_PanToRight,          [new(Hotkey.Ctrl | MKeys.Alt, Key.Right)]),
+        new(LangId.FrmMain_MnuPanToTop,         API.IG_PanToTop,            [new(Hotkey.Ctrl | MKeys.Alt, Key.Up)]),
+        new(LangId.FrmMain_MnuPanToBottom,      API.IG_PanToBottom,         [new(Hotkey.Ctrl | MKeys.Alt, Key.Down)]),
 
 
         // Image
         new(LangId.FrmMain_MnuRefresh,              API.IG_Refresh,             Key.R),
-        new(LangId.FrmMain_MnuReload,               API.IG_Reload,              MKeys.Control, Key.R),
-        new(LangId.FrmMain_MnuReloadImageList,      API.IG_ReloadList,          MKeys.Control | MKeys.Shift, Key.R),
+        new(LangId.FrmMain_MnuReload,               API.IG_Reload,              Hotkey.Ctrl, Key.R),
+        new(LangId.FrmMain_MnuReloadImageList,      API.IG_ReloadList,          Hotkey.Ctrl | MKeys.Shift, Key.R),
         new(LangId.FrmMain_MnuUnload,               API.IG_Unload,              Key.U),
         new(LangId.FrmSettings_ShouldUseExplorerSortOrder,  API.IG_ToggleUseExplorerSortOrder),
         new(LangId.ImageOrderBy_Name,               API.IG_SetLoadingOrderBy,   nameof(ImageOrderBy.Name)),
@@ -113,24 +113,24 @@ public partial class AppAPIProvider
         new(LangId.ImageOrderBy_ExifRating,         API.IG_SetLoadingOrderBy,   nameof(ImageOrderBy.ExifRating)),
         new(LangId.ImageOrderType_Asc,              API.IG_SetLoadingOrderType, nameof(ImageOrderType.Asc)),
         new(LangId.ImageOrderType_Desc,             API.IG_SetLoadingOrderType, nameof(ImageOrderType.Desc)),
-        new(LangId.FrmMain_MnuEdit,                 API.IG_OpenEditingApp,     Key.E),
-        new(LangId.FrmMain_MnuInvertColors,         API.IG_InvertColors,            MKeys.Control, Key.I),
-        new(LangId.FrmMain_MnuToggleImageAnimation, API.IG_ToggleImageAnimation,    MKeys.Control, Key.Space),
-        new(LangId.FrmMain_MnuRotateLeft,           API.IG_Rotate,              nameof(RotateOption.Left),          [new(MKeys.Control, Key.OemPeriod)]),
-        new(LangId.FrmMain_MnuRotateRight,          API.IG_Rotate,              nameof(RotateOption.Right),         [new(MKeys.Control, Key.OemQuestion)]),
-        new(LangId.FrmMain_MnuFlipHorizontal,       API.IG_FlipImage,           nameof(FlipOptions.Horizontal),     [new(MKeys.Control, Key.OemSemicolon)]),
-        new(LangId.FrmMain_MnuFlipVertical,         API.IG_FlipImage,           nameof(FlipOptions.Vertical),       [new(MKeys.Control, Key.OemQuotes)]),
+        new(LangId.FrmMain_MnuEdit,                 API.IG_OpenEditingApp,          Key.E),
+        new(LangId.FrmMain_MnuInvertColors,         API.IG_InvertColors,            Hotkey.Ctrl, Key.I),
+        new(LangId.FrmMain_MnuToggleImageAnimation, API.IG_ToggleImageAnimation,    Hotkey.Ctrl, Key.Space),
+        new(LangId.FrmMain_MnuRotateLeft,           API.IG_Rotate,              nameof(RotateOption.Left),          [new(Hotkey.Ctrl, Key.OemPeriod)]),
+        new(LangId.FrmMain_MnuRotateRight,          API.IG_Rotate,              nameof(RotateOption.Right),         [new(Hotkey.Ctrl, Key.OemQuestion)]),
+        new(LangId.FrmMain_MnuFlipHorizontal,       API.IG_FlipImage,           nameof(FlipOptions.Horizontal),     [new(Hotkey.Ctrl, Key.OemSemicolon)]),
+        new(LangId.FrmMain_MnuFlipVertical,         API.IG_FlipImage,           nameof(FlipOptions.Vertical),       [new(Hotkey.Ctrl, Key.OemQuotes)]),
         new(LangId.FrmMain_MnuSetDesktopBackground, API.IG_SetDesktopBackground),
         new(LangId.FrmMain_MnuSetLockScreen,        API.IG_SetLockScreenImage),
 
 
         // Clipboard
-        new(LangId.FrmMain_MnuPasteImage,       API.IG_PasteImage,          MKeys.Control, Key.V),
-        new(LangId.FrmMain_MnuCopyImagePixels,  API.IG_CopyImagePixels,     MKeys.Control | MKeys.Shift, Key.C),
-        new(LangId.FrmMain_MnuCopyFile,         API.IG_CopyFiles,           MKeys.Control, Key.C),
-        new(LangId.FrmMain_MnuCutFile,          API.IG_CutFiles,            MKeys.Control, Key.X),
-        new(LangId.FrmMain_MnuCopyPath,         API.IG_CopyImagePath,       MKeys.Control, Key.L),
-        new(LangId.FrmMain_MnuClearClipboard,   API.IG_ClearClipboard,      MKeys.Control, Key.OemTilde),
+        new(LangId.FrmMain_MnuPasteImage,       API.IG_PasteImage,          Hotkey.Ctrl, Key.V),
+        new(LangId.FrmMain_MnuCopyImagePixels,  API.IG_CopyImagePixels,     Hotkey.Ctrl | MKeys.Shift, Key.C),
+        new(LangId.FrmMain_MnuCopyFile,         API.IG_CopyFiles,           Hotkey.Ctrl, Key.C),
+        new(LangId.FrmMain_MnuCutFile,          API.IG_CutFiles,            Hotkey.Ctrl, Key.X),
+        new(LangId.FrmMain_MnuCopyPath,         API.IG_CopyImagePath,       Hotkey.Ctrl, Key.L),
+        new(LangId.FrmMain_MnuClearClipboard,   API.IG_ClearClipboard,      Hotkey.Ctrl, Key.OemTilde),
 
 
         // Window modes
@@ -155,11 +155,11 @@ public partial class AppAPIProvider
 
 
         // Settings
-        new(LangId.FrmMain_MnuSettings,             API.IG_OpenSettings,            MKeys.Control, Key.OemComma),
+        new(LangId.FrmMain_MnuSettings,             API.IG_OpenSettings,            Hotkey.Ctrl, Key.OemComma),
 
 
         // Help
-        new(LangId.FrmMain_MnuAbout,                        API.IG_OpenAboutWindow,             Key.F1),
+        new(LangId.FrmMain_MnuAbout,                        API.IG_OpenAboutWindow, Key.F1),
         new(LangId._CheckForUpdate,                         API.IG_CheckForUpdate),
         new(LangId.FrmMain_MnuReportIssue,                  API.IG_ReportIssue),
         new(LangId.FrmMain_MnuSetDefaultPhotoViewer,        API.IG_SetDefaultPhotoViewer),
@@ -167,7 +167,7 @@ public partial class AppAPIProvider
 
 
         // Exit
-        new(LangId.FrmMain_MnuExit,             API.IG_Exit,                [new(Key.Escape), new(MKeys.Control, Key.W)]),
+        new(LangId.FrmMain_MnuExit,                         API.IG_Exit,            [new(Key.Escape), new(Hotkey.Ctrl, Key.W)]),
     ];
 
 

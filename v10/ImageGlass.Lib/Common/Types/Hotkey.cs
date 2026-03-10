@@ -27,6 +27,17 @@ namespace ImageGlass.Common.Types;
 public class Hotkey
 {
     /// <summary>
+    /// The default modifier key for "Control" action, which is "Control" key on Windows and "Command (Meta)" key on macOS.
+    /// </summary>
+    public static readonly KeyModifiers Ctrl = BHelper.OS == OSType.Mac ? KeyModifiers.Meta : KeyModifiers.Control;
+
+    /// <summary>
+    /// The default hotkey for "Delete" action, which is "Delete" key on Windows and "Backspace" key on macOS.
+    /// </summary>
+    public static readonly Key Delete = BHelper.OS == OSType.Mac ? Key.Back : Key.Delete;
+
+
+    /// <summary>
     /// Gets, sets the virtual key.
     /// </summary>
     public Key Key { get; set; } = Key.None;
