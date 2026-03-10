@@ -555,12 +555,15 @@ public partial class MainWindowView : PhControl
                 Command = Core.API?.GetApiCommand(API.IG_SetDesktopBackground),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuSetDesktopBackground),
             });
-            mnuContext.Items.Add(new PhMenuItem
-            {
-                LangKey = LangId.FrmMain_MnuSetLockScreen,
-                Command = Core.API?.GetApiCommand(API.IG_SetLockScreenImage),
-                HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuSetLockScreen),
-            });
+            
+            if (BHelper.OS == OSType.Windows) {
+                mnuContext.Items.Add(new PhMenuItem
+                {
+                    LangKey = LangId.FrmMain_MnuSetLockScreen,
+                    Command = Core.API?.GetApiCommand(API.IG_SetLockScreenImage),
+                    HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuSetLockScreen),
+                });
+            }
         }
         #endregion // Menu group: Desktop wallpaper, lock screen
 
