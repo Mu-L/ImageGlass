@@ -49,7 +49,7 @@ public partial class BHelper
     private static OSType GetOS()
     {
         if (OperatingSystem.IsLinux()) return OSType.Linux;
-        if (OperatingSystem.IsMacCatalyst()) return OSType.Mac;
+        if (OperatingSystem.IsMacOS()) return OSType.Mac;
         if (OperatingSystem.IsWindows()) return OSType.Windows;
         return OSType.Unknown;
     }

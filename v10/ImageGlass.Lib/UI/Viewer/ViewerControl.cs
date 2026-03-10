@@ -298,15 +298,18 @@ public partial class ViewerControl : PhControl
         base.OnPointerWheelChanged(e);
 
         var delta = e.Delta.Y;
+        var deltaAbs = Math.Abs(delta);
         var position = e.GetPosition(this);
-        var isUsingTouchpad = Math.Abs(e.Delta.Y) != 1;
-
+        var isUsingTouchpad = deltaAbs != 1;
 
         // Touchpad scrolling
         if (isUsingTouchpad)
         {
+            var isScrollingHorz = Math.Abs(e.Delta.X) > 0
+                && (BHelper.OS == OSType.Mac ? deltaAbs <= 0.02 : deltaAbs < 0.5);
+
             // Scroll Left/Right: Pan horizontally
-            if (Math.Abs(e.Delta.X) > 0 && Math.Abs(e.Delta.Y) < 0.5)
+            if (isScrollingHorz)
             {
                 PanTo(e.Delta.X * -50, e.Delta.Y * -50, position);
                 return;

@@ -20,6 +20,8 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
+using ImageGlass.Common;
+using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer.ZoomAndPan;
 
 namespace ImageGlass.UI.Viewer;
@@ -149,8 +151,16 @@ public partial class ViewerControl
     private void OnTouchPadPinched(object? sender, PointerDeltaEventArgs e)
     {
         var position = e.GetPosition(this);
+        var delta = e.Delta.X;
 
-        ZoomByDeltaToPoint(e.Delta.X, position);
+        // macOS touchpad pinch gestures report a much smaller delta compared to Windows/Linux,
+        // so we need to scale it up for better responsiveness
+        if (BHelper.OS == OSType.Mac)
+        {
+            delta *= 1000;
+        }
+
+        ZoomByDeltaToPoint(delta, position);
         e.Handled = true;
     }
 
