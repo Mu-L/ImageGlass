@@ -556,7 +556,8 @@ public partial class MainWindowView : PhControl
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuSetDesktopBackground),
             });
             
-            if (BHelper.OS == OSType.Windows) {
+            if (BHelper.OS == OSType.Windows)
+            {
                 mnuContext.Items.Add(new PhMenuItem
                 {
                     LangKey = LangId.FrmMain_MnuSetLockScreen,

@@ -103,9 +103,7 @@
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuPrint" />
                                 <ui:PhMenuItem
                                     Click="MainMenuItem_Click"
-                                    IsVisible="{OnPlatform True,
-                                                           Windows=False,
-                                                           x:TypeArguments=x:Boolean}"
+                                    IsVisible="False"
                                     LangKey="FrmMain_MnuShare" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuOpenLocation" />
                                 <ui:PhMenuItem Header="-" />
@@ -493,10 +491,14 @@
                                     Click="MainMenuItem_Click"
                                     IsVisible="False"
                                     LangKey="FrmMain_MnuQuickSetup" />
-                                <ui:PhMenuItem Header="-" />
+                                <ui:PhMenuItem Header="-" IsVisible="{OnPlatform True, macOS=False, x:TypeArguments=x:Boolean}" />
 
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuSetDefaultPhotoViewer" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuRemoveDefaultPhotoViewer" />
+                                <ui:PhMenuItem Click="MainMenuItem_Click"
+                                    LangKey="FrmMain_MnuSetDefaultPhotoViewer"
+                                    IsVisible="{OnPlatform True, macOS=False, x:TypeArguments=x:Boolean}" />
+                                <ui:PhMenuItem Click="MainMenuItem_Click"
+                                    LangKey="FrmMain_MnuRemoveDefaultPhotoViewer"
+                                    IsVisible="{OnPlatform True, macOS=False, x:TypeArguments=x:Boolean}" />
                             </ui:PhMenuItem>
 
 

@@ -171,43 +171,10 @@ internal class MacShellProvider : PhDisposable, IShellProvider
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    /// <exception cref="NotSupportedException"></exception>
     public Task SetDefaultPhotoViewerAsync(string[] extensions, bool enable)
     {
-        var handlerBundleId = enable ? _bundleId : "com.apple.Preview";
-
-        foreach (var ext in extensions)
-        {
-            var cleanExt = ext.TrimStart('.');
-            if (string.IsNullOrEmpty(cleanExt)) continue;
-
-            // sanitize extension to prevent script injection
-            cleanExt = cleanExt.Replace("'", "").Replace("\"", "").Replace("\\", "");
-
-            // Use JXA (JavaScript for Automation) with CoreServices to resolve
-            // the UTI from the file extension and set the default handler via
-            // Launch Services. No external tools (e.g. 'duti') required.
-            var jxa =
-                "ObjC.import(\"CoreServices\"); " +
-                "var uti = $.UTTypeCreatePreferredIdentifierForTag(" +
-                $"\"public.filename-extension\", \"{cleanExt}\", $()).js; " +
-                "$.LSSetDefaultRoleHandlerForContentType(" +
-                $"uti, 0xFFFFFFFF, \"{handlerBundleId}\");";
-
-            using var proc = new Process();
-            proc.StartInfo.FileName = "osascript";
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.CreateNoWindow = true;
-            proc.StartInfo.RedirectStandardOutput = true;
-            proc.StartInfo.ArgumentList.Add("-l");
-            proc.StartInfo.ArgumentList.Add("JavaScript");
-            proc.StartInfo.ArgumentList.Add("-e");
-            proc.StartInfo.ArgumentList.Add(jxa);
-            proc.Start();
-            proc.StandardOutput.ReadToEnd();
-            proc.WaitForExit();
-        }
-
-        return Task.CompletedTask;
+        throw new NotSupportedException("IGE: Setting the default photo viewer is not supported on macOS.");
     }
 
 
@@ -216,13 +183,7 @@ internal class MacShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public Task SetLockScreenAsync(string filePath)
     {
-        // On modern macOS (Ventura+), the lock screen uses the desktop wallpaper.
-        // Setting the desktop picture via System Events also updates the lock screen.
-        RunAppleScript(
-            "tell application \"System Events\" to tell every desktop " +
-            $"to set picture to \"{filePath}\"");
-
-        return Task.CompletedTask;
+        throw new NotSupportedException("IGE: Setting the lock screen wallpaper is not supported on macOS.");
     }
 
 

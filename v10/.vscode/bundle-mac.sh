@@ -69,6 +69,64 @@ cat > "$INFO_PLIST" <<PLIST
 	<string>Logo.icns</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright (C) 2010-2026 Dương Diệu Pháp</string>
+
+	<key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key>
+      <string>Image</string>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>public.image</string>
+        <string>public.camera-raw-image</string>
+        
+        <string>public.jpeg</string>
+        <string>public.png</string>
+        <string>public.tiff</string>
+        <string>com.compuserve.gif</string>
+        <string>com.microsoft.bmp</string>
+        <string>com.microsoft.ico</string>
+        <string>public.svg-image</string>
+        <string>public.webp</string>
+        <string>public.avif</string>
+        <string>public.heic</string>
+        <string>public.heif</string>
+        
+        <string>com.adobe.photoshop-image</string>
+        <string>com.ilm.openexr-image</string>
+        <string>public.radiance</string>
+        <string>com.truevision.tga-image</string>
+        <string>public.xbitmap-image</string>
+        <string>com.microsoft.dds</string>
+        <string>com.microsoft.cur</string>
+        
+        <string>com.adobe.raw-image</string>
+        <string>com.canon.cr2-raw-image</string>
+        <string>com.canon.cr3-raw-image</string>
+        <string>com.canon.crw-raw-image</string>
+        <string>com.nikon.raw-image</string>
+        <string>com.nikon.nrw-raw-image</string>
+        <string>com.sony.arw-raw-image</string>
+        <string>com.sony.sr2-raw-image</string>
+        <string>com.sony.srf-raw-image</string>
+        <string>com.panasonic.raw-image</string>
+        <string>com.panasonic.rw2-raw-image</string>
+        <string>com.olympus.raw-image</string>
+        <string>com.fuji.raw-image</string>
+        <string>com.hasselblad.3fr-raw-image</string>
+        <string>com.hasselblad.fff-raw-image</string>
+        <string>com.kodak.raw-image</string>
+        <string>com.leica.raw-image</string>
+        <string>com.leica.rwl-raw-image</string>
+        <string>com.pentax.raw-image</string>
+        <string>com.phaseone.raw-image</string>
+        <string>com.samsung.raw-image</string>
+      </array>
+    </dict>
+  </array>
+
 </dict>
 </plist>
 PLIST
