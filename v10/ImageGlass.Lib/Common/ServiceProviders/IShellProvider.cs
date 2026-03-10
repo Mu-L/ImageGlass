@@ -66,6 +66,12 @@ public interface IShellProvider : IDisposable
 
 
     /// <summary>
+    /// Shows the "Open with" dialog for the specified file.
+    /// </summary>
+    void ShowOpenWith(string filePath);
+
+
+    /// <summary>
     /// Shows the file's Properties dialog.
     /// </summary>
     void ShowFileProperties(string filePath, nint windowHandle);

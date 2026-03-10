@@ -179,6 +179,23 @@ public class Win32ShellProvider : PhDisposable, IShellProvider
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    public void ShowOpenWith(string filePath)
+    {
+        // Uses the system shell32.dll 'OpenAs_RunDLL' entry point
+        var args = $"shell32.dll,OpenAs_RunDLL {filePath}";
+        
+        _ = Process.Start(new ProcessStartInfo
+        {
+            FileName = "rundll32.exe",
+            Arguments = args,
+            UseShellExecute = true,
+        });
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void ShowFileProperties(string filePath, nint windowHandle)
     {
         EggShell.DisplayFileProperties(filePath, windowHandle);

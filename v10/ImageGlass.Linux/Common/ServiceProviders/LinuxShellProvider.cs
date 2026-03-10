@@ -20,6 +20,7 @@ using ImageGlass.Common;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -242,6 +243,22 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
             $"set org.gnome.desktop.background picture-uri \"file://{filePath}\"");
         BHelper.RunProcess("gsettings",
             $"set org.gnome.desktop.background picture-uri-dark \"file://{filePath}\"");
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void ShowOpenWith(string filePath)
+    {
+        // -n forces a menu choice if multiple apps exist
+        _ = Process.Start(new ProcessStartInfo
+        {
+            FileName = "mimeopen",
+            Arguments = $"-n \"{filePath}\"",
+            UseShellExecute = false,
+            CreateNoWindow = false, // Often needs a terminal context for choice
+        });
     }
 
 

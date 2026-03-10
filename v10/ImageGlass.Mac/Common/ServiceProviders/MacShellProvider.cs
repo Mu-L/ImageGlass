@@ -241,6 +241,16 @@ internal class MacShellProvider : PhDisposable, IShellProvider
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    public void ShowOpenWith(string filePath)
+    {
+        RunAppleScript(
+            $"tell application \"Finder\" to open POSIX file \"{filePath}\" using (choose application)");
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void ShowFileProperties(string filePath, nint windowHandle)
     {
         // use AppleScript to open the Finder "Get Info" window for the file

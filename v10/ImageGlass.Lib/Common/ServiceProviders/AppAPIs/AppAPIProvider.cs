@@ -568,45 +568,7 @@ public partial class AppAPIProvider
         }
         else
         {
-            try
-            {
-                if (BHelper.OS == OSType.Windows)
-                {
-                    // Uses the system shell32.dll 'OpenAs_RunDLL' entry point
-                    var args = $"shell32.dll,OpenAs_RunDLL {filePath}";
-                    _ = Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "rundll32.exe",
-                        Arguments = args,
-                        UseShellExecute = true,
-                    });
-                }
-                else if (BHelper.OS == OSType.Mac)
-                {
-                    var script = $"tell application \"Finder\" to open POSIX file \"{filePath}\" using (choose application)";
-                    var escapedScript = script.Replace("\"", "\\\"");
-
-                    _ = Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "osascript",
-                        Arguments = $"-e \"{escapedScript}\"",
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                    });
-                }
-                else if (BHelper.OS == OSType.Linux)
-                {
-                    // -n forces a menu choice if multiple apps exist
-                    _ = Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "mimeopen",
-                        Arguments = $"-n \"{filePath}\"",
-                        UseShellExecute = false,
-                        CreateNoWindow = false, // Often needs a terminal context for choice
-                    });
-                }
-            }
-            catch { }
+            Core.ShellProvider?.ShowOpenWith(filePath);
         }
     }
 
