@@ -773,34 +773,97 @@ public static partial class SkiaCodec
     {
         if (abmp is null) return null;
 
-        // 1. Prepare Skia Info matching Avalonia's default layout (Bgra8888)
-        var info = new SKImageInfo(
-            abmp.PixelSize.Width,
-            abmp.PixelSize.Height,
-            SKColorType.Bgra8888,
-            SKAlphaType.Premul);
+        var width = abmp.PixelSize.Width;
+        var height = abmp.PixelSize.Height;
 
-        // 2. Allocate Skia Pixel Buffer
-        var skBmp = new SKBitmap(info);
+        // 1. Detect pixel format and alpha from the Avalonia bitmap
+        var srcFormat = abmp.Format;
+        var srcAlpha = abmp.AlphaFormat;
+        var (colorType, alphaType) = MapAvaloniaFormat(srcFormat, srcAlpha);
 
-        // 3. Direct Memory Copy
-        // CopyPixels transfers data from Avalonia's internal buffer 
-        // directly to the address of the Skia bitmap.
+        // 2. If the format maps directly to a Skia color type, do a fast direct copy
+        if (colorType != SKColorType.Unknown)
+        {
+            var info = new SKImageInfo(width, height, colorType, alphaType);
+            var skBmp = new SKBitmap(info);
+
+            try
+            {
+                abmp.CopyPixels(
+                    new PixelRect(0, 0, width, height),
+                    skBmp.GetPixels(),
+                    info.RowBytes * height,
+                    info.RowBytes);
+            }
+            catch
+            {
+                skBmp.Dispose();
+                return null;
+            }
+
+            return skBmp;
+        }
+
+        // 3. Fallback: use a WriteableBitmap in Bgra8888 as an intermediate
+        //    to let Avalonia transcode unsupported formats (Rgb24, Bgr24, BlackWhite, etc.)
+        var dstInfo = new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
+        var dstBmp = new SKBitmap(dstInfo);
+
         try
         {
-            abmp.CopyPixels(
-                new PixelRect(0, 0, info.Width, info.Height),
-                skBmp.GetPixels(),
-                info.RowBytes * info.Height, // Buffer size
-                info.RowBytes);              // Stride
+            using var wbmp = new WriteableBitmap(
+                new PixelSize(width, height),
+                abmp.Dpi,
+                PixelFormat.Bgra8888,
+                AlphaFormat.Premul);
+
+            using (var fb = wbmp.Lock())
+            {
+                abmp.CopyPixels(fb, AlphaFormat.Premul);
+            }
+
+            wbmp.CopyPixels(
+                new PixelRect(0, 0, width, height),
+                dstBmp.GetPixels(),
+                dstInfo.RowBytes * height,
+                dstInfo.RowBytes);
         }
         catch
         {
-            skBmp.Dispose();
+            dstBmp.Dispose();
             return null;
         }
 
-        return skBmp;
+        return dstBmp;
+    }
+
+
+    /// <summary>
+    /// Maps Avalonia pixel format and alpha to the corresponding SkiaSharp types.
+    /// Returns <see cref="SKColorType.Unknown"/> if no direct mapping exists.
+    /// </summary>
+    private static (SKColorType ColorType, SKAlphaType AlphaType) MapAvaloniaFormat(
+        PixelFormat? format, AlphaFormat? alpha)
+    {
+        var alphaType = alpha switch
+        {
+            AlphaFormat.Premul => SKAlphaType.Premul,
+            AlphaFormat.Unpremul => SKAlphaType.Unpremul,
+            AlphaFormat.Opaque => SKAlphaType.Opaque,
+            _ => SKAlphaType.Premul,
+        };
+
+        if (format is null) return (SKColorType.Unknown, alphaType);
+
+        var colorType = format.Value switch
+        {
+            var f when f == PixelFormat.Bgra8888 => SKColorType.Bgra8888,
+            var f when f == PixelFormat.Rgba8888 => SKColorType.Rgba8888,
+            var f when f == PixelFormat.Rgb565 => SKColorType.Rgb565,
+            _ => SKColorType.Unknown,
+        };
+
+        return (colorType, alphaType);
     }
 
 
