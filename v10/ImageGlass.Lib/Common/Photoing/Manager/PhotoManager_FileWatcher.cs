@@ -120,7 +120,30 @@ public partial class PhotoManager
         };
         _deleteWorkerThread.Start();
 
-        _fileWatcher.Start();
+        try
+        {
+            _fileWatcher.Start();
+        }
+        catch (ArgumentException)
+        {
+            // SymlinkAwareFileWatcher.Init() may throw when the watched
+            // directory tree contains symlinks that resolve to paths already
+            // registered (duplicate key). Fall back to a non-recursive watcher
+            // so the app can still start.
+            _fileWatcher.Stop();
+            _fileWatcher = new FileSystemWatcherEx
+            {
+                FolderPath = dirPath,
+                IncludeSubdirectories = false,
+            };
+
+            _fileWatcher.OnCreated += FileWatcher_OnCreated;
+            _fileWatcher.OnDeleted += FileWatcher_OnDeleted;
+            _fileWatcher.OnChanged += FileWatcher_OnChanged;
+            _fileWatcher.OnRenamed += FileWatcher_OnRenamed;
+
+            _fileWatcher.Start();
+        }
     }
 
 

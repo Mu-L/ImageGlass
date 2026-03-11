@@ -72,7 +72,7 @@ public partial class AboutWindow : DialogWindow
         ◍ D2Phap.EggShell                        Apache-2.0 license
           Copyright (c) 2024-2026 Dương Diệu Pháp
 
-        ◍ D2Phap.FileWatcher                            MIT licence
+        ◍ D2Phap.FileWatcherEx                          MIT licence
           https://github.com/d2phap/FileWatcherEx
           Copyright (c) 2018-2026 Dương Diệu Pháp
         """;

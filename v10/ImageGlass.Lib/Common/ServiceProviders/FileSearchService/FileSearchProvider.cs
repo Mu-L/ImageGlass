@@ -71,13 +71,15 @@ public partial class FileSearchProvider() : PhDisposable, IFileSearchProvider
         CancelSearching();
         IsSearchEnded = false;
 
+        // snapshot the collection to avoid modification during enumeration
+        var dirList = dirs.ToList();
 
         // get files from the given directories
         try
         {
             await Task.Run(() =>
             {
-                foreach (var dirPath in dirs)
+                foreach (var dirPath in dirList)
                 {
                     if (_cancelSearching.Token.IsCancellationRequested) break;
                     FindFiles(dirPath, _cancelSearching.Token);

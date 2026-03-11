@@ -35,6 +35,7 @@ using ImageGlass.ViewModels;
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -134,7 +135,10 @@ public partial class App : Application
         if (e is FileActivatedEventArgs fileArgs && fileArgs.Files.Count > 0)
         {
             var filePath = fileArgs.Files[0].TryGetLocalPath();
-            if (!string.IsNullOrEmpty(filePath))
+            var modulePath = Core.Args.FirstOrDefault();
+            var isModulePath = filePath?.Equals(modulePath, StringComparison.OrdinalIgnoreCase) ?? false;
+
+            if (!string.IsNullOrEmpty(filePath) && !isModulePath)
             {
                 Dispatcher.UIThread.Post(() =>
                 {
