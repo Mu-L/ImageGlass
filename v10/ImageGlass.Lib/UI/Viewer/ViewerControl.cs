@@ -300,13 +300,14 @@ public partial class ViewerControl : PhControl
         var delta = e.Delta.Y;
         var deltaAbs = Math.Abs(delta);
         var position = e.GetPosition(this);
-        var isUsingTouchpad = deltaAbs != 1;
+        var isUsingTouchpad = Core.ShellProvider?.HasPreciseScrollingDeltas()
+            ?? deltaAbs != 1;
 
         // Touchpad scrolling
         if (isUsingTouchpad)
         {
-            var isScrollingHorz = Math.Abs(e.Delta.X) > 0
-                && (BHelper.OS == OSType.Mac ? deltaAbs <= 0.02 : deltaAbs < 0.5);
+            // horizontal component dominates -> horizontal pan gesture
+            var isScrollingHorz = Math.Abs(e.Delta.X) > Math.Abs(e.Delta.Y) * 1.5;
 
             // Scroll Left/Right: Pan horizontally
             if (isScrollingHorz)

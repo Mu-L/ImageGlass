@@ -99,4 +99,12 @@ public interface IShellProvider : IDisposable
     /// Sets or removes this app as the default photo viewer for the specified file extensions.
     /// </summary>
     Task SetDefaultPhotoViewerAsync(string[] extensions, bool enable);
+
+
+    /// <summary>
+    /// Returns <c>true</c> if the current scroll event originates from a trackpad
+    /// (precise/continuous scrolling). Must be called during a scroll event handler.
+    /// Returns <c>false</c> for mouse wheel (discrete) events.
+    /// </summary>
+    bool HasPreciseScrollingDeltas() => false;
 }
