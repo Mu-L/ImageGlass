@@ -314,6 +314,22 @@ public partial class App : Application
 
         // initialize service providers
         Core.API = new AppAPIProvider(_mainWindow);
+
+
+        // initialize update provider and auto-check
+        InitializeUpdateProvider();
+    }
+
+
+    /// <summary>
+    /// Initializes the update provider and fires a silent update check.
+    /// </summary>
+    private static void InitializeUpdateProvider()
+    {
+        Core.Update = new UpdateProvider();
+
+        // silent check handles disabled/interval logic
+        _ = Core.API!.IG_CheckForUpdateAsync(false);
     }
 
 

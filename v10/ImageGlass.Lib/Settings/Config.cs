@@ -592,6 +592,24 @@ public partial class Config : PhReactive
     #region String items
 
     /// <summary>
+    /// Gets, sets the last time to check for update. Set it to <c>0</c> to disable auto-update.
+    /// </summary>
+    public string AutoUpdate
+    {
+        get => Get(ConfigId.AutoUpdate, DateTime.UtcNow.Subtract(TimeSpan.FromDays(30)).ToString());
+        set => Set(ConfigId.AutoUpdate, value);
+    }
+
+    /// <summary>
+    /// Gets, sets the version string the user chose to skip (e.g. "10.1.0.500").
+    /// </summary>
+    public string UpdateSkippedVersion
+    {
+        get => Get(ConfigId.UpdateSkippedVersion, string.Empty);
+        set => Set(ConfigId.UpdateSkippedVersion, value);
+    }
+
+    /// <summary>
     /// Gets, sets color profile string. It can be a defined name or ICC/ICM file path
     /// </summary>
     public string ColorProfile
@@ -599,11 +617,6 @@ public partial class Config : PhReactive
         get => Get(ConfigId.ColorProfile, nameof(ColorProfileOption.CurrentMonitorProfile));
         set => Set(ConfigId.ColorProfile, value);
     }
-
-    ///// <summary>
-    ///// Gets, sets the last time to check for update. Set it to <c>0</c> to disable auto-update.
-    ///// </summary>
-    //public string AutoUpdate { get; set; } = DateTime.UtcNow.Subtract(TimeSpan.FromDays(30)).ToISO8601String();
 
     /// <summary>
     /// Gets, sets the absolute file path of the last seen image

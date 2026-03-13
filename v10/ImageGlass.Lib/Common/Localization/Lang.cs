@@ -609,8 +609,16 @@ public class Lang
         new(LangId.FrmMain_MnuHelp, "Help"), //v7.0
         new(LangId.FrmMain_MnuAbout, "About"), //v3.0
         new(LangId.FrmMain_MnuQuickSetup, "Open ImageGlass Quick Setup"), //v9.0
-        new(LangId.FrmMain_MnuCheckForUpdate_NewVersion, "A new version is available!"), //v5.0
         new(LangId.FrmMain_MnuReportIssue, "Report an issue…"), //v3.0
+
+        new(LangId.FrmMain_MnuCheckForUpdate_NewVersion, "A new update is available!"), //v5.0
+        new(LangId.FrmMain_MnuCheckForUpdate_NoUpdate, "You are using the latest version!"),
+        new(LangId.FrmMain_MnuCheckForUpdate_Checking, "Checking for update…"),
+        new(LangId.FrmMain_MnuCheckForUpdate_Failed, "Could not check for update!"),
+        new(LangId.FrmMain_MnuCheckForUpdate_SkipVersion, "Skip this version"),
+        new(LangId.FrmMain_MnuCheckForUpdate_CurrentVersion, "Current version: {0}" ), //v9.0
+        new(LangId.FrmMain_MnuCheckForUpdate_LatestVersion, "The latest version: {0}" ), //v9.0
+        new(LangId.FrmMain_MnuCheckForUpdate_PublishedDate, "Published date: {0}" ), //v9.0
 
         new(LangId.FrmMain_MnuSetDefaultPhotoViewer, "Set default photo viewer"), //v9.0
         new(LangId.FrmMain_MnuSetDefaultPhotoViewer_Success, "You have successfully set ImageGlass as default photo viewer."), //v9.0
@@ -1017,16 +1025,6 @@ public class Lang
         new(LangId.FrmExportFrames_ExportDone, "Exported {0} frames successfully to \r\n{1}" ), //v9.0
         new(LangId.FrmExportFrames_OpenOutputFolder, "Open output folder" ), //v9.0
         #endregion // FrmExportFrames
-
-
-        #region FrmUpdate
-        new(LangId.FrmUpdate_StatusChecking, "Checking for update…" ), //v9.0
-        new(LangId.FrmUpdate_StatusUpdated, "You are using the latest version!" ), //v9.0
-        new(LangId.FrmUpdate_StatusOutdated, "A new update is available!" ), //v9.0
-        new(LangId.FrmUpdate_CurrentVersion, "Current version: {0}" ), //v9.0
-        new(LangId.FrmUpdate_LatestVersion, "The latest version: {0}" ), //v9.0
-        new(LangId.FrmUpdate_PublishedDate, "Published date: {0}" ), //v9.0
-        #endregion // FrmUpdate
 
 
         #region FrmQuickSetup

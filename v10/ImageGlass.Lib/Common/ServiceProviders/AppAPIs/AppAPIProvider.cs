@@ -37,6 +37,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ImageGlass.Common.ServiceProviders;
@@ -2738,13 +2739,64 @@ public partial class AppAPIProvider
 
 
     /// <summary>
-    /// Checks for new update.
+    /// Checks for new update asynchronously with option to shows UI feedback.
     /// </summary>
-    public void IG_CheckForUpdate()
+    /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
+    public async Task IG_CheckForUpdateAsync(string? boolStr = null)
     {
-        _ = BHelper.OpenUrlAsync(_mainWindow,
-            "https://github.com/d2phap/ImageGlass/releases",
-            "from_report_issue");
+        var showUI = BHelper.ConvertStringToBool(boolStr);
+        await IG_CheckForUpdateAsync(showUI ?? true);
+    }
+
+    /// <summary>
+    /// Checks for new update asynchronously with option to shows UI feedback.
+    /// </summary>
+    public async Task IG_CheckForUpdateAsync(bool showUI = true)
+    {
+        if (Core.Update is null) throw new NullReferenceException(nameof(Core.Update));
+
+
+        // silent mode: skip if disabled or checked recently
+        if (!showUI)
+        {
+            if (string.Equals(Core.Config.AutoUpdate, "0", StringComparison.Ordinal)) return;
+            if (!UpdateProvider.ShouldCheck) return;
+
+            // delay to let the app finish starting
+            await Task.Delay(TimeSpan.FromSeconds(30));
+        }
+
+
+        UpdateWindow? updateWindow = null;
+
+        if (showUI)
+        {
+            // open UpdateWindow immediately in "checking" state
+            updateWindow = new UpdateWindow();
+            updateWindow.SetCheckingState();
+
+            // show the window non-blocking, then perform the check
+            _ = updateWindow.ShowAsync(_mainWindow);
+        }
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        var result = await Core.Update.CheckForUpdateAsync(cts.Token);
+
+        if (showUI)
+        {
+            // transition the already-open window to result state
+            updateWindow!.SetResultState(result);
+        }
+        else
+        {
+            // silent mode: only show window if update is available
+            if (result.Status == Update.UpdateCheckStatus.UpdateAvailable)
+            {
+                updateWindow = new UpdateWindow();
+                updateWindow.SetResultState(result);
+                _ = await updateWindow.ShowAsync(_mainWindow);
+            }
+        }
     }
 
 

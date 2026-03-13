@@ -108,6 +108,12 @@ public static class Core
     /// </summary>
     public static SlideshowProvider? Slideshow { get; set; } = null;
 
+
+    /// <summary>
+    /// Provides the update service for checking and downloading app updates.
+    /// </summary>
+    public static UpdateProvider? Update { get; set; } = null;
+
     #endregion // Platform Service Provider
 
 
@@ -242,6 +248,8 @@ public static class Core
 
         Core.Slideshow?.Dispose();
         Core.Slideshow = null;
+
+        Core.Update = null;
 
         Core.Photos.Dispose();
         Core.ColorProfileProvider?.Dispose();

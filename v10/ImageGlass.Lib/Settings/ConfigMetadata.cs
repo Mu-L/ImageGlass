@@ -107,9 +107,9 @@ public enum ConfigId
 
 
     #region String settings
-
+    AutoUpdate,
+    UpdateSkippedVersion,
     ColorProfile,
-    // AutoUpdate,
     LastSeenImagePath,
     // LastOpenedSetting,
     BackgroundColor,

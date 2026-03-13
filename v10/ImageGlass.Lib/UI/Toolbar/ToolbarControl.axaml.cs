@@ -28,7 +28,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
@@ -370,6 +369,7 @@ public partial class ToolbarControl : PhControl
             else
             {
                 var itemBtn = new ToolbarButton();
+                itemBtn.IsChecked = ComputeCheckState(vm);
                 itemBtn.Click += ToolbarButton_Click;
                 itemEl = itemBtn;
             }

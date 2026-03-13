@@ -43,6 +43,18 @@ public partial class ModalWindow : DialogWindow
     #region Public Properties
 
     /// <summary>
+    /// Gets, sets the extra content above the footer.
+    /// </summary>
+    public object? ModalExtraContent
+    {
+        get => GetValue(ModalExtraContentProperty);
+        set => SetValue(ModalExtraContentProperty, value);
+    }
+    public static readonly StyledProperty<object?> ModalExtraContentProperty =
+        AvaloniaProperty.Register<ModalWindow, object?>(nameof(ModalExtraContent));
+
+
+    /// <summary>
     /// Gets, sets the text of modal's heading.
     /// </summary>
     public string? Heading
@@ -490,6 +502,13 @@ public partial class ModalWindow : DialogWindow
         };
 
 
+        // extra content
+        var extraContentSlot = new ContentControl
+        {
+            [!ContentControl.ContentProperty] = this[!ModalExtraContentProperty],
+        };
+
+
         // progress bar
         var progressEl = new ProgressBar
         {
@@ -500,11 +519,13 @@ public partial class ModalWindow : DialogWindow
             [!ProgressBar.IsVisibleProperty] = this[!IsProgressVisibleProperty],
         };
 
+
         rightSection.Children.Add(lblHeading);
         rightSection.Children.Add(lblDescription);
         rightSection.Children.Add(_txtInput);
         rightSection.Children.Add(lblDetails);
         rightSection.Children.Add(_noteContainer);
+        rightSection.Children.Add(extraContentSlot);
         rightSection.Children.Add(progressEl);
 
 

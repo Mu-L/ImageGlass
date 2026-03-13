@@ -350,8 +350,15 @@ public enum LangId
     FrmMain_MnuHelp,
     FrmMain_MnuAbout,
     FrmMain_MnuQuickSetup,
-    FrmMain_MnuCheckForUpdate_NewVersion,
     FrmMain_MnuReportIssue,
+    FrmMain_MnuCheckForUpdate_NewVersion,
+    FrmMain_MnuCheckForUpdate_NoUpdate,
+    FrmMain_MnuCheckForUpdate_Checking,
+    FrmMain_MnuCheckForUpdate_Failed,
+    FrmMain_MnuCheckForUpdate_SkipVersion,
+    FrmMain_MnuCheckForUpdate_CurrentVersion,
+    FrmMain_MnuCheckForUpdate_LatestVersion,
+    FrmMain_MnuCheckForUpdate_PublishedDate,
 
     FrmMain_MnuSetDefaultPhotoViewer,
     FrmMain_MnuSetDefaultPhotoViewer_Success,
@@ -750,16 +757,6 @@ public enum LangId
     FrmExportFrames_ExportDone,
     FrmExportFrames_OpenOutputFolder,
     #endregion // FrmExportFrames
-
-
-    #region FrmUpdate
-    FrmUpdate_StatusChecking,
-    FrmUpdate_StatusUpdated,
-    FrmUpdate_StatusOutdated,
-    FrmUpdate_CurrentVersion,
-    FrmUpdate_LatestVersion,
-    FrmUpdate_PublishedDate,
-    #endregion // FrmUpdate
 
 
     #region FrmQuickSetup
