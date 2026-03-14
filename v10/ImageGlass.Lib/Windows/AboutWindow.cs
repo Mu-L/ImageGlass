@@ -117,7 +117,7 @@ public partial class AboutWindow : DialogWindow
         _btnGitHub.Content = "GitHub";
         _btnEula.Content = Core.Lang[LangId.FrmAbout_License];
         _btnPrivacy.Content = Core.Lang[LangId.FrmAbout_Privacy];
-        _btnDonate.Content = Core.Lang[LangId.FrmAbout_Donate];
+        _btnDonate.Content = "❤️ " + Core.Lang[LangId.FrmAbout_Donate];
         _btnCheckForUpdate.Content = Core.Lang[LangId._CheckForUpdate];
 
         UpdateVersionText();
@@ -308,7 +308,7 @@ public partial class AboutWindow : DialogWindow
         };
         _btnCheckForUpdate.Click += (_, _) =>
         {
-            _ = BHelper.OpenUrlAsync(this, "https://imageglass.org/release", "from_check_update");
+            _ = Core.API?.IG_CheckForUpdateAsync(true);
         };
 
         var footerLeftPanel = new StackPanel
@@ -368,4 +368,7 @@ public partial class AboutWindow : DialogWindow
     }
 
     #endregion // Private Methods
+
+
+
 }

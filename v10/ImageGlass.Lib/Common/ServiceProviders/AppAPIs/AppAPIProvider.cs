@@ -2764,6 +2764,7 @@ public partial class AppAPIProvider
         await IG_CheckForUpdateAsync(showUI ?? true);
     }
 
+
     /// <summary>
     /// Checks for new update asynchronously with option to shows UI feedback.
     /// </summary>

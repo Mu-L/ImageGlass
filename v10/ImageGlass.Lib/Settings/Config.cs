@@ -435,7 +435,7 @@ public partial class Config : PhReactive
     /// </summary>
     public double PanMargin
     {
-        get => Get(ConfigId.PanMargin, 30d);
+        get => Get(ConfigId.PanMargin, 0);
         set => Set(ConfigId.PanMargin, value);
     }
 
@@ -514,7 +514,7 @@ public partial class Config : PhReactive
     /// </summary>
     public uint MaxMemoryCacheInMb
     {
-        get => Get(ConfigId.MaxMemoryCacheInMb, 2048u);
+        get => Get(ConfigId.MaxMemoryCacheInMb, 0u);
         set => Set(ConfigId.MaxMemoryCacheInMb, value);
     }
 

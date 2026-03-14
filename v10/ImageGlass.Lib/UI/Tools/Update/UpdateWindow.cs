@@ -40,6 +40,7 @@ public partial class UpdateWindow : ModalWindow
 
     public UpdateWindow()
     {
+        ShowInTaskbar = true;
         Title = Core.Lang[LangId._CheckForUpdate];
         Description = Core.Lang[LangId.FrmMain_MnuCheckForUpdate_CurrentVersion, Core.BuildInfo.AppVersion];
     }
