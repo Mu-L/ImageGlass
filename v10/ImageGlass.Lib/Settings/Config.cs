@@ -435,7 +435,7 @@ public partial class Config : PhReactive
     /// </summary>
     public double PanMargin
     {
-        get => Get(ConfigId.PanMargin, 0);
+        get => Get(ConfigId.PanMargin, 0d);
         set => Set(ConfigId.PanMargin, value);
     }
 

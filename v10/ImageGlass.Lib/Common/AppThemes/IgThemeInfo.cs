@@ -28,7 +28,7 @@ public record IgThemeInfo
     /// Theme name (required)
     /// </summary>
     public string Name { get; set; } = string.Empty;
-    public string Version { get; set; } = string.Empty;
+    public double Version { get; set; } = 1.0d;
     public string Author { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Website { get; set; } = string.Empty;

@@ -27,7 +27,7 @@ public record IgThemeMetadata
     /// <summary>
     /// Config version of this theme to work with (required)
     /// </summary>
-    public double Version { get; set; } = 9;
+    public double Version { get; set; } = 10;
 
     public string Description { get; set; } = "ImageGlass Theme Configuration File";
 

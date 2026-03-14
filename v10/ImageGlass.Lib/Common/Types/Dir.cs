@@ -24,55 +24,35 @@ namespace ImageGlass.Common.Types;
 public static class Dir
 {
     /// <summary>
-    /// Gets the Themes folder name
+    /// Gets the theme pack folder name
     /// </summary>
-    public static string Themes => "Themes";
+    public static string Themes { get; } = "_themes";
 
     /// <summary>
-    /// Gets the Icons folder name
+    /// Gets the extension icon folder name
     /// </summary>
-    public static string Icons => "Icons";
+    public static string ExtIcons { get; } = "_ext_icons";
 
     /// <summary>
-    /// Gets the Ext-Icons folder name
+    /// Gets the language folder name
     /// </summary>
-    public static string ExtIcons => "Ext-Icons";
+    public static string Language { get; } = "_lang";
 
     /// <summary>
-    /// Gets the Languages folder name
+    /// Gets the credit folder name
     /// </summary>
-    public static string Language => "Language";
-
-    /// <summary>
-    /// Gets the WebUI folder name
-    /// </summary>
-    public static string WebUI => "WebUI";
-
-    /// <summary>
-    /// Gets the WebView2_Runtime folder.
-    /// </summary>
-    public static string WebView2Runtime => "WebView2_Runtime";
-
-    /// <summary>
-    /// Gets the cached thumbnails folder name
-    /// </summary>
-    public static string ThumbnailsCache => "ThumbnailsCache";
-
-    /// <summary>
-    /// Gets the License folder name
-    /// </summary>
-    public static string License => "License";
+    public static string Credits { get; } = "_credits";
 
     /// <summary>
     /// Gets the temporary folder name
     /// </summary>
-    public static string Temporary => "Temp";
+    public static string Temporary { get; } = "_temp";
 
 #if DEBUG
     /// <summary>
     /// Logging should not be to the temporary folder, as it is deleted on shutdown
     /// </summary>
-    public static string Log => "Log";
+    public static string Log { get; } = "_log";
 #endif
 
 }
