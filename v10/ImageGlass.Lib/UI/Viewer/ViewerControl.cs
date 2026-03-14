@@ -300,8 +300,8 @@ public partial class ViewerControl : PhControl
         var delta = e.Delta.Y;
         var deltaAbs = Math.Abs(delta);
         var position = e.GetPosition(this);
-        var isUsingTouchpad = Core.ShellProvider?.HasPreciseScrollingDeltas()
-            ?? deltaAbs != 1;
+        var isPreciseScrolling = Core.ShellProvider?.HasPreciseScrollingDeltas() ?? false;
+        var isUsingTouchpad = isPreciseScrolling || deltaAbs != 1;
 
         // Touchpad scrolling
         if (isUsingTouchpad)
