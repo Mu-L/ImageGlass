@@ -28,7 +28,7 @@ namespace ImageGlass.Linux.Common.ServiceProviders;
 
 internal class LinuxShellProvider : PhDisposable, IShellProvider
 {
-    private static readonly string _desktopFileId = $"{BHelper.AppName}.desktop";
+    private static readonly string _desktopFileId = $"imageglass.desktop";
 
 
     public object? ForegroundShell { get; set; }
