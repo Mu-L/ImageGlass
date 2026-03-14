@@ -790,7 +790,7 @@ public partial class FrmMain : ThemedForm
                                 _pendingSwitchDirMessage = string.Format(
                                     Config.Language[$"{Name}._SwitchedToNextDirectory"],
                                     Path.GetFileName(nextDir));
-                                PrepareLoading(nextDir, false);
+                                PrepareLoading(nextDir, true);
                                 return;
                             }
                         }
@@ -826,7 +826,7 @@ public partial class FrmMain : ThemedForm
                                     Config.Language[$"{Name}._SwitchedToPrevDirectory"],
                                     Path.GetFileName(prevDir));
                                 _pendingNavigateToLast = true;
-                                PrepareLoading(prevDir, false);
+                                PrepareLoading(prevDir, true);
                                 return;
                             }
                         }
