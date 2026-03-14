@@ -31,7 +31,7 @@
       "group": "build"
     },
 
-    
+
     // Publish tasks
     {
       "label": "publish-linux-x64",
@@ -87,7 +87,7 @@
       "type": "process",
       "command": "/bin/bash",
       "args": [
-        "${workspaceFolder}/.vscode/bundle-mac-arm64.sh"
+        "${workspaceFolder}/.vscode/bundle-mac-arm64-app.sh"
       ],
       "problemMatcher": [],
       "dependsOn": [
@@ -101,7 +101,7 @@
       "type": "process",
       "command": "/bin/bash",
       "args": [
-        "${workspaceFolder}/.vscode/bundle-linux-deb.sh"
+        "${workspaceFolder}/.vscode/bundle-linux-x64-deb.sh"
       ],
       "problemMatcher": [],
       "dependsOn": [
