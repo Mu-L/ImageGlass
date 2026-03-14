@@ -1,6 +1,7 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // Build tasks
     {
       "label": "build-linux-x64",
       "type": "process",
@@ -29,6 +30,9 @@
       "problemMatcher": "$msCompile",
       "group": "build"
     },
+
+    
+    // Publish tasks
     {
       "label": "publish-linux-x64",
       "type": "process",
@@ -75,12 +79,15 @@
       "problemMatcher": "$msCompile",
       "group": "build"
     },
+
+
+    // Bundle tasks
     {
-      "label": "bundle-mac-arm64",
+      "label": "bundle-mac-arm64-app",
       "type": "process",
       "command": "/bin/bash",
       "args": [
-        "${workspaceFolder}/.vscode/bundle-mac.sh"
+        "${workspaceFolder}/.vscode/bundle-mac-arm64.sh"
       ],
       "problemMatcher": [],
       "dependsOn": [

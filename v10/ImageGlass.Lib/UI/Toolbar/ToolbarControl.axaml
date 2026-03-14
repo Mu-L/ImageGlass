@@ -99,8 +99,18 @@
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuExportFrames" />
                                 <ui:PhMenuItem Header="-" />
 
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuOpenWith" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuPrint" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="{OnPlatform False,
+                                                           Windows=True,
+                                                           x:TypeArguments=x:Boolean}"
+                                    LangKey="FrmMain_MnuOpenWith" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="{OnPlatform False,
+                                                           Windows=True,
+                                                           x:TypeArguments=x:Boolean}"
+                                    LangKey="FrmMain_MnuPrint" />
                                 <ui:PhMenuItem
                                     Click="MainMenuItem_Click"
                                     IsVisible="False"
@@ -375,9 +385,12 @@
                                 <ui:PhMenuItem Header="-" />
 
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuSetDesktopBackground" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click"
-                                    LangKey="FrmMain_MnuSetLockScreen"
-                                    IsVisible="{OnPlatform False, Windows=True, x:TypeArguments=x:Boolean}" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="{OnPlatform False,
+                                                           Windows=True,
+                                                           x:TypeArguments=x:Boolean}"
+                                    LangKey="FrmMain_MnuSetLockScreen" />
                             </ui:PhMenuItem>
 
 
@@ -444,9 +457,10 @@
                                     ToggleType="CheckBox" />
                                 <ui:PhMenuItem Header="-" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuToggleCheckerboard" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click"
-                                    LangKey="FrmMain_MnuChangeBackgroundColor"
-                                    IsVisible="False" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="False"
+                                    LangKey="FrmMain_MnuChangeBackgroundColor" />
                             </ui:PhMenuItem>
 
 
@@ -491,14 +505,20 @@
                                     Click="MainMenuItem_Click"
                                     IsVisible="False"
                                     LangKey="FrmMain_MnuQuickSetup" />
-                                <ui:PhMenuItem Header="-" IsVisible="{OnPlatform True, macOS=False, x:TypeArguments=x:Boolean}" />
+                                <ui:PhMenuItem Header="-" IsVisible="{OnPlatform False, Windows=True, x:TypeArguments=x:Boolean}" />
 
-                                <ui:PhMenuItem Click="MainMenuItem_Click"
-                                    LangKey="FrmMain_MnuSetDefaultPhotoViewer"
-                                    IsVisible="{OnPlatform True, macOS=False, x:TypeArguments=x:Boolean}" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click"
-                                    LangKey="FrmMain_MnuRemoveDefaultPhotoViewer"
-                                    IsVisible="{OnPlatform True, macOS=False, x:TypeArguments=x:Boolean}" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="{OnPlatform False,
+                                                           Windows=True,
+                                                           x:TypeArguments=x:Boolean}"
+                                    LangKey="FrmMain_MnuSetDefaultPhotoViewer" />
+                                <ui:PhMenuItem
+                                    Click="MainMenuItem_Click"
+                                    IsVisible="{OnPlatform False,
+                                                           Windows=True,
+                                                           x:TypeArguments=x:Boolean}"
+                                    LangKey="FrmMain_MnuRemoveDefaultPhotoViewer" />
                             </ui:PhMenuItem>
 
 

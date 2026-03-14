@@ -541,6 +541,12 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_OpenWithAsync()
     {
+        if (BHelper.OS != OSType.Windows)
+        {
+            throw new NotSupportedException($"IGE: This feature is not supported on {BHelper.OS}.");
+        }
+
+
         string? filePath = null;
         var isClipboardPhoto = Core.ClipboardImage is not null;
 
@@ -579,6 +585,11 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_PrintAsync()
     {
+        if (BHelper.OS != OSType.Windows)
+        {
+            throw new NotSupportedException($"IGE: This feature is not supported on {BHelper.OS}.");
+        }
+
         if (Core.PrintProvider is null) return;
 
         var fileToPrint = Core.Photos.CurrentFilePath;
@@ -1663,6 +1674,11 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_SetLockScreenImageAsync()
     {
+        if (BHelper.OS != OSType.Windows)
+        {
+            throw new NotSupportedException($"IGE: This feature is not supported on {BHelper.OS}.");
+        }
+
         await SetSystemBackgroundAsync(true);
     }
 

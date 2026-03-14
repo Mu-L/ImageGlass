@@ -68,11 +68,7 @@ internal partial class MacShellProvider : PhDisposable, IShellProvider
         }
         else
         {
-            try
-            {
-                File.Delete(filePath);
-            }
-            catch { }
+            File.Delete(filePath);
         }
     }
 
@@ -175,7 +171,7 @@ internal partial class MacShellProvider : PhDisposable, IShellProvider
     /// <exception cref="NotSupportedException"></exception>
     public Task SetDefaultPhotoViewerAsync(string[] extensions, bool enable)
     {
-        throw new NotSupportedException("IGE: Setting the default photo viewer is not supported on macOS.");
+        throw new NotSupportedException("IGE: This feature is not supported on macOS.");
     }
 
 
@@ -184,7 +180,7 @@ internal partial class MacShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public Task SetLockScreenAsync(string filePath)
     {
-        throw new NotSupportedException("IGE: Setting the lock screen wallpaper is not supported on macOS.");
+        throw new NotSupportedException("IGE: This feature is not supported on macOS.");
     }
 
 
@@ -205,8 +201,7 @@ internal partial class MacShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public void ShowOpenWith(string filePath)
     {
-        RunAppleScript(
-            $"tell application \"Finder\" to open POSIX file \"{filePath}\" using (choose application)");
+        throw new NotSupportedException("IGE: This feature is not supported on macOS.");
     }
 
 

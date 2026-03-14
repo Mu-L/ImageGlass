@@ -20,7 +20,6 @@ using ImageGlass.Common;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -66,11 +65,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
         }
         else
         {
-            try
-            {
-                File.Delete(filePath);
-            }
-            catch { }
+            File.Delete(filePath);
         }
     }
 
@@ -193,30 +188,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public Task SetDefaultPhotoViewerAsync(string[] extensions, bool enable)
     {
-        foreach (var ext in extensions)
-        {
-            // query the MIME type for this extension
-            var mimeType = BHelper.RunProcessAndReadOutput("xdg-mime", $"query filetype dummy{ext}");
-            if (string.IsNullOrWhiteSpace(mimeType)) continue;
-
-            mimeType = mimeType.Trim();
-
-            if (enable)
-            {
-                BHelper.RunProcess("xdg-mime", $"default {_desktopFileId} {mimeType}");
-            }
-            else
-            {
-                // reset to the system default by removing the user override
-                var mimeappsPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "mimeapps.list");
-
-                RemoveMimeAssociation(mimeappsPath, mimeType);
-            }
-        }
-
-        return Task.CompletedTask;
+        throw new NotSupportedException("IGE: This feature is not supported on Linux.");
     }
 
 
@@ -225,11 +197,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public Task SetLockScreenAsync(string filePath)
     {
-        // GNOME lock screen background
-        BHelper.RunProcess("gsettings",
-            $"set org.gnome.desktop.screensaver picture-uri \"file://{filePath}\"");
-
-        return Task.CompletedTask;
+        throw new NotSupportedException("IGE: This feature is not supported on Linux.");
     }
 
 
@@ -251,14 +219,7 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public void ShowOpenWith(string filePath)
     {
-        // -n forces a menu choice if multiple apps exist
-        _ = Process.Start(new ProcessStartInfo
-        {
-            FileName = "mimeopen",
-            Arguments = $"-n \"{filePath}\"",
-            UseShellExecute = false,
-            CreateNoWindow = false, // Often needs a terminal context for choice
-        });
+        throw new NotSupportedException("IGE: This feature is not supported on Linux.");
     }
 
 

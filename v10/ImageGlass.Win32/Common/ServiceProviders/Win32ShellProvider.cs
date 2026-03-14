@@ -183,7 +183,7 @@ public class Win32ShellProvider : PhDisposable, IShellProvider
     {
         // Uses the system shell32.dll 'OpenAs_RunDLL' entry point
         var args = $"shell32.dll,OpenAs_RunDLL {filePath}";
-        
+
         _ = Process.Start(new ProcessStartInfo
         {
             FileName = "rundll32.exe",
