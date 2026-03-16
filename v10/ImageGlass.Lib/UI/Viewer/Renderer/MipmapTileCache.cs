@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Extensions;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using SkiaSharp;
 using System;
@@ -260,11 +261,11 @@ internal sealed class MipmapTileCache : PhDisposable
         var bitmap = new SKBitmap(info);
 
         using var canvas = new SKCanvas(bitmap);
-        using var paint = new SKPaint { FilterQuality = SKFilterQuality.High };
+        var samping = SkiaCodec.ToSamplingOptions(ImageInterpolation.CubicMitchell);
 
         canvas.DrawImage(srcImage,
             new SKRect(srcX, srcY, srcX + srcW, srcY + srcH),
-            new SKRect(0, 0, tileW, tileH), paint);
+            new SKRect(0, 0, tileW, tileH), samping);
 
         return bitmap;
     }

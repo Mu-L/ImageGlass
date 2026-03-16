@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.GestureRecognizers;
 using Avalonia.Interactivity;
@@ -48,14 +47,16 @@ public partial class ViewerControl
         // touch screen gestures
         _pinchGesture.Pinch += OnTouchPinched; // pinch gesture
         GestureRecognizers.Add(_pinchGesture);
-        Gestures.AddScrollGestureHandler(this, OnTouchPanning);  // panning
-        Gestures.AddScrollGestureEndedHandler(this, OnTouchPanningEnd);
+
+        // panning
+        ScrollGesture += ViewerControl_ScrollGesture; // panning
+        ScrollGestureEnded += ViewerControl_ScrollGestureEnded;
+
+        // touchpad gestures
+        PointerTouchPadGestureMagnify += ViewerControl_PointerTouchPadGestureMagnify; // pinch
 
         // suppress context menu during multi-touch gestures
         AddHandler(ContextRequestedEvent, OnContextRequestedForTouch, RoutingStrategies.Tunnel);
-
-        // touchpad gestures
-        Gestures.AddPointerTouchPadGestureMagnifyHandler(this, OnTouchPadPinched); // pinch
     }
 
 
@@ -66,19 +67,23 @@ public partial class ViewerControl
     {
         // touch screen gestures
         _pinchGesture.Pinch -= OnTouchPinched; // pinch
-        Gestures.RemoveScrollGestureHandler(this, OnTouchPanning); // panning
-        Gestures.RemoveScrollGestureEndedHandler(this, OnTouchPanningEnd);
-        RemoveHandler(ContextRequestedEvent, OnContextRequestedForTouch);
+
+        // panning
+        ScrollGesture -= ViewerControl_ScrollGesture;
+        ScrollGestureEnded -= ViewerControl_ScrollGestureEnded;
 
         // touchpad gestures
-        Gestures.RemovePointerTouchPadGestureMagnifyHandler(this, OnTouchPadPinched); // pinch
+        PointerTouchPadGestureMagnify -= ViewerControl_PointerTouchPadGestureMagnify; // pinch
+
+        // suppress context menu during multi-touch gestures
+        RemoveHandler(ContextRequestedEvent, OnContextRequestedForTouch);
     }
 
 
     /// <summary>
     /// Handles panning event for touch screen.
     /// </summary>
-    private void OnTouchPanning(object? sender, RoutedEventArgs e)
+    private void ViewerControl_ScrollGesture(object? sender, ScrollGestureEventArgs e)
     {
         var args = (ScrollGestureEventArgs)e;
 
@@ -99,7 +104,7 @@ public partial class ViewerControl
     }
 
 
-    private void OnTouchPanningEnd(object? sender, ScrollGestureEndedEventArgs e)
+    private void ViewerControl_ScrollGestureEnded(object? sender, ScrollGestureEndedEventArgs e)
     {
         _enablePanningVelocity = true;
     }
@@ -148,7 +153,7 @@ public partial class ViewerControl
     /// <summary>
     /// Handles pinch event for touchpad.
     /// </summary>
-    private void OnTouchPadPinched(object? sender, PointerDeltaEventArgs e)
+    private void ViewerControl_PointerTouchPadGestureMagnify(object? sender, PointerDeltaEventArgs e)
     {
         var position = e.GetPosition(this);
         var delta = e.Delta.X;

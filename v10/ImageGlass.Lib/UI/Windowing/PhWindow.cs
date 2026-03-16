@@ -61,7 +61,7 @@ public partial class PhWindow : Window
     /// <summary>
     /// Gets the DPI scale of this window.
     /// </summary>
-    public double Dpi => VisualRoot?.RenderScaling ?? 1.0;
+    public double Dpi => TopLevel.GetTopLevel(this)?.RenderScaling ?? 1d;
 
 
     /// <summary>
@@ -307,7 +307,7 @@ public partial class PhWindow : Window
         if (enable)
         {
             ExtendClientAreaToDecorationsHint = true;
-            ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.NoChrome;
+            WindowDecorations = WindowDecorations.BorderOnly;
         }
         else
         {

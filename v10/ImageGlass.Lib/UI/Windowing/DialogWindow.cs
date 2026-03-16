@@ -184,7 +184,7 @@ public partial class DialogWindow : PhWindow
         if (BHelper.OS != OSType.Linux)
         {
             ExtendClientAreaToDecorationsHint = true;
-            ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.NoChrome;
+            WindowDecorations = WindowDecorations.BorderOnly;
         }
 
         SizeToContent = SizeToContent.WidthAndHeight;

@@ -731,7 +731,7 @@ public partial class Config : PhReactive
     [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleDown
     {
-        get => Get(ConfigId.ImageInterpolationScaleDown, ImageInterpolation.High);
+        get => Get(ConfigId.ImageInterpolationScaleDown, ImageInterpolation.CubicCatmullRom);
         set => Set(ConfigId.ImageInterpolationScaleDown, value);
     }
 
@@ -742,7 +742,7 @@ public partial class Config : PhReactive
     [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleUp
     {
-        get => Get(ConfigId.ImageInterpolationScaleUp, ImageInterpolation.None);
+        get => Get(ConfigId.ImageInterpolationScaleUp, ImageInterpolation.Nearest);
         set => Set(ConfigId.ImageInterpolationScaleUp, value);
     }
 

@@ -20,6 +20,7 @@ using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using ImageGlass.Common.Extensions;
+using ImageGlass.UI.Viewer;
 using ImageMagick;
 using SkiaSharp;
 using System;
@@ -654,6 +655,31 @@ public static partial class SkiaCodec
 
 
     /// <summary>
+    /// Converts the enum to an <see cref="SKSamplingOptions"/> struct.
+    /// </summary>
+    public static SKSamplingOptions ToSamplingOptions(this ImageInterpolation interpolation, int maxAniso = 16)
+    {
+        return interpolation switch
+        {
+            ImageInterpolation.Nearest => new SKSamplingOptions(SKFilterMode.Nearest, SKMipmapMode.None),
+            ImageInterpolation.NearestMipmapNearest => new SKSamplingOptions(SKFilterMode.Nearest, SKMipmapMode.Nearest),
+            ImageInterpolation.NearestMipmapLinear => new SKSamplingOptions(SKFilterMode.Nearest, SKMipmapMode.Linear),
+
+            ImageInterpolation.Linear => new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None),
+            ImageInterpolation.LinearMipmapNearest => new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Nearest),
+            ImageInterpolation.LinearMipmapLinear => new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear),
+
+            ImageInterpolation.CubicMitchell => new SKSamplingOptions(SKCubicResampler.Mitchell),
+            ImageInterpolation.CubicCatmullRom => new SKSamplingOptions(SKCubicResampler.CatmullRom),
+
+            ImageInterpolation.Anisotropic => new SKSamplingOptions(maxAniso),
+
+            _ => SKSamplingOptions.Default,
+        };
+    }
+
+
+    /// <summary>
     /// Attempts to apply the given color space to the source image and outputs a new image.
     /// </summary>
     public static bool TryApplyColorSpace(SKImage? imgSrc, SKColorSpace? destColorSpace, out SKImage? output)
@@ -819,7 +845,7 @@ public static partial class SkiaCodec
 
             using (var fb = wbmp.Lock())
             {
-                abmp.CopyPixels(fb, AlphaFormat.Premul);
+                abmp.CopyPixels(fb);
             }
 
             wbmp.CopyPixels(

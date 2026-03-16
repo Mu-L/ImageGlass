@@ -18,11 +18,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using Avalonia.Media;
-using Avalonia.Platform;
 using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
 using Avalonia.Threading;
 using ImageGlass.Common.Extensions;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using SkiaSharp;
 using System;
@@ -81,7 +81,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
     private readonly SKImageRef? _imgRender;
     private readonly SKRect _srcRect;
     private readonly SKRect _destRect;
-    private readonly ImageInterpolation _interpolation;
+    private readonly SKSamplingOptions _samplingOptions;
     private readonly MipmapTileCache? _tileCache;
     private readonly double _zoomFactor;
 
@@ -115,7 +115,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
             _srcRect = viewer.SrcRect.ToSKRect();
             _destRect = viewer.DestRect.ToSKRect();
-            _interpolation = viewer.CurrentInterpolation;
+            _samplingOptions = SkiaCodec.ToSamplingOptions(viewer.CurrentInterpolation);
             _tileCache = viewer._mipmapCache;
             _zoomFactor = viewer.ZoomFactor;
 
@@ -129,7 +129,6 @@ public partial class PhotoRenderer : ICustomDrawOperation
             }
         }
     }
-
 
 
     #region Interface Methods
@@ -181,13 +180,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
                     // draw the full image for first frame
                     var canvas = lease.SkCanvas;
                     canvas.Save();
-
-                    using var paintOptions = new SKPaint
-                    {
-                        FilterQuality = (SKFilterQuality)_interpolation,
-                    };
-
-                    canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
+                    canvas.DrawImage(imageRender, _srcRect, _destRect, _samplingOptions);
                     canvas.Restore();
 
 
@@ -213,13 +206,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
                     var canvas = lease.SkCanvas;
                     canvas.Save();
-
-                    using var paintOptions = new SKPaint
-                    {
-                        FilterQuality = (SKFilterQuality)_interpolation,
-                    };
-
-                    canvas.DrawImage(imageRender, _srcRect, _destRect, paintOptions);
+                    canvas.DrawImage(imageRender, _srcRect, _destRect, _samplingOptions);
                     canvas.Restore();
                 }
             }
@@ -263,17 +250,13 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
         canvas.Save();
 
-        using var paint = new SKPaint
-        {
-            FilterQuality = (SKFilterQuality)_interpolation,
-        };
-
         for (var ty = tileStartY; ty < tileEndY; ty++)
         {
             for (var tx = tileStartX; tx < tileEndX; tx++)
             {
-                var tile = tileCache.GetTile(tx, ty, mipLevel);
-                if (tile is null) continue;
+                var bmpTile = tileCache.GetTile(tx, ty, mipLevel);
+                var imgTile = SkiaCodec.ToSKImage(bmpTile);
+                if (imgTile.IsDisposed()) continue;
 
                 // tile bounds in original image coordinates
                 float tileSrcLeft = tx * sourceTileSize;
@@ -293,8 +276,8 @@ public partial class PhotoRenderer : ICustomDrawOperation
                 var tileBitmapSrc = new SKRect(
                     (clippedLeft - tileSrcLeft) * bmapScale,
                     (clippedTop - tileSrcTop) * bmapScale,
-                    Math.Min((clippedRight - tileSrcLeft) * bmapScale, tile.Width),
-                    Math.Min((clippedBottom - tileSrcTop) * bmapScale, tile.Height));
+                    Math.Min((clippedRight - tileSrcLeft) * bmapScale, imgTile.Width),
+                    Math.Min((clippedBottom - tileSrcTop) * bmapScale, imgTile.Height));
 
                 // map clipped region to destination screen coordinates
                 var tileDest = new SKRect(
@@ -303,7 +286,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
                     _destRect.Left + (clippedRight - _srcRect.Left) * scaleX,
                     _destRect.Top + (clippedBottom - _srcRect.Top) * scaleY);
 
-                canvas.DrawBitmap(tile, tileBitmapSrc, tileDest, paint);
+                canvas.DrawImage(imgTile, tileBitmapSrc, tileDest, _samplingOptions);
             }
         }
 
