@@ -84,13 +84,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="D2Phap.EggShell-ARM64" Version="1.0.517" Condition="'$(Platform)' == 'ARM64'" />
+        <PackageReference Include="D2Phap.EggShell-ARM64" Version="1.1.208" Condition="'$(Platform)' == 'ARM64'" />
         <PackageReference Include="D2Phap.EggShell-x64" Version="1.1.208" Condition="'$(Platform)' == 'X64'" />
 
-        <PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.10.3" Condition="'$(Platform)' == 'ARM64'" />
-        <PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.10.3" Condition="'$(Platform)' == 'X64'" />
-        <PackageReference Include="Magick.NET.SystemDrawing" Version="8.0.16" />
-        <PackageReference Include="Magick.NET.SystemWindowsMedia" Version="8.0.16" />
+        <PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.10.4" Condition="'$(Platform)' == 'ARM64'" />
+        <PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.10.4" Condition="'$(Platform)' == 'X64'" />
+        <PackageReference Include="Magick.NET.SystemDrawing" Version="8.0.17" />
+        <PackageReference Include="Magick.NET.SystemWindowsMedia" Version="8.0.17" />
         
         <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2151.40" />
         <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.269">
