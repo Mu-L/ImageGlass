@@ -18,7 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Presenters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -287,23 +286,6 @@ public partial class DialogWindow : PhWindow
     }
 
 
-    protected override void OnPointerPressed(PointerPressedEventArgs e)
-    {
-        base.OnPointerPressed(e);
-        if (e.Source is TextBox
-            or Button
-            or CheckBox
-            or SelectableTextBlock
-            or ScrollContentPresenter) return;
-
-        var p = e.GetCurrentPoint(this);
-        if (p.Properties.IsLeftButtonPressed)
-        {
-            BeginMoveDrag(e);
-        }
-    }
-
-
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
@@ -342,6 +324,7 @@ public partial class DialogWindow : PhWindow
             Child = _titleTextEl,
             [!Border.IsVisibleProperty] = this[!IsTitleVisibleProperty],
         };
+        _titleEl.PointerPressed += TitleEl_PointerPressed;
 
 
         // 2. create content slot
@@ -435,6 +418,16 @@ public partial class DialogWindow : PhWindow
         root.Children.Add(_footerEl);
 
         return root;
+    }
+
+
+    private void TitleEl_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        var p = e.GetCurrentPoint(this);
+        if (p.Properties.IsLeftButtonPressed)
+        {
+            BeginMoveDrag(e);
+        }
     }
 
 
