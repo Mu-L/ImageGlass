@@ -25,7 +25,7 @@ using ImageGlass.Common.ServiceProviders.Update;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Windowing;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Windows;
 
 public partial class UpdateWindow : ModalWindow
 {
@@ -178,6 +178,7 @@ public partial class UpdateWindow : ModalWindow
         IsButton2Visible = true;
         IsButton3Visible = false;
         Button2Text = Core.Lang[LangId._Close];
+        DefaultFocus = DialogFocus.Button2;
 
         DialogFooterLeftContent = null!;
         ModalExtraContent = null!;

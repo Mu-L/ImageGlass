@@ -30,6 +30,7 @@ using ImageGlass.Common.Windows;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
+using ImageGlass.Windows;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
