@@ -2678,6 +2678,16 @@ public partial class AppAPIProvider
 
 
     /// <summary>
+    /// Opens the image resizer tool.
+    /// </summary>
+    public async Task IG_OpenImageResizerAsync()
+    {
+        if (Core.IsBusy) return;
+
+    }
+
+
+    /// <summary>
     /// Performs a lossless compression operation.
     /// </summary>
     public async Task IG_LosslessCompressionAsync()

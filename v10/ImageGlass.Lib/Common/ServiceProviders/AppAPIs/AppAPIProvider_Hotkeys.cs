@@ -150,6 +150,7 @@ public partial class AppAPIProvider
 
         // Tools
         new(LangId.FrmMain_MnuColorPicker,          API.IG_ToggleToolColorPicker,   MKeys.Alt, Key.K),
+        new(LangId.FrmMain_MnuResizeTool,           API.IG_OpenImageResizer,        MKeys.Alt, Key.R),
         new(LangId.FrmMain_MnuLosslessCompression,  API.IG_LosslessCompression,     MKeys.Alt, Key.C),
         new(LangId.FrmMain_MnuGetMoreTools,         API.IG_GetMoreTool),
 

@@ -108,6 +108,7 @@ public enum API
 
     // Menu > Tools
     IG_ToggleToolColorPicker,
+    IG_OpenImageResizer,
     IG_LosslessCompression,
     IG_GetMoreTool,
 
