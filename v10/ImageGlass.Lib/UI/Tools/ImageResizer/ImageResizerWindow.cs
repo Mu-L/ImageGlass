@@ -24,6 +24,7 @@ using Avalonia.Layout;
 using Avalonia.Threading;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Windowing;
 using SkiaSharp;
@@ -35,11 +36,14 @@ namespace ImageGlass.UI;
 
 public partial class ImageResizerWindow : ModalWindow
 {
-    private CancellationTokenSource _cancel = new();
-    private double MAX_SIZE = 20000;
+    private const double MAX_SIZE = 20000;
+
     private SKBitmap _srcBmp;
-    private Size _srcSize = new(200, 200);
+    private Size _srcSize;
+    private Size _outputSize;
+
     private bool _suppressEvents;
+    private CancellationTokenSource _cancel = new();
 
     private RadioButton _radPixels = null!;
     private RadioButton _radPercentage = null!;
@@ -67,7 +71,7 @@ public partial class ImageResizerWindow : ModalWindow
     public ImageResizerWindow(SKBitmap srcBmp)
     {
         _srcBmp = srcBmp;
-        _srcSize = new(_srcBmp.Width, _srcBmp.Height);
+        _outputSize = _srcSize = new(_srcBmp.Width, _srcBmp.Height);
 
         IsButton1Visible = true;
         IsButton2Visible = true;
@@ -377,7 +381,7 @@ public partial class ImageResizerWindow : ModalWindow
             _suppressEvents = false;
         }
 
-        UpdateNewSizeLabel();
+        UpdateOutputSize();
     }
 
 
@@ -427,7 +431,7 @@ public partial class ImageResizerWindow : ModalWindow
             _suppressEvents = false;
         }
 
-        UpdateNewSizeLabel();
+        UpdateOutputSize();
     }
 
 
@@ -477,25 +481,27 @@ public partial class ImageResizerWindow : ModalWindow
             _suppressEvents = false;
         }
 
-        UpdateNewSizeLabel();
+        UpdateOutputSize();
     }
 
 
-    private void UpdateNewSizeLabel()
+    private void UpdateOutputSize()
     {
         var w = (double)(_numWidth.Value ?? 1);
         var h = (double)(_numHeight.Value ?? 1);
 
         if (_radPixels.IsChecked == true)
         {
-            _lblNewSizeValue.Text = $"{w:N0} × {h:N0} px";
+            _outputSize = new(w, h);
         }
         else if (_srcSize.Width > 0 && _srcSize.Height > 0)
         {
             var pxW = (int)Math.Round(w / 100.0 * _srcSize.Width);
             var pxH = (int)Math.Round(h / 100.0 * _srcSize.Height);
-            _lblNewSizeValue.Text = $"{pxW:N0} × {pxH:N0} px";
+            _outputSize = new(pxW, pxH);
         }
+
+        _lblNewSizeValue.Text = $"{_outputSize.Width:N0} × {_outputSize.Height:N0} px";
     }
 
 
@@ -523,18 +529,24 @@ public partial class ImageResizerWindow : ModalWindow
         _ = Task.Factory.StartNew(async () =>
         {
             // start resizing
-            OutputBitmap = null;
-            await Task.Delay(2000); // make it feel slow for better UX
+            var resample = (ImageResamplingMethod)_cmbResample.SelectedIndex;
+            OutputBitmap = await SkiaCodec.ResizeAsync(_srcBmp,
+                (int)_outputSize.Width,
+                (int)_outputSize.Height, resample, _cancel.Token);
 
 
             // done
             Dispatcher.UIThread.Post(() =>
             {
-                Button2Text = Core.Lang[LangId._Close];
+                IsProgressIndeterminate = false;
+                ProgressValue = 100;
 
+                Button2Text = Core.Lang[LangId._Close];
                 DialogResult = DialogExitCode.OK;
                 Close(DialogResult);
             });
+
+            await Task.Delay(200, _cancel.Token); // make it feel slow for better UX
         }, _cancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
     }
 

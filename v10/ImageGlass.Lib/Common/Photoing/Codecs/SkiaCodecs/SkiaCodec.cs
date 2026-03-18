@@ -20,7 +20,9 @@ using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using ImageGlass.Common.Extensions;
+using ImageGlass.Common.Types;
 using ImageMagick;
+using PhotoSauce.MagicScaler;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -681,6 +683,72 @@ public static partial class SkiaCodec
 
 
     /// <summary>
+    /// Resizes the specified bitmap to the given dimensions using the selected resampling method.
+    /// </summary>
+    public static async Task<SKBitmap?> ResizeAsync(SKBitmap? bmpSrc,
+        int width, int height, ImageResamplingMethod resample = ImageResamplingMethod.Auto,
+        CancellationToken token = default)
+    {
+        if (bmpSrc.IsDisposed()) return null;
+
+
+        try
+        {
+            // convert to bitmap stream
+            using var inputMs = ToBitmapStream(bmpSrc);
+            if (inputMs is null || token.IsCancellationRequested) return null;
+
+
+            // build settings
+            var settings = new ProcessImageSettings()
+            {
+                Width = width,
+                Height = height,
+                ResizeMode = CropScaleMode.Stretch,
+                HybridMode = HybridScaleMode.Turbo,
+                ColorProfileMode = ColorProfileMode.Preserve,
+            };
+
+            InterpolationSettings? interpolation = resample switch
+            {
+                ImageResamplingMethod.Average => InterpolationSettings.Average,
+                ImageResamplingMethod.CatmullRom => InterpolationSettings.CatmullRom,
+                ImageResamplingMethod.Cubic => InterpolationSettings.Cubic,
+                ImageResamplingMethod.CubicSmoother => InterpolationSettings.CubicSmoother,
+                ImageResamplingMethod.Hermite => InterpolationSettings.Hermite,
+                ImageResamplingMethod.Lanczos => InterpolationSettings.Lanczos,
+                ImageResamplingMethod.Linear => InterpolationSettings.Linear,
+                ImageResamplingMethod.Mitchell => InterpolationSettings.Mitchell,
+                ImageResamplingMethod.NearestNeighbor => InterpolationSettings.NearestNeighbor,
+                ImageResamplingMethod.Quadratic => InterpolationSettings.Quadratic,
+                ImageResamplingMethod.Spline36 => InterpolationSettings.Spline36,
+                _ => null,
+            };
+            if (interpolation != null) settings.Interpolation = interpolation.Value;
+
+
+            // perform resizing
+            using var outputMs = new MemoryStream();
+            await Task.Run(() =>
+            {
+                token.ThrowIfCancellationRequested();
+
+                _ = MagicImageProcessor.ProcessImage(inputMs, outputMs, settings);
+                outputMs.Position = 0;
+            }, token).ConfigureAwait(false);
+
+
+            // get output bitmap
+            return SKBitmap.Decode(outputMs);
+        }
+        catch (OperationCanceledException) { }
+        catch { }
+
+        return null;
+    }
+
+
+    /// <summary>
     /// Gets Skia color profile.
     /// </summary>
     /// <param name="name">Name or Full path of color profile</param>
@@ -997,7 +1065,84 @@ public static partial class SkiaCodec
     }
 
 
+    /// <summary>
+    /// Writes SKBitmap pixel data as an uncompressed 32-bit BMP into a MemoryStream.
+    /// </summary>
+    private static MemoryStream? ToBitmapStream(SKBitmap bmpSrc)
+    {
+        SKBitmap? converted = null;
+        try
+        {
+            var bmp = bmpSrc;
 
+            // BMP uses BGRA byte order; convert if the source uses a different color type
+            if (bmp.ColorType != SKColorType.Bgra8888)
+            {
+                var info = new SKImageInfo(bmp.Width, bmp.Height, SKColorType.Bgra8888, bmp.AlphaType);
+                converted = new SKBitmap(info);
+                if (!bmpSrc.CopyTo(converted, SKColorType.Bgra8888)) return null;
+                bmp = converted;
+            }
+
+            var w = bmp.Width;
+            var h = bmp.Height;
+            var bmpRowBytes = w * 4;
+
+            // guard against int overflow for extremely large images
+            long pixelBytesL = (long)bmpRowBytes * h;
+            if (pixelBytesL > int.MaxValue - 54) return null;
+
+            var pixelBytes = (int)pixelBytesL;
+            var fileSize = 54 + pixelBytes;
+
+            var ms = new MemoryStream(fileSize);
+
+            // BMP File Header (14 bytes) + BITMAPINFOHEADER (40 bytes)
+            using (var bw = new BinaryWriter(ms, System.Text.Encoding.UTF8, leaveOpen: true))
+            {
+                bw.Write((byte)'B');
+                bw.Write((byte)'M');
+                bw.Write(fileSize);       // file size
+                bw.Write(0);              // reserved
+                bw.Write(54);             // pixel data offset
+
+                bw.Write(40);             // DIB header size
+                bw.Write(w);
+                bw.Write(-h);             // negative = top-down row order
+                bw.Write((short)1);       // color planes
+                bw.Write((short)32);      // bits per pixel
+                bw.Write(0);              // BI_RGB (no compression)
+                bw.Write(pixelBytes);
+                bw.Write(0);              // X px/m
+                bw.Write(0);              // Y px/m
+                bw.Write(0);              // palette colors
+                bw.Write(0);              // important colors
+            }
+
+            // write raw pixel data
+            var pixels = bmp.GetPixelSpan();
+            var srcRowBytes = bmp.RowBytes;
+
+            if (srcRowBytes == bmpRowBytes)
+            {
+                ms.Write(pixels);
+            }
+            else
+            {
+                for (int y = 0; y < h; y++)
+                {
+                    ms.Write(pixels.Slice(y * srcRowBytes, bmpRowBytes));
+                }
+            }
+
+            ms.Position = 0;
+            return ms;
+        }
+        finally
+        {
+            converted?.Dispose();
+        }
+    }
 
 
 }

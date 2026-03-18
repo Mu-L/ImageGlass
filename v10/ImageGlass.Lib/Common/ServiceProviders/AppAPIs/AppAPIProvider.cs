@@ -2683,7 +2683,9 @@ public partial class AppAPIProvider
     public async Task IG_OpenImageResizerAsync()
     {
         if (Core.IsBusy) return;
+
         Core.IsBusy = true;
+        Viewer.StopAnimator();
 
         try
         {
@@ -2706,6 +2708,7 @@ public partial class AppAPIProvider
         }
         finally
         {
+            Viewer.StartAnimator();
             Core.IsBusy = false;
         }
     }
@@ -2737,6 +2740,7 @@ public partial class AppAPIProvider
 
         // 2. perform lossless compression
         Core.IsBusy = true;
+        Viewer.StopAnimator();
 
         var compressionWindow = new LosslessCompressionWindow(filePath)
         {
@@ -2761,6 +2765,7 @@ public partial class AppAPIProvider
         };
         _ = await compressionWindow.ShowAsync(_mainWindow);
 
+        Viewer.StartAnimator();
         Core.IsBusy = false;
     }
 

@@ -478,7 +478,6 @@
                                 <ui:PhMenuItem
                                     x:Name="PART_MnuResizeTool"
                                     Click="MainMenuItem_Click"
-                                    IsVisible="False"
                                     LangKey="FrmMain_MnuResizeTool" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuLosslessCompression" />
                                 <ui:PhMenuItem Header="-" IsVisible="False" />

@@ -90,8 +90,6 @@ public partial class AboutWindow : DialogWindow
 
         DialogContent = CreateDialogContentElement();
         DialogFooterLeftContent = CreateDialogFooterLeftContentElement();
-
-        _ = UpdateWindowIconAsync();
     }
 
 

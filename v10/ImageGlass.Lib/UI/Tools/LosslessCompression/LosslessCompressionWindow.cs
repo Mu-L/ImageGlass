@@ -40,6 +40,8 @@ public partial class LosslessCompressionWindow : ModalWindow
         if (string.IsNullOrEmpty(srcFilePath)) throw new ArgumentNullException(nameof(srcFilePath));
 
         _srcFileInfo = new FileInfo(srcFilePath);
+
+        ShowInTaskbar = true;
     }
 
 

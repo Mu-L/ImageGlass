@@ -192,6 +192,7 @@ public partial class DialogWindow : PhWindow
         CloseWindowHotkeys = [new(Avalonia.Input.Key.Escape)];
 
         Content = CreateContentElement();
+        _ = UpdateWindowIconAsync();
     }
 
 
