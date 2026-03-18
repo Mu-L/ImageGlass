@@ -43,10 +43,34 @@ public partial class ExportFramesWindow : ModalWindow
 
         _srcFilePath = srcFilePath;
         _destDirPath = destDirPath;
+        ShowInTaskbar = true;
+
+
+        Description = srcFilePath;
+        NoteStyle = InfoBarSeverity.Info;
+        Thumbnail = Core.Photos.Current?.GalleryThumbnail;
+
+        IsButton1Visible = true;
+        IsButton2Visible = true;
+        IsButton3Visible = false;
+        DefaultButton = DialogButton.Button1;
+        DefaultFocus = DialogFocus.Button1;
     }
 
 
+
     #region Override Methods
+
+    protected override void OnIgLanguageChanged()
+    {
+        base.OnIgLanguageChanged();
+
+        Title = Core.Lang[LangId.FrmExportFrames_Title];
+        Heading = Core.Lang[LangId.FrmExportFrames_Title];
+        Button1Text = Core.Lang[LangId._Start];
+        Button2Text = Core.Lang[LangId._Cancel];
+    }
+
 
     protected override void OnDialogSubmitted(DialogEventArgs e)
     {

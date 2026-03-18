@@ -511,28 +511,10 @@ public partial class AppAPIProvider
 
         // 3. export frames
         Core.IsBusy = true;
-        Viewer.StopAnimator();
 
-        var exportWindow = new ExportFramesWindow(srcFilePath, destDirPath)
-        {
-            Title = Core.Lang[LangId.FrmExportFrames_Title],
-            Heading = Core.Lang[LangId.FrmExportFrames_Title],
-            Description = srcFilePath,
-            NoteStyle = InfoBarSeverity.Info,
-            Thumbnail = Core.Photos.Current?.GalleryThumbnail,
-
-            Button1Text = Core.Lang[LangId._Start],
-            Button2Text = Core.Lang[LangId._Cancel],
-            IsButton1Visible = true,
-            IsButton2Visible = true,
-            IsButton3Visible = false,
-            DefaultButton = DialogButton.Button1,
-            DefaultFocus = DialogFocus.Button1,
-        };
-
-
+        var exportWindow = new ExportFramesWindow(srcFilePath, destDirPath);
         await exportWindow.ShowAsync(_mainWindow);
-        Viewer.StartAnimator();
+
         Core.IsBusy = false;
     }
 
@@ -2685,7 +2667,6 @@ public partial class AppAPIProvider
         if (Core.IsBusy) return;
 
         Core.IsBusy = true;
-        Viewer.StopAnimator();
 
         try
         {
@@ -2708,7 +2689,6 @@ public partial class AppAPIProvider
         }
         finally
         {
-            Viewer.StartAnimator();
             Core.IsBusy = false;
         }
     }
@@ -2740,32 +2720,10 @@ public partial class AppAPIProvider
 
         // 2. perform lossless compression
         Core.IsBusy = true;
-        Viewer.StopAnimator();
 
-        var compressionWindow = new LosslessCompressionWindow(filePath)
-        {
-            Title = Core.Lang[LangId.FrmMain_MnuLosslessCompression],
-            Heading = Core.Lang[LangId.FrmMain_MnuLosslessCompression_Confirm],
-            Description = Core.Lang[LangId.FrmMain_MnuLosslessCompression_Description],
-            Note = $"""
-            {filePath}
-
-            {Core.Photos.CurrentMetadata?.FileSizeFormatted}
-            """,
-            NoteStyle = InfoBarSeverity.Info,
-            Thumbnail = Core.Photos.Current?.GalleryThumbnail,
-
-            Button1Text = Core.Lang[LangId._Yes],
-            Button2Text = Core.Lang[LangId._No],
-            IsButton1Visible = true,
-            IsButton2Visible = true,
-            IsButton3Visible = false,
-            DefaultButton = DialogButton.Button1,
-            DefaultFocus = DialogFocus.Button1,
-        };
+        var compressionWindow = new LosslessCompressionWindow(filePath);
         _ = await compressionWindow.ShowAsync(_mainWindow);
 
-        Viewer.StartAnimator();
         Core.IsBusy = false;
     }
 

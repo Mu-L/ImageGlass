@@ -860,6 +860,10 @@ public partial class ViewerControl : PhControl
     /// </summary>
     private void Animator_FrameChanged(AnimatorImpl sender, AnimatorFrameChangedEventArgs e)
     {
+        // pause animation when app is busy
+        if (Core.IsBusy) return;
+
+
         // update the frame bitmap
         var renderedFrame = sender.GetRenderedFrameBitmap(e.CurrentFrame);
 

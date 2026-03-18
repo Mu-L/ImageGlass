@@ -42,11 +42,36 @@ public partial class LosslessCompressionWindow : ModalWindow
         _srcFileInfo = new FileInfo(srcFilePath);
 
         ShowInTaskbar = true;
+        Note = $"""
+            {srcFilePath}
+
+            {Core.Photos.CurrentMetadata?.FileSizeFormatted}
+            """;
+        NoteStyle = InfoBarSeverity.Info;
+        Thumbnail = Core.Photos.Current?.GalleryThumbnail;
+
+        IsButton1Visible = true;
+        IsButton2Visible = true;
+        IsButton3Visible = false;
+        DefaultButton = DialogButton.Button1;
+        DefaultFocus = DialogFocus.Button1;
     }
 
 
 
     #region Override Methods
+
+    protected override void OnIgLanguageChanged()
+    {
+        base.OnIgLanguageChanged();
+
+        Title = Core.Lang[LangId.FrmMain_MnuLosslessCompression];
+        Heading = Core.Lang[LangId.FrmMain_MnuLosslessCompression_Confirm];
+        Description = Core.Lang[LangId.FrmMain_MnuLosslessCompression_Description];
+        Button1Text = Core.Lang[LangId._Yes];
+        Button2Text = Core.Lang[LangId._No];
+    }
+
 
     protected override void OnDialogSubmitted(DialogEventArgs e)
     {

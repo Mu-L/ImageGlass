@@ -270,7 +270,6 @@ public partial class ToolbarControl : PhControl
             = PART_MnuRotateRight.IsEnabled
             = PART_MnuFlipHorizontal.IsEnabled
             = PART_MnuFlipVertical.IsEnabled
-            = PART_MnuResizeTool.IsEnabled
             = !isAnimator;
     }
 
