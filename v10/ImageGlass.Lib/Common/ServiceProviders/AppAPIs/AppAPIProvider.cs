@@ -2683,7 +2683,31 @@ public partial class AppAPIProvider
     public async Task IG_OpenImageResizerAsync()
     {
         if (Core.IsBusy) return;
+        Core.IsBusy = true;
 
+        try
+        {
+            // 1. get current bitmap
+            using var srcBmp = Viewer.GetRenderedBitmap();
+            if (srcBmp.IsDisposed()) return;
+
+
+            // 2. show resizer window
+            var resizerWindow = new ImageResizerWindow(srcBmp);
+            var result = await resizerWindow.ShowAsync(_mainWindow);
+
+
+            // 3. show the output image
+            if (result == DialogExitCode.OK && !resizerWindow.OutputBitmap.IsDisposed())
+            {
+                var photo = new Photo(resizerWindow.OutputBitmap);
+                await LoadClipboardPhotoAsync(photo);
+            }
+        }
+        finally
+        {
+            Core.IsBusy = false;
+        }
     }
 
 

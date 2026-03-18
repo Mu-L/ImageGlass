@@ -202,7 +202,7 @@ public partial class DialogWindow : PhWindow
     {
         base.OnLoaded(e);
         ApplyTheme();
-        SetDefaultButton();
+        SetDefaultButton(DefaultButton);
 
         // Note: need a delay so that pressing Space key won't hit the focused button
         await Task.Delay(200);
@@ -574,19 +574,19 @@ public partial class DialogWindow : PhWindow
     /// <summary>
     /// Sets the default button style.
     /// </summary>
-    protected void SetDefaultButton()
+    protected void SetDefaultButton(DialogButton btn)
     {
-        if (DefaultButton == DialogButton.Button1)
+        if (btn == DialogButton.Button1)
         {
             _btn1.IsDefault = true;
             _btn1.Classes.Add("accent");
         }
-        else if (DefaultButton == DialogButton.Button2)
+        else if (btn == DialogButton.Button2)
         {
             _btn2.IsDefault = true;
             _btn2.Classes.Add("accent");
         }
-        else if (DefaultButton == DialogButton.Button3)
+        else if (btn == DialogButton.Button3)
         {
             _btn3.IsDefault = true;
             _btn3.Classes.Add("accent");

@@ -111,6 +111,26 @@ public enum ImageOrderType
 }
 
 
+/// <summary>
+/// Options for image resampling methods.
+/// </summary>
+public enum ImageResamplingMethod : int
+{
+    Auto = 0,
+    Average,
+    CatmullRom,
+    Cubic,
+    CubicSmoother,
+    Hermite,
+    Lanczos,
+    Linear,
+    Mitchell,
+    NearestNeighbor,
+    Quadratic,
+    Spline36,
+}
+
+
 public enum OSType
 {
     Unknown,
