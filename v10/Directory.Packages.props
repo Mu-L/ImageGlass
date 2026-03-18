@@ -16,10 +16,11 @@
     <PackageVersion Include="D2Phap.EggShell-ARM64" Version="1.1.208" />
     <PackageVersion Include="D2Phap.EggShell-x64" Version="1.1.208" />
     <PackageVersion Include="D2Phap.FileWatcherEx" Version="3.0.0" />
-    <PackageVersion Include="Magick.NET-Q8-arm64" Version="14.10.4" />
-    <PackageVersion Include="Magick.NET-Q8-OpenMP-arm64" Version="14.10.4" />
-    <PackageVersion Include="Magick.NET-Q8-OpenMP-x64" Version="14.10.4" />
+    <PackageVersion Include="Magick.NET-Q8-arm64" Version="14.11.0" />
+    <PackageVersion Include="Magick.NET-Q8-OpenMP-arm64" Version="14.11.0" />
+    <PackageVersion Include="Magick.NET-Q8-OpenMP-x64" Version="14.11.0" />
     <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.269" />
+    <PackageVersion Include="PhotoSauce.MagicScaler" Version="0.15.0" />
     <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="11.3.9.4" />
   </ItemGroup>
 </Project>
