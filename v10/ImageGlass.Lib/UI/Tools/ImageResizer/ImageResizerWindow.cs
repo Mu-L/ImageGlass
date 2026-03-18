@@ -534,6 +534,8 @@ public partial class ImageResizerWindow : ModalWindow
                 (int)_outputSize.Width,
                 (int)_outputSize.Height, resample, _cancel.Token);
 
+            await Task.Delay(200, _cancel.Token); // make it feel slow for better UX
+
 
             // done
             Dispatcher.UIThread.Post(() =>
@@ -545,8 +547,6 @@ public partial class ImageResizerWindow : ModalWindow
                 DialogResult = DialogExitCode.OK;
                 Close(DialogResult);
             });
-
-            await Task.Delay(200, _cancel.Token); // make it feel slow for better UX
         }, _cancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
     }
 

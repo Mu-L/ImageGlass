@@ -51,6 +51,7 @@
         </Style>
 
 
+
         <!--  Menu item  -->
         <Style Selector="MenuItem">
             <Setter Property="Margin" Value="4, 0" />
@@ -81,8 +82,24 @@
         </Style>
 
 
+
+        <!--  ComboBoxItem  -->
+        <Style Selector="ComboBoxItem">
+            <Setter Property="Margin" Value="4, 0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+
+            <Style Selector="^ /template/ PathIcon#DropDownGlyph">
+                <Setter Property="Width" Value="10" />
+                <Setter Property="Height" Value="10" />
+            </Style>
+        </Style>
+
+
+
         <!--  Fixed: focus style  -->
-        <Style Selector="Button, ToggleButton, CheckBox, TextBox, SelectableTextBlock, RadioButton, ContextMenu, MenuItem">
+        <Style Selector="Button, ToggleButton, CheckBox, RadioButton, TextBox, SelectableTextBlock, ComboBox, ContextMenu, MenuItem">
             <Setter Property="FocusAdorner">
                 <FocusAdornerTemplate>
                     <Border
@@ -119,6 +136,11 @@
             <Thickness x:Key="MenuInputGestureTextMargin">6,0,0,0</Thickness>
             <Thickness x:Key="MenuIconPresenterMargin">0,0,6,0</Thickness>
             <Thickness x:Key="MenuFlyoutItemChevronMargin">6,0,0,0</Thickness>
+
+            <!--  Combobox  -->
+            <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="{DynamicResource SystemAltMediumLowColor}" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="{DynamicResource SystemAccentColor}" />
+            <Thickness x:Key="ComboBoxItemThemePadding">8,3,8,5</Thickness>
 
             <!--  Tooltip  -->
             <x:Double x:Key="ToolTipContentThemeFontSize">13</x:Double>

@@ -357,10 +357,11 @@ public static class Core
 
         // update border color
         Resx.Set(ResxId.TextControlBorderBrush, borderControl);
+        Resx.Set(ResxId.ComboBoxBorderBrush, borderControl);
         Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUnchecked, borderControl);
 
 
-        // update dropdown menu
+        // update dropdown menu =======
         var menuBg = AppThemeColors.MenuBgBrush.Color.NoAlpha(); // no alpha support
         var menuBorder = Core.Theme.InvertedBaseColor.WithAlpha(30);
         var menuText = AppThemeColors.TextColorBrush.Color;
@@ -369,6 +370,7 @@ public static class Core
         Resx.Set(ResxId.MenuFlyoutPresenterBackground, menuBg);
         Resx.Set(ResxId.MenuFlyoutPresenterBorderBrush, menuBorder);
         Resx.Set(ResxId.IG_MenuSeparatorBackground, menuText.A(20));
+
 
         // menu text
         Resx.Set(ResxId.MenuFlyoutItemForeground, menuText);
@@ -394,6 +396,16 @@ public static class Core
         Resx.Set(ResxId.ToolTipForeground, menuText);
         Resx.Set(ResxId.ToolTipBackground, menuBg);
         Resx.Set(ResxId.ToolTipBorder, menuBorder);
+
+
+        // combobox ===========
+        Resx.Set(ResxId.ComboBoxDropDownBackground, menuBg);
+        Resx.Set(ResxId.ComboBoxDropDownBorderBrush, menuBorder);
+
+        Resx.Set(ResxId.ComboBoxItemForeground, menuText);
+        Resx.Set(ResxId.ComboBoxItemForegroundPointerOver, menuText);
+        Resx.Set(ResxId.ComboBoxItemForegroundPressed, menuText);
+        Resx.Set(ResxId.ComboBoxItemForegroundDisabled, menuTextDisabled);
     }
 
 
@@ -427,6 +439,7 @@ public static class Core
         // border hover styles
         var borderHoverBrush = accentLight1.ToBrush();
         Resx.Set(ResxId.TextControlBorderBrushPointerOver, borderHoverBrush);
+        Resx.Set(ResxId.ComboBoxBorderBrushPointerOver, borderHoverBrush);
         Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUncheckedPointerOver, borderHoverBrush);
 
 
@@ -446,6 +459,12 @@ public static class Core
         Resx.Set(ResxId.MenuFlyoutItemBackground, btnBg);
         Resx.Set(ResxId.MenuFlyoutItemBackgroundPointerOver, btnBgHover);
         Resx.Set(ResxId.MenuFlyoutItemBackgroundPressed, btnBgPressed);
+
+        // combobox item background
+        Resx.Set(ResxId.ComboBoxItemBackground, btnBg);
+        Resx.Set(ResxId.ComboBoxItemBackgroundPointerOver, btnBgHover);
+        Resx.Set(ResxId.ComboBoxItemBackgroundPressed, btnBgPressed);
+        Resx.Set(ResxId.ComboBoxItemBackgroundSelected, btnBgChecked);
     }
 
 

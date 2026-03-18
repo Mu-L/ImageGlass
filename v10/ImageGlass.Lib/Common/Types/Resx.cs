@@ -107,11 +107,13 @@ public enum ResxId
     // border color
     TextControlBorderBrush,
     TextControlBorderBrushPointerOver,
+    ComboBoxBorderBrush,
+    ComboBoxBorderBrushPointerOver,
     CheckBoxCheckBackgroundStrokeUnchecked,
     CheckBoxCheckBackgroundStrokeUncheckedPointerOver,
 
 
-    // menu
+    // menu =======
     MenuFlyoutPresenterBackground,
     MenuFlyoutPresenterBorderBrush,
 
@@ -144,6 +146,22 @@ public enum ResxId
     ToolTipBackground,
     ToolTipForeground,
     ToolTipBorder,
+
+
+    // combobox ========
+    ComboBoxDropDownBackground,
+    ComboBoxDropDownBorderBrush,
+
+    ComboBoxItemForeground,
+    ComboBoxItemForegroundPointerOver,
+    ComboBoxItemForegroundPressed,
+    ComboBoxItemForegroundDisabled,
+    ComboBoxItemForegroundSelected,
+
+    ComboBoxItemBackground,
+    ComboBoxItemBackgroundPointerOver,
+    ComboBoxItemBackgroundPressed,
+    ComboBoxItemBackgroundSelected,
 
 
     // theme pack
