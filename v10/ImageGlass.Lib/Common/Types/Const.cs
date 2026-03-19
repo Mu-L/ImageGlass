@@ -66,22 +66,6 @@ public static class Const
     public const string FRAME_NAV_TOOLBAR_TOGGLE_ANIMATION = "Btn_FrameNav_ToggleFrameAnimation";
 
 
-    ///// <summary>
-    ///// Gets the aspect ratio value.
-    ///// </summary>
-    //public static Dictionary<SelectionAspectRatio, int[]> AspectRatioValue => new(9)
-    //{
-    //    { SelectionAspectRatio.Ratio1_1,    [1, 1] },
-    //    { SelectionAspectRatio.Ratio1_2,    [1, 2] },
-    //    { SelectionAspectRatio.Ratio2_1,    [2, 1] },
-    //    { SelectionAspectRatio.Ratio2_3,    [2, 3] },
-    //    { SelectionAspectRatio.Ratio3_2,    [3, 2] },
-    //    { SelectionAspectRatio.Ratio3_4,    [3, 4] },
-    //    { SelectionAspectRatio.Ratio4_3,    [4, 3] },
-    //    { SelectionAspectRatio.Ratio9_16,   [9, 16] },
-    //    { SelectionAspectRatio.Ratio16_9,   [16, 9] },
-    //};
-
     /// <summary>
     /// Quick setup version constant.
     /// If the value read from config file is less than this value,

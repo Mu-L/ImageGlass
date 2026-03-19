@@ -2674,27 +2674,27 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_ToggleCropTool(bool? enabled = null)
     {
-        //var toolId = ColorPickerToolControl.TOOL_ID;
-        //var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
+        var toolId = CropToolControl.TOOL_ID;
+        var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
 
-        //enabled ??= !isOpen;
-        //isOpen = enabled.Value;
-        //Core.ToolMap[toolId] = isOpen;
+        enabled ??= !isOpen;
+        isOpen = enabled.Value;
+        Core.ToolMap[toolId] = isOpen;
 
-        //if (enabled.Value)
-        //{
-        //    if (ToolHost.CloseCurrentTool())
-        //    {
-        //        ToolHost.OpenTool(new ColorPickerToolControl()
-        //        {
-        //            Viewer = Viewer,
-        //        });
-        //    }
-        //}
-        //else
-        //{
-        //    ToolHost.CloseTool(toolId);
-        //}
+        if (enabled.Value)
+        {
+            if (ToolHost.CloseCurrentTool())
+            {
+                ToolHost.OpenTool(new CropToolControl()
+                {
+                    Viewer = Viewer,
+                });
+            }
+        }
+        else
+        {
+            ToolHost.CloseTool(toolId);
+        }
     }
 
 

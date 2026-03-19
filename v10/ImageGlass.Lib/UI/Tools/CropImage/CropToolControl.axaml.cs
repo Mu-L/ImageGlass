@@ -1,0 +1,91 @@
+/*
+ImageGlass - A lightweight, versatile image viewer
+Copyright (C) 2010 - 2026 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+using ImageGlass.UI.Viewer;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace ImageGlass.UI;
+
+public partial class CropToolControl : PhControl, IToolControl
+{
+    public static string TOOL_ID => "CropImage";
+    public string ToolId => TOOL_ID;
+    public bool HasSettingsUI => true;
+    public object? Settings { get; private set; } = new CropImageConfig();
+    public CropImageConfig Options => (CropImageConfig)Settings!;
+    public ViewerControl Viewer { get; init; } = null!;
+
+
+
+
+    public CropToolControl()
+    {
+        InitializeComponent();
+    }
+
+
+
+
+    #region Control Methods
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void LoadSettings(JsonElement? jsonEl)
+    {
+        var settings = jsonEl?.Deserialize(CropImageConfigJsonContext.Default.CropImageConfig);
+        if (settings is not null)
+        {
+            Settings = settings;
+        }
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public JsonElement? SaveSettings()
+    {
+        var jsonEl = JsonSerializer.SerializeToElement(Options, CropImageConfigJsonContext.Default.CropImageConfig);
+
+        return jsonEl;
+    }
+
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public async Task ShowSettingsWindowAsync()
+    {
+        //var window = new ColorPickerSettingsWindow(Options);
+        //var owner = TopLevel.GetTopLevel(this) as PhWindow;
+        //var result = await window.ShowAsync(owner);
+
+        //if (result == DialogExitCode.OK)
+        //{
+        //    Settings = window.ResultConfig;
+        //    RaiseColorFormatPropertiesChanged();
+        //}
+    }
+
+    #endregion // Control Methods
+
+
+
+}
