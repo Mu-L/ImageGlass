@@ -107,7 +107,8 @@ public enum API
     IG_ToggleWindowTopMost,
 
     // Menu > Tools
-    IG_ToggleToolColorPicker,
+    IG_ToggleColorPicker,
+    IG_ToggleCropTool,
     IG_OpenImageResizer,
     IG_LosslessCompression,
     IG_GetMoreTool,

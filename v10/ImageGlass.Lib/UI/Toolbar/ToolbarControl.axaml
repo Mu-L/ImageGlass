@@ -467,6 +467,7 @@
                             <!--  Tools  -->
                             <ui:PhMenuItem LangKey="FrmMain_MnuTools">
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuColorPicker" />
+                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuCropTool" />
                                 <ui:PhMenuItem
                                     Click="MainMenuItem_Click"
                                     IsVisible="False"

@@ -2623,17 +2623,17 @@ public partial class AppAPIProvider
     /// <summary>
     /// Toggles visibility of Color picker tool.
     /// </summary>
-    public void IG_ToggleToolColorPicker(string? boolStr = null)
+    public void IG_ToggleColorPicker(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
-        IG_ToggleToolColorPicker(enabled);
+        IG_ToggleColorPicker(enabled);
     }
 
 
     /// <summary>
     /// Toggles visibility of Color picker tool
     /// </summary>
-    public void IG_ToggleToolColorPicker(bool? enabled = null)
+    public void IG_ToggleColorPicker(bool? enabled = null)
     {
         var toolId = ColorPickerToolControl.TOOL_ID;
         var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
@@ -2656,6 +2656,45 @@ public partial class AppAPIProvider
         {
             ToolHost.CloseTool(toolId);
         }
+    }
+
+
+    /// <summary>
+    /// Toggles visibility of Crop tool.
+    /// </summary>
+    public void IG_ToggleCropTool(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleCropTool(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggles visibility of Crop tool.
+    /// </summary>
+    public void IG_ToggleCropTool(bool? enabled = null)
+    {
+        //var toolId = ColorPickerToolControl.TOOL_ID;
+        //var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
+
+        //enabled ??= !isOpen;
+        //isOpen = enabled.Value;
+        //Core.ToolMap[toolId] = isOpen;
+
+        //if (enabled.Value)
+        //{
+        //    if (ToolHost.CloseCurrentTool())
+        //    {
+        //        ToolHost.OpenTool(new ColorPickerToolControl()
+        //        {
+        //            Viewer = Viewer,
+        //        });
+        //    }
+        //}
+        //else
+        //{
+        //    ToolHost.CloseTool(toolId);
+        //}
     }
 
 
