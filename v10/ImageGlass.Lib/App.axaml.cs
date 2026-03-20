@@ -185,24 +185,34 @@ public partial class App : Application
     }
 
 
-    private static async void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    private static void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        await ModalWindow.ShowUnhandledErrorAsync(e.Exception);
+        e.SetObserved();
+        var ex = e.Exception;
+
+        Dispatcher.UIThread.Post(async () =>
+        {
+            await ModalWindow.ShowUnhandledErrorAsync(ex);
 
 #if DEBUG
-        throw e.Exception;
+            throw ex;
 #endif
+        });
     }
 
 
-    private async void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
         var ex = (Exception)e.ExceptionObject;
-        _ = await ModalWindow.ShowUnhandledErrorAsync(ex);
+
+        Dispatcher.UIThread.Post(async () =>
+        {
+            _ = await ModalWindow.ShowUnhandledErrorAsync(ex);
 
 #if DEBUG
-        throw ex;
+            throw ex;
 #endif
+        });
     }
 
     #endregion // Unhandled Exception Handlers
