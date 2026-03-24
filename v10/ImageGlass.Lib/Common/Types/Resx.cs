@@ -92,12 +92,12 @@ public enum ResxId
     // control styles
     ControlCornerRadius,
     ContentControlThemeFontFamily,
-    TextControlBackground,
 
 
     // text color
     SystemControlForegroundBaseHighBrush,
     TextControlForeground,
+    ButtonForeground,
     CheckBoxForegroundChecked,
     CheckBoxForegroundCheckedPointerOver,
     CheckBoxForegroundUnchecked,
@@ -107,6 +107,7 @@ public enum ResxId
     // border color
     TextControlBorderBrush,
     TextControlBorderBrushPointerOver,
+    TextControlBorderBrushDisabled,
     ComboBoxBorderBrush,
     ComboBoxBorderBrushPointerOver,
     CheckBoxCheckBackgroundStrokeUnchecked,
@@ -149,6 +150,7 @@ public enum ResxId
 
 
     // combobox ========
+    ComboBoxForeground,
     ComboBoxDropDownBackground,
     ComboBoxDropDownBorderBrush,
 

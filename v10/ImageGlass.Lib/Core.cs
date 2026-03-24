@@ -350,6 +350,7 @@ public static class Core
 
         Resx.Set(ResxId.SystemControlForegroundBaseHighBrush, textBrush);
         Resx.Set(ResxId.TextControlForeground, textBrush);
+        Resx.Set(ResxId.ButtonForeground, textBrush);
         Resx.Set(ResxId.CheckBoxForegroundChecked, textBrush);
         Resx.Set(ResxId.CheckBoxForegroundCheckedPointerOver, textBrush);
         Resx.Set(ResxId.CheckBoxForegroundUnchecked, textBrush);
@@ -357,6 +358,7 @@ public static class Core
 
         // update border color
         Resx.Set(ResxId.TextControlBorderBrush, borderControl);
+        Resx.Set(ResxId.TextControlBorderBrushDisabled, borderControl);
         Resx.Set(ResxId.ComboBoxBorderBrush, borderControl);
         Resx.Set(ResxId.CheckBoxCheckBackgroundStrokeUnchecked, borderControl);
 
@@ -399,6 +401,7 @@ public static class Core
 
 
         // combobox ===========
+        Resx.Set(ResxId.ComboBoxForeground, textBrush);
         Resx.Set(ResxId.ComboBoxDropDownBackground, menuBg);
         Resx.Set(ResxId.ComboBoxDropDownBorderBrush, menuBorder);
 

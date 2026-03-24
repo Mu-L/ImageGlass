@@ -148,6 +148,11 @@ public partial class MainWindow : PhWindow
         base.OnKeyDown(e);
         if (e.Handled) return;
 
+        if (e.Source is TextBox
+            or NumericUpDown
+            or MaskedTextBox
+            or AutoCompleteBox) return;
+
         // process app hotkeys
         if (Core.API is not null)
         {

@@ -1819,7 +1819,7 @@ public partial class AppAPIProvider
     }
 
 
-    private async Task LoadClipboardPhotoAsync(Photo? photo)
+    public async Task LoadClipboardPhotoAsync(Photo? photo)
     {
         // cancel the current loading image
         Core.Photos.Current?.CancelLoading();

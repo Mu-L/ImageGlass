@@ -140,11 +140,11 @@ public partial class ToolHostControl : PhControl
 
         try
         {
+            HasSettings = newTool.HasSettingsUI;
+
             // load tool settings
             var jsonEl = Core.Config.ToolSettings.GetValueOrDefault(newTool.ToolId);
             newTool.LoadSettings(jsonEl);
-
-            HasSettings = newTool.HasSettingsUI;
         }
         catch { }
 

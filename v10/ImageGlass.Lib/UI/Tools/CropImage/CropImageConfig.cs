@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using ImageGlass.Common.Types;
+using ImageGlass.Common.Types.JsonTypeConverters;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -65,6 +66,7 @@ public class CropImageConfig() : PhReactive
     /// <summary>
     /// Gets, sets the aspect ratio type.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<SelectionAspectRatio>))]
     public SelectionAspectRatio AspectRatio
     {
         get; set
@@ -79,6 +81,7 @@ public class CropImageConfig() : PhReactive
     /// <summary>
     /// Gets, sets the aspect ratio values.
     /// </summary>
+    [JsonConverter(typeof(JsonArrayToIntConverter))]
     public int[] AspectRatioValues
     {
         get; set
@@ -93,6 +96,7 @@ public class CropImageConfig() : PhReactive
     /// <summary>
     /// Gets, sets the default selection type.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<DefaultSelectionType>))]
     public DefaultSelectionType InitSelectionType
     {
         get; set
@@ -107,6 +111,7 @@ public class CropImageConfig() : PhReactive
     /// <summary>
     /// Gets, sets the custom selection area is used for <see cref="DefaultSelectionType.CustomArea"/>.
     /// </summary>
+    [JsonConverter(typeof(JsonArrayToRectConverter))]
     public Rect InitSelectedArea
     {
         get; set

@@ -670,18 +670,11 @@ public enum LangId
     FrmCrop_SelectionAspectRatio_Custom,
     FrmCrop_SelectionAspectRatio_Original,
 
-    FrmCrop_BtnQuickSelect_Tooltip,
-    FrmCrop_BtnReset_Tooltip,
-    FrmCrop_BtnSettings_Tooltip,
-
+    FrmCrop_BtnReset,
     FrmCrop_BtnSave,
-    FrmCrop_BtnSave_Tooltip,
     FrmCrop_BtnSaveAs,
-    FrmCrop_BtnSaveAs_Tooltip,
     FrmCrop_BtnCrop,
-    FrmCrop_BtnCrop_Tooltip,
     FrmCrop_BtnCopy,
-    FrmCrop_BtnCopy_Tooltip,
 
 
     // Crop settings

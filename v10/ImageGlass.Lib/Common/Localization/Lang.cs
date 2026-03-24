@@ -933,18 +933,11 @@ public class Lang
         new(LangId.FrmCrop_SelectionAspectRatio_Custom, "Custom…"), //v9.0
         new(LangId.FrmCrop_SelectionAspectRatio_Original, "Original"), //v9.0
 
-        new(LangId.FrmCrop_BtnQuickSelect_Tooltip, "Quick select…"), //v9.0
-        new(LangId.FrmCrop_BtnReset_Tooltip, "Reset selection"), //v9.0
-        new(LangId.FrmCrop_BtnSettings_Tooltip, "Open Crop tool settings"), //v9.0
-
+        new(LangId.FrmCrop_BtnReset, "Reset"), //v9.0
         new(LangId.FrmCrop_BtnSave, "Save"), //v9.0
-        new(LangId.FrmCrop_BtnSave_Tooltip, "Save image"), //v9.0
         new(LangId.FrmCrop_BtnSaveAs, "Save as…"), //v9.0
-        new(LangId.FrmCrop_BtnSaveAs_Tooltip, "Save as a copy…"), //v9.0
         new(LangId.FrmCrop_BtnCrop, "Crop"), //v9.0
-        new(LangId.FrmCrop_BtnCrop_Tooltip, "Crop image only"), //v9.0
         new(LangId.FrmCrop_BtnCopy, "Copy"), //v9.0
-        new(LangId.FrmCrop_BtnCopy_Tooltip, "Copy selection to clipboard"), //v9.0
 
         // Crop settings
         new(LangId.FrmCropSettings_Title, "Crop settings"), //v9.0
