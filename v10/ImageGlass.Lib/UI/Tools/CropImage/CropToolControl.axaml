@@ -119,86 +119,31 @@
             ItemSpacing="6"
             LineSpacing="6"
             Orientation="Horizontal">
-            <Button
-                x:Name="PART_BtnReset"
-                MinWidth="80"
-                HorizontalContentAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <PathIcon
-                        Width="14"
-                        Height="14"
-                        Data="{StaticResource ResetIconGeometry}"
-                        Foreground="{DynamicResource ButtonForeground}" />
-                    <TextBlock
-                        x:Name="PART_BtnReset_Text"
-                        Foreground="{DynamicResource ButtonForeground}"
-                        Text="[Reset]" />
-                </StackPanel>
-            </Button>
-            <Button
-                x:Name="PART_BtnSave"
-                MinWidth="80"
-                HorizontalContentAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <PathIcon
-                        Width="14"
-                        Height="14"
-                        Data="{StaticResource SaveIconGeometry}"
-                        Foreground="{DynamicResource ButtonForeground}" />
-                    <TextBlock
-                        x:Name="PART_BtnSave_Text"
-                        Foreground="{DynamicResource ButtonForeground}"
-                        Text="[Save]" />
-                </StackPanel>
-            </Button>
-            <Button
-                x:Name="PART_BtnSaveAs"
-                MinWidth="80"
-                HorizontalContentAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <PathIcon
-                        Width="14"
-                        Height="14"
-                        Data="{StaticResource SaveAsIconGeometry}"
-                        Foreground="{DynamicResource ButtonForeground}" />
-                    <TextBlock
-                        x:Name="PART_BtnSaveAs_Text"
-                        Foreground="{DynamicResource ButtonForeground}"
-                        Text="[Save As]" />
-                </StackPanel>
-            </Button>
-            <Button
+            <ui:PhButton
                 x:Name="PART_BtnCrop"
                 MinWidth="80"
-                HorizontalContentAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <PathIcon
-                        Width="14"
-                        Height="14"
-                        Data="{StaticResource CropIconGeometry}"
-                        Foreground="{DynamicResource ButtonForeground}" />
-                    <TextBlock
-                        x:Name="PART_BtnCrop_Text"
-                        Foreground="{DynamicResource ButtonForeground}"
-                        Text="[Crop]" />
-                </StackPanel>
-            </Button>
-            <Button
+                HorizontalContentAlignment="Center"
+                IconData="{StaticResource CropIconGeometry}" />
+            <ui:PhButton
                 x:Name="PART_BtnCopy"
                 MinWidth="80"
-                HorizontalContentAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <PathIcon
-                        Width="14"
-                        Height="14"
-                        Data="{StaticResource CopyIconGeometry}"
-                        Foreground="{DynamicResource ButtonForeground}" />
-                    <TextBlock
-                        x:Name="PART_BtnCopy_Text"
-                        Foreground="{DynamicResource ButtonForeground}"
-                        Text="[Copy]" />
-                </StackPanel>
-            </Button>
+                HorizontalContentAlignment="Center"
+                IconData="{StaticResource CopyIconGeometry}" />
+            <ui:PhButton
+                x:Name="PART_BtnSave"
+                MinWidth="80"
+                HorizontalContentAlignment="Center"
+                IconData="{StaticResource SaveIconGeometry}" />
+            <ui:PhButton
+                x:Name="PART_BtnSaveAs"
+                MinWidth="80"
+                HorizontalContentAlignment="Center"
+                IconData="{StaticResource SaveAsIconGeometry}" />
+            <ui:PhButton
+                x:Name="PART_BtnReset"
+                MinWidth="80"
+                HorizontalContentAlignment="Center"
+                IconData="{StaticResource ResetIconGeometry}" />
         </WrapPanel>
 
     </WrapPanel>
