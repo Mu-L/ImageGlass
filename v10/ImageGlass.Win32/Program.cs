@@ -66,6 +66,7 @@ sealed class Program
 #endif
         .UseWin32()
         .UseSkia()
+        .UseHarfBuzz()
         .With(new SkiaOptions
         {
             MaxGpuResourceSizeBytes = long.MaxValue,

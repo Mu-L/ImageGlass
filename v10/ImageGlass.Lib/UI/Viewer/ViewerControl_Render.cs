@@ -121,7 +121,7 @@ public partial class ViewerControl
         set => SetValue(InterpolationScaleDownProperty, value);
     }
     public static readonly StyledProperty<ImageInterpolation> InterpolationScaleDownProperty =
-        AvaloniaProperty.Register<ViewerControl, ImageInterpolation>(nameof(InterpolationScaleDown), ImageInterpolation.Medium, coerce: (sender, value) =>
+        AvaloniaProperty.Register<ViewerControl, ImageInterpolation>(nameof(InterpolationScaleDown), ImageInterpolation.CubicMitchell, coerce: (sender, value) =>
         {
             Dispatcher.UIThread.Post(() =>
             {
@@ -143,7 +143,7 @@ public partial class ViewerControl
         set => SetValue(InterpolationScaleUpProperty, value);
     }
     public static readonly StyledProperty<ImageInterpolation> InterpolationScaleUpProperty =
-        AvaloniaProperty.Register<ViewerControl, ImageInterpolation>(nameof(InterpolationScaleUp), ImageInterpolation.Medium, coerce: (sender, value) =>
+        AvaloniaProperty.Register<ViewerControl, ImageInterpolation>(nameof(InterpolationScaleUp), ImageInterpolation.CubicMitchell, coerce: (sender, value) =>
         {
             Dispatcher.UIThread.Post(() =>
             {
@@ -165,7 +165,7 @@ public partial class ViewerControl
             if (ZoomFactor < 1f) return InterpolationScaleDown;
             if (ZoomFactor > 1f) return InterpolationScaleUp;
 
-            return ImageInterpolation.None;
+            return ImageInterpolation.Nearest;
         }
     }
 

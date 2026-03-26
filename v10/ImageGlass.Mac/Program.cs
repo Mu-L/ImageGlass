@@ -68,6 +68,7 @@ sealed class Program
         .UseAvaloniaNative()
 #endif
         .UseSkia()
+        .UseHarfBuzz()
         .With(new SkiaOptions
         {
             MaxGpuResourceSizeBytes = long.MaxValue,

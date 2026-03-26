@@ -97,22 +97,65 @@ public enum AnimationSources
 /// </summary>
 public enum ImageInterpolation : int
 {
-    //
-    // Summary:
-    //     Disable interpolation.
-    None = 0,
-    //
-    // Summary:
-    //     The best performance but worst image quality. 
-    Low = 2,
-    //
-    // Summary:
-    //     Good performance and decent image quality.
-    Medium = 3,
-    //
-    // Summary:
-    //     Highest quality but worst performance.
-    High = 4,
+    /// <summary>
+    /// Nearest-neighbor. No blending. 
+    /// Best for: Pixel art, 'retro' aesthetics, or viewing individual pixels when zoomed in > 1000%.
+    /// Performance: Fastest.
+    /// </summary>
+    Nearest,
+
+    /// <summary>
+    /// Nearest-neighbor with nearest mipmap level.
+    /// Best for: Decreasing aliasing in high-speed thumbnail scrolling where quality is secondary to speed.
+    /// </summary>
+    NearestMipmapNearest,
+
+    /// <summary>
+    /// Nearest-neighbor with linear interpolation between mipmap levels.
+    /// Best for: Specific GPU-heavy texture effects; rarely used for standard photo viewing.
+    /// </summary>
+    NearestMipmapLinear,
+
+    /// <summary>
+    /// Bilinear filtering. 
+    /// Best for: General purpose scaling and fast UI transformations (panning/zooming).
+    /// Performance: High.
+    /// </summary>
+    Linear,
+
+    /// <summary>
+    /// Bilinear filtering with nearest mipmap level.
+    /// Best for: Moderate quality downscaling with lower memory bandwidth than Trilinear.
+    /// </summary>
+    LinearMipmapNearest,
+
+    /// <summary>
+    /// Trilinear filtering (Bilinear + Mipmap interpolation).
+    /// Best for: High-quality downscaling during smooth zoom animations. Prevents 'shimmering'.
+    /// </summary>
+    LinearMipmapLinear,
+
+    /// <summary>
+    /// Bicubic (Mitchell-Netravali).
+    /// Best for: High-quality downscaling of photographic content. Provides a smooth, natural look.
+    /// Performance: Moderate (higher CPU/GPU cost than Linear).
+    /// </summary>
+    CubicMitchell,
+
+    /// <summary>
+    /// Bicubic (Catmull-Rom).
+    /// Best for: Upscaling or when a sharper result is desired. 
+    /// Note: May produce slight 'ringing' artifacts on high-contrast edges.
+    /// </summary>
+    CubicCatmullRom,
+
+    /// <summary>
+    /// Anisotropic filtering.
+    /// Best for: Images rendered with perspective transforms or at extreme oblique angles.
+    /// Note: Requires mipmaps for efficiency.
+    /// </summary>
+    Anisotropic,
+
 }
 
 
