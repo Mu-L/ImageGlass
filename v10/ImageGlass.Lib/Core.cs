@@ -350,7 +350,6 @@ public static class Core
 
         Resx.Set(ResxId.SystemControlForegroundBaseHighBrush, textBrush);
         Resx.Set(ResxId.TextControlForeground, textBrush);
-        Resx.Set(ResxId.ButtonForeground, textBrush);
         Resx.Set(ResxId.CheckBoxForegroundChecked, textBrush);
         Resx.Set(ResxId.CheckBoxForegroundCheckedPointerOver, textBrush);
         Resx.Set(ResxId.CheckBoxForegroundUnchecked, textBrush);

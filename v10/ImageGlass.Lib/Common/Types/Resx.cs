@@ -97,7 +97,6 @@ public enum ResxId
     // text color
     SystemControlForegroundBaseHighBrush,
     TextControlForeground,
-    ButtonForeground,
     CheckBoxForegroundChecked,
     CheckBoxForegroundCheckedPointerOver,
     CheckBoxForegroundUnchecked,
@@ -188,6 +187,4 @@ public enum ResxId
     IG_ToolButtonBackgroundHover,
     IG_ToolButtonBackgroundPressed,
     IG_ToolButtonBackgroundChecked,
-
-
 }

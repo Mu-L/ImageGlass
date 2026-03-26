@@ -115,6 +115,12 @@
             </Setter>
         </Style>
 
+
+        <!--  Disabled style for buttons  -->
+        <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+
     </Application.Styles>
 
 
