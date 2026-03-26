@@ -114,16 +114,92 @@
 
 
         <!--  Action buttons  -->
-        <StackPanel
+        <WrapPanel
             HorizontalAlignment="Center"
-            Orientation="Horizontal"
-            Spacing="6">
-            <Button x:Name="PART_BtnReset">[Reset]</Button>
-            <Button x:Name="PART_BtnSave">[Save]</Button>
-            <Button x:Name="PART_BtnSaveAs">[Save As]</Button>
-            <Button x:Name="PART_BtnCrop">[Crop]</Button>
-            <Button x:Name="PART_BtnCopy">[Copy]</Button>
-        </StackPanel>
+            ItemSpacing="6"
+            LineSpacing="6"
+            Orientation="Horizontal">
+            <Button
+                x:Name="PART_BtnReset"
+                MinWidth="80"
+                HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <PathIcon
+                        Width="14"
+                        Height="14"
+                        Data="{StaticResource ResetIconGeometry}"
+                        Foreground="{DynamicResource ButtonForeground}" />
+                    <TextBlock
+                        x:Name="PART_BtnReset_Text"
+                        Foreground="{DynamicResource ButtonForeground}"
+                        Text="[Reset]" />
+                </StackPanel>
+            </Button>
+            <Button
+                x:Name="PART_BtnSave"
+                MinWidth="80"
+                HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <PathIcon
+                        Width="14"
+                        Height="14"
+                        Data="{StaticResource SaveIconGeometry}"
+                        Foreground="{DynamicResource ButtonForeground}" />
+                    <TextBlock
+                        x:Name="PART_BtnSave_Text"
+                        Foreground="{DynamicResource ButtonForeground}"
+                        Text="[Save]" />
+                </StackPanel>
+            </Button>
+            <Button
+                x:Name="PART_BtnSaveAs"
+                MinWidth="80"
+                HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <PathIcon
+                        Width="14"
+                        Height="14"
+                        Data="{StaticResource SaveAsIconGeometry}"
+                        Foreground="{DynamicResource ButtonForeground}" />
+                    <TextBlock
+                        x:Name="PART_BtnSaveAs_Text"
+                        Foreground="{DynamicResource ButtonForeground}"
+                        Text="[Save As]" />
+                </StackPanel>
+            </Button>
+            <Button
+                x:Name="PART_BtnCrop"
+                MinWidth="80"
+                HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <PathIcon
+                        Width="14"
+                        Height="14"
+                        Data="{StaticResource CropIconGeometry}"
+                        Foreground="{DynamicResource ButtonForeground}" />
+                    <TextBlock
+                        x:Name="PART_BtnCrop_Text"
+                        Foreground="{DynamicResource ButtonForeground}"
+                        Text="[Crop]" />
+                </StackPanel>
+            </Button>
+            <Button
+                x:Name="PART_BtnCopy"
+                MinWidth="80"
+                HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <PathIcon
+                        Width="14"
+                        Height="14"
+                        Data="{StaticResource CopyIconGeometry}"
+                        Foreground="{DynamicResource ButtonForeground}" />
+                    <TextBlock
+                        x:Name="PART_BtnCopy_Text"
+                        Foreground="{DynamicResource ButtonForeground}"
+                        Text="[Copy]" />
+                </StackPanel>
+            </Button>
+        </WrapPanel>
 
     </WrapPanel>
 </ui:PhControl>

@@ -139,11 +139,11 @@ public partial class CropToolControl : PhControl, IToolControl
     {
         base.OnIgLanguageChanged();
 
-        PART_BtnReset.Content = Core.Lang[LangId.FrmCrop_BtnReset];
-        PART_BtnSave.Content = Core.Lang[LangId.FrmCrop_BtnSave];
-        PART_BtnSaveAs.Content = Core.Lang[LangId.FrmCrop_BtnSaveAs];
-        PART_BtnCrop.Content = Core.Lang[LangId.FrmCrop_BtnCrop];
-        PART_BtnCopy.Content = Core.Lang[LangId.FrmCrop_BtnCopy];
+        PART_BtnReset_Text.Text = Core.Lang[LangId.FrmCrop_BtnReset];
+        PART_BtnSave_Text.Text = Core.Lang[LangId.FrmCrop_BtnSave];
+        PART_BtnSaveAs_Text.Text = Core.Lang[LangId.FrmCrop_BtnSaveAs];
+        PART_BtnCrop_Text.Text = Core.Lang[LangId.FrmCrop_BtnCrop];
+        PART_BtnCopy_Text.Text = Core.Lang[LangId.FrmCrop_BtnCopy];
 
         PART_CmdAspectRatio.Items[0] = Core.Lang[LangId.FrmCrop_SelectionAspectRatio_FreeRatio];
         PART_CmdAspectRatio.Items[1] = Core.Lang[LangId.FrmCrop_SelectionAspectRatio_Custom];
