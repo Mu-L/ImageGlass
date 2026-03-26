@@ -611,7 +611,7 @@ public partial class Photo : PhDisposable
     /// </summary>
     public async Task LoadMetadataAsync(bool useCache, PhotoReadOptions? newOptions = null)
     {
-        var meta = await Task.Run(() => LoadMetadataAsync__(useCache, newOptions));
+        var meta = await Task.Run(() => LoadMetadataAsync__(useCache, newOptions)).ConfigureAwait(false);
 
         if (meta is not null)
         {
@@ -778,7 +778,7 @@ public partial class Photo : PhDisposable
 
 
                 // 4. load metadata if needed
-                await LoadMetadataAsync(true);
+                await LoadMetadataAsync(true).ConfigureAwait(false);
                 if (token.IsCancellationRequested) return;
 
 
