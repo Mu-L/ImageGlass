@@ -41,9 +41,9 @@ public partial class DialogWindow : PhWindow
     protected TextBlock _titleTextEl;
     protected Grid _contentEl;
     protected Border _footerEl;
-    protected Button _btn1;
-    protected Button _btn2;
-    protected Button _btn3;
+    protected PhButton _btn1;
+    protected PhButton _btn2;
+    protected PhButton _btn3;
 
     protected TaskCompletionSource<DialogExitCode> _taskSourceExitCode = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -348,29 +348,29 @@ public partial class DialogWindow : PhWindow
 
 
         // 3.2 right footer
-        _btn1 = new Button
+        _btn1 = new PhButton
         {
             MinWidth = 100,
             HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            [!Button.ContentProperty] = this[!Button1TextProperty],
-            [!Button.IsVisibleProperty] = this[!IsButton1VisibleProperty],
+            [!PhButton.TextProperty] = this[!Button1TextProperty],
+            [!PhButton.IsVisibleProperty] = this[!IsButton1VisibleProperty],
         };
-        _btn2 = new Button
+        _btn2 = new PhButton
         {
             MinWidth = 100,
             HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            [!Button.ContentProperty] = this[!Button2TextProperty],
-            [!Button.IsVisibleProperty] = this[!IsButton2VisibleProperty],
+            [!PhButton.TextProperty] = this[!Button2TextProperty],
+            [!PhButton.IsVisibleProperty] = this[!IsButton2VisibleProperty],
         };
-        _btn3 = new Button
+        _btn3 = new PhButton
         {
             MinWidth = 100,
             HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            [!Button.ContentProperty] = this[!Button3TextProperty],
-            [!Button.IsVisibleProperty] = this[!IsButton3VisibleProperty],
+            [!PhButton.TextProperty] = this[!Button3TextProperty],
+            [!PhButton.IsVisibleProperty] = this[!IsButton3VisibleProperty],
         };
         _btn1.Click += Button1_Click;
         _btn2.Click += Button2_Click;
@@ -447,7 +447,7 @@ public partial class DialogWindow : PhWindow
             .ToList();
         if (visibleButtons.Count == 0) return;
 
-        // get focused button and it's index
+        // get focused button and its index
         var focusedIndex = -1;
         if (FocusManager?.GetFocusedElement() is Button focusedButton)
         {
@@ -580,17 +580,17 @@ public partial class DialogWindow : PhWindow
         if (btn == DialogButton.Button1)
         {
             _btn1.IsDefault = true;
-            _btn1.Classes.Add("accent");
+            _btn1.IsAccent = true;
         }
         else if (btn == DialogButton.Button2)
         {
             _btn2.IsDefault = true;
-            _btn2.Classes.Add("accent");
+            _btn2.IsAccent = true;
         }
         else if (btn == DialogButton.Button3)
         {
             _btn3.IsDefault = true;
-            _btn3.Classes.Add("accent");
+            _btn3.IsAccent = true;
         }
     }
 

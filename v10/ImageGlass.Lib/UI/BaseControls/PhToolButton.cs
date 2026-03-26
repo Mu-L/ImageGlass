@@ -216,6 +216,11 @@ public partial class PhToolButton : ToggleButton
 
         if (e.Property == DropdownMenuProperty)
         {
+            DropdownMenu?.Opening -= DropdownMenu_Opening;
+            DropdownMenu?.Opened -= DropdownMenu_Opened;
+            DropdownMenu?.Closing -= DropdownMenu_Closing;
+            DropdownMenu?.Closed -= DropdownMenu_Closed;
+
             DropdownMenu?.Opening += DropdownMenu_Opening;
             DropdownMenu?.Opened += DropdownMenu_Opened;
             DropdownMenu?.Closing += DropdownMenu_Closing;

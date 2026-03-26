@@ -18,7 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using ImageGlass.Common;
@@ -28,9 +27,9 @@ using System.ComponentModel;
 
 namespace ImageGlass.UI;
 
-public class PhButton : ToggleButton
+public class PhButton : Button
 {
-    protected override Type StyleKeyOverride => typeof(ToggleButton);
+    protected override Type StyleKeyOverride => typeof(Button);
 
 
     // events
@@ -70,6 +69,18 @@ public class PhButton : ToggleButton
     }
     public static readonly StyledProperty<string> TextProperty =
         AvaloniaProperty.Register<PhButton, string>(nameof(Text));
+
+
+    /// <summary>
+    /// Gets, sets the value indicates that the button is an accent button.
+    /// </summary>
+    public bool IsAccent
+    {
+        get => GetValue(IsAccentProperty);
+        set => SetValue(IsAccentProperty, value);
+    }
+    public static readonly StyledProperty<bool> IsAccentProperty =
+        AvaloniaProperty.Register<PhButton, bool>(nameof(IsAccent));
 
 
     /// <summary>
@@ -176,15 +187,6 @@ public class PhButton : ToggleButton
     }
 
 
-    protected override void Toggle()
-    {
-        // don't call Toggle() method if not allowed.
-        if (!IsCheckOnClick) return;
-
-        base.Toggle();
-    }
-
-
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
@@ -208,6 +210,11 @@ public class PhButton : ToggleButton
         else if (e.Property == IconDataProperty)
         {
             RaisePropertyChanged(IsIconVisibleProperty, default, IsIconVisible);
+        }
+        else if (e.Property == IsAccentProperty)
+        {
+            if (IsAccent) Classes.Add("accent");
+            else Classes.Remove("accent");
         }
     }
 
@@ -304,7 +311,7 @@ public class PhButton : ToggleButton
 
 
 
-    #region Public Methods
+    #region Control Methods
 
     /// <summary>
     /// Creates default button content element with icon and text element.
@@ -316,14 +323,14 @@ public class PhButton : ToggleButton
             Width = 14,
             Height = 14,
             [!PathIcon.DataProperty] = this[!IconDataProperty],
-            [!PathIcon.ForegroundProperty] = Resx.CreateBinding(ResxId.TextControlForeground),
+            [!PathIcon.ForegroundProperty] = this[!ForegroundProperty],
             [!PathIcon.IsVisibleProperty] = this[!IsIconVisibleProperty],
         };
 
         var textEl = new TextBlock
         {
             [!TextBlock.TextProperty] = this[!TextProperty],
-            [!TextBlock.ForegroundProperty] = Resx.CreateBinding(ResxId.TextControlForeground),
+            [!TextBlock.ForegroundProperty] = this[!ForegroundProperty],
             [!TextBlock.IsVisibleProperty] = this[!IsTextVisibleProperty],
         };
 
@@ -350,7 +357,7 @@ public class PhButton : ToggleButton
         DropdownMenu.Open(this);
     }
 
-    #endregion // Public Methods
+    #endregion // Control Methods
 
 
 }

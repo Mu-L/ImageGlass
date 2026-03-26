@@ -23,6 +23,7 @@ using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.ServiceProviders.Update;
 using ImageGlass.Common.Types;
+using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
 
 namespace ImageGlass.Windows;
@@ -67,16 +68,16 @@ public partial class UpdateWindow : ModalWindow
     /// <summary>
     /// Creates the footer left content with "Skip this version" link button.
     /// </summary>
-    private Button CreateSkipButton()
+    private PhButton CreateSkipButton()
     {
-        var btnSkip = new Button
+        var btnSkip = new PhButton
         {
             Content = Core.Lang[LangId.FrmMain_MnuCheckForUpdate_SkipVersion],
             Padding = new Thickness(6, 2),
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
             Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
-            [!Button.ForegroundProperty] = Resx.CreateBinding(ResxId.SystemAccentColor),
+            [!PhButton.ForegroundProperty] = Resx.CreateBinding(ResxId.SystemAccentColor),
         };
         btnSkip.Click += (_, _) =>
         {
@@ -98,7 +99,7 @@ public partial class UpdateWindow : ModalWindow
     /// <summary>
     /// Creates the <see cref="ModalExtraContent"/> panel for displaying update details.
     /// </summary>
-    private Border CreateUpdateAvailableContent(UpdateReleaseInfo release)
+    private static Border CreateUpdateAvailableContent(UpdateReleaseInfo release)
     {
         // header: version + date
         var lblVersion = new TextBlock

@@ -25,6 +25,7 @@ using Avalonia.Svg.Skia;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
+using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
 using ImageMagick;
 using System;
@@ -39,12 +40,12 @@ public partial class AboutWindow : DialogWindow
     private SelectableTextBlock _lblVersion = null!;
     private SelectableTextBlock _lblCopyright = null!;
     private TextBlock _lblCredits = null!;
-    private Button _btnWebsite = null!;
-    private Button _btnGitHub = null!;
-    private Button _btnEula = null!;
-    private Button _btnPrivacy = null!;
-    private Button _btnDonate = null!;
-    private Button _btnCheckForUpdate = null!;
+    private PhButton _btnWebsite = null!;
+    private PhButton _btnGitHub = null!;
+    private PhButton _btnEula = null!;
+    private PhButton _btnPrivacy = null!;
+    private PhButton _btnDonate = null!;
+    private PhButton _btnCheckForUpdate = null!;
 
 
     private const string _creditContent = $"""
@@ -111,12 +112,12 @@ public partial class AboutWindow : DialogWindow
 
         _lblSlogan.Text = Core.Lang[LangId.FrmAbout_Slogan];
         _lblCredits.Text = Core.Lang[LangId.FrmAbout_Credits];
-        _btnWebsite.Content = Core.Lang[LangId.FrmAbout_Homepage];
-        _btnGitHub.Content = "GitHub";
-        _btnEula.Content = Core.Lang[LangId.FrmAbout_License];
-        _btnPrivacy.Content = Core.Lang[LangId.FrmAbout_Privacy];
-        _btnDonate.Content = "❤️ " + Core.Lang[LangId.FrmAbout_Donate];
-        _btnCheckForUpdate.Content = Core.Lang[LangId._CheckForUpdate];
+        _btnWebsite.Text = Core.Lang[LangId.FrmAbout_Homepage];
+        _btnGitHub.Text = "GitHub";
+        _btnEula.Text = Core.Lang[LangId.FrmAbout_License];
+        _btnPrivacy.Text = Core.Lang[LangId.FrmAbout_Privacy];
+        _btnDonate.Text = "❤️ " + Core.Lang[LangId.FrmAbout_Donate];
+        _btnCheckForUpdate.Text = Core.Lang[LangId._CheckForUpdate];
 
         UpdateVersionText();
     }
@@ -281,7 +282,7 @@ public partial class AboutWindow : DialogWindow
 
 
         // 8. Footer left content: Donate + Check for Update
-        _btnDonate = new Button
+        _btnDonate = new PhButton
         {
             MinWidth = 80,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -298,7 +299,7 @@ public partial class AboutWindow : DialogWindow
 
     private StackPanel CreateDialogFooterLeftContentElement()
     {
-        _btnCheckForUpdate = new Button
+        _btnCheckForUpdate = new PhButton
         {
             MinWidth = 80,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -320,9 +321,9 @@ public partial class AboutWindow : DialogWindow
     }
 
 
-    private static Button CreateLinkButton(Action clickFn)
+    private static PhButton CreateLinkButton(Action clickFn)
     {
-        var btn = new Button
+        var btn = new PhButton
         {
             Padding = new Thickness(6, 2),
             Margin = new Thickness(1),
@@ -330,7 +331,7 @@ public partial class AboutWindow : DialogWindow
             BorderThickness = new Thickness(0),
             Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
             FontSize = Const.FONT_SIZE_SMALL,
-            [!Button.ForegroundProperty] = Resx.CreateBinding(ResxId.SystemAccentColor),
+            [!PhButton.ForegroundProperty] = Resx.CreateBinding(ResxId.SystemAccentColor),
         };
 
         btn.Click += (_, _) => clickFn();
