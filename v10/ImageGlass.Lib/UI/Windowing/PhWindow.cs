@@ -312,6 +312,7 @@ public partial class PhWindow : Window
         else
         {
             ExtendClientAreaToDecorationsHint = false;
+            WindowDecorations = WindowDecorations.Full;
         }
     }
 

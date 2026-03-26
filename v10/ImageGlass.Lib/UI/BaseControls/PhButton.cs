@@ -44,7 +44,7 @@ public class PhButton : Button
     /// <summary>
     /// Gets the DPI scale value.
     /// </summary>
-    public double Dpi => VisualRoot?.RenderScaling ?? 1d;
+    public double Dpi => TopLevel.GetTopLevel(this)?.RenderScaling ?? 1d;
 
 
     /// <summary>
