@@ -84,7 +84,7 @@ internal class CropImageSettingsWindow : DialogWindow
 
         ResultConfig = new CropImageConfig
         {
-            CloseToolAfterSaving = _chkCloseToolAfterSaving.IsChecked == true,
+            CloseToolAfterSaved = _chkCloseToolAfterSaving.IsChecked == true,
             InitSelectionType = selectionType,
             AutoCenterSelection = _chkAutoCenterSelection.IsChecked == true,
             InitSelectedArea = new Rect(
@@ -108,7 +108,7 @@ internal class CropImageSettingsWindow : DialogWindow
     /// </summary>
     private void LoadConfigValues(CropImageConfig config)
     {
-        _chkCloseToolAfterSaving.IsChecked = config.CloseToolAfterSaving;
+        _chkCloseToolAfterSaving.IsChecked = config.CloseToolAfterSaved;
         _chkAutoCenterSelection.IsChecked = config.AutoCenterSelection;
 
         _numX.Value = (decimal)config.InitSelectedArea.X;

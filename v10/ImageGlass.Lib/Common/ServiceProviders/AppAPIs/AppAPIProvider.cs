@@ -2621,6 +2621,15 @@ public partial class AppAPIProvider
     #region Tools APIs
 
     /// <summary>
+    /// Closes the currently active tool in the tool host, if one is open.
+    /// </summary>
+    public void IG_CloseCurrentTool()
+    {
+        ToolHost.CloseCurrentTool();
+    }
+
+
+    /// <summary>
     /// Toggles visibility of Color picker tool.
     /// </summary>
     public void IG_ToggleColorPicker(string? boolStr = null)

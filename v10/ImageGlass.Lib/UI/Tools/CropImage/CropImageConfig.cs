@@ -38,7 +38,7 @@ public class CropImageConfig() : PhReactive
     /// <summary>
     /// Gets, sets the option to close the Crop tool after the selected area is saved.
     /// </summary>
-    public bool CloseToolAfterSaving
+    public bool CloseToolAfterSaved
     {
         get; set
         {

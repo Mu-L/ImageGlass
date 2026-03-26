@@ -40,7 +40,7 @@ public partial class CropToolControl : PhControl, IToolControl
     private Rect _lastSelectionArea;
 
 
-    public static string TOOL_ID => "CropImage";
+    public static string TOOL_ID => "Tool_CropImage";
     public string ToolId => TOOL_ID;
     public bool HasSettingsUI => true;
     public object? Settings { get; private set; } = new CropImageConfig();
@@ -225,12 +225,22 @@ public partial class CropToolControl : PhControl, IToolControl
     private async void PART_BtnSave_Click(object? sender, RoutedEventArgs e)
     {
         await Core.API!.RunApiAsync(API.IG_Save);
+
+        if (Options.CloseToolAfterSaved)
+        {
+            await Core.API!.RunApiAsync(API.IG_CloseCurrentTool);
+        }
     }
 
 
     private async void PART_BtnSaveAs_Click(object? sender, RoutedEventArgs e)
     {
         await Core.API!.RunApiAsync(API.IG_SaveAs);
+
+        if (Options.CloseToolAfterSaved)
+        {
+            await Core.API!.RunApiAsync(API.IG_CloseCurrentTool);
+        }
     }
 
 

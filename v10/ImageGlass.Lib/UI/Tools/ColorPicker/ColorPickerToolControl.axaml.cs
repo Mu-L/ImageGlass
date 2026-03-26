@@ -33,7 +33,7 @@ namespace ImageGlass.UI;
 
 public partial class ColorPickerToolControl : PhControl, IToolControl
 {
-    public static string TOOL_ID => "ColorPicker";
+    public static string TOOL_ID => "Tool_ColorPicker";
     public string ToolId => TOOL_ID;
     public bool HasSettingsUI => true;
     public object? Settings { get; private set; } = new ColorPickerConfig();

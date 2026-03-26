@@ -129,6 +129,7 @@ public partial class AppAPIProvider
 
 
         // Tools
+        { API.IG_CloseCurrentTool,          PhCommands.Create(IG_CloseCurrentTool) },
         { API.IG_ToggleColorPicker,         PhCommands.Create(IG_ToggleColorPicker) },
         { API.IG_ToggleCropTool,            PhCommands.Create(IG_ToggleCropTool) },
         { API.IG_OpenImageResizer,          PhCommands.Create(IG_OpenImageResizerAsync) },
