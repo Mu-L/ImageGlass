@@ -37,8 +37,6 @@ public partial class DialogWindow : PhWindow
     internal readonly int MIN_WIDTH = 400;
     internal readonly int MAX_WIDTH = 600;
 
-    protected Border _titleEl;
-    protected TextBlock _titleTextEl;
     protected Grid _contentEl;
     protected Border _footerEl;
     protected PhButton _btn1;
@@ -179,12 +177,7 @@ public partial class DialogWindow : PhWindow
     {
         CanResize = false;
         ShowInTaskbar = false;
-
-        if (BHelper.OS != OSType.Linux)
-        {
-            ExtendClientAreaToDecorationsHint = true;
-            WindowDecorations = WindowDecorations.BorderOnly;
-        }
+        CanMinimize = false;
 
         SizeToContent = SizeToContent.WidthAndHeight;
         BackdropStyle = BackdropStyle.MicaAlt;
@@ -231,20 +224,6 @@ public partial class DialogWindow : PhWindow
         base.OnIgThemeChanged(e);
 
         ApplyTheme();
-    }
-
-
-    protected override void OnIgActivated(EventArgs e)
-    {
-        base.OnIgActivated(e);
-        _titleTextEl.Opacity = 1;
-    }
-
-
-    protected override void OnIgDeactivated(EventArgs e)
-    {
-        base.OnIgDeactivated(e);
-        _titleTextEl.Opacity = 0.5;
     }
 
 
@@ -302,8 +281,6 @@ public partial class DialogWindow : PhWindow
     /// Creates layout and content for dialog window.
     /// </summary>
     [MemberNotNull(
-        nameof(_titleEl),
-        nameof(_titleTextEl),
         nameof(_contentEl),
         nameof(_footerEl),
         nameof(_btn1),
@@ -311,24 +288,7 @@ public partial class DialogWindow : PhWindow
         nameof(_btn3))]
     protected Grid CreateContentElement()
     {
-        // 1. create title bar
-        _titleTextEl = new TextBlock
-        {
-            TextTrimming = TextTrimming.CharacterEllipsis,
-            [!TextBlock.TextProperty] = this[!TitleProperty],
-        };
-        _titleEl = new Border
-        {
-            Padding = new Thickness(24, 8, 24, 7),
-            BorderThickness = new Thickness(0, 0, 0, 1),
-            BorderBrush = Brushes.LightGray,
-            Child = _titleTextEl,
-            [!Border.IsVisibleProperty] = this[!IsTitleVisibleProperty],
-        };
-        _titleEl.PointerPressed += TitleEl_PointerPressed;
-
-
-        // 2. create content slot
+        // 1. create content slot
         var dialogContentSlot = new ContentControl
         {
             Padding = new Thickness(24, 14, 24, 20),
@@ -339,15 +299,15 @@ public partial class DialogWindow : PhWindow
 
 
 
-        // 3. create footer
-        // 3.1 left footer
+        // 2. create footer
+        // 2.1 left footer
         var footerLeftSlot = new ContentControl
         {
             [!ContentControl.ContentProperty] = this[!DialogFooterLeftContentProperty],
         };
 
 
-        // 3.2 right footer
+        // 2.2 right footer
         _btn1 = new PhButton
         {
             MinWidth = 100,
@@ -401,34 +361,22 @@ public partial class DialogWindow : PhWindow
         };
 
 
-        // 4. create root content
+        // 3. create root content
         var root = new Grid
         {
             MinWidth = MIN_WIDTH,
             MaxWidth = MAX_WIDTH,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            RowDefinitions = new RowDefinitions("Auto, *, Auto"),
+            RowDefinitions = new RowDefinitions("*, Auto"),
         };
-        Grid.SetRow(_titleEl, 0);
-        Grid.SetRow(_contentEl, 1);
-        Grid.SetRow(_footerEl, 2);
+        Grid.SetRow(_contentEl, 0);
+        Grid.SetRow(_footerEl, 1);
 
-        root.Children.Add(_titleEl);
         root.Children.Add(_contentEl);
         root.Children.Add(_footerEl);
 
         return root;
-    }
-
-
-    private void TitleEl_PointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        var p = e.GetCurrentPoint(this);
-        if (p.Properties.IsLeftButtonPressed)
-        {
-            BeginMoveDrag(e);
-        }
     }
 
 
@@ -565,10 +513,6 @@ public partial class DialogWindow : PhWindow
         var contentAlpha = isDarkMode ? 180 : 220;
         var contentBg = bg.WithAlpha(contentAlpha);
         _contentEl.Background = new SolidColorBrush(contentBg);
-
-        // title & footer
-        _titleEl.Background = _footerEl.Background = Resx.Get<IBrush>(ResxId.IG_BackgroundNeutralBrush);
-        _titleEl.BorderBrush = _footerEl.BorderBrush = Resx.Get<IBrush>(ResxId.IG_BorderNeutralBrush);
     }
 
 
