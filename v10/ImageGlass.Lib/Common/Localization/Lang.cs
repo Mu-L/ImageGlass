@@ -442,7 +442,7 @@ public class Lang
         new(LangId.FrmMain_Loading, "Loading…"), // v3.0
         new(LangId.FrmMain_OpenWith, "Open with {0}"), //v9.0
         new(LangId.FrmMain_ReachedFirstImage, "Reached the first image"), // v4.0
-        new(LangId.FrmMain_ReachedLastLast, "Reached the last image"), // v4.0
+        new(LangId.FrmMain_ReachedLastImage, "Reached the last image"), // v4.0
         new(LangId.FrmMain_ClipboardImage, "Clipboard image"), //v9.0
 
         #endregion // Main Window > General

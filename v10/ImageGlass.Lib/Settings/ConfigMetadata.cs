@@ -48,7 +48,7 @@ public enum ConfigId
     ShowToolbar,
     // ShowFrameNavTool,
     ShowAppIcon,
-    // EnableLoopBackNavigation,
+    EnableLoopBackNavigation,
     EnableMultiInstances,
     EnableWindowTopMost,
     EnableFreePan,
@@ -107,6 +107,7 @@ public enum ConfigId
 
 
     #region String settings
+
     AutoUpdate,
     UpdateSkippedVersion,
     ColorProfile,
@@ -148,18 +149,11 @@ public enum ConfigId
     // MouseClickActions,
     // MouseWheelActions,
     Layout,
-    // Tools,
+    ToolSettings,
     // DisabledMenus,
     ToolbarButtons,
 
     #endregion // Array settings
-
-
-    #region Dynamic settings
-
-    ToolSettings,
-
-    #endregion // Dynamic settings
 
 }
 

@@ -106,17 +106,20 @@ public partial class PhotoManager : PhDisposable
 
 
     /// <summary>
-    /// Selects and gets a photo by step.
+    /// Tries to get & select a photo at a position offset from the current index by the specified step value.
     /// </summary>
-    public Photo? GetByStep(int step, bool loopBackNavigation)
+    public bool GetByStep(int step, bool loopBackNavigation, out Photo? outputPhoto)
     {
+        outputPhoto = null;
+
         // calculate new index
         var newIndex = CurrentIndex + step;
         var safeIndex = BHelper.ComputeIndexInRange(newIndex, Count, loopBackNavigation);
+        if (safeIndex == CurrentIndex) return false;
 
-        var photo = Select(safeIndex);
+        outputPhoto = Select(safeIndex);
 
-        return photo;
+        return true;
     }
 
 

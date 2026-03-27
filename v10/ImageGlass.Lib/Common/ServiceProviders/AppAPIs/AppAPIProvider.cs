@@ -877,7 +877,22 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_ViewByStep(int step)
     {
-        var photo = Core.Photos.GetByStep(step, true);
+        // check if can navigate to the image
+        var canLoopBack = Core.Config.EnableSlideshow
+            ? Core.Config.EnableLoopSlideshow
+            : Core.Config.EnableLoopBackNavigation;
+
+        if (!Core.Photos.GetByStep(step, canLoopBack, out var photo))
+        {
+            var isFirst = Core.Photos.CurrentIndex == 0;
+
+            _ = Message.ShowAsync(Core.Lang[isFirst
+                ? LangId.FrmMain_ReachedFirstImage
+                : LangId.FrmMain_ReachedLastImage]);
+            return;
+        }
+
+
         _ = _mainWindow.PART_MainView.ViewPhotoAsync(photo);
 
         // reset slideshow interval on manual navigation

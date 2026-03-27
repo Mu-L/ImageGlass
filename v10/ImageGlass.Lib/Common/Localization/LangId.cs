@@ -174,7 +174,7 @@ public enum LangId
     FrmMain_Loading,
     FrmMain_OpenWith,
     FrmMain_ReachedFirstImage,
-    FrmMain_ReachedLastLast,
+    FrmMain_ReachedLastImage,
     FrmMain_ClipboardImage,
     #endregion // Main Window > General
 

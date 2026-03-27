@@ -229,8 +229,10 @@ public partial class MainWindowView : PhControl
             // navigate to the photo at the same index (or the last valid one)
             if (Core.Photos.Count > 0)
             {
-                var photo = Core.Photos.GetByStep(0, true);
-                _ = ViewPhotoAsync(photo);
+                if (Core.Photos.GetByStep(0, Core.Config.EnableLoopBackNavigation, out var photo))
+                {
+                    _ = ViewPhotoAsync(photo);
+                }
             }
             else
             {
@@ -555,7 +557,7 @@ public partial class MainWindowView : PhControl
                 Command = Core.API?.GetApiCommand(API.IG_SetDesktopBackground),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuSetDesktopBackground),
             });
-            
+
             if (BHelper.OS == OSType.Windows)
             {
                 mnuContext.Items.Add(new PhMenuItem

@@ -191,13 +191,17 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ShowAppIcon, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets value indicating that ImageGlass will loop back viewer to the first image when reaching the end of the list.
-    ///// </summary>
-    //public bool EnableLoopBackNavigation { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether loop-back navigation is enabled when browsing images.
+    /// </summary>
+    public bool EnableLoopBackNavigation
+    {
+        get => Get(ConfigId.EnableLoopBackNavigation, true);
+        set => Set(ConfigId.EnableLoopBackNavigation, value);
+    }
 
     /// <summary>
-    /// Gets, sets value indicating that multi instances is allowed or not
+    /// Gets, sets value indicating that multi instances is allowed.
     /// </summary>
     public bool EnableMultiInstances
     {
@@ -206,7 +210,7 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
-    /// Gets, sets value indicating that FrmMain is always on top or not.
+    /// Gets, sets value indicating that app window is always on top..
     /// </summary>
     public bool EnableWindowTopMost
     {
