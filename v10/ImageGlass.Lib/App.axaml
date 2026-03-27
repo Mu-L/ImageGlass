@@ -127,6 +127,11 @@
 
     <Application.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--  WinUI 3-style ScrollBar  -->
+                <ResourceInclude Source="avares://ImageGlass.Lib/UI/Styles/ScrollBarStyle.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
                     <BoxShadows x:Key="MenuShadow">0 6 12 0 #40000000</BoxShadows>
