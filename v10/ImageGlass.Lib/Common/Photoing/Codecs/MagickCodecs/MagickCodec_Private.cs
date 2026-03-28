@@ -74,7 +74,7 @@ public static partial class MagickCodec
 
             // if always apply color profile
             // or only apply color profile if there is an embedded profile
-            if (Core.Config.ShouldUseColorProfileForAll || meta.MagickColorProfile is not null)
+            if (Core.Config.AlwaysApplyColorProfile || meta.MagickColorProfile is not null)
             {
                 if (GetColorProfileByName(Core.Config.ColorProfile) is { } destIccProfile)
                 {

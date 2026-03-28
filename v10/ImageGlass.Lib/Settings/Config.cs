@@ -244,10 +244,14 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ShowSaveOverrideConfirmation, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets the setting to control whether the image's original modified date value is preserved on save
-    ///// </summary>
-    //public bool ShouldPreserveModifiedDate { get; set; } = false;
+    /// <summary>
+    /// Gets, sets the setting to control whether the image's original modified date value is preserved on save
+    /// </summary>
+    public bool PreserveModifiedDate
+    {
+        get => Get(ConfigId.PreserveModifiedDate, false);
+        set => Set(ConfigId.PreserveModifiedDate, value);
+    }
 
     /// <summary>
     /// Gets, sets value indicates that Save dialog should use the current image folder as initial directory
@@ -268,12 +272,12 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
-    /// Gets, sets the value indicates that the ColorProfile will be applied for all or only the images with embedded profile
+    /// Gets, sets the value indicates that the color profile will be always applied for all images.
     /// </summary>
-    public bool ShouldUseColorProfileForAll
+    public bool AlwaysApplyColorProfile
     {
-        get => Get(ConfigId.ShouldUseColorProfileForAll, false);
-        set => Set(ConfigId.ShouldUseColorProfileForAll, value);
+        get => Get(ConfigId.AlwaysApplyColorProfile, false);
+        set => Set(ConfigId.AlwaysApplyColorProfile, value);
     }
 
     ///// <summary>
@@ -293,10 +297,10 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets the value indicates that Windows File Explorer sort order is used if possible
     /// </summary>
-    public bool ShouldUseExplorerSortOrder
+    public bool UseExplorerSortOrder
     {
-        get => Get(ConfigId.ShouldUseExplorerSortOrder, true);
-        set => Set(ConfigId.ShouldUseExplorerSortOrder, value);
+        get => Get(ConfigId.UseExplorerSortOrder, true);
+        set => Set(ConfigId.UseExplorerSortOrder, value);
     }
 
     /// <summary>
@@ -351,10 +355,10 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets value indicates that image preview is shown while the image is being loaded.
     /// </summary>
-    public bool ShowImagePreview
+    public bool EnableImagePreview
     {
-        get => Get(ConfigId.ShowImagePreview, true);
-        set => Set(ConfigId.ShowImagePreview, value);
+        get => Get(ConfigId.EnableImagePreview, true);
+        set => Set(ConfigId.EnableImagePreview, value);
     }
 
     /// <summary>

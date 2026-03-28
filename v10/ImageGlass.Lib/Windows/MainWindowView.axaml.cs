@@ -153,7 +153,7 @@ public partial class MainWindowView : PhControl
 
         // 3. load single file path
         // 3.1 get foreground shell
-        if (Core.Config.ShouldUseExplorerSortOrder)
+        if (Core.Config.UseExplorerSortOrder)
         {
             Core.ShellProvider?.ForegroundShell = Core.ShellProvider?.GetForegroundWindowView();
         }
@@ -293,7 +293,7 @@ public partial class MainWindowView : PhControl
     }
 
 
-    private void HandleFileWatcher_FilesRenamed(FileWatcherChangedEventArgs e)
+    private static void HandleFileWatcher_FilesRenamed(FileWatcherChangedEventArgs e)
     {
         if (e.FilePaths.Count == 0 || e.OldFilePaths is null) return;
 
@@ -459,11 +459,11 @@ public partial class MainWindowView : PhControl
             {
                 mnuLoadingOrders.Items.Add(new PhMenuItem
                 {
-                    LangKey = LangId.FrmSettings_ShouldUseExplorerSortOrder,
+                    LangKey = LangId.FrmSettings_UseExplorerSortOrder,
                     ToggleType = MenuItemToggleType.CheckBox,
-                    IsChecked = Core.Config.ShouldUseExplorerSortOrder,
+                    IsChecked = Core.Config.UseExplorerSortOrder,
                     Command = Core.API?.GetApiCommand(API.IG_ToggleUseExplorerSortOrder),
-                    HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmSettings_ShouldUseExplorerSortOrder),
+                    HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmSettings_UseExplorerSortOrder),
                 });
                 mnuLoadingOrders.Items.Add("-");
             }
@@ -717,7 +717,7 @@ public partial class MainWindowView : PhControl
             var searchOptions = new FileSearchOptions()
             {
                 AllowedExtensions = Core.Config.FileFormats,
-                UseExplorerSortOrder = Core.Config.ShouldUseExplorerSortOrder,
+                UseExplorerSortOrder = Core.Config.UseExplorerSortOrder,
                 ForegroundShell = foregroundShell,
                 SearchSubDirectories = Core.Config.EnableRecursiveLoading,
                 GroupByDir = Core.Config.ShouldGroupImagesByDirectory,
@@ -802,7 +802,7 @@ public partial class MainWindowView : PhControl
         Dispatcher.UIThread.Post(async () =>
         {
             // apply user settings to the viewer
-            PART_Viewer.EnableImagePreview = Core.Config.ShowImagePreview;
+            PART_Viewer.EnableImagePreview = Core.Config.EnableImagePreview;
 
             if (scrollToThumbnail)
             {

@@ -159,7 +159,7 @@ public partial class ViewerControl
         if (!Core.IsDestColorProfileSupported) return false;
 
         // 2. check user configs
-        if (Core.Config.ShouldUseColorProfileForAll || Photo?.Metadata?.SkiaColorSpace is not null)
+        if (Core.Config.AlwaysApplyColorProfile || Photo?.Metadata?.SkiaColorSpace is not null)
         {
             return true;
         }

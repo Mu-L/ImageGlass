@@ -703,13 +703,16 @@ public partial class Photo : PhDisposable
     /// Saves the photo to file.
     /// </summary>
     /// <exception cref="Exception"></exception>
-    public async Task SaveAsAsync(string destFilePath, ImgTransform transforms, uint quality, CancellationToken token = default)
+    public async Task SaveAsAsync(string destFilePath, ImgTransform transforms, uint quality,
+        bool preserveModifiedDate = false, CancellationToken token = default)
     {
         var taskId = Guid.NewGuid();
         _ = _taskRefs.TryAdd(taskId, true);
 
         try
         {
+            var lastWriteTime = File.GetLastWriteTime(destFilePath);
+
             // 1. save clipboard photo to file
             if (IsClipboard && Bitmap is SKImage img)
             {
@@ -726,6 +729,13 @@ public partial class Photo : PhDisposable
                 {
                     await MagickCodec.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, quality, token);
                 }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+            }
+
+
+            // Issue #307: option to preserve the modified date/time
+            if (preserveModifiedDate)
+            {
+                File.SetLastWriteTime(destFilePath, lastWriteTime);
             }
         }
         catch (OperationCanceledException) { }

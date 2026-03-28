@@ -101,7 +101,7 @@ public partial class AppAPIProvider
         new(LangId.FrmMain_MnuReload,               API.IG_Reload,              Hotkey.Ctrl, Key.R),
         new(LangId.FrmMain_MnuReloadImageList,      API.IG_ReloadList,          Hotkey.Ctrl | MKeys.Shift, Key.R),
         new(LangId.FrmMain_MnuUnload,               API.IG_Unload,              Key.U),
-        new(LangId.FrmSettings_ShouldUseExplorerSortOrder,  API.IG_ToggleUseExplorerSortOrder),
+        new(LangId.FrmSettings_UseExplorerSortOrder,  API.IG_ToggleUseExplorerSortOrder),
         new(LangId.ImageOrderBy_Name,               API.IG_SetLoadingOrderBy,   nameof(ImageOrderBy.Name)),
         new(LangId.ImageOrderBy_Random,             API.IG_SetLoadingOrderBy,   nameof(ImageOrderBy.Random)),
         new(LangId.ImageOrderBy_FileSize,           API.IG_SetLoadingOrderBy,   nameof(ImageOrderBy.FileSize)),

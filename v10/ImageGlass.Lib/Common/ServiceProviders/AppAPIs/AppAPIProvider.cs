@@ -386,7 +386,8 @@ public partial class AppAPIProvider
                 var selectedImg = SkiaCodec.ToSKImage(selectedBmp)!;
                 using var photo = new Photo(selectedImg);
 
-                await photo.SaveAsAsync(destFilePath, new ImgTransform(), Core.Config.ImageEditQuality);
+                await photo.SaveAsAsync(destFilePath, new ImgTransform(),
+                    Core.Config.ImageEditQuality, Core.Config.PreserveModifiedDate);
                 saveSource = ImageSaveSource.SelectedArea;
             }
             catch (Exception ex) { error = ex; }
@@ -397,7 +398,8 @@ public partial class AppAPIProvider
         {
             try
             {
-                await Core.ClipboardImage.SaveAsAsync(destFilePath, Core.ImageTransform, Core.Config.ImageEditQuality);
+                await Core.ClipboardImage.SaveAsAsync(destFilePath, Core.ImageTransform,
+                    Core.Config.ImageEditQuality, Core.Config.PreserveModifiedDate);
                 saveSource = ImageSaveSource.Clipboard;
             }
             catch (Exception ex) { error = ex; }
@@ -408,7 +410,8 @@ public partial class AppAPIProvider
         {
             try
             {
-                await Core.Photos.Current.SaveAsAsync(destFilePath, Core.ImageTransform, Core.Config.ImageEditQuality);
+                await Core.Photos.Current.SaveAsAsync(destFilePath, Core.ImageTransform,
+                    Core.Config.ImageEditQuality, Core.Config.PreserveModifiedDate);
                 saveSource = ImageSaveSource.CurrentFile;
             }
             catch (Exception ex) { error = ex; }
@@ -1304,8 +1307,8 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_ToggleUseExplorerSortOrder(bool? enabled)
     {
-        enabled ??= !Core.Config.ShouldUseExplorerSortOrder;
-        Core.Config.ShouldUseExplorerSortOrder = enabled.Value;
+        enabled ??= !Core.Config.UseExplorerSortOrder;
+        Core.Config.UseExplorerSortOrder = enabled.Value;
 
         IG_ReloadList();
     }

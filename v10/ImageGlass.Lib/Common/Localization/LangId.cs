@@ -456,12 +456,12 @@ public enum LangId
     // Image > Image loading
     FrmSettings_ImageLoading,
     FrmSettings_ImageLoadingOrder,
-    FrmSettings_ShouldUseExplorerSortOrder,
+    FrmSettings_UseExplorerSortOrder,
     FrmSettings_EnableRecursiveLoading,
     FrmSettings_ShouldGroupImagesByDirectory,
     FrmSettings_ShouldLoadHiddenImages,
     FrmSettings_EnableLoopBackNavigation,
-    FrmSettings_ShowImagePreview,
+    FrmSettings_EnableImagePreview,
 
     FrmSettings_EmbeddedThumbnail,
     FrmSettings_UseEmbeddedThumbnailRawFormats,
@@ -478,7 +478,7 @@ public enum LangId
 
     // Image > Color management
     FrmSettings_ColorManagement,
-    FrmSettings_ShouldUseColorProfileForAll,
+    FrmSettings_AlwaysApplyColorProfile,
     FrmSettings_ColorProfile,
     FrmSettings_CurrentMonitorProfile_Description,
     #endregion // FrmSettings > Tab Image
@@ -504,7 +504,7 @@ public enum LangId
     // Edit > Edit
     FrmSettings_ShowDeleteConfirmation,
     FrmSettings_ShowSaveOverrideConfirmation,
-    FrmSettings_ShouldPreserveModifiedDate,
+    FrmSettings_PreserveModifiedDate,
     FrmSettings_OpenSaveAsDialogInTheCurrentImageDir,
     FrmSettings_ImageEditQuality,
     FrmSettings_AfterEditingAction,

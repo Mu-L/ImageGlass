@@ -303,7 +303,7 @@ public partial class PhotoManager
         var options = new FileSearchOptions()
         {
             AllowedExtensions = Core.Config.FileFormats,
-            UseExplorerSortOrder = Core.Config.ShouldUseExplorerSortOrder,
+            UseExplorerSortOrder = Core.Config.UseExplorerSortOrder,
             SearchSubDirectories = Core.Config.EnableRecursiveLoading,
             GroupByDir = Core.Config.ShouldGroupImagesByDirectory,
             IncludeHidden = Core.Config.ShouldLoadHiddenImages,

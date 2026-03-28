@@ -101,7 +101,7 @@ public partial class App : Application
             desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             // get foreground shell
-            if (Core.Config.ShouldUseExplorerSortOrder)
+            if (Core.Config.UseExplorerSortOrder)
             {
                 Core.ShellProvider?.ForegroundShell = Core.ShellProvider.GetForegroundWindowView();
             }

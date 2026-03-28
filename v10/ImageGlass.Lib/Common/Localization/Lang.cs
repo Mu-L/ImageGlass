@@ -716,12 +716,12 @@ public class Lang
         // Image > Image loading
         new(LangId.FrmSettings_ImageLoading, "Image loading"),
         new(LangId.FrmSettings_ImageLoadingOrder, "Image loading order"),
-        new(LangId.FrmSettings_ShouldUseExplorerSortOrder, "Use Explorer sort order if possible"),
+        new(LangId.FrmSettings_UseExplorerSortOrder, "Use Explorer sort order"),
         new(LangId.FrmSettings_EnableRecursiveLoading, "Load images in subfolders"),
         new(LangId.FrmSettings_ShouldGroupImagesByDirectory, "Group images by directory"),
         new(LangId.FrmSettings_ShouldLoadHiddenImages, "Load hidden images"),
         new(LangId.FrmSettings_EnableLoopBackNavigation, "Loop back to the first image when reaching the end of the image list"),
-        new(LangId.FrmSettings_ShowImagePreview, "Display image preview while it's being loaded"),
+        new(LangId.FrmSettings_EnableImagePreview, "Display image preview while it's being loaded"),
 
         new(LangId.FrmSettings_EmbeddedThumbnail, "Embedded thumbnail"),
         new(LangId.FrmSettings_UseEmbeddedThumbnailRawFormats, "Load only the embedded thumbnail for RAW formats"),
@@ -738,7 +738,7 @@ public class Lang
 
         // Image > Color management
         new(LangId.FrmSettings_ColorManagement, "Color management"),
-        new(LangId.FrmSettings_ShouldUseColorProfileForAll, "Apply also for images without embedded color profile"),
+        new(LangId.FrmSettings_AlwaysApplyColorProfile, "Always apply for image without embedded color profile"),
         new(LangId.FrmSettings_ColorProfile, "Color profile"),
         new(LangId.FrmSettings_CurrentMonitorProfile_Description, "ImageGlass does not auto-update the color when moving its window between monitors"),
         #endregion // FrmSettings > Tab Image
@@ -764,7 +764,7 @@ public class Lang
         // Edit > Edit
         new(LangId.FrmSettings_ShowDeleteConfirmation, "Show confirmation dialog when deleting file"),
         new(LangId.FrmSettings_ShowSaveOverrideConfirmation, "Show confirmation dialog when overriding file"),
-        new(LangId.FrmSettings_ShouldPreserveModifiedDate, "Preserve the image's modified date on save"),
+        new(LangId.FrmSettings_PreserveModifiedDate, "Preserve the image's modified date on save"),
         new(LangId.FrmSettings_OpenSaveAsDialogInTheCurrentImageDir, "Open the Save As dialog in the current image directory"), // v9.1
         new(LangId.FrmSettings_ImageEditQuality, "Image quality"),
         new(LangId.FrmSettings_AfterEditingAction, "After opening editing app"),
