@@ -2,9 +2,9 @@
     x:Class="ImageGlass.UI.GalleryItem"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cm="using:ImageGlass.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:cm="using:ImageGlass.Common"
     xmlns:photo="using:ImageGlass.Common.Photoing"
     xmlns:ui="using:ImageGlass.UI"
     mc:Ignorable="d"
@@ -13,7 +13,7 @@
     x:DataType="photo:Photo"
     Padding="3"
     BorderThickness="1">
-    <Grid VerticalAlignment="Stretch" RowDefinitions="*, Auto">
+    <Grid RowDefinitions="*, Auto" VerticalAlignment="Stretch">
 
         <!--  Gallery Item: Thumbnail Skeleton  -->
         <Border
@@ -53,8 +53,9 @@
         <!--  Gallery Item: File name  -->
         <Grid
             Grid.Row="1"
+            ColumnDefinitions="*, Auto"
             HorizontalAlignment="Center"
-            ColumnDefinitions="*, Auto">
+            IsVisible="{CompiledBinding ShowGalleryFileName, Source={x:Static cm:Core.Config}}">
             <TextBlock
                 Grid.Column="0"
                 Padding="2,0,0,0"

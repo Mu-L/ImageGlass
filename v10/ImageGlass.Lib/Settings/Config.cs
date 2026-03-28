@@ -149,15 +149,14 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ShowGallery, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets value whether gallery scrollbars visible
-    ///// </summary>
-    //public bool ShowGalleryScrollbars { get; set; } = false;
-
-    ///// <summary>
-    ///// Gets, sets value indicates that showing image file name on gallery
-    ///// </summary>
-    //public bool ShowGalleryFileName { get; set; } = true;
+    /// <summary>
+    /// Gets, sets value indicates that showing image file name on gallery
+    /// </summary>
+    public bool ShowGalleryFileName
+    {
+        get => Get(ConfigId.ShowGalleryFileName, true);
+        set => Set(ConfigId.ShowGalleryFileName, value);
+    }
 
     /// <summary>
     /// Gets, sets welcome picture value

@@ -578,7 +578,6 @@ public enum LangId
     #region FrmSettings > Tab Gallery
     // Gallery > Gallery
     FrmSettings_HideGalleryInFullscreen,
-    FrmSettings_ShowGalleryScrollbars,
     FrmSettings_ShowGalleryFileName,
     FrmSettings_ThumbnailSize,
     FrmSettings_GalleryCacheSizeInMb,

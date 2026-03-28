@@ -841,7 +841,6 @@ public class Lang
         #region FrmSettings > Tab Gallery
         // Gallery > Gallery
         new(LangId.FrmSettings_HideGalleryInFullscreen, "Hide gallery in Full Screen mode"),
-        new(LangId.FrmSettings_ShowGalleryScrollbars, "Show gallery scrollbars"),
         new(LangId.FrmSettings_ShowGalleryFileName, "Show thumbnail filename"),
         new(LangId.FrmSettings_ThumbnailSize, "Thumbnail size (in pixels)"),
         new(LangId.FrmSettings_GalleryCacheSizeInMb, "Maximum gallery cache size (in megabytes)"),
