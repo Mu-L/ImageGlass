@@ -462,7 +462,6 @@ public enum LangId
     FrmSettings_ShouldLoadHiddenImages,
     FrmSettings_EnableLoopBackNavigation,
     FrmSettings_ShowImagePreview,
-    FrmSettings_EnableImageAsyncLoading,
 
     FrmSettings_EmbeddedThumbnail,
     FrmSettings_UseEmbeddedThumbnailRawFormats,
@@ -558,7 +557,6 @@ public enum LangId
     #region FrmSettings > Tab Toolbar
     // Toolbar > Toolbar
     FrmSettings_Toolbar_HideToolbarInFullscreen,
-    FrmSettings_Toolbar_EnableCenterToolbar,
     FrmSettings_Toolbar_ToolbarIconHeight,
 
     FrmSettings_Toolbar_AddNewButton,

@@ -722,7 +722,6 @@ public class Lang
         new(LangId.FrmSettings_ShouldLoadHiddenImages, "Load hidden images"),
         new(LangId.FrmSettings_EnableLoopBackNavigation, "Loop back to the first image when reaching the end of the image list"),
         new(LangId.FrmSettings_ShowImagePreview, "Display image preview while it's being loaded"),
-        new(LangId.FrmSettings_EnableImageAsyncLoading, "Enable image asynchronous loading"),
 
         new(LangId.FrmSettings_EmbeddedThumbnail, "Embedded thumbnail"),
         new(LangId.FrmSettings_UseEmbeddedThumbnailRawFormats, "Load only the embedded thumbnail for RAW formats"),
@@ -819,7 +818,6 @@ public class Lang
         #region FrmSettings > Tab Toolbar
         // Toolbar > Toolbar
         new(LangId.FrmSettings_Toolbar_HideToolbarInFullscreen, "Hide toolbar in Full Screen mode"),
-        new(LangId.FrmSettings_Toolbar_EnableCenterToolbar, "Use center alignment for toolbar"),
         new(LangId.FrmSettings_Toolbar_ToolbarIconHeight, "Toolbar icon size"),
 
         new(LangId.FrmSettings_Toolbar_AddNewButton, "Add a custom toolbar button"),

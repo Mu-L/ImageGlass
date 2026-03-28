@@ -258,16 +258,6 @@ public partial class Config : PhReactive
         set => Set(ConfigId.OpenSaveAsDialogInTheCurrentImageDir, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets the value indicates that there is a new version
-    ///// </summary>
-    //public bool ShowNewVersionIndicator { get; set; } = false;
-
-    ///// <summary>
-    ///// Gets, sets the value indicates that to toolbar buttons to be centered horizontally
-    ///// </summary>
-    //public bool EnableCenterToolbar { get; set; } = true;
-
     /// <summary>
     /// Gets, sets the value indicates that to show last seen image on startup
     /// </summary>
@@ -366,12 +356,6 @@ public partial class Config : PhReactive
         get => Get(ConfigId.ShowImagePreview, true);
         set => Set(ConfigId.ShowImagePreview, value);
     }
-
-
-    ///// <summary>
-    ///// Gets, sets value indicates that images should be loaded asynchronously.
-    ///// </summary>
-    //public bool EnableImageAsyncLoading { get; set; } = true;
 
     /// <summary>
     /// Enables / Disables copy multiple files.
