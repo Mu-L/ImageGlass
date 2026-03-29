@@ -811,6 +811,10 @@ public partial class MainWindowView : PhControl
             {
                 FrameIndex = 0,
                 FirstFrameOnly = Core.Config.SingleFrameFormats.Contains(photo.Extension),
+                UseEmbeddedThumbnailRawFormats = Core.Config.UseEmbeddedThumbnailRawFormats,
+                UseEmbeddedThumbnailOtherFormats = Core.Config.UseEmbeddedThumbnailOtherFormats,
+                EmbeddedThumbnailMinWidth = Core.Config.EmbeddedThumbnailMinWidth,
+                EmbeddedThumbnailMinHeight = Core.Config.EmbeddedThumbnailMinHeight,
             };
         }
 

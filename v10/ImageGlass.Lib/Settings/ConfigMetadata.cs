@@ -64,8 +64,8 @@ public enum ConfigId
     ShouldLoadHiddenImages,
     EnableWindowFit,
     CenterWindowFit,
-    // UseEmbeddedThumbnailRawFormats,
-    // UseEmbeddedThumbnailOtherFormats,
+    UseEmbeddedThumbnailRawFormats,
+    UseEmbeddedThumbnailOtherFormats,
     EnableImagePreview,
     EnableCopyMultipleFiles,
     EnableCutMultipleFiles,
@@ -96,8 +96,8 @@ public enum ConfigId
     ToolbarIconHeight,
     ImageEditQuality,
     InAppMessageDuration,
-    // EmbeddedThumbnailMinWidth,
-    // EmbeddedThumbnailMinHeight,
+    EmbeddedThumbnailMinWidth,
+    EmbeddedThumbnailMinHeight,
 
     #endregion // Number settings
 

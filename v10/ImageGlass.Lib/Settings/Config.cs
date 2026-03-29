@@ -345,16 +345,23 @@ public partial class Config : PhReactive
         set => Set(ConfigId.CenterWindowFit, value);
     }
 
-    ///// <summary>
-    ///// Displays the embedded thumbnail for RAW formats if found.
-    ///// </summary>
-    //public bool UseEmbeddedThumbnailRawFormats { get; set; } = false;
+    /// <summary>
+    /// Displays the embedded thumbnail for RAW formats if found.
+    /// </summary>
+    public bool UseEmbeddedThumbnailRawFormats
+    {
+        get => Get(ConfigId.UseEmbeddedThumbnailRawFormats, false);
+        set => Set(ConfigId.UseEmbeddedThumbnailRawFormats, value);
+    }
 
-    ///// <summary>
-    ///// Displays the embedded thumbnail for other formats if found.
-    ///// </summary>
-    //public bool UseEmbeddedThumbnailOtherFormats { get; set; } = false;
-
+    /// <summary>
+    /// Displays the embedded thumbnail for other formats if found.
+    /// </summary>
+    public bool UseEmbeddedThumbnailOtherFormats
+    {
+        get => Get(ConfigId.UseEmbeddedThumbnailOtherFormats, false);
+        set => Set(ConfigId.UseEmbeddedThumbnailOtherFormats, value);
+    }
 
     /// <summary>
     /// Gets, sets value indicates that image preview is shown while the image is being loaded.
@@ -569,17 +576,25 @@ public partial class Config : PhReactive
         set => Set(ConfigId.InAppMessageDuration, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets the minimum width of the embedded thumbnail to use for displaying
-    ///// image when the setting <see cref="UseEmbeddedThumbnailRawFormats"/> or <see cref="UseEmbeddedThumbnailOtherFormats"/> is <c>true</c>.
-    ///// </summary>
-    //public int EmbeddedThumbnailMinWidth { get; set; } = 0;
+    /// <summary>
+    /// Gets, sets the minimum width of the embedded thumbnail to use for displaying
+    /// image when the setting <see cref="UseEmbeddedThumbnailRawFormats"/> or <see cref="UseEmbeddedThumbnailOtherFormats"/> is <c>true</c>.
+    /// </summary>
+    public int EmbeddedThumbnailMinWidth
+    {
+        get => Get(ConfigId.EmbeddedThumbnailMinWidth, 0);
+        set => Set(ConfigId.EmbeddedThumbnailMinWidth, value);
+    }
 
-    ///// <summary>
-    ///// Gets, sets the minimum height of the embedded thumbnail to use for displaying
-    ///// image when the setting <see cref="UseEmbeddedThumbnailRawFormats"/> or <see cref="UseEmbeddedThumbnailOtherFormats"/> is <c>true</c>.
-    ///// </summary>
-    //public int EmbeddedThumbnailMinHeight { get; set; } = 0;
+    /// <summary>
+    /// Gets, sets the minimum height of the embedded thumbnail to use for displaying
+    /// image when the setting <see cref="UseEmbeddedThumbnailRawFormats"/> or <see cref="UseEmbeddedThumbnailOtherFormats"/> is <c>true</c>.
+    /// </summary>
+    public int EmbeddedThumbnailMinHeight
+    {
+        get => Get(ConfigId.EmbeddedThumbnailMinHeight, 0);
+        set => Set(ConfigId.EmbeddedThumbnailMinHeight, value);
+    }
 
     #endregion // Number items
 
