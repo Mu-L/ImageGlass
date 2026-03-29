@@ -41,6 +41,17 @@ public enum ColorProfileOption
 
 
 /// <summary>
+/// Specifies the codec used to decode an image file.
+/// </summary>
+public enum DecodedCodec
+{
+    Unknown,
+    Skia,
+    Magick,
+}
+
+
+/// <summary>
 /// Flip options.
 /// </summary>
 [Flags]

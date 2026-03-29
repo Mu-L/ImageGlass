@@ -829,7 +829,7 @@ public partial class Config : PhReactive
     [JsonConverter(typeof(JsonHashSetToStringConverter))]
     public HashSet<string> NativeCodecReadFormats
     {
-        get => Get(ConfigId.NativeCodecReadFormats, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".bmp", ".gif", ".gifv", ".jpg", ".png", ".webp", });
+        get => Get(ConfigId.NativeCodecReadFormats, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".bmp", ".gif", ".gifv", ".jpg", ".png", ".webp" });
         set => Set(ConfigId.NativeCodecReadFormats, value);
     }
 

@@ -91,6 +91,11 @@ public partial class Photo : PhDisposable
     public PhotoState State { get; set; } = PhotoState.None;
 
     /// <summary>
+    /// Gets the codec that was used to decode the photo.
+    /// </summary>
+    public DecodedCodec DecodedBy { get; private set; } = DecodedCodec.Unknown;
+
+    /// <summary>
     /// Gets the codec used to decode the photo.
     /// </summary>
     public PhotoCodec ReadCodec
@@ -374,19 +379,31 @@ public partial class Photo : PhDisposable
     /// </summary>
     private async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        var useNativeCodec = Core.Config.NativeCodecReadFormats.Contains(meta.FileExtension)
+        // get embedded thumbnail requirements
+        var loadRawThumbnailOnly = ReadOptions.UseEmbeddedThumbnailRawFormats
+            && meta.RawThumbnail is not null;
+        var loadOtherThumbnailOnly = ReadOptions.UseEmbeddedThumbnailOtherFormats
+            && (meta.ExifProfile?.ThumbnailLength ?? 0) > 0;
+
+        // check if we can use Skia to decode
+        var useSkiaCodec = Core.Config.NativeCodecReadFormats.Contains(meta.FileExtension)
             && SkiaCodec.CanRead(meta)
-            && Core.IsDestColorProfileSupported;
+            && Core.IsDestColorProfileSupported
+            && !loadRawThumbnailOnly
+            && !loadOtherThumbnailOnly;
+
 
         // use native codec
-        if (useNativeCodec)
+        if (useSkiaCodec)
         {
-            await LoadWithNativeCodecAsync(meta, token);
+            DecodedBy = DecodedCodec.Skia;
+            await LoadWithSkiaCodecAsync(meta, token);
         }
 
         // use Magick codec
         else
         {
+            DecodedBy = DecodedCodec.Magick;
             await LoadWithMagickAsync(meta, token);
         }
     }
@@ -395,10 +412,10 @@ public partial class Photo : PhDisposable
     /// <summary>
     /// Loads an image using native codec.
     /// </summary>
-    private async Task LoadWithNativeCodecAsync(PhotoMetadata meta, CancellationToken token)
+    private async Task LoadWithSkiaCodecAsync(PhotoMetadata meta, CancellationToken token)
     {
         ReadCodec = PhotoCodec.Native;
-        var result = await SkiaCodec.LoadAsync(meta, token);
+        var result = await SkiaCodec.LoadAsync(meta, ReadOptions.CorrectRotation, token);
 
         _width = (uint)result.Size.Width;
         _height = (uint)result.Size.Height;

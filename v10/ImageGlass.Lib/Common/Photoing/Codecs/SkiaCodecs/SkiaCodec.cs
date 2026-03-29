@@ -137,16 +137,17 @@ public static partial class SkiaCodec
     /// <summary>
     /// Loads photo.
     /// </summary>
-    public static async Task<SkiaDecoderOutput> LoadAsync(PhotoMetadata meta, CancellationToken token)
+    public static async Task<SkiaDecoderOutput> LoadAsync(PhotoMetadata meta,
+        bool correctRotation, CancellationToken token)
     {
-        return await Task.Run(() => Load(meta), token).ConfigureAwait(false);
+        return await Task.Run(() => Load(meta, correctRotation), token).ConfigureAwait(false);
     }
 
 
     /// <summary>
     /// Loads photo.
     /// </summary>
-    public static SkiaDecoderOutput Load(PhotoMetadata meta)
+    public static SkiaDecoderOutput Load(PhotoMetadata meta, bool correctRotation)
     {
         // 0. create Skia codec
         var codec = SKCodec.Create(meta.FilePath);
@@ -166,19 +167,28 @@ public static partial class SkiaCodec
         // 2. read single-frame formats
         using var bmpFrame = new SKBitmap(codec.Info);
         var codecOption = new SKCodecOptions((int)meta.FrameIndex);
+
         if (codec.GetPixels(codec.Info, bmpFrame.GetPixels(), codecOption) == SKCodecResult.Success)
         {
-            if (TryApplyOrientation(bmpFrame, codec.EncodedOrigin, out var fixedBmp))
+            // 2.1 correct rotation
+            if (correctRotation)
             {
-                if (fixedBmp is not null)
+                if (TryApplyOrientation(bmpFrame, codec.EncodedOrigin, out var fixedBmp))
                 {
-                    result.Size = new Size(fixedBmp.Width, fixedBmp.Height);
-                    result.SingleFrame = ToSKImage(fixedBmp);
-                    bmpFrame.Dispose();
+                    if (fixedBmp is not null)
+                    {
+                        result.Size = new Size(fixedBmp.Width, fixedBmp.Height);
+                        result.SingleFrame = ToSKImage(fixedBmp);
+                        bmpFrame.Dispose();
+                    }
+                }
+
+                if (fixedBmp is null)
+                {
+                    result.SingleFrame = ToSKImage(bmpFrame);
                 }
             }
-
-            if (fixedBmp is null)
+            else
             {
                 result.SingleFrame = ToSKImage(bmpFrame);
             }
