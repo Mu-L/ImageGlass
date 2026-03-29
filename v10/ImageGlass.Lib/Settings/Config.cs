@@ -280,10 +280,14 @@ public partial class Config : PhReactive
         set => Set(ConfigId.AlwaysApplyColorProfile, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets the value indicates whether to show or hide the Navigation Buttons on viewer
-    ///// </summary>
-    //public bool EnableNavigationButtons { get; set; } = true;
+    /// <summary>
+    /// Gets, sets the value indicates whether to show or hide the navigation buttons on viewer.
+    /// </summary>
+    public bool EnableNavigationButtons
+    {
+        get => Get(ConfigId.EnableNavigationButtons, true);
+        set => Set(ConfigId.EnableNavigationButtons, value);
+    }
 
     /// <summary>
     /// Gets, sets recursive value

@@ -72,6 +72,7 @@ public partial class MainWindowView : PhControl
         Core.Photos.FileWatcherChanged += Photos_FileWatcherChanged;
         PART_Viewer.PhotoLoading += PART_Viewer_PhotoLoading;
         PART_Viewer.ZoomChanged += PART_Viewer_ZoomChanged;
+        PART_Viewer.NavButtonClicked += PART_Viewer_NavButtonClicked;
         PART_Viewer.ContextMenu?.Opened += PART_Viewer_ContextMenu_Opened;
 
 
@@ -92,6 +93,7 @@ public partial class MainWindowView : PhControl
         Core.Photos.FileWatcherChanged -= Photos_FileWatcherChanged;
         PART_Viewer.PhotoLoading -= PART_Viewer_PhotoLoading;
         PART_Viewer.ZoomChanged -= PART_Viewer_ZoomChanged;
+        PART_Viewer.NavButtonClicked -= PART_Viewer_NavButtonClicked;
         PART_Viewer.ContextMenu?.Opened -= PART_Viewer_ContextMenu_Opened;
 
     }
@@ -365,6 +367,19 @@ public partial class MainWindowView : PhControl
             && (e.IsManualZoom || e.IsZoomModeChange))
         {
             Core.API?.ApplyWindowFitMode(e.ChangeSource == ZoomChangeSource.ZoomMode);
+        }
+    }
+
+
+    private void PART_Viewer_NavButtonClicked(ViewerControl sender, NavButtonClickedEventArgs e)
+    {
+        if (e.Direction == NavButtonDirection.Right)
+        {
+            Core.API?.IG_ViewNext();
+        }
+        else
+        {
+            Core.API?.IG_ViewPrevious();
         }
     }
 

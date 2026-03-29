@@ -39,6 +39,7 @@
                 CheckerboardMode="{CompiledBinding CheckerboardMode, Source={x:Static cm:Core.Config}}"
                 EnableDebug="{CompiledBinding EnableDebug, Source={x:Static cm:Core.Config}}"
                 EnableFreePan="{CompiledBinding EnableFreePan, Source={x:Static cm:Core.Config}}"
+                EnableNavButtons="{CompiledBinding EnableNavigationButtons, Source={x:Static cm:Core.Config}}"
                 InterpolationScaleDown="{CompiledBinding ImageInterpolationScaleDown, Source={x:Static cm:Core.Config}}"
                 InterpolationScaleUp="{CompiledBinding ImageInterpolationScaleUp, Source={x:Static cm:Core.Config}}"
                 IsWindowFitMode="{CompiledBinding EnableWindowFit, Source={x:Static cm:Core.Config}}"
@@ -47,6 +48,7 @@
                 <Panel>
                     <ui:MessageControl x:Name="PART_Message" />
                     <viewer:SlideshowCountdownOverlay x:Name="PART_SlideshowCountdown" IsHitTestVisible="False" />
+                    <viewer:NavButtonsOverlay IsVisible="{CompiledBinding EnableNavigationButtons, Source={x:Static cm:Core.Config}}" />
                 </Panel>
             </viewer:ViewerControl>
 

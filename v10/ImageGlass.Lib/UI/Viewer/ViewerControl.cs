@@ -189,6 +189,10 @@ public partial class ViewerControl : PhControl
                 Refresh(shouldResetZoom, false, true);
             });
         }
+        else if (e.Property == EnableNavButtonsProperty)
+        {
+            _navButtons.IsEnabled = (bool)e.NewValue!;
+        }
     }
 
 

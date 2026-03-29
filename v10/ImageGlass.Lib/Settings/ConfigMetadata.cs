@@ -57,7 +57,7 @@ public enum ConfigId
     OpenSaveAsDialogInTheCurrentImageDir,
     ShouldOpenLastSeenImage,
     AlwaysApplyColorProfile,
-    // EnableNavigationButtons,
+    EnableNavigationButtons,
     EnableRecursiveLoading,
     UseExplorerSortOrder,
     ShouldGroupImagesByDirectory,
