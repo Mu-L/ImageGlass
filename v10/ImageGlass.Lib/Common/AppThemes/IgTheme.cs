@@ -189,15 +189,7 @@ public partial class IgTheme : PhReactive
             var themeIconName = "";
 
             // icon from Settings
-            if (iconName == IgThemeIcon.NavButtonLeft)
-            {
-                themeIconName = Settings.NavButtonLeft;
-            }
-            else if (iconName == IgThemeIcon.NavButtonRight)
-            {
-                themeIconName = Settings.NavButtonLeft;
-            }
-            else if (iconName == IgThemeIcon.AppLogo)
+            if (iconName == IgThemeIcon.AppLogo)
             {
                 themeIconName = Settings.AppLogo;
             }

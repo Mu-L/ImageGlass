@@ -25,8 +25,6 @@ namespace ImageGlass.Common.AppThemes;
 public enum IgThemeIcon
 {
     // settings icons
-    NavButtonLeft,
-    NavButtonRight,
     AppLogo,
 
     // toolbar icons
