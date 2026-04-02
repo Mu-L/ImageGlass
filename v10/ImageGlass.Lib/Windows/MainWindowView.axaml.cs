@@ -73,6 +73,8 @@ public partial class MainWindowView : PhControl
         PART_Viewer.PhotoLoading += PART_Viewer_PhotoLoading;
         PART_Viewer.ZoomChanged += PART_Viewer_ZoomChanged;
         PART_Viewer.NavButtonClicked += PART_Viewer_NavButtonClicked;
+        PART_Viewer.ViewerPointerClicked += PART_Viewer_ViewerPointerClicked;
+        PART_Viewer.ViewerMouseWheel += PART_Viewer_ViewerMouseWheel;
         PART_Viewer.ContextMenu?.Opened += PART_Viewer_ContextMenu_Opened;
 
 
@@ -94,6 +96,8 @@ public partial class MainWindowView : PhControl
         PART_Viewer.PhotoLoading -= PART_Viewer_PhotoLoading;
         PART_Viewer.ZoomChanged -= PART_Viewer_ZoomChanged;
         PART_Viewer.NavButtonClicked -= PART_Viewer_NavButtonClicked;
+        PART_Viewer.ViewerPointerClicked -= PART_Viewer_ViewerPointerClicked;
+        PART_Viewer.ViewerMouseWheel -= PART_Viewer_ViewerMouseWheel;
         PART_Viewer.ContextMenu?.Opened -= PART_Viewer_ContextMenu_Opened;
 
     }
@@ -380,6 +384,50 @@ public partial class MainWindowView : PhControl
         else
         {
             Core.API?.IG_ViewPrevious();
+        }
+    }
+
+
+    private void PART_Viewer_ViewerPointerClicked(ViewerControl sender, ViewerPointerClickEventArgs e)
+    {
+        var actions = Core.Config.MouseClickActions;
+        if (actions.Count == 0) actions = Config.DefaultMouseClickActions;
+
+        if (!actions.TryGetValue(e.ClickEvent, out var action)) return;
+
+        _ = Core.API?.RunActionAsync(action);
+    }
+
+
+    private void PART_Viewer_ViewerMouseWheel(ViewerControl sender, ViewerMouseWheelEventArgs e)
+    {
+        var wheelActions = Core.Config.MouseWheelActions;
+        if (wheelActions.Count == 0) wheelActions = Config.DefaultMouseWheelActions;
+
+        if (!wheelActions.TryGetValue(e.WheelEvent, out var wheelAction)) return;
+
+        switch (wheelAction)
+        {
+            case MouseWheelAction.Zoom:
+                _ = PART_Viewer.ZoomByDeltaToPoint(e.Delta, e.Position);
+                break;
+
+            case MouseWheelAction.PanVertically:
+                PART_Viewer.PanTo(0, -e.Delta, e.Position);
+                break;
+
+            case MouseWheelAction.PanHorizontally:
+                PART_Viewer.PanTo(-e.Delta, 0, e.Position);
+                break;
+
+            case MouseWheelAction.BrowseImages:
+                if (e.Delta > 0) Core.API?.IG_ViewPrevious();
+                else Core.API?.IG_ViewNext();
+                break;
+
+            case MouseWheelAction.DoNothing:
+            default:
+                break;
         }
     }
 

@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common.Actions;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
@@ -110,6 +111,32 @@ public partial class Config
         "DateTimeAuto",
         "AppName",
     ]);
+
+
+    /// <summary>
+    /// Gets the default mouse wheel actions.
+    /// </summary>
+    [JsonIgnore]
+    public static Dictionary<MouseWheelEvent, MouseWheelAction> DefaultMouseWheelActions { get; } = new()
+    {
+        [MouseWheelEvent.Scroll] = MouseWheelAction.Zoom,
+        [MouseWheelEvent.CtrlAndScroll] = MouseWheelAction.PanVertically,
+        [MouseWheelEvent.ShiftAndScroll] = MouseWheelAction.PanHorizontally,
+        [MouseWheelEvent.AltAndScroll] = MouseWheelAction.BrowseImages,
+    };
+
+
+    /// <summary>
+    /// Gets the default mouse click actions.
+    /// </summary>
+    [JsonIgnore]
+    public static Dictionary<MouseClickEvent, SingleAction> DefaultMouseClickActions { get; } = new()
+    {
+        [MouseClickEvent.LeftDoubleClick] = new SingleAction(API.IG_SetZoomForMouseClick),
+        [MouseClickEvent.WheelClick] = new SingleAction(API.IG_Refresh),
+        [MouseClickEvent.XButton1Click] = new SingleAction(API.IG_ViewPrevious),
+        [MouseClickEvent.XButton2Click] = new SingleAction(API.IG_ViewNext),
+    };
 
 
     /// <summary>
