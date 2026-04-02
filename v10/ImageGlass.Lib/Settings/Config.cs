@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
+using ImageGlass.Common.Actions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
@@ -790,7 +791,6 @@ public partial class Config : PhReactive
         set => Set(ConfigId.MainWindowBounds, value);
     }
 
-
     /// <summary>
     /// Gets, sets zoom levels of the viewer
     /// </summary>
@@ -801,7 +801,6 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ZoomLevels, value);
     }
 
-
     /// <summary>
     /// Gets, sets the list of apps for edit action.
     /// </summary>
@@ -810,7 +809,6 @@ public partial class Config : PhReactive
         get => Get(ConfigId.EditApps, new Dictionary<string, EditingApp?>());
         set => Set(ConfigId.EditApps, value);
     }
-
 
     /// <summary>
     /// Gets, sets the list of formats that only load the first frame forcefully
@@ -822,7 +820,6 @@ public partial class Config : PhReactive
         set => Set(ConfigId.SingleFrameFormats, value);
     }
 
-
     /// <summary>
     /// Gets, sets the list of formats that always use native codec to decode.
     /// </summary>
@@ -832,7 +829,6 @@ public partial class Config : PhReactive
         get => Get(ConfigId.NativeCodecReadFormats, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".bmp", ".gif", ".gifv", ".jpg", ".png", ".webp" });
         set => Set(ConfigId.NativeCodecReadFormats, value);
     }
-
 
     /// <summary>
     /// Gets, sets the list of supported image formats
@@ -844,7 +840,6 @@ public partial class Config : PhReactive
         set => Set(ConfigId.FileFormats, value);
     }
 
-
     /// <summary>
     /// Gets, sets the tags for displaying image info.
     /// </summary>
@@ -855,7 +850,6 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ImageInfoTags, value);
     }
 
-
     /// <summary>
     /// Gets, sets hotkeys list of menu
     /// </summary>
@@ -865,16 +859,23 @@ public partial class Config : PhReactive
         set => Set(ConfigId.MenuHotkeys, value);
     }
 
+    /// <summary>
+    /// Gets, sets mouse click actions
+    /// </summary>
+    public Dictionary<MouseClickEvent, SingleAction> MouseClickActions
+    {
+        get => Get(ConfigId.MouseClickActions, new Dictionary<MouseClickEvent, SingleAction>());
+        set => Set(ConfigId.MouseClickActions, value);
+    }
 
-    ///// <summary>
-    ///// Gets, sets mouse click actions
-    ///// </summary>
-    //public Dictionary<MouseClickEvent, ToggleAction> MouseClickActions { get; set; } = [];
-
-    ///// <summary>
-    ///// Gets, sets mouse wheel actions
-    ///// </summary>
-    //public Dictionary<MouseWheelEvent, MouseWheelAction> MouseWheelActions { get; set; } = [];
+    /// <summary>
+    /// Gets, sets mouse wheel actions
+    /// </summary>
+    public Dictionary<MouseWheelEvent, MouseWheelAction> MouseWheelActions
+    {
+        get => Get(ConfigId.MouseWheelActions, new Dictionary<MouseWheelEvent, MouseWheelAction>());
+        set => Set(ConfigId.MouseWheelActions, value);
+    }
 
     /// <summary>
     /// Gets, sets layout for FrmMain. Syntax:
