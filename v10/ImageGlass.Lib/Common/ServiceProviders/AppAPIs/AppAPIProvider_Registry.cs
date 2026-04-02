@@ -69,6 +69,7 @@ public partial class AppAPIProvider
         // Zoom
         { API.IG_CustomZoom,            PhCommands.Create(IG_CustomZoomAsync) },
         { API.IG_SetZoom,               PhCommands.Create(IG_SetZoom) },
+        { API.IG_SetZoomForMouseClick,  PhCommands.Create(IG_SetZoomForMouseClick) },
         { API.IG_ZoomIn,                PhCommands.Create(IG_ZoomIn) },
         { API.IG_ZoomOut,               PhCommands.Create(IG_ZoomOut) },
         { API.IG_SetZoomMode,           PhCommands.Create(IG_SetZoomMode) },
@@ -94,7 +95,7 @@ public partial class AppAPIProvider
         { API.IG_SetLoadingOrderBy,             PhCommands.Create(IG_SetLoadingOrderBy) },
         { API.IG_SetLoadingOrderType,           PhCommands.Create(IG_SetLoadingOrderType) },
         { API.IG_SetColorChannels,              PhCommands.Create(IG_SetColorChannels) },
-        { API.IG_OpenEditingApp,           PhCommands.Create(IG_OpenEditingAppAsync) },
+        { API.IG_OpenEditingApp,                PhCommands.Create(IG_OpenEditingAppAsync) },
         { API.IG_InvertColors,                  PhCommands.Create(IG_InvertColors) },
         { API.IG_ToggleImageAnimation,          PhCommands.Create(IG_ToggleImageAnimation) },
         { API.IG_Rotate,                        PhCommands.Create(IG_Rotate) },
@@ -129,12 +130,12 @@ public partial class AppAPIProvider
 
 
         // Tools
-        { API.IG_CloseCurrentTool,          PhCommands.Create(IG_CloseCurrentTool) },
-        { API.IG_ToggleColorPicker,         PhCommands.Create(IG_ToggleColorPicker) },
-        { API.IG_ToggleCropTool,            PhCommands.Create(IG_ToggleCropTool) },
-        { API.IG_OpenImageResizer,          PhCommands.Create(IG_OpenImageResizerAsync) },
-        { API.IG_LosslessCompression,       PhCommands.Create(IG_LosslessCompressionAsync) },
-        { API.IG_GetMoreTool,               PhCommands.Create(IG_GetMoreTool) },
+        { API.IG_CloseCurrentTool,      PhCommands.Create(IG_CloseCurrentTool) },
+        { API.IG_ToggleColorPicker,     PhCommands.Create(IG_ToggleColorPicker) },
+        { API.IG_ToggleCropTool,        PhCommands.Create(IG_ToggleCropTool) },
+        { API.IG_OpenImageResizer,      PhCommands.Create(IG_OpenImageResizerAsync) },
+        { API.IG_LosslessCompression,   PhCommands.Create(IG_LosslessCompressionAsync) },
+        { API.IG_GetMoreTool,           PhCommands.Create(IG_GetMoreTool) },
 
 
         // Settings

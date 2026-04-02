@@ -53,6 +53,7 @@ public enum API
     // Menu > Zoom
     IG_CustomZoom,
     IG_SetZoom,
+    IG_SetZoomForMouseClick,
     IG_ZoomIn,
     IG_ZoomOut,
     IG_SetZoomMode,
