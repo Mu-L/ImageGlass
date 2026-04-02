@@ -51,12 +51,71 @@ public partial class Config : PhReactive
     #region Boolean items
 
     /// <summary>
+    /// Gets, sets value of visibility of toolbar on start up
+    /// </summary>
+    public bool ShowToolbar
+    {
+        get => Get(ConfigId.ShowToolbar, true);
+        set => Set(ConfigId.ShowToolbar, value);
+    }
+
+    /// <summary>
+    /// Gets, sets value indicates that the toolbar should be hidden in Full screen mode
+    /// </summary>
+    public bool ShowToolbarInFullscreen
+    {
+        get => Get(ConfigId.ShowToolbarInFullscreen, false);
+        set => Set(ConfigId.ShowToolbarInFullscreen, value);
+    }
+
+    /// <summary>
+    /// Gets, sets value of gallery visibility
+    /// </summary>
+    public bool ShowGallery
+    {
+        get => Get(ConfigId.ShowGallery, true);
+        set => Set(ConfigId.ShowGallery, value);
+    }
+
+    /// <summary>
+    /// Gets, sets value indicates that the gallery should be hidden in Full screen mode
+    /// </summary>
+    public bool ShowGalleryInFullscreen
+    {
+        get => Get(ConfigId.ShowGalleryInFullscreen, false);
+        set => Set(ConfigId.ShowGalleryInFullscreen, value);
+    }
+
+    /// <summary>
+    /// Gets, sets value indicates that showing image file name on gallery
+    /// </summary>
+    public bool ShowGalleryFileName
+    {
+        get => Get(ConfigId.ShowGalleryFileName, true);
+        set => Set(ConfigId.ShowGalleryFileName, value);
+    }
+
+    ///// <summary>
+    ///// Gets, sets value of visibility of Frame Navigation tool on startup
+    ///// </summary>
+    //public bool ShowFrameNavTool { get; set; } = false;
+
+    /// <summary>
+    /// Gets, sets value of visibility of app icon
+    /// </summary>
+    public bool ShowAppIcon
+    {
+        get => Get(ConfigId.ShowAppIcon, true);
+        set => Set(ConfigId.ShowAppIcon, value);
+    }
+
+    /// <summary>
     /// Gets, sets maximized state of main window.
     /// </summary>
-    public bool IsMainWindowMaximized
+    public bool EnableMainWindowMaximized
     {
-        get => Get(ConfigId.IsMainWindowMaximized, false);
-        set => Set(ConfigId.IsMainWindowMaximized, value);
+        get => Get(ConfigId.EnableMainWindowMaximized, false);
+        set => Set(ConfigId.EnableMainWindowMaximized, value);
     }
 
     /// <summary>
@@ -72,19 +131,19 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets value if the countdown timer is shown or not.
     /// </summary>
-    public bool ShowSlideshowCountdown
+    public bool EnableSlideshowCountdown
     {
-        get => Get(ConfigId.ShowSlideshowCountdown, true);
-        set => Set(ConfigId.ShowSlideshowCountdown, value);
+        get => Get(ConfigId.EnableSlideshowCountdown, true);
+        set => Set(ConfigId.EnableSlideshowCountdown, value);
     }
 
     /// <summary>
     /// Gets, sets value indicates whether the slide show interval is random.
     /// </summary>
-    public bool UseRandomIntervalForSlideshow
+    public bool EnableSlideshowRandomInterval
     {
-        get => Get(ConfigId.UseRandomIntervalForSlideshow, false);
-        set => Set(ConfigId.UseRandomIntervalForSlideshow, value);
+        get => Get(ConfigId.EnableSlideshowRandomInterval, false);
+        set => Set(ConfigId.EnableSlideshowRandomInterval, value);
     }
 
     /// <summary>
@@ -121,74 +180,6 @@ public partial class Config : PhReactive
     {
         get => Get(ConfigId.EnableFullScreen, false);
         set => Set(ConfigId.EnableFullScreen, value);
-    }
-
-    /// <summary>
-    /// Gets, sets value indicates that the toolbar should be hidden in Full screen mode
-    /// </summary>
-    public bool HideToolbarInFullscreen
-    {
-        get => Get(ConfigId.HideToolbarInFullscreen, false);
-        set => Set(ConfigId.HideToolbarInFullscreen, value);
-    }
-
-    /// <summary>
-    /// Gets, sets value indicates that the gallery should be hidden in Full screen mode
-    /// </summary>
-    public bool HideGalleryInFullscreen
-    {
-        get => Get(ConfigId.HideGalleryInFullscreen, false);
-        set => Set(ConfigId.HideGalleryInFullscreen, value);
-    }
-
-    /// <summary>
-    /// Gets, sets value of gallery visibility
-    /// </summary>
-    public bool ShowGallery
-    {
-        get => Get(ConfigId.ShowGallery, true);
-        set => Set(ConfigId.ShowGallery, value);
-    }
-
-    /// <summary>
-    /// Gets, sets value indicates that showing image file name on gallery
-    /// </summary>
-    public bool ShowGalleryFileName
-    {
-        get => Get(ConfigId.ShowGalleryFileName, true);
-        set => Set(ConfigId.ShowGalleryFileName, value);
-    }
-
-    /// <summary>
-    /// Gets, sets welcome picture value
-    /// </summary>
-    public bool ShowWelcomeImage
-    {
-        get => Get(ConfigId.ShowWelcomeImage, true);
-        set => Set(ConfigId.ShowWelcomeImage, value);
-    }
-
-    /// <summary>
-    /// Gets, sets value of visibility of toolbar on start up
-    /// </summary>
-    public bool ShowToolbar
-    {
-        get => Get(ConfigId.ShowToolbar, true);
-        set => Set(ConfigId.ShowToolbar, value);
-    }
-
-    ///// <summary>
-    ///// Gets, sets value of visibility of Frame Navigation tool on startup
-    ///// </summary>
-    //public bool ShowFrameNavTool { get; set; } = false;
-
-    /// <summary>
-    /// Gets, sets value of visibility of app icon
-    /// </summary>
-    public bool ShowAppIcon
-    {
-        get => Get(ConfigId.ShowAppIcon, true);
-        set => Set(ConfigId.ShowAppIcon, value);
     }
 
     /// <summary>
@@ -230,55 +221,64 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets value indicates that Confirmation dialog is displayed when deleting image
     /// </summary>
-    public bool ShowDeleteConfirmation
+    public bool EnableDeleteConfirmation
     {
-        get => Get(ConfigId.ShowDeleteConfirmation, true);
-        set => Set(ConfigId.ShowDeleteConfirmation, value);
+        get => Get(ConfigId.EnableDeleteConfirmation, true);
+        set => Set(ConfigId.EnableDeleteConfirmation, value);
     }
 
     /// <summary>
     /// Gets, sets value indicates that Confirmation dialog is displayed when overriding the viewing image
     /// </summary>
-    public bool ShowSaveOverrideConfirmation
+    public bool EnableSaveConfirmation
     {
-        get => Get(ConfigId.ShowSaveOverrideConfirmation, true);
-        set => Set(ConfigId.ShowSaveOverrideConfirmation, value);
+        get => Get(ConfigId.EnableSaveConfirmation, true);
+        set => Set(ConfigId.EnableSaveConfirmation, value);
     }
 
     /// <summary>
     /// Gets, sets the setting to control whether the image's original modified date value is preserved on save
     /// </summary>
-    public bool PreserveModifiedDate
+    public bool EnablePreserveModifiedDate
     {
-        get => Get(ConfigId.PreserveModifiedDate, false);
-        set => Set(ConfigId.PreserveModifiedDate, value);
+        get => Get(ConfigId.EnablePreserveModifiedDate, false);
+        set => Set(ConfigId.EnablePreserveModifiedDate, value);
     }
 
     /// <summary>
     /// Gets, sets value indicates that Save dialog should use the current image folder as initial directory
     /// </summary>
-    public bool OpenSaveAsDialogInTheCurrentImageDir
+    public bool EnableOpenSaveAsInCurrentFolder
     {
-        get => Get(ConfigId.OpenSaveAsDialogInTheCurrentImageDir, true);
-        set => Set(ConfigId.OpenSaveAsDialogInTheCurrentImageDir, value);
+        get => Get(ConfigId.EnableOpenSaveAsInCurrentFolder, true);
+        set => Set(ConfigId.EnableOpenSaveAsInCurrentFolder, value);
+    }
+
+    /// <summary>
+    /// Gets, sets welcome picture value
+    /// </summary>
+    public bool EnableWelcomeImage
+    {
+        get => Get(ConfigId.EnableWelcomeImage, true);
+        set => Set(ConfigId.EnableWelcomeImage, value);
     }
 
     /// <summary>
     /// Gets, sets the value indicates that to show last seen image on startup
     /// </summary>
-    public bool ShouldOpenLastSeenImage
+    public bool EnableLastSeenImage
     {
-        get => Get(ConfigId.ShouldOpenLastSeenImage, true);
-        set => Set(ConfigId.ShouldOpenLastSeenImage, value);
+        get => Get(ConfigId.EnableLastSeenImage, true);
+        set => Set(ConfigId.EnableLastSeenImage, value);
     }
 
     /// <summary>
     /// Gets, sets the value indicates that the color profile will be always applied for all images.
     /// </summary>
-    public bool AlwaysApplyColorProfile
+    public bool EnableAlwaysApplyColorProfile
     {
-        get => Get(ConfigId.AlwaysApplyColorProfile, false);
-        set => Set(ConfigId.AlwaysApplyColorProfile, value);
+        get => Get(ConfigId.EnableAlwaysApplyColorProfile, false);
+        set => Set(ConfigId.EnableAlwaysApplyColorProfile, value);
     }
 
     /// <summary>
@@ -291,39 +291,39 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
-    /// Gets, sets recursive value
+    /// Gets, sets the value indicates whether to load photos in sub folders.
     /// </summary>
-    public bool EnableRecursiveLoading
+    public bool EnableSubfoldersLoading
     {
-        get => Get(ConfigId.EnableRecursiveLoading, false);
-        set => Set(ConfigId.EnableRecursiveLoading, value);
-    }
-
-    /// <summary>
-    /// Gets, sets the value indicates that Windows File Explorer sort order is used if possible
-    /// </summary>
-    public bool UseExplorerSortOrder
-    {
-        get => Get(ConfigId.UseExplorerSortOrder, true);
-        set => Set(ConfigId.UseExplorerSortOrder, value);
-    }
-
-    /// <summary>
-    /// Gets, sets the value indicates that images order should be grouped by directory
-    /// </summary>
-    public bool ShouldGroupImagesByDirectory
-    {
-        get => Get(ConfigId.ShouldGroupImagesByDirectory, false);
-        set => Set(ConfigId.ShouldGroupImagesByDirectory, value);
+        get => Get(ConfigId.EnableSubfoldersLoading, false);
+        set => Set(ConfigId.EnableSubfoldersLoading, value);
     }
 
     /// <summary>
     /// Gets, sets showing/loading hidden images
     /// </summary>
-    public bool ShouldLoadHiddenImages
+    public bool EnableHiddenImagesLoading
     {
-        get => Get(ConfigId.ShouldLoadHiddenImages, false);
-        set => Set(ConfigId.ShouldLoadHiddenImages, value);
+        get => Get(ConfigId.EnableHiddenImagesLoading, false);
+        set => Set(ConfigId.EnableHiddenImagesLoading, value);
+    }
+
+    /// <summary>
+    /// Gets, sets the value indicates that images order should be grouped by directory
+    /// </summary>
+    public bool EnableImageFolderGrouping
+    {
+        get => Get(ConfigId.EnableImageFolderGrouping, false);
+        set => Set(ConfigId.EnableImageFolderGrouping, value);
+    }
+
+    /// <summary>
+    /// Gets, sets the value indicates that Windows File Explorer sort order is used if possible
+    /// </summary>
+    public bool EnableExplorerSortOrder
+    {
+        get => Get(ConfigId.EnableExplorerSortOrder, true);
+        set => Set(ConfigId.EnableExplorerSortOrder, value);
     }
 
 
@@ -340,28 +340,28 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets value indicates the window should be always center in Window Fit mode
     /// </summary>
-    public bool CenterWindowFit
+    public bool EnableCenterWindowFit
     {
-        get => Get(ConfigId.CenterWindowFit, true);
-        set => Set(ConfigId.CenterWindowFit, value);
+        get => Get(ConfigId.EnableCenterWindowFit, true);
+        set => Set(ConfigId.EnableCenterWindowFit, value);
     }
 
     /// <summary>
     /// Displays the embedded thumbnail for RAW formats if found.
     /// </summary>
-    public bool UseEmbeddedThumbnailRawFormats
+    public bool EnableOnlyLoadRawPreview
     {
-        get => Get(ConfigId.UseEmbeddedThumbnailRawFormats, false);
-        set => Set(ConfigId.UseEmbeddedThumbnailRawFormats, value);
+        get => Get(ConfigId.EnableOnlyLoadRawPreview, false);
+        set => Set(ConfigId.EnableOnlyLoadRawPreview, value);
     }
 
     /// <summary>
     /// Displays the embedded thumbnail for other formats if found.
     /// </summary>
-    public bool UseEmbeddedThumbnailOtherFormats
+    public bool EnableOnlyLoadNonRawPreview
     {
-        get => Get(ConfigId.UseEmbeddedThumbnailOtherFormats, false);
-        set => Set(ConfigId.UseEmbeddedThumbnailOtherFormats, value);
+        get => Get(ConfigId.EnableOnlyLoadNonRawPreview, false);
+        set => Set(ConfigId.EnableOnlyLoadNonRawPreview, value);
     }
 
     /// <summary>
@@ -394,19 +394,19 @@ public partial class Config : PhReactive
     /// <summary>
     /// Enables / Disables the file system watcher.
     /// </summary>
-    public bool EnableRealTimeFileUpdate
+    public bool EnableFileWatcher
     {
-        get => Get(ConfigId.EnableRealTimeFileUpdate, true);
-        set => Set(ConfigId.EnableRealTimeFileUpdate, value);
+        get => Get(ConfigId.EnableFileWatcher, true);
+        set => Set(ConfigId.EnableFileWatcher, value);
     }
 
     /// <summary>
     /// Gets, sets value indicates that ImageGlass should open the new image file added in the viewing folder.
     /// </summary>
-    public bool ShouldAutoOpenNewAddedImage
+    public bool EnableAutoOpenNewAddedImage
     {
-        get => Get(ConfigId.ShouldAutoOpenNewAddedImage, false);
-        set => Set(ConfigId.ShouldAutoOpenNewAddedImage, value);
+        get => Get(ConfigId.EnableAutoOpenNewAddedImage, false);
+        set => Set(ConfigId.EnableAutoOpenNewAddedImage, value);
     }
 
     ///// <summary>
@@ -515,30 +515,30 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets the maximum memory for image caching (in MB).
     /// </summary>
-    public uint MaxMemoryCacheInMb
+    public uint CacheMaxMemoryInMb
     {
-        get => Get(ConfigId.MaxMemoryCacheInMb, 0u);
-        set => Set(ConfigId.MaxMemoryCacheInMb, value);
+        get => Get(ConfigId.CacheMaxMemoryInMb, 0u);
+        set => Set(ConfigId.CacheMaxMemoryInMb, value);
     }
 
     /// <summary>
     /// Gets, sets the maximum image file size (in MB) for caching.
     /// If value is <c>0</c>, the option will be ignored.
     /// </summary>
-    public double MaxFileSizeCacheInMb
+    public double CacheMaxFileSizeInMb
     {
-        get => Get(ConfigId.MaxFileSizeCacheInMb, 100d);
-        set => Set(ConfigId.MaxFileSizeCacheInMb, value);
+        get => Get(ConfigId.CacheMaxFileSizeInMb, 100d);
+        set => Set(ConfigId.CacheMaxFileSizeInMb, value);
     }
 
     /// <summary>
     /// Gets, sets the maximum image dimension for caching.
     /// If value is <c>0</c>, the option will be ignored.
     /// </summary>
-    public uint MaxDimensionCache
+    public uint CacheMaxDimension
     {
-        get => Get(ConfigId.MaxDimensionCache, 8_000u);
-        set => Set(ConfigId.MaxDimensionCache, value);
+        get => Get(ConfigId.CacheMaxDimension, 8_000u);
+        set => Set(ConfigId.CacheMaxDimension, value);
     }
 
     /// <summary>
@@ -579,22 +579,22 @@ public partial class Config : PhReactive
 
     /// <summary>
     /// Gets, sets the minimum width of the embedded thumbnail to use for displaying
-    /// image when the setting <see cref="UseEmbeddedThumbnailRawFormats"/> or <see cref="UseEmbeddedThumbnailOtherFormats"/> is <c>true</c>.
+    /// image when the setting <see cref="EnableOnlyLoadRawPreview"/> or <see cref="EnableOnlyLoadNonRawPreview"/> is <c>true</c>.
     /// </summary>
-    public int EmbeddedThumbnailMinWidth
+    public int PreviewMinWidth
     {
-        get => Get(ConfigId.EmbeddedThumbnailMinWidth, 0);
-        set => Set(ConfigId.EmbeddedThumbnailMinWidth, value);
+        get => Get(ConfigId.PreviewMinWidth, 0);
+        set => Set(ConfigId.PreviewMinWidth, value);
     }
 
     /// <summary>
     /// Gets, sets the minimum height of the embedded thumbnail to use for displaying
-    /// image when the setting <see cref="UseEmbeddedThumbnailRawFormats"/> or <see cref="UseEmbeddedThumbnailOtherFormats"/> is <c>true</c>.
+    /// image when the setting <see cref="EnableOnlyLoadRawPreview"/> or <see cref="EnableOnlyLoadNonRawPreview"/> is <c>true</c>.
     /// </summary>
-    public int EmbeddedThumbnailMinHeight
+    public int PreviewMinHeight
     {
-        get => Get(ConfigId.EmbeddedThumbnailMinHeight, 0);
-        set => Set(ConfigId.EmbeddedThumbnailMinHeight, value);
+        get => Get(ConfigId.PreviewMinHeight, 0);
+        set => Set(ConfigId.PreviewMinHeight, value);
     }
 
     #endregion // Number items

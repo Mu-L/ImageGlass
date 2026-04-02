@@ -224,11 +224,11 @@
                                 <ui:PhMenuItem LangKey="FrmMain_MnuLoadingOrders">
                                     <ui:PhMenuItem
                                         Click="MainMenuItem_Click"
-                                        IsChecked="{CompiledBinding Config.UseExplorerSortOrder}"
+                                        IsChecked="{CompiledBinding Config.EnableExplorerSortOrder}"
                                         IsVisible="{OnPlatform False,
                                                                Windows=True,
                                                                x:TypeArguments=x:Boolean}"
-                                        LangKey="FrmSettings_UseExplorerSortOrder"
+                                        LangKey="FrmSettings_EnableExplorerSortOrder"
                                         ToggleType="CheckBox" />
                                     <ui:PhMenuItem Header="-" IsVisible="{OnPlatform False, Windows=True, x:TypeArguments=x:Boolean}" />
 

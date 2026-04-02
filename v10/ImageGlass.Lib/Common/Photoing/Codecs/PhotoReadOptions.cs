@@ -40,27 +40,27 @@ public record PhotoReadOptions
     /// <summary>
     /// Gets, sets the value indicates the embedded thumbnail of the RAW formats should be returned (if found).
     /// </summary>
-    public bool UseEmbeddedThumbnailRawFormats { get; set; } = false;
+    public bool OnlyLoadRawPreview { get; set; } = false;
 
 
     /// <summary>
     /// Gets, sets the value indicates the embedded thumbnail of the non-RAW formats should be returned (if found).
     /// </summary>
-    public bool UseEmbeddedThumbnailOtherFormats { get; set; } = false;
+    public bool OnlyLoadNonRawPreview { get; set; } = false;
 
 
     /// <summary>
     /// Gets, sets the minimum width of the embedded thumbnail to use for displaying
-    /// image when the setting <see cref="UseEmbeddedThumbnailRawFormats"/> or <see cref="UseEmbeddedThumbnailOtherFormats"/> is <c>true</c>.
+    /// image when the setting <see cref="OnlyLoadRawPreview"/> or <see cref="OnlyLoadNonRawPreview"/> is <c>true</c>.
     /// </summary>
-    public int EmbeddedThumbnailMinWidth { get; set; } = 0;
+    public int PreviewMinWidth { get; set; } = 0;
 
 
     /// <summary>
     /// Gets, sets the minimum height of the embedded thumbnail to use for displaying
-    /// image when the setting <see cref="UseEmbeddedThumbnailRawFormats"/> or <see cref="UseEmbeddedThumbnailOtherFormats"/> is <c>true</c>.
+    /// image when the setting <see cref="OnlyLoadRawPreview"/> or <see cref="OnlyLoadNonRawPreview"/> is <c>true</c>.
     /// </summary>
-    public int EmbeddedThumbnailMinHeight { get; set; } = 0;
+    public int PreviewMinHeight { get; set; } = 0;
 
 
     /// <summary>

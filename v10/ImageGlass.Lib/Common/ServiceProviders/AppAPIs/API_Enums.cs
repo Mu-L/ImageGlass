@@ -73,7 +73,7 @@ public enum API
     IG_Reload,
     IG_ReloadList,
     IG_Unload,
-    IG_ToggleUseExplorerSortOrder,
+    IG_ToggleExplorerSortOrder,
     IG_SetLoadingOrderBy,
     IG_SetLoadingOrderType,
     IG_SetColorChannels,

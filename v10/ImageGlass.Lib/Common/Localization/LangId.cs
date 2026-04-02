@@ -424,8 +424,8 @@ public enum LangId
 
     // General > Startup
     FrmSettings_Startup,
-    FrmSettings_ShowWelcomeImage,
-    FrmSettings_ShouldOpenLastSeenImage,
+    FrmSettings_EnableWelcomeImage,
+    FrmSettings_EnableLastSeenImage,
 
     FrmSettings_StartupBoost,
     FrmSettings_StartupBoost_Description,
@@ -438,8 +438,8 @@ public enum LangId
 
     // General > Real-time update
     FrmSettings_RealTimeFileUpdate,
-    FrmSettings_EnableRealTimeFileUpdate,
-    FrmSettings_ShouldAutoOpenNewAddedImage,
+    FrmSettings_EnableFileWatcher,
+    FrmSettings_EnableAutoOpenNewAddedImage,
 
     // General > Others
     FrmSettings_Others,
@@ -456,16 +456,16 @@ public enum LangId
     // Image > Image loading
     FrmSettings_ImageLoading,
     FrmSettings_ImageLoadingOrder,
-    FrmSettings_UseExplorerSortOrder,
-    FrmSettings_EnableRecursiveLoading,
-    FrmSettings_ShouldGroupImagesByDirectory,
-    FrmSettings_ShouldLoadHiddenImages,
+    FrmSettings_EnableExplorerSortOrder,
+    FrmSettings_EnableSubfoldersLoading,
+    FrmSettings_EnableImageFolderGrouping,
+    FrmSettings_EnableHiddenImagesLoading,
     FrmSettings_EnableLoopBackNavigation,
     FrmSettings_EnableImagePreview,
 
     FrmSettings_EmbeddedThumbnail,
-    FrmSettings_UseEmbeddedThumbnailRawFormats,
-    FrmSettings_UseEmbeddedThumbnailOtherFormats,
+    FrmSettings_EnableOnlyLoadRawPreview,
+    FrmSettings_EnableOnlyLoadNonRawPreview,
     FrmSettings_MinEmbeddedThumbnailSize,
     FrmSettings_MinEmbeddedThumbnailSize_Width,
     FrmSettings_MinEmbeddedThumbnailSize_Height,
@@ -478,7 +478,7 @@ public enum LangId
 
     // Image > Color management
     FrmSettings_ColorManagement,
-    FrmSettings_AlwaysApplyColorProfile,
+    FrmSettings_EnableAlwaysApplyColorProfile,
     FrmSettings_ColorProfile,
     FrmSettings_CurrentMonitorProfile_Description,
     #endregion // FrmSettings > Tab Image
@@ -486,9 +486,9 @@ public enum LangId
 
     #region FrmSettings > Tab Slideshow
     // Slideshow > Slideshow
-    FrmSettings_ShowSlideshowCountdown,
+    FrmSettings_EnableSlideshowCountdown,
     FrmSettings_EnableFullscreenSlideshow,
-    FrmSettings_UseRandomIntervalForSlideshow,
+    FrmSettings_EnableSlideshowRandomInterval,
     FrmSettings_SlideshowInterval,
     FrmSettings_SlideshowInterval_From,
     FrmSettings_SlideshowInterval_To,
@@ -502,10 +502,10 @@ public enum LangId
 
     #region FrmSettings > Tab Edit
     // Edit > Edit
-    FrmSettings_ShowDeleteConfirmation,
-    FrmSettings_ShowSaveOverrideConfirmation,
-    FrmSettings_PreserveModifiedDate,
-    FrmSettings_OpenSaveAsDialogInTheCurrentImageDir,
+    FrmSettings_EnableDeleteConfirmation,
+    FrmSettings_EnableSaveConfirmation,
+    FrmSettings_EnablePreserveModifiedDate,
+    FrmSettings_EnableOpenSaveAsInCurrentFolder,
     FrmSettings_ImageEditQuality,
     FrmSettings_AfterEditingAction,
 
@@ -538,7 +538,7 @@ public enum LangId
     // Viewer > Viewer
     FrmSettings_ShowCheckerboardOnlyImageRegion,
     FrmSettings_EnableNavigationButtons,
-    FrmSettings_CenterWindowFit,
+    FrmSettings_EnableCenterWindowFit,
     FrmSettings_UseWebview2ForSvg,
     FrmSettings_PanSpeed,
 
@@ -556,7 +556,7 @@ public enum LangId
 
     #region FrmSettings > Tab Toolbar
     // Toolbar > Toolbar
-    FrmSettings_Toolbar_HideToolbarInFullscreen,
+    FrmSettings_Toolbar_ShowToolbarInFullscreen,
     FrmSettings_Toolbar_ToolbarIconHeight,
 
     FrmSettings_Toolbar_AddNewButton,
@@ -575,7 +575,7 @@ public enum LangId
 
     #region FrmSettings > Tab Gallery
     // Gallery > Gallery
-    FrmSettings_HideGalleryInFullscreen,
+    FrmSettings_ShowGalleryInFullscreen,
     FrmSettings_ShowGalleryFileName,
     FrmSettings_ThumbnailSize,
     FrmSettings_GalleryCacheSizeInMb,

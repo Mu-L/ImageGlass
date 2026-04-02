@@ -684,8 +684,8 @@ public class Lang
 
         // General > Startup
         new(LangId.FrmSettings_Startup, "Startup"),
-        new(LangId.FrmSettings_ShowWelcomeImage, "Show welcome image"),
-        new(LangId.FrmSettings_ShouldOpenLastSeenImage, "Open the last seen image"),
+        new(LangId.FrmSettings_EnableWelcomeImage, "Show welcome image"),
+        new(LangId.FrmSettings_EnableLastSeenImage, "Open the last seen image"),
 
         new(LangId.FrmSettings_StartupBoost, "Startup Boost"), // v9.1
         new(LangId.FrmSettings_StartupBoost_Description, "Preload and run ImageGlass in the background for a few seconds during Windows startup to accelerate the first launch."), // v9.1
@@ -698,8 +698,8 @@ public class Lang
 
         // General > Real-time update
         new(LangId.FrmSettings_RealTimeFileUpdate, "Real-time file update"),
-        new(LangId.FrmSettings_EnableRealTimeFileUpdate, "Monitor file changes in the viewing folder and update in realtime"),
-        new(LangId.FrmSettings_ShouldAutoOpenNewAddedImage, "Open the new added image automatically"),
+        new(LangId.FrmSettings_EnableFileWatcher, "Monitor file changes in the viewing folder and update in realtime"),
+        new(LangId.FrmSettings_EnableAutoOpenNewAddedImage, "Open the new added image automatically"),
 
         // General > Others
         new(LangId.FrmSettings_Others, "Others"),
@@ -716,16 +716,16 @@ public class Lang
         // Image > Image loading
         new(LangId.FrmSettings_ImageLoading, "Image loading"),
         new(LangId.FrmSettings_ImageLoadingOrder, "Image loading order"),
-        new(LangId.FrmSettings_UseExplorerSortOrder, "Use Explorer sort order"),
-        new(LangId.FrmSettings_EnableRecursiveLoading, "Load images in subfolders"),
-        new(LangId.FrmSettings_ShouldGroupImagesByDirectory, "Group images by directory"),
-        new(LangId.FrmSettings_ShouldLoadHiddenImages, "Load hidden images"),
+        new(LangId.FrmSettings_EnableExplorerSortOrder, "Use Explorer sort order"),
+        new(LangId.FrmSettings_EnableSubfoldersLoading, "Load images in subfolders"),
+        new(LangId.FrmSettings_EnableImageFolderGrouping, "Group images by directory"),
+        new(LangId.FrmSettings_EnableHiddenImagesLoading, "Load hidden images"),
         new(LangId.FrmSettings_EnableLoopBackNavigation, "Loop back to the first image when reaching the end of the image list"),
         new(LangId.FrmSettings_EnableImagePreview, "Display image preview while it's being loaded"),
 
         new(LangId.FrmSettings_EmbeddedThumbnail, "Embedded thumbnail"),
-        new(LangId.FrmSettings_UseEmbeddedThumbnailRawFormats, "Load only the embedded thumbnail for RAW formats"),
-        new(LangId.FrmSettings_UseEmbeddedThumbnailOtherFormats, "Load only the embedded thumbnail for other formats"),
+        new(LangId.FrmSettings_EnableOnlyLoadRawPreview, "Load only the embedded thumbnail for RAW formats"),
+        new(LangId.FrmSettings_EnableOnlyLoadNonRawPreview, "Load only the embedded thumbnail for other formats"),
         new(LangId.FrmSettings_MinEmbeddedThumbnailSize, "Minimum size of the embedded thumbnail to be loaded"),
         new(LangId.FrmSettings_MinEmbeddedThumbnailSize_Width, "Width"),
         new(LangId.FrmSettings_MinEmbeddedThumbnailSize_Height, "Height"),
@@ -738,7 +738,7 @@ public class Lang
 
         // Image > Color management
         new(LangId.FrmSettings_ColorManagement, "Color management"),
-        new(LangId.FrmSettings_AlwaysApplyColorProfile, "Always apply for image without embedded color profile"),
+        new(LangId.FrmSettings_EnableAlwaysApplyColorProfile, "Always apply for image without embedded color profile"),
         new(LangId.FrmSettings_ColorProfile, "Color profile"),
         new(LangId.FrmSettings_CurrentMonitorProfile_Description, "ImageGlass does not auto-update the color when moving its window between monitors"),
         #endregion // FrmSettings > Tab Image
@@ -746,9 +746,9 @@ public class Lang
 
         #region FrmSettings > Tab Slideshow
         // Slideshow > Slideshow
-        new(LangId.FrmSettings_ShowSlideshowCountdown, "Show slideshow countdown"),
+        new(LangId.FrmSettings_EnableSlideshowCountdown, "Show slideshow countdown"),
         new(LangId.FrmSettings_EnableFullscreenSlideshow, "Start slideshow in Full Screen mode"),
-        new(LangId.FrmSettings_UseRandomIntervalForSlideshow, "Use random interval"),
+        new(LangId.FrmSettings_EnableSlideshowRandomInterval, "Use random interval"),
         new(LangId.FrmSettings_SlideshowInterval, "Slideshow interval:"),
         new(LangId.FrmSettings_SlideshowInterval_From, "From"),
         new(LangId.FrmSettings_SlideshowInterval_To, "To"),
@@ -762,10 +762,10 @@ public class Lang
 
         #region FrmSettings > Tab Edit
         // Edit > Edit
-        new(LangId.FrmSettings_ShowDeleteConfirmation, "Show confirmation dialog when deleting file"),
-        new(LangId.FrmSettings_ShowSaveOverrideConfirmation, "Show confirmation dialog when overriding file"),
-        new(LangId.FrmSettings_PreserveModifiedDate, "Preserve the image's modified date on save"),
-        new(LangId.FrmSettings_OpenSaveAsDialogInTheCurrentImageDir, "Open the Save As dialog in the current image directory"), // v9.1
+        new(LangId.FrmSettings_EnableDeleteConfirmation, "Show confirmation dialog when deleting file"),
+        new(LangId.FrmSettings_EnableSaveConfirmation, "Show confirmation dialog when overriding file"),
+        new(LangId.FrmSettings_EnablePreserveModifiedDate, "Preserve the image's modified date on save"),
+        new(LangId.FrmSettings_EnableOpenSaveAsInCurrentFolder, "Open the Save As dialog in the current image directory"), // v9.1
         new(LangId.FrmSettings_ImageEditQuality, "Image quality"),
         new(LangId.FrmSettings_AfterEditingAction, "After opening editing app"),
 
@@ -799,7 +799,7 @@ public class Lang
         // Viewer > Viewer
         new(LangId.FrmSettings_ShowCheckerboardOnlyImageRegion, "Show checkerboard only within the image region"),
         new(LangId.FrmSettings_EnableNavigationButtons, "Show navigation arrow buttons"),
-        new(LangId.FrmSettings_CenterWindowFit, "Automatically center the window in Window Fit mode"),
+        new(LangId.FrmSettings_EnableCenterWindowFit, "Automatically center the window in Window Fit mode"),
         new(LangId.FrmSettings_UseWebview2ForSvg, "Use Webview2 for viewing SVG format"),
         new(LangId.FrmSettings_PanSpeed, "Panning speed"),
 
@@ -817,7 +817,7 @@ public class Lang
 
         #region FrmSettings > Tab Toolbar
         // Toolbar > Toolbar
-        new(LangId.FrmSettings_Toolbar_HideToolbarInFullscreen, "Hide toolbar in Full Screen mode"),
+        new(LangId.FrmSettings_Toolbar_ShowToolbarInFullscreen, "Show toolbar in Full Screen mode"),
         new(LangId.FrmSettings_Toolbar_ToolbarIconHeight, "Toolbar icon size"),
 
         new(LangId.FrmSettings_Toolbar_AddNewButton, "Add a custom toolbar button"),
@@ -838,7 +838,7 @@ public class Lang
 
         #region FrmSettings > Tab Gallery
         // Gallery > Gallery
-        new(LangId.FrmSettings_HideGalleryInFullscreen, "Hide gallery in Full Screen mode"),
+        new(LangId.FrmSettings_ShowGalleryInFullscreen, "Show gallery in Full Screen mode"),
         new(LangId.FrmSettings_ShowGalleryFileName, "Show thumbnail filename"),
         new(LangId.FrmSettings_ThumbnailSize, "Thumbnail size (in pixels)"),
         new(LangId.FrmSettings_GalleryCacheSizeInMb, "Maximum gallery cache size (in megabytes)"),

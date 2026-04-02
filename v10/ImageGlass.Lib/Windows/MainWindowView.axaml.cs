@@ -117,10 +117,10 @@ public partial class MainWindowView : PhControl
         {
             ApplyAppLayout();
         }
-        else if (e.PropertyName == nameof(Config.EnableRealTimeFileUpdate))
+        else if (e.PropertyName == nameof(Config.EnableFileWatcher))
         {
             // set file watcher
-            AppAPIProvider.SetRealTimeFileWatcher(Core.Config.EnableRealTimeFileUpdate);
+            AppAPIProvider.SetRealTimeFileWatcher(Core.Config.EnableFileWatcher);
         }
     }
 
@@ -159,7 +159,7 @@ public partial class MainWindowView : PhControl
 
         // 3. load single file path
         // 3.1 get foreground shell
-        if (Core.Config.UseExplorerSortOrder)
+        if (Core.Config.EnableExplorerSortOrder)
         {
             Core.ShellProvider?.ForegroundShell = Core.ShellProvider?.GetForegroundWindowView();
         }
@@ -205,7 +205,7 @@ public partial class MainWindowView : PhControl
         if (e.FilePaths.Count == 0) return;
 
         // scroll gallery to the newly added file if configured
-        if (Core.Config.ShouldAutoOpenNewAddedImage)
+        if (Core.Config.EnableAutoOpenNewAddedImage)
         {
             var lastAdded = e.FilePaths[^1];
             var newIndex = Core.Photos.IndexOf(lastAdded);
@@ -473,10 +473,10 @@ public partial class MainWindowView : PhControl
             mnuContext.Items.Add(new PhMenuItem
             {
                 ToggleType = MenuItemToggleType.CheckBox,
-                IsChecked = Core.Config.ShowSlideshowCountdown,
+                IsChecked = Core.Config.EnableSlideshowCountdown,
                 LangKey = LangId.FrmSlideshow_MnuToggleCountdown,
                 Command = Core.API?.GetApiCommand(API.IG_ToggleSlideshowCountdown),
-                CommandParameter = !Core.Config.ShowSlideshowCountdown,
+                CommandParameter = !Core.Config.EnableSlideshowCountdown,
             });
             mnuContext.Items.Add("-"); //------------
         }
@@ -522,11 +522,11 @@ public partial class MainWindowView : PhControl
             {
                 mnuLoadingOrders.Items.Add(new PhMenuItem
                 {
-                    LangKey = LangId.FrmSettings_UseExplorerSortOrder,
+                    LangKey = LangId.FrmSettings_EnableExplorerSortOrder,
                     ToggleType = MenuItemToggleType.CheckBox,
-                    IsChecked = Core.Config.UseExplorerSortOrder,
-                    Command = Core.API?.GetApiCommand(API.IG_ToggleUseExplorerSortOrder),
-                    HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmSettings_UseExplorerSortOrder),
+                    IsChecked = Core.Config.EnableExplorerSortOrder,
+                    Command = Core.API?.GetApiCommand(API.IG_ToggleExplorerSortOrder),
+                    HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmSettings_EnableExplorerSortOrder),
                 });
                 mnuLoadingOrders.Items.Add("-");
             }
@@ -736,7 +736,7 @@ public partial class MainWindowView : PhControl
 
         // check for last seen image
         if (string.IsNullOrEmpty(pathToLoad)
-            && Core.Config.ShouldOpenLastSeenImage
+            && Core.Config.EnableLastSeenImage
             && BHelper.CheckPath(Core.Config.LastSeenImagePath) == PathType.File)
         {
             pathToLoad = Core.Config.LastSeenImagePath;
@@ -745,7 +745,7 @@ public partial class MainWindowView : PhControl
         // check for Welcome image
         if (string.IsNullOrEmpty(pathToLoad))
         {
-            if (Core.Config.ShowWelcomeImage)
+            if (Core.Config.EnableWelcomeImage)
             {
                 pathToLoad = BHelper.BaseDir("default.webp");
             }
@@ -780,11 +780,11 @@ public partial class MainWindowView : PhControl
             var searchOptions = new FileSearchOptions()
             {
                 AllowedExtensions = Core.Config.FileFormats,
-                UseExplorerSortOrder = Core.Config.UseExplorerSortOrder,
+                UseExplorerSortOrder = Core.Config.EnableExplorerSortOrder,
                 ForegroundShell = foregroundShell,
-                SearchSubDirectories = Core.Config.EnableRecursiveLoading,
-                GroupByDir = Core.Config.ShouldGroupImagesByDirectory,
-                IncludeHidden = Core.Config.ShouldLoadHiddenImages,
+                SearchSubDirectories = Core.Config.EnableSubfoldersLoading,
+                GroupByDir = Core.Config.EnableImageFolderGrouping,
+                IncludeHidden = Core.Config.EnableHiddenImagesLoading,
                 OrderBy = Core.Config.ImageLoadingOrder,
                 OrderType = Core.Config.ImageLoadingOrderType,
             };
@@ -833,7 +833,7 @@ public partial class MainWindowView : PhControl
         if (isEmptyList)
         {
             // set file watcher
-            AppAPIProvider.SetRealTimeFileWatcher(Core.Config.EnableRealTimeFileUpdate);
+            AppAPIProvider.SetRealTimeFileWatcher(Core.Config.EnableFileWatcher);
 
             Dispatcher.UIThread.Post(async () =>
             {
@@ -859,10 +859,10 @@ public partial class MainWindowView : PhControl
             {
                 FrameIndex = 0,
                 FirstFrameOnly = Core.Config.SingleFrameFormats.Contains(photo.Extension),
-                UseEmbeddedThumbnailRawFormats = Core.Config.UseEmbeddedThumbnailRawFormats,
-                UseEmbeddedThumbnailOtherFormats = Core.Config.UseEmbeddedThumbnailOtherFormats,
-                EmbeddedThumbnailMinWidth = Core.Config.EmbeddedThumbnailMinWidth,
-                EmbeddedThumbnailMinHeight = Core.Config.EmbeddedThumbnailMinHeight,
+                OnlyLoadRawPreview = Core.Config.EnableOnlyLoadRawPreview,
+                OnlyLoadNonRawPreview = Core.Config.EnableOnlyLoadNonRawPreview,
+                PreviewMinWidth = Core.Config.PreviewMinWidth,
+                PreviewMinHeight = Core.Config.PreviewMinHeight,
             };
         }
 

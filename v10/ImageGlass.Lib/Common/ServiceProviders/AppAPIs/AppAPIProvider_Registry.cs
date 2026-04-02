@@ -91,7 +91,7 @@ public partial class AppAPIProvider
         { API.IG_Reload,                        PhCommands.Create(IG_Reload) },
         { API.IG_ReloadList,                    PhCommands.Create(IG_ReloadList) },
         { API.IG_Unload,                        PhCommands.Create(IG_UnloadAsync) },
-        { API.IG_ToggleUseExplorerSortOrder,    PhCommands.Create(IG_ToggleUseExplorerSortOrder) },
+        { API.IG_ToggleExplorerSortOrder,    PhCommands.Create(IG_ToggleExplorerSortOrder) },
         { API.IG_SetLoadingOrderBy,             PhCommands.Create(IG_SetLoadingOrderBy) },
         { API.IG_SetLoadingOrderType,           PhCommands.Create(IG_SetLoadingOrderType) },
         { API.IG_SetColorChannels,              PhCommands.Create(IG_SetColorChannels) },

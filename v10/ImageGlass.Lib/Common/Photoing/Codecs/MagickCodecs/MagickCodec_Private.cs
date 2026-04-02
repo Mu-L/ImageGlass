@@ -42,13 +42,13 @@ public static partial class MagickCodec
 
 
         // Use embedded thumbnails if specified
-        if (requestThumbnail && meta.ExifProfile != null && options.UseEmbeddedThumbnailOtherFormats)
+        if (requestThumbnail && meta.ExifProfile != null && options.OnlyLoadNonRawPreview)
         {
             // Fetch the embedded thumbnail
             thumbM = meta.ExifProfile.CreateThumbnail();
             if (thumbM != null
-                && thumbM.Width > options.EmbeddedThumbnailMinWidth
-                && thumbM.Height > options.EmbeddedThumbnailMinHeight)
+                && thumbM.Width > options.PreviewMinWidth
+                && thumbM.Height > options.PreviewMinHeight)
             {
                 if (options.CorrectRotation) thumbM.AutoOrient();
 
@@ -74,7 +74,7 @@ public static partial class MagickCodec
 
             // if always apply color profile
             // or only apply color profile if there is an embedded profile
-            if (Core.Config.AlwaysApplyColorProfile || meta.MagickColorProfile is not null)
+            if (Core.Config.EnableAlwaysApplyColorProfile || meta.MagickColorProfile is not null)
             {
                 if (GetColorProfileByName(Core.Config.ColorProfile) is { } destIccProfile)
                 {

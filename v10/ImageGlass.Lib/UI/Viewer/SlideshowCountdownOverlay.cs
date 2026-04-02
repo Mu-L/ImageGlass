@@ -34,7 +34,7 @@ public class SlideshowCountdownOverlay : PhControl
     {
         base.Render(c);
 
-        if (!Core.Config.EnableSlideshow || !Core.Config.ShowSlideshowCountdown) return;
+        if (!Core.Config.EnableSlideshow || !Core.Config.EnableSlideshowCountdown) return;
         if (Core.Slideshow is null || !Core.Slideshow.IsRunning) return;
 
         // 1. format countdown

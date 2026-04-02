@@ -328,7 +328,7 @@ public sealed class SlideshowProvider : PhDisposable
         var intervalFrom = Core.Config.SlideshowInterval;
         var intervalTo = Core.Config.SlideshowIntervalTo;
 
-        if (Core.Config.UseRandomIntervalForSlideshow && intervalTo > intervalFrom)
+        if (Core.Config.EnableSlideshowRandomInterval && intervalTo > intervalFrom)
         {
             // Random.Shared is thread-safe
             var range = intervalTo - intervalFrom;

@@ -52,7 +52,7 @@ public partial class MainWindow : PhWindow
         if (!Core.Config.EnableWindowFit)
         {
             // load window state
-            if (Core.Config.IsMainWindowMaximized) WindowState = WindowState.Maximized;
+            if (Core.Config.EnableMainWindowMaximized) WindowState = WindowState.Maximized;
         }
 
         // set zoom lock
@@ -244,7 +244,7 @@ public partial class MainWindow : PhWindow
     private async Task SaveConfigOnClosingAsync()
     {
         // 1. save window maximized state
-        Core.Config.IsMainWindowMaximized = WindowState == Avalonia.Controls.WindowState.Maximized;
+        Core.Config.EnableMainWindowMaximized = WindowState == Avalonia.Controls.WindowState.Maximized;
         Core.Config.EnableFullScreen = WindowState == WindowState.FullScreen;
 
         // 2. save window bounds

@@ -103,7 +103,7 @@ public partial class PhotoManager
         if (string.IsNullOrWhiteSpace(dirPath)) return;
 
         _fileWatcher.FolderPath = dirPath;
-        _fileWatcher.IncludeSubdirectories = Core.Config.EnableRecursiveLoading;
+        _fileWatcher.IncludeSubdirectories = Core.Config.EnableSubfoldersLoading;
 
         _fileWatcher.OnCreated += FileWatcher_OnCreated;
         _fileWatcher.OnDeleted += FileWatcher_OnDeleted;
@@ -303,10 +303,10 @@ public partial class PhotoManager
         var options = new FileSearchOptions()
         {
             AllowedExtensions = Core.Config.FileFormats,
-            UseExplorerSortOrder = Core.Config.UseExplorerSortOrder,
-            SearchSubDirectories = Core.Config.EnableRecursiveLoading,
-            GroupByDir = Core.Config.ShouldGroupImagesByDirectory,
-            IncludeHidden = Core.Config.ShouldLoadHiddenImages,
+            UseExplorerSortOrder = Core.Config.EnableExplorerSortOrder,
+            SearchSubDirectories = Core.Config.EnableSubfoldersLoading,
+            GroupByDir = Core.Config.EnableImageFolderGrouping,
+            IncludeHidden = Core.Config.EnableHiddenImagesLoading,
             OrderBy = Core.Config.ImageLoadingOrder,
             OrderType = Core.Config.ImageLoadingOrderType,
             ForegroundShell = Core.ShellProvider?.ForegroundShell,

@@ -253,7 +253,7 @@ public partial class AppAPIProvider
 
 
         // show override warning
-        if (Core.Config.ShowSaveOverrideConfirmation)
+        if (Core.Config.EnableSaveConfirmation)
         {
             var modal = await ModalWindow.ShowWarningAsync(_mainWindow, new ModalWindowOptions
             {
@@ -265,8 +265,8 @@ public partial class AppAPIProvider
                 Thumbnail = Core.Photos.Current?.GalleryThumbnail,
             }, ModalWindowButton.Yes_No);
 
-            // update ShowSaveOverrideConfirmation setting
-            Core.Config.ShowSaveOverrideConfirmation = !modal.IsRememberOptionChecked;
+            // update EnableSaveConfirmation setting
+            Core.Config.EnableSaveConfirmation = !modal.IsRememberOptionChecked;
 
             if (modal.ExitCode != DialogExitCode.OK) return;
         }
@@ -292,7 +292,7 @@ public partial class AppAPIProvider
             srcExt = Core.Photos.Current?.Extension?.ToLowerInvariant() ?? srcExt;
 
 
-            if (Core.Config.OpenSaveAsDialogInTheCurrentImageDir)
+            if (Core.Config.EnableOpenSaveAsInCurrentFolder)
             {
                 var initSaveDirPath = Path.GetDirectoryName(srcFilePath);
 
@@ -313,7 +313,7 @@ public partial class AppAPIProvider
         {
             Title = Core.Lang[LangId.FrmMain_MnuSaveAs],
             FileTypeChoices = SavingExts.FilePickerFileTypeChoices,
-            ShowOverwritePrompt = !Core.Config.ShowSaveOverrideConfirmation, // only show 1 prompt
+            ShowOverwritePrompt = !Core.Config.EnableSaveConfirmation, // only show 1 prompt
             SuggestedStartLocation = initSaveDir,
             SuggestedFileName = destFileName,
             SuggestedFileType = SavingExts.LastSavedFileType,
@@ -326,7 +326,7 @@ public partial class AppAPIProvider
 
 
         // 3. show override warning
-        if (File.Exists(destFilePath) && Core.Config.ShowSaveOverrideConfirmation)
+        if (File.Exists(destFilePath) && Core.Config.EnableSaveConfirmation)
         {
             var fi = new FileInfo(destFilePath);
 
@@ -343,8 +343,8 @@ public partial class AppAPIProvider
                 IsRememberOptionVisible = true,
             }, ModalWindowButton.Yes_No);
 
-            // update ShowSaveOverrideConfirmation setting
-            Core.Config.ShowSaveOverrideConfirmation = !modal.IsRememberOptionChecked;
+            // update EnableSaveConfirmation setting
+            Core.Config.EnableSaveConfirmation = !modal.IsRememberOptionChecked;
 
             if (modal.ExitCode != DialogExitCode.OK) return;
         }
@@ -387,7 +387,7 @@ public partial class AppAPIProvider
                 using var photo = new Photo(selectedImg);
 
                 await photo.SaveAsAsync(destFilePath, new ImgTransform(),
-                    Core.Config.ImageEditQuality, Core.Config.PreserveModifiedDate);
+                    Core.Config.ImageEditQuality, Core.Config.EnablePreserveModifiedDate);
                 saveSource = ImageSaveSource.SelectedArea;
             }
             catch (Exception ex) { error = ex; }
@@ -399,7 +399,7 @@ public partial class AppAPIProvider
             try
             {
                 await Core.ClipboardImage.SaveAsAsync(destFilePath, Core.ImageTransform,
-                    Core.Config.ImageEditQuality, Core.Config.PreserveModifiedDate);
+                    Core.Config.ImageEditQuality, Core.Config.EnablePreserveModifiedDate);
                 saveSource = ImageSaveSource.Clipboard;
             }
             catch (Exception ex) { error = ex; }
@@ -411,7 +411,7 @@ public partial class AppAPIProvider
             try
             {
                 await Core.Photos.Current.SaveAsAsync(destFilePath, Core.ImageTransform,
-                    Core.Config.ImageEditQuality, Core.Config.PreserveModifiedDate);
+                    Core.Config.ImageEditQuality, Core.Config.EnablePreserveModifiedDate);
                 saveSource = ImageSaveSource.CurrentFile;
             }
             catch (Exception ex) { error = ex; }
@@ -719,7 +719,7 @@ public partial class AppAPIProvider
 
 
             // manually update the change if FileWatcher is not enabled
-            if (!Core.Config.EnableRealTimeFileUpdate)
+            if (!Core.Config.EnableFileWatcher)
             {
                 Core.Photos.SetFilePath(Core.Photos.CurrentIndex, newFilePath);
             }
@@ -761,7 +761,7 @@ public partial class AppAPIProvider
 
 
         // 1. show confirm dialog
-        if (Core.Config.ShowDeleteConfirmation)
+        if (Core.Config.EnableDeleteConfirmation)
         {
             var heading = moveToRecycleBin
                 ? Core.Lang[LangId.FrmMain_MnuMoveToRecycleBin_Description]
@@ -784,7 +784,7 @@ public partial class AppAPIProvider
             }, ModalWindowButton.Yes_No);
 
             // update remember confirm setting
-            Core.Config.ShowDeleteConfirmation = !modal.IsRememberOptionChecked;
+            Core.Config.EnableDeleteConfirmation = !modal.IsRememberOptionChecked;
 
             canDelete = modal.ExitCode == DialogExitCode.OK;
         }
@@ -1312,20 +1312,20 @@ public partial class AppAPIProvider
     /// <summary>
     /// Sets whether to use the Explorer sort order.
     /// </summary>
-    public void IG_ToggleUseExplorerSortOrder(string? boolStr = null)
+    public void IG_ToggleExplorerSortOrder(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
-        IG_ToggleUseExplorerSortOrder(enabled);
+        IG_ToggleExplorerSortOrder(enabled);
     }
 
 
     /// <summary>
     /// Sets whether to use the Explorer sort order.
     /// </summary>
-    public void IG_ToggleUseExplorerSortOrder(bool? enabled)
+    public void IG_ToggleExplorerSortOrder(bool? enabled)
     {
-        enabled ??= !Core.Config.UseExplorerSortOrder;
-        Core.Config.UseExplorerSortOrder = enabled.Value;
+        enabled ??= !Core.Config.EnableExplorerSortOrder;
+        Core.Config.EnableExplorerSortOrder = enabled.Value;
 
         IG_ReloadList();
     }
@@ -2148,7 +2148,7 @@ public partial class AppAPIProvider
 
 
         // check center window to screen option
-        if (!Core.Config.CenterWindowFit)
+        if (!Core.Config.EnableCenterWindowFit)
         {
             winBounds = winBounds.WithX(_mainWindow.Position.X / dpi);
             winBounds = winBounds.WithY(_mainWindow.Position.Y / dpi);
@@ -2257,7 +2257,8 @@ public partial class AppAPIProvider
     public void IG_ToggleFullScreen(bool? enabled = null)
     {
         enabled ??= !Core.Config.EnableFullScreen;
-        SetFullScreenMode__(enabled.Value, Core.Config.HideToolbarInFullscreen, Core.Config.HideGalleryInFullscreen);
+        SetFullScreenMode__(enabled.Value,
+            !Core.Config.ShowToolbarInFullscreen, !Core.Config.ShowGalleryInFullscreen);
     }
     private void SetFullScreenMode__(bool enabled, bool hideToolbar = false, bool hideThumbnails = false)
     {
@@ -2305,7 +2306,7 @@ public partial class AppAPIProvider
 
 
             // restore window state, size, position
-            Core.Config.IsMainWindowMaximized = _windowMaximized;
+            Core.Config.EnableMainWindowMaximized = _windowMaximized;
             _mainWindow.WindowState = _windowMaximized
                 ? WindowState.Maximized
                 : WindowState.Normal;
@@ -2386,7 +2387,7 @@ public partial class AppAPIProvider
 
 
         // 4. start countdown refresh timer for the viewer overlay
-        SetSlideshowCountdown(Core.Config.ShowSlideshowCountdown);
+        SetSlideshowCountdown(Core.Config.EnableSlideshowCountdown);
     }
 
     private void StopSlideshow__()
@@ -2413,7 +2414,7 @@ public partial class AppAPIProvider
         {
             Core.Config.EnableFullScreen = false;
 
-            Core.Config.IsMainWindowMaximized = _windowMaximizedBeforeSlideshow;
+            Core.Config.EnableMainWindowMaximized = _windowMaximizedBeforeSlideshow;
             _mainWindow.WindowState = _windowMaximizedBeforeSlideshow
                 ? WindowState.Maximized
                 : WindowState.Normal;
@@ -2453,8 +2454,8 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_ToggleSlideshowCountdown(bool? enabled = null)
     {
-        enabled ??= !Core.Config.ShowSlideshowCountdown;
-        Core.Config.ShowSlideshowCountdown = enabled.Value;
+        enabled ??= !Core.Config.EnableSlideshowCountdown;
+        Core.Config.EnableSlideshowCountdown = enabled.Value;
 
         SetSlideshowCountdown(enabled.Value);
     }
@@ -2991,12 +2992,12 @@ public partial class AppAPIProvider
     /// </summary>
     public static void IG_SetRealTimeFileUpdate(bool enabled)
     {
-        Core.Config.EnableRealTimeFileUpdate = enabled;
+        Core.Config.EnableFileWatcher = enabled;
     }
 
 
     /// <summary>
-    /// Sets the real-time file update engine without updating the setting <see cref="Config.EnableRealTimeFileUpdate"/>.
+    /// Sets the real-time file update engine without updating the setting <see cref="Config.EnableFileWatcher"/>.
     /// </summary>
     public static void SetRealTimeFileWatcher(bool enabled)
     {

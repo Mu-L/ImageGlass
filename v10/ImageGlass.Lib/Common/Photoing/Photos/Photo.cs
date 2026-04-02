@@ -380,9 +380,9 @@ public partial class Photo : PhDisposable
     private async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
         // get embedded thumbnail requirements
-        var loadRawThumbnailOnly = ReadOptions.UseEmbeddedThumbnailRawFormats
+        var loadRawThumbnailOnly = ReadOptions.OnlyLoadRawPreview
             && meta.RawThumbnail is not null;
-        var loadOtherThumbnailOnly = ReadOptions.UseEmbeddedThumbnailOtherFormats
+        var loadOtherThumbnailOnly = ReadOptions.OnlyLoadNonRawPreview
             && (meta.ExifProfile?.ThumbnailLength ?? 0) > 0;
 
         // check if we can use Skia to decode

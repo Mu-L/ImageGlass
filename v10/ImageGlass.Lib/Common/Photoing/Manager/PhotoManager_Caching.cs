@@ -94,9 +94,9 @@ public partial class PhotoManager
             token = _cacheCts.Token;
         }
 
-        if (Core.Config.MaxMemoryCacheInMb == 0
-            || Core.Config.MaxFileSizeCacheInMb == 0
-            || Core.Config.MaxDimensionCache == 0) return;
+        if (Core.Config.CacheMaxMemoryInMb == 0
+            || Core.Config.CacheMaxFileSizeInMb == 0
+            || Core.Config.CacheMaxDimension == 0) return;
 
         // run on a dedicated thread to avoid thread pool starvation
         _ = Task.Factory.StartNew(
@@ -174,9 +174,9 @@ public partial class PhotoManager
     {
         try
         {
-            var maxMemoryBytes = (long)Core.Config.MaxMemoryCacheInMb * 1024L * 1024L;
-            var maxFileSizeBytes = (long)(Core.Config.MaxFileSizeCacheInMb * 1024.0 * 1024.0);
-            var maxDimension = Core.Config.MaxDimensionCache;
+            var maxMemoryBytes = (long)Core.Config.CacheMaxMemoryInMb * 1024L * 1024L;
+            var maxFileSizeBytes = (long)(Core.Config.CacheMaxFileSizeInMb * 1024.0 * 1024.0);
+            var maxDimension = Core.Config.CacheMaxDimension;
             var totalCount = (int)Count;
 
             if (totalCount == 0 || centerIndex < 0) return;

@@ -471,7 +471,7 @@ public static partial class MagickCodec
         var hasRequestedThumbnail = false;
 
         // 3.1 read embedded thumbnail only
-        if (options.UseEmbeddedThumbnailRawFormats is true)
+        if (options.OnlyLoadRawPreview is true)
         {
             try
             {
@@ -484,8 +484,8 @@ public static partial class MagickCodec
                     imgM.Ping(thumbSpan);
 
                     // check min size
-                    if (imgM.Width > options.EmbeddedThumbnailMinWidth
-                        && imgM.Height > options.EmbeddedThumbnailMinHeight)
+                    if (imgM.Width > options.PreviewMinWidth
+                        && imgM.Height > options.PreviewMinHeight)
                     {
                         imgM.Read(thumbSpan, settings);
                         hasRequestedThumbnail = true;
