@@ -43,6 +43,8 @@ public partial class ViewerControl : PhControl
 
     private Point? _lastMousePanPoint = null; // mouse panning
     private Point? _lockZoomSavedSrcPoint; // saved pan position for LockZoom
+    private Point? _mouseClickDownPoint = null; // track press point for click action
+    private MouseButton _lastPressedMouseButton; // track which button was pressed
 
 
     // events
@@ -50,6 +52,8 @@ public partial class ViewerControl : PhControl
     public event TEventHandler<ViewerControl, AnimatorFrameChangedEventArgs>? PhotoAnimatorFrameChanged;
     public event TEventHandler<ViewerControl, ViewerPointerEventArgs>? ViewerPointerMoved;
     public event TEventHandler<ViewerControl, ViewerPointerEventArgs>? ViewerPointerPressed;
+    public event TEventHandler<ViewerControl, ViewerPointerClickEventArgs>? ViewerPointerClicked;
+    public event TEventHandler<ViewerControl, ViewerMouseWheelEventArgs>? ViewerMouseWheel;
 
 
     #region Public Properties
@@ -216,6 +220,18 @@ public partial class ViewerControl : PhControl
             {
                 requestRerender = OnSelectionBegin(p);
             }
+
+            // track press point and button for mouse click action dispatch
+            _mouseClickDownPoint = p.Position;
+            _lastPressedMouseButton = e.GetCurrentPoint(this).Properties.PointerUpdateKind switch
+            {
+                PointerUpdateKind.LeftButtonPressed => MouseButton.Left,
+                PointerUpdateKind.RightButtonPressed => MouseButton.Right,
+                PointerUpdateKind.MiddleButtonPressed => MouseButton.Middle,
+                PointerUpdateKind.XButton1Pressed => MouseButton.XButton1,
+                PointerUpdateKind.XButton2Pressed => MouseButton.XButton2,
+                _ => MouseButton.None,
+            };
         }
 
         // request re-render control
@@ -243,9 +259,12 @@ public partial class ViewerControl : PhControl
         // reset the panning point
         _lastMousePanPoint = null;
 
-
         var requestRerender = OnSelectionEnd(false);
         if (requestRerender) InvalidateVisual();
+
+        // dispatch mouse click action (single clicks only)
+        DispatchMouseClickAction(e);
+        _mouseClickDownPoint = null;
 
         base.OnPointerReleased(e);
     }
@@ -297,6 +316,27 @@ public partial class ViewerControl : PhControl
     }
 
 
+    protected override void OnDoubleTapped(TappedEventArgs e)
+    {
+        base.OnDoubleTapped(e);
+        if (EnableSelection) return;
+
+        var pos = e.GetPosition(this);
+
+        // exclude nav button regions
+        if (IsInNavButtonHitArea(pos)) return;
+
+        var clickEvent = _lastPressedMouseButton switch
+        {
+            MouseButton.Left => MouseClickEvent.LeftDoubleClick,
+            _ => (MouseClickEvent?)null,
+        };
+        if (clickEvent is null) return;
+
+        ViewerPointerClicked?.Invoke(this, new ViewerPointerClickEventArgs(e, clickEvent.Value));
+    }
+
+
     protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
     {
         base.OnPointerWheelChanged(e);
@@ -307,7 +347,7 @@ public partial class ViewerControl : PhControl
         var isPreciseScrolling = Core.ShellProvider?.HasPreciseScrollingDeltas() ?? false;
         var isUsingTouchpad = isPreciseScrolling || deltaAbs != 1;
 
-        // Touchpad scrolling
+        // Touchpad scrolling — keep existing behavior
         if (isUsingTouchpad)
         {
             // horizontal component dominates -> horizontal pan gesture
@@ -322,15 +362,15 @@ public partial class ViewerControl : PhControl
 
             // Scroll Up/Down: Zoom
             delta *= 70;
-        }
-        // Mouse wheel
-        else
-        {
-            delta *= SystemInfo.MouseWheelScrollDelta;
+            _ = ZoomByDeltaToPoint(delta, position);
+            return;
         }
 
-        // Zooming
-        _ = ZoomByDeltaToPoint(delta, position);
+        // Mouse wheel — raise event for external dispatch
+        delta *= SystemInfo.MouseWheelScrollDelta;
+        var wheelEvent = GetMouseWheelEvent(e.KeyModifiers);
+
+        ViewerMouseWheel?.Invoke(this, new ViewerMouseWheelEventArgs(e, wheelEvent, delta, position));
     }
 
 
@@ -375,6 +415,68 @@ public partial class ViewerControl : PhControl
             var srcPoint = PointClientToSource(p.Position).ToPixelPoint();
             ViewerPointerMoved.Invoke(this, new ViewerPointerEventArgs(e, p, srcPoint));
         }
+    }
+
+
+    /// <summary>
+    /// Determines the <see cref="MouseWheelEvent"/> from keyboard modifiers.
+    /// </summary>
+    private static MouseWheelEvent GetMouseWheelEvent(KeyModifiers modifiers)
+    {
+        if (modifiers.HasFlag(KeyModifiers.Control)) return MouseWheelEvent.CtrlAndScroll;
+        if (modifiers.HasFlag(KeyModifiers.Shift)) return MouseWheelEvent.ShiftAndScroll;
+        if (modifiers.HasFlag(KeyModifiers.Alt)) return MouseWheelEvent.AltAndScroll;
+        return MouseWheelEvent.Scroll;
+    }
+
+
+    /// <summary>
+    /// Checks if the given position is within the nav button hit area.
+    /// </summary>
+    private bool IsInNavButtonHitArea(Point pos)
+    {
+        if (!EnableNavButtons || !_navButtons.IsEnabled) return false;
+
+        var hitWidth = NavButtonsInfo.NAV_BTN_SIZE.Width + NavButtonsInfo.NAV_BTN_MARGIN;
+        var leftHitArea = new Rect(0, 0, hitWidth, Bounds.Height);
+        var rightHitArea = new Rect(Bounds.Width - hitWidth, 0, hitWidth, Bounds.Height);
+
+        return leftHitArea.Contains(pos) || rightHitArea.Contains(pos);
+    }
+
+
+    /// <summary>
+    /// Dispatches a single-click action based on the pointer release event.
+    /// Double-click is handled by <see cref="OnDoubleTapped"/>.
+    /// </summary>
+    private void DispatchMouseClickAction(PointerReleasedEventArgs e)
+    {
+        if (_mouseClickDownPoint is null) return;
+        if (EnableSelection) return;
+
+        var pos = e.GetPosition(this);
+
+        // don't fire if the user dragged (threshold 5px)
+        var dragDistance = Math.Sqrt(
+            Math.Pow(pos.X - _mouseClickDownPoint.Value.X, 2)
+            + Math.Pow(pos.Y - _mouseClickDownPoint.Value.Y, 2));
+        if (dragDistance > 5) return;
+
+        // exclude nav button regions
+        if (IsInNavButtonHitArea(pos)) return;
+
+        // determine the single-click event
+        var clickEvent = e.InitialPressMouseButton switch
+        {
+            MouseButton.Left => MouseClickEvent.LeftClick,
+            MouseButton.Middle => MouseClickEvent.WheelClick,
+            MouseButton.XButton1 => MouseClickEvent.XButton1Click,
+            MouseButton.XButton2 => MouseClickEvent.XButton2Click,
+            _ => (MouseClickEvent?)null,
+        };
+        if (clickEvent is null) return;
+
+        ViewerPointerClicked?.Invoke(this, new ViewerPointerClickEventArgs(e, clickEvent.Value));
     }
 
     #endregion // Override Methods

@@ -66,6 +66,10 @@ public partial class SingleAction : PhReactive
     public string? LangKey { get; set; }
 
 
+    // for JSON deserialization
+    public SingleAction() { }
+
+
     public SingleAction(string executable = "", string argument = "", SingleAction? nextAction = null)
     {
         Executable = executable;

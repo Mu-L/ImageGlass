@@ -18,6 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using ImageGlass.Common.Types;
 using System;
 
 namespace ImageGlass.UI.Viewer;
@@ -42,3 +44,51 @@ public class ViewerPointerEventArgs(PointerEventArgs e, PointerPoint p, PixelPoi
     public PixelPoint SourcePoint => srcPoint;
 
 }
+
+
+
+/// <summary>
+/// Event args for mouse click action dispatch from the viewer.
+/// </summary>
+public class ViewerPointerClickEventArgs(RoutedEventArgs e, MouseClickEvent clickEvent) : EventArgs
+{
+    /// <summary>
+    /// Gets the pointer event data associated with the current input event.
+    /// </summary>
+    public RoutedEventArgs Event => e;
+
+    /// <summary>
+    /// Gets the mouse click event that triggered this action.
+    /// </summary>
+    public MouseClickEvent ClickEvent => clickEvent;
+}
+
+
+
+/// <summary>
+/// Event args for mouse wheel action dispatch from the viewer.
+/// </summary>
+public class ViewerMouseWheelEventArgs(PointerWheelEventArgs e, MouseWheelEvent wheelEvent, double delta, Point position) : EventArgs
+{
+    /// <summary>
+    /// Gets the pointer event data associated with the current input event.
+    /// </summary>
+    public PointerWheelEventArgs Event => e;
+
+    /// <summary>
+    /// Gets the mouse wheel event that triggered this action.
+    /// </summary>
+    public MouseWheelEvent WheelEvent => wheelEvent;
+
+    /// <summary>
+    /// Gets the scroll delta (positive = up/forward, negative = down/backward).
+    /// Already multiplied by <see cref="Common.OsApi.SystemInfo.MouseWheelScrollDelta"/>.
+    /// </summary>
+    public double Delta => delta;
+
+    /// <summary>
+    /// Gets the pointer position relative to the viewer control.
+    /// </summary>
+    public Point Position => position;
+}
+
