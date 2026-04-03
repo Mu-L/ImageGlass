@@ -66,7 +66,7 @@ public class SkiaAnimator : AnimatorImpl
 
         // Use DispatcherTimer to integrate with Avalonia's loop.
         // We set a high resolution (16ms ~ 60fps) to poll the stopwatch in the base class.
-        _timer = new DispatcherTimer(DispatcherPriority.Render);
+        _timer = new DispatcherTimer(DispatcherPriority.Render, Dispatcher.UIThread);
         _timer.Interval = TimeSpan.FromMilliseconds(16);
         _timer.Tick += Timer_Tick;
     }
