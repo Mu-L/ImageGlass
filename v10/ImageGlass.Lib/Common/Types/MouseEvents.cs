@@ -22,13 +22,14 @@ namespace ImageGlass.Common.Types;
 
 
 /// <summary>
-/// List of MouseClick / MouseDoubleClick events
+/// List of mouse click events
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<MouseClickEvent>))]
 public enum MouseClickEvent
 {
     LeftClick = 1,
     LeftDoubleClick,
+    RightClick,
     WheelClick,
 
     XButton1Click,
@@ -37,7 +38,7 @@ public enum MouseClickEvent
 
 
 /// <summary>
-/// List of MouseWheel events
+/// List of mouse wheel events
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<MouseWheelEvent>))]
 public enum MouseWheelEvent

@@ -119,6 +119,7 @@ public partial class Config
     public static Dictionary<MouseClickEvent, SingleAction> DefaultMouseClickActions { get; } = new()
     {
         [MouseClickEvent.LeftDoubleClick] = new SingleAction(API.IG_SetZoomForMouseClick),
+        [MouseClickEvent.RightClick] = new SingleAction(API.IG_OpenContextMenu),
         [MouseClickEvent.WheelClick] = new SingleAction(API.IG_Refresh),
         [MouseClickEvent.XButton1Click] = new SingleAction(API.IG_ViewPrevious),
         [MouseClickEvent.XButton2Click] = new SingleAction(API.IG_ViewNext),

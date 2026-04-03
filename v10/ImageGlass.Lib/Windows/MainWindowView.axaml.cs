@@ -388,23 +388,29 @@ public partial class MainWindowView : PhControl
     }
 
 
-    private void PART_Viewer_ViewerPointerClicked(ViewerControl sender, ViewerPointerClickEventArgs e)
+    private async void PART_Viewer_ViewerPointerClicked(ViewerControl sender, ViewerPointerClickEventArgs e)
     {
-        var actions = Core.Config.MouseClickActions;
-        if (actions.Count == 0) actions = Config.DefaultMouseClickActions;
+        // get pointer click action from user settings
+        var action = Core.Config.MouseClickActions.GetValueOrDefault(e.ClickEvent);
 
-        if (!actions.TryGetValue(e.ClickEvent, out var action)) return;
+        // fallback to the default action
+        if (action is null)
+        {
+            action = Config.DefaultMouseClickActions.GetValueOrDefault(e.ClickEvent);
+        }
 
-        _ = Core.API?.RunActionAsync(action);
+        await Core.API!.RunActionAsync(action);
     }
 
 
     private void PART_Viewer_ViewerMouseWheel(ViewerControl sender, ViewerMouseWheelEventArgs e)
     {
-        var wheelActions = Core.Config.MouseWheelActions;
-        if (wheelActions.Count == 0) wheelActions = Config.DefaultMouseWheelActions;
-
-        if (!wheelActions.TryGetValue(e.WheelEvent, out var wheelAction)) return;
+        // get mouse wheel action from user settings
+        if (!Core.Config.MouseWheelActions.TryGetValue(e.WheelEvent, out var wheelAction))
+        {
+            // fallback to the default action
+            _ = Config.DefaultMouseWheelActions.TryGetValue(e.WheelEvent, out wheelAction);
+        }
 
         switch (wheelAction)
         {

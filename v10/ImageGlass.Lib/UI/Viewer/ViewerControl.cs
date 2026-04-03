@@ -43,7 +43,6 @@ public partial class ViewerControl : PhControl
     private Point? _lastMousePanPoint = null; // mouse panning
     private Point? _lockZoomSavedSrcPoint; // saved pan position for LockZoom
     private Point? _mouseClickDownPoint = null; // track press point for click action
-    private MouseButton _lastPressedMouseButton; // track which button was pressed
 
 
     // events
@@ -206,8 +205,7 @@ public partial class ViewerControl : PhControl
 
     private void OnContextMenuRequested(object? sender, ContextRequestedEventArgs e)
     {
-        // disable default context menu behavior because it conflicts to touch gesture.
-        // we handle opening the context menu in OnRightTapped()
+        // disable context menu for custom mouse click actions
         e.Handled = true;
     }
 
@@ -235,15 +233,6 @@ public partial class ViewerControl : PhControl
 
             // track press point and button for mouse click action dispatch
             _mouseClickDownPoint = p.Position;
-            _lastPressedMouseButton = e.GetCurrentPoint(this).Properties.PointerUpdateKind switch
-            {
-                PointerUpdateKind.LeftButtonPressed => MouseButton.Left,
-                PointerUpdateKind.RightButtonPressed => MouseButton.Right,
-                PointerUpdateKind.MiddleButtonPressed => MouseButton.Middle,
-                PointerUpdateKind.XButton1Pressed => MouseButton.XButton1,
-                PointerUpdateKind.XButton2Pressed => MouseButton.XButton2,
-                _ => MouseButton.None,
-            };
         }
 
         // request re-render control
@@ -332,8 +321,7 @@ public partial class ViewerControl : PhControl
     {
         base.OnRightTapped(e);
 
-        // show context menu here
-        ContextMenu?.Open();
+        ViewerPointerClicked?.Invoke(this, new ViewerPointerClickEventArgs(e, MouseClickEvent.RightClick));
     }
 
 
@@ -342,19 +330,12 @@ public partial class ViewerControl : PhControl
         base.OnDoubleTapped(e);
         if (EnableSelection) return;
 
-        var pos = e.GetPosition(this);
 
         // exclude nav button regions
+        var pos = e.GetPosition(this);
         if (IsInNavButtonHitArea(pos)) return;
 
-        var clickEvent = _lastPressedMouseButton switch
-        {
-            MouseButton.Left => MouseClickEvent.LeftDoubleClick,
-            _ => (MouseClickEvent?)null,
-        };
-        if (clickEvent is null) return;
-
-        ViewerPointerClicked?.Invoke(this, new ViewerPointerClickEventArgs(e, clickEvent.Value));
+        ViewerPointerClicked?.Invoke(this, new ViewerPointerClickEventArgs(e, MouseClickEvent.LeftDoubleClick));
     }
 
 
