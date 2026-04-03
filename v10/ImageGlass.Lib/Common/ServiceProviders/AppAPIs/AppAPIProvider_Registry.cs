@@ -155,7 +155,8 @@ public partial class AppAPIProvider
 
 
         // Others
-        { API.IG_SetRealTimeFileUpdate,     PhCommands.Create(IG_SetRealTimeFileUpdate) },
+        { API.IG_SetFileWatcher,            PhCommands.Create(IG_SetFileWatcher) },
+        { API.IG_OpenContextMenu,           PhCommands.Create(IG_OpenContextMenu) },
 
     }.ToFrozenDictionary();
 

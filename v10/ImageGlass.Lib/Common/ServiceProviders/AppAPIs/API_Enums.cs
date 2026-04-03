@@ -129,7 +129,8 @@ public enum API
 
 
     // Other APIs,
-    IG_SetRealTimeFileUpdate,
+    IG_SetFileWatcher,
+    IG_OpenContextMenu,
 
 }
 

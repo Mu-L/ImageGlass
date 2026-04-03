@@ -120,7 +120,7 @@ public partial class MainWindowView : PhControl
         else if (e.PropertyName == nameof(Config.EnableFileWatcher))
         {
             // set file watcher
-            AppAPIProvider.SetRealTimeFileWatcher(Core.Config.EnableFileWatcher);
+            AppAPIProvider.SetFileWatcher(Core.Config.EnableFileWatcher);
         }
     }
 
@@ -833,7 +833,7 @@ public partial class MainWindowView : PhControl
         if (isEmptyList)
         {
             // set file watcher
-            AppAPIProvider.SetRealTimeFileWatcher(Core.Config.EnableFileWatcher);
+            AppAPIProvider.SetFileWatcher(Core.Config.EnableFileWatcher);
 
             Dispatcher.UIThread.Post(async () =>
             {

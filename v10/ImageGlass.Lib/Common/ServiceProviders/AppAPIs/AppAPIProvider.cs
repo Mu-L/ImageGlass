@@ -2980,17 +2980,17 @@ public partial class AppAPIProvider
     /// Sets the real-time file update engine.
     /// </summary>
     /// <param name="boolStr">Values: <c>"true"</c>, <c>"false"</c> or empty.</param>
-    public static void IG_SetRealTimeFileUpdate(string? boolStr)
+    public static void IG_SetFileWatcher(string? boolStr)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr) ?? false;
-        IG_SetRealTimeFileUpdate(enabled);
+        IG_SetFileWatcher(enabled);
     }
 
 
     /// <summary>
     /// Sets the real-time file update engine.
     /// </summary>
-    public static void IG_SetRealTimeFileUpdate(bool enabled)
+    public static void IG_SetFileWatcher(bool enabled)
     {
         Core.Config.EnableFileWatcher = enabled;
     }
@@ -2999,7 +2999,7 @@ public partial class AppAPIProvider
     /// <summary>
     /// Sets the real-time file update engine without updating the setting <see cref="Config.EnableFileWatcher"/>.
     /// </summary>
-    public static void SetRealTimeFileWatcher(bool enabled)
+    public static void SetFileWatcher(bool enabled)
     {
         if (enabled)
         {
@@ -3020,6 +3020,15 @@ public partial class AppAPIProvider
         {
             Core.Photos.StopFileWatcher();
         }
+    }
+
+
+    /// <summary>
+    /// Opens the context menu associated with the viewer.
+    /// </summary>
+    public void IG_OpenContextMenu()
+    {
+        Viewer.ContextMenu?.Open();
     }
 
     #endregion // Other APIs
