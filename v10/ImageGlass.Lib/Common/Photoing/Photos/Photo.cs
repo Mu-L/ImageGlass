@@ -719,7 +719,8 @@ public partial class Photo : PhDisposable
     /// Saves the photo to file.
     /// </summary>
     /// <exception cref="Exception"></exception>
-    public async Task SaveAsAsync(string destFilePath, ImgTransform transforms, uint quality,
+    public async Task SaveAsAsync(string destFilePath,
+        ImgTransform transforms, uint quality,
         bool preserveModifiedDate = false, CancellationToken token = default)
     {
         var taskId = Guid.NewGuid();
@@ -743,7 +744,15 @@ public partial class Photo : PhDisposable
             {
                 await Task.Factory.StartNew(async () =>
                 {
-                    await MagickCodec.SaveAsync(Metadata, destFilePath, ReadOptions, transforms, quality, token);
+                    // update read options
+                    var readOptions = ReadOptions with
+                    {
+                        FrameIndex = Metadata.FrameCount > 1
+                            ? -1 // save all frame
+                            : ReadOptions.FrameIndex, // save only current frame
+                    };
+
+                    await MagickCodec.SaveAsync(Metadata, destFilePath, readOptions, transforms, quality, token);
                 }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
             }
 
