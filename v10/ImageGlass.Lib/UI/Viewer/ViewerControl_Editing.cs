@@ -282,6 +282,7 @@ public partial class ViewerControl
             SKImageRef.Set(ref _imgRender, null);
             _mipmapCache?.Dispose();
             _mipmapCache = null;
+            _loadingOptions.Channels = colors;
 
 
             // 3. skip filtering when all channels (RGBA) are selected

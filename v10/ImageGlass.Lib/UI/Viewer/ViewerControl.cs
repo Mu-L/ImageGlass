@@ -828,7 +828,8 @@ public partial class ViewerControl : PhControl
                 // native bitmap is a single-frame bitmap
                 else
                 {
-                    imgFrame = await e.Photo.GetFrameAsync(0);
+                    var frameToLoad = (uint)Math.Max(0, e.Photo.FrameIndex);
+                    imgFrame = await e.Photo.GetFrameAsync(frameToLoad);
 
                     // apply color space
                     if (TryApplySkiaColorSpace(imgFrame, out var imgFrameColored))
@@ -1013,6 +1014,41 @@ public partial class ViewerControl : PhControl
             _animator?.Pause();
             IsImageAnimating = false;
         }
+    }
+
+
+    /// <summary>
+    /// Views a single frame for multi-frame images.
+    /// </summary>
+    public async Task ViewFrameAsync(uint frameIndex)
+    {
+        if (Photo is null) return;
+
+        // pause the animator if it's running
+        if (IsImageAnimating) StopAnimator();
+
+        var imgFrame = await Photo.GetFrameAsync(frameIndex);
+        if (imgFrame is null) return;
+
+        // apply color space
+        var sourceImg = imgFrame;
+        if (TryApplySkiaColorSpace(imgFrame, out var colored))
+        {
+            sourceImg = colored;
+        }
+
+        lock (_lock)
+        {
+            _mipmapCache?.Dispose();
+            _mipmapCache = null;
+
+            SKImageRef.Set(ref _imgRender, null);
+            SKImageRef.Set(ref _imgSource, sourceImg);
+            _isFirstDraw.SetTrue();
+            BitmapSize = Photo.Size;
+        }
+
+        Refresh(resetZoom: _loadingOptions.ResetZoom);
     }
 
 

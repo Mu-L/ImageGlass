@@ -1014,8 +1014,10 @@ public partial class AppAPIProvider
 
         var safeFrameIndex = BHelper.ComputeIndexInRange(frameIndex, frameCount, true);
 
-        // TODO:
-        //
+        Dispatcher.UIThread.Post(async () =>
+        {
+            await Viewer.ViewFrameAsync((uint)safeFrameIndex);
+        });
     }
 
 
