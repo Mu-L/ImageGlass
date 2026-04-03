@@ -37,6 +37,7 @@ public partial class Photo : PhDisposable
     // private properties
     private uint _width = 0;
     private uint _height = 0;
+    private int _currentFrame = -1;
 
     private Task<PhotoMetadata>? _taskMetadata;
     private CancellationTokenSource? _cancelPhotoLoading;
@@ -65,7 +66,6 @@ public partial class Photo : PhDisposable
     /// <summary>
     /// Gets the native bitmap,
     /// either <see cref="SKImage"/>,
-    /// or <see cref="SKCodec"/>,
     /// or <see cref="SkiaAnimator"/>.
     /// </summary>
     public IDisposable? Bitmap { get; private set; } = null;
@@ -421,7 +421,6 @@ public partial class Photo : PhDisposable
         _height = (uint)result.Size.Height;
 
         if (result.Animator is not null) Bitmap = result.Animator;
-        else if (result.MultiFrames is not null) Bitmap = result.MultiFrames;
         else if (result.SingleFrame is not null) Bitmap = result.SingleFrame;
         else Bitmap = null;
     }
@@ -435,46 +434,13 @@ public partial class Photo : PhDisposable
         ReadCodec = PhotoCodec.Magick;
         using var data = await MagickCodec.DecodeImageAsync(meta, ReadOptions, ReadSettings, null, token);
 
-        // multi-frame
-        if (data.MultiFrames != null)
-        {
-            _width = meta.Width;
-            _height = meta.Width;
 
-            // animated format
-            if (meta.CanAnimate)
-            {
-                //// fall back to use Magick.NET
-                //data.MultiFrameImage.Coalesce();
-                //var frames = data.MultiFrameImage.AsEnumerable().Select(frame =>
-                //{
-                //    var duration = frame.AnimationDelay > 0 ? frame.AnimationDelay : 10;
-                //    duration = duration * 1000 / (uint)frame.AnimationTicksPerSecond;
+        // always load single frame
+        var img = SkiaCodec.FromMagick(data.SingleFrame, meta.SkiaColorSpace);
+        _width = (uint)(img?.Width ?? 0);
+        _height = (uint)(img?.Height ?? 0);
 
-                //    return new AnimatedImgFrame(frame.ToBitmap(), duration);
-                //});
-
-                //Source = new AnimatedImg(frames, data.FrameCount);
-            }
-
-            // multi-frame formats
-            else
-            {
-                // TODO:
-                //var bytes = data.MultiFrames.ToByteArray(MagickFormat.Tiff);
-                //Bitmap = PhotoWIC.CreateDecoder(bytes);
-            }
-        }
-
-        // single-frame formats
-        else
-        {
-            var img = SkiaCodec.FromMagick(data.SingleFrame, meta.SkiaColorSpace);
-
-            Bitmap = img;
-            _width = (uint)(img?.Width ?? 0);
-            _height = (uint)(img?.Height ?? 0);
-        }
+        Bitmap = img;
     }
 
 
@@ -693,22 +659,19 @@ public partial class Photo : PhDisposable
     /// <summary>
     /// Gets an image frame from the photo.
     /// </summary>
-    public SKImage? GetFrame(uint frameIndex)
+    public async Task<SKImage?> GetFrameAsync(uint frameIndex)
     {
-        // 1. native bitmap is a single-frame bitmap
+        _currentFrame = (int)frameIndex;
+
+
+        // native bitmap is a single-frame bitmap
         if (Bitmap is SKImage img) return img;
 
 
-        // 2. native bitmap is a multi-frame bitmap
-        if (Bitmap is SKCodec codec)
+        // native bitmap is a multi-frame bitmap
+        if (Metadata.FrameCount > 1)
         {
-            var bmpFrame = new SKBitmap(codec.Info);
-            var codecOption = new SKCodecOptions((int)Metadata.FrameIndex);
-
-            if (codec.GetPixels(codec.Info, bmpFrame.GetPixels(), codecOption) == SKCodecResult.Success)
-            {
-                return SkiaCodec.ToSKImage(bmpFrame);
-            }
+            // TODO:
         }
 
         return null;

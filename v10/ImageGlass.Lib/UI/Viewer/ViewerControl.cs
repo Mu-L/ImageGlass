@@ -819,16 +819,16 @@ public partial class ViewerControl : PhControl
                 BitmapSize = e.Photo.Size;
 
                 // native bitmap is a animated bitmap
-                if (e.Photo.Bitmap is SkiaAnimator wicAnimator)
+                if (e.Photo.Bitmap is SkiaAnimator skAnimator)
                 {
-                    animator = wicAnimator;
+                    animator = skAnimator;
                     hasSource = true;
                 }
 
                 // native bitmap is a single-frame bitmap
                 else
                 {
-                    imgFrame = e.Photo.GetFrame(0);
+                    imgFrame = await e.Photo.GetFrameAsync(0);
 
                     // apply color space
                     if (TryApplySkiaColorSpace(imgFrame, out var imgFrameColored))

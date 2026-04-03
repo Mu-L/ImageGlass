@@ -27,7 +27,6 @@ namespace ImageGlass.Common.Photoing;
 public partial class SkiaDecoderOutput : PhDisposable
 {
     public SKImage? SingleFrame { get; set; } = null;
-    public SKCodec? MultiFrames { get; set; } = null;
     public SkiaAnimator? Animator { get; set; } = null;
     public Size Size { get; set; } = new();
 
@@ -38,9 +37,6 @@ public partial class SkiaDecoderOutput : PhDisposable
 
         SingleFrame?.Dispose();
         SingleFrame = null;
-
-        MultiFrames?.Dispose();
-        MultiFrames = null;
 
         Animator?.Dispose();
         Animator = null;
