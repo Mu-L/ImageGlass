@@ -18,7 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia.Input;
 using Avalonia.Input.GestureRecognizers;
-using Avalonia.Interactivity;
 using ImageGlass.Common;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer.ZoomAndPan;
@@ -54,9 +53,6 @@ public partial class ViewerControl
 
         // touchpad gestures
         PointerTouchPadGestureMagnify += ViewerControl_PointerTouchPadGestureMagnify; // pinch
-
-        // suppress context menu during multi-touch gestures
-        AddHandler(ContextRequestedEvent, OnContextRequestedForTouch, RoutingStrategies.Tunnel);
     }
 
 
@@ -74,9 +70,6 @@ public partial class ViewerControl
 
         // touchpad gestures
         PointerTouchPadGestureMagnify -= ViewerControl_PointerTouchPadGestureMagnify; // pinch
-
-        // suppress context menu during multi-touch gestures
-        RemoveHandler(ContextRequestedEvent, OnContextRequestedForTouch);
     }
 
 
@@ -135,18 +128,6 @@ public partial class ViewerControl
         }
 
         e.Handled = true;
-    }
-
-
-    /// <summary>
-    /// Suppresses context menu when a multi-touch gesture (pinch, 2-finger tap) is active or was recently active.
-    /// </summary>
-    private void OnContextRequestedForTouch(object? sender, ContextRequestedEventArgs e)
-    {
-        if (_pinchGesture.IsPinchingOrRecentlyPinched)
-        {
-            e.Handled = true;
-        }
     }
 
 

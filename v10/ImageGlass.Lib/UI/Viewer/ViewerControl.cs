@@ -111,6 +111,8 @@ public partial class ViewerControl : PhControl
 
         Core.ColorProfileChanged += Core_ColorProfileChanged;
 
+        // suppress the default way to open context menu
+        AddHandler(ContextRequestedEvent, OnContextMenuRequested, RoutingStrategies.Tunnel);
         RegisterTouchGestures();
     }
 
@@ -122,6 +124,9 @@ public partial class ViewerControl : PhControl
         Core.ColorProfileChanged -= Core_ColorProfileChanged;
 
         UnregisterTouchGestures();
+
+        // suppress the default way to open context menu
+        RemoveHandler(ContextRequestedEvent, OnContextMenuRequested);
 
         DisposeCheckerboard();
         DisposeNativePhotoResources();
@@ -196,6 +201,14 @@ public partial class ViewerControl : PhControl
         {
             _navButtons.IsEnabled = (bool)e.NewValue!;
         }
+    }
+
+
+    private void OnContextMenuRequested(object? sender, ContextRequestedEventArgs e)
+    {
+        // disable default context menu behavior because it conflicts to touch gesture.
+        // we handle opening the context menu in OnRightTapped()
+        e.Handled = true;
     }
 
 
@@ -312,6 +325,15 @@ public partial class ViewerControl : PhControl
 
         // trigger event
         OnViewerPointerMoved(e, p);
+    }
+
+
+    protected override void OnRightTapped(TappedEventArgs e)
+    {
+        base.OnRightTapped(e);
+
+        // show context menu here
+        ContextMenu?.Open();
     }
 
 
