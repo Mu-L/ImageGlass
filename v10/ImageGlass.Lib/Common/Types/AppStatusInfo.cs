@@ -159,7 +159,7 @@ public partial class AppStatusInfo : PhDisposable
                 && Core.Photos.CurrentMetadata.FrameCount > 1)
             {
                 var frameInfo = new StringBuilder();
-                frameInfo.Append(Core.Photos.CurrentMetadata.FrameIndex + 1);
+                frameInfo.Append((_viewer.Photo?.FrameIndex ?? 0) + 1);
                 frameInfo.Append('/');
                 frameInfo.Append(Core.Photos.CurrentMetadata.FrameCount);
 
@@ -389,7 +389,7 @@ public partial class AppStatusInfo : PhDisposable
         Core.Photos.PropertyChanged += Photos_PropertyChanged;
         Core.ImageTransform.Changed += ImageTransform_Changed;
         _viewer.ZoomChanged += Viewer_ZoomChanged;
-        _viewer.PhotoAnimatorFrameChanged += Viewer_PhotoAnimatorFrameChanged;
+        _viewer.PhotoFrameChanged += Viewer_PhotoFrameChanged;
     }
 
 
@@ -400,7 +400,7 @@ public partial class AppStatusInfo : PhDisposable
         Core.Photos.PropertyChanged -= Photos_PropertyChanged;
         Core.ImageTransform.Changed -= ImageTransform_Changed;
         _viewer.ZoomChanged -= Viewer_ZoomChanged;
-        _viewer.PhotoAnimatorFrameChanged -= Viewer_PhotoAnimatorFrameChanged;
+        _viewer.PhotoFrameChanged -= Viewer_PhotoFrameChanged;
     }
 
 
@@ -439,10 +439,8 @@ public partial class AppStatusInfo : PhDisposable
     }
 
 
-    private void Viewer_PhotoAnimatorFrameChanged(ViewerControl sender, AnimatorFrameChangedEventArgs e)
+    private void Viewer_PhotoFrameChanged(ViewerControl sender, EventArgs e)
     {
-        Core.Photos.CurrentMetadata?.FrameIndex = (uint)e.CurrentFrame;
-
         Dispatcher.UIThread.Post(() =>
         {
             Changed?.Invoke(this, EventArgs.Empty);

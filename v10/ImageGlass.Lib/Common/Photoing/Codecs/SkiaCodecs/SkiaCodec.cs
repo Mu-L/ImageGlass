@@ -63,7 +63,6 @@ public static partial class SkiaCodec
         if (frameIndex >= decoder.FrameCount) frameIndex = 0;
         else if (frameIndex < 0) frameIndex = (int)decoder.FrameCount - 1;
 
-        meta.FrameIndex = (uint)frameIndex;
         meta.FrameCount = (uint)decoder.FrameCount;
         if (token.IsCancellationRequested) return meta;
 
@@ -138,16 +137,16 @@ public static partial class SkiaCodec
     /// Loads photo.
     /// </summary>
     public static async Task<SkiaDecoderOutput> LoadAsync(PhotoMetadata meta,
-        bool correctRotation, CancellationToken token)
+        PhotoReadOptions options, CancellationToken token)
     {
-        return await Task.Run(() => Load(meta, correctRotation), token).ConfigureAwait(false);
+        return await Task.Run(() => Load(meta, options), token).ConfigureAwait(false);
     }
 
 
     /// <summary>
     /// Loads photo.
     /// </summary>
-    public static SkiaDecoderOutput Load(PhotoMetadata meta, bool correctRotation)
+    public static SkiaDecoderOutput Load(PhotoMetadata meta, PhotoReadOptions options)
     {
         // 0. create Skia codec
         var codec = SKCodec.Create(meta.FilePath);
@@ -166,12 +165,13 @@ public static partial class SkiaCodec
 
         // 2. read single-frame formats
         using var bmpFrame = new SKBitmap(codec.Info);
-        var codecOption = new SKCodecOptions((int)meta.FrameIndex);
+        var frameIndex = Math.Min(0, options.FrameIndex);
+        var codecOption = new SKCodecOptions(frameIndex);
 
         if (codec.GetPixels(codec.Info, bmpFrame.GetPixels(), codecOption) == SKCodecResult.Success)
         {
             // 2.1 correct rotation
-            if (correctRotation)
+            if (options.CorrectRotation)
             {
                 if (TryApplyOrientation(bmpFrame, codec.EncodedOrigin, out var fixedBmp))
                 {

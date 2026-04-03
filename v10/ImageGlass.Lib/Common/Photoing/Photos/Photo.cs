@@ -37,7 +37,7 @@ public partial class Photo : PhDisposable
     // private properties
     private uint _width = 0;
     private uint _height = 0;
-    private int _currentFrame = -1;
+    private int _frameIndex = -1;
 
     private Task<PhotoMetadata>? _taskMetadata;
     private CancellationTokenSource? _cancelPhotoLoading;
@@ -88,7 +88,7 @@ public partial class Photo : PhDisposable
     /// <summary>
     /// Gets the current frame index of this photo.
     /// </summary>
-    public int FrameIndex => _currentFrame;
+    public int FrameIndex => _frameIndex;
 
     /// <summary>
     /// Gets the loading state of the photo.
@@ -420,12 +420,17 @@ public partial class Photo : PhDisposable
     private async Task LoadWithSkiaCodecAsync(PhotoMetadata meta, CancellationToken token)
     {
         ReadCodec = PhotoCodec.Native;
-        var result = await SkiaCodec.LoadAsync(meta, ReadOptions.CorrectRotation, token);
+        var result = await SkiaCodec.LoadAsync(meta, ReadOptions, token);
 
         _width = (uint)result.Size.Width;
         _height = (uint)result.Size.Height;
 
-        if (result.Animator is not null) Bitmap = result.Animator;
+        if (result.Animator is not null)
+        {
+            result.Animator.FrameChanged -= OnAnimatorFrameChanged;
+            result.Animator.FrameChanged += OnAnimatorFrameChanged;
+            Bitmap = result.Animator;
+        }
         else if (result.SingleFrame is not null) Bitmap = result.SingleFrame;
         else Bitmap = null;
     }
@@ -446,6 +451,15 @@ public partial class Photo : PhDisposable
         _height = (uint)(img?.Height ?? 0);
 
         Bitmap = img;
+    }
+
+
+    /// <summary>
+    /// Keeps <see cref="_frameIndex"/> in sync during animation playback.
+    /// </summary>
+    private void OnAnimatorFrameChanged(AnimatorImpl sender, AnimatorFrameChangedEventArgs e)
+    {
+        _frameIndex = e.CurrentFrame;
     }
 
 
@@ -481,9 +495,14 @@ public partial class Photo : PhDisposable
     /// </summary>
     public void UnloadBitmap()
     {
+        if (Bitmap is SkiaAnimator animator)
+        {
+            animator.FrameChanged -= OnAnimatorFrameChanged;
+        }
+
         Bitmap?.Dispose();
         Bitmap = null;
-        _currentFrame = -1;
+        _frameIndex = -1;
     }
 
 
@@ -672,12 +691,12 @@ public partial class Photo : PhDisposable
         // 1. animated formats: delegate to animator's own frame cache
         if (Bitmap is SkiaAnimator animator)
         {
-            _currentFrame = newFrameIndex;
+            _frameIndex = newFrameIndex;
             return animator.GetRenderedFrameBitmap(newFrameIndex);
         }
 
         // 2. cache hit: requested frame is already loaded in Bitmap
-        if (frameIndex == _currentFrame && Bitmap is SKImage cachedImg)
+        if (frameIndex == _frameIndex && Bitmap is SKImage cachedImg)
         {
             return cachedImg;
         }
@@ -686,7 +705,7 @@ public partial class Photo : PhDisposable
         // 3. single-frame image: nothing else to decode
         if (Metadata.FrameCount <= 1)
         {
-            _currentFrame = newFrameIndex;
+            _frameIndex = newFrameIndex;
             return Bitmap as SKImage;
         }
 
@@ -713,7 +732,7 @@ public partial class Photo : PhDisposable
 
             Bitmap?.Dispose();
             Bitmap = newFrame;
-            _currentFrame = newFrameIndex;
+            _frameIndex = newFrameIndex;
             _width = (uint)(newFrame?.Width ?? 0);
             _height = (uint)(newFrame?.Height ?? 0);
         }

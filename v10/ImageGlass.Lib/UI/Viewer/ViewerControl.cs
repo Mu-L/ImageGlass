@@ -48,6 +48,7 @@ public partial class ViewerControl : PhControl
     // events
     public event TEventHandler<ViewerControl, PhotoLoadingEventArgs>? PhotoLoading;
     public event TEventHandler<ViewerControl, AnimatorFrameChangedEventArgs>? PhotoAnimatorFrameChanged;
+    public event TEventHandler<ViewerControl, EventArgs>? PhotoFrameChanged;
     public event TEventHandler<ViewerControl, ViewerPointerEventArgs>? ViewerPointerMoved;
     public event TEventHandler<ViewerControl, ViewerPointerEventArgs>? ViewerPointerPressed;
     public event TEventHandler<ViewerControl, ViewerPointerClickEventArgs>? ViewerPointerClicked;
@@ -944,8 +945,9 @@ public partial class ViewerControl : PhControl
         {
             SourceKind = hasSource ? PhotoSource.Native : PhotoSource.None;
 
-            // raise event
+            // raise events
             OnPhotoLoading(e);
+            if (hasSource) PhotoFrameChanged?.Invoke(this, EventArgs.Empty);
         }
 
 
@@ -985,6 +987,7 @@ public partial class ViewerControl : PhControl
 
         InvalidateVisual();
         OnPhotoAnimatorFrameChanged(e);
+        PhotoFrameChanged?.Invoke(this, EventArgs.Empty);
     }
 
 
@@ -1049,6 +1052,7 @@ public partial class ViewerControl : PhControl
         }
 
         Refresh(resetZoom: _loadingOptions.ResetZoom);
+        PhotoFrameChanged?.Invoke(this, EventArgs.Empty);
     }
 
 

@@ -301,7 +301,6 @@ public static partial class MagickCodec
         if (frameIndex >= imgC.Count) frameIndex = 0;
         else if (frameIndex < 0) frameIndex = imgC.Count - 1;
 
-        meta.FrameIndex = (uint)frameIndex;
         meta.FrameCount = (uint)imgC.Count;
 
 
