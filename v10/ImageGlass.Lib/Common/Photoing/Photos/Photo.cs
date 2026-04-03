@@ -197,7 +197,7 @@ public partial class Photo : PhDisposable
     public MagickReadSettings? ReadSettings { get; set; } = null;
 
     /// <summary>
-    /// Gets image metadata. <c>MUST</c> assign on UI thread due to reactivity.
+    /// Gets image metadata.
     /// </summary>
     public PhotoMetadata Metadata
     {
@@ -558,7 +558,6 @@ public partial class Photo : PhDisposable
 
             // load metadata
             await LoadMetadataAsync(useCache);
-            ReadOptions.FirstFrameOnly ??= Metadata.FrameCount < 2;
 
             if (!skipLoadingEvent)
             {
@@ -739,7 +738,7 @@ public partial class Photo : PhDisposable
                 }, token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
             }
 
-            // 2. save photo file to file
+            // 2. save photo to file
             else
             {
                 await Task.Factory.StartNew(async () =>

@@ -864,7 +864,6 @@ public partial class MainWindowView : PhControl
             photo.ReadOptions = new()
             {
                 FrameIndex = 0,
-                FirstFrameOnly = Core.Config.SingleFrameFormats.Contains(photo.Extension),
                 OnlyLoadRawPreview = Core.Config.EnableOnlyLoadRawPreview,
                 OnlyLoadNonRawPreview = Core.Config.EnableOnlyLoadNonRawPreview,
                 PreviewMinWidth = Core.Config.PreviewMinWidth,

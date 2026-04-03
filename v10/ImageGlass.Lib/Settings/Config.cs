@@ -811,16 +811,6 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
-    /// Gets, sets the list of formats that only load the first frame forcefully
-    /// </summary>
-    [JsonConverter(typeof(JsonHashSetToStringConverter))]
-    public HashSet<string> SingleFrameFormats
-    {
-        get => Get(ConfigId.SingleFrameFormats, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".avif", ".heic", ".heif", ".psd", ".jxl" });
-        set => Set(ConfigId.SingleFrameFormats, value);
-    }
-
-    /// <summary>
     /// Gets, sets the list of formats that always use native codec to decode.
     /// </summary>
     [JsonConverter(typeof(JsonHashSetToStringConverter))]

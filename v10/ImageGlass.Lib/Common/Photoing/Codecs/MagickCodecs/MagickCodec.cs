@@ -71,8 +71,10 @@ public static partial class MagickCodec
         bool writePurpose, string filePath = "")
     {
         options ??= new();
-
         var ext = Path.GetExtension(filePath).ToUpperInvariant();
+
+
+        // 1. create base settings
         var settings = new MagickReadSettings
         {
             // https://github.com/dlemstra/Magick.NET/issues/1077
@@ -80,6 +82,16 @@ public static partial class MagickCodec
             SyncImageWithTiffProperties = true,
         };
 
+
+        // 2. check the requested frame to decode
+        if (options.FrameIndex >= 0)
+        {
+            settings.FrameIndex = (uint)options.FrameIndex;
+            settings.FrameCount = 1;
+        }
+
+
+        // 3. add settings for specific format
         if (ext.Equals(".SVG", StringComparison.OrdinalIgnoreCase))
         {
             settings.Format = MagickFormat.Rsvg;
@@ -104,8 +116,8 @@ public static partial class MagickCodec
                 QualityLayers = 100,
             });
         }
-        else if (ext.Equals(".TIF", StringComparison.OrdinalIgnoreCase)
-            || ext.Equals(".TIFF", StringComparison.OrdinalIgnoreCase))
+        else if (ext.Equals(".TIF", StringComparison.Ordinal)
+            || ext.Equals(".TIFF", StringComparison.Ordinal))
         {
             settings.SetDefines(new TiffReadDefines
             {
@@ -125,11 +137,13 @@ public static partial class MagickCodec
                 ],
             });
         }
-        else if (ext.Equals(".APNG", StringComparison.OrdinalIgnoreCase))
+        else if (ext.Equals(".APNG", StringComparison.Ordinal))
         {
             settings.Format = MagickFormat.APng;
         }
 
+
+        // 4. update requested size for JPEG formats
         if (options.Width > 0 && options.Height > 0)
         {
             settings.Width = options.Width;
@@ -144,6 +158,8 @@ public static partial class MagickCodec
             }
         }
 
+
+        // 5. Edge case fixes
         // Fixed #708: length and filesize do not match
         settings.SetDefines(new BmpReadDefines
         {
@@ -159,7 +175,7 @@ public static partial class MagickCodec
         });
 
 
-
+        // 6. add settings for writing
         if (writePurpose)
         {
             if (ext == ".TIF" || ext == ".TIFF")
@@ -181,6 +197,7 @@ public static partial class MagickCodec
             }
         }
 
+
         return settings;
     }
 
@@ -201,7 +218,12 @@ public static partial class MagickCodec
 
         // 1. parse Magick settings
         var settings = readSettings ?? ParseSettings(options, false, filePath);
+
+        // always get all frames metadata
+        settings.FrameIndex = null;
+        settings.FrameCount = null;
         using var imgC = new MagickImageCollection();
+
 
         // 2. ping data
         try
@@ -218,7 +240,7 @@ public static partial class MagickCodec
         }
 
         // 3. load metadata
-        meta = await LoadMetadataAsync(meta, imgC, options, readSettings, token);
+        meta = await LoadMetadataAsync(meta, imgC, options, token);
 
         return meta;
     }
@@ -237,7 +259,12 @@ public static partial class MagickCodec
 
         // 1. parse Magick settings
         var settings = readSettings ?? ParseSettings(options, false);
+
+        // always get all frames metadata
+        settings.FrameIndex = null;
+        settings.FrameCount = null;
         using var imgC = new MagickImageCollection();
+
 
         // 2. ping data
         try
@@ -250,7 +277,7 @@ public static partial class MagickCodec
         }
 
         // 3. load metadata
-        meta = await LoadMetadataAsync(meta, imgC, options, readSettings, token);
+        meta = await LoadMetadataAsync(meta, imgC, options, token);
 
         return meta;
     }
@@ -262,7 +289,6 @@ public static partial class MagickCodec
     public static async Task<PhotoMetadata> LoadMetadataAsync(PhotoMetadata meta,
         MagickImageCollection imgC,
         PhotoReadOptions? options = null,
-        MagickReadSettings? readSettings = null,
         CancellationToken token = default)
     {
         if (imgC.Count == 0) return meta;
@@ -429,20 +455,9 @@ public static partial class MagickCodec
         settings ??= ParseSettings(options, false, meta.FilePath);
         var result = new MagickDecoderOutput();
 
-        // 1. standardize first frame reading option
-        bool readFirstFrameOnly;
-        if (options.FirstFrameOnly == null)
-        {
-            readFirstFrameOnly = meta.FrameCount < 2;
-        }
-        else
-        {
-            readFirstFrameOnly = options.FirstFrameOnly.Value;
-        }
 
-
-        // 2. read all frames if requested
-        if (meta.FrameCount > 1 && readFirstFrameOnly is false)
+        // 1. read all frames if requested
+        if (options.FrameIndex < 0)
         {
             var imgColl = new MagickImageCollection();
             await imgColl.ReadAsync(meta.FilePath, settings, cancelToken);
@@ -466,11 +481,12 @@ public static partial class MagickCodec
         }
 
 
-        // 3. read a single frame only
+        // 2. read a single frame only
         var imgM = new MagickImage();
         var hasRequestedThumbnail = false;
 
-        // 3.1 read embedded thumbnail only
+
+        // 2.1 read embedded thumbnail only
         if (options.OnlyLoadRawPreview is true)
         {
             try
@@ -496,7 +512,7 @@ public static partial class MagickCodec
         }
 
 
-        // 3.2 read full image data
+        // 2.2 read full image data
         if (!hasRequestedThumbnail)
         {
             imgM.Dispose();
@@ -504,12 +520,12 @@ public static partial class MagickCodec
         }
 
 
-        // 3.3 process image
+        // 2.3 process image
         var thumbM = ProcessMagickImage__(imgM, options, meta, true);
         if (thumbM != null) imgM = thumbM;
 
 
-        // 3.4 apply final changes
+        // 2.4 apply final changes
         TransformImage__(imgM, transform);
         result.SingleFrame = imgM;
 
@@ -698,7 +714,7 @@ public static partial class MagickCodec
     public static async Task SaveAsync(PhotoMetadata meta, string destFilePath, PhotoReadOptions options,
         ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
     {
-        var ext = Path.GetExtension(destFilePath);
+        var destExt = Path.GetExtension(destFilePath);
 
         try
         {
@@ -722,6 +738,13 @@ public static partial class MagickCodec
             // 3. save the photo to file
             if (result.MultiFrames is not null)
             {
+                // convert GIF to non-GIF formats, we need to coalesce all frames
+                if (meta.FileExtension.Equals(".gif", StringComparison.OrdinalIgnoreCase)
+                    && !destExt.Equals(".gif", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.MultiFrames.Coalesce();
+                }
+
                 await result.MultiFrames.WriteAsync(destFilePath, token);
             }
             else if (result.SingleFrame is not null)
@@ -729,7 +752,7 @@ public static partial class MagickCodec
                 result.SingleFrame.Quality = quality;
 
                 // resize ICO file if it's larger than 256
-                if (ext.Equals(".ICO", StringComparison.OrdinalIgnoreCase))
+                if (destExt.Equals(".ICO", StringComparison.OrdinalIgnoreCase))
                 {
                     var imgW = result.SingleFrame.Width;
                     var imgH = result.SingleFrame.Height;

@@ -70,16 +70,10 @@ public record PhotoReadOptions
 
 
     /// <summary>
-    /// Gets, sets the value indicates that the first frame of the image should be returned.
-    /// If it's <c>null</c>, the coder will decide.
-    /// </summary>
-    public bool? FirstFrameOnly { get; set; } = null;
-
-
-    /// <summary>
     /// Gets, sets the requested image frame index for metadata reading.
+    /// If the frame index is <c> less than 0</c>, it will attempt to decode all frames.
     /// </summary>
-    public int? FrameIndex { get; set; } = null;
+    public int FrameIndex { get; set; } = 0;
 
 
     /// <summary>
