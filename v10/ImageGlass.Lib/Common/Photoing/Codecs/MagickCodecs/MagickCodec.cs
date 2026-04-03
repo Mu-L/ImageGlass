@@ -452,8 +452,16 @@ public static partial class MagickCodec
         PhotoReadOptions options, MagickReadSettings? settings,
         ImgTransform? transform, CancellationToken cancelToken)
     {
-        settings ??= ParseSettings(options, false, meta.FilePath);
         var result = new MagickDecoderOutput();
+
+
+        // 0. parse settings, make sure the frame index is correct
+        settings ??= ParseSettings(options, false, meta.FilePath);
+        if (options.FrameIndex >= 0)
+        {
+            settings.FrameIndex = (uint)options.FrameIndex;
+            settings.FrameCount = 1;
+        }
 
 
         // 1. read all frames if requested

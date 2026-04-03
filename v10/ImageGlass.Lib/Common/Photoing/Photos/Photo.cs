@@ -667,20 +667,58 @@ public partial class Photo : PhDisposable
     /// </summary>
     public async Task<SKImage?> GetFrameAsync(uint frameIndex)
     {
-        _currentFrame = (int)frameIndex;
+        var newFrameIndex = (int)frameIndex;
 
-
-        // native bitmap is a single-frame bitmap
-        if (Bitmap is SKImage img) return img;
-
-
-        // native bitmap is a multi-frame bitmap
-        if (Metadata.FrameCount > 1)
+        // 1. animated formats: delegate to animator's own frame cache
+        if (Bitmap is SkiaAnimator animator)
         {
-            // TODO:
+            _currentFrame = newFrameIndex;
+            return animator.GetRenderedFrameBitmap(newFrameIndex);
         }
 
-        return null;
+        // 2. cache hit: requested frame is already loaded in Bitmap
+        if (frameIndex == _currentFrame && Bitmap is SKImage cachedImg)
+        {
+            return cachedImg;
+        }
+
+
+        // 3. single-frame image: nothing else to decode
+        if (Metadata.FrameCount <= 1)
+        {
+            _currentFrame = newFrameIndex;
+            return Bitmap as SKImage;
+        }
+
+
+        // 4. multi-frame: decode the requested frame via Magick
+        var newFrame = await Task.Factory.StartNew(async () =>
+        {
+            var options = ReadOptions with { FrameIndex = newFrameIndex };
+            using var data = await MagickCodec.DecodeImageAsync(Metadata, options, ReadSettings,
+                null, CancellationToken.None);
+            var frameImg = SkiaCodec.FromMagick(data.SingleFrame, Metadata.SkiaColorSpace);
+
+            return frameImg;
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+
+
+        lock (_lock)
+        {
+            if (IsDisposed)
+            {
+                newFrame?.Dispose();
+                return null;
+            }
+
+            Bitmap?.Dispose();
+            Bitmap = newFrame;
+            _currentFrame = newFrameIndex;
+            _width = (uint)(newFrame?.Width ?? 0);
+            _height = (uint)(newFrame?.Height ?? 0);
+        }
+
+        return newFrame;
     }
 
 
