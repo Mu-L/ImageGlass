@@ -82,7 +82,7 @@ public class ViewerMouseWheelEventArgs(PointerWheelEventArgs e, MouseWheelEvent 
 
     /// <summary>
     /// Gets the scroll delta (positive = up/forward, negative = down/backward).
-    /// Already multiplied by <see cref="Common.OsApi.SystemInfo.MouseWheelScrollDelta"/>.
+    /// Already multiplied by <see cref="Const.MOUSE_WHEEL_SCROLL_DELTA"/>.
     /// </summary>
     public double Delta => delta;
 

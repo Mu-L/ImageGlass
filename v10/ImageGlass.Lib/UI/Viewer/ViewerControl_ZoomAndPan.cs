@@ -20,7 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Threading;
 using ImageGlass.Common.Extensions;
-using ImageGlass.Common.OsApi;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer.ZoomAndPan;
 using System;
@@ -752,7 +751,7 @@ public partial class ViewerControl
     /// </returns>
     public bool ZoomIn(Point? point = null, bool requestRerender = true)
     {
-        return ZoomByDeltaToPoint(SystemInfo.MouseWheelScrollDelta, point, requestRerender);
+        return ZoomByDeltaToPoint(Const.MOUSE_WHEEL_SCROLL_DELTA, point, requestRerender);
     }
 
 
@@ -770,7 +769,7 @@ public partial class ViewerControl
     /// </returns>
     public bool ZoomOut(Point? point = null, bool requestRerender = true)
     {
-        return ZoomByDeltaToPoint(-SystemInfo.MouseWheelScrollDelta, point, requestRerender);
+        return ZoomByDeltaToPoint(-Const.MOUSE_WHEEL_SCROLL_DELTA, point, requestRerender);
     }
 
 
@@ -874,7 +873,7 @@ public partial class ViewerControl
     public bool ZoomByDeltaToPoint(double delta, Point? point = null, bool requestRerender = true)
     {
         var newZoomFactor = _zooming.Factor;
-        var isZoomingByMouseWheel = Math.Abs(delta) == SystemInfo.MouseWheelScrollDelta;
+        var isZoomingByMouseWheel = Math.Abs(delta) == Const.MOUSE_WHEEL_SCROLL_DELTA;
 
         // use zoom levels
         if (ZoomLevels.Length > 0 && isZoomingByMouseWheel)

@@ -22,7 +22,6 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using ImageGlass.Common;
 using ImageGlass.Common.Extensions;
-using ImageGlass.Common.OsApi;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer.ZoomAndPan;
@@ -367,7 +366,7 @@ public partial class ViewerControl : PhControl
         }
 
         // Mouse wheel — raise event for external dispatch
-        delta *= SystemInfo.MouseWheelScrollDelta;
+        delta *= Const.MOUSE_WHEEL_SCROLL_DELTA;
         var wheelEvent = GetMouseWheelEvent(e.KeyModifiers);
 
         ViewerMouseWheel?.Invoke(this, new ViewerMouseWheelEventArgs(e, wheelEvent, delta, position));

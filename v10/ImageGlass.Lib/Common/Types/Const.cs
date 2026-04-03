@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using Avalonia;
 using Avalonia.Media;
 using System.Globalization;
 
@@ -29,25 +28,19 @@ namespace ImageGlass.Common.Types;
 public static class Const
 {
     public const int MENU_ICON_HEIGHT = 24;
-    public const float VIEWER_GRID_SIZE = 9f;
     public const int TOOLBAR_ICON_HEIGHT = 24;
     public const int THUMBNAIL_HEIGHT = 70;
-    public const string CONFIG_CMD_PREFIX = ":";
+    public const string CONFIG_CMD_PREFIX = "-p:";
     public const string DATETIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
     public const string DATE_FORMAT = "yyyy/MM/dd";
     public const string APP_PROTOCOL = "imageglass";
     public const string MS_APPSTORE_ID = "9N33VZK3C7TH";
-    public static readonly CornerRadius BORDER_RADIUS = new(6);
-    public static readonly CornerRadius WIN_BORDER_RADIUS = new(
-        BORDER_RADIUS.TopLeft * 2.25f,
-        BORDER_RADIUS.TopRight * 2.25f,
-        BORDER_RADIUS.BottomRight,
-        BORDER_RADIUS.BottomLeft);
 
     public static readonly string SIGN_POSITIVE = NumberFormatInfo.CurrentInfo.PositiveSign;
     public static readonly string SIGN_NEGATIVE = NumberFormatInfo.CurrentInfo.NegativeSign;
     public static readonly string DECIMAL_SEPARATOR = NumberFormatInfo.CurrentInfo.NumberDecimalSeparator;
     public static readonly Color COLOR_EMPTY = new Color(0, 0, 0, 0);
+    public static readonly int MOUSE_WHEEL_SCROLL_DELTA = 120;
 
 
     /// <summary>
@@ -55,15 +48,10 @@ public static class Const
     /// Example: <c>"C:\my\photo.jpg"</c>
     /// </summary>
     public const string FILE_MACRO = "<file>";
-
     public const string THEME_SYSTEM_ACCENT = "accent";
 
     // predefined built-in tool names
     public const string IGTOOL_EXIFTOOL = "Tool_ExifGlass";
-    public const string IGTOOL_SLIDESHOW = "Tool_Slideshow";
-
-    public const string FRAME_NAV_TOOLBAR_FRAME_INFO = "Lbl_FrameNav_FrameInfo";
-    public const string FRAME_NAV_TOOLBAR_TOGGLE_ANIMATION = "Btn_FrameNav_ToggleFrameAnimation";
 
 
     /// <summary>

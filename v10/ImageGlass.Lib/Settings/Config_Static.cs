@@ -18,7 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Actions;
 using ImageGlass.Common.AppThemes;
-using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
@@ -28,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 namespace ImageGlass.Common;
@@ -63,18 +61,6 @@ public partial class Config
     /// </summary>
     [JsonIgnore]
     public static string CONFIG_ADMIN => "igconfig.admin.json";
-
-
-    /// <summary>
-    /// Gets user settings from command line arguments
-    /// </summary>
-    [JsonIgnore]
-    public static string[] SettingsFromCmdLine { get; } = Environment.GetCommandLineArgs()
-        // filter the command lines begin with '/'
-        // example: ImageGlass.exe /FrmMainWidth=900
-        .Where(cmd => cmd.StartsWith(Const.CONFIG_CMD_PREFIX))
-        .Select(cmd => cmd[1..]) // trim '/' from the command
-        .ToArray();
 
 
     /// <summary>
