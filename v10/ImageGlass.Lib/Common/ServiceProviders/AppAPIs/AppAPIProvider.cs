@@ -982,6 +982,81 @@ public partial class AppAPIProvider
         IG_ViewByIndex((int)Core.Photos.Count - 1);
     }
 
+
+    /// <summary>
+    /// View a frame of the current photo.
+    /// </summary>
+    public void IG_ViewFrame(string? frameIndexStr)
+    {
+        if (!int.TryParse(frameIndexStr, out var frameIndex))
+        {
+            throw new ArgumentException($"""
+                Frame index '{frameIndexStr}' is not a valid integer.
+                
+                ----------
+                👉🏼 Method: {nameof(IG_ViewFrame)}
+                """,
+                nameof(frameIndexStr));
+        }
+
+        IG_ViewFrame(frameIndex);
+    }
+
+
+    /// <summary>
+    /// View a frame of the current photo.
+    /// If the frame index is out of range, it will be looped.
+    /// </summary>
+    public void IG_ViewFrame(int frameIndex)
+    {
+        var frameCount = Core.Photos.CurrentMetadata?.FrameCount ?? 0;
+        if (frameCount <= 1) return;
+
+        var safeFrameIndex = BHelper.ComputeIndexInRange(frameIndex, frameCount, true);
+
+        // TODO:
+        //
+    }
+
+
+    /// <summary>
+    /// View the next frame of the current photo.
+    /// </summary>
+    public void IG_ViewNextFrame()
+    {
+        var newFrameIndex = (Core.Photos.Current?.FrameIndex ?? 0) + 1;
+        IG_ViewFrame(newFrameIndex);
+    }
+
+
+    /// <summary>
+    /// View the previous frame of the current photo.
+    /// </summary>
+    public void IG_ViewPreviousFrame()
+    {
+        var newFrameIndex = (Core.Photos.Current?.FrameIndex ?? 1) - 1;
+        IG_ViewFrame(newFrameIndex);
+    }
+
+
+    /// <summary>
+    /// View the first frame of the current photo.
+    /// </summary>
+    public void IG_ViewFirstFrame()
+    {
+        IG_ViewFrame(0);
+    }
+
+
+    /// <summary>
+    /// View the last frame of the current photo.
+    /// </summary>
+    public void IG_ViewLastFrame()
+    {
+        var lastFrameIndex = (int)(Core.Photos.CurrentMetadata?.FrameCount ?? 1) - 1;
+        IG_ViewFrame(lastFrameIndex);
+    }
+
     #endregion // Navigation APIs
 
 
@@ -3030,6 +3105,7 @@ public partial class AppAPIProvider
     {
         Viewer.ContextMenu?.Open();
     }
+
 
     #endregion // Other APIs
 

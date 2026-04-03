@@ -258,10 +258,12 @@ public partial class ToolbarControl : PhControl
     {
         UpdateMenuTextIfNeeded();
 
-        // update editing app name
+        // 1. update editing app name
         EditingApp.UpdateAppNameForMenuEdit(PART_MnuEdit);
 
-        // update menu state
+
+        // 2. update menu state
+        // 2.1 animated format
         var isAnimator = Core.Photos.Current?.Bitmap is AnimatorImpl;
         PART_MnuToggleImageAnimation.IsEnabled = isAnimator;
         PART_MnuViewChannels.IsEnabled
@@ -271,6 +273,14 @@ public partial class ToolbarControl : PhControl
             = PART_MnuFlipHorizontal.IsEnabled
             = PART_MnuFlipVertical.IsEnabled
             = !isAnimator;
+
+        // 2.2 multi-frame format
+        var hasMultiFrames = Core.Photos.CurrentMetadata?.FrameCount > 1;
+        PART_MnuViewNextFrame.IsEnabled
+            = PART_MnuViewPreviousFrame.IsEnabled
+            = PART_MnuViewFirstFrame.IsEnabled
+            = PART_MnuViewLastFrame.IsEnabled
+            = hasMultiFrames;
     }
 
 

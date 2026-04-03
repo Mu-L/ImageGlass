@@ -49,6 +49,11 @@ public enum API
     IG_Goto,
     IG_GotoFirst,
     IG_GotoLast,
+    IG_ViewFrame,
+    IG_ViewNextFrame,
+    IG_ViewPreviousFrame,
+    IG_ViewFirstFrame,
+    IG_ViewLastFrame,
 
     // Menu > Zoom
     IG_CustomZoom,

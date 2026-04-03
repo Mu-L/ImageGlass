@@ -86,6 +86,11 @@ public partial class Photo : PhDisposable
     public uint Height => (uint)Size.Height;
 
     /// <summary>
+    /// Gets the current frame index of this photo.
+    /// </summary>
+    public int FrameIndex => _currentFrame;
+
+    /// <summary>
     /// Gets the loading state of the photo.
     /// </summary>
     public PhotoState State { get; set; } = PhotoState.None;
@@ -478,6 +483,7 @@ public partial class Photo : PhDisposable
     {
         Bitmap?.Dispose();
         Bitmap = null;
+        _currentFrame = -1;
     }
 
 

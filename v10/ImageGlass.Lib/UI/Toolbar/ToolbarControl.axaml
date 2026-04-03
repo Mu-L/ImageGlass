@@ -136,23 +136,23 @@
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuGoTo" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuGoToFirst" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuGoToLast" />
-                                <ui:PhMenuItem Header="-" IsVisible="False" />
+                                <ui:PhMenuItem Header="-" />
 
                                 <ui:PhMenuItem
+                                    x:Name="PART_MnuViewNextFrame"
                                     Click="MainMenuItem_Click"
-                                    IsVisible="False"
                                     LangKey="FrmMain_MnuViewNextFrame" />
                                 <ui:PhMenuItem
+                                    x:Name="PART_MnuViewPreviousFrame"
                                     Click="MainMenuItem_Click"
-                                    IsVisible="False"
                                     LangKey="FrmMain_MnuViewPreviousFrame" />
                                 <ui:PhMenuItem
+                                    x:Name="PART_MnuViewFirstFrame"
                                     Click="MainMenuItem_Click"
-                                    IsVisible="False"
                                     LangKey="FrmMain_MnuViewFirstFrame" />
                                 <ui:PhMenuItem
+                                    x:Name="PART_MnuViewLastFrame"
                                     Click="MainMenuItem_Click"
-                                    IsVisible="False"
                                     LangKey="FrmMain_MnuViewLastFrame" />
                             </ui:PhMenuItem>
 

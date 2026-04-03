@@ -61,6 +61,11 @@ public partial class AppAPIProvider
         { API.IG_Goto,                  PhCommands.Create(IG_GoToAsync) },
         { API.IG_GotoFirst,             PhCommands.Create(IG_GoToFirst) },
         { API.IG_GotoLast,              PhCommands.Create(IG_GoToLast) },
+        { API.IG_ViewFrame,             PhCommands.Create(IG_ViewFrame) },
+        { API.IG_ViewNextFrame,         PhCommands.Create(IG_ViewNextFrame) },
+        { API.IG_ViewPreviousFrame,     PhCommands.Create(IG_ViewPreviousFrame) },
+        { API.IG_ViewFirstFrame,        PhCommands.Create(IG_ViewFirstFrame) },
+        { API.IG_ViewLastFrame,         PhCommands.Create(IG_ViewLastFrame) },
 
         { API.IG_ViewByStep,            PhCommands.Create(IG_ViewByStep) },
         { API.IG_ViewByIndex,           PhCommands.Create(IG_ViewByIndex) },

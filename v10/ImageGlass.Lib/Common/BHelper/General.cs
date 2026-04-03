@@ -113,7 +113,7 @@ public partial class BHelper
     /// CalculateIndexInRange(-2, 0, true); // => 0
     /// </code>
     /// 
-    /// When loopIndex == true:
+    /// When loopIndex == false:
     /// <code>
     /// CalculateIndexInRange(-2, 10, false); // => 0
     /// CalculateIndexInRange(12, 10, false); // => 9

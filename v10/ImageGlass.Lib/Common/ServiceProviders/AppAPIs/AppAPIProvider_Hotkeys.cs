@@ -65,11 +65,15 @@ public partial class AppAPIProvider
 
 
         // Navigation
-        new(LangId.FrmMain_MnuViewNext,         API.IG_ViewNext,            Key.Right),
-        new(LangId.FrmMain_MnuViewPrevious,     API.IG_ViewPrevious,        Key.Left),
-        new(LangId.FrmMain_MnuGoTo,             API.IG_Goto,                Key.F),
-        new(LangId.FrmMain_MnuGoToFirst,        API.IG_GotoFirst,           Key.Home),
-        new(LangId.FrmMain_MnuGoToLast,         API.IG_GotoLast,            Key.End),
+        new(LangId.FrmMain_MnuViewNext,             API.IG_ViewNext,            Key.Right),
+        new(LangId.FrmMain_MnuViewPrevious,         API.IG_ViewPrevious,        Key.Left),
+        new(LangId.FrmMain_MnuGoTo,                 API.IG_Goto,                Key.F),
+        new(LangId.FrmMain_MnuGoToFirst,            API.IG_GotoFirst,           Key.Home),
+        new(LangId.FrmMain_MnuGoToLast,             API.IG_GotoLast,            Key.End),
+        new(LangId.FrmMain_MnuViewNextFrame,        API.IG_ViewNextFrame,       Hotkey.Ctrl, Key.Right),
+        new(LangId.FrmMain_MnuViewPreviousFrame,    API.IG_ViewPreviousFrame,   Hotkey.Ctrl, Key.Left),
+        new(LangId.FrmMain_MnuViewFirstFrame,       API.IG_ViewFirstFrame,      Hotkey.Ctrl, Key.Up),
+        new(LangId.FrmMain_MnuViewLastFrame,        API.IG_ViewLastFrame,       Hotkey.Ctrl, Key.Down),
 
 
         // Zoom
