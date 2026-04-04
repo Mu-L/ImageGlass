@@ -459,7 +459,7 @@ public partial class Photo : PhDisposable
     /// </summary>
     private void OnAnimatorFrameChanged(AnimatorImpl sender, AnimatorFrameChangedEventArgs e)
     {
-        _frameIndex = e.CurrentFrame;
+        _frameIndex = (int)e.CurrentFrame;
     }
 
 
@@ -692,7 +692,7 @@ public partial class Photo : PhDisposable
         if (Bitmap is SkiaAnimator animator)
         {
             _frameIndex = newFrameIndex;
-            return animator.GetRenderedFrameBitmap(newFrameIndex);
+            return animator.GetRenderedFrameBitmap(frameIndex);
         }
 
         // 2. cache hit: requested frame is already loaded in Bitmap

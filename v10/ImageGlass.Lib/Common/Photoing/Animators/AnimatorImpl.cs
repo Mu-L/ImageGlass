@@ -43,19 +43,51 @@ public abstract class AnimatorImpl : PhDisposable
 
 
     /// <summary>
-    /// Gets frames of this photo.
-    /// </summary>
-    public SKCodecFrameInfo[] Frames => _frames;
-
-    /// <summary>
     /// Occurs when the image frame is changed.
     /// </summary>
     public event TEventHandler<AnimatorImpl, AnimatorFrameChangedEventArgs>? FrameChanged;
+
 
     /// <summary>
     /// Occurs when the animation stopped or the loop has completed.
     /// </summary>
     public event TEventHandler<AnimatorImpl, EventArgs>? Stopped;
+
+
+    #region Public Properties
+
+    /// <summary>
+    /// Gets frames.
+    /// </summary>
+    public SKCodecFrameInfo[] Frames => _frames;
+
+
+    /// <summary>
+    /// Gets the current frame.
+    /// </summary>
+    public uint CurrentFrame => (uint)_currentFrame;
+
+
+    /// <summary>
+    /// Gets the current loop.
+    /// </summary>
+    public uint CurrentLoop => (uint)_currentLoop;
+
+
+    /// <summary>
+    /// Gets the loop count.
+    /// </summary>
+    public uint LoopCount => (uint)_loopCount;
+
+
+    /// <summary>
+    /// Gets the playback status.
+    /// </summary>
+    public bool IsPlaying => !_isPaused;
+
+    #endregion // Public Properties
+
+
 
 
 
@@ -84,7 +116,7 @@ public abstract class AnimatorImpl : PhDisposable
     /// <summary>
     /// Renders the current frame of the animation and returns the resulting bitmap.
     /// </summary>
-    public abstract SKImage? GetRenderedFrameBitmap(int frameIndex);
+    public abstract SKImage? GetRenderedFrameBitmap(uint frameIndex);
 
 
 
@@ -160,10 +192,10 @@ public abstract class AnimatorImpl : PhDisposable
         // frame changed
         OnFrameChanged(new AnimatorFrameChangedEventArgs()
         {
-            CurrentFrame = _currentFrame,
-            CurrentLoop = _currentLoop,
-            FrameCount = _frameCount,
-            LoopCount = _loopCount,
+            CurrentFrame = (uint)_currentFrame,
+            CurrentLoop = (uint)_currentLoop,
+            FrameCount = (uint)_frameCount,
+            LoopCount = (uint)_loopCount,
         });
     }
 
@@ -240,10 +272,10 @@ public abstract class AnimatorImpl : PhDisposable
             // frame changed
             OnFrameChanged(new AnimatorFrameChangedEventArgs()
             {
-                CurrentFrame = frameIndex,
-                CurrentLoop = _currentLoop,
-                FrameCount = _frameCount,
-                LoopCount = _loopCount,
+                CurrentFrame = (uint)frameIndex,
+                CurrentLoop = (uint)_currentLoop,
+                FrameCount = (uint)_frameCount,
+                LoopCount = (uint)_loopCount,
             });
 
             _currentFrame = frameIndex + 1;

@@ -491,7 +491,6 @@ public class Lang
         new(LangId.FrmMain_MnuGoToFirst, "Go to first image"), //v3.0
         new(LangId.FrmMain_MnuGoToLast, "Go to last image"), //v3.0
 
-        new(LangId.FrmMain_MnuViewFrame, "View a frame…"),
         new(LangId.FrmMain_MnuViewNextFrame, "View next frame"),
         new(LangId.FrmMain_MnuViewPreviousFrame, "View previous frame"),
         new(LangId.FrmMain_MnuViewFirstFrame, "View first frame"),

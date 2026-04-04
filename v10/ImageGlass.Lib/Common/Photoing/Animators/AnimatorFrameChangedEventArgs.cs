@@ -23,9 +23,9 @@ namespace ImageGlass.Common.Photoing;
 
 public class AnimatorFrameChangedEventArgs : EventArgs
 {
-    public required int FrameCount { get; init; }
-    public required int CurrentFrame { get; init; }
-    public required int LoopCount { get; init; }
-    public required int CurrentLoop { get; init; }
+    public required uint FrameCount { get; init; }
+    public required uint CurrentFrame { get; init; }
+    public required uint LoopCount { get; init; }
+    public required uint CurrentLoop { get; init; }
 }
 

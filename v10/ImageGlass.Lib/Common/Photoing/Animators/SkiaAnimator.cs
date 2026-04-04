@@ -36,7 +36,7 @@ public class SkiaAnimator : AnimatorImpl
 
     private readonly SKCodec _codec;
     private readonly SKImage?[] _frameCache;
-    private readonly Queue<int> _cachedFramesQueue = new();
+    private readonly Queue<uint> _cachedFramesQueue = new();
     private readonly Lock _syncLock = new();
 
 
@@ -129,7 +129,7 @@ public class SkiaAnimator : AnimatorImpl
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public override SKImage? GetRenderedFrameBitmap(int frameIndex)
+    public override SKImage? GetRenderedFrameBitmap(uint frameIndex)
     {
         lock (_syncLock)
         {

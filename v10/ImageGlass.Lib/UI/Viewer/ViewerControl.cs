@@ -47,8 +47,7 @@ public partial class ViewerControl : PhControl
 
     // events
     public event TEventHandler<ViewerControl, PhotoLoadingEventArgs>? PhotoLoading;
-    public event TEventHandler<ViewerControl, AnimatorFrameChangedEventArgs>? PhotoAnimatorFrameChanged;
-    public event TEventHandler<ViewerControl, EventArgs>? PhotoFrameChanged;
+    public event TEventHandler<ViewerControl, PhotoFrameChangedEventArgs>? PhotoFrameChanged;
     public event TEventHandler<ViewerControl, ViewerPointerEventArgs>? ViewerPointerMoved;
     public event TEventHandler<ViewerControl, ViewerPointerEventArgs>? ViewerPointerPressed;
     public event TEventHandler<ViewerControl, ViewerPointerClickEventArgs>? ViewerPointerClicked;
@@ -90,7 +89,7 @@ public partial class ViewerControl : PhControl
     /// <summary>
     /// Checks if the photo is animating.
     /// </summary>
-    public bool IsImageAnimating { get; protected set; } = false;
+    public bool IsImageAnimating => _animator?.IsPlaying ?? false;
 
 
     /// <summary>
@@ -387,11 +386,22 @@ public partial class ViewerControl : PhControl
 
 
     /// <summary>
-    /// Raises <see cref="PhotoAnimatorFrameChanged"/> event.
+    /// Raises <see cref="PhotoFrameChanged"/> event.
     /// </summary>
-    protected virtual void OnPhotoAnimatorFrameChanged(AnimatorFrameChangedEventArgs e)
+    protected virtual void OnPhotoFrameChanged(AnimatorFrameChangedEventArgs? e = null)
     {
-        PhotoAnimatorFrameChanged?.Invoke(this, e);
+        if (SourceKind != PhotoSource.Native) return;
+
+        var canAnimate = _animator != null;
+        var args = new PhotoFrameChangedEventArgs(canAnimate, IsImageAnimating)
+        {
+            CurrentFrame = e?.CurrentFrame ?? (uint)(Math.Min(0, Photo?.FrameIndex ?? 0)),
+            FrameCount = e?.FrameCount ?? Photo?.Metadata.FrameCount ?? 0,
+            CurrentLoop = e?.CurrentLoop ?? _animator?.CurrentLoop ?? 0,
+            LoopCount = e?.LoopCount ?? _animator?.LoopCount ?? 0,
+        };
+
+        PhotoFrameChanged?.Invoke(this, args);
     }
 
 
@@ -947,7 +957,7 @@ public partial class ViewerControl : PhControl
 
             // raise events
             OnPhotoLoading(e);
-            if (hasSource) PhotoFrameChanged?.Invoke(this, EventArgs.Empty);
+            OnPhotoFrameChanged();
         }
 
 
@@ -986,8 +996,7 @@ public partial class ViewerControl : PhControl
         }
 
         InvalidateVisual();
-        OnPhotoAnimatorFrameChanged(e);
-        PhotoFrameChanged?.Invoke(this, EventArgs.Empty);
+        OnPhotoFrameChanged(e);
     }
 
 
@@ -1002,7 +1011,9 @@ public partial class ViewerControl : PhControl
         lock (_lock)
         {
             _animator.Play();
-            IsImageAnimating = true;
+
+            // emit frame changed event
+            OnPhotoFrameChanged();
         }
     }
 
@@ -1014,8 +1025,11 @@ public partial class ViewerControl : PhControl
     {
         lock (_lock)
         {
-            _animator?.Pause();
-            IsImageAnimating = false;
+            if (_animator is null) return;
+            _animator.Pause();
+
+            // emit frame changed event
+            OnPhotoFrameChanged();
         }
     }
 
@@ -1052,7 +1066,9 @@ public partial class ViewerControl : PhControl
         }
 
         Refresh(resetZoom: _loadingOptions.ResetZoom);
-        PhotoFrameChanged?.Invoke(this, EventArgs.Empty);
+
+        // emit frame changed event
+        OnPhotoFrameChanged();
     }
 
 

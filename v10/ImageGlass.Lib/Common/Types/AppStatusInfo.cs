@@ -439,7 +439,7 @@ public partial class AppStatusInfo : PhDisposable
     }
 
 
-    private void Viewer_PhotoFrameChanged(ViewerControl sender, EventArgs e)
+    private void Viewer_PhotoFrameChanged(ViewerControl sender, PhotoFrameChangedEventArgs e)
     {
         Dispatcher.UIThread.Post(() =>
         {

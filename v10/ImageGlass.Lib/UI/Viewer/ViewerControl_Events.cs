@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using System;
 
@@ -90,5 +91,16 @@ public class ViewerMouseWheelEventArgs(PointerWheelEventArgs e, MouseWheelEvent 
     /// Gets the pointer position relative to the viewer control.
     /// </summary>
     public Point Position => position;
+}
+
+
+/// <summary>
+/// Event args for the playback state of a photo frame changes.
+/// </summary>
+public class PhotoFrameChangedEventArgs(bool canAnimate, bool isAnimating) : AnimatorFrameChangedEventArgs
+{
+    public bool CanAnimate => canAnimate;
+    public bool IsAnimating => isAnimating;
+
 }
 

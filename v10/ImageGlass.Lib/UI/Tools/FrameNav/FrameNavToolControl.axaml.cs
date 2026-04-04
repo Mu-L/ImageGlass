@@ -18,6 +18,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
+using ImageGlass.Common;
+using ImageGlass.Common.Localization;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.UI.Viewer;
 
 namespace ImageGlass.UI;
@@ -31,6 +35,8 @@ public partial class FrameNavToolControl : PhControl, IToolControl
     public object? Settings { get; } = null;
     public ViewerControl Viewer { get; init; } = null!;
 
+
+    #region Public Properties 
 
     /// <summary>
     /// Gets value indicating if the current photo has multiple frames.
@@ -57,6 +63,18 @@ public partial class FrameNavToolControl : PhControl, IToolControl
 
 
     /// <summary>
+    /// Gets value indicating if the current photo is animating.
+    /// </summary>
+    public bool IsPlaying
+    {
+        get => GetValue(IsPlayingProperty);
+        private set => SetValue(IsPlayingProperty, value);
+    }
+    public static readonly StyledProperty<bool> IsPlayingProperty =
+        AvaloniaProperty.Register<FrameNavToolControl, bool>(nameof(IsPlaying));
+
+
+    /// <summary>
     /// Gets frame text info.
     /// </summary>
     public string FrameTextInfo
@@ -67,6 +85,7 @@ public partial class FrameNavToolControl : PhControl, IToolControl
     public static readonly StyledProperty<string> FrameTextInfoProperty =
         AvaloniaProperty.Register<FrameNavToolControl, string>(nameof(FrameTextInfo));
 
+    #endregion // Public Properties
 
 
     public FrameNavToolControl()
@@ -84,6 +103,13 @@ public partial class FrameNavToolControl : PhControl, IToolControl
         UpdateFrameInfo();
 
         Viewer.PhotoFrameChanged += Viewer_PhotoFrameChanged;
+
+        PART_BtnViewFirstFrame.Click += PART_BtnViewFirstFrame_Click;
+        PART_BtnViewPreviousFrame.Click += PART_BtnViewPreviousFrame_Click;
+        PART_BtnToggleAnimation.Click += PART_BtnToggleAnimation_Click;
+        PART_BtnViewNextFrame.Click += PART_BtnViewNextFrame_Click;
+        PART_BtnViewLastFrame.Click += PART_BtnViewLastFrame_Click;
+        PART_BtnExportFrame.Click += PART_BtnExportFrame_Click;
     }
 
 
@@ -92,18 +118,65 @@ public partial class FrameNavToolControl : PhControl, IToolControl
         base.OnUnloaded(e);
 
         Viewer.PhotoFrameChanged -= Viewer_PhotoFrameChanged;
+
+        PART_BtnViewFirstFrame.Click -= PART_BtnViewFirstFrame_Click;
+        PART_BtnViewPreviousFrame.Click -= PART_BtnViewPreviousFrame_Click;
+        PART_BtnToggleAnimation.Click -= PART_BtnToggleAnimation_Click;
+        PART_BtnViewNextFrame.Click -= PART_BtnViewNextFrame_Click;
+        PART_BtnViewLastFrame.Click -= PART_BtnViewLastFrame_Click;
+        PART_BtnExportFrame.Click -= PART_BtnExportFrame_Click;
     }
 
 
     protected override void OnIgLanguageChanged()
     {
         base.OnIgLanguageChanged();
+        UpdateHotkeyTooltip();
     }
 
 
-    private void Viewer_PhotoFrameChanged(ViewerControl sender, System.EventArgs e)
+    private void Viewer_PhotoFrameChanged(ViewerControl sender, PhotoFrameChangedEventArgs e)
     {
-        UpdateFrameInfo();
+        Dispatcher.UIThread.Post(() =>
+        {
+            UpdateFrameInfo(e);
+        });
+    }
+
+
+    private async void PART_BtnViewFirstFrame_Click(object? sender, RoutedEventArgs e)
+    {
+        await Core.API!.RunApiAsync(API.IG_ViewFirstFrame);
+    }
+
+
+    private async void PART_BtnViewPreviousFrame_Click(object? sender, RoutedEventArgs e)
+    {
+        await Core.API!.RunApiAsync(API.IG_ViewPreviousFrame);
+    }
+
+
+    private async void PART_BtnToggleAnimation_Click(object? sender, RoutedEventArgs e)
+    {
+        await Core.API!.RunApiAsync(API.IG_ToggleImageAnimation);
+    }
+
+
+    private async void PART_BtnViewNextFrame_Click(object? sender, RoutedEventArgs e)
+    {
+        await Core.API!.RunApiAsync(API.IG_ViewNextFrame);
+    }
+
+
+    private async void PART_BtnViewLastFrame_Click(object? sender, RoutedEventArgs e)
+    {
+        await Core.API!.RunApiAsync(API.IG_ViewLastFrame);
+    }
+
+
+    private async void PART_BtnExportFrame_Click(object? sender, RoutedEventArgs e)
+    {
+        await Core.API!.RunApiAsync(API.IG_ExportImageFrames);
     }
 
 
@@ -116,12 +189,13 @@ public partial class FrameNavToolControl : PhControl, IToolControl
     /// <summary>
     /// Updates the frame-related information for the current photo.
     /// </summary>
-    private void UpdateFrameInfo()
+    private void UpdateFrameInfo(PhotoFrameChangedEventArgs? e = null)
     {
-        var frameCount = Viewer.Photo?.Metadata?.FrameCount ?? 0;
+        var frameCount = e?.FrameCount ?? Viewer.Photo?.Metadata?.FrameCount ?? 0;
 
         HasMultiFrames = frameCount > 1;
-        CanAnimate = HasMultiFrames && (Viewer.Photo?.Metadata?.CanAnimate ?? false);
+        CanAnimate = e?.CanAnimate ?? Viewer.Photo?.Metadata?.CanAnimate ?? false;
+        IsPlaying = e?.IsAnimating ?? false;
 
         if (frameCount > 0)
         {
@@ -134,6 +208,38 @@ public partial class FrameNavToolControl : PhControl, IToolControl
         {
             FrameTextInfo = string.Empty;
         }
+    }
+
+
+    /// <summary>
+    /// Updates the hotkey text for all buttons.
+    /// </summary>
+    private void UpdateHotkeyTooltip()
+    {
+        PART_BtnViewFirstFrame.VM.Text = nameof(LangId.FrmMain_MnuViewFirstFrame);
+        PART_BtnViewFirstFrame.VM.HotkeyText
+            = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuViewFirstFrame);
+
+        PART_BtnViewPreviousFrame.VM.Text = nameof(LangId.FrmMain_MnuViewPreviousFrame);
+        PART_BtnViewPreviousFrame.VM.HotkeyText
+            = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuViewPreviousFrame);
+
+        PART_BtnToggleAnimation.VM.Text = nameof(LangId.FrmMain_MnuToggleImageAnimation);
+        PART_BtnToggleAnimation.VM.HotkeyText
+            = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuToggleImageAnimation);
+
+        PART_BtnViewNextFrame.VM.Text = nameof(LangId.FrmMain_MnuViewNextFrame);
+        PART_BtnViewNextFrame.VM.HotkeyText
+            = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuViewNextFrame);
+
+        PART_BtnViewLastFrame.VM.Text = nameof(LangId.FrmMain_MnuViewLastFrame);
+        PART_BtnViewLastFrame.VM.HotkeyText
+            = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuViewLastFrame);
+
+        PART_BtnExportFrame.VM.Text = nameof(LangId.FrmMain_MnuExportFrames);
+        PART_BtnExportFrame.VM.HotkeyText
+            = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuExportFrames);
+
     }
 
     #endregion // Control Methods
