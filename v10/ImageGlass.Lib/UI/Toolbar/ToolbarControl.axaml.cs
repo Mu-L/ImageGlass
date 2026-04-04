@@ -276,7 +276,8 @@ public partial class ToolbarControl : PhControl
 
         // 2.2 multi-frame format
         var hasMultiFrames = Core.Photos.CurrentMetadata?.FrameCount > 1;
-        PART_MnuViewNextFrame.IsEnabled
+        PART_MnuExportFrames.IsEnabled
+            = PART_MnuViewNextFrame.IsEnabled
             = PART_MnuViewPreviousFrame.IsEnabled
             = PART_MnuViewFirstFrame.IsEnabled
             = PART_MnuViewLastFrame.IsEnabled

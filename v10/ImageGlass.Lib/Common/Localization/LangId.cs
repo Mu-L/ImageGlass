@@ -225,6 +225,7 @@ public enum LangId
     FrmMain_MnuGoToFirst,
     FrmMain_MnuGoToLast,
 
+    FrmMain_MnuViewFrame,
     FrmMain_MnuViewNextFrame,
     FrmMain_MnuViewPreviousFrame,
     FrmMain_MnuViewFirstFrame,

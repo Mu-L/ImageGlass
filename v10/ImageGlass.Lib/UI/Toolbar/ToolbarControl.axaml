@@ -96,7 +96,10 @@
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuNewWindow" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuSave" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuSaveAs" />
-                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuExportFrames" />
+                                <ui:PhMenuItem
+                                    x:Name="PART_MnuExportFrames"
+                                    Click="MainMenuItem_Click"
+                                    LangKey="FrmMain_MnuExportFrames" />
                                 <ui:PhMenuItem Header="-" />
 
                                 <ui:PhMenuItem

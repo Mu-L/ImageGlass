@@ -4,11 +4,129 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ac="using:ImageGlass.Common.Actions"
+    xmlns:cm="using:ImageGlass.Common"
     xmlns:ui="using:ImageGlass.UI"
     mc:Ignorable="d"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:Name="Root"
     Padding="6,12">
-    TODO
+
+    <Grid ColumnDefinitions="1*,Auto,1*" ColumnSpacing="8">
+        <TextBlock
+            x:Name="PART_FrameCount"
+            Grid.Column="0"
+            Margin="0,0,4,0"
+            VerticalAlignment="Center"
+            Text="{CompiledBinding #Root.FrameTextInfo}"
+            TextAlignment="Right" />
+
+        <Border
+            Grid.Column="1"
+            Padding="6"
+            Background="{DynamicResource IG_BackgroundNeutralBrush}"
+            CornerRadius="10">
+            <StackPanel
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="4">
+                <!--  View first frame  -->
+                <ui:ToolbarButton IsEnabled="{CompiledBinding #Root.HasMultiFrames}">
+                    <PathIcon
+                        Width="24"
+                        Height="24"
+                        Data="{StaticResource IconArrowPrevious}" />
+
+                    <ui:ToolbarButton.DataContext>
+                        <ui:ToolbarItemModel Text="FrmMain_MnuViewFirstFrame" />
+                    </ui:ToolbarButton.DataContext>
+                </ui:ToolbarButton>
+
+
+                <!--  View previous frame  -->
+                <ui:ToolbarButton IsEnabled="{CompiledBinding #Root.HasMultiFrames}">
+                    <PathIcon
+                        Width="24"
+                        Height="24"
+                        Data="{StaticResource IconArrowLeft}" />
+
+                    <ui:ToolbarButton.DataContext>
+                        <ui:ToolbarItemModel Text="FrmMain_MnuViewPreviousFrame" />
+                    </ui:ToolbarButton.DataContext>
+                </ui:ToolbarButton>
+
+
+                <!--  Play/Pause animation  -->
+                <ui:ToolbarButton x:Name="PART_BtnToggleAnimation" IsEnabled="{CompiledBinding #Root.CanAnimate}">
+                    <PathIcon
+                        Width="24"
+                        Height="24"
+                        Data="{StaticResource IconPlay}" />
+
+                    <ui:ToolbarButton.DataContext>
+                        <ui:ToolbarItemModel Text="FrmMain_MnuToggleImageAnimation" />
+                    </ui:ToolbarButton.DataContext>
+                </ui:ToolbarButton>
+
+
+                <!--  View next frame  -->
+                <ui:ToolbarButton IsEnabled="{CompiledBinding #Root.HasMultiFrames}">
+                    <PathIcon
+                        Width="24"
+                        Height="24"
+                        Data="{StaticResource IconArrowRight}" />
+
+                    <ui:ToolbarButton.DataContext>
+                        <ui:ToolbarItemModel Text="FrmMain_MnuViewNextFrame" />
+                    </ui:ToolbarButton.DataContext>
+                </ui:ToolbarButton>
+
+
+                <!--  View last frame  -->
+                <ui:ToolbarButton IsEnabled="{CompiledBinding #Root.HasMultiFrames}">
+                    <PathIcon
+                        Width="24"
+                        Height="24"
+                        Data="{StaticResource IconArrowNext}" />
+
+                    <ui:ToolbarButton.DataContext>
+                        <ui:ToolbarItemModel Text="FrmMain_MnuViewLastFrame" />
+                    </ui:ToolbarButton.DataContext>
+                </ui:ToolbarButton>
+            </StackPanel>
+        </Border>
+
+
+        <StackPanel
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
+            <!--  Export current frame  -->
+            <ui:ToolbarButton IsEnabled="{CompiledBinding #Root.HasMultiFrames}">
+                <PathIcon
+                    Width="24"
+                    Height="24"
+                    Data="{StaticResource IconImageForward}" />
+
+                <ui:ToolbarButton.DataContext>
+                    <ui:ToolbarItemModel Text="FrmMain_MnuExportFrames" />
+                </ui:ToolbarButton.DataContext>
+            </ui:ToolbarButton>
+
+
+            <!--  View custom frame  -->
+            <ui:ToolbarButton IsEnabled="{CompiledBinding #Root.HasMultiFrames}">
+                <PathIcon
+                    Width="24"
+                    Height="24"
+                    Data="{StaticResource IconFrame}" />
+
+                <ui:ToolbarButton.DataContext>
+                    <ui:ToolbarItemModel Text="FrmMain_MnuViewFrame" />
+                </ui:ToolbarButton.DataContext>
+            </ui:ToolbarButton>
+        </StackPanel>
+
+    </Grid>
 </ui:PhControl>

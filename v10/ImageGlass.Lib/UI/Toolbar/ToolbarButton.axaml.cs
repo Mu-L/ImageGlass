@@ -28,6 +28,7 @@ public partial class ToolbarButton : PhToolButton, IToolbarItem
 
     public ToolbarButton()
     {
+        DataContext = new ToolbarItemModel();
         InitializeComponent();
     }
 

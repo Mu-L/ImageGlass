@@ -489,6 +489,8 @@ public partial class AppAPIProvider
     public async Task IG_ExportImageFrames()
     {
         if (Viewer.SourceKind == PhotoSource.None) return;
+        var frameCount = Core.Photos.CurrentMetadata?.FrameCount ?? 0;
+        if (frameCount < 2) return;
 
         // 1. open folder picker
         var results = await _mainWindow.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
@@ -1010,7 +1012,7 @@ public partial class AppAPIProvider
     public void IG_ViewFrame(int frameIndex)
     {
         var frameCount = Core.Photos.CurrentMetadata?.FrameCount ?? 0;
-        if (frameCount <= 1) return;
+        if (frameCount < 2) return;
 
         var safeFrameIndex = BHelper.ComputeIndexInRange(frameIndex, frameCount, true);
 
