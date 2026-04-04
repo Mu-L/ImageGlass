@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using Avalonia.Threading;
+using ImageGlass.Common.Extensions;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -135,10 +136,11 @@ public class SkiaAnimator : AnimatorImpl
             if (IsDisposed || _codec is null) return null;
 
             // 1. Return cached result if available
-            if (_frameCache[frameIndex] is not null)
-            {
-                return _frameCache[frameIndex];
-            }
+            var cached = _frameCache[frameIndex];
+            if (!cached.IsDisposed()) return cached;
+
+            // Clear stale entry (disposed externally by SKImageRef)
+            _frameCache[frameIndex] = null;
 
 
             // 2. Initialize Composite Bitmap if needed (Lazy init)
