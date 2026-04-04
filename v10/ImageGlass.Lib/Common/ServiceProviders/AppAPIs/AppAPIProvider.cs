@@ -2796,7 +2796,7 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_ToggleCropTool(bool? enabled = null)
     {
-        var toolId = CropToolControl.TOOL_ID;
+        var toolId = CropImageToolControl.TOOL_ID;
         var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
 
         enabled ??= !isOpen;
@@ -2807,7 +2807,7 @@ public partial class AppAPIProvider
         {
             if (ToolHost.CloseCurrentTool())
             {
-                ToolHost.OpenTool(new CropToolControl()
+                ToolHost.OpenTool(new CropImageToolControl()
                 {
                     Viewer = Viewer,
                 });

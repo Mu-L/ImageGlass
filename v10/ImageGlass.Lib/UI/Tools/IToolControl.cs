@@ -52,18 +52,18 @@ public interface IToolControl
     /// <summary>
     /// Shows the tool settings window.
     /// </summary>
-    Task ShowSettingsWindowAsync();
+    Task ShowSettingsWindowAsync() => Task.CompletedTask;
 
 
     /// <summary>
     /// Loads and parses tool settings from JSON element.
     /// </summary>
-    void LoadSettings(JsonElement? jsonEl);
+    void LoadSettings(JsonElement? jsonEl) { }
 
 
     /// <summary>
     /// Saves the tool settings as JSON element.
     /// </summary>
-    JsonElement? SaveSettings();
+    JsonElement? SaveSettings() => null;
 
 }

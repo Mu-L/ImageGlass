@@ -33,7 +33,7 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
 
-public partial class CropToolControl : PhControl, IToolControl
+public partial class CropImageToolControl : PhControl, IToolControl
 {
     // prevents dead-loop when updating NumericUpDown values from SelectionChanged
     private bool _isUpdatingSelectionUI;
@@ -48,7 +48,7 @@ public partial class CropToolControl : PhControl, IToolControl
     public ViewerControl Viewer { get; init; } = null!;
 
 
-    public CropToolControl()
+    public CropImageToolControl()
     {
         InitializeComponent();
     }

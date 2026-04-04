@@ -50,4 +50,13 @@
     <PackageReference Include="Svg.Controls.Skia.Avalonia" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="UI\Tools\ColorPicker\ColorPickerToolControl.axaml.cs">
+      <DependentUpon>ColorPickerToolControl.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="UI\Tools\CropImage\CropImageToolControl.axaml.cs">
+      <DependentUpon>CropImageToolControl.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
