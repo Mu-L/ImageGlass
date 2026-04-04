@@ -57,6 +57,9 @@
     <Compile Update="UI\Tools\CropImage\CropImageToolControl.axaml.cs">
       <DependentUpon>CropImageToolControl.axaml</DependentUpon>
     </Compile>
+    <Compile Update="UI\Tools\FrameNav\FrameNavToolControl.axaml.cs">
+      <DependentUpon>FrameNavToolControl.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

@@ -2835,27 +2835,27 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_ToggleFrameNavTool(bool? enabled = null)
     {
-        //var toolId = CropToolControl.TOOL_ID;
-        //var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
+        var toolId = FrameNavToolControl.TOOL_ID;
+        var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
 
-        //enabled ??= !isOpen;
-        //isOpen = enabled.Value;
-        //Core.ToolMap[toolId] = isOpen;
+        enabled ??= !isOpen;
+        isOpen = enabled.Value;
+        Core.ToolMap[toolId] = isOpen;
 
-        //if (enabled.Value)
-        //{
-        //    if (ToolHost.CloseCurrentTool())
-        //    {
-        //        ToolHost.OpenTool(new CropToolControl()
-        //        {
-        //            Viewer = Viewer,
-        //        });
-        //    }
-        //}
-        //else
-        //{
-        //    ToolHost.CloseTool(toolId);
-        //}
+        if (enabled.Value)
+        {
+            if (ToolHost.CloseCurrentTool())
+            {
+                ToolHost.OpenTool(new FrameNavToolControl()
+                {
+                    Viewer = Viewer,
+                });
+            }
+        }
+        else
+        {
+            ToolHost.CloseTool(toolId);
+        }
     }
 
 
