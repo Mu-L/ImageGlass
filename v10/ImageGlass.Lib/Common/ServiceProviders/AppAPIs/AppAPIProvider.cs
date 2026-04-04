@@ -2745,17 +2745,17 @@ public partial class AppAPIProvider
     /// <summary>
     /// Toggles visibility of Color picker tool.
     /// </summary>
-    public void IG_ToggleColorPicker(string? boolStr = null)
+    public void IG_ToggleColorPickerTool(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
-        IG_ToggleColorPicker(enabled);
+        IG_ToggleColorPickerTool(enabled);
     }
 
 
     /// <summary>
     /// Toggles visibility of Color picker tool
     /// </summary>
-    public void IG_ToggleColorPicker(bool? enabled = null)
+    public void IG_ToggleColorPickerTool(bool? enabled = null)
     {
         var toolId = ColorPickerToolControl.TOOL_ID;
         var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
@@ -2821,9 +2821,48 @@ public partial class AppAPIProvider
 
 
     /// <summary>
+    /// Toggles visibility of Frame navigation tool.
+    /// </summary>
+    public void IG_ToggleFrameNavTool(string? boolStr = null)
+    {
+        var enabled = BHelper.ConvertStringToBool(boolStr);
+        IG_ToggleFrameNavTool(enabled);
+    }
+
+
+    /// <summary>
+    /// Toggles visibility of Frame navigation tool.
+    /// </summary>
+    public void IG_ToggleFrameNavTool(bool? enabled = null)
+    {
+        //var toolId = CropToolControl.TOOL_ID;
+        //var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
+
+        //enabled ??= !isOpen;
+        //isOpen = enabled.Value;
+        //Core.ToolMap[toolId] = isOpen;
+
+        //if (enabled.Value)
+        //{
+        //    if (ToolHost.CloseCurrentTool())
+        //    {
+        //        ToolHost.OpenTool(new CropToolControl()
+        //        {
+        //            Viewer = Viewer,
+        //        });
+        //    }
+        //}
+        //else
+        //{
+        //    ToolHost.CloseTool(toolId);
+        //}
+    }
+
+
+    /// <summary>
     /// Opens the image resizer tool.
     /// </summary>
-    public async Task IG_OpenImageResizerAsync()
+    public async Task IG_OpenImageResizeToolAsync()
     {
         if (Core.IsBusy) return;
 
@@ -2858,7 +2897,7 @@ public partial class AppAPIProvider
     /// <summary>
     /// Performs a lossless compression operation.
     /// </summary>
-    public async Task IG_LosslessCompressionAsync()
+    public async Task IG_OpenLosslessCompressionToolAsync()
     {
         if (Core.IsBusy || Core.Photos.Count == 0 || Core.ClipboardImage != null) return;
 

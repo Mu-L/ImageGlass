@@ -114,10 +114,11 @@ public enum API
 
     // Menu > Tools
     IG_CloseCurrentTool,
-    IG_ToggleColorPicker,
+    IG_ToggleColorPickerTool,
     IG_ToggleCropTool,
-    IG_OpenImageResizer,
-    IG_LosslessCompression,
+    IG_ToggleFrameNavTool,
+    IG_OpenImageResizeTool,
+    IG_LosslessCompressionTool,
     IG_GetMoreTool,
 
     // Menu > Settings
