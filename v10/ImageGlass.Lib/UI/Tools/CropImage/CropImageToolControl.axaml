@@ -123,27 +123,27 @@
                 x:Name="PART_BtnCrop"
                 MinWidth="80"
                 HorizontalContentAlignment="Center"
-                IconData="{StaticResource CropIconGeometry}" />
+                IconData="{StaticResource IconCrop}" />
             <ui:PhButton
                 x:Name="PART_BtnCopy"
                 MinWidth="80"
                 HorizontalContentAlignment="Center"
-                IconData="{StaticResource CopyIconGeometry}" />
+                IconData="{StaticResource IconCopy}" />
             <ui:PhButton
                 x:Name="PART_BtnSave"
                 MinWidth="80"
                 HorizontalContentAlignment="Center"
-                IconData="{StaticResource SaveIconGeometry}" />
+                IconData="{StaticResource IconSave}" />
             <ui:PhButton
                 x:Name="PART_BtnSaveAs"
                 MinWidth="80"
                 HorizontalContentAlignment="Center"
-                IconData="{StaticResource SaveAsIconGeometry}" />
+                IconData="{StaticResource IconSaveAs}" />
             <ui:PhButton
                 x:Name="PART_BtnReset"
                 MinWidth="80"
                 HorizontalContentAlignment="Center"
-                IconData="{StaticResource ResetIconGeometry}" />
+                IconData="{StaticResource IconReset}" />
         </WrapPanel>
 
     </WrapPanel>
