@@ -173,17 +173,17 @@ public static partial class SkiaCodec
             // 2.1 correct rotation
             if (options.CorrectRotation)
             {
-                if (TryApplyOrientation(bmpFrame, codec.EncodedOrigin, out var fixedBmp))
+                if (TryApplyOrientation(bmpFrame, codec.EncodedOrigin, out var bmpOriented))
                 {
-                    if (fixedBmp is not null)
+                    if (bmpOriented is not null)
                     {
-                        result.Size = new Size(fixedBmp.Width, fixedBmp.Height);
-                        result.SingleFrame = ToSKImage(fixedBmp);
+                        result.Size = new Size(bmpOriented.Width, bmpOriented.Height);
+                        result.SingleFrame = ToSKImage(bmpOriented);
                         bmpFrame.Dispose();
                     }
                 }
 
-                if (fixedBmp is null)
+                if (bmpOriented is null)
                 {
                     result.SingleFrame = ToSKImage(bmpFrame);
                 }
@@ -234,14 +234,6 @@ public static partial class SkiaCodec
             if (result is not SKCodecResult.Success and not SKCodecResult.IncompleteInput)
             {
                 return null;
-            }
-
-            if (TryApplyOrientation(bmp, codec.EncodedOrigin, out var fixedBmp))
-            {
-                var output = ToSKImage(fixedBmp);
-                fixedBmp?.Dispose();
-
-                return output;
             }
 
             return ToSKImage(bmp);
@@ -560,7 +552,31 @@ public static partial class SkiaCodec
 
 
     /// <summary>
-    /// Attempts to apply the specified orientation to the source bitmap and outputs the transformed bitmap if
+    /// Tries to apply the specified orientation to the source bitmap and outputs the transformed bitmap if
+    /// successful.
+    /// </summary>
+    public static bool TryApplyOrientation(SKImage? imgSrc, SKEncodedOrigin? orientation, out SKImage? output)
+    {
+        output = null;
+        if (imgSrc.IsDisposed()) return false;
+
+        var bmpSrc = SKBitmap.FromImage(imgSrc);
+
+        if (TryApplyOrientation(bmpSrc, orientation, out var bmpOriented))
+        {
+            bmpSrc?.Dispose();
+            bmpSrc = null;
+
+            output = SKImage.FromBitmap(bmpOriented);
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /// <summary>
+    /// Tries to apply the specified orientation to the source bitmap and outputs the transformed bitmap if
     /// successful.
     /// </summary>
     public static bool TryApplyOrientation(SKBitmap? bmpSrc, SKEncodedOrigin? orientation, out SKBitmap? output)
@@ -721,6 +737,23 @@ public static partial class SkiaCodec
     /// <summary>
     /// Resizes the specified bitmap to the given dimensions using the selected resampling method.
     /// </summary>
+    public static async Task<SKBitmap?> ResizeAsync(SKImage? imgSrc,
+        double size, ImageResamplingMethod resample = ImageResamplingMethod.Auto,
+        CancellationToken token = default)
+    {
+        if (imgSrc.IsDisposed()) return null;
+
+        var oldSize = new Size(imgSrc.Width, imgSrc.Height);
+        var newSize = BHelper.ResizeRatio(oldSize, size);
+
+        using var bmpSrc = SKBitmap.FromImage(imgSrc);
+        return await ResizeAsync(bmpSrc, (int)newSize.Width, (int)newSize.Height, resample, token);
+    }
+
+
+    /// <summary>
+    /// Resizes the specified bitmap to the given dimensions using the selected resampling method.
+    /// </summary>
     public static async Task<SKBitmap?> ResizeAsync(SKBitmap? bmpSrc,
         int width, int height, ImageResamplingMethod resample = ImageResamplingMethod.Auto,
         CancellationToken token = default)
@@ -730,8 +763,7 @@ public static partial class SkiaCodec
 
         try
         {
-            // convert to bitmap stream
-            using var inputMs = ToBitmapStream(bmpSrc);
+            using var inputMs = ToBitmapV4Stream(bmpSrc);
             if (inputMs is null || token.IsCancellationRequested) return null;
 
 
@@ -1102,10 +1134,25 @@ public static partial class SkiaCodec
 
 
     /// <summary>
-    /// Writes SKBitmap pixel data as an uncompressed 32-bit BMP into a MemoryStream.
+    /// Converts SKImage to memory stream using uncompressed 32-bit BMPv4 format for transparency support.
     /// </summary>
-    private static MemoryStream? ToBitmapStream(SKBitmap bmpSrc)
+    public static MemoryStream? ToBitmapV4Stream(SKImage? imgSrc)
     {
+        if (imgSrc.IsDisposed()) return null;
+
+        var bmpSrc = SKBitmap.FromImage(imgSrc);
+        return ToBitmapV4Stream(bmpSrc);
+    }
+
+
+    /// <summary>
+    /// Converts SKBitmap to memory stream using uncompressed 32-bit BMPv4 format for transparency support.
+    /// </summary>
+    public static MemoryStream? ToBitmapV4Stream(SKBitmap? bmpSrc)
+    {
+        if (bmpSrc.IsDisposed()) return null;
+
+
         SKBitmap? converted = null;
         try
         {
@@ -1124,38 +1171,53 @@ public static partial class SkiaCodec
             var h = bmp.Height;
             var bmpRowBytes = w * 4;
 
-            // guard against int overflow for extremely large images
+            // header = 14 (file header) + 108 (BITMAPV4HEADER) = 122 bytes
+            const int headerSize = 122;
             long pixelBytesL = (long)bmpRowBytes * h;
-            if (pixelBytesL > int.MaxValue - 54) return null;
+
+            // guard against int overflow for extremely large images
+            if (pixelBytesL > int.MaxValue - headerSize) return null;
 
             var pixelBytes = (int)pixelBytesL;
-            var fileSize = 54 + pixelBytes;
-
+            var fileSize = headerSize + pixelBytes;
             var ms = new MemoryStream(fileSize);
 
-            // BMP File Header (14 bytes) + BITMAPINFOHEADER (40 bytes)
+            // BMP File Header (14 bytes) + BITMAPV4HEADER (108 bytes, full alpha + color space support)
             using (var bw = new BinaryWriter(ms, System.Text.Encoding.UTF8, leaveOpen: true))
             {
+                // -- BMP File Header (14 bytes) --
                 bw.Write((byte)'B');
                 bw.Write((byte)'M');
-                bw.Write(fileSize);       // file size
+                bw.Write(fileSize);       // total file size in bytes
                 bw.Write(0);              // reserved
-                bw.Write(54);             // pixel data offset
+                bw.Write(headerSize);     // pixel data offset
 
-                bw.Write(40);             // DIB header size
-                bw.Write(w);
-                bw.Write(-h);             // negative = top-down row order
-                bw.Write((short)1);       // color planes
+                // -- BITMAPV4HEADER (108 bytes) --
+                bw.Write(108);            // biSize: header size identifies this as V4
+                bw.Write(w);              // width in pixels
+                bw.Write(-h);             // negative height = top-down row order
+                bw.Write((short)1);       // color planes (always 1)
                 bw.Write((short)32);      // bits per pixel
-                bw.Write(0);              // BI_RGB (no compression)
-                bw.Write(pixelBytes);
-                bw.Write(0);              // X px/m
-                bw.Write(0);              // Y px/m
-                bw.Write(0);              // palette colors
-                bw.Write(0);              // important colors
+                bw.Write(3);              // biCompression: BI_BITFIELDS (required for channel masks)
+                bw.Write(pixelBytes);     // raw pixel data size
+                bw.Write(0);              // X pixels per meter (ignored)
+                bw.Write(0);              // Y pixels per meter (ignored)
+                bw.Write(0);              // palette colors used (0 = none for 32bpp)
+                bw.Write(0);              // important colors (0 = all)
+
+                // BGRA channel masks (BI_BITFIELDS layout, BGRA byte order)
+                bw.Write(0x00FF0000);                     // red mask
+                bw.Write(0x0000FF00);                     // green mask
+                bw.Write(0x000000FF);                     // blue mask
+                bw.Write(unchecked((int)0xFF000000));     // alpha mask
+
+                // V4 color space block (52 bytes)
+                bw.Write(0x73524742);                     // bV4CSType = 'sRGB' signals alpha-aware readers
+                for (int i = 0; i < 12; i++) bw.Write(0); // CIEXYZTRIPLE endpoints (36 bytes, zeroed = default)
+                                                          // bV4GammaRed/Green/Blue (12 bytes, zeroed = default)
             }
 
-            // write raw pixel data
+            // write raw pixel data (zero-copy fast path if row stride matches)
             var pixels = bmp.GetPixelSpan();
             var srcRowBytes = bmp.RowBytes;
 
@@ -1179,6 +1241,5 @@ public static partial class SkiaCodec
             converted?.Dispose();
         }
     }
-
 
 }

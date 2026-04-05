@@ -16,15 +16,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Avalonia;
 using ImageGlass.Common.Types;
 using ImageMagick;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Numerics;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace ImageGlass.Common;
 
@@ -143,30 +140,17 @@ public partial class BHelper
 
 
     /// <summary>
-    /// Create an unique key for the input file.
+    /// Calculates a new size that preserves the aspect ratio of the original size, scaling it so that the longer side
+    /// matches the specified length.
     /// </summary>
-    public static string CreateUniqueFileKey(string filePath, Vector2? size = null)
+    public static Size ResizeRatio(Size size, double newSize)
     {
-        var fi = new FileInfo(filePath);
-        var sb = new StringBuilder();
-
-        sb.Append(filePath);
-        sb.Append(':');
-        sb.Append(fi.LastWriteTimeUtc.ToBinary());
-
-        // Thumbnail size
-        if (size is Vector2 s)
+        if (size.Width >= size.Height)
         {
-            sb.Append(':');
-            sb.Append(s.X);
-            sb.Append(',');
-            sb.Append(s.Y);
+            return new Size(newSize, newSize * size.Height / size.Width);
         }
 
-
-        var hash = MD5.HashData(Encoding.ASCII.GetBytes(sb.ToString()));
-
-        return Convert.ToHexString(hash).ToLowerInvariant();
+        return new Size(newSize * size.Width / size.Height, newSize);
     }
 
 
@@ -228,7 +212,7 @@ public partial class BHelper
     public static (string DebugInfo, string Details) GetInAppError(Exception ex)
     {
         // get system info
-        var osArch = Environment.Is64BitOperatingSystem ? "64" : "32";
+        var osArch = Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit";
 
         var debugInfo = $"""
             {BHelper.AppName} {Core.BuildInfo.AppVersion}
