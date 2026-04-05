@@ -32,7 +32,7 @@ public partial class ToolHostControl : PhControl
     #region Public Properties
 
     /// <summary>
-    /// Gets, sets the tool content hosted by this control.
+    /// Gets, sets the current tool content hosted by this control.
     /// </summary>
     [Content]
     public IToolControl? Tool
@@ -151,7 +151,6 @@ public partial class ToolHostControl : PhControl
         // open the tool
         Tool = newTool;
         IsContentVisible = true;
-        Core.ToolMap[newTool.ToolId] = true;
 
         return true;
     }
@@ -160,21 +159,21 @@ public partial class ToolHostControl : PhControl
     /// <summary>
     /// Closes the tool with the specified identifier if it is currently active.
     /// </summary>
-    public bool CloseTool(string toolId)
+    public void CloseTool(string toolId)
     {
-        if (Tool is not IToolControl tool) return true;
-        if (tool.ToolId != toolId) return false;
+        if (Tool is not IToolControl tool) return;
+        if (tool.ToolId != toolId) return;
 
-        return CloseCurrentTool();
+        CloseCurrentTool();
     }
 
 
     /// <summary>
     /// Closes the currently active tool and saves its settings.
     /// </summary>
-    public bool CloseCurrentTool()
+    public void CloseCurrentTool()
     {
-        if (Tool is not IToolControl tool) return true;
+        if (Tool is not IToolControl tool) return;
 
         try
         {
@@ -184,13 +183,8 @@ public partial class ToolHostControl : PhControl
             // close the tool
             Tool = null;
             IsContentVisible = false;
-            Core.ToolMap[tool.ToolId] = false;
-
-            return true;
         }
         catch { }
-
-        return false;
     }
 
 

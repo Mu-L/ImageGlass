@@ -33,7 +33,6 @@ using ImageGlass.UI.Windowing;
 using ImageGlass.Windows;
 using System;
 using System.Collections.Frozen;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
@@ -82,6 +81,11 @@ public partial class AppAPIProvider
     public AppAPIProvider(MainWindow mainWindow)
     {
         _mainWindow = mainWindow;
+
+        // Register built-in hosted tools
+        Core.ToolRegistry.Register(ColorPickerToolControl.TOOL_ID, v => new ColorPickerToolControl { Viewer = v });
+        Core.ToolRegistry.Register(CropImageToolControl.TOOL_ID, v => new CropImageToolControl { Viewer = v });
+        Core.ToolRegistry.Register(FrameNavToolControl.TOOL_ID, v => new FrameNavToolControl { Viewer = v });
     }
 
 
@@ -2736,128 +2740,64 @@ public partial class AppAPIProvider
     #region Tools APIs
 
     /// <summary>
+    /// Toggles the hosted tool: opens it if closed, closes it if open.
+    /// </summary>
+    public void IG_ToggleTool(string? toolId)
+    {
+        if (string.IsNullOrEmpty(toolId)) return;
+        if (!Core.ToolRegistry.Contains(toolId)) return;
+
+        var currentToolId = ToolHost.Tool?.ToolId;
+
+        if (string.Equals(currentToolId, toolId, StringComparison.Ordinal))
+        {
+            // if same tool is open, close it
+            ToolHost.CloseCurrentTool();
+        }
+        else
+        {
+            // if different tool or none, close current, open requested
+            ToolHost.CloseCurrentTool();
+            var tool = Core.ToolRegistry.CreateTool(toolId, Viewer);
+            ToolHost.OpenTool(tool);
+        }
+    }
+
+
+    /// <summary>
+    /// Opens the hosted tool. No-op if already open or toolId is unknown.
+    /// </summary>
+    public void IG_OpenTool(string? toolId)
+    {
+        if (string.IsNullOrEmpty(toolId)) return;
+        if (!Core.ToolRegistry.Contains(toolId)) return;
+
+        var currentToolId = ToolHost.Tool?.ToolId;
+        if (string.Equals(currentToolId, toolId, StringComparison.Ordinal)) return;
+
+        ToolHost.CloseCurrentTool();
+        var tool = Core.ToolRegistry.CreateTool(toolId, Viewer);
+        ToolHost.OpenTool(tool);
+    }
+
+
+    /// <summary>
+    /// Closes the hosted tool. No-op if the tool is not open.
+    /// </summary>
+    public void IG_CloseTool(string? toolId)
+    {
+        if (string.IsNullOrEmpty(toolId)) return;
+
+        ToolHost.CloseTool(toolId);
+    }
+
+
+    /// <summary>
     /// Closes the currently active tool in the tool host, if one is open.
     /// </summary>
     public void IG_CloseCurrentTool()
     {
         ToolHost.CloseCurrentTool();
-    }
-
-
-    /// <summary>
-    /// Toggles visibility of Color picker tool.
-    /// </summary>
-    public void IG_ToggleColorPickerTool(string? boolStr = null)
-    {
-        var enabled = BHelper.ConvertStringToBool(boolStr);
-        IG_ToggleColorPickerTool(enabled);
-    }
-
-
-    /// <summary>
-    /// Toggles visibility of Color picker tool
-    /// </summary>
-    public void IG_ToggleColorPickerTool(bool? enabled = null)
-    {
-        var toolId = ColorPickerToolControl.TOOL_ID;
-        var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
-
-        enabled ??= !isOpen;
-        isOpen = enabled.Value;
-        Core.ToolMap[toolId] = isOpen;
-
-        if (enabled.Value)
-        {
-            if (ToolHost.CloseCurrentTool())
-            {
-                ToolHost.OpenTool(new ColorPickerToolControl()
-                {
-                    Viewer = Viewer,
-                });
-            }
-        }
-        else
-        {
-            ToolHost.CloseTool(toolId);
-        }
-    }
-
-
-    /// <summary>
-    /// Toggles visibility of Crop tool.
-    /// </summary>
-    public void IG_ToggleCropTool(string? boolStr = null)
-    {
-        var enabled = BHelper.ConvertStringToBool(boolStr);
-        IG_ToggleCropTool(enabled);
-    }
-
-
-    /// <summary>
-    /// Toggles visibility of Crop tool.
-    /// </summary>
-    public void IG_ToggleCropTool(bool? enabled = null)
-    {
-        var toolId = CropImageToolControl.TOOL_ID;
-        var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
-
-        enabled ??= !isOpen;
-        isOpen = enabled.Value;
-        Core.ToolMap[toolId] = isOpen;
-
-        if (enabled.Value)
-        {
-            if (ToolHost.CloseCurrentTool())
-            {
-                ToolHost.OpenTool(new CropImageToolControl()
-                {
-                    Viewer = Viewer,
-                });
-            }
-        }
-        else
-        {
-            ToolHost.CloseTool(toolId);
-        }
-    }
-
-
-    /// <summary>
-    /// Toggles visibility of Frame navigation tool.
-    /// </summary>
-    public void IG_ToggleFrameNavTool(string? boolStr = null)
-    {
-        var enabled = BHelper.ConvertStringToBool(boolStr);
-        IG_ToggleFrameNavTool(enabled);
-    }
-
-
-    /// <summary>
-    /// Toggles visibility of Frame navigation tool.
-    /// </summary>
-    public void IG_ToggleFrameNavTool(bool? enabled = null)
-    {
-        var toolId = FrameNavToolControl.TOOL_ID;
-        var isOpen = Core.ToolMap.GetValueOrDefault(toolId, false);
-
-        enabled ??= !isOpen;
-        isOpen = enabled.Value;
-        Core.ToolMap[toolId] = isOpen;
-
-        if (enabled.Value)
-        {
-            if (ToolHost.CloseCurrentTool())
-            {
-                ToolHost.OpenTool(new FrameNavToolControl()
-                {
-                    Viewer = Viewer,
-                });
-            }
-        }
-        else
-        {
-            ToolHost.CloseTool(toolId);
-        }
     }
 
 

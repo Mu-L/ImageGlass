@@ -87,6 +87,9 @@ public partial class MainWindow : PhWindow
 
         // load color profile
         Core.UpdateDestColorProfile();
+
+        // restore last opened tool
+        Core.API?.IG_OpenTool(Core.Config.LastOpenedTool);
     }
 
 

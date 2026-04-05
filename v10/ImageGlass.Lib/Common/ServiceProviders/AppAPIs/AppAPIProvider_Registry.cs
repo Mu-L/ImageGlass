@@ -136,9 +136,9 @@ public partial class AppAPIProvider
 
         // Tools
         { API.IG_CloseCurrentTool,          PhCommands.Create(IG_CloseCurrentTool) },
-        { API.IG_ToggleColorPickerTool,     PhCommands.Create(IG_ToggleColorPickerTool) },
-        { API.IG_ToggleCropTool,            PhCommands.Create(IG_ToggleCropTool) },
-        { API.IG_ToggleFrameNavTool,        PhCommands.Create(IG_ToggleFrameNavTool) },
+        { API.IG_ToggleTool,                PhCommands.Create(IG_ToggleTool) },
+        { API.IG_OpenTool,                  PhCommands.Create(IG_OpenTool) },
+        { API.IG_CloseTool,                 PhCommands.Create(IG_CloseTool) },
         { API.IG_OpenImageResizeTool,       PhCommands.Create(IG_OpenImageResizeToolAsync) },
         { API.IG_LosslessCompressionTool,   PhCommands.Create(IG_OpenLosslessCompressionToolAsync) },
         { API.IG_GetMoreTool,               PhCommands.Create(IG_GetMoreTool) },

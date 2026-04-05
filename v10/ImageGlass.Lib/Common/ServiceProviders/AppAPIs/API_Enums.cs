@@ -114,9 +114,9 @@ public enum API
 
     // Menu > Tools
     IG_CloseCurrentTool,
-    IG_ToggleColorPickerTool,
-    IG_ToggleCropTool,
-    IG_ToggleFrameNavTool,
+    IG_ToggleTool,
+    IG_OpenTool,
+    IG_CloseTool,
     IG_OpenImageResizeTool,
     IG_LosslessCompressionTool,
     IG_GetMoreTool,

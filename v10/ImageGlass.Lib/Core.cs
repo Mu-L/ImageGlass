@@ -26,6 +26,7 @@ using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
+using ImageGlass.UI;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -178,9 +179,10 @@ public static class Core
 
 
     /// <summary>
-    /// Gets the tools manager where save the state of the tool.
+    /// Gets the central registry for hosted tools.
+    /// Built-in tools are registered during <see cref="ServiceProviders.AppAPIProvider"/> construction.
     /// </summary>
-    public static Dictionary<string, bool> ToolMap { get; private set; } = new();
+    public static HostedToolRegistry ToolRegistry { get; } = new();
 
 
     /// <summary>
