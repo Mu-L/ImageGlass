@@ -374,6 +374,15 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
+    /// Gets, sets value indicates that gallery can use shell for thumbnails.
+    /// </summary>
+    public bool EnableGalleryShellThumbnail
+    {
+        get => Get(ConfigId.EnableGalleryShellThumbnail, true);
+        set => Set(ConfigId.EnableGalleryShellThumbnail, value);
+    }
+
+    /// <summary>
     /// Enables / Disables copy multiple files.
     /// </summary>
     public bool EnableCopyMultipleFiles

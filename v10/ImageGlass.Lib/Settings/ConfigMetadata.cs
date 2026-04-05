@@ -67,6 +67,7 @@ public enum ConfigId
     EnableOnlyLoadRawPreview,
     EnableOnlyLoadNonRawPreview,
     EnableImagePreview,
+    EnableGalleryShellThumbnail,
     EnableCopyMultipleFiles,
     EnableCutMultipleFiles,
     EnableFileWatcher,

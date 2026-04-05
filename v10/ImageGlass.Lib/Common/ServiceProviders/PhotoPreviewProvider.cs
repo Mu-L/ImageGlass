@@ -16,7 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
+using ImageGlass.Common.Types;
 using SkiaSharp;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,47 +31,99 @@ public class PhotoPreviewProvider : IPhotoPreviewProvider
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual async Task<SKImage?> GetPreviewAsync(PhotoMetadata meta, double? minHeight, CancellationToken token = default)
+    public virtual async Task<SKImage?> GetPreviewAsync(PhotoMetadata meta, double? minHeight,
+        CancellationToken token = default)
     {
-        var size = (int)(minHeight ?? double.MinValue);
-
-
         // 1. fast path: native scaled decode via SkiaSharp
+        var size = (int)(minHeight ?? double.MinValue);
         var imgPreview = await Task.Run(() => SkiaCodec.LoadThumbnail(meta.FilePath, size), token)
             .ConfigureAwait(false);
-        if (imgPreview is not null) return imgPreview;
 
 
         // 2. try embedded EXIF preview
-        using var thumbM = meta.GetEmbeddedPreview();
-        if (thumbM is not null && thumbM.Height >= minHeight)
+        if (imgPreview.IsDisposed())
         {
-            imgPreview = SkiaCodec.FromMagick(thumbM, meta.SkiaColorSpace);
-            if (imgPreview is not null) return imgPreview;
+            using var thumbM = meta.GetEmbeddedPreview();
+            if (thumbM is not null && thumbM.Height >= minHeight)
+            {
+                imgPreview = SkiaCodec.FromMagick(thumbM, meta.SkiaColorSpace);
+            }
         }
 
 
-        return null;
+        // 3. process preview
+        if (TryProcessImage(imgPreview, meta, out var imgProcessed))
+        {
+            imgPreview?.Dispose();
+            imgPreview = imgProcessed;
+        }
+
+
+        if (imgPreview.IsDisposed()) imgPreview = null;
+        return imgPreview;
     }
 
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual async Task<SKImage?> GetThumbnailAsync(PhotoMetadata meta, double minHeight, CancellationToken token = default)
+    public virtual async Task<SKImage?> GetThumbnailAsync(PhotoMetadata meta, double minHeight,
+        CancellationToken token = default)
     {
-        var size = (int)minHeight;
+        var minSize = (int)minHeight;
+        var maxSize = minSize * 2;
 
         // 1. fast path: try to get the quick preview
-        var imgPreview = await GetPreviewAsync(meta, size, token);
-        if (imgPreview is not null) return imgPreview;
+        var imgPreview = await GetPreviewAsync(meta, minSize, token);
 
 
-        // 2. slow path: use ImageMagick for unsupported formats, skip for those larger than 3000px
-        using var imgM = await MagickCodec.QuickDecodeAsync(meta.FilePath, 0, 0, 0, 3000, token);
-        imgPreview = SkiaCodec.FromMagick(imgM, meta.SkiaColorSpace);
+        // 2. slow path: use ImageMagick for unsupported formats
+        if (imgPreview.IsDisposed())
+        {
+            using var imgM = await MagickCodec.QuickDecodeAsync(meta.FilePath, 0, 0, token: token);
+            imgPreview = SkiaCodec.FromMagick(imgM, meta.SkiaColorSpace);
+        }
 
+
+        // 3. resize if needed
+        if (minSize > 0 && (imgPreview?.Width > maxSize || imgPreview?.Height > maxSize))
+        {
+            var resizedBmpPreview = await SkiaCodec.ResizeAsync(imgPreview, minSize, ImageResamplingMethod.Auto, token);
+            imgPreview?.Dispose();
+            imgPreview = SKImage.FromBitmap(resizedBmpPreview);
+        }
+
+
+        if (imgPreview.IsDisposed()) imgPreview = null;
         return imgPreview;
+    }
+
+
+    /// <summary>
+    /// Processes the preview image by applying orientation and color management adjustments.
+    /// </summary>
+    protected static bool TryProcessImage(SKImage? imgPreview, PhotoMetadata meta, out SKImage? output)
+    {
+        output = null;
+        if (imgPreview.IsDisposed()) return false;
+
+
+        // 1. apply orientation
+        if (SkiaCodec.TryApplyOrientation(imgPreview, meta.Orientation, out var imgOriented))
+        {
+            output?.Dispose();
+            output = imgOriented;
+        }
+
+
+        // 2. apply color management
+        if (SkiaCodec.TryApplyColorSpace(output ?? imgPreview, Core.DestColorProfile, out var imgFrameColored))
+        {
+            output?.Dispose();
+            output = imgFrameColored;
+        }
+
+        return true;
     }
 
 }
