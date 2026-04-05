@@ -109,6 +109,7 @@ public enum ConfigId
     UpdateSkippedVersion,
     ColorProfile,
     LastSeenImagePath,
+    LastOpenedTool,
     // LastOpenedSetting,
     BackgroundColor,
     SlideshowBackgroundColor,

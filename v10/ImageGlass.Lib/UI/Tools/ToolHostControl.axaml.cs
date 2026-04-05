@@ -35,13 +35,13 @@ public partial class ToolHostControl : PhControl
     /// Gets, sets the tool content hosted by this control.
     /// </summary>
     [Content]
-    public object? ToolContent
+    public IToolControl? Tool
     {
         get => GetValue(ToolContentProperty);
         set => SetValue(ToolContentProperty, value);
     }
-    public static readonly StyledProperty<object?> ToolContentProperty =
-        AvaloniaProperty.Register<ToolHostControl, object?>(nameof(ToolContent));
+    public static readonly StyledProperty<IToolControl?> ToolContentProperty =
+        AvaloniaProperty.Register<ToolHostControl, IToolControl?>(nameof(Tool));
 
 
 
@@ -112,7 +112,7 @@ public partial class ToolHostControl : PhControl
 
     private async void PART_BtnSettings_Click(object? sender, RoutedEventArgs e)
     {
-        if (ToolContent is not IToolControl tool) return;
+        if (Tool is not IToolControl tool) return;
         if (!tool.HasSettingsUI) return;
 
         await tool.ShowSettingsWindowAsync();
@@ -133,7 +133,7 @@ public partial class ToolHostControl : PhControl
     {
         if (newTool is null) return false;
 
-        if (ToolContent is IToolControl tool)
+        if (Tool is IToolControl tool)
         {
             throw new InvalidOperationException($"IGE: The current tool (ID = {tool.ToolId}) must be close before opening another tool");
         }
@@ -149,7 +149,7 @@ public partial class ToolHostControl : PhControl
         catch { }
 
         // open the tool
-        ToolContent = newTool;
+        Tool = newTool;
         IsContentVisible = true;
         Core.ToolMap[newTool.ToolId] = true;
 
@@ -162,7 +162,7 @@ public partial class ToolHostControl : PhControl
     /// </summary>
     public bool CloseTool(string toolId)
     {
-        if (ToolContent is not IToolControl tool) return true;
+        if (Tool is not IToolControl tool) return true;
         if (tool.ToolId != toolId) return false;
 
         return CloseCurrentTool();
@@ -174,7 +174,7 @@ public partial class ToolHostControl : PhControl
     /// </summary>
     public bool CloseCurrentTool()
     {
-        if (ToolContent is not IToolControl tool) return true;
+        if (Tool is not IToolControl tool) return true;
 
         try
         {
@@ -182,7 +182,7 @@ public partial class ToolHostControl : PhControl
             SaveCurrentToolSettings();
 
             // close the tool
-            ToolContent = null;
+            Tool = null;
             IsContentVisible = false;
             Core.ToolMap[tool.ToolId] = false;
 
@@ -199,7 +199,7 @@ public partial class ToolHostControl : PhControl
     /// </summary>
     public void SaveCurrentToolSettings()
     {
-        if (ToolContent is not IToolControl tool) return;
+        if (Tool is not IToolControl tool) return;
 
         try
         {

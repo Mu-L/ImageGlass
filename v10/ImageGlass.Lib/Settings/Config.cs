@@ -647,6 +647,15 @@ public partial class Config : PhReactive
         set => Set(ConfigId.LastSeenImagePath, value);
     }
 
+    /// <summary>
+    /// Gets, sets the tool ID to open on startup.
+    /// </summary>
+    public string LastOpenedTool
+    {
+        get => Get(ConfigId.LastOpenedTool, string.Empty);
+        set => Set(ConfigId.LastOpenedTool, value);
+    }
+
     ///// <summary>
     ///// Gets, sets the last view of settings window.
     ///// </summary>

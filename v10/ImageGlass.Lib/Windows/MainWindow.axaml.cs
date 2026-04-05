@@ -260,6 +260,7 @@ public partial class MainWindow : PhWindow
         // fullscreen mode: use the backup value
         if (Core.Config.EnableFullScreen)
         {
+            // TODO:
             //Core.Config.ShowToolbar = _showToolbar;
             //Core.Config.ShowGallery = _showGallery;
         }
@@ -269,6 +270,7 @@ public partial class MainWindow : PhWindow
         Core.Config.ZoomLockValue = PART_MainView.PART_Viewer.ZoomFactor * 100f;
 
         // save current tool setting if it's open
+        Core.Config.LastOpenedTool = PART_MainView.PART_ToolHost.Tool?.ToolId ?? string.Empty;
         PART_MainView.PART_ToolHost.SaveCurrentToolSettings();
 
         // save config to file
