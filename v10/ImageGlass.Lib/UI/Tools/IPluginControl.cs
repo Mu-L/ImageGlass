@@ -16,54 +16,30 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.UI.Viewer;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
 
-public interface IToolControl
+/// <summary>
+/// Interface for hosted plugins that are displayed in <see cref="PluginHostControl"/>.
+/// Extends <see cref="IPlugin"/> with hosted-UI-specific members.
+/// </summary>
+public interface IPluginControl : IPlugin
 {
-    /// <summary>
-    /// Gets the ID of the tool.
-    /// </summary>
-    string ToolId { get; }
+    // Hosted plugins are always hosted
+    bool IPlugin.IsHosted => true;
 
 
     /// <summary>
-    /// Gets, sets settings for this tool, written in app's config file.
-    /// </summary>
-    object? Settings { get; }
-
-
-    /// <summary>
-    /// Gets the value indicates that the tool contains settings UI,
+    /// Gets the value indicates that the plugin contains settings UI,
     /// that can be open with <see cref="ShowSettingsWindowAsync"/>.
     /// </summary>
     bool HasSettingsUI { get; }
 
 
     /// <summary>
-    /// Gets the instance of Viewer control.
-    /// </summary>
-    ViewerControl Viewer { get; init; }
-
-
-    /// <summary>
-    /// Shows the tool settings window.
+    /// Shows the plugin settings window.
     /// </summary>
     Task ShowSettingsWindowAsync() => Task.CompletedTask;
-
-
-    /// <summary>
-    /// Loads and parses tool settings from JSON element.
-    /// </summary>
-    void LoadSettings(JsonElement? jsonEl) { }
-
-
-    /// <summary>
-    /// Saves the tool settings as JSON element.
-    /// </summary>
-    JsonElement? SaveSettings() => null;
 
 }

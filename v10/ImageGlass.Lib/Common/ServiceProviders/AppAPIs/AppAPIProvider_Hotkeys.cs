@@ -152,17 +152,17 @@ public partial class AppAPIProvider
         new(LangId.FrmMain_MnuToggleTopMost,        API.IG_ToggleWindowTopMost),
 
 
-        // Tools
-        new(LangId.FrmMain_MnuColorPicker,          API.IG_ToggleTool, ColorPickerToolControl.TOOL_ID,  [new(MKeys.Alt, Key.K)]),
-        new(LangId.FrmMain_MnuCropTool,             API.IG_ToggleTool, CropImageToolControl.TOOL_ID,    [new(MKeys.Alt, Key.C)]),
-        new(LangId.FrmMain_MnuFrameNav,             API.IG_ToggleTool, FrameNavToolControl.TOOL_ID,     [new(MKeys.Alt, Key.P)]),
-        new(LangId.FrmMain_MnuResizeTool,           API.IG_OpenImageResizeTool,                         MKeys.Alt, Key.R),
-        new(LangId.FrmMain_MnuLosslessCompression,  API.IG_LosslessCompressionTool,                     MKeys.Alt, Key.S),
-        new(LangId.FrmMain_MnuGetMoreTools,         API.IG_GetMoreTool),
+        // Plugins
+        new(LangId.FrmMain_MnuColorPicker,          API.IG_TogglePlugin, ColorPickerToolControl.PLUGIN_ID,      [new(MKeys.Alt, Key.K)]),
+        new(LangId.FrmMain_MnuCropTool,             API.IG_TogglePlugin, CropImageToolControl.PLUGIN_ID,        [new(MKeys.Alt, Key.C)]),
+        new(LangId.FrmMain_MnuFrameNav,             API.IG_TogglePlugin, FrameNavToolControl.PLUGIN_ID,         [new(MKeys.Alt, Key.P)]),
+        new(LangId.FrmMain_MnuResizeTool,           API.IG_OpenPlugin,  ImageResizerPlugin.PLUGIN_ID,           [new(MKeys.Alt, Key.R)]),
+        new(LangId.FrmMain_MnuLosslessCompression,  API.IG_OpenPlugin,  LosslessCompressionPlugin.PLUGIN_ID,    [new(MKeys.Alt, Key.S)]),
+        new(LangId.FrmMain_MnuGetMoreTools,         API.IG_GetMorePlugin),
 
 
         // Settings
-        new(LangId.FrmMain_MnuSettings,             API.IG_OpenSettings,            Hotkey.Ctrl, Key.OemComma),
+        new(LangId.FrmMain_MnuSettings,                     API.IG_OpenSettings,    Hotkey.Ctrl, Key.OemComma),
 
 
         // Help

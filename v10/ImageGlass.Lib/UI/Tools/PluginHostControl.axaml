@@ -1,5 +1,5 @@
 <ui:PhControl
-    x:Class="ImageGlass.UI.ToolHostControl"
+    x:Class="ImageGlass.UI.PluginHostControl"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -29,12 +29,12 @@
 
     <ui:PhControl.Content>
         <Grid ColumnDefinitions="*,Auto">
-            <!--  The slot for hosted tool content  -->
+            <!--  The slot for hosted plugin content  -->
             <ContentControl
                 Grid.Column="0"
                 BorderBrush="{DynamicResource IG_BorderNeutralBrush}"
                 BorderThickness="0,1"
-                Content="{CompiledBinding #Root.Tool}" />
+                Content="{CompiledBinding #Root.Plugin}" />
 
 
             <!--  Close button  -->

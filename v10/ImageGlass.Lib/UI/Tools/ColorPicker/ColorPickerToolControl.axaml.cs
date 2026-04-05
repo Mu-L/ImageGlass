@@ -32,14 +32,14 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
 
-public partial class ColorPickerToolControl : PhControl, IToolControl
+public partial class ColorPickerToolControl : PhControl, IPluginControl
 {
-    public static string TOOL_ID => "Tool_ColorPicker";
-    public string ToolId => TOOL_ID;
+    public static string PLUGIN_ID => "Tool_ColorPicker";
+    public string PluginId => PLUGIN_ID;
     public bool HasSettingsUI => true;
     public object? Settings { get; private set; } = new ColorPickerConfig();
     public ColorPickerConfig Options => (ColorPickerConfig)Settings!;
-    public ViewerControl Viewer { get; init; } = null!;
+    public ViewerControl Viewer { get; set; } = null!;
 
 
 

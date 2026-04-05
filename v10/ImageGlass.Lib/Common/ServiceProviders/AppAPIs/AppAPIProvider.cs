@@ -37,6 +37,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -74,7 +75,7 @@ public partial class AppAPIProvider
     private GalleryControl Gallery => _mainWindow.PART_MainView.PART_Gallery;
     private PhGridSplitter GalleryResizer => _mainWindow.PART_MainView.PART_GalleryResizer;
     private MessageControl Message => _mainWindow.PART_MainView.PART_Message;
-    private ToolHostControl ToolHost => _mainWindow.PART_MainView.PART_ToolHost;
+    private PluginHostControl PluginHost => _mainWindow.PART_MainView.PART_PluginHost;
     private SlideshowCountdownOverlay SlideshowCountdown => _mainWindow.PART_MainView.PART_SlideshowCountdown;
 
 
@@ -82,10 +83,17 @@ public partial class AppAPIProvider
     {
         _mainWindow = mainWindow;
 
-        // Register built-in hosted tools
-        Core.ToolRegistry.Register(ColorPickerToolControl.TOOL_ID, v => new ColorPickerToolControl { Viewer = v });
-        Core.ToolRegistry.Register(CropImageToolControl.TOOL_ID, v => new CropImageToolControl { Viewer = v });
-        Core.ToolRegistry.Register(FrameNavToolControl.TOOL_ID, v => new FrameNavToolControl { Viewer = v });
+        // Register built-in hosted plugins (via PluginControlAdapter)
+        Core.PluginRegistry.Register(ColorPickerToolControl.PLUGIN_ID,
+            new PluginControlAdapter(ColorPickerToolControl.PLUGIN_ID, v => new ColorPickerToolControl { Viewer = v }));
+        Core.PluginRegistry.Register(CropImageToolControl.PLUGIN_ID,
+            new PluginControlAdapter(CropImageToolControl.PLUGIN_ID, v => new CropImageToolControl { Viewer = v }));
+        Core.PluginRegistry.Register(FrameNavToolControl.PLUGIN_ID,
+            new PluginControlAdapter(FrameNavToolControl.PLUGIN_ID, v => new FrameNavToolControl { Viewer = v }));
+
+        // Register built-in non-hosted plugins
+        Core.PluginRegistry.Register(ImageResizerPlugin.PLUGIN_ID, new ImageResizerPlugin());
+        Core.PluginRegistry.Register(LosslessCompressionPlugin.PLUGIN_ID, new LosslessCompressionPlugin());
     }
 
 
@@ -2737,148 +2745,191 @@ public partial class AppAPIProvider
 
 
 
-    #region Tools APIs
+    #region Plugin APIs
 
     /// <summary>
-    /// Toggles the hosted tool: opens it if closed, closes it if open.
+    /// Loads settings for a plugin from the app config.
     /// </summary>
-    public void IG_ToggleTool(string? toolId)
+    private static void LoadPluginSettings(IPlugin plugin)
     {
-        if (string.IsNullOrEmpty(toolId)) return;
-        if (!Core.ToolRegistry.Contains(toolId)) return;
+        JsonElement? jsonEl = Core.Config.PluginSettings.TryGetValue(plugin.PluginId, out var el)
+            ? el
+            : null;
 
-        var currentToolId = ToolHost.Tool?.ToolId;
+        plugin.LoadSettings(jsonEl);
+    }
 
-        if (string.Equals(currentToolId, toolId, StringComparison.Ordinal))
+
+    /// <summary>
+    /// Saves settings for a plugin to the app config.
+    /// </summary>
+    private static void SavePluginSettings(IPlugin plugin)
+    {
+        var jsonEl = plugin.SaveSettings();
+
+        if (jsonEl is null)
         {
-            // if same tool is open, close it
-            ToolHost.CloseCurrentTool();
+            Core.Config.PluginSettings.Remove(plugin.PluginId);
         }
         else
         {
-            // if different tool or none, close current, open requested
-            ToolHost.CloseCurrentTool();
-            var tool = Core.ToolRegistry.CreateTool(toolId, Viewer);
-            ToolHost.OpenTool(tool);
+            Core.Config.PluginSettings[plugin.PluginId] = jsonEl.Value;
         }
     }
 
 
     /// <summary>
-    /// Opens the hosted tool. No-op if already open or toolId is unknown.
+    /// Executes a non-hosted plugin and saves its settings on completion.
     /// </summary>
-    public void IG_OpenTool(string? toolId)
+    private static async Task ExecuteNonHostedPluginAsync(IPlugin plugin, PluginExecutionContext context)
     {
-        if (string.IsNullOrEmpty(toolId)) return;
-        if (!Core.ToolRegistry.Contains(toolId)) return;
-
-        var currentToolId = ToolHost.Tool?.ToolId;
-        if (string.Equals(currentToolId, toolId, StringComparison.Ordinal)) return;
-
-        ToolHost.CloseCurrentTool();
-        var tool = Core.ToolRegistry.CreateTool(toolId, Viewer);
-        ToolHost.OpenTool(tool);
-    }
-
-
-    /// <summary>
-    /// Closes the hosted tool. No-op if the tool is not open.
-    /// </summary>
-    public void IG_CloseTool(string? toolId)
-    {
-        if (string.IsNullOrEmpty(toolId)) return;
-
-        ToolHost.CloseTool(toolId);
-    }
-
-
-    /// <summary>
-    /// Closes the currently active tool in the tool host, if one is open.
-    /// </summary>
-    public void IG_CloseCurrentTool()
-    {
-        ToolHost.CloseCurrentTool();
-    }
-
-
-    /// <summary>
-    /// Opens the image resizer tool.
-    /// </summary>
-    public async Task IG_OpenImageResizeToolAsync()
-    {
-        if (Core.IsBusy) return;
-
-        Core.IsBusy = true;
-
         try
         {
-            // 1. get current bitmap
-            using var srcBmp = Viewer.GetRenderedBitmap();
-            if (srcBmp.IsDisposed()) return;
-
-
-            // 2. show resizer window
-            var resizerWindow = new ImageResizerWindow(srcBmp);
-            var result = await resizerWindow.ShowAsync(_mainWindow);
-
-
-            // 3. show the output image
-            if (result == DialogExitCode.OK && !resizerWindow.OutputBitmap.IsDisposed())
-            {
-                var photo = new Photo(resizerWindow.OutputBitmap);
-                await LoadClipboardPhotoAsync(photo);
-            }
+            await plugin.ExecuteAsync(context);
         }
         finally
         {
-            Core.IsBusy = false;
+            SavePluginSettings(plugin);
         }
     }
 
 
     /// <summary>
-    /// Performs a lossless compression operation.
+    /// Creates the execution context for non-hosted plugins.
     /// </summary>
-    public async Task IG_OpenLosslessCompressionToolAsync()
+    private PluginExecutionContext CreatePluginExecutionContext()
     {
-        if (Core.IsBusy || Core.Photos.Count == 0 || Core.ClipboardImage != null) return;
-
-        var filePath = Core.Photos.CurrentFilePath;
-
-        // 1. check if image format not supported
-        if (!MagickCodec.IsLosslessCompressSupported(filePath))
+        return new PluginExecutionContext
         {
-            _ = await ModalWindow.ShowInfoAsync(_mainWindow, new ModalWindowOptions
-            {
-                Title = Core.Lang[LangId.FrmMain_MnuLosslessCompression],
-                Heading = Core.Lang[LangId._NotSupported],
-                Description = filePath,
-                Thumbnail = Core.Photos.Current?.GalleryThumbnail,
-            });
-
-            return;
-        }
-
-
-        // 2. perform lossless compression
-        Core.IsBusy = true;
-
-        var compressionWindow = new LosslessCompressionWindow(filePath);
-        _ = await compressionWindow.ShowAsync(_mainWindow);
-
-        Core.IsBusy = false;
+            Window = _mainWindow,
+        };
     }
 
 
     /// <summary>
-    /// Opens website to download more tools.
+    /// Toggles a plugin by ID. Non-hosted plugins only support open (toggle = open).
     /// </summary>
-    public void IG_GetMoreTool()
+    public void IG_TogglePlugin(string? pluginId)
+    {
+        if (string.IsNullOrEmpty(pluginId)) return;
+
+        var plugin = Core.PluginRegistry.Get(pluginId);
+        if (plugin is null) return;
+
+        if (plugin.IsHosted)
+        {
+            var currentPluginId = PluginHost.Plugin?.PluginId;
+
+            if (string.Equals(currentPluginId, pluginId, StringComparison.Ordinal))
+            {
+                // Close: save settings first, then close UI
+                if (PluginHost.Plugin is IPlugin currentPlugin)
+                {
+                    SavePluginSettings(currentPlugin);
+                }
+                PluginHost.CloseCurrentPlugin();
+            }
+            else
+            {
+                // Open: close current (with save), then open new
+                IG_ClosePlugin(currentPluginId);
+
+                if (plugin is PluginControlAdapter adapter)
+                {
+                    var control = adapter.CreatePluginControl(Viewer);
+                    LoadPluginSettings(control);
+                    PluginHost.OpenPlugin(control);
+                }
+            }
+        }
+        else
+        {
+            // Non-hosted plugins can only be opened, not toggled closed
+            IG_OpenPlugin(pluginId);
+        }
+    }
+
+
+    /// <summary>
+    /// Opens a plugin by ID. Handles both hosted and non-hosted plugins.
+    /// Settings are loaded before the plugin is opened/executed.
+    /// </summary>
+    public void IG_OpenPlugin(string? pluginId)
+    {
+        if (string.IsNullOrEmpty(pluginId)) return;
+
+        var plugin = Core.PluginRegistry.Get(pluginId);
+        if (plugin is null) return;
+
+        if (plugin.IsHosted)
+        {
+            // Hosted plugin — create via adapter, load settings, host in PluginHostControl
+            var currentPluginId = PluginHost.Plugin?.PluginId;
+            if (string.Equals(currentPluginId, pluginId, StringComparison.Ordinal)) return;
+
+            // Close current plugin (with save) before opening new one
+            IG_ClosePlugin(currentPluginId);
+
+            if (plugin is PluginControlAdapter adapter)
+            {
+                var control = adapter.CreatePluginControl(Viewer);
+                LoadPluginSettings(control);
+                PluginHost.OpenPlugin(control);
+            }
+        }
+        else
+        {
+            // Non-hosted plugin — set viewer, load settings, execute, save on completion
+            plugin.Viewer = Viewer;
+            LoadPluginSettings(plugin);
+
+            var context = CreatePluginExecutionContext();
+            _ = ExecuteNonHostedPluginAsync(plugin, context);
+        }
+    }
+
+
+    /// <summary>
+    /// Closes a plugin by ID. Only applicable to hosted plugins.
+    /// Saves settings before closing.
+    /// </summary>
+    public void IG_ClosePlugin(string? pluginId)
+    {
+        if (string.IsNullOrEmpty(pluginId)) return;
+
+        // Save settings for the current hosted plugin before closing
+        if (PluginHost.Plugin is IPlugin currentPlugin
+            && string.Equals(currentPlugin.PluginId, pluginId, StringComparison.Ordinal))
+        {
+            SavePluginSettings(currentPlugin);
+        }
+
+        PluginHost.ClosePlugin(pluginId);
+    }
+
+
+    /// <summary>
+    /// Closes the currently active plugin in the plugin host, if one is open.
+    /// </summary>
+    public void IG_CloseCurrentPlugin()
+    {
+        if (PluginHost.Plugin is IPlugin currentPlugin)
+        {
+            SavePluginSettings(currentPlugin);
+        }
+        PluginHost.CloseCurrentPlugin();
+    }
+
+
+    /// <summary>
+    /// Opens website to download more plugins.
+    /// </summary>
+    public void IG_GetMorePlugin()
     {
         _ = BHelper.OpenUrlAsync(_mainWindow, "https://imageglass.org/tools", "from_get_more_tools");
     }
 
-    #endregion // Tools APIs
+    #endregion // Plugin APIs
 
 
 

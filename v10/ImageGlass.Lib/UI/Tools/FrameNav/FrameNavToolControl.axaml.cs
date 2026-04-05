@@ -26,14 +26,14 @@ using ImageGlass.UI.Viewer;
 
 namespace ImageGlass.UI;
 
-public partial class FrameNavToolControl : PhControl, IToolControl
+public partial class FrameNavToolControl : PhControl, IPluginControl
 {
 
-    public static string TOOL_ID => "Tool_FrameNav";
-    public string ToolId => TOOL_ID;
+    public static string PLUGIN_ID => "Tool_FrameNav";
+    public string PluginId => PLUGIN_ID;
     public bool HasSettingsUI => false;
     public object? Settings { get; } = null;
-    public ViewerControl Viewer { get; init; } = null!;
+    public ViewerControl Viewer { get; set; } = null!;
 
 
     #region Public Properties 

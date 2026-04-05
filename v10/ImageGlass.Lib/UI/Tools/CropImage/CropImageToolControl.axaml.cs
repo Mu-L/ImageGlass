@@ -33,19 +33,19 @@ using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
 
-public partial class CropImageToolControl : PhControl, IToolControl
+public partial class CropImageToolControl : PhControl, IPluginControl
 {
     // prevents dead-loop when updating NumericUpDown values from SelectionChanged
     private bool _isUpdatingSelectionUI;
     private Rect _lastSelectionArea;
 
 
-    public static string TOOL_ID => "Tool_CropImage";
-    public string ToolId => TOOL_ID;
+    public static string PLUGIN_ID => "Tool_CropImage";
+    public string PluginId => PLUGIN_ID;
     public bool HasSettingsUI => true;
     public object? Settings { get; private set; } = new CropImageConfig();
     public CropImageConfig Options => (CropImageConfig)Settings!;
-    public ViewerControl Viewer { get; init; } = null!;
+    public ViewerControl Viewer { get; set; } = null!;
 
 
     public CropImageToolControl()
@@ -228,7 +228,7 @@ public partial class CropImageToolControl : PhControl, IToolControl
 
         if (Options.CloseToolAfterSaved)
         {
-            await Core.API!.RunApiAsync(API.IG_CloseCurrentTool);
+            await Core.API!.RunApiAsync(API.IG_CloseCurrentPlugin);
         }
     }
 
@@ -239,7 +239,7 @@ public partial class CropImageToolControl : PhControl, IToolControl
 
         if (Options.CloseToolAfterSaved)
         {
-            await Core.API!.RunApiAsync(API.IG_CloseCurrentTool);
+            await Core.API!.RunApiAsync(API.IG_CloseCurrentPlugin);
         }
     }
 

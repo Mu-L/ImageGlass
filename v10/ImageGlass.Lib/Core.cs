@@ -179,10 +179,10 @@ public static class Core
 
 
     /// <summary>
-    /// Gets the central registry for hosted tools.
-    /// Built-in tools are registered during <see cref="ServiceProviders.AppAPIProvider"/> construction.
+    /// Gets the central registry for all plugins (hosted and non-hosted).
+    /// Built-in plugins are registered during <see cref="ServiceProviders.AppAPIProvider"/> construction.
     /// </summary>
-    public static HostedToolRegistry ToolRegistry { get; } = new();
+    public static PluginRegistry PluginRegistry { get; } = new();
 
 
     /// <summary>
@@ -583,6 +583,16 @@ public static class Core
         Core.DestColorProfile?.Dispose();
         Core.DestColorProfile = results.ColorSpace;
         Core.OnColorProfileChanged();
+    }
+
+
+    /// <summary>
+    /// Loads a photo as the clipboard image in the viewer.
+    /// </summary>
+    public static async Task LoadClipboardPhotoAsync(Photo? photo)
+    {
+        if (API is null) return;
+        await API.LoadClipboardPhotoAsync(photo);
     }
 
 

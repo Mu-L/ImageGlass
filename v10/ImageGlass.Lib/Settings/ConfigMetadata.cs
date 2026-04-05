@@ -109,7 +109,7 @@ public enum ConfigId
     UpdateSkippedVersion,
     ColorProfile,
     LastSeenImagePath,
-    LastOpenedTool,
+    LastOpenedPlugin,
     // LastOpenedSetting,
     BackgroundColor,
     SlideshowBackgroundColor,
@@ -147,7 +147,7 @@ public enum ConfigId
     MouseClickActions,
     MouseWheelActions,
     Layout,
-    ToolSettings,
+    PluginSettings,
     // DisabledMenus,
     ToolbarButtons,
 

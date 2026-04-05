@@ -134,14 +134,12 @@ public partial class AppAPIProvider
         { API.IG_ToggleWindowTopMost,   PhCommands.Create(IG_ToggleWindowTopMost) },
 
 
-        // Tools
-        { API.IG_CloseCurrentTool,          PhCommands.Create(IG_CloseCurrentTool) },
-        { API.IG_ToggleTool,                PhCommands.Create(IG_ToggleTool) },
-        { API.IG_OpenTool,                  PhCommands.Create(IG_OpenTool) },
-        { API.IG_CloseTool,                 PhCommands.Create(IG_CloseTool) },
-        { API.IG_OpenImageResizeTool,       PhCommands.Create(IG_OpenImageResizeToolAsync) },
-        { API.IG_LosslessCompressionTool,   PhCommands.Create(IG_OpenLosslessCompressionToolAsync) },
-        { API.IG_GetMoreTool,               PhCommands.Create(IG_GetMoreTool) },
+        // Plugins
+        { API.IG_CloseCurrentPlugin,        PhCommands.Create(IG_CloseCurrentPlugin) },
+        { API.IG_TogglePlugin,              PhCommands.Create(IG_TogglePlugin) },
+        { API.IG_OpenPlugin,                PhCommands.Create(IG_OpenPlugin) },
+        { API.IG_ClosePlugin,               PhCommands.Create(IG_ClosePlugin) },
+        { API.IG_GetMorePlugin,             PhCommands.Create(IG_GetMorePlugin) },
 
 
         // Settings

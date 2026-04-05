@@ -648,12 +648,12 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
-    /// Gets, sets the tool ID to open on startup.
+    /// Gets, sets the plugin ID to open on startup.
     /// </summary>
-    public string LastOpenedTool
+    public string LastOpenedPlugin
     {
-        get => Get(ConfigId.LastOpenedTool, string.Empty);
-        set => Set(ConfigId.LastOpenedTool, value);
+        get => Get(ConfigId.LastOpenedPlugin, string.Empty);
+        set => Set(ConfigId.LastOpenedPlugin, value);
     }
 
     ///// <summary>
@@ -911,13 +911,13 @@ public partial class Config : PhReactive
     //];
 
     /// <summary>
-    /// Gets, sets the config section of tool settings.
-    /// Each tool serializes/deserializes its own <see cref="JsonElement"/> using its source-generated <see cref="JsonSerializerContext"/>.
+    /// Gets, sets the config section of plugin settings.
+    /// Each plugin serializes/deserializes its own <see cref="JsonElement"/> using its source-generated <see cref="JsonSerializerContext"/>.
     /// </summary>
-    public Dictionary<string, JsonElement> ToolSettings
+    public Dictionary<string, JsonElement> PluginSettings
     {
-        get => Get(ConfigId.ToolSettings, new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase));
-        set => Set(ConfigId.ToolSettings, value);
+        get => Get(ConfigId.PluginSettings, new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase));
+        set => Set(ConfigId.PluginSettings, value);
     }
 
     ///// <summary>

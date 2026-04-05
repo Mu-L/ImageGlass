@@ -52,7 +52,7 @@
                 </Panel>
             </viewer:ViewerControl>
 
-            <ui:ToolHostControl x:Name="PART_ToolHost" Grid.Row="1" />
+            <ui:PluginHostControl x:Name="PART_PluginHost" Grid.Row="1" />
         </Grid>
 
 

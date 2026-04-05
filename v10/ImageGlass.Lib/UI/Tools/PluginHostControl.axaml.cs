@@ -22,26 +22,25 @@ using Avalonia.Metadata;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using System;
-using System.Collections.Generic;
 
 namespace ImageGlass.UI;
 
-public partial class ToolHostControl : PhControl
+public partial class PluginHostControl : PhControl
 {
 
     #region Public Properties
 
     /// <summary>
-    /// Gets, sets the current tool content hosted by this control.
+    /// Gets, sets the current plugin content hosted by this control.
     /// </summary>
     [Content]
-    public IToolControl? Tool
+    public IPluginControl? Plugin
     {
-        get => GetValue(ToolContentProperty);
-        set => SetValue(ToolContentProperty, value);
+        get => GetValue(PluginContentProperty);
+        set => SetValue(PluginContentProperty, value);
     }
-    public static readonly StyledProperty<IToolControl?> ToolContentProperty =
-        AvaloniaProperty.Register<ToolHostControl, IToolControl?>(nameof(Tool));
+    public static readonly StyledProperty<IPluginControl?> PluginContentProperty =
+        AvaloniaProperty.Register<PluginHostControl, IPluginControl?>(nameof(Plugin));
 
 
 
@@ -54,7 +53,7 @@ public partial class ToolHostControl : PhControl
         private set => SetValue(CloseButtonTooltipTextProperty, value);
     }
     public static readonly StyledProperty<string> CloseButtonTooltipTextProperty =
-        AvaloniaProperty.Register<ColorPickerToolControl, string>(nameof(CloseButtonTooltipText));
+        AvaloniaProperty.Register<PluginHostControl, string>(nameof(CloseButtonTooltipText));
 
 
     /// <summary>
@@ -66,11 +65,11 @@ public partial class ToolHostControl : PhControl
         private set => SetValue(SettingsButtonTooltipTextProperty, value);
     }
     public static readonly StyledProperty<string> SettingsButtonTooltipTextProperty =
-        AvaloniaProperty.Register<ColorPickerToolControl, string>(nameof(SettingsButtonTooltipText));
+        AvaloniaProperty.Register<PluginHostControl, string>(nameof(SettingsButtonTooltipText));
 
 
     /// <summary>
-    /// Gets the value indicates if the tool contains settings.
+    /// Gets the value indicates if the plugin contains settings.
     /// </summary>
     public bool HasSettings
     {
@@ -78,14 +77,14 @@ public partial class ToolHostControl : PhControl
         private set => SetValue(HasSettingsProperty, value);
     }
     public static readonly StyledProperty<bool> HasSettingsProperty =
-        AvaloniaProperty.Register<ColorPickerToolControl, bool>(nameof(HasSettings));
+        AvaloniaProperty.Register<PluginHostControl, bool>(nameof(HasSettings));
 
 
     #endregion // Public Properties
 
 
 
-    public ToolHostControl()
+    public PluginHostControl()
     {
         InitializeComponent();
         IsContentVisible = false;
@@ -106,16 +105,20 @@ public partial class ToolHostControl : PhControl
 
     private void PART_BtnClose_Click(object? sender, RoutedEventArgs e)
     {
-        CloseCurrentTool();
+        // Route through API so settings are saved before closing
+        if (Plugin is IPluginControl plugin)
+        {
+            Core.API?.IG_ClosePlugin(plugin.PluginId);
+        }
     }
 
 
     private async void PART_BtnSettings_Click(object? sender, RoutedEventArgs e)
     {
-        if (Tool is not IToolControl tool) return;
-        if (!tool.HasSettingsUI) return;
+        if (Plugin is not IPluginControl plugin) return;
+        if (!plugin.HasSettingsUI) return;
 
-        await tool.ShowSettingsWindowAsync();
+        await plugin.ShowSettingsWindowAsync();
     }
 
 
@@ -126,30 +129,23 @@ public partial class ToolHostControl : PhControl
     #region Public Methods
 
     /// <summary>
-    /// Opens the specified tool and sets it as the current tool content if no other tool is currently open.
+    /// Opens the specified plugin as the current hosted content.
+    /// Settings are NOT loaded here — the caller (API layer) loads them before calling this.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    public bool OpenTool(IToolControl? newTool)
+    public bool OpenPlugin(IPluginControl? newPlugin)
     {
-        if (newTool is null) return false;
+        if (newPlugin is null) return false;
 
-        if (Tool is IToolControl tool)
+        if (Plugin is IPluginControl plugin)
         {
-            throw new InvalidOperationException($"IGE: The current tool (ID = {tool.ToolId}) must be close before opening another tool");
+            throw new InvalidOperationException($"IGE: The current plugin (ID = {plugin.PluginId}) must be closed before opening another plugin");
         }
 
-        try
-        {
-            HasSettings = newTool.HasSettingsUI;
+        HasSettings = newPlugin.HasSettingsUI;
 
-            // load tool settings
-            var jsonEl = Core.Config.ToolSettings.GetValueOrDefault(newTool.ToolId);
-            newTool.LoadSettings(jsonEl);
-        }
-        catch { }
-
-        // open the tool
-        Tool = newTool;
+        // open the plugin
+        Plugin = newPlugin;
         IsContentVisible = true;
 
         return true;
@@ -157,57 +153,30 @@ public partial class ToolHostControl : PhControl
 
 
     /// <summary>
-    /// Closes the tool with the specified identifier if it is currently active.
+    /// Closes the plugin with the specified identifier if it is currently active.
+    /// Settings are NOT saved here — the caller (API layer) saves them before calling this.
     /// </summary>
-    public void CloseTool(string toolId)
+    public void ClosePlugin(string pluginId)
     {
-        if (Tool is not IToolControl tool) return;
-        if (tool.ToolId != toolId) return;
+        if (Plugin is not IPluginControl plugin) return;
+        if (plugin.PluginId != pluginId) return;
 
-        CloseCurrentTool();
+        CloseCurrentPlugin();
     }
 
 
     /// <summary>
-    /// Closes the currently active tool and saves its settings.
+    /// Closes the currently active plugin.
+    /// Settings are NOT saved here — the caller (API layer) saves them before calling this.
     /// </summary>
-    public void CloseCurrentTool()
+    public void CloseCurrentPlugin()
     {
-        if (Tool is not IToolControl tool) return;
+        if (Plugin is not IPluginControl) return;
 
         try
         {
-            // save tool settings
-            SaveCurrentToolSettings();
-
-            // close the tool
-            Tool = null;
+            Plugin = null;
             IsContentVisible = false;
-        }
-        catch { }
-    }
-
-
-    /// <summary>
-    /// Saves the current tool's settings to the app config.
-    /// </summary>
-    public void SaveCurrentToolSettings()
-    {
-        if (Tool is not IToolControl tool) return;
-
-        try
-        {
-            // save tool settings
-            var jsonEl = tool.SaveSettings();
-
-            if (jsonEl is null)
-            {
-                Core.Config.ToolSettings.Remove(tool.ToolId);
-            }
-            else
-            {
-                Core.Config.ToolSettings[tool.ToolId] = jsonEl.Value;
-            }
         }
         catch { }
     }

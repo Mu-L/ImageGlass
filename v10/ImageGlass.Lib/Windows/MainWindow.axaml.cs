@@ -88,8 +88,8 @@ public partial class MainWindow : PhWindow
         // load color profile
         Core.UpdateDestColorProfile();
 
-        // restore last opened tool
-        Core.API?.IG_OpenTool(Core.Config.LastOpenedTool);
+        // restore last opened plugin
+        Core.API?.IG_OpenPlugin(Core.Config.LastOpenedPlugin);
     }
 
 
@@ -272,9 +272,18 @@ public partial class MainWindow : PhWindow
         Core.Config.LastSeenImagePath = Core.Photos.CurrentFilePath;
         Core.Config.ZoomLockValue = PART_MainView.PART_Viewer.ZoomFactor * 100f;
 
-        // save current tool setting if it's open
-        Core.Config.LastOpenedTool = PART_MainView.PART_ToolHost.Tool?.ToolId ?? string.Empty;
-        PART_MainView.PART_ToolHost.SaveCurrentToolSettings();
+        // save current plugin setting if it's open
+        var currentPluginId = PART_MainView.PART_PluginHost.Plugin?.PluginId ?? string.Empty;
+        var currentPlugin = Core.PluginRegistry.Get(currentPluginId);
+        Core.Config.LastOpenedPlugin = (currentPlugin is not null && !currentPlugin.IsHosted)
+            ? string.Empty
+            : currentPluginId;
+
+        // save settings for the current hosted plugin
+        if (PART_MainView.PART_PluginHost.Plugin is IPlugin pluginToSave)
+        {
+            Core.API?.IG_ClosePlugin(pluginToSave.PluginId);
+        }
 
         // save config to file
         await Core.Config.SaveAsync();
