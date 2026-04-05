@@ -792,63 +792,38 @@ public partial class ViewerControl
     {
         if (factor >= _zooming.Max || factor <= _zooming.Min) return false;
 
-        var newZoomFactor = factor;
-        var location = point ?? new Point(-1, -1);
+        var newZoomFactor = (double)factor;
+        if (newZoomFactor == _zooming.Factor) return false;
 
-        // use the center point if the point is outside
-        if (!Bounds.Contains(location))
+        // Use the provided point, or fall back to the last tracked cursor position.
+        // If neither is valid, use the center of the drawing area.
+        var location = point ?? _zooming.ZoomedPoint;
+        if (location == default || !Bounds.Contains(location))
         {
             location = DrawingArea.Center;
         }
 
-        // get the gap when the viewport is smaller than the control size
-        var gapX = Math.Max(0, DestRect.X);
-        var gapY = Math.Max(0, DestRect.Y);
+        _zooming.OldFactor = _zooming.Factor;
+        _zooming.Factor = Math.Min(MaxZoom, Math.Max(newZoomFactor, MinZoom));
+        _zooming.IsManual = true;
+        _zooming.ZoomedPoint = location;
 
-        // the location after zoomed
-        var zoomedLocation = new Point(
-            (location.X - gapX) * newZoomFactor / ZoomFactor,
-            (location.Y - gapY) * newZoomFactor / ZoomFactor);
+        // update drawing regions (handles zoom-to-cursor anchoring)
+        CalculateDrawingRegion();
 
-        // the distance of 2 points after zoomed
-        var zoomedDistance = new Size(
-            Math.Max(0, zoomedLocation.X - location.X),
-            Math.Max(0, zoomedLocation.Y - location.Y));
+        if (requestRerender) InvalidateVisual();
 
-        // perform zoom if the new zoom factor is different
-        if (_zooming.Factor != newZoomFactor)
+        // emit ZoomChanged event
+        ZoomChanged?.Invoke(this, new ViewerZoomEventArgs()
         {
-            _zooming.Factor = Math.Min(MaxZoom, Math.Max(newZoomFactor, MinZoom));
-            _zooming.IsManual = true;
+            ZoomFactor = _zooming.Factor,
+            IsManualZoom = _zooming.IsManual,
+            IsZoomModeChange = false,
+            IsPreviewingImage = _isPreviewing,
+            ChangeSource = ZoomChangeSource.Unknown,
+        });
 
-            // update drawing regions
-            CalculateDrawingRegion();
-
-            //// if using Webview2
-            //if (UseWebview2)
-            //{
-            //    SetZoomFactorWeb2(_zoomFactor, _isManualZoom);
-            //    return true;
-            //}
-
-            _ = PanTo(zoomedDistance.Width, zoomedDistance.Height, location, false);
-
-            if (requestRerender) InvalidateVisual();
-
-            // emit ZoomChanged event
-            ZoomChanged?.Invoke(this, new ViewerZoomEventArgs()
-            {
-                ZoomFactor = _zooming.Factor,
-                IsManualZoom = _zooming.IsManual,
-                IsZoomModeChange = false,
-                IsPreviewingImage = _isPreviewing,
-                ChangeSource = ZoomChangeSource.Unknown,
-            });
-
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
 
