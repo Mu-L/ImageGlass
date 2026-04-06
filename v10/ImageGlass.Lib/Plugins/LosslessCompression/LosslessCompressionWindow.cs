@@ -26,7 +26,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Plugins;
+namespace ImageGlass.Plugins.LosslessCompression;
 
 public partial class LosslessCompressionWindow : ModalWindow
 {

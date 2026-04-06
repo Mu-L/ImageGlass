@@ -17,20 +17,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
-using ImageGlass.Common.Localization;
+using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
 using System.Threading.Tasks;
 
-namespace ImageGlass.Plugins;
+namespace ImageGlass.Plugins.ImageResizer;
 
 /// <summary>
-/// Non-hosted plugin for Lossless Compression.
+/// Non-hosted plugin for the Image Resizer.
 /// </summary>
-public sealed class LosslessCompressionPlugin : IPlugin
+public sealed class ImageResizerPlugin : IPlugin
 {
-    public static string PLUGIN_ID => "Plugin_LosslessCompression";
+    public static string PLUGIN_ID => "Plugin_ImageResizer";
 
     public string PluginId => PLUGIN_ID;
     public bool IsHosted => false;
@@ -40,30 +40,30 @@ public sealed class LosslessCompressionPlugin : IPlugin
 
     public async Task ExecuteAsync(PluginExecutionContext context)
     {
-        if (Core.IsBusy || Core.Photos.Count == 0 || Core.ClipboardImage != null) return;
+        if (Core.IsBusy) return;
 
-        var filePath = Core.Photos.CurrentFilePath;
-
-        // check if image format not supported
-        if (!MagickCodec.IsLosslessCompressSupported(filePath))
-        {
-            _ = await ModalWindow.ShowInfoAsync(context.Window, new ModalWindowOptions
-            {
-                Title = Core.Lang[LangId.FrmMain_MnuLosslessCompression],
-                Heading = Core.Lang[LangId._NotSupported],
-                Description = filePath,
-                Thumbnail = Core.Photos.Current?.GalleryThumbnail,
-            });
-
-            return;
-        }
-
-        // perform lossless compression
         Core.IsBusy = true;
 
-        var compressionWindow = new LosslessCompressionWindow(filePath);
-        _ = await compressionWindow.ShowAsync(context.Window);
+        try
+        {
+            // get current bitmap
+            using var srcBmp = Viewer.GetRenderedBitmap();
+            if (srcBmp.IsDisposed()) return;
 
-        Core.IsBusy = false;
+            // show resizer window
+            var resizerWindow = new ImageResizerWindow(srcBmp);
+            var result = await resizerWindow.ShowAsync(context.Window);
+
+            // load the output image
+            if (result == DialogExitCode.OK && !resizerWindow.OutputBitmap.IsDisposed())
+            {
+                var photo = new Photo(resizerWindow.OutputBitmap);
+                await Core.LoadClipboardPhotoAsync(photo);
+            }
+        }
+        finally
+        {
+            Core.IsBusy = false;
+        }
     }
 }

@@ -26,7 +26,7 @@ using ImageGlass.UI.Windowing;
 using System;
 using System.Globalization;
 
-namespace ImageGlass.Plugins;
+namespace ImageGlass.Plugins.CropImage;
 
 internal class CropImageSettingsWindow : DialogWindow
 {

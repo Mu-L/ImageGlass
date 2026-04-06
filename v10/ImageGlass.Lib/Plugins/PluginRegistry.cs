@@ -16,8 +16,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using ImageGlass.Common;
 using ImageGlass.UI.Viewer;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Plugins;
 
@@ -60,5 +63,53 @@ public sealed class PluginRegistry
     /// Checks whether a plugin ID is registered.
     /// </summary>
     public bool Contains(string pluginId) => _plugins.ContainsKey(pluginId);
+
+
+    /// <summary>
+    /// Loads settings for a plugin from the app config.
+    /// </summary>
+    public static void LoadPluginSettings(IPlugin plugin)
+    {
+        JsonElement? jsonEl = Core.Config.PluginSettings.TryGetValue(plugin.PluginId, out var el)
+            ? el
+            : null;
+
+        plugin.LoadSettings(jsonEl);
+    }
+
+
+    /// <summary>
+    /// Saves settings for a plugin to the app config.
+    /// </summary>
+    public static void SavePluginSettings(IPlugin plugin)
+    {
+        var jsonEl = plugin.SaveSettings();
+
+        if (jsonEl is null)
+        {
+            Core.Config.PluginSettings.Remove(plugin.PluginId);
+        }
+        else
+        {
+            Core.Config.PluginSettings[plugin.PluginId] = jsonEl.Value;
+        }
+    }
+
+
+    /// <summary>
+    /// Executes a non-hosted plugin and saves its settings on completion.
+    /// </summary>
+    public static async Task ExecuteNonHostedPluginAsync(IPlugin plugin, PluginExecutionContext context)
+    {
+        try
+        {
+            await plugin.ExecuteAsync(context);
+        }
+        finally
+        {
+            SavePluginSettings(plugin);
+        }
+    }
+
 
 }

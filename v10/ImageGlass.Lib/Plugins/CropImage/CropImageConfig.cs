@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Types.JsonTypeConverters;
+using ImageGlass.Plugins.CropImage;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 

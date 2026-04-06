@@ -28,6 +28,8 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Windows;
 using ImageGlass.Plugins;
+using ImageGlass.Plugins.ImageResizer;
+using ImageGlass.Plugins.LosslessCompression;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
@@ -38,7 +40,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -2749,73 +2750,12 @@ public partial class AppAPIProvider
     #region Plugin APIs
 
     /// <summary>
-    /// Loads settings for a plugin from the app config.
-    /// </summary>
-    private static void LoadPluginSettings(IPlugin plugin)
-    {
-        JsonElement? jsonEl = Core.Config.PluginSettings.TryGetValue(plugin.PluginId, out var el)
-            ? el
-            : null;
-
-        plugin.LoadSettings(jsonEl);
-    }
-
-
-    /// <summary>
-    /// Saves settings for a plugin to the app config.
-    /// </summary>
-    private static void SavePluginSettings(IPlugin plugin)
-    {
-        var jsonEl = plugin.SaveSettings();
-
-        if (jsonEl is null)
-        {
-            Core.Config.PluginSettings.Remove(plugin.PluginId);
-        }
-        else
-        {
-            Core.Config.PluginSettings[plugin.PluginId] = jsonEl.Value;
-        }
-    }
-
-
-    /// <summary>
-    /// Executes a non-hosted plugin and saves its settings on completion.
-    /// </summary>
-    private static async Task ExecuteNonHostedPluginAsync(IPlugin plugin, PluginExecutionContext context)
-    {
-        try
-        {
-            await plugin.ExecuteAsync(context);
-        }
-        finally
-        {
-            SavePluginSettings(plugin);
-        }
-    }
-
-
-    /// <summary>
-    /// Creates the execution context for non-hosted plugins.
-    /// </summary>
-    private PluginExecutionContext CreatePluginExecutionContext()
-    {
-        return new PluginExecutionContext
-        {
-            Window = _mainWindow,
-        };
-    }
-
-
-    /// <summary>
     /// Toggles a plugin by ID. Non-hosted plugins only support open (toggle = open).
     /// </summary>
     public void IG_TogglePlugin(string? pluginId)
     {
         if (string.IsNullOrEmpty(pluginId)) return;
-
-        var plugin = Core.PluginRegistry.Get(pluginId);
-        if (plugin is null) return;
+        if (Core.PluginRegistry.Get(pluginId) is not { } plugin) return;
 
         if (plugin.IsHosted)
         {
@@ -2824,9 +2764,9 @@ public partial class AppAPIProvider
             if (string.Equals(currentPluginId, pluginId, StringComparison.Ordinal))
             {
                 // Close: save settings first, then close UI
-                if (PluginHost.Plugin is IPlugin currentPlugin)
+                if (PluginHost.Plugin is { } currentPlugin)
                 {
-                    SavePluginSettings(currentPlugin);
+                    PluginRegistry.SavePluginSettings(currentPlugin);
                 }
                 PluginHost.CloseCurrentPlugin();
             }
@@ -2838,7 +2778,7 @@ public partial class AppAPIProvider
                 if (plugin is PluginControlAdapter adapter)
                 {
                     var control = adapter.CreatePluginControl(Viewer);
-                    LoadPluginSettings(control);
+                    PluginRegistry.LoadPluginSettings(control);
                     PluginHost.OpenPlugin(control);
                 }
             }
@@ -2858,9 +2798,7 @@ public partial class AppAPIProvider
     public void IG_OpenPlugin(string? pluginId)
     {
         if (string.IsNullOrEmpty(pluginId)) return;
-
-        var plugin = Core.PluginRegistry.Get(pluginId);
-        if (plugin is null) return;
+        if (Core.PluginRegistry.Get(pluginId) is not { } plugin) return;
 
         if (plugin.IsHosted)
         {
@@ -2874,7 +2812,7 @@ public partial class AppAPIProvider
             if (plugin is PluginControlAdapter adapter)
             {
                 var control = adapter.CreatePluginControl(Viewer);
-                LoadPluginSettings(control);
+                PluginRegistry.LoadPluginSettings(control);
                 PluginHost.OpenPlugin(control);
             }
         }
@@ -2882,10 +2820,13 @@ public partial class AppAPIProvider
         {
             // Non-hosted plugin — set viewer, load settings, execute, save on completion
             plugin.Viewer = Viewer;
-            LoadPluginSettings(plugin);
+            PluginRegistry.LoadPluginSettings(plugin);
 
-            var context = CreatePluginExecutionContext();
-            _ = ExecuteNonHostedPluginAsync(plugin, context);
+            var context = new PluginExecutionContext
+            {
+                Window = _mainWindow,
+            };
+            _ = PluginRegistry.ExecuteNonHostedPluginAsync(plugin, context);
         }
     }
 
@@ -2902,7 +2843,7 @@ public partial class AppAPIProvider
         if (PluginHost.Plugin is IPlugin currentPlugin
             && string.Equals(currentPlugin.PluginId, pluginId, StringComparison.Ordinal))
         {
-            SavePluginSettings(currentPlugin);
+            PluginRegistry.SavePluginSettings(currentPlugin);
         }
 
         PluginHost.ClosePlugin(pluginId);
@@ -2916,7 +2857,7 @@ public partial class AppAPIProvider
     {
         if (PluginHost.Plugin is IPlugin currentPlugin)
         {
-            SavePluginSettings(currentPlugin);
+            PluginRegistry.SavePluginSettings(currentPlugin);
         }
         PluginHost.CloseCurrentPlugin();
     }

@@ -23,6 +23,8 @@ using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.Plugins;
+using ImageGlass.Plugins.ImageResizer;
+using ImageGlass.Plugins.LosslessCompression;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using System;
