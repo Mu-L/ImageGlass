@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.Common.Types;
 using System.Text.Json.Serialization;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 
 [JsonSerializable(typeof(ColorPickerConfig))]
@@ -27,7 +27,7 @@ public partial class ColorPickerConfigJsonContext : JsonSerializerContext { }
 
 
 /// <summary>
-/// Provides settings for Color Picker tool.
+/// Provides settings for Color Picker plugin.
 /// </summary>
 public class ColorPickerConfig() : PhReactive
 {

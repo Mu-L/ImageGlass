@@ -27,6 +27,7 @@ using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Windows;
+using ImageGlass.Plugins;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
@@ -84,12 +85,12 @@ public partial class AppAPIProvider
         _mainWindow = mainWindow;
 
         // Register built-in hosted plugins (via PluginControlAdapter)
-        Core.PluginRegistry.Register(ColorPickerToolControl.PLUGIN_ID,
-            new PluginControlAdapter(ColorPickerToolControl.PLUGIN_ID, v => new ColorPickerToolControl { Viewer = v }));
-        Core.PluginRegistry.Register(CropImageToolControl.PLUGIN_ID,
-            new PluginControlAdapter(CropImageToolControl.PLUGIN_ID, v => new CropImageToolControl { Viewer = v }));
-        Core.PluginRegistry.Register(FrameNavToolControl.PLUGIN_ID,
-            new PluginControlAdapter(FrameNavToolControl.PLUGIN_ID, v => new FrameNavToolControl { Viewer = v }));
+        Core.PluginRegistry.Register(ColorPickerPluginControl.PLUGIN_ID,
+            new PluginControlAdapter(ColorPickerPluginControl.PLUGIN_ID, v => new ColorPickerPluginControl { Viewer = v }));
+        Core.PluginRegistry.Register(CropImagePluginControl.PLUGIN_ID,
+            new PluginControlAdapter(CropImagePluginControl.PLUGIN_ID, v => new CropImagePluginControl { Viewer = v }));
+        Core.PluginRegistry.Register(FrameNavPluginControl.PLUGIN_ID,
+            new PluginControlAdapter(FrameNavPluginControl.PLUGIN_ID, v => new FrameNavPluginControl { Viewer = v }));
 
         // Register built-in non-hosted plugins
         Core.PluginRegistry.Register(ImageResizerPlugin.PLUGIN_ID, new ImageResizerPlugin());
@@ -2926,7 +2927,7 @@ public partial class AppAPIProvider
     /// </summary>
     public void IG_GetMorePlugin()
     {
-        _ = BHelper.OpenUrlAsync(_mainWindow, "https://imageglass.org/tools", "from_get_more_tools");
+        _ = BHelper.OpenUrlAsync(_mainWindow, "https://imageglass.org/plugins", "from_get_more_plugins");
     }
 
     #endregion // Plugin APIs

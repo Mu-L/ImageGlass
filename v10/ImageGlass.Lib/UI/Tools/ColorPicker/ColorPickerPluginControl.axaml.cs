@@ -25,16 +25,17 @@ using ImageGlass.Common;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Types;
+using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
-public partial class ColorPickerToolControl : PhControl, IPluginControl
+public partial class ColorPickerPluginControl : PhControl, IPluginControl
 {
-    public static string PLUGIN_ID => "Tool_ColorPicker";
+    public static string PLUGIN_ID => "Plugin_ColorPicker";
     public string PluginId => PLUGIN_ID;
     public bool HasSettingsUI => true;
     public object? Settings { get; private set; } = new ColorPickerConfig();
@@ -54,7 +55,7 @@ public partial class ColorPickerToolControl : PhControl, IPluginControl
         private set => SetValue(CopyButtonTooltipTextProperty, value);
     }
     public static readonly StyledProperty<string> CopyButtonTooltipTextProperty =
-        AvaloniaProperty.Register<ColorPickerToolControl, string>(nameof(CopyButtonTooltipText));
+        AvaloniaProperty.Register<ColorPickerPluginControl, string>(nameof(CopyButtonTooltipText));
 
 
     /// <summary>
@@ -66,7 +67,7 @@ public partial class ColorPickerToolControl : PhControl, IPluginControl
         set => SetValue(CurrentPointProperty, value);
     }
     public static readonly StyledProperty<Point?> CurrentPointProperty =
-        AvaloniaProperty.Register<ColorPickerToolControl, Point?>(nameof(CurrentPoint));
+        AvaloniaProperty.Register<ColorPickerPluginControl, Point?>(nameof(CurrentPoint));
 
 
     /// <summary>
@@ -78,23 +79,23 @@ public partial class ColorPickerToolControl : PhControl, IPluginControl
         set => SetValue(SelectedPointProperty, value);
     }
     public static readonly StyledProperty<Point?> SelectedPointProperty =
-        AvaloniaProperty.Register<ColorPickerToolControl, Point?>(nameof(SelectedPoint));
+        AvaloniaProperty.Register<ColorPickerPluginControl, Point?>(nameof(SelectedPoint));
 
 
     /// <summary>
     /// Gets, sets the current text color.
     /// </summary>
     public Color CurrentTextColor => GetPositionTextColor(CurrentColor);
-    public static readonly DirectProperty<ColorPickerToolControl, Color> CurrentTextColorProperty =
-        AvaloniaProperty.RegisterDirect<ColorPickerToolControl, Color>(nameof(CurrentTextColor), i => i.CurrentTextColor);
+    public static readonly DirectProperty<ColorPickerPluginControl, Color> CurrentTextColorProperty =
+        AvaloniaProperty.RegisterDirect<ColorPickerPluginControl, Color>(nameof(CurrentTextColor), i => i.CurrentTextColor);
 
 
     /// <summary>
     /// Gets, sets the selected text color.
     /// </summary>
     public Color SelectedTextColor => GetPositionTextColor(SelectedColor);
-    public static readonly DirectProperty<ColorPickerToolControl, Color> SelectedTextColorProperty =
-        AvaloniaProperty.RegisterDirect<ColorPickerToolControl, Color>(nameof(SelectedTextColor), i => i.SelectedTextColor);
+    public static readonly DirectProperty<ColorPickerPluginControl, Color> SelectedTextColorProperty =
+        AvaloniaProperty.RegisterDirect<ColorPickerPluginControl, Color>(nameof(SelectedTextColor), i => i.SelectedTextColor);
 
 
     /// <summary>
@@ -106,7 +107,7 @@ public partial class ColorPickerToolControl : PhControl, IPluginControl
         set => SetValue(CurrentColorProperty, value);
     }
     public static readonly StyledProperty<Color> CurrentColorProperty =
-        AvaloniaProperty.Register<ColorPickerToolControl, Color>(nameof(CurrentColor), Const.COLOR_EMPTY);
+        AvaloniaProperty.Register<ColorPickerPluginControl, Color>(nameof(CurrentColor), Const.COLOR_EMPTY);
 
 
     /// <summary>
@@ -118,7 +119,7 @@ public partial class ColorPickerToolControl : PhControl, IPluginControl
         set => SetValue(SelectedColorProperty, value);
     }
     public static readonly StyledProperty<Color> SelectedColorProperty =
-        AvaloniaProperty.Register<ColorPickerToolControl, Color>(nameof(SelectedColor));
+        AvaloniaProperty.Register<ColorPickerPluginControl, Color>(nameof(SelectedColor));
 
 
 
@@ -128,55 +129,55 @@ public partial class ColorPickerToolControl : PhControl, IPluginControl
     /// Gets the selected color in RGB format.
     /// </summary>
     public string? ColorRGB => FormatColor(ColorFormat.RGB, Options.ShowRgbWithAlpha);
-    public static readonly DirectProperty<ColorPickerToolControl, string?> ColorRGBProperty =
-        AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorRGB), i => i.ColorRGB);
+    public static readonly DirectProperty<ColorPickerPluginControl, string?> ColorRGBProperty =
+        AvaloniaProperty.RegisterDirect<ColorPickerPluginControl, string?>(nameof(ColorRGB), i => i.ColorRGB);
 
 
     /// <summary>
     /// Gets the selected color in HEX format.
     /// </summary>
     public string? ColorHEX => FormatColor(ColorFormat.HEX, Options.ShowHexWithAlpha);
-    public static readonly DirectProperty<ColorPickerToolControl, string?> ColorHEXProperty =
-        AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorHEX), i => i.ColorHEX);
+    public static readonly DirectProperty<ColorPickerPluginControl, string?> ColorHEXProperty =
+        AvaloniaProperty.RegisterDirect<ColorPickerPluginControl, string?>(nameof(ColorHEX), i => i.ColorHEX);
 
 
     /// <summary>
     /// Gets the selected color in HSL format.
     /// </summary>
     public string? ColorHSL => FormatColor(ColorFormat.HSL, Options.ShowHslWithAlpha);
-    public static readonly DirectProperty<ColorPickerToolControl, string?> ColorHSLProperty =
-        AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorHSL), i => i.ColorHSL);
+    public static readonly DirectProperty<ColorPickerPluginControl, string?> ColorHSLProperty =
+        AvaloniaProperty.RegisterDirect<ColorPickerPluginControl, string?>(nameof(ColorHSL), i => i.ColorHSL);
 
 
     /// <summary>
     /// Gets the selected color in HSV format.
     /// </summary>
     public string? ColorHSV => FormatColor(ColorFormat.HSV, Options.ShowHsvWithAlpha);
-    public static readonly DirectProperty<ColorPickerToolControl, string?> ColorHSVProperty =
-        AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorHSV), i => i.ColorHSV);
+    public static readonly DirectProperty<ColorPickerPluginControl, string?> ColorHSVProperty =
+        AvaloniaProperty.RegisterDirect<ColorPickerPluginControl, string?>(nameof(ColorHSV), i => i.ColorHSV);
 
 
     /// <summary>
     /// Gets the selected color in CMYK format.
     /// </summary>
     public string? ColorCMYK => FormatColor(ColorFormat.CMYK, Options.ShowCmykWithAlpha);
-    public static readonly DirectProperty<ColorPickerToolControl, string?> ColorCMYKProperty =
-        AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorCMYK), i => i.ColorCMYK);
+    public static readonly DirectProperty<ColorPickerPluginControl, string?> ColorCMYKProperty =
+        AvaloniaProperty.RegisterDirect<ColorPickerPluginControl, string?>(nameof(ColorCMYK), i => i.ColorCMYK);
 
 
     /// <summary>
     /// Gets the selected color in CIELAB format.
     /// </summary>
     public string? ColorCIELAB => FormatColor(ColorFormat.CIELAB, Options.ShowCIELabWithAlpha);
-    public static readonly DirectProperty<ColorPickerToolControl, string?> ColorCIELABProperty =
-        AvaloniaProperty.RegisterDirect<ColorPickerToolControl, string?>(nameof(ColorCIELAB), i => i.ColorCIELAB);
+    public static readonly DirectProperty<ColorPickerPluginControl, string?> ColorCIELABProperty =
+        AvaloniaProperty.RegisterDirect<ColorPickerPluginControl, string?>(nameof(ColorCIELAB), i => i.ColorCIELAB);
 
 
     #endregion // Public Properties
 
 
 
-    public ColorPickerToolControl()
+    public ColorPickerPluginControl()
     {
         InitializeComponent();
     }

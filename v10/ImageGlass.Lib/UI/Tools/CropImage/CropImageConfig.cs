@@ -22,7 +22,7 @@ using ImageGlass.Common.Types.JsonTypeConverters;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 
 [JsonSerializable(typeof(CropImageConfig))]
@@ -30,15 +30,15 @@ public partial class CropImageConfigJsonContext : JsonSerializerContext { }
 
 
 /// <summary>
-/// Provides settings for Color Picker tool.
+/// Provides settings for Color Picker plugin.
 /// </summary>
 public class CropImageConfig() : PhReactive
 {
 
     /// <summary>
-    /// Gets, sets the option to close the Crop tool after the selected area is saved.
+    /// Gets, sets the option to close the Crop plugin after the selected area is saved.
     /// </summary>
-    public bool CloseToolAfterSaved
+    public bool CloseAfterSaved
     {
         get; set
         {

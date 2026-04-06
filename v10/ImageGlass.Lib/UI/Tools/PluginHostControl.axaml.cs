@@ -21,9 +21,10 @@ using Avalonia.Interactivity;
 using Avalonia.Metadata;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
+using ImageGlass.UI;
 using System;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 public partial class PluginHostControl : PhControl
 {

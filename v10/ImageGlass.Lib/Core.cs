@@ -26,7 +26,7 @@ using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
-using ImageGlass.UI;
+using ImageGlass.Plugins;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;

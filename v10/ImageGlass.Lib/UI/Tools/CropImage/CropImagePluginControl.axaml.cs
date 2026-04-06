@@ -25,22 +25,23 @@ using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
+using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
-public partial class CropImageToolControl : PhControl, IPluginControl
+public partial class CropImagePluginControl : PhControl, IPluginControl
 {
     // prevents dead-loop when updating NumericUpDown values from SelectionChanged
     private bool _isUpdatingSelectionUI;
     private Rect _lastSelectionArea;
 
 
-    public static string PLUGIN_ID => "Tool_CropImage";
+    public static string PLUGIN_ID => "Plugin_CropImage";
     public string PluginId => PLUGIN_ID;
     public bool HasSettingsUI => true;
     public object? Settings { get; private set; } = new CropImageConfig();
@@ -48,7 +49,7 @@ public partial class CropImageToolControl : PhControl, IPluginControl
     public ViewerControl Viewer { get; set; } = null!;
 
 
-    public CropImageToolControl()
+    public CropImagePluginControl()
     {
         InitializeComponent();
     }
@@ -226,7 +227,7 @@ public partial class CropImageToolControl : PhControl, IPluginControl
     {
         await Core.API!.RunApiAsync(API.IG_Save);
 
-        if (Options.CloseToolAfterSaved)
+        if (Options.CloseAfterSaved)
         {
             await Core.API!.RunApiAsync(API.IG_CloseCurrentPlugin);
         }
@@ -237,7 +238,7 @@ public partial class CropImageToolControl : PhControl, IPluginControl
     {
         await Core.API!.RunApiAsync(API.IG_SaveAs);
 
-        if (Options.CloseToolAfterSaved)
+        if (Options.CloseAfterSaved)
         {
             await Core.API!.RunApiAsync(API.IG_CloseCurrentPlugin);
         }

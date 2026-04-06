@@ -51,14 +51,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="UI\Tools\ColorPicker\ColorPickerToolControl.axaml.cs">
-      <DependentUpon>ColorPickerToolControl.axaml</DependentUpon>
+    <Compile Update="UI\Tools\ColorPicker\ColorPickerPluginControl.axaml.cs">
+      <DependentUpon>ColorPickerPluginControl.axaml</DependentUpon>
     </Compile>
-    <Compile Update="UI\Tools\CropImage\CropImageToolControl.axaml.cs">
-      <DependentUpon>CropImageToolControl.axaml</DependentUpon>
+    <Compile Update="UI\Tools\CropImage\CropImagePluginControl.axaml.cs">
+      <DependentUpon>CropImagePluginControl.axaml</DependentUpon>
     </Compile>
-    <Compile Update="UI\Tools\FrameNav\FrameNavToolControl.axaml.cs">
-      <DependentUpon>FrameNavToolControl.axaml</DependentUpon>
+    <Compile Update="UI\Tools\FrameNav\FrameNavPluginControl.axaml.cs">
+      <DependentUpon>FrameNavPluginControl.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
 

@@ -22,7 +22,7 @@ using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.UI.Windowing;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 internal class ColorPickerSettingsWindow : DialogWindow
 {

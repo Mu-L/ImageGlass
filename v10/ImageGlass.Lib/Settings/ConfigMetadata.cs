@@ -36,7 +36,6 @@ public enum ConfigId
     ShowGallery,
     ShowGalleryInFullscreen,
     ShowGalleryFileName,
-    // ShowFrameNavTool,
     ShowAppIcon,
     EnableMainWindowMaximized,
     EnableSlideshow,

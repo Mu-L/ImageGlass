@@ -95,11 +95,6 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ShowGalleryFileName, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets value of visibility of Frame Navigation tool on startup
-    ///// </summary>
-    //public bool ShowFrameNavTool { get; set; } = false;
-
     /// <summary>
     /// Gets, sets value of visibility of app icon
     /// </summary>
@@ -894,21 +889,6 @@ public partial class Config : PhReactive
         get => Get(ConfigId.Layout, new Dictionary<LayoutControl, LayoutPosition>());
         set => Set(ConfigId.Layout, value);
     }
-
-    ///// <summary>
-    ///// Gets, sets tools.
-    ///// </summary>
-    //public List<IgTool?> Tools { get; set; } = [
-    //    new IgTool()
-    //    {
-    //        ToolId = Const.IGTOOL_EXIFTOOL,
-    //        ToolName = "ExifGlass - EXIF metadata viewer",
-    //        Executable = "exifglass",
-    //        Argument = Const.FILE_MACRO,
-    //        IsIntegrated = true,
-    //        Hotkeys = [new Hotkey(Keys.X)],
-    //    },
-    //];
 
     /// <summary>
     /// Gets, sets the config section of plugin settings.

@@ -20,6 +20,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using ImageGlass.Common.Types;
+using ImageGlass.Plugins;
 using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
 using ImageGlass.ViewModels;

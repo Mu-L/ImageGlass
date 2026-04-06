@@ -21,10 +21,9 @@ using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
-using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 /// <summary>
 /// Non-hosted plugin for Lossless Compression.

@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using ImageGlass.UI.Viewer;
 using System.Collections.Generic;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 
 /// <summary>
@@ -61,33 +61,4 @@ public sealed class PluginRegistry
     /// </summary>
     public bool Contains(string pluginId) => _plugins.ContainsKey(pluginId);
 
-}
-
-
-/// <summary>
-/// Wraps a <see cref="PluginControlFactory"/> as an <see cref="IPlugin"/> for registry compatibility.
-/// The factory is invoked each time a hosted plugin needs to be opened.
-/// </summary>
-public sealed class PluginControlAdapter : IPlugin
-{
-    private readonly PluginControlFactory _factory;
-
-    public string PluginId { get; }
-    public bool IsHosted => true;
-
-    // Settings and Viewer are not used on the adapter itself;
-    // they are set on the IPluginControl instance created by the factory.
-    public object? Settings => null;
-    public ViewerControl Viewer { get; set; } = null!;
-
-    public PluginControlAdapter(string pluginId, PluginControlFactory factory)
-    {
-        PluginId = pluginId;
-        _factory = factory;
-    }
-
-    /// <summary>
-    /// Creates a new hosted plugin instance.
-    /// </summary>
-    public IPluginControl CreatePluginControl(ViewerControl viewer) => _factory(viewer);
 }

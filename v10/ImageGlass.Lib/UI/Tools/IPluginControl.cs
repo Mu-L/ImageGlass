@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System.Threading.Tasks;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 /// <summary>
 /// Interface for hosted plugins that are displayed in <see cref="PluginHostControl"/>.

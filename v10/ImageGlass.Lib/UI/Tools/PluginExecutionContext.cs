@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Windows;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 /// <summary>
 /// Context passed to <see cref="IPlugin.ExecuteAsync"/> for non-hosted plugin execution.

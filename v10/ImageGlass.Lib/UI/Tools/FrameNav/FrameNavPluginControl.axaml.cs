@@ -22,14 +22,15 @@ using Avalonia.Threading;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.ServiceProviders;
+using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
-public partial class FrameNavToolControl : PhControl, IPluginControl
+public partial class FrameNavPluginControl : PhControl, IPluginControl
 {
 
-    public static string PLUGIN_ID => "Tool_FrameNav";
+    public static string PLUGIN_ID => "Plugin_FrameNav";
     public string PluginId => PLUGIN_ID;
     public bool HasSettingsUI => false;
     public object? Settings { get; } = null;
@@ -47,7 +48,7 @@ public partial class FrameNavToolControl : PhControl, IPluginControl
         private set => SetValue(HasMultiFramesProperty, value);
     }
     public static readonly StyledProperty<bool> HasMultiFramesProperty =
-        AvaloniaProperty.Register<FrameNavToolControl, bool>(nameof(HasMultiFrames));
+        AvaloniaProperty.Register<FrameNavPluginControl, bool>(nameof(HasMultiFrames));
 
 
     /// <summary>
@@ -59,7 +60,7 @@ public partial class FrameNavToolControl : PhControl, IPluginControl
         private set => SetValue(CanAnimateProperty, value);
     }
     public static readonly StyledProperty<bool> CanAnimateProperty =
-        AvaloniaProperty.Register<FrameNavToolControl, bool>(nameof(CanAnimate));
+        AvaloniaProperty.Register<FrameNavPluginControl, bool>(nameof(CanAnimate));
 
 
     /// <summary>
@@ -71,7 +72,7 @@ public partial class FrameNavToolControl : PhControl, IPluginControl
         private set => SetValue(IsPlayingProperty, value);
     }
     public static readonly StyledProperty<bool> IsPlayingProperty =
-        AvaloniaProperty.Register<FrameNavToolControl, bool>(nameof(IsPlaying));
+        AvaloniaProperty.Register<FrameNavPluginControl, bool>(nameof(IsPlaying));
 
 
     /// <summary>
@@ -83,12 +84,12 @@ public partial class FrameNavToolControl : PhControl, IPluginControl
         private set => SetValue(FrameTextInfoProperty, value);
     }
     public static readonly StyledProperty<string> FrameTextInfoProperty =
-        AvaloniaProperty.Register<FrameNavToolControl, string>(nameof(FrameTextInfo));
+        AvaloniaProperty.Register<FrameNavPluginControl, string>(nameof(FrameTextInfo));
 
     #endregion // Public Properties
 
 
-    public FrameNavToolControl()
+    public FrameNavPluginControl()
     {
         InitializeComponent();
     }

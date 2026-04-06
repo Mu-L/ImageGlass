@@ -20,7 +20,7 @@ using ImageGlass.UI.Viewer;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 /// <summary>
 /// Base interface for all plugins in the ImageGlass plugin registry.
@@ -39,7 +39,6 @@ public interface IPlugin
     /// Gets whether this plugin is hosted in <see cref="PluginHostControl"/>.
     /// Hosted plugins use <see cref="PluginHostControl"/> for UI.
     /// Non-hosted plugins use <see cref="ExecuteAsync"/> instead.
-    /// Also determines persistability — only hosted plugins can be <c>LastOpenedPlugin</c>.
     /// </summary>
     bool IsHosted { get; }
 

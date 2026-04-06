@@ -21,11 +21,12 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
+using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
 using System;
 using System.Globalization;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 internal class CropImageSettingsWindow : DialogWindow
 {
@@ -84,7 +85,7 @@ internal class CropImageSettingsWindow : DialogWindow
 
         ResultConfig = new CropImageConfig
         {
-            CloseToolAfterSaved = _chkCloseToolAfterSaving.IsChecked == true,
+            CloseAfterSaved = _chkCloseToolAfterSaving.IsChecked == true,
             InitSelectionType = selectionType,
             AutoCenterSelection = _chkAutoCenterSelection.IsChecked == true,
             InitSelectedArea = new Rect(
@@ -108,7 +109,7 @@ internal class CropImageSettingsWindow : DialogWindow
     /// </summary>
     private void LoadConfigValues(CropImageConfig config)
     {
-        _chkCloseToolAfterSaving.IsChecked = config.CloseToolAfterSaved;
+        _chkCloseToolAfterSaving.IsChecked = config.CloseAfterSaved;
         _chkAutoCenterSelection.IsChecked = config.AutoCenterSelection;
 
         _numX.Value = (decimal)config.InitSelectedArea.X;

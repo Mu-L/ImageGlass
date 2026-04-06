@@ -32,7 +32,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ImageGlass.UI;
+namespace ImageGlass.Plugins;
 
 public partial class ImageResizerWindow : ModalWindow
 {
