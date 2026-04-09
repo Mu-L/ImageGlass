@@ -13,6 +13,10 @@
     <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="ImageGlass.SDK/ImageGlass.SDK.csproj">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="ImageGlass.Linux/ImageGlass.Linux.csproj" Id="c5199e3e-1f92-4670-a1b9-725c48c31149">
     <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />
