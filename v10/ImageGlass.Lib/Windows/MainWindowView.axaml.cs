@@ -77,6 +77,13 @@ public partial class MainWindowView : PhControl
         PART_Viewer.ViewerMouseWheel += PART_Viewer_ViewerMouseWheel;
         PART_Viewer.ContextMenu?.Opened += PART_Viewer_ContextMenu_Opened;
 
+        // hook viewer events for external plugin broadcasting
+        PART_Viewer.PhotoLoading += Core.Viewer_PhotoLoadingForPlugins;
+        PART_Viewer.ViewerPointerMoved += Core.Viewer_PointerMovedForPlugins;
+        PART_Viewer.ViewerPointerPressed += Core.Viewer_PointerPressedForPlugins;
+        PART_Viewer.SelectionChanged += Core.Viewer_SelectionChangedForPlugins;
+        PART_Viewer.PhotoFrameChanged += Core.Viewer_FrameChangedForPlugins;
+
 
         // load image from command line arguments
         LoadImagesFromCmdArgs();
@@ -100,6 +107,12 @@ public partial class MainWindowView : PhControl
         PART_Viewer.ViewerMouseWheel -= PART_Viewer_ViewerMouseWheel;
         PART_Viewer.ContextMenu?.Opened -= PART_Viewer_ContextMenu_Opened;
 
+        // unhook viewer events for external plugins
+        PART_Viewer.PhotoLoading -= Core.Viewer_PhotoLoadingForPlugins;
+        PART_Viewer.ViewerPointerMoved -= Core.Viewer_PointerMovedForPlugins;
+        PART_Viewer.ViewerPointerPressed -= Core.Viewer_PointerPressedForPlugins;
+        PART_Viewer.SelectionChanged -= Core.Viewer_SelectionChangedForPlugins;
+        PART_Viewer.PhotoFrameChanged -= Core.Viewer_FrameChangedForPlugins;
     }
 
 

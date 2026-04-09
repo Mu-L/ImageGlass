@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ImageGlass.UI;
@@ -282,6 +283,10 @@ public partial class ToolbarControl : PhControl
             = PART_MnuViewFirstFrame.IsEnabled
             = PART_MnuViewLastFrame.IsEnabled
             = hasMultiFrames;
+
+
+        // 3. rebuild external plugin entries in the Tools submenu
+        BuildExternalPluginMenuItems();
     }
 
 
@@ -547,7 +552,6 @@ public partial class ToolbarControl : PhControl
     }
 
 
-
     /// <summary>
     /// Updates the text and hotkey text of main menu if needed.
     /// </summary>
@@ -639,6 +643,47 @@ public partial class ToolbarControl : PhControl
         Core.API?.IG_SetColorChannels(newChannels);
     }
 
+
+    /// <summary>
+    /// Rebuilds external plugin entries in the Tools submenu dynamically.
+    /// Items are inserted before <see cref="PART_MnuExternalPluginsEndSeparator"/>.
+    /// </summary>
+    private void BuildExternalPluginMenuItems()
+    {
+        var items = PART_MnuTools.Items;
+        var sepEndIndex = items.IndexOf(PART_MnuExternalPluginsEndSeparator);
+        if (sepEndIndex < 0) return;
+
+        // remove previously added external plugin entries (tagged with our marker)
+        var toRemove = items
+            .OfType<PhMenuItem>()
+            .Where(m => m.Tag is string tag && tag == "external_plugin")
+            .ToList();
+        foreach (var m in toRemove) items.Remove(m);
+
+        // re-query separator index after removal
+        sepEndIndex = items.IndexOf(PART_MnuExternalPluginsEndSeparator);
+
+        var manifests = Core.PluginRegistry.GetAllExternalPluginManifests().ToList();
+        if (manifests.Count == 0) return;
+
+        // show the separator that visually separates built-ins from external plugins
+        PART_MnuExternalPluginsEndSeparator.IsVisible = true;
+
+        // insert one menu item per external plugin, before the separator
+        for (var i = 0; i < manifests.Count; i++)
+        {
+            var manifest = manifests[i];
+            var mnu = new PhMenuItem
+            {
+                Header = manifest.Name ?? manifest.Id,
+                Tag = "external_plugin",
+                CommandParameter = manifest.Id,
+            };
+            mnu.Click += (_, _) => Core.API?.IG_OpenPlugin(manifest.Id);
+            items.Insert(sepEndIndex + i, mnu);
+        }
+    }
 
     #endregion // Methods
 

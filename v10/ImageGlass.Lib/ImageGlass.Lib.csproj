@@ -51,6 +51,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ImageGlass.SDK\ImageGlass.SDK.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Plugins\ColorPicker\ColorPickerPluginControl.axaml.cs">
       <DependentUpon>ColorPickerPluginControl.axaml</DependentUpon>
     </Compile>

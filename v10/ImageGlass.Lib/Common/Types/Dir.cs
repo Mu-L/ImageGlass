@@ -24,29 +24,35 @@ namespace ImageGlass.Common.Types;
 public static class Dir
 {
     /// <summary>
-    /// Gets the theme pack folder name
+    /// Gets the theme pack folder name.
     /// </summary>
     public static string Themes { get; } = "_themes";
 
     /// <summary>
-    /// Gets the extension icon folder name
+    /// Gets the extension icon folder name.
     /// </summary>
     public static string ExtIcons { get; } = "_ext_icons";
 
     /// <summary>
-    /// Gets the language folder name
+    /// Gets the language folder name.
     /// </summary>
     public static string Language { get; } = "_lang";
 
     /// <summary>
-    /// Gets the credit folder name
+    /// Gets the external plugins folder name.
+    /// </summary>
+    public static string Plugins { get; } = "_plugins";
+
+    /// <summary>
+    /// Gets the credit folder name.
     /// </summary>
     public static string Credits { get; } = "_credits";
 
     /// <summary>
-    /// Gets the temporary folder name
+    /// Gets the temporary folder name.
     /// </summary>
     public static string Temporary { get; } = "_temp";
+
 
 #if DEBUG
     /// <summary>

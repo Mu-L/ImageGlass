@@ -30,6 +30,8 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Windows;
+using ImageGlass.Plugins;
+using ImageGlass.Plugins.External;
 using ImageGlass.UI.Windowing;
 using ImageGlass.ViewModels;
 using System;
@@ -111,6 +113,9 @@ public partial class App : Application
 
             // set main window
             CreateMainWindowIfNotExist();
+
+            // discover and register external plugins (background)
+            Core.DiscoverExternalPlugins();
 
             // wait for UI settings ready
             await _taskUi.Task;

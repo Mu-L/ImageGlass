@@ -107,7 +107,6 @@ public partial class MainWindow : PhWindow
 
         base.OnLoaded(e);
 
-
         // register app hotkeys
         Core.API?.RegisterHotkeys();
 
@@ -132,6 +131,9 @@ public partial class MainWindow : PhWindow
 
         // stop slideshow so pre-slideshow config values are restored before saving
         Core.API?.IG_ToggleSlideshow(false);
+
+        // stop all external plugin processes before saving config
+        await Core.ExternalPlugins.StopAllAsync();
 
         // Only save config here, do NOT dispose resources yet
         await SaveConfigOnClosingAsync();

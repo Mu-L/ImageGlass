@@ -27,6 +27,9 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.Plugins;
+using ImageGlass.Plugins.External;
+using ImageGlass.SDK;
+using ImageGlass.UI.Viewer;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -186,6 +189,12 @@ public static class Core
 
 
     /// <summary>
+    /// Gets the process manager for external (out-of-process) plugins.
+    /// </summary>
+    public static PluginProcessManager ExternalPlugins { get; } = new();
+
+
+    /// <summary>
     /// Gets the path of the image file from the arguments.
     /// </summary>
     public static string InputImagePathFromArgs => _initImagePathFromArgs;
@@ -245,6 +254,9 @@ public static class Core
     public static void Dispose()
     {
         Config.CleanUpPropertyChangedEvents();
+
+        // Dispose external plugins (StopAllAsync already called in OnClosing)
+        ExternalPlugins.Dispose();
 
         DisposeClipboardPhoto();
 
@@ -612,6 +624,8 @@ public static class Core
         {
             ColorProfileChanged?.Invoke(null, new());
         });
+
+        ExternalPlugins.BroadcastToAll(SDK.MessageTypes.COLOR_PROFILE_CHANGED);
     }
 
 
@@ -624,6 +638,13 @@ public static class Core
         {
             ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
         });
+
+        ExternalPlugins.BroadcastToAll(SDK.MessageTypes.THEME_CHANGED, new SDK.ThemeInfo
+        {
+            IsDarkMode = Theme.Settings.IsDarkMode,
+            AccentColor = AccentColor.ToString(),
+            BackgroundColor = Config.BackgroundColor,
+        });
     }
 
 
@@ -635,6 +656,13 @@ public static class Core
         Dispatcher.UIThread.Post(() =>
         {
             LanguageChanged?.Invoke(null, new());
+        });
+
+        ExternalPlugins.BroadcastToAll(SDK.MessageTypes.LANGUAGE_CHANGED, new SDK.LanguageChangedEventArgs
+        {
+            Code = Lang.Metadata.Code,
+            EnglishName = Lang.Metadata.EnglishName,
+            LocalName = Lang.Metadata.LocalName,
         });
     }
 
@@ -660,6 +688,105 @@ public static class Core
         {
             PhotoSaved?.Invoke(null, e);
         });
+    }
+
+
+    /// <summary>
+    /// Broadcasts a photo change event to all running external plugins.
+    /// </summary>
+    public static void BroadcastPhotoChanged(Photo? photo)
+    {
+        if (photo is null) return;
+
+        ExternalPlugins.BroadcastToAll(SDK.MessageTypes.PHOTO_CHANGED, new SDK.PhotoChangedEventArgs
+        {
+            FilePath = photo.FilePath,
+            Width = (int)(photo.Metadata?.OriginalWidth ?? 0),
+            Height = (int)(photo.Metadata?.OriginalHeight ?? 0),
+            Format = photo.Metadata?.FileExtension,
+            FrameCount = (int)(photo.Metadata?.FrameCount ?? 1),
+            CanAnimate = photo.Metadata?.CanAnimate ?? false,
+        });
+    }
+
+
+    /// <summary>
+    /// Discovers external plugins from the <c>_plugins</c> directory and registers them.
+    /// Runs on a background thread to avoid blocking app startup.
+    /// </summary>
+    public static void DiscoverExternalPlugins()
+    {
+        _ = Task.Run(() =>
+        {
+            var pluginsDir = BHelper.ConfigDir(Dir.Plugins);
+            var discovered = PluginProcessManager.DiscoverPlugins(pluginsDir);
+
+            foreach (var (manifest, dir) in discovered)
+            {
+                var proxy = new ExternalPluginProxy(manifest, ExternalPlugins, dir);
+                PluginRegistry.Register(manifest.Id, proxy);
+            }
+        });
+    }
+
+
+    internal static void Viewer_PhotoLoadingForPlugins(ViewerControl sender, PhotoLoadingEventArgs e)
+    {
+        if (e.State == PhotoState.Loaded)
+        {
+            BroadcastPhotoChanged(e.Photo);
+        }
+    }
+
+    internal static void Viewer_PointerMovedForPlugins(ViewerControl sender, ViewerPointerEventArgs e)
+    {
+        ExternalPlugins.BroadcastToSubscribed(
+            MessageTypes.POINTER_MOVED,
+            new PointerEventArgs
+            {
+                SourceX = e.SourcePoint.X,
+                SourceY = e.SourcePoint.Y,
+                ClientX = (float)e.Point.Position.X,
+                ClientY = (float)e.Point.Position.Y,
+            },
+            s => s.PointerMoved);
+    }
+
+    internal static void Viewer_PointerPressedForPlugins(ViewerControl sender, ViewerPointerEventArgs e)
+    {
+        ExternalPlugins.BroadcastToSubscribed(
+            MessageTypes.POINTER_PRESSED,
+            new PointerEventArgs
+            {
+                SourceX = e.SourcePoint.X,
+                SourceY = e.SourcePoint.Y,
+                ClientX = (float)e.Point.Position.X,
+                ClientY = (float)e.Point.Position.Y,
+            },
+            s => s.PointerPressed);
+    }
+
+    internal static void Viewer_SelectionChangedForPlugins(ViewerControl sender, ViewerSelectionChangedEventArgs e)
+    {
+        var src = e.SourceSelection;
+        ExternalPlugins.BroadcastToSubscribed(
+            MessageTypes.SELECTION_CHANGED,
+            src == default ? null : new SelectionEventArgs
+            {
+                X = (float)src.X,
+                Y = (float)src.Y,
+                Width = (float)src.Width,
+                Height = (float)src.Height,
+            },
+            s => s.SelectionChanged);
+    }
+
+    internal static void Viewer_FrameChangedForPlugins(ViewerControl sender, PhotoFrameChangedEventArgs e)
+    {
+        ExternalPlugins.BroadcastToSubscribed(
+            MessageTypes.FRAME_CHANGED,
+            (int)e.CurrentFrame,
+            s => s.FrameChanged);
     }
 
 

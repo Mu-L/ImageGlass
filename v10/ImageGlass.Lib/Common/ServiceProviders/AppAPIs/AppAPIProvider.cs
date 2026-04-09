@@ -28,6 +28,7 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Windows;
 using ImageGlass.Plugins;
+using ImageGlass.Plugins.External;
 using ImageGlass.Plugins.ImageResizer;
 using ImageGlass.Plugins.LosslessCompression;
 using ImageGlass.UI;
@@ -79,6 +80,12 @@ public partial class AppAPIProvider
     private MessageControl Message => _mainWindow.PART_MainView.PART_Message;
     private PluginHostControl PluginHost => _mainWindow.PART_MainView.PART_PluginHost;
     private SlideshowCountdownOverlay SlideshowCountdown => _mainWindow.PART_MainView.PART_SlideshowCountdown;
+
+
+    /// <summary>
+    /// Gets the <see cref="ViewerControl"/> for external plugin access.
+    /// </summary>
+    internal ViewerControl? GetViewer() => Viewer;
 
 
     public AppAPIProvider(MainWindow mainWindow)
@@ -2768,6 +2775,7 @@ public partial class AppAPIProvider
                 {
                     PluginRegistry.SavePluginSettings(currentPlugin);
                 }
+
                 PluginHost.CloseCurrentPlugin();
             }
             else
@@ -2802,7 +2810,7 @@ public partial class AppAPIProvider
 
         if (plugin.IsHosted)
         {
-            // Hosted plugin — create via adapter, load settings, host in PluginHostControl
+            // Hosted plugin: create via adapter, load settings, host in PluginHostControl
             var currentPluginId = PluginHost.Plugin?.PluginId;
             if (string.Equals(currentPluginId, pluginId, StringComparison.Ordinal)) return;
 
@@ -2818,15 +2826,23 @@ public partial class AppAPIProvider
         }
         else
         {
-            // Non-hosted plugin — set viewer, load settings, execute, save on completion
-            plugin.Viewer = Viewer;
-            PluginRegistry.LoadPluginSettings(plugin);
-
-            var context = new PluginExecutionContext
+            if (plugin is ExternalPluginProxy)
             {
-                Window = _mainWindow,
-            };
-            _ = PluginRegistry.ExecuteNonHostedPluginAsync(plugin, context);
+                // Only allow one instance of a non-hosted external plugin
+                if (Core.ExternalPlugins.IsRunning(pluginId)) return;
+
+                // External non-hosted plugin: start process and execute
+                _ = plugin.ExecuteAsync(new PluginExecutionContext { Window = _mainWindow });
+            }
+            else
+            {
+                // Built-in non-hosted plugin: set viewer, load settings, execute
+                plugin.Viewer = Viewer;
+                PluginRegistry.LoadPluginSettings(plugin);
+
+                var context = new PluginExecutionContext { Window = _mainWindow };
+                _ = PluginRegistry.ExecuteNonHostedPluginAsync(plugin, context);
+            }
         }
     }
 

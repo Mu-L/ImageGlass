@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Plugins.External;
+using ImageGlass.SDK;
 using ImageGlass.UI.Viewer;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -63,6 +65,25 @@ public sealed class PluginRegistry
     /// Checks whether a plugin ID is registered.
     /// </summary>
     public bool Contains(string pluginId) => _plugins.ContainsKey(pluginId);
+
+
+    /// <summary>
+    /// Gets all registered external plugin proxies for menu building.
+    /// </summary>
+    public IEnumerable<PluginManifest> GetAllExternalPluginManifests()
+    {
+        foreach (var plugin in _plugins.Values)
+        {
+            if (plugin is ExternalPluginProxy proxy)
+                yield return proxy.Manifest;
+        }
+    }
+
+
+    /// <summary>
+    /// Gets all registered plugin IDs.
+    /// </summary>
+    public IEnumerable<string> GetAllPluginIds() => _plugins.Keys;
 
 
     /// <summary>

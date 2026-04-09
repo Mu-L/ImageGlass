@@ -468,19 +468,19 @@
 
 
                             <!--  Tools  -->
-                            <ui:PhMenuItem LangKey="FrmMain_MnuTools">
+                            <ui:PhMenuItem x:Name="PART_MnuTools" LangKey="FrmMain_MnuTools">
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuColorPicker" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuCropTool" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuFrameNav" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuResizeTool" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuLosslessCompression" />
-                                <ui:PhMenuItem Header="-" IsVisible="False" />
+                                <ui:PhMenuItem x:Name="PART_MnuExternalPluginsBeginSeparator" Header="-" />
 
-                                <ui:PhMenuItem Header="-" IsVisible="False" />
                                 <ui:PhMenuItem
-                                    Click="MainMenuItem_Click"
-                                    IsVisible="False"
-                                    LangKey="FrmMain_MnuGetMoreTools" />
+                                    x:Name="PART_MnuExternalPluginsEndSeparator"
+                                    Header="-"
+                                    IsVisible="False" />
+                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuGetMoreTools" />
                             </ui:PhMenuItem>
 
 
