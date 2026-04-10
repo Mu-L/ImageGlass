@@ -14,7 +14,10 @@
     IsChecked="{CompiledBinding IsChecked}"
     IsVisible="{CompiledBinding IsNotOverflow}"
     ToolTip.Tip="{CompiledBinding Tooltip}">
-    <StackPanel Orientation="Horizontal" Spacing="{CompiledBinding InnerSpacing}">
+    <StackPanel
+        IsHitTestVisible="False"
+        Orientation="Horizontal"
+        Spacing="{CompiledBinding InnerSpacing}">
 
         <Svg
             Width="{CompiledBinding Config.ToolbarIconHeight}"

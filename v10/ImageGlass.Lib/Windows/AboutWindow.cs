@@ -76,6 +76,9 @@ public partial class AboutWindow : DialogWindow
         ◍ D2Phap.FileWatcherEx                          MIT licence
           https://github.com/d2phap/FileWatcherEx
           Copyright (c) 2018-2026 Dương Diệu Pháp
+
+        ◍ Initial ImageGlass logo design
+          Nguyễn Quốc Tuấn
         """;
 
 

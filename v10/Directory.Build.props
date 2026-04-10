@@ -3,7 +3,7 @@
     <!-- Central app version: change ONLY here to update all platform projects.
          Each executable project sets <IgPlatformId> (e.g. win32, mac, linux).
          IgFullVersion is composed in Directory.Build.targets after all properties are set. -->
-    <IgVersion>10.0.0.407</IgVersion>
+    <IgVersion>10.0.0.410</IgVersion>
     <IgReleaseType>beta</IgReleaseType>
     <IgUpdateChannel>beta</IgUpdateChannel>
   </PropertyGroup>

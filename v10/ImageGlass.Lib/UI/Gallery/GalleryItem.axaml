@@ -13,7 +13,10 @@
     x:DataType="photo:Photo"
     Padding="3"
     BorderThickness="1">
-    <Grid RowDefinitions="*, Auto" VerticalAlignment="Stretch">
+    <Grid
+        RowDefinitions="*, Auto"
+        VerticalAlignment="Stretch"
+        IsHitTestVisible="False">
 
         <!--  Gallery Item: Thumbnail Skeleton  -->
         <Border
