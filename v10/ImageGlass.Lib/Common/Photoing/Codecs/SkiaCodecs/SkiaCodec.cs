@@ -623,7 +623,6 @@ public static partial class SkiaCodec
                         break;
 
                     case SKEncodedOrigin.LeftTop:
-                        canvas.Translate(w, 0);
                         canvas.RotateDegrees(90);
                         canvas.Scale(1, -1);
                         break;
@@ -634,7 +633,7 @@ public static partial class SkiaCodec
                         break;
 
                     case SKEncodedOrigin.RightBottom:
-                        canvas.Translate(0, h);
+                        canvas.Translate(w, h);
                         canvas.RotateDegrees(-90);
                         canvas.Scale(1, -1);
                         break;
