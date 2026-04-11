@@ -1640,19 +1640,29 @@ public partial class AppAPIProvider
 
     /// <summary>
     /// Sets whether to play or pause the image animation.
+    /// If the photo is a live/motion photo, opens the embedded video instead.
     /// </summary>
-    public void IG_ToggleImageAnimation(string? boolStr = null)
+    public async Task IG_ToggleImageAnimationAsync(string? boolStr = null)
     {
         var enabled = BHelper.ConvertStringToBool(boolStr);
-        IG_ToggleImageAnimation(enabled);
+        await IG_ToggleImageAnimationAsync(enabled);
     }
 
 
     /// <summary>
     /// Sets whether to play or pause the image animation.
+    /// If the photo is a live/motion photo, opens the embedded video instead.
     /// </summary>
-    public void IG_ToggleImageAnimation(bool? enabled)
+    public async Task IG_ToggleImageAnimationAsync(bool? enabled)
     {
+        // if this is a motion/live photo, extract and play the embedded video
+        var meta = Viewer.Photo?.Metadata;
+        if (meta?.IsLivePhoto == true && meta.EmbeddedVideoOffsetFromEnd > 0)
+        {
+            await meta.OpenLivePhotoVideoAsync().ConfigureAwait(false);
+            return;
+        }
+
         enabled ??= !Viewer.IsImageAnimating;
 
         if (enabled.Value)

@@ -97,10 +97,11 @@ public class ViewerMouseWheelEventArgs(PointerWheelEventArgs e, MouseWheelEvent 
 /// <summary>
 /// Event args for the playback state of a photo frame changes.
 /// </summary>
-public class PhotoFrameChangedEventArgs(bool canAnimate, bool isAnimating) : AnimatorFrameChangedEventArgs
+public class PhotoFrameChangedEventArgs(bool canAnimate, bool isAnimating, bool isLivePhoto = false) : AnimatorFrameChangedEventArgs
 {
     public bool CanAnimate => canAnimate;
     public bool IsAnimating => isAnimating;
+    public bool IsLivePhoto => isLivePhoto;
 
 }
 

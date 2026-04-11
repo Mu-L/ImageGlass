@@ -434,6 +434,15 @@ public static partial class MagickCodec
             }
             catch { }
 
+
+            // 6. detect motion/live photo
+            if (!token.IsCancellationRequested)
+            {
+                var liveInfo = LivePhotoDetector.Detect(meta.FilePath);
+                meta.IsLivePhoto = liveInfo.IsLivePhoto;
+                meta.EmbeddedVideoOffsetFromEnd = liveInfo.EmbeddedVideoOffsetFromEnd;
+            }
+
         }, token).ConfigureAwait(false);
 
 

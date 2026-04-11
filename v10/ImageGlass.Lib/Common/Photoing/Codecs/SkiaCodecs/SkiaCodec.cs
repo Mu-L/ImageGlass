@@ -125,6 +125,15 @@ public static partial class SkiaCodec
                     : ImageMagick.ColorSpace.Undefined;
             }
             catch { }
+
+
+            // detect motion/live photo
+            if (!token.IsCancellationRequested)
+            {
+                var liveInfo = LivePhotoDetector.Detect(meta.FilePath);
+                meta.IsLivePhoto = liveInfo.IsLivePhoto;
+                meta.EmbeddedVideoOffsetFromEnd = liveInfo.EmbeddedVideoOffsetFromEnd;
+            }
         }, token).ConfigureAwait(false);
 
 

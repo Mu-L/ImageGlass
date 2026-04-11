@@ -21,7 +21,9 @@ using ImageMagick;
 using SkiaSharp;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -97,6 +99,17 @@ public partial class PhotoMetadata : PhDisposable
     public bool HasAlpha { get; set; } = false;
     public bool CanAnimate { get; set; } = false;
     public SKEncodedOrigin Orientation { get; set; } = SKEncodedOrigin.Default;
+
+    /// <summary>
+    /// Gets whether this image contains an embedded motion/live photo video.
+    /// </summary>
+    public bool IsLivePhoto { get; set; } = false;
+
+    /// <summary>
+    /// Gets the byte offset from end-of-file where the embedded video starts.
+    /// For Google/Samsung motion photos. 0 means no embedded video.
+    /// </summary>
+    public long EmbeddedVideoOffsetFromEnd { get; set; } = 0;
 
     #endregion // Bitmap information
 
@@ -176,6 +189,9 @@ public partial class PhotoMetadata : PhDisposable
         ExifProfile = null;
         FrameCount = 0;
         Frames.Clear();
+
+        IsLivePhoto = false;
+        EmbeddedVideoOffsetFromEnd = 0;
     }
 
 
@@ -267,6 +283,32 @@ public partial class PhotoMetadata : PhDisposable
 
         return thumbM;
     }
+
+
+    /// <summary>
+    /// Extracts the embedded video from a motion/live photo and opens it
+    /// in the system default video player.
+    /// </summary>
+    public async Task OpenLivePhotoVideoAsync()
+    {
+        if (!IsLivePhoto || EmbeddedVideoOffsetFromEnd == 0) return;
+
+        try
+        {
+            var videoPath = await Task.Run(() => LivePhotoDetector.ExtractEmbeddedVideoAsync(FilePath, EmbeddedVideoOffsetFromEnd))
+                .ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(videoPath)) return;
+
+            var psi = new ProcessStartInfo(videoPath)
+            {
+                UseShellExecute = true,
+            };
+            using var proc = Process.Start(psi);
+        }
+        catch { }
+    }
+
 
     #endregion // Methods
 

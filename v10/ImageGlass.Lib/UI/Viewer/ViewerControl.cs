@@ -393,7 +393,8 @@ public partial class ViewerControl : PhControl
         if (SourceKind != PhotoSource.Native) return;
 
         var canAnimate = _animator != null;
-        var args = new PhotoFrameChangedEventArgs(canAnimate, IsImageAnimating)
+        var isLivePhoto = Photo?.Metadata?.IsLivePhoto ?? false;
+        var args = new PhotoFrameChangedEventArgs(canAnimate, IsImageAnimating, isLivePhoto)
         {
             CurrentFrame = e?.CurrentFrame ?? (uint)(Math.Min(0, Photo?.FrameIndex ?? 0)),
             FrameCount = e?.FrameCount ?? Photo?.Metadata.FrameCount ?? 0,

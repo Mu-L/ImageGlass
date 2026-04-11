@@ -102,7 +102,7 @@ public partial class AppAPIProvider
         { API.IG_SetColorChannels,              PhCommands.Create(IG_SetColorChannels) },
         { API.IG_OpenEditingApp,                PhCommands.Create(IG_OpenEditingAppAsync) },
         { API.IG_InvertColors,                  PhCommands.Create(IG_InvertColors) },
-        { API.IG_ToggleImageAnimation,          PhCommands.Create(IG_ToggleImageAnimation) },
+        { API.IG_ToggleImageAnimation,          PhCommands.Create(IG_ToggleImageAnimationAsync) },
         { API.IG_Rotate,                        PhCommands.Create(IG_Rotate) },
         { API.IG_FlipImage,                     PhCommands.Create(IG_FlipImage) },
         { API.IG_SetDesktopBackground,          PhCommands.Create(IG_SetDesktopBackgroundAsync) },

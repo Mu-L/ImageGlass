@@ -208,7 +208,7 @@ public partial class FrameNavPluginControl : PhControl, IPluginControl
         var isAnimatedFormat = e?.CanAnimate ?? Viewer.Photo?.Metadata?.CanAnimate ?? false;
 
         HasMultiFrames = frameCount > 1;
-        IsLivePhoto = false; // TODO
+        IsLivePhoto = e?.IsLivePhoto ?? Viewer.Photo?.Metadata?.IsLivePhoto ?? false;
         CanPlay = IsLivePhoto || isAnimatedFormat;
         IsPlaying = !IsLivePhoto && (e?.IsAnimating ?? false);
 
