@@ -46,6 +46,7 @@
     <PackageReference Include="Magick.NET-Q8-OpenMP-x64" Condition="'$(Platform)' == 'x64'" />
     <PackageReference Include="Magick.NET-Q8-OpenMP-arm64" Condition="'$(Platform)' == 'ARM64' And !$([MSBuild]::IsOSPlatform('osx'))" />
     <PackageReference Include="Magick.NET-Q8-arm64" Condition="'$(Platform)' == 'ARM64' And $([MSBuild]::IsOSPlatform('osx'))" />
+    <PackageReference Include="NativeMemoryArray" />
     <PackageReference Include="PhotoSauce.MagicScaler" />
     <PackageReference Include="Svg.Controls.Skia.Avalonia" />
     <PackageReference Include="System.IO.Hashing" />

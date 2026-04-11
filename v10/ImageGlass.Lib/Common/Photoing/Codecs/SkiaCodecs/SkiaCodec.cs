@@ -32,6 +32,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Cysharp.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -871,7 +872,7 @@ public static partial class SkiaCodec
     /// <summary>
     /// Converts Magick image to SKBitmap.
     /// </summary>
-    public static SKImage? FromMagick(MagickImage? imgM, SKColorSpace? srcColorSpace = null)
+    public static unsafe SKImage? FromMagick(MagickImage? imgM, SKColorSpace? srcColorSpace = null)
     {
         if (imgM is null) return null;
 
@@ -888,16 +889,22 @@ public static partial class SkiaCodec
         var bytes = pixels.ToByteArray(PixelMapping.RGBA);
         if (bytes is null) return null;
 
-        // create data from pinned pointer
-        var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-        var data = SKData.Create(
-            handle.AddrOfPinnedObject(),
-            bytes.Length,
-            (addr, ctx) => ((GCHandle)ctx).Free(),
-            handle
-        );
+        // copy to native memory (off-heap, no LOH pinning)
+        var nativeBuffer = new NativeMemoryArray<byte>(bytes.Length, skipZeroClear: true, addMemoryPressure: true);
+        bytes.CopyTo(nativeBuffer.AsSpan());
 
-        return SKImage.FromPixels(info, data);
+        // create SKData backed by native memory; release callback disposes nativeBuffer
+        fixed (byte* ptr = nativeBuffer)
+        {
+            var data = SKData.Create(
+                (nint)ptr,
+                bytes.Length,
+                (addr, ctx) => ((NativeMemoryArray<byte>)ctx!).Dispose(),
+                nativeBuffer
+            );
+
+            return SKImage.FromPixels(info, data);
+        }
     }
 
 
