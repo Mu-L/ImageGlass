@@ -392,6 +392,7 @@ public partial class PhotoManager
         foreach (var path in changedList)
         {
             InvalidateCacheAt(path);
+            ThumbnailDiskCache.Invalidate(path);
         }
 
         string currentFilePath;

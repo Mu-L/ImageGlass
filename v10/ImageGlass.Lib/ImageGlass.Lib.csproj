@@ -48,6 +48,7 @@
     <PackageReference Include="Magick.NET-Q8-arm64" Condition="'$(Platform)' == 'ARM64' And $([MSBuild]::IsOSPlatform('osx'))" />
     <PackageReference Include="PhotoSauce.MagicScaler" />
     <PackageReference Include="Svg.Controls.Skia.Avalonia" />
+    <PackageReference Include="System.IO.Hashing" />
   </ItemGroup>
 
   <ItemGroup>

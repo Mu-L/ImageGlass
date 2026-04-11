@@ -843,12 +843,40 @@ public partial class Photo : PhDisposable
                 if (token.IsCancellationRequested) return;
 
 
+                // 4b. try disk cache
+                var diskThumb = await ThumbnailDiskCache.TryGetAsync(FilePath, (int)thumbSize, token)
+                    .ConfigureAwait(false);
+                if (token.IsCancellationRequested) return;
+
+                if (diskThumb is not null)
+                {
+                    var avBitmapCached = await Task.Run(
+                        () => SkiaCodec.ToWritableBitmap(diskThumb), token)
+                        .ConfigureAwait(false);
+                    diskThumb.Dispose();
+
+                    if (token.IsCancellationRequested)
+                    {
+                        avBitmapCached?.Dispose();
+                        return;
+                    }
+
+                    GalleryThumbnail?.Dispose();
+                    GalleryThumbnail = avBitmapCached;
+                    return;
+                }
+
+
                 // 5. get thumbnail from platform provider
                 if (Core.PreviewProvider is null) return;
                 using var skThumb = await Task.Run(
                     () => Core.PreviewProvider.GetThumbnailAsync(Metadata, thumbSize, token), token)
                     .ConfigureAwait(false);
                 if (token.IsCancellationRequested || skThumb.IsDisposed()) return;
+
+
+                // 5b. write to disk cache (fire-and-forget, encoding is synchronous)
+                _ = ThumbnailDiskCache.PutAsync(FilePath, (int)thumbSize, skThumb, token);
 
 
                 // 6. convert SKImage to Avalonia Bitmap
