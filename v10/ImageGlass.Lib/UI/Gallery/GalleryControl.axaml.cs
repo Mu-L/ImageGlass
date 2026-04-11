@@ -221,9 +221,13 @@ public partial class GalleryControl : PhControl
     public void LoadThumbnail(int index, bool useCache)
     {
         var photo = Core.Photos.Get(index);
-        if (!useCache) photo?.UnloadThumbnail();
+        if (photo is null) return;
 
-        _ = photo?.LoadThumbnailAsync(Dpi);
+        // Cancel in-flight thumbnail load so it exits early
+        if (!useCache) photo.CancelThumbnailLoading();
+
+        var thumbSize = Core.Config.ThumbnailSize * Dpi * 2;
+        _ = photo.LoadThumbnailAsync(thumbSize, useCache);
     }
 
 

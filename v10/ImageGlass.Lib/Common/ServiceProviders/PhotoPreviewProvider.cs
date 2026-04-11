@@ -80,7 +80,7 @@ public class PhotoPreviewProvider : IPhotoPreviewProvider
         // 2. slow path: use ImageMagick for unsupported formats
         if (imgPreview.IsDisposed())
         {
-            using var imgM = await MagickCodec.QuickDecodeAsync(meta.FilePath, 0, 0, token: token);
+            using var imgM = await MagickCodec.QuickDecodeAsync(meta.FilePath, maxSize, maxSize, token: token);
             imgPreview = SkiaCodec.FromMagick(imgM, meta.SkiaColorSpace);
         }
 

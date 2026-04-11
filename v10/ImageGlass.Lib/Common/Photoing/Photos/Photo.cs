@@ -331,7 +331,7 @@ public partial class Photo : PhDisposable
         // dispose everything
         if (disposeEverything)
         {
-            UnloadThumbnail();
+            await UnloadThumbnailAsync().ConfigureAwait(false);
             _thumbnailLock.Dispose();
 
             if (_taskMetadata is not null)
@@ -798,6 +798,15 @@ public partial class Photo : PhDisposable
 
 
     /// <summary>
+    /// Signals cancellation to any in-progress thumbnail loading so it exits early.
+    /// </summary>
+    public void CancelThumbnailLoading()
+    {
+        _cancelThumbnailLoading?.Cancel();
+    }
+
+
+    /// <summary>
     /// Loads a thumbnail image at the specified DPI scaling factor.
     /// </summary>
     public async Task LoadThumbnailAsync(double dpi)
@@ -915,12 +924,15 @@ public partial class Photo : PhDisposable
     /// <summary>
     /// Cancels pending thumbnail loading and disposes the cached thumbnail.
     /// </summary>
-    public void UnloadThumbnail()
+    public async Task UnloadThumbnailAsync()
     {
-        _thumbnailLock.Wait();
+        // Signal cancellation first so any in-progress load
+        // can exit early and release the lock sooner.
+        _cancelThumbnailLoading?.Cancel();
+
+        await _thumbnailLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            _cancelThumbnailLoading?.Cancel();
             _cancelThumbnailLoading?.Dispose();
             _cancelThumbnailLoading = null;
 
