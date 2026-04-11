@@ -3070,12 +3070,13 @@ public partial class AppAPIProvider
     {
         if (enabled)
         {
-            // get current dir path
-            var dirPath = Core.Photos.FileWatcherFolderPath;
+            // always prefer the current photo list's directory so the watcher
+            // follows folder changes (e.g. opening a photo in a new folder)
+            var dirPath = Core.Photos.DistinctDirs.FirstOrDefault();
+
             if (string.IsNullOrEmpty(dirPath))
             {
-                // get the first dir in the list
-                dirPath = Core.Photos.DistinctDirs.FirstOrDefault();
+                dirPath = Core.Photos.FileWatcherFolderPath;
             }
 
             if (!string.IsNullOrEmpty(dirPath))
