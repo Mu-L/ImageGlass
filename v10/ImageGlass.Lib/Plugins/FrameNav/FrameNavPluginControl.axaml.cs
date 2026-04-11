@@ -40,6 +40,18 @@ public partial class FrameNavPluginControl : PhControl, IPluginControl
     #region Public Properties 
 
     /// <summary>
+    /// Gets value indicating if the current photo has embedding video.
+    /// </summary>
+    public bool IsLivePhoto
+    {
+        get => GetValue(IsLivePhotoProperty);
+        private set => SetValue(IsLivePhotoProperty, value);
+    }
+    public static readonly StyledProperty<bool> IsLivePhotoProperty =
+        AvaloniaProperty.Register<FrameNavPluginControl, bool>(nameof(IsLivePhoto));
+
+
+    /// <summary>
     /// Gets value indicating if the current photo has multiple frames.
     /// </summary>
     public bool HasMultiFrames
@@ -54,13 +66,13 @@ public partial class FrameNavPluginControl : PhControl, IPluginControl
     /// <summary>
     /// Gets value indicating if the current photo can animate.
     /// </summary>
-    public bool CanAnimate
+    public bool CanPlay
     {
-        get => GetValue(CanAnimateProperty);
-        private set => SetValue(CanAnimateProperty, value);
+        get => GetValue(CanPlayProperty);
+        private set => SetValue(CanPlayProperty, value);
     }
-    public static readonly StyledProperty<bool> CanAnimateProperty =
-        AvaloniaProperty.Register<FrameNavPluginControl, bool>(nameof(CanAnimate));
+    public static readonly StyledProperty<bool> CanPlayProperty =
+        AvaloniaProperty.Register<FrameNavPluginControl, bool>(nameof(CanPlay));
 
 
     /// <summary>
@@ -193,10 +205,12 @@ public partial class FrameNavPluginControl : PhControl, IPluginControl
     private void UpdateFrameInfo(PhotoFrameChangedEventArgs? e = null)
     {
         var frameCount = e?.FrameCount ?? Viewer.Photo?.Metadata?.FrameCount ?? 0;
+        var isAnimatedFormat = e?.CanAnimate ?? Viewer.Photo?.Metadata?.CanAnimate ?? false;
 
         HasMultiFrames = frameCount > 1;
-        CanAnimate = e?.CanAnimate ?? Viewer.Photo?.Metadata?.CanAnimate ?? false;
-        IsPlaying = e?.IsAnimating ?? false;
+        IsLivePhoto = false; // TODO
+        CanPlay = IsLivePhoto || isAnimatedFormat;
+        IsPlaying = !IsLivePhoto && (e?.IsAnimating ?? false);
 
         if (frameCount > 0)
         {

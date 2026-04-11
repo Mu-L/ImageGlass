@@ -59,18 +59,29 @@
                 <ui:ToolbarButton
                     x:Name="PART_BtnToggleAnimation"
                     Focusable="False"
-                    IsEnabled="{CompiledBinding #Root.CanAnimate}">
-                    <StackPanel Orientation="Horizontal">
+                    IsEnabled="{CompiledBinding #Root.CanPlay}">
+                    <StackPanel IsVisible="{CompiledBinding !#Root.IsLivePhoto}" Orientation="Horizontal">
+                        <!--  Live Photo  -->
                         <PathIcon
                             Width="24"
                             Height="24"
-                            Data="{StaticResource IconPlay}"
-                            IsVisible="{CompiledBinding !#Root.IsPlaying}" />
-                        <PathIcon
-                            Width="24"
-                            Height="24"
-                            Data="{StaticResource IconPause}"
-                            IsVisible="{CompiledBinding #Root.IsPlaying}" />
+                            Data="{StaticResource IconLivePhoto}"
+                            IsVisible="{CompiledBinding #Root.IsLivePhoto}" />
+
+
+                        <!--  Animated Photo  -->
+                        <StackPanel IsVisible="{CompiledBinding !#Root.IsLivePhoto}">
+                            <PathIcon
+                                Width="24"
+                                Height="24"
+                                Data="{StaticResource IconPlay}"
+                                IsVisible="{CompiledBinding !#Root.IsPlaying}" />
+                            <PathIcon
+                                Width="24"
+                                Height="24"
+                                Data="{StaticResource IconPause}"
+                                IsVisible="{CompiledBinding #Root.IsPlaying}" />
+                        </StackPanel>
                     </StackPanel>
                 </ui:ToolbarButton>
 
