@@ -87,7 +87,7 @@ public enum ConfigId
     SlideshowIntervalTo,
     SlideshowImagesToNotifySound,
     ThumbnailSize,
-    // GalleryCacheSizeInMb,
+    GalleryCacheSizeInMb,
     GalleryColumns,
     CacheMaxMemoryInMb,
     CacheMaxDimension,

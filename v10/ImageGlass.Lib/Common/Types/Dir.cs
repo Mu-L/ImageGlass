@@ -49,6 +49,16 @@ public static class Dir
     public static string Credits { get; } = "_credits";
 
     /// <summary>
+    /// Gets the cache folder name.
+    /// </summary>
+    public static string Cache { get; } = "_cache";
+
+    /// <summary>
+    /// Gets the thumbnail cache folder name. This folder is located inside the <see cref="Cache"/> folder.
+    /// </summary>
+    public static string Cache_Thumbnails { get; } = "_thumbnails";
+
+    /// <summary>
     /// Gets the temporary folder name.
     /// </summary>
     public static string Temporary { get; } = "_temp";

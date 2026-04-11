@@ -502,10 +502,14 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ThumbnailSize, value);
     }
 
-    ///// <summary>
-    ///// Gets, sets the maximum size in MB of thumbnail persistent cache.
-    ///// </summary>
-    //public int GalleryCacheSizeInMb { get; set; } = 400;
+    /// <summary>
+    /// Gets, sets the maximum size in MB of thumbnail persistent cache.
+    /// </summary>
+    public uint GalleryCacheSizeInMb
+    {
+        get => Get(ConfigId.GalleryCacheSizeInMb, 100u);
+        set => Set(ConfigId.GalleryCacheSizeInMb, value);
+    }
 
     /// <summary>
     /// Gets, sets number of thumbnail columns displayed in vertical gallery.
