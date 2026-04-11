@@ -294,6 +294,48 @@ public partial class AppStatusInfo : PhDisposable
     }
 
 
+    private string? HdrInfo
+    {
+        get
+        {
+            // skip for clipboard image
+            if (Core.ClipboardImage is not null) return null;
+
+            if (Core.Config.ImageInfoTags.Contains(nameof(HdrInfo))
+                && Core.Photos.CurrentMetadata is { } meta
+                && (meta.IsHdr || meta.IsWideGamut))
+            {
+                var parts = new System.Collections.Generic.List<string>(3);
+
+                if (meta.IsHdr)
+                {
+                    var fn = meta.HdrTransferFn switch
+                    {
+                        Photoing.HdrTransferFunction.PQ => "HDR PQ",
+                        Photoing.HdrTransferFunction.HLG => "HDR HLG",
+                        Photoing.HdrTransferFunction.GainMap => "HDR Gain Map",
+                        _ => "HDR",
+                    };
+                    parts.Add(fn);
+                }
+                else if (meta.IsWideGamut)
+                {
+                    parts.Add("Wide Gamut");
+                }
+
+                if (meta.BitsPerChannel > 8)
+                {
+                    parts.Add($"{meta.BitsPerChannel}-bit");
+                }
+
+                return string.Join(", ", parts);
+            }
+
+            return null;
+        }
+    }
+
+
     private string? ColorSpace
     {
         get
@@ -362,6 +404,7 @@ public partial class AppStatusInfo : PhDisposable
                     nameof(ExifDateTimeOriginal) => ExifDateTimeOriginal,
                     nameof(DateTimeAuto) => DateTimeAuto,
                     nameof(ColorSpace) => ColorSpace,
+                    nameof(HdrInfo) => HdrInfo,
                     _ => null,
                 };
 

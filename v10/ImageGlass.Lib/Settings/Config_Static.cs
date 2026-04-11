@@ -93,6 +93,7 @@ public partial class Config
         "Dimension",
         "FileSize",
         "ColorSpace",
+        "HdrInfo",
         "ExifRating",
         "DateTimeAuto",
         "AppName",

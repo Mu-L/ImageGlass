@@ -127,6 +127,11 @@ public static partial class SkiaCodec
             catch { }
 
 
+            // detect HDR transfer function, wide gamut, and bit depth
+            meta.BitsPerChannel = GetBitsPerChannel(decoder.Info.ColorType);
+            MagickCodec.DetectHdrInfo(meta);
+
+
             // detect motion/live photo
             if (!token.IsCancellationRequested)
             {
@@ -329,6 +334,23 @@ public static partial class SkiaCodec
 
         return true;
     }
+
+
+    /// <summary>
+    /// Derives bits per channel from a SkiaSharp color type.
+    /// </summary>
+    private static int GetBitsPerChannel(SKColorType colorType) => colorType switch
+    {
+        SKColorType.Rgba8888 or SKColorType.Bgra8888
+            or SKColorType.Rgb888x or SKColorType.Gray8
+            or SKColorType.Bgr101010xXR => 8,
+        SKColorType.Rgba1010102 or SKColorType.Bgra1010102
+            or SKColorType.Rgb101010x or SKColorType.Bgr101010x => 10,
+        SKColorType.Rgba16161616
+            or SKColorType.RgbaF16 or SKColorType.RgbaF16Clamped => 16,
+        SKColorType.RgbaF32 => 32,
+        _ => 8,
+    };
 
 
     /// <summary>

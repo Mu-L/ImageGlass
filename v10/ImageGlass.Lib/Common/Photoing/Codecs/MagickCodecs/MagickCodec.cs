@@ -435,6 +435,10 @@ public static partial class MagickCodec
             catch { }
 
 
+            // detect HDR transfer function, wide gamut, and bit depth
+            DetectHdrInfo(meta, imgC[frameIndex]);
+
+
             // 6. detect motion/live photo
             if (!token.IsCancellationRequested)
             {
@@ -822,6 +826,246 @@ public static partial class MagickCodec
             catch { }
 
             yield return (index, frameCount, newFilename);
+        }
+    }
+
+
+    /// <summary>
+    /// Detects HDR transfer function, wide gamut, and bit depth from all available signals,
+    /// and populates the corresponding fields on <see cref="PhotoMetadata"/>.
+    /// Uses a layered approach: Magick Depth → SKColorSpace → CICP box → extension heuristics.
+    /// </summary>
+    /// <param name="meta">Metadata with <c>SkiaColorSpace</c>, <c>FileExtension</c>, and <c>FilePath</c> already set.</param>
+    /// <param name="img">Optional Magick image for access to <c>Depth</c> and <c>ColorSpace</c>.</param>
+    public static void DetectHdrInfo(PhotoMetadata meta, IMagickImage? img = null)
+    {
+        // 1. bit depth from Magick (most accurate source)
+        if (img is not null)
+        {
+            meta.BitsPerChannel = (int)img.Depth;
+        }
+
+        // 2. SKColorSpace-based detection (works for parametric ICC profiles)
+        if (meta.SkiaColorSpace is not null)
+        {
+            if (meta.SkiaColorSpace.GetNumericalTransferFunction(out var transferFn))
+            {
+                if (transferFn.Equals(SKColorSpaceTransferFn.Pq))
+                {
+                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.PQ;
+                }
+                else if (transferFn.Equals(SKColorSpaceTransferFn.Hlg))
+                {
+                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.HLG;
+                }
+            }
+
+            if (meta.SkiaColorSpace.ToColorSpaceXyz(out var gamut))
+            {
+                meta.IsWideGamut = !gamut.Equals(SKColorSpaceXyz.Srgb);
+            }
+        }
+
+        // 3. ICC profile text scan (covers LUT-based ICC that Skia can't parse)
+        //    Works with or without img — falls back to meta.MagickColorProfile
+        if (!meta.IsHdr)
+        {
+            ReadOnlySpan<byte> icc = default;
+            if (img is not null && img.GetProfile("icc") is { } iccProfile)
+            {
+                icc = iccProfile.ToReadOnlySpan();
+            }
+            else if (meta.MagickColorProfile is { } metaIcc)
+            {
+                icc = metaIcc.ToReadOnlySpan();
+            }
+
+            if (icc.Length > 0)
+            {
+                if (icc.IndexOf("ST 2084"u8) >= 0
+                    || icc.IndexOf("ST2084"u8) >= 0
+                    || icc.IndexOf("PQ"u8) >= 0
+                    || icc.IndexOf("Perceptual Quantizer"u8) >= 0)
+                {
+                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.PQ;
+                }
+                else if (icc.IndexOf("HLG"u8) >= 0
+                    || icc.IndexOf("Hybrid Log"u8) >= 0)
+                {
+                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.HLG;
+                }
+
+                if (!meta.IsWideGamut)
+                {
+                    if (icc.IndexOf("BT.2020"u8) >= 0
+                        || icc.IndexOf("Rec. 2020"u8) >= 0
+                        || icc.IndexOf("Rec.2020"u8) >= 0
+                        || icc.IndexOf("Display P3"u8) >= 0)
+                    {
+                        meta.IsWideGamut = true;
+                    }
+                }
+            }
+        }
+
+        // 4. CICP-based detection for ISOBMFF containers (AVIF, HEIF, HEIC, HIF)
+        //    when ICC is absent or uses a LUT-based profile that Skia can't parse
+        if (!meta.IsHdr
+            && meta.FileExtension is ".avif" or ".heif" or ".heic" or ".hif")
+        {
+            if (ParseCicpFromIsobmff(meta.FilePath) is (var primaries, var transfer))
+            {
+                // CICP transfer_characteristics: 16 = PQ (ST 2084), 18 = HLG
+                if (transfer == 16)
+                {
+                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.PQ;
+                }
+                else if (transfer == 18)
+                {
+                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.HLG;
+                }
+
+                // CICP color_primaries: 9 = BT.2020, 12 = Display P3
+                if (!meta.IsWideGamut && primaries is 9 or 12)
+                {
+                    meta.IsWideGamut = true;
+                }
+            }
+        }
+
+        // 5. PNG cICP chunk detection (PNG equivalent of ISOBMFF CICP)
+        if (!meta.IsHdr && meta.FileExtension is ".png")
+        {
+            if (ParseCicpFromPng(meta.FilePath) is (var pngPrimaries, var pngTransfer))
+            {
+                if (pngTransfer == 16)
+                {
+                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.PQ;
+                }
+                else if (pngTransfer == 18)
+                {
+                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.HLG;
+                }
+
+                if (!meta.IsWideGamut && pngPrimaries is 9 or 11 or 12)
+                {
+                    meta.IsWideGamut = true;
+                }
+            }
+        }
+
+        // 6. JXL codestream color encoding
+        if (!meta.IsHdr && meta.FileExtension is ".jxl")
+        {
+            if (ParseJxlColorEncoding(meta.FilePath) is (var jxlPrimaries, var jxlTransfer))
+            {
+                // JXL TransferFunction (CICP-compatible): 16=PQ, 18=HLG, 8=Linear
+                if (jxlTransfer == 16)
+                {
+                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.PQ;
+                }
+                else if (jxlTransfer == 18)
+                {
+                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.HLG;
+                }
+                else if (jxlTransfer == 8) // Linear — HDR scene-referred
+                {
+                    meta.IsHdr = true;
+                }
+
+                // JXL Primaries: 9=BT.2100/BT.2020, 11=P3
+                if (!meta.IsWideGamut && jxlPrimaries is 9 or 11)
+                {
+                    meta.IsWideGamut = true;
+                }
+            }
+            else
+            {
+                // Fallback only when parser couldn't determine TF (want_icc, all_default, etc.):
+                // treat high bit-depth + wide gamut as HDR candidate.
+                if (!meta.IsHdr
+                    && meta.BitsPerChannel >= 10
+                    && (meta.IsWideGamut
+                        || img?.ColorSpace is ImageMagick.ColorSpace.DisplayP3))
+                {
+                    meta.IsHdr = true;
+                }
+            }
+        }
+
+        // 7. Natively HDR formats: OpenEXR (.exr), Radiance HDR (.hdr),
+        //    JPEG XR (.jxr/.wdp) are always HDR
+        if (!meta.IsHdr
+            && meta.FileExtension is ".exr" or ".hdr" or ".jxr" or ".wdp")
+        {
+            meta.IsHdr = true;
+            meta.IsWideGamut = true;
+        }
+
+        // 8. HDR10 EXIF metadata (ContentLightLevel / MasteringDisplayColorVolume)
+        if (!meta.IsHdr && img is not null)
+        {
+            var cll = img.GetAttribute("exif:ContentLightLevel");
+            var mdcv = img.GetAttribute("exif:MasteringDisplayColorVolume");
+            if (cll is not null || mdcv is not null)
+            {
+                meta.IsHdr = true;
+            }
+        }
+
+        // 9. Gain map detection (JPEG Ultra HDR, HEIC/AVIF gain maps, ISO 21496-1)
+        if (!meta.IsHdr)
+        {
+            var hasGainMap = false;
+
+            if (img is not null)
+            {
+                // Apple HDR gain map (embedded as named profile in HEIC/JPEG)
+                if (img.GetProfile("apple_hdrgainmap") is not null)
+                {
+                    hasGainMap = true;
+                }
+                // XMP-based gain maps (ISO 21496-1, Adobe, Android Ultra HDR)
+                else if (img.GetProfile("xmp") is { } xmpProfile)
+                {
+                    ReadOnlySpan<byte> xmp = xmpProfile.ToReadOnlySpan();
+                    if (xmp.IndexOf("hdrgm:"u8) >= 0
+                        || xmp.IndexOf("HDRGainMap"u8) >= 0
+                        || xmp.IndexOf("GContainer:"u8) >= 0)
+                    {
+                        hasGainMap = true;
+                    }
+                }
+            }
+
+            // Fallback: scan raw file bytes when Magick image is not available
+            if (!hasGainMap && !string.IsNullOrEmpty(meta.FilePath))
+            {
+                hasGainMap = DetectGainMap(meta.FilePath);
+            }
+
+            if (hasGainMap)
+            {
+                meta.IsHdr = true;
+                meta.HdrTransferFn = HdrTransferFunction.GainMap;
+            }
+        }
+
+        // 10. Magick ColorSpace-based wide gamut fallback
+        if (!meta.IsWideGamut && img is not null
+            && img.ColorSpace is ImageMagick.ColorSpace.DisplayP3)
+        {
+            meta.IsWideGamut = true;
         }
     }
 

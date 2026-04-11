@@ -100,6 +100,18 @@ public partial class PhotoMetadata : PhDisposable
     public bool CanAnimate { get; set; } = false;
     public SKEncodedOrigin Orientation { get; set; } = SKEncodedOrigin.Default;
 
+    /// <summary>Whether the image uses a PQ or HLG transfer function (true HDR).</summary>
+    public bool IsHdr { get; set; } = false;
+
+    /// <summary>The detected HDR transfer function type.</summary>
+    public HdrTransferFunction HdrTransferFn { get; set; } = HdrTransferFunction.None;
+
+    /// <summary>Whether the image has a wider-than-sRGB color gamut.</summary>
+    public bool IsWideGamut { get; set; } = false;
+
+    /// <summary>The native bit depth per channel from the source codec.</summary>
+    public int BitsPerChannel { get; set; } = 8;
+
     /// <summary>
     /// Gets whether this image contains an embedded motion/live photo video.
     /// </summary>

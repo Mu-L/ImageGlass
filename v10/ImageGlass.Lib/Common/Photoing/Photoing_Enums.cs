@@ -74,6 +74,24 @@ public enum RotateOption
 
 
 /// <summary>
+/// HDR transfer function type.
+/// </summary>
+public enum HdrTransferFunction
+{
+    None = 0,
+
+    /// <summary>Perceptual Quantizer (SMPTE ST 2084), used in HDR10 and Dolby Vision.</summary>
+    PQ,
+
+    /// <summary>Hybrid Log-Gamma, used in broadcast HDR.</summary>
+    HLG,
+
+    /// <summary>HDR via gain map (Ultra HDR / ISO 21496-1).</summary>
+    GainMap,
+}
+
+
+/// <summary>
 /// Color channels
 /// </summary>
 [Flags]
