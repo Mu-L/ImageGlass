@@ -81,20 +81,27 @@ public static class HdrToneMapper
 
             if (!IsHdrColorSpace(source.ColorSpace))
             {
-                var hdrCs = BuildHdrColorSpace(transferFn, source.ColorSpace);
-                if (hdrCs is null) return null;
+                // Linear scene-referred HDR (EXR, Radiance HDR, JXR) has
+                // transferFn == None — already linear, no PQ/HLG re-tagging needed.
+                // Only re-tag when the metadata explicitly identifies PQ or HLG
+                // but the decoded color space doesn't reflect it.
+                if (transferFn is not HdrTransferFunction.None)
+                {
+                    var hdrCs = BuildHdrColorSpace(transferFn, source.ColorSpace);
+                    if (hdrCs is null) return null;
 
-                retaggedSource = ReinterpretColorSpace(source, hdrCs);
-                if (retaggedSource is null) return null;
+                    retaggedSource = ReinterpretColorSpace(source, hdrCs);
+                    if (retaggedSource is null) return null;
 
-                effectiveSource = retaggedSource;
+                    effectiveSource = retaggedSource;
+                }
             }
 
             // Tone-mapping operators
             // (input / output in normalized linear, 1.0 = SDR reference white = 203 nits)
             return mode switch
             {
-                HdrToneMappingMode.Auto => ToneMapManual(effectiveSource, transferFn,
+                HdrToneMappingMode.BT2408 => ToneMapManual(effectiveSource, transferFn,
                     destColorSpace, brightnessVal, Bt2408KneeToneMap),
                 HdrToneMappingMode.Reinhard => ToneMapManual(effectiveSource, transferFn,
                     destColorSpace, brightnessVal, ExtendedReinhardToneMap),
@@ -300,48 +307,49 @@ public static class HdrToneMapper
 
 
     /// <summary>
-    /// Extended Reinhard with knee-based shoulder (no discontinuity).
-    /// Linear below the knee, Reinhard-shaped soft roll-off above.
-    /// Preserves more highlight differentiation than exponential decay.
-    /// Derivative at knee = 1 (matches linear passthrough).
+    /// Extended Reinhard with wide shoulder (no discontinuity).
+    /// Knee at 0.7 with Reinhard-shaped rolloff over a 0.3 range.
+    /// Trades ~15% SDR brightness for significantly more highlight detail:
+    /// 2x SDR white = 94%, 5x SDR white = 98% (vs BT.2408 which clips both near 100%).
     /// </summary>
     private static float ExtendedReinhardToneMap(float v)
     {
         if (v <= 0f) return 0f;
 
-        const float kneeStart = 0.9f;
+        const float kneeStart = 0.7f;
         const float maxOut = 1.0f;
-        const float range = maxOut - kneeStart; // 0.1
+        const float range = maxOut - kneeStart; // 0.3
 
         if (v <= kneeStart) return v;
 
         // Reinhard shoulder: range * x / (x + range)
-        // f'(knee) = range / (0 + range)² = 1/range · range²/range² ... = 1  ✓
-        // Approaches maxOut more slowly than exponential → more highlight detail.
+        // Derivative at knee = 1 (matches linear passthrough).
+        // Approaches maxOut more slowly than exp/tanh -> most highlight detail.
         float excess = v - kneeStart;
         return kneeStart + range * excess / (excess + range);
     }
 
 
     /// <summary>
-    /// ACES-style filmic curve with knee-based shoulder (no discontinuity).
-    /// Linear below the knee, tanh-shaped roll-off above for cinematic feel.
-    /// Converges to 1.0 faster than Reinhard → punchier highlight rolloff.
-    /// Derivative at knee = 1 (matches linear passthrough).
+    /// ACES-style filmic curve with wide shoulder (no discontinuity).
+    /// Knee at 0.5 with tanh-shaped rolloff over a 0.5 range.
+    /// Starts compressing earlier than Reinhard (0.5 vs 0.7), but tanh
+    /// converges faster — punchier look with highlights clipped sooner.
+    /// At SDR white: BT.2408 96% -> ACES 88% -> Reinhard 85%.
     /// </summary>
     private static float AcesToneMap(float v)
     {
         if (v <= 0f) return 0f;
 
-        const float kneeStart = 0.9f;
+        const float kneeStart = 0.5f;
         const float maxOut = 1.0f;
-        const float range = maxOut - kneeStart; // 0.1
+        const float range = maxOut - kneeStart; // 0.5
 
         if (v <= kneeStart) return v;
 
         // Tanh shoulder: range * tanh(x / range)
-        // f'(knee) = tanh'(0) = 1  ✓  (sech²(0) = 1)
-        // Converges to maxOut faster than Reinhard, giving a punchier rolloff.
+        // Derivative at knee = 1 (sech²(0) = 1).
+        // Converges to maxOut faster than Reinhard -> punchier highlight rolloff.
         float excess = v - kneeStart;
         return kneeStart + range * MathF.Tanh(excess / range);
     }

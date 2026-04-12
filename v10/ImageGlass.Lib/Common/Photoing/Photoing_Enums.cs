@@ -103,17 +103,23 @@ public enum HdrToneMappingMode
     None,
 
     /// <summary>
-    /// Skia-native color space conversion (default). Fast, may clip extreme highlights.
+    /// BT.2408-style knee curve (default, closest to Chrome).
+    /// SDR content preserved; only super-white highlights are compressed
+    /// with a tight exponential shoulder starting at 0.9.
     /// </summary>
-    Auto,
+    BT2408,
 
     /// <summary>
-    /// Global Reinhard operator — preserves highlight detail.
+    /// Extended Reinhard with wide shoulder.
+    /// Trades SDR brightness for significantly more highlight detail.
+    /// Best for recovering specular highlights in HDR photos.
     /// </summary>
     Reinhard,
 
     /// <summary>
-    /// ACES filmic curve — cinematic rolloff with deeper blacks.
+    /// ACES-style filmic curve with moderate shoulder.
+    /// Cinematic rolloff — punchier than Reinhard, more highlight
+    /// headroom than BT.2408.
     /// </summary>
     ACES,
 }

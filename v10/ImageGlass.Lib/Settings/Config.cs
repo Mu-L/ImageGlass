@@ -768,7 +768,7 @@ public partial class Config : PhReactive
     [JsonConverter(typeof(JsonStringEnumConverter<HdrToneMappingMode>))]
     public HdrToneMappingMode HdrToneMapping
     {
-        get => Get(ConfigId.HdrToneMapping, HdrToneMappingMode.Auto);
+        get => Get(ConfigId.HdrToneMapping, HdrToneMappingMode.BT2408);
         set => Set(ConfigId.HdrToneMapping, value);
     }
 
