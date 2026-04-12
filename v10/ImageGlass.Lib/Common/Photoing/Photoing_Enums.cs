@@ -98,14 +98,14 @@ public enum ColorChannels
 public enum HdrToneMappingMode
 {
     /// <summary>
-    /// Skia-native color space conversion (default). Fast, may clip extreme highlights.
-    /// </summary>
-    Auto,
-
-    /// <summary>
     /// Pass through raw HDR values (for HDR monitors). Clips on SDR displays.
     /// </summary>
     None,
+
+    /// <summary>
+    /// Skia-native color space conversion (default). Fast, may clip extreme highlights.
+    /// </summary>
+    Auto,
 
     /// <summary>
     /// Global Reinhard operator — preserves highlight detail.

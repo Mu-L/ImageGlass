@@ -39,15 +39,15 @@ public static class HdrToneMapper
 
     /// <summary>Normalization multiplier: after PQ EOTF (1.0 = 10 000 nits),
     /// scale so that 203 nits -> 1.0.</summary>
-    private const float PqNormScale = PqPeakNits / SdrWhiteNits; // ≈ 49.26
+    private const float PqNormScale = PqPeakNits / SdrWhiteNits; // ~ 49.26
 
     // Rec.2020 luminance coefficients (ITU-R BT.2020)
     private const float LumR = 0.2627f;
     private const float LumG = 0.6780f;
     private const float LumB = 0.0593f;
 
-    // Rec.2020 -> sRGB  3×3 gamut mapping matrix (linear)
-    // M = sRGB_from_XYZ × XYZ_from_Rec2020
+    // Rec.2020 -> sRGB  3x3 gamut mapping matrix (linear)
+    // M = sRGB_from_XYZ x XYZ_from_Rec2020
     private const float M00 = 1.6605f, M01 = -0.5876f, M02 = -0.0729f;
     private const float M10 = -0.1245f, M11 = 1.1329f, M12 = -0.0083f;
     private const float M20 = -0.0182f, M21 = -0.1006f, M22 = 1.1188f;
@@ -62,8 +62,10 @@ public static class HdrToneMapper
     /// is <see cref="HdrToneMappingMode.None"/> (pass-through), or when the
     /// decoded image is not actually HDR-encoded.
     /// </summary>
+    /// <param name="brightness">Brightness adjustment in EV stops.
+    /// <c>0</c> = no change, <c>+1</c> = 2x brighter, <c>-1</c> = 0.5x.</param>
     public static SKImage? ToneMapToSdr(SKImage? source, HdrTransferFunction transferFn,
-        HdrToneMappingMode mode, SKColorSpace? destColorSpace = null)
+        HdrToneMappingMode mode, double brightness = 0d, SKColorSpace? destColorSpace = null)
     {
         if (source.IsDisposed()) return null;
         if (mode == HdrToneMappingMode.None) return null;
@@ -75,6 +77,8 @@ public static class HdrToneMapper
         try
         {
             var effectiveSource = source;
+            var brightnessVal = (float)brightness;
+
             if (!IsHdrColorSpace(source.ColorSpace))
             {
                 var hdrCs = BuildHdrColorSpace(transferFn, source.ColorSpace);
@@ -90,9 +94,12 @@ public static class HdrToneMapper
             // (input / output in normalized linear, 1.0 = SDR reference white = 203 nits)
             return mode switch
             {
-                HdrToneMappingMode.Auto => ToneMapManual(effectiveSource, transferFn, destColorSpace, Bt2408KneeToneMap),
-                HdrToneMappingMode.Reinhard => ToneMapManual(effectiveSource, transferFn, destColorSpace, ExtendedReinhardToneMap),
-                HdrToneMappingMode.ACES => ToneMapManual(effectiveSource, transferFn, destColorSpace, AcesToneMap),
+                HdrToneMappingMode.Auto => ToneMapManual(effectiveSource, transferFn,
+                    destColorSpace, brightnessVal, Bt2408KneeToneMap),
+                HdrToneMappingMode.Reinhard => ToneMapManual(effectiveSource, transferFn,
+                    destColorSpace, brightnessVal, ExtendedReinhardToneMap),
+                HdrToneMappingMode.ACES => ToneMapManual(effectiveSource, transferFn,
+                    destColorSpace, brightnessVal, AcesToneMap),
                 _ => null,
             };
         }
@@ -126,11 +133,12 @@ public static class HdrToneMapper
     /// 2. Normalize so 203 nits = 1.0 (PQ) or keep 1.0 (HLG).
     /// 3. Compute Rec.2020 luminance; apply tone curve on luminance only.
     /// 4. Scale RGB by (mapped luminance / original luminance) to preserve hue.
-    /// 5. Gamut-map Rec.2020 -> sRGB via 3×3 matrix.
+    /// 5. Gamut-map Rec.2020 -> sRGB via 3x3 matrix.
     /// 6. Encode to sRGB gamma.
     /// </summary>
     private static unsafe SKImage? ToneMapManual(SKImage source,
-        HdrTransferFunction transferFn, SKColorSpace? destColorSpace, Func<float, float> toneCurve)
+        HdrTransferFunction transferFn, SKColorSpace? destColorSpace,
+        float brightness, Func<float, float> toneCurve)
     {
         // Step 1: Decode into linear-light Rec.2020 float buffer.
         var linearRec2020 = SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.Rec2020);
@@ -160,6 +168,14 @@ public static class HdrToneMapper
         // PQ: after EOTF 1.0 = 10 000 nits.  Scale so 203 nits -> 1.0.
         // HLG: after EOTF 1.0 ≈ reference white already.
         var normScale = transferFn == HdrTransferFunction.PQ ? PqNormScale : 1f;
+
+        // Brightness adjustment: EV stops applied as exposure multiplier.
+        // 0 = no change, +1 = 2x, -1 = 0.5x.
+        // Combined with normScale to avoid an extra per-pixel multiply.
+        if (brightness != 0f)
+        {
+            normScale *= MathF.Pow(2f, brightness);
+        }
 
         for (var y = 0; y < height; y++)
         {

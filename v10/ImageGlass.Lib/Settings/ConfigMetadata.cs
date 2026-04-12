@@ -98,6 +98,7 @@ public enum ConfigId
     InAppMessageDuration,
     PreviewMinWidth,
     PreviewMinHeight,
+    HdrBrightness,
 
     #endregion // Number settings
 

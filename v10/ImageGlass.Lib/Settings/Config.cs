@@ -605,6 +605,17 @@ public partial class Config : PhReactive
         set => Set(ConfigId.PreviewMinHeight, value);
     }
 
+    /// <summary>
+    /// Gets, sets the HDR brightness adjustment in EV stops.
+    /// <c>0</c> = no change, <c>+1</c> = 2× brighter, <c>-1</c> = 0.5×.
+    /// Typical range: <c>-3</c> to <c>+3</c>.
+    /// </summary>
+    public double HdrBrightness
+    {
+        get => Get(ConfigId.HdrBrightness, 0d);
+        set => Set(ConfigId.HdrBrightness, value);
+    }
+
     #endregion // Number items
 
 

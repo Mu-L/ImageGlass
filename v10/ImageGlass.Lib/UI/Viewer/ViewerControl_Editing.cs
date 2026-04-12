@@ -140,16 +140,16 @@ public partial class ViewerControl
         output = null;
 
         // HDR tone mapping (applies regardless of color profile setting)
-        if (Photo?.Metadata?.IsHdr == true && srcImage is not null)
+        if (Photo?.Metadata?.IsHdr == true && !srcImage.IsDisposed())
         {
-            var mode = Core.Config.HdrToneMapping;
             var toneMapped = HdrToneMapper.ToneMapToSdr(
                 srcImage,
                 Photo.Metadata.HdrTransferFn,
-                mode,
+                Core.Config.HdrToneMapping,
+                Core.Config.HdrBrightness,
                 Core.DestColorProfile);
 
-            if (toneMapped is not null)
+            if (!toneMapped.IsDisposed())
             {
                 output = toneMapped;
                 return true;
