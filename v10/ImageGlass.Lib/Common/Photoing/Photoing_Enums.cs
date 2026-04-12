@@ -74,24 +74,6 @@ public enum RotateOption
 
 
 /// <summary>
-/// HDR transfer function type.
-/// </summary>
-public enum HdrTransferFunction
-{
-    None = 0,
-
-    /// <summary>Perceptual Quantizer (SMPTE ST 2084), used in HDR10 and Dolby Vision.</summary>
-    PQ,
-
-    /// <summary>Hybrid Log-Gamma, used in broadcast HDR.</summary>
-    HLG,
-
-    /// <summary>HDR via gain map (Ultra HDR / ISO 21496-1).</summary>
-    GainMap,
-}
-
-
-/// <summary>
 /// Color channels
 /// </summary>
 [Flags]
@@ -108,3 +90,55 @@ public enum ColorChannels
     GA = G | A,
     BA = B | A,
 }
+
+
+/// <summary>
+/// HDR tone mapping mode for SDR displays.
+/// </summary>
+public enum HdrToneMappingMode
+{
+    /// <summary>
+    /// Skia-native color space conversion (default). Fast, may clip extreme highlights.
+    /// </summary>
+    Auto,
+
+    /// <summary>
+    /// Pass through raw HDR values (for HDR monitors). Clips on SDR displays.
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// Global Reinhard operator — preserves highlight detail.
+    /// </summary>
+    Reinhard,
+
+    /// <summary>
+    /// ACES filmic curve — cinematic rolloff with deeper blacks.
+    /// </summary>
+    ACES,
+}
+
+
+/// <summary>
+/// HDR transfer function type.
+/// </summary>
+public enum HdrTransferFunction
+{
+    None = 0,
+
+    /// <summary>
+    /// Perceptual Quantizer (SMPTE ST 2084), used in HDR10 and Dolby Vision.
+    /// </summary>
+    PQ,
+
+    /// <summary>
+    /// Hybrid Log-Gamma, used in broadcast HDR.
+    /// </summary>
+    HLG,
+
+    /// <summary>
+    /// HDR via gain map (Ultra HDR / ISO 21496-1).
+    /// </summary>
+    GainMap,
+}
+

@@ -139,7 +139,11 @@ public partial class ViewerControl : PhControl
             // 1. check if we can apply color profile
             // skip animated images
             if (_animator is not null) return;
-            if (!CanApplySkiaColorSpace()) return;
+
+            // Always re-process HDR photos on monitor change (HDR↔SDR transition).
+            // For SDR photos, gate on the normal color profile check.
+            var isHdrPhoto = Photo?.Metadata?.IsHdr == true;
+            if (!isHdrPhoto && !CanApplySkiaColorSpace()) return;
 
             // 2. dispose tile cache (will be rebuilt after next first draw)
             _mipmapCache?.Dispose();

@@ -446,7 +446,7 @@ public partial class Photo : PhDisposable
 
 
         // always load single frame
-        var img = SkiaCodec.FromMagick(data.SingleFrame, meta.SkiaColorSpace);
+        var img = SkiaCodec.FromMagick(data.SingleFrame, meta.SkiaColorSpace, meta.IsHdr);
         _width = (uint)(img?.Width ?? 0);
         _height = (uint)(img?.Height ?? 0);
 
@@ -716,7 +716,7 @@ public partial class Photo : PhDisposable
             var options = ReadOptions with { FrameIndex = newFrameIndex };
             using var data = await MagickCodec.DecodeImageAsync(Metadata, options, ReadSettings,
                 null, CancellationToken.None);
-            var frameImg = SkiaCodec.FromMagick(data.SingleFrame, Metadata.SkiaColorSpace);
+            var frameImg = SkiaCodec.FromMagick(data.SingleFrame, Metadata.SkiaColorSpace, Metadata.IsHdr);
 
             return frameImg;
         }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();

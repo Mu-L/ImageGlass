@@ -751,6 +751,15 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ZoomMode, value);
     }
 
+    /// <summary>
+    /// Gets, sets HDR tone mapping mode for SDR displays.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<HdrToneMappingMode>))]
+    public HdrToneMappingMode HdrToneMapping
+    {
+        get => Get(ConfigId.HdrToneMapping, HdrToneMappingMode.Auto);
+        set => Set(ConfigId.HdrToneMapping, value);
+    }
 
     /// <summary>
     /// Gets, sets the interpolation mode to render the viewing image

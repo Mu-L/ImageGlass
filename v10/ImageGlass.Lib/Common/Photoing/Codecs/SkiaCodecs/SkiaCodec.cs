@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Cysharp.Collections;
 using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer;
@@ -32,7 +33,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Cysharp.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -351,6 +351,18 @@ public static partial class SkiaCodec
         SKColorType.RgbaF32 => 32,
         _ => 8,
     };
+
+
+    /// <summary>
+    /// Returns <c>true</c> when the color type stores more than 8 bits per channel,
+    /// indicating a high-bit-depth or HDR pixel format.
+    /// </summary>
+    public static bool IsHighBitDepthColorType(SKColorType colorType) => colorType is
+        SKColorType.RgbaF16 or SKColorType.RgbaF16Clamped
+        or SKColorType.RgbaF32
+        or SKColorType.Rgba16161616
+        or SKColorType.Rgba1010102 or SKColorType.Bgra1010102
+        or SKColorType.Rgb101010x or SKColorType.Bgr101010x;
 
 
     /// <summary>
@@ -902,34 +914,51 @@ public static partial class SkiaCodec
 
     /// <summary>
     /// Converts Magick image to SKBitmap.
+    /// When <paramref name="isHdr"/> is <c>true</c>, exports at 16-bit precision
+    /// (<see cref="SKColorType.Rgba16161616"/>) to preserve HDR data from Q16-HDRI.
     /// </summary>
-    public static unsafe SKImage? FromMagick(MagickImage? imgM, SKColorSpace? srcColorSpace = null)
+    public static unsafe SKImage? FromMagick(MagickImage? imgM, SKColorSpace? srcColorSpace = null, bool isHdr = false)
     {
         if (imgM is null) return null;
 
         // prepare image info
         var alphaType = imgM.HasAlpha ? SKAlphaType.Unpremul : SKAlphaType.Opaque;
-        var info = new SKImageInfo((int)imgM.Width, (int)imgM.Height, SKColorType.Rgba8888, alphaType);
+        var colorType = isHdr ? SKColorType.Rgba16161616 : SKColorType.Rgba8888;
+        var info = new SKImageInfo((int)imgM.Width, (int)imgM.Height, colorType, alphaType);
         if (srcColorSpace is not null)
         {
             info = info.WithColorSpace(srcColorSpace);
         }
 
-        // get pixels array
         using var pixels = imgM.GetPixelsUnsafe();
-        var bytes = pixels.ToByteArray(PixelMapping.RGBA);
-        if (bytes is null) return null;
+        NativeMemoryArray<byte> nativeBuffer;
 
-        // copy to native memory (off-heap, no LOH pinning)
-        var nativeBuffer = new NativeMemoryArray<byte>(bytes.Length, skipZeroClear: true, addMemoryPressure: true);
-        bytes.CopyTo(nativeBuffer.AsSpan());
+        if (isHdr)
+        {
+            // HDR path: export at full 16-bit precision per channel from Q16-HDRI
+            var shorts = pixels.ToShortArray(PixelMapping.RGBA);
+            if (shorts is null) return null;
+
+            var byteSpan = MemoryMarshal.AsBytes(shorts.AsSpan());
+            nativeBuffer = new NativeMemoryArray<byte>(byteSpan.Length, skipZeroClear: true, addMemoryPressure: true);
+            byteSpan.CopyTo(nativeBuffer.AsSpan());
+        }
+        else
+        {
+            // SDR path: 8-bit RGBA to save memory
+            var bytes = pixels.ToByteArray(PixelMapping.RGBA);
+            if (bytes is null) return null;
+
+            nativeBuffer = new NativeMemoryArray<byte>(bytes.Length, skipZeroClear: true, addMemoryPressure: true);
+            bytes.CopyTo(nativeBuffer.AsSpan());
+        }
 
         // create SKData backed by native memory; release callback disposes nativeBuffer
         fixed (byte* ptr = nativeBuffer)
         {
             var data = SKData.Create(
                 (nint)ptr,
-                bytes.Length,
+                (int)nativeBuffer.Length,
                 (addr, ctx) => ((NativeMemoryArray<byte>)ctx!).Dispose(),
                 nativeBuffer
             );
@@ -1064,26 +1093,53 @@ public static partial class SkiaCodec
 
     /// <summary>
     /// Converts <see cref="SKImage"/> to <see cref="MagickImage"/>.
+    /// High-bit-depth images are normalized to Bgra8888 before import
+    /// so that Magick's raw BGRA reader receives the expected 8-bit data.
     /// </summary>
     public static MagickImage? ToMagick(SKImage? skImg)
     {
         if (skImg.IsDisposed()) return null;
 
-        // convert to pixels
-        using var pixmap = skImg.PeekPixels();
-        var pixSpan = pixmap.GetPixelSpan();
+        // Normalize to Bgra8888 when the source uses a different color type.
+        // MagickFormat.Bgra expects 8-bit per channel; high-bit-depth data
+        // would be misinterpreted without this conversion.
+        SKImage? normalized = null;
+        var srcImage = skImg;
 
-        // convert to MagickImage
-        var imgM = new MagickImage();
-        var settings = new MagickReadSettings()
+        if (skImg.ColorType != SKColorType.Bgra8888)
         {
-            Format = MagickFormat.Bgra,
-            Width = (uint)skImg.Width,
-            Height = (uint)skImg.Height,
-        };
-        imgM.Read(pixSpan, settings);
+            var normInfo = new SKImageInfo(skImg.Width, skImg.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+            using var surface = SKSurface.Create(normInfo);
+            if (surface is not null)
+            {
+                surface.Canvas.DrawImage(skImg, 0, 0);
+                normalized = surface.Snapshot();
+                srcImage = normalized;
+            }
+        }
 
-        return imgM;
+        try
+        {
+            // convert to pixels
+            using var pixmap = srcImage.PeekPixels();
+            var pixSpan = pixmap.GetPixelSpan();
+
+            // convert to MagickImage
+            var imgM = new MagickImage();
+            var settings = new MagickReadSettings()
+            {
+                Format = MagickFormat.Bgra,
+                Width = (uint)srcImage.Width,
+                Height = (uint)srcImage.Height,
+            };
+            imgM.Read(pixSpan, settings);
+
+            return imgM;
+        }
+        finally
+        {
+            normalized?.Dispose();
+        }
     }
 
 

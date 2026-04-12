@@ -81,6 +81,23 @@ internal sealed class MipmapTileCache : PhDisposable
     /// </summary>
     private readonly SKImageRef _sourceRef;
 
+    /// <summary>
+    /// The color type of the source image, used to create tiles at matching bit depth.
+    /// </summary>
+    private readonly SKColorType _colorType;
+
+    /// <summary>
+    /// The color space of the source image, attached to tiles during extraction
+    /// so that downscaling preserves encoded values without color-space conversion.
+    /// </summary>
+    private readonly SKColorSpace? _colorSpace;
+
+    /// <summary>
+    /// Maximum number of tiles to cache, scaled down for high-bit-depth formats
+    /// to stay within a constant memory budget.
+    /// </summary>
+    private readonly int _maxCachedTiles;
+
 
     /// <summary>
     /// Gets the width of the source image.
@@ -93,12 +110,22 @@ internal sealed class MipmapTileCache : PhDisposable
     public int SourceHeight { get; }
 
 
-    private MipmapTileCache(SKImageRef sourceRef, int width, int height)
+    private MipmapTileCache(SKImageRef sourceRef, int width, int height,
+        SKColorType colorType, SKColorSpace? colorSpace)
     {
         _sourceRef = sourceRef;
         _sourceRef.KeepAlive();
         SourceWidth = width;
         SourceHeight = height;
+        _colorType = colorType;
+        _colorSpace = colorSpace;
+
+        // Scale max tiles inversely with bytes-per-pixel to keep a constant memory budget.
+        // Budget baseline: MAX_CACHED_TILES tiles of Rgba8888 (4 bpp).
+        var bpp = new SKImageInfo(1, 1, colorType).BytesPerPixel;
+        _maxCachedTiles = bpp <= 4
+            ? MAX_CACHED_TILES
+            : Math.Max(10, MAX_CACHED_TILES * 4 / bpp);
     }
 
 
@@ -117,7 +144,8 @@ internal sealed class MipmapTileCache : PhDisposable
         var pixels = (long)img.Width * img.Height;
         if (pixels < MIN_PIXELS_FOR_TILING) return null;
 
-        return new MipmapTileCache(sourceRef!, img.Width, img.Height);
+        return new MipmapTileCache(sourceRef!, img.Width, img.Height,
+            img.ColorType, img.ColorSpace);
     }
 
 
@@ -205,7 +233,7 @@ internal sealed class MipmapTileCache : PhDisposable
             _nodeMap[key] = _lruList.AddLast(key);
 
             // LRU eviction
-            while (_tiles.Count > MAX_CACHED_TILES && _lruList.First is not null)
+            while (_tiles.Count > _maxCachedTiles && _lruList.First is not null)
             {
                 var oldest = _lruList.First.Value;
                 _lruList.RemoveFirst();
@@ -257,7 +285,9 @@ internal sealed class MipmapTileCache : PhDisposable
         var srcImage = lease?.Image;
         if (srcImage is null || srcImage.IsDisposed()) return null;
 
-        var info = new SKImageInfo(tileW, tileH, SKColorType.Rgba8888, SKAlphaType.Premul);
+        // Use the source's color type and space so that high-bit-depth / HDR
+        // data is preserved in tiles without unwanted color-space conversion.
+        var info = new SKImageInfo(tileW, tileH, _colorType, SKAlphaType.Premul, _colorSpace);
         var bitmap = new SKBitmap(info);
 
         using var canvas = new SKCanvas(bitmap);

@@ -125,6 +125,7 @@ public enum ConfigId
     ImageLoadingOrder,
     ImageLoadingOrderType,
     ZoomMode,
+    HdrToneMapping,
     ImageInterpolationScaleDown,
     ImageInterpolationScaleUp,
     AfterEditingAction,

@@ -132,11 +132,30 @@ public partial class ViewerControl
 
 
     /// <summary>
-    /// Attempts to apply the destination Skia color profile to the current photo.
+    /// Attempts to apply HDR tone mapping and/or the destination Skia color profile
+    /// to the current photo.
     /// </summary>
     private bool TryApplySkiaColorSpace(SKImage? srcImage, out SKImage? output)
     {
         output = null;
+
+        // HDR tone mapping (applies regardless of color profile setting)
+        if (Photo?.Metadata?.IsHdr == true && srcImage is not null)
+        {
+            var mode = Core.Config.HdrToneMapping;
+            var toneMapped = HdrToneMapper.ToneMapToSdr(
+                srcImage,
+                Photo.Metadata.HdrTransferFn,
+                mode,
+                Core.DestColorProfile);
+
+            if (toneMapped is not null)
+            {
+                output = toneMapped;
+                return true;
+            }
+        }
+
         if (!CanApplySkiaColorSpace()) return false;
 
         // apply new color space for source image

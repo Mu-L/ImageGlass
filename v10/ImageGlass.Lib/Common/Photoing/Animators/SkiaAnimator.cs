@@ -147,9 +147,13 @@ public class SkiaAnimator : AnimatorImpl
             if (_compositeBitmap is null)
             {
                 var info = _codec.Info;
-                // Use Bgra8888 for best compatibility with Avalonia/Windows
-                // Premul is generally faster for composition
-                _compositeBitmap = new SKBitmap(info.Width, info.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+                // For high-bit-depth sources (HDR AVIF, animated WebP with wide gamut),
+                // preserve the native color type. Otherwise use Bgra8888 for best
+                // compatibility with Avalonia/Windows. Premul is faster for composition.
+                var compositeType = SkiaCodec.IsHighBitDepthColorType(info.ColorType)
+                    ? info.ColorType
+                    : SKColorType.Bgra8888;
+                _compositeBitmap = new SKBitmap(info.Width, info.Height, compositeType, SKAlphaType.Premul);
                 _lastRenderedFrameIndex = -1;
             }
 
