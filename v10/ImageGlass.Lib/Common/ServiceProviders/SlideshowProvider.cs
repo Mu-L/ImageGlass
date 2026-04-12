@@ -276,7 +276,7 @@ public sealed class SlideshowProvider : PhDisposable
                 if (token.IsCancellationRequested) break;
 
 
-                // 4. check end of list without loop → auto-pause
+                // 4. check end of list without loop -> auto-pause
                 var isLastPhoto = Core.Photos.CurrentIndex >= (int)Core.Photos.Count - 1;
                 if (isLastPhoto && !Core.Config.EnableLoopSlideshow)
                 {

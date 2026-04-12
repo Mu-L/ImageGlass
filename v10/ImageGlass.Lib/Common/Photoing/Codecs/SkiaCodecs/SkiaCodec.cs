@@ -32,7 +32,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -913,9 +912,9 @@ public static partial class SkiaCodec
 
 
     /// <summary>
-    /// Converts Magick image to SKBitmap.
-    /// When <paramref name="isHdr"/> is <c>true</c>, exports at 16-bit precision
-    /// (<see cref="SKColorType.Rgba16161616"/>) to preserve HDR data from Q16-HDRI.
+    /// Converts Magick image to SKImage.
+    /// When <paramref name="isHdr"/> is <c>true</c>, exports at full float precision
+    /// (<see cref="SKColorType.RgbaF32"/>) to preserve super-white HDR values from Q16-HDRI.
     /// </summary>
     public static unsafe SKImage? FromMagick(MagickImage? imgM, SKColorSpace? srcColorSpace = null, bool isHdr = false)
     {
@@ -923,7 +922,7 @@ public static partial class SkiaCodec
 
         // prepare image info
         var alphaType = imgM.HasAlpha ? SKAlphaType.Unpremul : SKAlphaType.Opaque;
-        var colorType = isHdr ? SKColorType.Rgba16161616 : SKColorType.Rgba8888;
+        var colorType = isHdr ? SKColorType.RgbaF32 : SKColorType.Rgba8888;
         var info = new SKImageInfo((int)imgM.Width, (int)imgM.Height, colorType, alphaType);
         if (srcColorSpace is not null)
         {
@@ -935,13 +934,10 @@ public static partial class SkiaCodec
 
         if (isHdr)
         {
-            // HDR path: export at full 16-bit precision per channel from Q16-HDRI
-            var shorts = pixels.ToShortArray(PixelMapping.RGBA);
-            if (shorts is null) return null;
+            var hdrBuffer = MagickCodec.ExportHdrPixels(imgM, pixels);
+            if (hdrBuffer is null) return null;
 
-            var byteSpan = MemoryMarshal.AsBytes(shorts.AsSpan());
-            nativeBuffer = new NativeMemoryArray<byte>(byteSpan.Length, skipZeroClear: true, addMemoryPressure: true);
-            byteSpan.CopyTo(nativeBuffer.AsSpan());
+            nativeBuffer = hdrBuffer;
         }
         else
         {
@@ -1334,5 +1330,4 @@ public static partial class SkiaCodec
             converted?.Dispose();
         }
     }
-
 }

@@ -25,26 +25,39 @@ namespace ImageGlass.Common.Photoing;
 
 /// <summary>
 /// Tone-maps HDR images to SDR sRGB for display on standard monitors.
-/// Matches Chrome/BT.2408 behavior: SDR reference white (203 nits) maps to
-/// full SDR white; only super-white highlights are compressed.
-/// Tone mapping is applied on luminance to preserve hue and saturation.
+/// <para>
+/// Two tone-mapping strategies are used depending on content type:
+/// <list type="bullet">
+/// <item><b>Per-channel</b> for linear scene-referred content (EXR, Radiance HDR, JXR)
+/// — avoids overflow artifacts (skyblue tint, blue->white wash-out) in sRGB space.</item>
+/// <item><b>Luminance-based</b> for wide-gamut PQ/HLG content (JXL, AVIF, HEIF)
+/// — preserves channel ratios needed by the Rec.2020->sRGB gamut matrix.</item>
+/// </list>
+/// </para>
+/// Monitor color profile is applied by the caller after tone mapping.
 /// </summary>
 public static class HdrToneMapper
 {
-    /// <summary>PQ EOTF peak luminance in nits (SMPTE ST 2084).</summary>
+    /// <summary>
+    /// PQ EOTF peak luminance in nits (SMPTE ST 2084).
+    /// </summary>
     private const float PqPeakNits = 10_000f;
 
-    /// <summary>SDR reference white in nits (ITU-R BT.2408).</summary>
+    /// <summary>
+    /// SDR reference white in nits (ITU-R BT.2408).
+    /// </summary>
     private const float SdrWhiteNits = 203f;
 
-    /// <summary>Normalization multiplier: after PQ EOTF (1.0 = 10 000 nits),
-    /// scale so that 203 nits -> 1.0.</summary>
+    /// <summary>
+    /// Normalization multiplier: after PQ EOTF (1.0 = 10 000 nits),
+    /// scale so that 203 nits -> 1.0.
+    /// </summary>
     private const float PqNormScale = PqPeakNits / SdrWhiteNits; // ~ 49.26
 
-    // Rec.2020 luminance coefficients (ITU-R BT.2020)
-    private const float LumR = 0.2627f;
-    private const float LumG = 0.6780f;
-    private const float LumB = 0.0593f;
+    // Rec.2020 luminance coefficients (ITU-R BT.2020) — used by luminance-based path
+    private const float Lum2020R = 0.2627f;
+    private const float Lum2020G = 0.6780f;
+    private const float Lum2020B = 0.0593f;
 
     // Rec.2020 -> sRGB  3x3 gamut mapping matrix (linear)
     // M = sRGB_from_XYZ x XYZ_from_Rec2020
@@ -65,7 +78,7 @@ public static class HdrToneMapper
     /// <param name="brightness">Brightness adjustment in EV stops.
     /// <c>0</c> = no change, <c>+1</c> = 2x brighter, <c>-1</c> = 0.5x.</param>
     public static SKImage? ToneMapToSdr(SKImage? source, HdrTransferFunction transferFn,
-        HdrToneMappingMode mode, double brightness = 0d, SKColorSpace? destColorSpace = null)
+        HdrToneMappingMode mode, double brightness = 0d)
     {
         if (source.IsDisposed()) return null;
         if (mode == HdrToneMappingMode.None) return null;
@@ -81,12 +94,27 @@ public static class HdrToneMapper
 
             if (!IsHdrColorSpace(source.ColorSpace))
             {
-                // Linear scene-referred HDR (EXR, Radiance HDR, JXR) has
-                // transferFn == None — already linear, no PQ/HLG re-tagging needed.
-                // Only re-tag when the metadata explicitly identifies PQ or HLG
-                // but the decoded color space doesn't reflect it.
-                if (transferFn is not HdrTransferFunction.None)
+                if (transferFn is HdrTransferFunction.None)
                 {
+                    // Linear scene-referred HDR (EXR, Radiance HDR, JXR):
+                    // pixels are already linear but the source may have no color
+                    // space tag (or sRGB). Tag as linear-sRGB so that Skia's
+                    // DrawImage in ToneMapManual doesn't apply an unwanted sRGB
+                    // gamma -> linear conversion (which would darken the image).
+                    // Using sRGB primaries (not Rec.2020) because most EXR/HDR
+                    // files use Rec.709/sRGB primaries; Skia will then correctly
+                    // gamut-map from sRGB to Rec.2020 in ToneMapManual.
+                    var linearCs = SKColorSpace.CreateSrgbLinear();
+
+                    retaggedSource = ReinterpretColorSpace(source, linearCs);
+                    if (retaggedSource is null) return null;
+
+                    effectiveSource = retaggedSource;
+                }
+                else
+                {
+                    // PQ/HLG: metadata says PQ or HLG but the decoded color space
+                    // doesn't reflect it — re-tag with the correct transfer function.
                     var hdrCs = BuildHdrColorSpace(transferFn, source.ColorSpace);
                     if (hdrCs is null) return null;
 
@@ -102,11 +130,11 @@ public static class HdrToneMapper
             return mode switch
             {
                 HdrToneMappingMode.BT2408 => ToneMapManual(effectiveSource, transferFn,
-                    destColorSpace, brightnessVal, Bt2408KneeToneMap),
+                    brightnessVal, Bt2408KneeToneMap),
                 HdrToneMappingMode.Reinhard => ToneMapManual(effectiveSource, transferFn,
-                    destColorSpace, brightnessVal, ExtendedReinhardToneMap),
+                    brightnessVal, ExtendedReinhardToneMap),
                 HdrToneMappingMode.ACES => ToneMapManual(effectiveSource, transferFn,
-                    destColorSpace, brightnessVal, AcesToneMap),
+                    brightnessVal, AcesToneMap),
                 _ => null,
             };
         }
@@ -135,59 +163,136 @@ public static class HdrToneMapper
     #region Private Methods
 
     /// <summary>
-    /// Tone mapping pipeline:
-    /// 1. Linearize PQ/HLG via Skia color-space conversion to linear Rec.2020.
+    /// Tone mapping pipeline with two strategies:
+    /// <para><b>PQ/HLG path</b> (wide-gamut Rec.2020):</para>
+    /// 1. Linearize via Skia color-space conversion to linear Rec.2020.
     /// 2. Normalize so 203 nits = 1.0 (PQ) or keep 1.0 (HLG).
-    /// 3. Compute Rec.2020 luminance; apply tone curve on luminance only.
-    /// 4. Scale RGB by (mapped luminance / original luminance) to preserve hue.
-    /// 5. Gamut-map Rec.2020 -> sRGB via 3x3 matrix.
-    /// 6. Encode to sRGB gamma.
+    /// 3. Apply tone curve on <b>luminance</b>, scale RGB proportionally.
+    /// 4. Gamut-map Rec.2020 -> sRGB via 3×3 matrix.
+    /// 5. Encode to sRGB gamma.
+    /// <para><b>Linear scene-referred path</b> (EXR, Radiance HDR, JXR):</para>
+    /// 1. Read float pixels directly (already linear sRGB).
+    /// 2. Apply tone curve <b>per-channel</b> independently.
+    /// 3. Encode to sRGB gamma.
+    /// <para>
+    /// The two strategies exist because:
+    /// <list type="bullet">
+    /// <item>Per-channel avoids overflow artifacts in sRGB space (no skyblue
+    /// tint on near-white, no blue->white wash-out).</item>
+    /// <item>Luminance-based preserves channel ratios that the Rec.2020->sRGB
+    /// gamut matrix needs; per-channel would compress all channels toward 1.0,
+    /// making the matrix output near-white.</item>
+    /// </list>
+    /// </para>
     /// </summary>
     private static unsafe SKImage? ToneMapManual(SKImage source,
-        HdrTransferFunction transferFn, SKColorSpace? destColorSpace,
+        HdrTransferFunction transferFn,
         float brightness, Func<float, float> toneCurve)
     {
-        // Step 1: Decode into linear-light Rec.2020 float buffer.
-        var linearRec2020 = SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.Rec2020);
+        var isLinearSceneReferred = transferFn == HdrTransferFunction.None;
+
+        // ── Step 1: linearize source into float pixels ──
+        using var linearBmp = LinearizeToFloat(source, isLinearSceneReferred);
+        if (linearBmp is null) return null;
+
+        var width = linearBmp.Width;
+        var height = linearBmp.Height;
+
+        // ── Step 2: allocate output (linear sRGB, RgbaF32) ──
+        var outputInfo = new SKImageInfo(width, height,
+            SKColorType.RgbaF32, SKAlphaType.Unpremul, SKColorSpace.CreateSrgbLinear());
+        using var outputBmp = new SKBitmap(outputInfo);
+
+        var srcPtr = (byte*)linearBmp.GetPixels();
+        var dstPtr = (byte*)outputBmp.GetPixels();
+        var srcRowBytes = linearBmp.RowBytes;
+        var dstRowBytes = outputBmp.RowBytes;
+
+        // ── Step 3: normalization and brightness ──
+        var normScale = ComputeNormScale(transferFn, brightness);
+
+        // ── Step 4: per-pixel tone mapping ──
+        if (isLinearSceneReferred)
+        {
+            ToneMapPerChannel(srcPtr, srcRowBytes, dstPtr, dstRowBytes,
+                width, height, normScale, toneCurve);
+        }
+        else
+        {
+            ToneMapLuminanceBased(srcPtr, srcRowBytes, dstPtr, dstRowBytes,
+                width, height, normScale, toneCurve);
+        }
+
+        // ── Step 5: convert linear sRGB float -> final sRGB Rgba8888 ──
+        return ConvertToFinalSrgb(outputBmp);
+    }
+
+
+    /// <summary>
+    /// Linearizes the source image into an <see cref="SKColorType.RgbaF32"/> bitmap.
+    /// For scene-referred content (EXR/HDR/JXR), the target is linear sRGB.
+    /// For PQ/HLG content, the target is linear Rec.2020.
+    /// </summary>
+    /// <returns>An <see cref="SKBitmap"/> owning the linearized pixels,
+    /// or <c>null</c> on failure. Caller owns disposal.</returns>
+    private static SKBitmap? LinearizeToFloat(SKImage source, bool isLinearSceneReferred)
+    {
+        var targetCs = isLinearSceneReferred
+            ? SKColorSpace.CreateSrgbLinear()
+            : SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.Rec2020);
+
         var linearInfo = new SKImageInfo(source.Width, source.Height,
-            SKColorType.RgbaF32, SKAlphaType.Unpremul, linearRec2020);
+            SKColorType.RgbaF32, SKAlphaType.Unpremul, targetCs);
 
         using var linearSurface = SKSurface.Create(linearInfo);
         if (linearSurface is null) return null;
 
         linearSurface.Canvas.DrawImage(source, 0, 0);
 
-        // Step 2: Read back linear-light pixels.
+        // Copy pixels into an owned bitmap so the surface can be disposed safely.
         using var linearSnapshot = linearSurface.Snapshot();
-        using var pixmap = linearSnapshot.PeekPixels();
-        if (pixmap is null) return null;
+        var bitmap = new SKBitmap(linearInfo);
+        if (!linearSnapshot.ReadPixels(bitmap.Info, bitmap.GetPixels(), bitmap.RowBytes, 0, 0))
+        {
+            bitmap.Dispose();
+            return null;
+        }
 
-        var width = pixmap.Width;
-        var height = pixmap.Height;
-        var rowBytes = pixmap.RowBytes;
+        return bitmap;
+    }
 
-        // Allocate output buffer (linear sRGB, RgbaF32)
-        var outputInfo = new SKImageInfo(width, height, SKColorType.RgbaF32, SKAlphaType.Unpremul);
-        using var outputBmp = new SKBitmap(outputInfo);
-        var srcPtr = (byte*)pixmap.GetPixels();
-        var dstPtr = (byte*)outputBmp.GetPixels();
 
-        // PQ: after EOTF 1.0 = 10 000 nits.  Scale so 203 nits -> 1.0.
-        // HLG: after EOTF 1.0 ≈ reference white already.
+    /// <summary>
+    /// Computes the combined normalization scale: PQ EOTF rescaling + brightness EV.
+    /// </summary>
+    private static float ComputeNormScale(HdrTransferFunction transferFn, float brightness)
+    {
+        // PQ: after EOTF 1.0 = 10 000 nits. Scale so 203 nits -> 1.0.
+        // HLG/Linear: 1.0 ≈ reference white already.
         var normScale = transferFn == HdrTransferFunction.PQ ? PqNormScale : 1f;
 
-        // Brightness adjustment: EV stops applied as exposure multiplier.
-        // 0 = no change, +1 = 2x, -1 = 0.5x.
-        // Combined with normScale to avoid an extra per-pixel multiply.
+        // Brightness in EV stops: 0 = no change, +1 = 2×, -1 = 0.5×.
         if (brightness != 0f)
         {
             normScale *= MathF.Pow(2f, brightness);
         }
 
+        return normScale;
+    }
+
+
+    /// <summary>
+    /// Per-channel tone mapping for linear scene-referred sRGB content.
+    /// Each channel is independently compressed — avoids overflow artifacts.
+    /// </summary>
+    private static unsafe void ToneMapPerChannel(
+        byte* srcPtr, int srcRowBytes, byte* dstPtr, int dstRowBytes,
+        int width, int height, float normScale, Func<float, float> toneCurve)
+    {
         for (var y = 0; y < height; y++)
         {
-            var srcRow = (float*)(srcPtr + (long)y * rowBytes);
-            var dstRow = (float*)(dstPtr + (long)y * outputBmp.RowBytes);
+            var srcRow = (float*)(srcPtr + (long)y * srcRowBytes);
+            var dstRow = (float*)(dstPtr + (long)y * dstRowBytes);
 
             for (var x = 0; x < width; x++)
             {
@@ -197,54 +302,87 @@ public static class HdrToneMapper
                 var b = srcRow[i + 2] * normScale;
                 var a = srcRow[i + 3];
 
-                // ── Luminance-based tone mapping ──
-                // Compute Rec.2020 luminance
-                var lum = LumR * r + LumG * g + LumB * b;
+                if (r > 0f || g > 0f || b > 0f)
+                {
+                    r = toneCurve(r);
+                    g = toneCurve(g);
+                    b = toneCurve(b);
+                }
+
+                dstRow[i] = Math.Clamp(r, 0f, 1f);
+                dstRow[i + 1] = Math.Clamp(g, 0f, 1f);
+                dstRow[i + 2] = Math.Clamp(b, 0f, 1f);
+                dstRow[i + 3] = Math.Clamp(a, 0f, 1f);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Luminance-based tone mapping for wide-gamut Rec.2020 content (PQ/HLG).
+    /// Preserves channel ratios for correct Rec.2020 -> sRGB gamut mapping.
+    /// </summary>
+    private static unsafe void ToneMapLuminanceBased(
+        byte* srcPtr, int srcRowBytes, byte* dstPtr, int dstRowBytes,
+        int width, int height, float normScale, Func<float, float> toneCurve)
+    {
+        for (var y = 0; y < height; y++)
+        {
+            var srcRow = (float*)(srcPtr + (long)y * srcRowBytes);
+            var dstRow = (float*)(dstPtr + (long)y * dstRowBytes);
+
+            for (var x = 0; x < width; x++)
+            {
+                var i = x * 4;
+                var r = srcRow[i] * normScale;
+                var g = srcRow[i + 1] * normScale;
+                var b = srcRow[i + 2] * normScale;
+                var a = srcRow[i + 3];
+
+                var lum = Lum2020R * r + Lum2020G * g + Lum2020B * b;
 
                 if (lum > 0f)
                 {
-                    var mappedLum = toneCurve(lum);
-                    var scale = mappedLum / lum;
-
-                    // Scale RGB proportionally — preserves hue and saturation
+                    var scale = toneCurve(lum) / lum;
                     r *= scale;
                     g *= scale;
                     b *= scale;
                 }
                 else
                 {
-                    r = 0f;
-                    g = 0f;
-                    b = 0f;
+                    r = 0f; g = 0f; b = 0f;
                 }
 
-                // ── Gamut map: Rec.2020 linear -> sRGB linear ──
+                // Gamut map: Rec.2020 linear -> sRGB linear
                 var sr = M00 * r + M01 * g + M02 * b;
                 var sg = M10 * r + M11 * g + M12 * b;
                 var sb = M20 * r + M21 * g + M22 * b;
 
-                // Clamp to [0, 1] (out-of-gamut values after matrix)
                 dstRow[i] = Math.Clamp(sr, 0f, 1f);
                 dstRow[i + 1] = Math.Clamp(sg, 0f, 1f);
                 dstRow[i + 2] = Math.Clamp(sb, 0f, 1f);
                 dstRow[i + 3] = Math.Clamp(a, 0f, 1f);
             }
         }
+    }
 
-        // Step 3: Tag output as sRGB-linear, then convert to final sRGB gamma.
-        var srgbLinear = SKColorSpace.CreateSrgbLinear();
-        using var toneMappedBmpImg = SKImage.FromBitmap(outputBmp);
-        if (toneMappedBmpImg is null) return null;
 
-        using var toneMappedLinear = ReinterpretColorSpace(toneMappedBmpImg, srgbLinear);
-        if (toneMappedLinear is null) return null;
+    /// <summary>
+    /// Converts a linear sRGB <see cref="SKColorType.RgbaF32"/> bitmap to a final
+    /// sRGB <see cref="SKColorType.Rgba8888"/> image. Monitor profile is applied
+    /// by the caller.
+    /// </summary>
+    private static SKImage? ConvertToFinalSrgb(SKBitmap linearBmp)
+    {
+        using var linearImg = SKImage.FromBitmap(linearBmp);
+        if (linearImg is null) return null;
 
-        var dest = destColorSpace ?? SKColorSpace.CreateSrgb();
-        var finalInfo = new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Premul, dest);
+        var finalInfo = new SKImageInfo(linearBmp.Width, linearBmp.Height,
+            SKColorType.Rgba8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb());
         using var finalSurface = SKSurface.Create(finalInfo);
         if (finalSurface is null) return null;
 
-        finalSurface.Canvas.DrawImage(toneMappedLinear, 0, 0);
+        finalSurface.Canvas.DrawImage(linearImg, 0, 0);
         return finalSurface.Snapshot();
     }
 

@@ -239,14 +239,14 @@ public partial class PhotoManager
         // neither old nor new is a supported file type
         if (!oldSupported && !newSupported) return;
 
-        // old was supported, new is not → treat as delete
+        // old was supported, new is not -> treat as delete
         if (oldSupported && !newSupported)
         {
             _deleteQueue.Enqueue(oldFilePath);
             return;
         }
 
-        // old was not supported, new is → treat as add
+        // old was not supported, new is -> treat as add
         if (!oldSupported && newSupported)
         {
             _pendingAdds.Enqueue(newFilePath);

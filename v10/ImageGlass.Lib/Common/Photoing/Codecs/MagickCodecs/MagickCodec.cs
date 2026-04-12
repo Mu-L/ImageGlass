@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+using Cysharp.Collections;
 using ImageMagick;
 using ImageMagick.Formats;
 using SkiaSharp;
@@ -26,6 +27,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -833,7 +835,7 @@ public static partial class MagickCodec
     /// <summary>
     /// Detects HDR transfer function, wide gamut, and bit depth from all available signals,
     /// and populates the corresponding fields on <see cref="PhotoMetadata"/>.
-    /// Uses a layered approach: Magick Depth → SKColorSpace → CICP box → extension heuristics.
+    /// Uses a layered approach: Magick Depth -> SKColorSpace -> CICP box -> extension heuristics.
     /// </summary>
     /// <param name="meta">Metadata with <c>SkiaColorSpace</c>, <c>FileExtension</c>, and <c>FilePath</c> already set.</param>
     /// <param name="img">Optional Magick image for access to <c>Depth</c> and <c>ColorSpace</c>.</param>
@@ -1087,6 +1089,79 @@ public static partial class MagickCodec
             OrientationType.LeftBottom => SKEncodedOrigin.LeftBottom,
             _ => SKEncodedOrigin.Default,
         };
+    }
+
+
+
+    /// <summary>
+    /// Exports HDR float RGBA pixels from a Q16-HDRI Magick image.
+    /// <para>
+    /// Magick Q16-HDRI quantum range: 0 = black, 65535 = SDR white.
+    /// Scene-referred HDR values above SDR white exceed 65535.
+    /// This method normalizes to [0, 1+] for SkiaSharp <see cref="SKColorType.RgbaF32"/>.
+    /// </para>
+    /// <para>
+    /// Channel order is discovered via <see cref="IUnsafePixelCollection{TQuantumType}.GetChannelIndex"/>
+    /// because <see cref="IUnsafePixelCollection{TQuantumType}.GetArea"/> returns channels
+    /// in Magick's internal order, which is NOT guaranteed to be RGB.
+    /// </para>
+    /// </summary>
+    public static NativeMemoryArray<byte>? ExportHdrPixels(MagickImage imgM, IUnsafePixelCollection<float> pixels)
+    {
+        var hasAlpha = imgM.HasAlpha;
+        var area = pixels.GetArea(0, 0, imgM.Width, imgM.Height);
+        if (area is null || area.Length == 0) return null;
+
+        var w = (int)imgM.Width;
+        var h = (int)imgM.Height;
+        var pixelCount = w * h;
+
+        // Derive source channel count from the actual array size.
+        // EXR files may have extra channels (depth, normals, etc.) beyond RGB(A).
+        var srcChannels = area.Length / pixelCount;
+
+        // Discover actual channel positions in Magick's internal order.
+        var chR = (int)(pixels.GetChannelIndex(PixelChannel.Red) ?? 0);
+        var chG = (int)(pixels.GetChannelIndex(PixelChannel.Green) ?? 1);
+        var chB = (int)(pixels.GetChannelIndex(PixelChannel.Blue) ?? 2);
+        var chA = hasAlpha ? (int)(pixels.GetChannelIndex(PixelChannel.Alpha) ?? 0u) : -1;
+
+        var floatCount = pixelCount * 4; // always RGBA for Skia
+        var nativeBuffer = new NativeMemoryArray<byte>(floatCount * sizeof(float), skipZeroClear: true, addMemoryPressure: true);
+        var dst = MemoryMarshal.Cast<byte, float>(nativeBuffer.AsSpan());
+
+        const float quantumScale = 1f / 65535f;
+        var srcIdx = 0;
+
+        for (var i = 0; i < pixelCount; i++)
+        {
+            var dstIdx = i * 4;
+
+            if (srcChannels >= 3)
+            {
+                dst[dstIdx] = area[srcIdx + chR] * quantumScale;
+                dst[dstIdx + 1] = area[srcIdx + chG] * quantumScale;
+                dst[dstIdx + 2] = area[srcIdx + chB] * quantumScale;
+                dst[dstIdx + 3] = chA >= 0 && srcIdx + chA < area.Length
+                    ? area[srcIdx + chA] * quantumScale
+                    : 1f;
+            }
+            else
+            {
+                // Grayscale (1 channel) or Gray+Alpha (2 channels)
+                var gray = area[srcIdx] * quantumScale;
+                dst[dstIdx] = gray;
+                dst[dstIdx + 1] = gray;
+                dst[dstIdx + 2] = gray;
+                dst[dstIdx + 3] = chA >= 0 && srcChannels >= 2
+                    ? area[srcIdx + chA] * quantumScale
+                    : 1f;
+            }
+
+            srcIdx += srcChannels;
+        }
+
+        return nativeBuffer;
     }
 
 

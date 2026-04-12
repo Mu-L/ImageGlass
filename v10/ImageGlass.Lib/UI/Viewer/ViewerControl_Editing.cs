@@ -142,16 +142,29 @@ public partial class ViewerControl
         // HDR tone mapping (applies regardless of color profile setting)
         if (Photo?.Metadata?.IsHdr == true && !srcImage.IsDisposed())
         {
+            // Tone-map to standard sRGB (no monitor profile yet).
+            // The monitor color profile will be applied below via TryApplyColorSpace,
+            // same as SDR images, for consistent color handling.
             var toneMapped = HdrToneMapper.ToneMapToSdr(
                 srcImage,
                 Photo.Metadata.HdrTransferFn,
                 Core.Config.HdrToneMapping,
-                Core.Config.HdrBrightness,
-                Core.DestColorProfile);
+                Core.Config.HdrBrightness);
 
             if (!toneMapped.IsDisposed())
             {
-                output = toneMapped;
+                // Apply monitor color profile to the tone-mapped SDR image
+                if (CanApplySkiaColorSpace()
+                    && SkiaCodec.TryApplyColorSpace(toneMapped, Core.DestColorProfile, out var profiled))
+                {
+                    toneMapped.Dispose();
+                    output = profiled;
+                }
+                else
+                {
+                    output = toneMapped;
+                }
+
                 return true;
             }
         }

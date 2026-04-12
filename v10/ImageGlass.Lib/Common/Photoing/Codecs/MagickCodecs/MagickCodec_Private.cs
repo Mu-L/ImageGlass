@@ -75,8 +75,11 @@ public static partial class MagickCodec
 
 
             // if always apply color profile
-            // or only apply color profile if there is an embedded profile
-            if (Core.Config.EnableAlwaysApplyColorProfile || meta.MagickColorProfile is not null)
+            // or only apply color profile if there is an embedded profile.
+            // Skip for HDR images: tone mapping handles color space conversion;
+            // applying the monitor profile here would cause a double transform.
+            if (!meta.IsHdr
+                && (Core.Config.EnableAlwaysApplyColorProfile || meta.MagickColorProfile is not null))
             {
                 if (GetColorProfileByName(Core.Config.ColorProfile) is { } destIccProfile)
                 {
@@ -385,7 +388,7 @@ public static partial class MagickCodec
             SkipSizeHeader();
 
             // --- Parse ImageMetadata ---
-            if (ReadBool()) return null; // all_default → sRGB
+            if (ReadBool()) return null; // all_default -> sRGB
 
             var extraFields = ReadBool();
             if (extraFields)
@@ -423,8 +426,8 @@ public static partial class MagickCodec
             ReadBool();
 
             // --- Parse ColorEncoding ---
-            if (ReadBool()) return null; // all_default → sRGB
-            if (ReadBool()) return null; // want_icc → can't parse structure
+            if (ReadBool()) return null; // all_default -> sRGB
+            if (ReadBool()) return null; // want_icc -> can't parse structure
 
             var colorSpace = (int)ReadEnum(); // 0=RGB, 1=Gray, 2=XYB, 3=Unknown
 
@@ -450,7 +453,7 @@ public static partial class MagickCodec
             }
 
             // CustomTransferFunction (not implicit since we excluded XYB above)
-            if (ReadBool()) return null; // have_gamma → not a named HDR TF
+            if (ReadBool()) return null; // have_gamma -> not a named HDR TF
             var transferFunction = (int)ReadEnum();
 
             return (primaries, transferFunction);

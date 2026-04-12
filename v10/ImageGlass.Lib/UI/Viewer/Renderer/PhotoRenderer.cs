@@ -245,7 +245,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
         var scaleX = _destRect.Width / _srcRect.Width;
         var scaleY = _destRect.Height / _srcRect.Height;
 
-        // bitmap coordinate scale: source pixels → tile bitmap pixels
+        // bitmap coordinate scale: source pixels -> tile bitmap pixels
         var bmapScale = (float)MipmapTileCache.TILE_SIZE / sourceTileSize;
 
         canvas.Save();

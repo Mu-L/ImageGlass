@@ -315,7 +315,7 @@ public partial class ViewerControl
                 {
                     // Zoom anchor: map cursor to an image coordinate, then position
                     // the image so that coordinate stays under the cursor.
-                    // Works for both normal fits-within and overflow → fits-within transitions.
+                    // Works for both normal fits-within and overflow -> fits-within transitions.
                     var screenZoomX = zoomX + DrawingArea.Left;
                     var imgX = SrcRect.X + (screenZoomX - DestRect.X) / oldZoomFactor;
                     imgX = Math.Clamp(imgX, 0, BitmapSize.Width);
@@ -443,7 +443,7 @@ public partial class ViewerControl
         // Clamping is SKIPPED during zoom-to-cursor when:
         //   - CanUseFreePan is on: zoom-to-cursor must stay unconstrained for smooth
         //     overflow ↔ fits-within transitions.
-        //   - The axis just transitioned from fits-within → overflow: skip for continuity
+        //   - The axis just transitioned from fits-within -> overflow: skip for continuity
         //     even without FreePan.
         var panMargin = IsWindowFitMode ? 0 : PanMargin;
         var panMarginSrc = DpiScale(panMargin) / currentZoomFactor;
@@ -561,7 +561,7 @@ public partial class ViewerControl
         // and proportionally shrink/offset the dest rect. This creates a visible
         // gap at the edge when the user has over-panned.
 
-        // left edge: srcX < 0 → shift dest right, narrow both rects
+        // left edge: srcX < 0 -> shift dest right, narrow both rects
         if (srcX < 0)
         {
             var overPan = -srcX * currentZoomFactor;
@@ -571,7 +571,7 @@ public partial class ViewerControl
             srcX = 0;
         }
 
-        // right edge: source extends past image width → narrow dest from the right
+        // right edge: source extends past image width -> narrow dest from the right
         if (srcX + srcWidth > BitmapSize.Width)
         {
             var excess = srcX + srcWidth - BitmapSize.Width;
