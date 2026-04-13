@@ -760,15 +760,15 @@ public static partial class SkiaCodec
         // convert color space
         if (destColorSpace is not null)
         {
-            var info = imgSrc.Info.WithColorSpace(destColorSpace);
-            using var colorBmp = new SKBitmap(info);
-            using (var canvas = new SKCanvas(colorBmp))
-            {
-                // performs the ICC conversion during this draw operation
-                canvas.DrawImage(imgSrc, 0, 0);
-            }
+            // Use SKSurface (not SKCanvas from SKBitmap) so that Skia's color
+            // management pipeline performs the ICC gamut conversion during draw.
+            var info = new SKImageInfo(imgSrc.Width, imgSrc.Height,
+                imgSrc.ColorType, imgSrc.AlphaType, destColorSpace);
+            using var surface = SKSurface.Create(info);
+            if (surface is null) return false;
 
-            output = SKImage.FromBitmap(colorBmp);
+            surface.Canvas.DrawImage(imgSrc, 0, 0);
+            output = surface.Snapshot();
             return true;
         }
 
