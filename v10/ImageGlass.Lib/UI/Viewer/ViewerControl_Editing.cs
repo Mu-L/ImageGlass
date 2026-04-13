@@ -145,11 +145,15 @@ public partial class ViewerControl
             // Tone-map to standard sRGB (no monitor profile yet).
             // The monitor color profile will be applied below via TryApplyColorSpace,
             // same as SDR images, for consistent color handling.
-            var toneMapped = HdrToneMapper.ToneMapToSdr(
-                srcImage,
-                Photo.Metadata.HdrTransferFn,
-                Core.Config.HdrToneMapping,
-                Core.Config.HdrBrightness);
+            var toneMapped = HdrToneMapper.ToneMapToSdr(srcImage, new HdrToneMappingOptions
+            {
+                TransferFn = Photo.Metadata.HdrTransferFn,
+                Mode = Core.Config.HdrToneMapping,
+                Exposure = Core.Config.HdrExposure,
+                WhitePointNits = Core.Config.HdrWhitePointNits,
+                HighlightCompression = Core.Config.HdrHighlightCompression,
+                Saturation = Core.Config.HdrSaturation,
+            });
 
             if (!toneMapped.IsDisposed())
             {

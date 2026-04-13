@@ -606,14 +606,48 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
-    /// Gets, sets the HDR brightness adjustment in EV stops.
+    /// Gets, sets the HDR exposure adjustment in EV stops.
     /// <c>0</c> = no change, <c>+1</c> = 2× brighter, <c>-1</c> = 0.5×.
     /// Typical range: <c>-3</c> to <c>+3</c>.
     /// </summary>
-    public double HdrBrightness
+    public double HdrExposure
     {
-        get => Get(ConfigId.HdrBrightness, 0d);
-        set => Set(ConfigId.HdrBrightness, value);
+        get => Get(ConfigId.HdrExposure, 0d);
+        set => Set(ConfigId.HdrExposure, value);
+    }
+
+    /// <summary>
+    /// Gets, sets the HDR white point in nits.
+    /// Controls what HDR luminance level maps to SDR white (1.0).
+    /// Lower values produce brighter output; higher values retain more highlights.
+    /// Default: <c>203</c> (ITU-R BT.2408). Typical range: <c>100</c> to <c>400</c>.
+    /// </summary>
+    public double HdrWhitePointNits
+    {
+        get => Get(ConfigId.HdrWhitePointNits, 203d);
+        set => Set(ConfigId.HdrWhitePointNits, value);
+    }
+
+    /// <summary>
+    /// Gets, sets the HDR highlight compression strength.
+    /// <c>0</c> = default shoulder, <c>1</c> = maximum compression.
+    /// Typical range: <c>0</c> to <c>1</c>.
+    /// </summary>
+    public double HdrHighlightCompression
+    {
+        get => Get(ConfigId.HdrHighlightCompression, 0d);
+        set => Set(ConfigId.HdrHighlightCompression, value);
+    }
+
+    /// <summary>
+    /// Gets, sets the HDR post-tone-map saturation multiplier.
+    /// <c>1</c> = no change, <c>&lt;1</c> = desaturate, <c>&gt;1</c> = boost.
+    /// Typical range: <c>0</c> to <c>2</c>.
+    /// </summary>
+    public double HdrSaturation
+    {
+        get => Get(ConfigId.HdrSaturation, 1d);
+        set => Set(ConfigId.HdrSaturation, value);
     }
 
     #endregion // Number items

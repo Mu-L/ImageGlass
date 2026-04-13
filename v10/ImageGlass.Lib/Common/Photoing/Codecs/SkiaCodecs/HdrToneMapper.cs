@@ -43,17 +43,6 @@ public static class HdrToneMapper
     /// </summary>
     private const float PqPeakNits = 10_000f;
 
-    /// <summary>
-    /// SDR reference white in nits (ITU-R BT.2408).
-    /// </summary>
-    private const float SdrWhiteNits = 203f;
-
-    /// <summary>
-    /// Normalization multiplier: after PQ EOTF (1.0 = 10 000 nits),
-    /// scale so that 203 nits -> 1.0.
-    /// </summary>
-    private const float PqNormScale = PqPeakNits / SdrWhiteNits; // ~ 49.26
-
     // Rec.2020 luminance coefficients (ITU-R BT.2020) — used by luminance-based path
     private const float Lum2020R = 0.2627f;
     private const float Lum2020G = 0.6780f;
@@ -65,45 +54,44 @@ public static class HdrToneMapper
     private const float M10 = -0.1245f, M11 = 1.1329f, M12 = -0.0083f;
     private const float M20 = -0.0182f, M21 = -0.1006f, M22 = 1.1188f;
 
+    // sRGB/Rec.709 luminance coefficients — used for saturation in per-channel path
+    private const float Lum709R = 0.2126f;
+    private const float Lum709G = 0.7152f;
+    private const float Lum709B = 0.0722f;
+
 
 
     #region Public Methods
 
     /// <summary>
     /// Tone-maps an HDR image to SDR sRGB for display on standard monitors.
-    /// Returns <c>null</c> if the source is invalid, when <paramref name="mode"/>
+    /// Returns <c>null</c> if the source is invalid, when <see cref="HdrToneMappingOptions.Mode"/>
     /// is <see cref="HdrToneMappingMode.None"/> (pass-through), or when the
     /// decoded image is not actually HDR-encoded.
     /// </summary>
-    /// <param name="brightness">Brightness adjustment in EV stops.
-    /// <c>0</c> = no change, <c>+1</c> = 2x brighter, <c>-1</c> = 0.5x.</param>
-    public static SKImage? ToneMapToSdr(SKImage? source, HdrTransferFunction transferFn,
-        HdrToneMappingMode mode, double brightness = 0d)
+    public static SKImage? ToneMapToSdr(SKImage? source, HdrToneMappingOptions options)
     {
+        ArgumentNullException.ThrowIfNull(options);
         if (source.IsDisposed()) return null;
-        if (mode == HdrToneMappingMode.None) return null;
+        if (options.Mode == HdrToneMappingMode.None) return null;
 
         // Gain-map images: the decoded base layer is already SDR.
-        if (transferFn == HdrTransferFunction.GainMap) return null;
+        if (options.TransferFn == HdrTransferFunction.GainMap) return null;
 
         SKImage? retaggedSource = null;
         try
         {
             var effectiveSource = source;
-            var brightnessVal = (float)brightness;
 
             if (!IsHdrColorSpace(source.ColorSpace))
             {
-                if (transferFn is HdrTransferFunction.None)
+                if (options.TransferFn is HdrTransferFunction.None)
                 {
                     // Linear scene-referred HDR (EXR, Radiance HDR, JXR):
                     // pixels are already linear but the source may have no color
                     // space tag (or sRGB). Tag as linear-sRGB so that Skia's
                     // DrawImage in ToneMapManual doesn't apply an unwanted sRGB
                     // gamma -> linear conversion (which would darken the image).
-                    // Using sRGB primaries (not Rec.2020) because most EXR/HDR
-                    // files use Rec.709/sRGB primaries; Skia will then correctly
-                    // gamut-map from sRGB to Rec.2020 in ToneMapManual.
                     var linearCs = SKColorSpace.CreateSrgbLinear();
 
                     retaggedSource = ReinterpretColorSpace(source, linearCs);
@@ -115,7 +103,7 @@ public static class HdrToneMapper
                 {
                     // PQ/HLG: metadata says PQ or HLG but the decoded color space
                     // doesn't reflect it — re-tag with the correct transfer function.
-                    var hdrCs = BuildHdrColorSpace(transferFn, source.ColorSpace);
+                    var hdrCs = BuildHdrColorSpace(options.TransferFn, source.ColorSpace);
                     if (hdrCs is null) return null;
 
                     retaggedSource = ReinterpretColorSpace(source, hdrCs);
@@ -125,18 +113,20 @@ public static class HdrToneMapper
                 }
             }
 
-            // Tone-mapping operators
-            // (input / output in normalized linear, 1.0 = SDR reference white = 203 nits)
-            return mode switch
+            // Build the tone curve with highlight compression factored in
+            var compression = Math.Clamp((float)options.HighlightCompression, 0f, 1f);
+            var saturation = Math.Clamp((float)options.Saturation, 0f, 2f);
+            Func<float, float> toneCurve = options.Mode switch
             {
-                HdrToneMappingMode.BT2408 => ToneMapManual(effectiveSource, transferFn,
-                    brightnessVal, Bt2408KneeToneMap),
-                HdrToneMappingMode.Reinhard => ToneMapManual(effectiveSource, transferFn,
-                    brightnessVal, ExtendedReinhardToneMap),
-                HdrToneMappingMode.ACES => ToneMapManual(effectiveSource, transferFn,
-                    brightnessVal, AcesToneMap),
-                _ => null,
+                HdrToneMappingMode.BT2408 => v => Bt2408KneeToneMap(v, compression),
+                HdrToneMappingMode.Reinhard => v => ExtendedReinhardToneMap(v, compression),
+                HdrToneMappingMode.ACES => v => AcesToneMap(v, compression),
+                _ => null!,
             };
+
+            if (toneCurve is null) return null;
+
+            return ToneMapManual(effectiveSource, options, saturation, toneCurve);
         }
         finally
         {
@@ -186,10 +176,10 @@ public static class HdrToneMapper
     /// </para>
     /// </summary>
     private static unsafe SKImage? ToneMapManual(SKImage source,
-        HdrTransferFunction transferFn,
-        float brightness, Func<float, float> toneCurve)
+        HdrToneMappingOptions options, float saturation,
+        Func<float, float> toneCurve)
     {
-        var isLinearSceneReferred = transferFn == HdrTransferFunction.None;
+        var isLinearSceneReferred = options.TransferFn == HdrTransferFunction.None;
 
         // ── Step 1: linearize source into float pixels ──
         using var linearBmp = LinearizeToFloat(source, isLinearSceneReferred);
@@ -208,19 +198,19 @@ public static class HdrToneMapper
         var srcRowBytes = linearBmp.RowBytes;
         var dstRowBytes = outputBmp.RowBytes;
 
-        // ── Step 3: normalization and brightness ──
-        var normScale = ComputeNormScale(transferFn, brightness);
+        // ── Step 3: normalization and exposure ──
+        var normScale = ComputeNormScale(options);
 
         // ── Step 4: per-pixel tone mapping ──
         if (isLinearSceneReferred)
         {
             ToneMapPerChannel(srcPtr, srcRowBytes, dstPtr, dstRowBytes,
-                width, height, normScale, toneCurve);
+                width, height, normScale, saturation, toneCurve);
         }
         else
         {
             ToneMapLuminanceBased(srcPtr, srcRowBytes, dstPtr, dstRowBytes,
-                width, height, normScale, toneCurve);
+                width, height, normScale, saturation, toneCurve);
         }
 
         // ── Step 5: convert linear sRGB float -> final sRGB Rgba8888 ──
@@ -263,18 +253,23 @@ public static class HdrToneMapper
 
 
     /// <summary>
-    /// Computes the combined normalization scale: PQ EOTF rescaling + brightness EV.
+    /// Computes the combined normalization scale from white point + exposure EV.
     /// </summary>
-    private static float ComputeNormScale(HdrTransferFunction transferFn, float brightness)
+    private static float ComputeNormScale(HdrToneMappingOptions options)
     {
-        // PQ: after EOTF 1.0 = 10 000 nits. Scale so 203 nits -> 1.0.
-        // HLG/Linear: 1.0 ≈ reference white already.
-        var normScale = transferFn == HdrTransferFunction.PQ ? PqNormScale : 1f;
+        var whiteNits = Math.Clamp((float)options.WhitePointNits, 50f, 1000f);
 
-        // Brightness in EV stops: 0 = no change, +1 = 2×, -1 = 0.5×.
-        if (brightness != 0f)
+        // PQ: after EOTF 1.0 = 10 000 nits. Scale so whiteNits -> 1.0.
+        // HLG/Linear: 1.0 ≈ reference white already.
+        var normScale = options.TransferFn == HdrTransferFunction.PQ
+            ? PqPeakNits / whiteNits
+            : 1f;
+
+        // Exposure in EV stops: 0 = no change, +1 = 2×, -1 = 0.5×.
+        var exposure = (float)options.Exposure;
+        if (exposure != 0f)
         {
-            normScale *= MathF.Pow(2f, brightness);
+            normScale *= MathF.Pow(2f, exposure);
         }
 
         return normScale;
@@ -287,8 +282,11 @@ public static class HdrToneMapper
     /// </summary>
     private static unsafe void ToneMapPerChannel(
         byte* srcPtr, int srcRowBytes, byte* dstPtr, int dstRowBytes,
-        int width, int height, float normScale, Func<float, float> toneCurve)
+        int width, int height, float normScale, float saturation,
+        Func<float, float> toneCurve)
     {
+        var applySaturation = MathF.Abs(saturation - 1f) > 1e-4f;
+
         for (var y = 0; y < height; y++)
         {
             var srcRow = (float*)(srcPtr + (long)y * srcRowBytes);
@@ -309,6 +307,15 @@ public static class HdrToneMapper
                     b = toneCurve(b);
                 }
 
+                // Saturation: lerp toward luminance gray in linear sRGB
+                if (applySaturation)
+                {
+                    var lum = Lum709R * r + Lum709G * g + Lum709B * b;
+                    r = lum + saturation * (r - lum);
+                    g = lum + saturation * (g - lum);
+                    b = lum + saturation * (b - lum);
+                }
+
                 dstRow[i] = Math.Clamp(r, 0f, 1f);
                 dstRow[i + 1] = Math.Clamp(g, 0f, 1f);
                 dstRow[i + 2] = Math.Clamp(b, 0f, 1f);
@@ -324,8 +331,11 @@ public static class HdrToneMapper
     /// </summary>
     private static unsafe void ToneMapLuminanceBased(
         byte* srcPtr, int srcRowBytes, byte* dstPtr, int dstRowBytes,
-        int width, int height, float normScale, Func<float, float> toneCurve)
+        int width, int height, float normScale, float saturation,
+        Func<float, float> toneCurve)
     {
+        var applySaturation = MathF.Abs(saturation - 1f) > 1e-4f;
+
         for (var y = 0; y < height; y++)
         {
             var srcRow = (float*)(srcPtr + (long)y * srcRowBytes);
@@ -357,6 +367,15 @@ public static class HdrToneMapper
                 var sr = M00 * r + M01 * g + M02 * b;
                 var sg = M10 * r + M11 * g + M12 * b;
                 var sb = M20 * r + M21 * g + M22 * b;
+
+                // Saturation: lerp toward luminance gray in sRGB linear
+                if (applySaturation)
+                {
+                    var srgbLum = Lum709R * sr + Lum709G * sg + Lum709B * sb;
+                    sr = srgbLum + saturation * (sr - srgbLum);
+                    sg = srgbLum + saturation * (sg - srgbLum);
+                    sb = srgbLum + saturation * (sb - srgbLum);
+                }
 
                 dstRow[i] = Math.Clamp(sr, 0f, 1f);
                 dstRow[i + 1] = Math.Clamp(sg, 0f, 1f);
@@ -423,18 +442,19 @@ public static class HdrToneMapper
 
 
     /// <summary>
-    /// BT.2408-style knee curve (used by Auto mode, closest to Chrome).
+    /// BT.2408-style knee curve (closest to Chrome).
     /// Linear below the knee, exponential soft roll-off above.
     /// SDR content (≤ 1.0) passes through unchanged.
     /// </summary>
-    private static float Bt2408KneeToneMap(float v)
+    /// <param name="compression">0 = default knee at 0.9, 1 = knee at 0.5 (max compression).</param>
+    private static float Bt2408KneeToneMap(float v, float compression)
     {
         if (v <= 0f) return 0f;
 
-        // Knee starts at 0.9 to give a smooth transition before 1.0
-        const float kneeStart = 0.9f;
+        // Knee slides from 0.9 (no compression) to 0.5 (max compression)
+        var kneeStart = 0.9f - 0.4f * compression;
         const float maxOut = 1.0f;
-        const float range = maxOut - kneeStart; // 0.1
+        var range = maxOut - kneeStart;
 
         if (v <= kneeStart) return v;
 
@@ -446,23 +466,20 @@ public static class HdrToneMapper
 
     /// <summary>
     /// Extended Reinhard with wide shoulder (no discontinuity).
-    /// Knee at 0.7 with Reinhard-shaped rolloff over a 0.3 range.
-    /// Trades ~15% SDR brightness for significantly more highlight detail:
-    /// 2x SDR white = 94%, 5x SDR white = 98% (vs BT.2408 which clips both near 100%).
+    /// Trades SDR brightness for significantly more highlight detail.
     /// </summary>
-    private static float ExtendedReinhardToneMap(float v)
+    /// <param name="compression">0 = default knee at 0.7, 1 = knee at 0.3 (max compression).</param>
+    private static float ExtendedReinhardToneMap(float v, float compression)
     {
         if (v <= 0f) return 0f;
 
-        const float kneeStart = 0.7f;
+        // Knee slides from 0.7 (no compression) to 0.3 (max compression)
+        var kneeStart = 0.7f - 0.4f * compression;
         const float maxOut = 1.0f;
-        const float range = maxOut - kneeStart; // 0.3
+        var range = maxOut - kneeStart;
 
         if (v <= kneeStart) return v;
 
-        // Reinhard shoulder: range * x / (x + range)
-        // Derivative at knee = 1 (matches linear passthrough).
-        // Approaches maxOut more slowly than exp/tanh -> most highlight detail.
         float excess = v - kneeStart;
         return kneeStart + range * excess / (excess + range);
     }
@@ -470,24 +487,20 @@ public static class HdrToneMapper
 
     /// <summary>
     /// ACES-style filmic curve with wide shoulder (no discontinuity).
-    /// Knee at 0.5 with tanh-shaped rolloff over a 0.5 range.
-    /// Starts compressing earlier than Reinhard (0.5 vs 0.7), but tanh
-    /// converges faster — punchier look with highlights clipped sooner.
-    /// At SDR white: BT.2408 96% -> ACES 88% -> Reinhard 85%.
+    /// Cinematic rolloff — punchier than Reinhard, more highlight headroom than BT.2408.
     /// </summary>
-    private static float AcesToneMap(float v)
+    /// <param name="compression">0 = default knee at 0.5, 1 = knee at 0.1 (max compression).</param>
+    private static float AcesToneMap(float v, float compression)
     {
         if (v <= 0f) return 0f;
 
-        const float kneeStart = 0.5f;
+        // Knee slides from 0.5 (no compression) to 0.1 (max compression)
+        var kneeStart = 0.5f - 0.4f * compression;
         const float maxOut = 1.0f;
-        const float range = maxOut - kneeStart; // 0.5
+        var range = maxOut - kneeStart;
 
         if (v <= kneeStart) return v;
 
-        // Tanh shoulder: range * tanh(x / range)
-        // Derivative at knee = 1 (sech²(0) = 1).
-        // Converges to maxOut faster than Reinhard -> punchier highlight rolloff.
         float excess = v - kneeStart;
         return kneeStart + range * MathF.Tanh(excess / range);
     }
