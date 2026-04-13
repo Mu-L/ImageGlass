@@ -847,7 +847,49 @@ public static partial class MagickCodec
             meta.BitsPerChannel = (int)img.Depth;
         }
 
-        // 2. SKColorSpace-based detection (works for parametric ICC profiles)
+        // 2. Gain map detection — must run FIRST before ICC/CICP scanning.
+        //    Gain-map images (JPEG Ultra HDR, HEIC/AVIF gain maps, ISO 21496-1)
+        //    carry PQ metadata for the gain map, not for the base layer.
+        //    If we let ICC scanning run first, the PQ profile text triggers a
+        //    false PQ classification and the SDR base layer gets over-exposed.
+        {
+            var hasGainMap = false;
+
+            if (img is not null)
+            {
+                // Apple HDR gain map (embedded as named profile in HEIC/JPEG)
+                if (img.GetProfile("apple_hdrgainmap") is not null)
+                {
+                    hasGainMap = true;
+                }
+                // XMP-based gain maps (ISO 21496-1, Adobe, Android Ultra HDR)
+                else if (img.GetProfile("xmp") is { } xmpProfile)
+                {
+                    ReadOnlySpan<byte> xmp = xmpProfile.ToReadOnlySpan();
+                    if (xmp.IndexOf("hdrgm:"u8) >= 0
+                        || xmp.IndexOf("HDRGainMap"u8) >= 0
+                        || xmp.IndexOf("GContainer:"u8) >= 0)
+                    {
+                        hasGainMap = true;
+                    }
+                }
+            }
+
+            // Fallback: scan raw file bytes when Magick image is not available
+            if (!hasGainMap && !string.IsNullOrEmpty(meta.FilePath))
+            {
+                hasGainMap = DetectGainMap(meta.FilePath);
+            }
+
+            if (hasGainMap)
+            {
+                meta.IsHdr = true;
+                meta.HdrTransferFn = HdrTransferFunction.GainMap;
+                return; // base layer is SDR — no further HDR classification needed
+            }
+        }
+
+        // 3. SKColorSpace-based detection (works for parametric ICC profiles)
         if (meta.SkiaColorSpace is not null)
         {
             if (meta.SkiaColorSpace.GetNumericalTransferFunction(out var transferFn))
@@ -886,16 +928,17 @@ public static partial class MagickCodec
 
             if (icc.Length > 0)
             {
+                // Match canonical PQ identifiers only — avoid bare "PQ" (2 bytes)
+                // which false-positives on random ICC LUT table data.
                 if (icc.IndexOf("ST 2084"u8) >= 0
                     || icc.IndexOf("ST2084"u8) >= 0
-                    || icc.IndexOf("PQ"u8) >= 0
                     || icc.IndexOf("Perceptual Quantizer"u8) >= 0)
                 {
                     meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.PQ;
                 }
-                else if (icc.IndexOf("HLG"u8) >= 0
-                    || icc.IndexOf("Hybrid Log"u8) >= 0)
+                else if (icc.IndexOf("Hybrid Log"u8) >= 0
+                    || icc.IndexOf("Hybrid Log-Gamma"u8) >= 0)
                 {
                     meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.HLG;
@@ -1025,45 +1068,7 @@ public static partial class MagickCodec
             }
         }
 
-        // 9. Gain map detection (JPEG Ultra HDR, HEIC/AVIF gain maps, ISO 21496-1)
-        if (!meta.IsHdr)
-        {
-            var hasGainMap = false;
-
-            if (img is not null)
-            {
-                // Apple HDR gain map (embedded as named profile in HEIC/JPEG)
-                if (img.GetProfile("apple_hdrgainmap") is not null)
-                {
-                    hasGainMap = true;
-                }
-                // XMP-based gain maps (ISO 21496-1, Adobe, Android Ultra HDR)
-                else if (img.GetProfile("xmp") is { } xmpProfile)
-                {
-                    ReadOnlySpan<byte> xmp = xmpProfile.ToReadOnlySpan();
-                    if (xmp.IndexOf("hdrgm:"u8) >= 0
-                        || xmp.IndexOf("HDRGainMap"u8) >= 0
-                        || xmp.IndexOf("GContainer:"u8) >= 0)
-                    {
-                        hasGainMap = true;
-                    }
-                }
-            }
-
-            // Fallback: scan raw file bytes when Magick image is not available
-            if (!hasGainMap && !string.IsNullOrEmpty(meta.FilePath))
-            {
-                hasGainMap = DetectGainMap(meta.FilePath);
-            }
-
-            if (hasGainMap)
-            {
-                meta.IsHdr = true;
-                meta.HdrTransferFn = HdrTransferFunction.GainMap;
-            }
-        }
-
-        // 10. Magick ColorSpace-based wide gamut fallback
+        // 9. Magick ColorSpace-based wide gamut fallback
         if (!meta.IsWideGamut && img is not null
             && img.ColorSpace is ImageMagick.ColorSpace.DisplayP3)
         {
