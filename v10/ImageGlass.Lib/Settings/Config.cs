@@ -241,7 +241,7 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
-    /// Gets, sets value indicates that Save dialog should use the current image folder as initial directory
+    /// Gets, sets value indicates that Save dialog should use the current image folder as initial directory.
     /// </summary>
     public bool EnableOpenSaveAsInCurrentFolder
     {
@@ -259,12 +259,21 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
-    /// Gets, sets the value indicates that to show last seen image on startup
+    /// Gets, sets the value indicates that the last seen image will be re-opened on startup.
     /// </summary>
     public bool EnableLastSeenImage
     {
         get => Get(ConfigId.EnableLastSeenImage, true);
         set => Set(ConfigId.EnableLastSeenImage, value);
+    }
+
+    /// <summary>
+    /// Gets, sets the value indicates that HDR tone mapping is enabled when rendering image.
+    /// </summary>
+    public bool EnableHdrToneMapping
+    {
+        get => Get(ConfigId.EnableHdrToneMapping, true);
+        set => Set(ConfigId.EnableHdrToneMapping, value);
     }
 
     /// <summary>
@@ -597,57 +606,13 @@ public partial class Config : PhReactive
 
     /// <summary>
     /// Gets, sets the minimum height of the embedded thumbnail to use for displaying
-    /// image when the setting <see cref="EnableOnlyLoadRawPreview"/> or <see cref="EnableOnlyLoadNonRawPreview"/> is <c>true</c>.
+    /// image when the setting <see cref="EnableOnlyLoadRawPreview"/>
+    /// or <see cref="EnableOnlyLoadNonRawPreview"/> is <c>true</c>.
     /// </summary>
     public int PreviewMinHeight
     {
         get => Get(ConfigId.PreviewMinHeight, 0);
         set => Set(ConfigId.PreviewMinHeight, value);
-    }
-
-    /// <summary>
-    /// Gets, sets the HDR exposure adjustment in EV stops.
-    /// <c>0</c> = no change, <c>+1</c> = 2× brighter, <c>-1</c> = 0.5×.
-    /// Typical range: <c>-3</c> to <c>+3</c>.
-    /// </summary>
-    public double HdrExposure
-    {
-        get => Get(ConfigId.HdrExposure, 0d);
-        set => Set(ConfigId.HdrExposure, value);
-    }
-
-    /// <summary>
-    /// Gets, sets the HDR white point in nits.
-    /// Controls what HDR luminance level maps to SDR white (1.0).
-    /// Lower values produce brighter output; higher values retain more highlights.
-    /// Default: <c>203</c> (ITU-R BT.2408). Typical range: <c>100</c> to <c>400</c>.
-    /// </summary>
-    public double HdrWhitePointNits
-    {
-        get => Get(ConfigId.HdrWhitePointNits, 203d);
-        set => Set(ConfigId.HdrWhitePointNits, value);
-    }
-
-    /// <summary>
-    /// Gets, sets the HDR highlight compression strength.
-    /// <c>0</c> = default shoulder, <c>1</c> = maximum compression.
-    /// Typical range: <c>0</c> to <c>1</c>.
-    /// </summary>
-    public double HdrHighlightCompression
-    {
-        get => Get(ConfigId.HdrHighlightCompression, 0d);
-        set => Set(ConfigId.HdrHighlightCompression, value);
-    }
-
-    /// <summary>
-    /// Gets, sets the HDR post-tone-map saturation multiplier.
-    /// <c>1</c> = no change, <c>&lt;1</c> = desaturate, <c>&gt;1</c> = boost.
-    /// Typical range: <c>0</c> to <c>2</c>.
-    /// </summary>
-    public double HdrSaturation
-    {
-        get => Get(ConfigId.HdrSaturation, 1d);
-        set => Set(ConfigId.HdrSaturation, value);
     }
 
     #endregion // Number items
@@ -785,7 +750,6 @@ public partial class Config : PhReactive
         set => Set(ConfigId.ImageLoadingOrderType, value);
     }
 
-
     /// <summary>
     /// Gets, sets zoom mode value
     /// </summary>
@@ -794,16 +758,6 @@ public partial class Config : PhReactive
     {
         get => Get(ConfigId.ZoomMode, ZoomMode.AutoZoom);
         set => Set(ConfigId.ZoomMode, value);
-    }
-
-    /// <summary>
-    /// Gets, sets HDR tone mapping mode for SDR displays.
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<HdrToneMappingMode>))]
-    public HdrToneMappingMode HdrToneMapping
-    {
-        get => Get(ConfigId.HdrToneMapping, HdrToneMappingMode.BT2408);
-        set => Set(ConfigId.HdrToneMapping, value);
     }
 
     /// <summary>

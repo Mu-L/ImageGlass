@@ -182,6 +182,12 @@ public static class Core
 
 
     /// <summary>
+    /// Gets or sets the HDR tone mapping options used when rendering high dynamic range images.
+    /// </summary>
+    public static HdrToneMappingOptions HdrToneMappingConfig { get; set; } = new();
+
+
+    /// <summary>
     /// Gets the central registry for all plugins (hosted and non-hosted).
     /// Built-in plugins are registered during <see cref="ServiceProviders.AppAPIProvider"/> construction.
     /// </summary>

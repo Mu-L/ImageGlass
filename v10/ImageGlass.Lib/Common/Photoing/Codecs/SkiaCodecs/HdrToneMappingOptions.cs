@@ -26,21 +26,16 @@ namespace ImageGlass.Common.Photoing;
 public sealed record HdrToneMappingOptions
 {
     /// <summary>
-    /// The HDR transfer function of the source image.
-    /// </summary>
-    public HdrTransferFunction TransferFn { get; init; }
-
-    /// <summary>
     /// Tone mapping algorithm (BT.2408, Reinhard, ACES, or None for pass-through).
     /// </summary>
-    public HdrToneMappingMode Mode { get; init; } = HdrToneMappingMode.BT2408;
+    public HdrToneMappingMode Mode { get; set; } = HdrToneMappingMode.BT2408;
 
     /// <summary>
     /// Exposure adjustment in EV stops.
     /// <c>0</c> = no change, <c>+1</c> = 2× brighter, <c>-1</c> = 0.5×.
     /// Typical range: <c>-3</c> to <c>+3</c>.
     /// </summary>
-    public double Exposure { get; init; }
+    public double Exposure { get; set; } = 0d;
 
     /// <summary>
     /// The luminance level (in nits) that maps to SDR white (1.0).
@@ -48,7 +43,7 @@ public sealed record HdrToneMappingOptions
     /// Default: <c>203</c> (ITU-R BT.2408 reference white).
     /// Typical range: <c>100</c> to <c>400</c>.
     /// </summary>
-    public double WhitePointNits { get; init; } = 203d;
+    public double WhitePointNits { get; set; } = 203d;
 
     /// <summary>
     /// Controls the strength of highlight compression in the tone curve shoulder.
@@ -56,12 +51,12 @@ public sealed record HdrToneMappingOptions
     /// (preserves more highlight detail at the cost of lower peak brightness).
     /// Typical range: <c>0</c> to <c>1</c>.
     /// </summary>
-    public double HighlightCompression { get; init; }
+    public double HighlightCompression { get; set; } = 0d;
 
     /// <summary>
     /// Post-tone-map saturation multiplier.
     /// <c>1</c> = no change, <c>&lt;1</c> = desaturate, <c>&gt;1</c> = boost.
     /// Typical range: <c>0</c> to <c>2</c>.
     /// </summary>
-    public double Saturation { get; init; } = 1d;
+    public double Saturation { get; set; } = 1d;
 }

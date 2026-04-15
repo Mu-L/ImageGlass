@@ -69,14 +69,15 @@ public static class HdrToneMapper
     /// is <see cref="HdrToneMappingMode.None"/> (pass-through), or when the
     /// decoded image is not actually HDR-encoded.
     /// </summary>
-    public static SKImage? ToneMapToSdr(SKImage? source, HdrToneMappingOptions options)
+    public static SKImage? ToneMapToSdr(SKImage? source,
+        HdrTransferFunction transferFn, HdrToneMappingOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
         if (source.IsDisposed()) return null;
         if (options.Mode == HdrToneMappingMode.None) return null;
 
         // Gain-map images: the decoded base layer is already SDR.
-        if (options.TransferFn == HdrTransferFunction.GainMap) return null;
+        if (transferFn == HdrTransferFunction.GainMap) return null;
 
         SKImage? retaggedSource = null;
         try
@@ -85,7 +86,7 @@ public static class HdrToneMapper
 
             if (!IsHdrColorSpace(source.ColorSpace))
             {
-                if (options.TransferFn is HdrTransferFunction.None)
+                if (transferFn is HdrTransferFunction.None)
                 {
                     // Linear scene-referred HDR (EXR, Radiance HDR, JXR):
                     // pixels are already linear but the source may have no color
@@ -103,7 +104,7 @@ public static class HdrToneMapper
                 {
                     // PQ/HLG: metadata says PQ or HLG but the decoded color space
                     // doesn't reflect it — re-tag with the correct transfer function.
-                    var hdrCs = BuildHdrColorSpace(options.TransferFn, source.ColorSpace);
+                    var hdrCs = BuildHdrColorSpace(transferFn, source.ColorSpace);
                     if (hdrCs is null) return null;
 
                     retaggedSource = ReinterpretColorSpace(source, hdrCs);
@@ -126,7 +127,7 @@ public static class HdrToneMapper
 
             if (toneCurve is null) return null;
 
-            return ToneMapManual(effectiveSource, options, saturation, toneCurve);
+            return ToneMapManual(effectiveSource, transferFn, options, saturation, toneCurve);
         }
         finally
         {
@@ -176,10 +177,10 @@ public static class HdrToneMapper
     /// </para>
     /// </summary>
     private static unsafe SKImage? ToneMapManual(SKImage source,
-        HdrToneMappingOptions options, float saturation,
+        HdrTransferFunction transferFn, HdrToneMappingOptions options, float saturation,
         Func<float, float> toneCurve)
     {
-        var isLinearSceneReferred = options.TransferFn == HdrTransferFunction.None;
+        var isLinearSceneReferred = transferFn == HdrTransferFunction.None;
 
         // ── Step 1: linearize source into float pixels ──
         using var linearBmp = LinearizeToFloat(source, isLinearSceneReferred);
@@ -199,7 +200,7 @@ public static class HdrToneMapper
         var dstRowBytes = outputBmp.RowBytes;
 
         // ── Step 3: normalization and exposure ──
-        var normScale = ComputeNormScale(options);
+        var normScale = ComputeNormScale(transferFn, options);
 
         // ── Step 4: per-pixel tone mapping ──
         if (isLinearSceneReferred)
@@ -255,13 +256,13 @@ public static class HdrToneMapper
     /// <summary>
     /// Computes the combined normalization scale from white point + exposure EV.
     /// </summary>
-    private static float ComputeNormScale(HdrToneMappingOptions options)
+    private static float ComputeNormScale(HdrTransferFunction transferFn, HdrToneMappingOptions options)
     {
         var whiteNits = Math.Clamp((float)options.WhitePointNits, 50f, 1000f);
 
         // PQ: after EOTF 1.0 = 10 000 nits. Scale so whiteNits -> 1.0.
         // HLG/Linear: 1.0 ≈ reference white already.
-        var normScale = options.TransferFn == HdrTransferFunction.PQ
+        var normScale = transferFn == HdrTransferFunction.PQ
             ? PqPeakNits / whiteNits
             : 1f;
 

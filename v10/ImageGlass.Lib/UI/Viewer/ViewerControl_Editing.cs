@@ -138,22 +138,16 @@ public partial class ViewerControl
     private bool TryApplySkiaColorSpace(SKImage? srcImage, out SKImage? output)
     {
         output = null;
+        if (srcImage.IsDisposed()) return false;
 
-        // HDR tone mapping (applies regardless of color profile setting)
-        if (Photo?.Metadata?.IsHdr == true && !srcImage.IsDisposed())
+        // 1. HDR tone mapping (applies regardless of color profile setting)
+        if (Core.Config.EnableHdrToneMapping && Photo?.Metadata?.IsHdr == true)
         {
             // Tone-map to standard sRGB (no monitor profile yet).
             // The monitor color profile will be applied below via TryApplyColorSpace,
             // same as SDR images, for consistent color handling.
-            var toneMapped = HdrToneMapper.ToneMapToSdr(srcImage, new HdrToneMappingOptions
-            {
-                TransferFn = Photo.Metadata.HdrTransferFn,
-                Mode = Core.Config.HdrToneMapping,
-                Exposure = Core.Config.HdrExposure,
-                WhitePointNits = Core.Config.HdrWhitePointNits,
-                HighlightCompression = Core.Config.HdrHighlightCompression,
-                Saturation = Core.Config.HdrSaturation,
-            });
+            var toneMapped = HdrToneMapper.ToneMapToSdr(srcImage,
+                Photo.Metadata.HdrTransferFn, Core.HdrToneMappingConfig);
 
             if (!toneMapped.IsDisposed())
             {
@@ -173,9 +167,10 @@ public partial class ViewerControl
             }
         }
 
+
+        // 2. apply new color space for source image
         if (!CanApplySkiaColorSpace()) return false;
 
-        // apply new color space for source image
         if (SkiaCodec.TryApplyColorSpace(srcImage, Core.DestColorProfile, out var imgFrameColored))
         {
             output = imgFrameColored;

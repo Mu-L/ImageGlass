@@ -55,6 +55,7 @@ public enum ConfigId
     EnableOpenSaveAsInCurrentFolder,
     EnableWelcomeImage,
     EnableLastSeenImage,
+    EnableHdrToneMapping,
     EnableAlwaysApplyColorProfile,
     EnableNavigationButtons,
     EnableSubfoldersLoading,
@@ -98,10 +99,6 @@ public enum ConfigId
     InAppMessageDuration,
     PreviewMinWidth,
     PreviewMinHeight,
-    HdrExposure,
-    HdrWhitePointNits,
-    HdrHighlightCompression,
-    HdrSaturation,
 
     #endregion // Number settings
 
@@ -129,7 +126,6 @@ public enum ConfigId
     ImageLoadingOrder,
     ImageLoadingOrderType,
     ZoomMode,
-    HdrToneMapping,
     ImageInterpolationScaleDown,
     ImageInterpolationScaleUp,
     AfterEditingAction,
