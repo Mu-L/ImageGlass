@@ -173,3 +173,4 @@ launchSettings.json
 Setup/Assets/WebView2_Runtime/
 */**/.github/*-instructions.md
 */**/.github/skills/*
+/v10/.github/instructions

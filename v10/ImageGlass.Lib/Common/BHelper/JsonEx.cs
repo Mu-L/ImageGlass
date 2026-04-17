@@ -56,6 +56,23 @@ public partial class BHelper
 
 
     /// <summary>
+    /// Reads a JSON file into a <see cref="JsonDocument"/>.
+    /// </summary>
+    public static JsonDocument? ReadJsonDocFromFile(string jsonFilePath)
+    {
+        if (!File.Exists(jsonFilePath)) return null;
+
+        using var stream = File.OpenRead(jsonFilePath);
+
+        return JsonDocument.Parse(stream, new JsonDocumentOptions
+        {
+            AllowTrailingCommas = true,
+            CommentHandling = JsonCommentHandling.Skip,
+        });
+    }
+
+
+    /// <summary>
     /// Reads JSON file and parses to object.
     /// </summary>
     public static T? ReadJsonFromFile<T>(string jsonFilePath, JsonTypeInfo<T> jsonTypeInfo)

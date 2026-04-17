@@ -43,6 +43,9 @@ public static class Const
     public static readonly int MOUSE_WHEEL_SCROLL_DELTA = 120;
 
 
+    public const bool ENABLE_CONFIG_MERGE = true;
+
+
     /// <summary>
     /// A file macro to replace with the current viewing image file path in double quotes.
     /// Example: <c>"C:\my\photo.jpg"</c>

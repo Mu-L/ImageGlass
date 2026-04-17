@@ -242,9 +242,9 @@ public partial class App : Application
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
 
-        // 2. load app configs
+        // 2. load app configs (merges default, user, CLI -p: args, and admin configs)
         Core.Args = Environment.GetCommandLineArgs();
-        Core.Config = Config.Load(Config.CONFIG_USER);
+        Core.Config = Config.Load(Config.CONFIG_USER, Core.Args);
 
 
         // 3. initialize service providers

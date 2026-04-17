@@ -213,6 +213,9 @@ public partial class MainWindow : PhWindow
             Core.Args = [modulePath, .. e.Arguments];
             Core.UpdateInitImagePath();
 
+            // apply any -p: config overrides from the forwarded args
+            Config.ApplyCliOverrides(Core.Config, e.Arguments);
+
             // load image path
             Core.API?.IG_OpenPath(Core.InputImagePathFromArgs);
 

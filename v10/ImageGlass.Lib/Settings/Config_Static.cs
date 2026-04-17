@@ -24,9 +24,11 @@ using ImageGlass.Common.Types;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 namespace ImageGlass.Common;
@@ -272,43 +274,105 @@ public partial class Config
     #region Public static methods
 
     /// <summary>
-    /// Loads and parses configs from file.
+    /// Loads and merges configs from multiple sources.
+    /// Priority (lowest -> highest): developer defaults -> igconfig.default.json -> igconfig.json -> CLI args -> igconfig.admin.json.
     /// </summary>
-    public static Config Load(string configFileName)
+    public static Config Load(string configFileName, string[]? cliArgs = null)
     {
         Config? appConfig = null;
 
-
-        // 1. get user config file path
-        var configPath = BHelper.ConfigDir(configFileName);
-
-        if (File.Exists(configPath))
+        try
         {
-            // 2. load user settings
             var jsonOptions = BHelper.CreateJsonOptions();
             var jsonContext = new ConfigJsonContext(jsonOptions);
 
-
-            try
+            if (Const.ENABLE_CONFIG_MERGE)
             {
-                var config = BHelper.ReadJsonFromFile(configPath, jsonContext.Config)
-                    ?? throw new FileLoadException($"Could not parse settings from file: {configPath}");
+                // 1. read igconfig.default.json (Startup Dir, then Config Dir fallback)
+                using var defaultDoc = ReadConfigJsonDocument(
+                    BHelper.BaseDir(CONFIG_DEFAULT),
+                    BHelper.ConfigDir(CONFIG_DEFAULT));
 
+                // 2. read igconfig.json (Config Dir only)
+                var userConfigPath = BHelper.ConfigDir(configFileName);
+                using var userDoc = BHelper.ReadJsonDocFromFile(userConfigPath);
 
-                // 3. migrate user config file if config version is changed
+                // 3. parse CLI -p: args
+                var cliOverrides = ParseCliConfigArgs(cliArgs);
+
+                // 4. read igconfig.admin.json (Startup Dir, then Config Dir fallback)
+                using var adminDoc = ReadConfigJsonDocument(
+                    BHelper.BaseDir(CONFIG_ADMIN),
+                    BHelper.ConfigDir(CONFIG_ADMIN));
+
+                // 5. merge all layers into a single JSON byte array
+                var mergedJson = MergeJsonLayers(defaultDoc, userDoc, cliOverrides, adminDoc);
+
+                // 6. deserialize the merged JSON into Config
+                var config = JsonSerializer.Deserialize(mergedJson, jsonContext.Config)
+                    ?? throw new FileLoadException("IGE: Could not parse merged config.");
+
+                // 7. migrate if config version changed
                 appConfig = MigrateUserConfigFile(config);
             }
-            catch (Exception ex)
+            else
             {
-                // save error
-                LoadingException = ex;
+                // simple single-file load (no merge)
+                var configPath = BHelper.ConfigDir(configFileName);
+
+                if (File.Exists(configPath))
+                {
+                    var config = BHelper.ReadJsonFromFile(configPath, jsonContext.Config)
+                        ?? throw new FileLoadException($"IGE: Could not parse settings from file: {configPath}");
+
+                    appConfig = MigrateUserConfigFile(config);
+                }
             }
         }
+        catch (Exception ex)
+        {
+            LoadingException = ex;
+        }
 
-        // initialize app config
         appConfig ??= new();
-
         return appConfig;
+    }
+
+
+    /// <summary>
+    /// Applies CLI config overrides (<c>-p:Key=Value</c>) to the current config instance.
+    /// Used when the first instance receives forwarded args from a second instance.
+    /// </summary>
+    public static void ApplyCliOverrides(Config config, string[]? cliArgs)
+    {
+        if (!Const.ENABLE_CONFIG_MERGE) return;
+
+        var overrides = ParseCliConfigArgs(cliArgs);
+        if (overrides.Count == 0) return;
+
+        try
+        {
+            var jsonOptions = BHelper.CreateJsonOptions();
+            var jsonContext = new ConfigJsonContext(jsonOptions);
+
+            // serialize current config to JSON
+            var currentJson = JsonSerializer.SerializeToUtf8Bytes(config, jsonContext.Config);
+            using var currentDoc = JsonDocument.Parse(currentJson);
+
+            // merge CLI overrides on top
+            var mergedJson = MergeJsonLayers(null, currentDoc, overrides, null);
+
+            // deserialize back into a new Config
+            var updated = JsonSerializer.Deserialize(mergedJson, jsonContext.Config);
+            if (updated == null) return;
+
+            // copy all values from the updated config
+            foreach (var kvp in updated._values)
+            {
+                config.Set(kvp.Key, kvp.Value);
+            }
+        }
+        catch { }
     }
 
 
@@ -492,6 +556,171 @@ public partial class Config
     #endregion // Public methods
 
 
+
+    // Private static methods (config merge)
+    #region Private static methods (config merge)
+
+    /// <summary>
+    /// Reads a JSON config file using dual-path fallback (primary first, then fallback).
+    /// Returns <c>null</c> if neither path exists.
+    /// </summary>
+    private static JsonDocument? ReadConfigJsonDocument(string primaryPath, string fallbackPath)
+    {
+        var path = File.Exists(primaryPath) ? primaryPath
+            : File.Exists(fallbackPath) ? fallbackPath
+            : null;
+
+        if (string.IsNullOrEmpty(path)) return null;
+
+        return BHelper.ReadJsonDocFromFile(path);
+    }
+
+
+    /// <summary>
+    /// Parses CLI arguments with <see cref="Const.CONFIG_CMD_PREFIX"/> prefix
+    /// into a dictionary of property-name -> raw-JSON-value pairs.
+    /// Example: <c>-p:ShowGallery=true</c> -> <c>{ "ShowGallery": "true" }</c>.
+    /// </summary>
+    private static Dictionary<string, string> ParseCliConfigArgs(string[]? args)
+    {
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (args == null) return result;
+
+        foreach (var arg in args)
+        {
+            if (!arg.StartsWith(Const.CONFIG_CMD_PREFIX, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            // strip prefix, e.g. "-p:ShowGallery=true" -> "ShowGallery=true"
+            var kvPart = arg[Const.CONFIG_CMD_PREFIX.Length..];
+            var eqIdx = kvPart.IndexOf('=');
+            if (eqIdx <= 0) continue;
+
+            var key = kvPart[..eqIdx].Trim();
+            var value = kvPart[(eqIdx + 1)..].Trim();
+            if (key.Length == 0) continue;
+
+            result[key] = value;
+        }
+
+        return result;
+    }
+
+
+    /// <summary>
+    /// Merges multiple JSON config layers into a single UTF-8 byte array.
+    /// Later layers override earlier ones at the top-level property level (shallow merge).
+    /// CLI overrides are written as raw JSON values.
+    /// </summary>
+    private static byte[] MergeJsonLayers(
+        JsonDocument? defaultDoc,
+        JsonDocument? userDoc,
+        Dictionary<string, string> cliOverrides,
+        JsonDocument? adminDoc)
+    {
+        var buffer = new ArrayBufferWriter<byte>();
+        using var writer = new Utf8JsonWriter(buffer, new JsonWriterOptions
+        {
+            Indented = false,
+            SkipValidation = false,
+        });
+
+        writer.WriteStartObject();
+
+        // collect all property names across all layers (preserves override order)
+        var allKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        CollectKeys(defaultDoc, allKeys);
+        CollectKeys(userDoc, allKeys);
+        foreach (var k in cliOverrides.Keys) allKeys.Add(k);
+        CollectKeys(adminDoc, allKeys);
+
+        foreach (var key in allKeys)
+        {
+            // admin > CLI > user > default (last wins)
+            if (TryGetProperty(adminDoc, key, out var adminVal))
+            {
+                writer.WritePropertyName(key);
+                adminVal.WriteTo(writer);
+            }
+            else if (cliOverrides.TryGetValue(key, out var cliRaw))
+            {
+                WriteCliValue(writer, key, cliRaw);
+            }
+            else if (TryGetProperty(userDoc, key, out var userVal))
+            {
+                writer.WritePropertyName(key);
+                userVal.WriteTo(writer);
+            }
+            else if (TryGetProperty(defaultDoc, key, out var defVal))
+            {
+                writer.WritePropertyName(key);
+                defVal.WriteTo(writer);
+            }
+        }
+
+        writer.WriteEndObject();
+        writer.Flush();
+
+        return buffer.WrittenSpan.ToArray();
+    }
+
+
+    /// <summary>
+    /// Collects top-level property names from a <see cref="JsonDocument"/>.
+    /// </summary>
+    private static void CollectKeys(JsonDocument? doc, HashSet<string> keys)
+    {
+        if (doc == null) return;
+        foreach (var prop in doc.RootElement.EnumerateObject())
+        {
+            keys.Add(prop.Name);
+        }
+    }
+
+
+    /// <summary>
+    /// Tries to get a top-level property from a <see cref="JsonDocument"/> (case-insensitive).
+    /// </summary>
+    private static bool TryGetProperty(JsonDocument? doc, string name, out JsonElement value)
+    {
+        value = default;
+        if (doc == null) return false;
+
+        foreach (var prop in doc.RootElement.EnumerateObject())
+        {
+            if (prop.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+            {
+                value = prop.Value;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    /// <summary>
+    /// Writes a CLI override value as a JSON property.
+    /// Attempts to parse the value as JSON first; falls back to writing as a string.
+    /// </summary>
+    private static void WriteCliValue(Utf8JsonWriter writer, string key, string rawValue)
+    {
+        writer.WritePropertyName(key);
+
+        // try parsing as valid JSON (handles true, false, null, numbers, arrays, objects)
+        try
+        {
+            using var doc = JsonDocument.Parse(rawValue);
+            doc.RootElement.WriteTo(writer);
+        }
+        catch (JsonException)
+        {
+            // not valid JSON, write as a quoted string
+            writer.WriteStringValue(rawValue);
+        }
+    }
+
+    #endregion // Private static methods (config merge)
 
 
 }
