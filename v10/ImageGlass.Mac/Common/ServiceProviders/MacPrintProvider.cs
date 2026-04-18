@@ -51,10 +51,7 @@ internal class MacPrintProvider : IPrintProvider
         // rename .fax -> .tiff for multi-frame printing
         else if (ext.Equals(".fax", StringComparison.OrdinalIgnoreCase))
         {
-            var tempDir = BHelper.ConfigDir(Dir.Temporary);
-            Directory.CreateDirectory(tempDir);
-
-            fileToPrint = Path.Combine(tempDir, Path.GetFileNameWithoutExtension(srcFilePath) + ".tiff");
+            fileToPrint = BHelper.ConfigDir(Dir.Temporary, Path.GetFileNameWithoutExtension(srcFilePath) + ".tiff");
             File.Copy(srcFilePath, fileToPrint, true);
         }
         else if (meta?.FrameCount > 1

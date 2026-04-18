@@ -543,9 +543,7 @@ public static class Core
 
 
         // 2. create temp file path
-        var tempDir = BHelper.ConfigDir(Dir.Temporary);
-        Directory.CreateDirectory(tempDir);
-        var tempFilePath = Path.Combine(tempDir, $"ig_temp_{DateTime.UtcNow:yyyy-MM-dd-hh-mm-ss}{ext}");
+        var tempFilePath = BHelper.ConfigDir(Dir.Temporary, $"ig_temp_{DateTime.UtcNow:yyyy-MM-dd-hh-mm-ss}{ext}");
 
 
         // 3. save the photo to file

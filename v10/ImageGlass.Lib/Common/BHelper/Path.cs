@@ -62,12 +62,41 @@ public partial class BHelper
 
     /// <summary>
     /// Computes the full path based on the config folder.
+    /// Also, auto-create the built-in directory if not exist.
     /// </summary>
     public static string ConfigDir(params string[] paths)
     {
-        // create the directory if not exist
-        Directory.CreateDirectory(ConfigPath);
+        var isDirCreated = false;
 
+        // 1. auto-create built-in directory if not exist
+        if (paths.Length > 0)
+        {
+            var firstPath = paths[0];
+            var isBuiltinDir = firstPath.Equals(Dir.Themes, StringComparison.OrdinalIgnoreCase)
+                || firstPath.Equals(Dir.ExtIcons, StringComparison.OrdinalIgnoreCase)
+                || firstPath.Equals(Dir.Language, StringComparison.OrdinalIgnoreCase)
+                || firstPath.Equals(Dir.Plugins, StringComparison.OrdinalIgnoreCase)
+                || firstPath.Equals(Dir.Cache, StringComparison.OrdinalIgnoreCase)
+                || firstPath.Equals(Dir.Temporary, StringComparison.OrdinalIgnoreCase);
+
+            // create the built-in directory if not exist
+            if (isBuiltinDir)
+            {
+                var builtinConfigPath = Path.Combine(ConfigPath, firstPath);
+                Directory.CreateDirectory(builtinConfigPath);
+                isDirCreated = true;
+            }
+        }
+
+
+        // 2. create the config directory if not exist
+        if (!isDirCreated)
+        {
+            Directory.CreateDirectory(ConfigPath);
+        }
+
+
+        // 3. build the complete path
         var newPaths = paths.ToList();
         newPaths.Insert(0, ConfigPath);
         var path = Path.Combine([.. newPaths]);

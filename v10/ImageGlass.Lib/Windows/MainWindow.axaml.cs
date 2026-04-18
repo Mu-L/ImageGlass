@@ -35,6 +35,7 @@ namespace ImageGlass.Common.Windows;
 public partial class MainWindow : PhWindow
 {
     private readonly AppStatusInfo _status;
+    private bool _isClosingHandled; // to handle closing for saving configs
 
     public MainWindowModel VM => (MainWindowModel)DataContext!;
 
@@ -119,7 +120,16 @@ public partial class MainWindow : PhWindow
 
     protected override async void OnClosing(WindowClosingEventArgs e)
     {
-        base.OnClosing(e);
+        // allow the close through on the second pass after async work is done
+        if (_isClosingHandled)
+        {
+            base.OnClosing(e);
+            return;
+        }
+
+        // cancel the close so async work can complete before the app tears down
+        e.Cancel = true;
+        _isClosingHandled = true;
 
         // control events
         _status.Changed -= Status_Changed;
@@ -135,8 +145,11 @@ public partial class MainWindow : PhWindow
         // stop all external plugin processes before saving config
         await Core.ExternalPlugins.StopAllAsync();
 
-        // Only save config here, do NOT dispose resources yet
+        // only save config here, do NOT dispose resources yet
         await SaveConfigOnClosingAsync();
+
+        // now close for real — _isClosingHandled lets the second pass through
+        Close();
     }
 
 
@@ -299,7 +312,8 @@ public partial class MainWindow : PhWindow
         try
         {
             // delete trash
-            Directory.Delete(BHelper.ConfigDir(Dir.Temporary), true);
+            var tempDir = BHelper.ConfigDir(Dir.Temporary);
+            Directory.Delete(tempDir, true);
         }
         catch { }
     }
