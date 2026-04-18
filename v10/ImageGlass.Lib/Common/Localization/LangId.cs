@@ -81,9 +81,6 @@ public enum LangId
     _UserAction_MethodArgumentNotSupported,
     _UserAction_Win32ExeError,
 
-    _Webview2_NotFound,
-    _Webview2_Outdated,
-
     // Gallery tooltip
     _Metadata_FileSize,
     _Metadata_FileCreationTime,
@@ -539,7 +536,6 @@ public enum LangId
     FrmSettings_ShowCheckerboardOnlyImageRegion,
     FrmSettings_EnableNavigationButtons,
     FrmSettings_EnableCenterWindowFit,
-    FrmSettings_UseWebview2ForSvg,
     FrmSettings_PanSpeed,
 
     // Viewer > Zooming

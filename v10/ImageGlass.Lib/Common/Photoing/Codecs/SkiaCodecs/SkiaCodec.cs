@@ -51,6 +51,32 @@ public static partial class SkiaCodec
         // 0. get file info
         if (string.IsNullOrWhiteSpace(filePath)) return meta;
 
+        // SVG: use SvgCodec for metadata
+        if (SvgCodec.IsSvgFile(filePath))
+        {
+            await Task.Run(() =>
+            {
+                meta.IsVector = true;
+                meta.FrameCount = 1;
+                meta.HasAlpha = true;
+
+                try
+                {
+                    using var svgDoc = SvgCodec.LoadSvg(filePath);
+                    var picture = svgDoc.Picture;
+                    if (picture is not null)
+                    {
+                        var size = SvgCodec.GetIntrinsicSize(picture);
+                        meta.OriginalWidth = meta.Width = (uint)size.Width;
+                        meta.OriginalHeight = meta.Height = (uint)size.Height;
+                    }
+                }
+                catch { }
+            }, token).ConfigureAwait(false);
+
+            return meta;
+        }
+
         // create Skia codec
         using var decoder = SKCodec.Create(filePath);
         if (decoder.IsDisposed()) return meta;
@@ -162,6 +188,34 @@ public static partial class SkiaCodec
     /// </summary>
     public static SkiaDecoderOutput Load(PhotoMetadata meta, PhotoReadOptions options)
     {
+        // A. SVG format: use SvgCodec for decoding
+        if (meta.IsVector && SvgCodec.IsSvgFile(meta.FilePath))
+        {
+            var svgResult = new SkiaDecoderOutput();
+            var svgDoc = SvgCodec.LoadSvg(meta.FilePath);
+            var picture = svgDoc.Picture;
+
+            if (picture is not null)
+            {
+                var size = SvgCodec.GetIntrinsicSize(picture);
+                svgResult.Size = new Size(size.Width, size.Height);
+                svgResult.SvgDocument = svgDoc;
+                svgResult.VectorPicture = picture;
+
+                // rasterized fallback for gallery thumbnails
+                var maxDim = (int)Math.Max(size.Width, size.Height);
+                svgResult.SingleFrame = SvgCodec.RasterizeThumbnail(picture, Math.Min(maxDim, 1024));
+            }
+            else
+            {
+                svgDoc.Dispose();
+            }
+
+            return svgResult;
+        }
+
+
+        // B. Rasterize format
         // 0. create Skia codec
         var codec = SKCodec.Create(meta.FilePath);
         var result = new SkiaDecoderOutput();

@@ -100,6 +100,11 @@ public partial class PhotoMetadata : PhDisposable
     public bool CanAnimate { get; set; } = false;
     public SKEncodedOrigin Orientation { get; set; } = SKEncodedOrigin.Default;
 
+    /// <summary>
+    /// Gets, sets whether this image is a scalable vector format (SVG/SVGZ).
+    /// </summary>
+    public bool IsVector { get; set; } = false;
+
     /// <summary>Whether the image uses a PQ or HLG transfer function (true HDR).</summary>
     public bool IsHdr { get; set; } = false;
 

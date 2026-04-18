@@ -339,9 +339,6 @@ public class Lang
         new(LangId._UserAction_MethodArgumentNotSupported, "The argument type of method '{0}' is not supported"), // v9.0
         new(LangId._UserAction_Win32ExeError, "Cannot execute command '{0}'. Make sure the name is correct."), // v9.0
 
-        new(LangId._Webview2_NotFound, "Please install WebView2 Runtime to access full features of ImageGlass."), // 9.2
-        new(LangId._Webview2_Outdated, "Your WebView2 Runtime is not supported. Please update to version {0} or later."), // 9.2
-
         // Gallery tooltip
         new(LangId._Metadata_FileSize, "File size"), //v9.0
         new(LangId._Metadata_FileCreationTime, "Date created"), //v9.0
@@ -800,7 +797,6 @@ public class Lang
         new(LangId.FrmSettings_ShowCheckerboardOnlyImageRegion, "Show checkerboard only within the image region"),
         new(LangId.FrmSettings_EnableNavigationButtons, "Show navigation arrow buttons"),
         new(LangId.FrmSettings_EnableCenterWindowFit, "Automatically center the window in Window Fit mode"),
-        new(LangId.FrmSettings_UseWebview2ForSvg, "Use Webview2 for viewing SVG format"),
         new(LangId.FrmSettings_PanSpeed, "Panning speed"),
 
         // Viewer > Zooming

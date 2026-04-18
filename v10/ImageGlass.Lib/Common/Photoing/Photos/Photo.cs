@@ -65,8 +65,8 @@ public partial class Photo : PhDisposable
 
     /// <summary>
     /// Gets the native bitmap,
-    /// either <see cref="SKImage"/>,
-    /// or <see cref="SkiaAnimator"/>.
+    /// either <see cref="SKImage"/>, <see cref="SkiaAnimator"/>,
+    /// or <see cref="SkiaDecoderOutput"/> (for vector formats).
     /// </summary>
     public IDisposable? Bitmap { get; private set; } = null;
 
@@ -390,6 +390,14 @@ public partial class Photo : PhDisposable
         var loadOtherThumbnailOnly = ReadOptions.OnlyLoadNonRawPreview
             && (meta.ExifProfile?.ThumbnailLength ?? 0) > 0;
 
+        // SVG native rendering
+        if (meta.IsVector && Core.Config.EnableVectorRenderer)
+        {
+            DecodedBy = DecodedCodec.Skia;
+            await LoadWithSkiaCodecAsync(meta, token);
+            return;
+        }
+
         // check if we can use Skia to decode
         var useSkiaCodec = Core.Config.NativeCodecReadFormats.Contains(meta.FileExtension)
             && SkiaCodec.CanRead(meta)
@@ -424,6 +432,13 @@ public partial class Photo : PhDisposable
 
         _width = (uint)result.Size.Width;
         _height = (uint)result.Size.Height;
+
+        // SVG vector output: store the entire decoder output
+        if (result.VectorPicture is not null)
+        {
+            Bitmap = result;
+            return;
+        }
 
         if (result.Animator is not null)
         {
@@ -502,6 +517,7 @@ public partial class Photo : PhDisposable
 
         Bitmap?.Dispose();
         Bitmap = null;
+
         _frameIndex = -1;
     }
 
