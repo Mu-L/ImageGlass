@@ -45,7 +45,7 @@ public partial class ViewerControl
     // drawing image
     internal SKImageRef? _imgSource;
     internal SKImageRef? _imgRender;
-    private SkiaAnimator? _animator;
+    private AnimatorImpl? _animator;
     internal MipmapTileCache? _mipmapCache;
 
     private RenderTargetBitmap? _bmpCheckerboard;

@@ -23,6 +23,7 @@ using ImageGlass.Common;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.UI;
+using System;
 using ImageGlass.UI.Viewer;
 
 namespace ImageGlass.Plugins;
@@ -214,7 +215,7 @@ public partial class FrameNavPluginControl : PhControl, IPluginControl
 
         if (frameCount > 0)
         {
-            var currentFrame = (Viewer.Photo?.FrameIndex ?? 0) + 1;
+            var currentFrame = Math.Max(0, Viewer.Photo?.FrameIndex ?? 0) + 1;
             var frameInfo = $"{currentFrame} / {frameCount}";
 
             FrameTextInfo = frameInfo;

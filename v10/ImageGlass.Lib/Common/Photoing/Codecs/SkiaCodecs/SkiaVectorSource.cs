@@ -54,6 +54,11 @@ public sealed class SkiaVectorSource : PhDisposable
     /// </summary>
     public Size IntrinsicSize { get; }
 
+    /// <summary>
+    /// Gets whether the SVG contains SMIL animations.
+    /// </summary>
+    public bool HasAnimations => SvgDocument?.HasAnimations ?? false;
+
 
     public SkiaVectorSource(SKSvg svgDocument, Size intrinsicSize, SKImage? rasterizedFallback)
     {

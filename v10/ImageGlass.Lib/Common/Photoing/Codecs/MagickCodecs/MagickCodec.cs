@@ -218,8 +218,11 @@ public static partial class MagickCodec
         // 0. get file info
         if (string.IsNullOrWhiteSpace(filePath)) return meta;
 
-        // detect vector format
-        meta.IsVector = SvgCodec.IsSvgFile(filePath);
+        // SVG: delegate to SvgCodec for metadata
+        if (SvgCodec.IsSvgFile(filePath))
+        {
+            return await SvgCodec.LoadMetadataAsync(filePath, token);
+        }
 
         // 1. parse Magick settings
         var settings = readSettings ?? ParseSettings(options, false, filePath);

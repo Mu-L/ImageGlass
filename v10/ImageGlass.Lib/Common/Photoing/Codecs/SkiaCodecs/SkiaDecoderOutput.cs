@@ -16,8 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
-
 using Avalonia;
 using ImageGlass.Common.Types;
 using SkiaSharp;
@@ -28,12 +26,9 @@ public partial class SkiaDecoderOutput : PhDisposable
 {
     public SKImage? SingleFrame { get; set; } = null;
     public SkiaAnimator? Animator { get; set; } = null;
-    public Size Size { get; set; } = new();
-
-    /// <summary>
-    /// Gets, sets the vector source for SVG rendering.
-    /// </summary>
     public SkiaVectorSource? VectorSource { get; set; } = null;
+
+    public Size Size { get; set; } = new();
 
 
     protected override void OnDisposing()

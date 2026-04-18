@@ -84,7 +84,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
     private readonly SKSamplingOptions _samplingOptions;
     private readonly MipmapTileCache? _tileCache;
     private readonly double _zoomFactor;
-    private readonly SKPicture? _svgPicture;
+    private readonly ViewerControl _viewer;
 
 
     #region Public Properties
@@ -119,7 +119,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
             _samplingOptions = SkiaCodec.ToSamplingOptions(viewer.CurrentInterpolation);
             _tileCache = viewer._mipmapCache;
             _zoomFactor = viewer.ZoomFactor;
-            _svgPicture = viewer._svgPicture;
+            _viewer = viewer;
 
             // Atomically claim first-draw ownership so that concurrent
             // InvalidateVisual() calls cannot trigger duplicate
@@ -168,10 +168,13 @@ public partial class PhotoRenderer : ICustomDrawOperation
             {
                 SKImage? imageRender;
 
-                // Vector (SVG) rendering: re-draw the picture at current scale
-                if (_svgPicture is not null)
+                // Vector (SVG) rendering: read the picture live from the
+                // viewer so we always use the latest picture reference
+                // produced by SvgAnimator (avoids using a stale/disposed snapshot).
+                var svgPicture = _viewer._svgPicture;
+                if (svgPicture is not null && !svgPicture.IsDisposed())
                 {
-                    RenderVector(lease.SkCanvas);
+                    RenderVector(lease.SkCanvas, svgPicture);
 
                     if (_isFirstDraw)
                     {
@@ -315,15 +318,14 @@ public partial class PhotoRenderer : ICustomDrawOperation
     /// <summary>
     /// Renders the SVG picture scaled to the destination rect.
     /// </summary>
-    private void RenderVector(SKCanvas canvas)
+    private void RenderVector(SKCanvas canvas, SKPicture picture)
     {
-        var picture = _svgPicture!;
-        var cullRect = picture.CullRect;
+        // safety: the picture may have been disposed between the null-check
+        // and arriving here if the animation advanced on another thread.
+        if (picture.IsDisposed()) return;
 
         // compute transform: map SVG CullRect to destRect, accounting for srcRect (pan/zoom)
-        var transform = ViewerControl.ComputeVectorTransform(
-            _srcRect,
-            _destRect);
+        var transform = ViewerControl.ComputeVectorTransform(_srcRect, _destRect);
 
         canvas.Save();
         canvas.ClipRect(_destRect);

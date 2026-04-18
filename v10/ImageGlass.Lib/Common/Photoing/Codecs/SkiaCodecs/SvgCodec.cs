@@ -22,6 +22,8 @@ using Svg.Skia;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -122,5 +124,43 @@ public static class SvgCodec
         canvas.DrawPicture(picture);
 
         return surface.Snapshot();
+    }
+
+
+    /// <summary>
+    /// Loads SVG-specific metadata (size, vector flag, animation detection).
+    /// </summary>
+    public static async Task<PhotoMetadata> LoadMetadataAsync(string filePath, CancellationToken token = default)
+    {
+        var meta = new PhotoMetadata(filePath)
+        {
+            IsVector = true,
+            FrameCount = 1,
+            HasAlpha = true,
+        };
+
+        await Task.Run(() =>
+        {
+            try
+            {
+                using var svgDoc = LoadSvg(filePath);
+                var picture = svgDoc.Picture;
+                if (picture is not null)
+                {
+                    var size = GetIntrinsicSize(picture);
+                    meta.OriginalWidth = meta.Width = (uint)size.Width;
+                    meta.OriginalHeight = meta.Height = (uint)size.Height;
+                }
+
+                // detect SMIL animations
+                if (svgDoc.HasAnimations)
+                {
+                    meta.CanAnimate = true;
+                }
+            }
+            catch { }
+        }, token).ConfigureAwait(false);
+
+        return meta;
     }
 }

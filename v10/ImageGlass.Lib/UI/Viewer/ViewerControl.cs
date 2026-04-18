@@ -394,13 +394,13 @@ public partial class ViewerControl : PhControl
     /// </summary>
     protected virtual void OnPhotoFrameChanged(AnimatorFrameChangedEventArgs? e = null)
     {
-        if (SourceKind != PhotoSource.Native) return;
+        if (SourceKind == PhotoSource.None) return;
 
         var canAnimate = _animator != null;
         var isLivePhoto = Photo?.Metadata?.IsLivePhoto ?? false;
         var args = new PhotoFrameChangedEventArgs(canAnimate, IsImageAnimating, isLivePhoto)
         {
-            CurrentFrame = e?.CurrentFrame ?? (uint)(Math.Min(0, Photo?.FrameIndex ?? 0)),
+            CurrentFrame = e?.CurrentFrame ?? (uint)Math.Max(0, Photo?.FrameIndex ?? 0),
             FrameCount = e?.FrameCount ?? Photo?.Metadata.FrameCount ?? 0,
             CurrentLoop = e?.CurrentLoop ?? _animator?.CurrentLoop ?? 0,
             LoopCount = e?.LoopCount ?? _animator?.LoopCount ?? 0,
@@ -1010,8 +1010,15 @@ public partial class ViewerControl : PhControl
         // pause animation when app is busy
         if (Core.IsBusy) return;
 
+        // SVG animation: _svgPicture and InvalidateVisual() are already
+        // handled by SvgAnimator.OnTimerTicked() under _lock.
+        if (sender is SvgAnimator)
+        {
+            OnPhotoFrameChanged(e);
+            return;
+        }
 
-        // update the frame bitmap
+        // Raster animation: update the frame bitmap
         var renderedFrame = sender.GetRenderedFrameBitmap(e.CurrentFrame);
 
         lock (_lock)

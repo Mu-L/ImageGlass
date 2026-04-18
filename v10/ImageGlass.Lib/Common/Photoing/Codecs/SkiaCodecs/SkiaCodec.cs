@@ -51,30 +51,10 @@ public static partial class SkiaCodec
         // 0. get file info
         if (string.IsNullOrWhiteSpace(filePath)) return meta;
 
-        // SVG: use SvgCodec for metadata
+        // SVG: delegate to SvgCodec for metadata
         if (SvgCodec.IsSvgFile(filePath))
         {
-            await Task.Run(() =>
-            {
-                meta.IsVector = true;
-                meta.FrameCount = 1;
-                meta.HasAlpha = true;
-
-                try
-                {
-                    using var svgDoc = SvgCodec.LoadSvg(filePath);
-                    var picture = svgDoc.Picture;
-                    if (picture is not null)
-                    {
-                        var size = SvgCodec.GetIntrinsicSize(picture);
-                        meta.OriginalWidth = meta.Width = (uint)size.Width;
-                        meta.OriginalHeight = meta.Height = (uint)size.Height;
-                    }
-                }
-                catch { }
-            }, token).ConfigureAwait(false);
-
-            return meta;
+            return await SvgCodec.LoadMetadataAsync(filePath, token);
         }
 
         // create Skia codec

@@ -82,6 +82,21 @@ public partial class ViewerControl
         // mark for first draw
         _isFirstDraw.SetTrue();
 
+        // set up SMIL animation if the SVG has animations
+        if (_svgDocument!.HasAnimations)
+        {
+            _animator?.FrameChanged -= Animator_FrameChanged;
+            _animator?.Dispose();
+
+            _animator = new SvgAnimator(
+                _svgDocument,
+                _lock,
+                picture => _svgPicture = picture,
+                InvalidateVisual);
+            _animator.FrameChanged += Animator_FrameChanged;
+            StartAnimator();
+        }
+
         return true;
     }
 
