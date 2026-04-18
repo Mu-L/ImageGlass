@@ -52,34 +52,32 @@ public partial class ViewerControl
 
 
     /// <summary>
-    /// Handles loading a vector photo from decoded SVG output.
+    /// Handles loading a vector photo from the decoded SVG vector source.
     /// Must be called inside <see cref="_lock"/>.
     /// </summary>
     /// <returns><c>true</c> if the vector photo was handled successfully.</returns>
-    private bool HandleVectorPhotoLoaded(SkiaDecoderOutput vectorOutput)
+    private bool HandleVectorPhotoLoaded(SkiaVectorSource vectorSource)
     {
-        if (vectorOutput.VectorPicture is null) return false;
+        if (vectorSource.VectorPicture is null) return false;
+
+        // dispose old vector resources before taking new ones
+        DisposeVectorResources();
 
         // take ownership of the SVG document and picture
-        _svgDocument = vectorOutput.SvgDocument;
-        _svgPicture = vectorOutput.VectorPicture;
+        _svgDocument = vectorSource.SvgDocument;
+        _svgPicture = vectorSource.VectorPicture;
 
-        // null out references in the output so Photo.UnloadBitmap() won't dispose them
-        vectorOutput.SvgDocument = null;
-        vectorOutput.VectorPicture = null;
+        // prevent Photo.UnloadBitmap() from disposing our SVG
+        vectorSource.SvgDocument = null;
 
         SourceKind = PhotoSource.VectorRenderer;
 
-        // compute bitmap size from CullRect
-        var cullRect = _svgPicture.CullRect;
-        BitmapSize = new Size(
-            System.Math.Max(1, cullRect.Width),
-            System.Math.Max(1, cullRect.Height));
+        // use intrinsic size for zoom/pan calculations
+        BitmapSize = vectorSource.IntrinsicSize;
 
-        // set rasterized fallback as _imgSource (for pixel operations: copy, export)
-        var rasterized = SvgCodec.RasterizeThumbnail(_svgPicture,
-            (int)System.Math.Min(System.Math.Max(BitmapSize.Width, BitmapSize.Height), 4096));
-        SKImageRef.Set(ref _imgSource, rasterized);
+        // set pre-rasterized fallback as _imgSource (for pixel operations: copy, export)
+        SKImageRef.Set(ref _imgSource, vectorSource.RasterizedFallback);
+        vectorSource.RasterizedFallback = null; // transfer ownership
 
         // mark for first draw
         _isFirstDraw.SetTrue();

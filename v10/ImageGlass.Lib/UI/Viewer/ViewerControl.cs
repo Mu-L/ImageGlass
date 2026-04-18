@@ -834,58 +834,42 @@ public partial class ViewerControl : PhControl
             // 3. create the native bitmap
             if (e.Photo.Bitmap is not null)
             {
-                // 3. handle vector (SVG) source
-                if (e.Photo.Bitmap is SkiaDecoderOutput { VectorPicture: not null } vectorOutput)
+                // vector (SVG) source
+                if (e.Photo.Bitmap is SkiaVectorSource)
                 {
-                    // cancel if requested
-                    if (e.CancelToken.IsCancellationRequested)
-                    {
-                        HandleCancelLoaded(true);
-                        return;
-                    }
-
-                    CancelPreview();
-
-                    lock (_lock)
-                    {
-                        if (HandleVectorPhotoLoaded(vectorOutput))
-                        {
-                            hasSource = true;
-                        }
-                    }
+                    hasSource = true;
                 }
+                // native bitmap is an animated bitmap
+                else if (e.Photo.Bitmap is SkiaAnimator skAnimator)
+                {
+                    // update bitmap size
+                    BitmapSize = e.Photo.Size;
+
+                    animator = skAnimator;
+                    hasSource = true;
+                }
+                // native bitmap is a single-frame bitmap
                 else
                 {
                     // update bitmap size
                     BitmapSize = e.Photo.Size;
 
-                    // native bitmap is a animated bitmap
-                    if (e.Photo.Bitmap is SkiaAnimator skAnimator)
-                    {
-                        animator = skAnimator;
-                        hasSource = true;
-                    }
+                    var frameToLoad = (uint)Math.Max(0, e.Photo.FrameIndex);
+                    imgFrame = await e.Photo.GetFrameAsync(frameToLoad);
 
-                    // native bitmap is a single-frame bitmap
-                    else
+                    // apply color space
+                    if (TryApplySkiaColorSpace(imgFrame, out var imgFrameColored))
                     {
-                        var frameToLoad = (uint)Math.Max(0, e.Photo.FrameIndex);
-                        imgFrame = await e.Photo.GetFrameAsync(frameToLoad);
-
-                        // apply color space
-                        if (TryApplySkiaColorSpace(imgFrame, out var imgFrameColored))
+                        // don't dispose the clipboard photo
+                        if (!e.Photo.IsClipboard)
                         {
-                            // don't dispose the clipboard photo
-                            if (!e.Photo.IsClipboard)
-                            {
-                                imgFrame?.Dispose();
-                            }
-
-                            imgFrame = imgFrameColored;
+                            imgFrame?.Dispose();
                         }
 
-                        hasSource = imgFrame != null;
+                        imgFrame = imgFrameColored;
                     }
+
+                    hasSource = imgFrame != null;
                 }
             }
 
@@ -910,9 +894,16 @@ public partial class ViewerControl : PhControl
                 // 5. calculate the source viewport to match with the preview
                 if (hasSource)
                 {
-                    // 5.1 set non-animated source
-                    _isFirstDraw.SetTrue();
-                    SKImageRef.Set(ref _imgSource, imgFrame);
+                    // 5.1 set source based on type
+                    if (e.Photo.Bitmap is SkiaVectorSource vectorSource)
+                    {
+                        HandleVectorPhotoLoaded(vectorSource);
+                    }
+                    else
+                    {
+                        _isFirstDraw.SetTrue();
+                        SKImageRef.Set(ref _imgSource, imgFrame);
+                    }
 
 
                     // 5.2 set animator
@@ -984,7 +975,11 @@ public partial class ViewerControl : PhControl
         }
         finally
         {
-            SourceKind = hasSource ? PhotoSource.Native : PhotoSource.None;
+            // don't override VectorRenderer set by HandleVectorPhotoLoaded
+            if (SourceKind != PhotoSource.VectorRenderer)
+            {
+                SourceKind = hasSource ? PhotoSource.Native : PhotoSource.None;
+            }
 
             // raise events
             OnPhotoLoading(e);

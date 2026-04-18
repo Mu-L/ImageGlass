@@ -433,10 +433,11 @@ public partial class Photo : PhDisposable
         _width = (uint)result.Size.Width;
         _height = (uint)result.Size.Height;
 
-        // SVG vector output: store the entire decoder output
-        if (result.VectorPicture is not null)
+        // SVG vector output: store the vector source (not entire decoder output)
+        if (result.VectorSource is not null)
         {
-            Bitmap = result;
+            Bitmap = result.VectorSource;
+            result.VectorSource = null; // transfer ownership
             return;
         }
 

@@ -21,7 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using ImageGlass.Common.Types;
 using SkiaSharp;
-using Svg.Skia;
 
 namespace ImageGlass.Common.Photoing;
 
@@ -32,15 +31,9 @@ public partial class SkiaDecoderOutput : PhDisposable
     public Size Size { get; set; } = new();
 
     /// <summary>
-    /// Gets, sets the vector picture for SVG rendering.
-    /// Owned by <see cref="SvgDocument"/> - do NOT dispose separately.
+    /// Gets, sets the vector source for SVG rendering.
     /// </summary>
-    public SKPicture? VectorPicture { get; set; } = null;
-
-    /// <summary>
-    /// Gets, sets the SVG document that owns <see cref="VectorPicture"/>.
-    /// </summary>
-    public SKSvg? SvgDocument { get; set; } = null;
+    public SkiaVectorSource? VectorSource { get; set; } = null;
 
 
     protected override void OnDisposing()
@@ -53,9 +46,7 @@ public partial class SkiaDecoderOutput : PhDisposable
         Animator?.Dispose();
         Animator = null;
 
-        // VectorPicture is owned by SvgDocument - just null the reference
-        VectorPicture = null;
-        SvgDocument?.Dispose();
-        SvgDocument = null;
+        VectorSource?.Dispose();
+        VectorSource = null;
     }
 }

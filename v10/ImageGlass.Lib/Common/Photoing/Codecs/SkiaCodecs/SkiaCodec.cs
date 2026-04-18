@@ -197,14 +197,15 @@ public static partial class SkiaCodec
 
             if (picture is not null)
             {
-                var size = SvgCodec.GetIntrinsicSize(picture);
-                svgResult.Size = new Size(size.Width, size.Height);
-                svgResult.SvgDocument = svgDoc;
-                svgResult.VectorPicture = picture;
+                var intrinsicSize = SvgCodec.GetIntrinsicSize(picture);
+                svgResult.Size = new Size(intrinsicSize.Width, intrinsicSize.Height);
 
-                // rasterized fallback for gallery thumbnails
-                var maxDim = (int)Math.Max(size.Width, size.Height);
-                svgResult.SingleFrame = SvgCodec.RasterizeThumbnail(picture, Math.Min(maxDim, 1024));
+                // pre-rasterize fallback for pixel operations (copy, export)
+                // on background thread to avoid blocking UI
+                var maxDim = (int)Math.Max(intrinsicSize.Width, intrinsicSize.Height);
+                var rasterized = SvgCodec.RasterizeThumbnail(picture, Math.Min(maxDim, 1024));
+
+                svgResult.VectorSource = new SkiaVectorSource(svgDoc, intrinsicSize, rasterized);
             }
             else
             {

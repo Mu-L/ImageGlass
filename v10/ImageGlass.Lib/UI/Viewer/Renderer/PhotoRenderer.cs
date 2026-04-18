@@ -175,7 +175,11 @@ public partial class PhotoRenderer : ICustomDrawOperation
 
                     if (_isFirstDraw)
                     {
+                        // clear old cache
+                        lease.GrContext?.PurgeResources();
+
                         _isFirstDraw = false;
+
                         // no raster image to process for vector; pass null
                         Dispatcher.UIThread.Post(() => _onDrawFirstTime(null), DispatcherPriority.Send);
                     }
