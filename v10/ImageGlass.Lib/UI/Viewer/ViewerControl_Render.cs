@@ -264,18 +264,6 @@ public partial class ViewerControl
         Rect region;
         if (CheckerboardMode == CheckerboardType.Image)
         {
-            //if (UseWebview2)
-            //{
-            //    region = _web2DestRect;
-            //}
-            //else
-            //{
-            //    // no need to draw checkerboard if image does not has alpha pixels
-            //    if (!HasAlphaPixels) return;
-
-            //    region = _destRect;
-            //}
-
             region = DestRect;
         }
         else
@@ -347,6 +335,13 @@ public partial class ViewerControl
     {
         lock (_lock)
         {
+            // vector images don't need raster caching
+            if (IsVectorSource())
+            {
+                InvalidateVisual();
+                return;
+            }
+
             // cache the proccessed image for next draw
             SKImageRef.Set(ref _imgRender, img, _imgSource);
 
@@ -370,7 +365,6 @@ public partial class ViewerControl
     /// </summary>
     protected virtual void OnDrawAnimationSource(double eslapseDelta)
     {
-        //if (UseWebview2) return;
         var panDelta = eslapseDelta * 30;
         var zoomDelta = eslapseDelta * 1000;
 

@@ -75,11 +75,6 @@ public partial class ViewerControl
     {
         if (durationMs <= 0) return;
 
-        //if (UseWebview2)
-        //{
-        //    StartWeb2Animation(sources);
-        //}
-
         AnimationSource = sources;
         EnableDrawingAnimation = true;
         _lastAnimationFrameTime = TimeSpan.Zero;
@@ -110,11 +105,6 @@ public partial class ViewerControl
     /// <param name="sources">Source of animation</param>
     public void StopDrawingAnimation(AnimationSources sources, Action? callbackFn = null)
     {
-        //if (UseWebview2)
-        //{
-        //    StopWeb2Animations();
-        //}
-
         AnimationSource ^= sources;
         EnableDrawingAnimation = false;
         InvalidateVisual();

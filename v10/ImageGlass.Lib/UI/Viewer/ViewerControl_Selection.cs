@@ -492,7 +492,6 @@ public partial class ViewerControl
     /// </summary>
     private void OnDrawSelection(DrawingContext g)
     {
-        //if (UseWebview2 || Source == ImageSource.Null || SourceSelection.IsEmpty) return;
         if (!EnableSelection || SourceSelection.IsEmpty) return;
 
 

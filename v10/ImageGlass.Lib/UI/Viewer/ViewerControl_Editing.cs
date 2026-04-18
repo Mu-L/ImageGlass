@@ -206,8 +206,8 @@ public partial class ViewerControl
     {
         lock (_lock)
         {
-            // do nothing for animated images or when there is no source
-            if (_animator is not null) return false;
+            // do nothing for animated/vector images or when there is no source
+            if (_animator is not null || IsVectorSource()) return false;
 
             var srcImage = (_imgRender ?? _imgSource)?.Image;
             var invertedImage = SkiaCodec.InvertImageColors(srcImage);
@@ -240,7 +240,7 @@ public partial class ViewerControl
         lock (_lock)
         {
             // do nothing for animated images or when there is no source
-            if (_animator is not null) return false;
+            if (_animator is not null || IsVectorSource()) return false;
 
             var srcImage = (_imgRender ?? _imgSource)?.Image;
             var rotatedImage = SkiaCodec.RotateImage(srcImage, degree);
@@ -273,7 +273,7 @@ public partial class ViewerControl
         lock (_lock)
         {
             // do nothing for animated images or when there is no source
-            if (_animator is not null) return false;
+            if (_animator is not null || IsVectorSource()) return false;
 
             var srcImage = (_imgRender ?? _imgSource)?.Image;
             var flippedImage = SkiaCodec.FlipImage(srcImage, options);
@@ -302,8 +302,8 @@ public partial class ViewerControl
     {
         lock (_lock)
         {
-            // 1. do nothing for animated images or when there is no source
-            if (_animator is not null) return false;
+            // 1. do nothing for animated/vector images or when there is no source
+            if (_animator is not null || IsVectorSource()) return false;
 
             var srcImage = _imgSource?.Image;
             if (srcImage.IsDisposed()) return false;

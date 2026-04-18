@@ -25,7 +25,7 @@ public enum PhotoSource
 {
     None,
     Native,
-    Webview2,
+    VectorRenderer,
 }
 
 

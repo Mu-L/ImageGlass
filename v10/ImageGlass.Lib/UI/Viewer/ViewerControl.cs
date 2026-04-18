@@ -558,6 +558,9 @@ public partial class ViewerControl : PhControl
             _animator?.Dispose();
             _animator = null;
 
+            // dispose vector resources
+            DisposeVectorResources();
+
             // dispose native bitmap
             SKImageRef.Set(ref _imgSource, null);
             SKImageRef.Set(ref _imgRender, null);
@@ -831,35 +834,58 @@ public partial class ViewerControl : PhControl
             // 3. create the native bitmap
             if (e.Photo.Bitmap is not null)
             {
-                // update bitmap size
-                BitmapSize = e.Photo.Size;
-
-                // native bitmap is a animated bitmap
-                if (e.Photo.Bitmap is SkiaAnimator skAnimator)
+                // 3. handle vector (SVG) source
+                if (e.Photo.Bitmap is SkiaDecoderOutput { VectorPicture: not null } vectorOutput)
                 {
-                    animator = skAnimator;
-                    hasSource = true;
-                }
-
-                // native bitmap is a single-frame bitmap
-                else
-                {
-                    var frameToLoad = (uint)Math.Max(0, e.Photo.FrameIndex);
-                    imgFrame = await e.Photo.GetFrameAsync(frameToLoad);
-
-                    // apply color space
-                    if (TryApplySkiaColorSpace(imgFrame, out var imgFrameColored))
+                    // cancel if requested
+                    if (e.CancelToken.IsCancellationRequested)
                     {
-                        // don't dispose the clipboard photo
-                        if (!e.Photo.IsClipboard)
-                        {
-                            imgFrame?.Dispose();
-                        }
-
-                        imgFrame = imgFrameColored;
+                        HandleCancelLoaded(true);
+                        return;
                     }
 
-                    hasSource = imgFrame != null;
+                    CancelPreview();
+
+                    lock (_lock)
+                    {
+                        if (HandleVectorPhotoLoaded(vectorOutput))
+                        {
+                            hasSource = true;
+                        }
+                    }
+                }
+                else
+                {
+                    // update bitmap size
+                    BitmapSize = e.Photo.Size;
+
+                    // native bitmap is a animated bitmap
+                    if (e.Photo.Bitmap is SkiaAnimator skAnimator)
+                    {
+                        animator = skAnimator;
+                        hasSource = true;
+                    }
+
+                    // native bitmap is a single-frame bitmap
+                    else
+                    {
+                        var frameToLoad = (uint)Math.Max(0, e.Photo.FrameIndex);
+                        imgFrame = await e.Photo.GetFrameAsync(frameToLoad);
+
+                        // apply color space
+                        if (TryApplySkiaColorSpace(imgFrame, out var imgFrameColored))
+                        {
+                            // don't dispose the clipboard photo
+                            if (!e.Photo.IsClipboard)
+                            {
+                                imgFrame?.Dispose();
+                            }
+
+                            imgFrame = imgFrameColored;
+                        }
+
+                        hasSource = imgFrame != null;
+                    }
                 }
             }
 

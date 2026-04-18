@@ -84,6 +84,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
     private readonly SKSamplingOptions _samplingOptions;
     private readonly MipmapTileCache? _tileCache;
     private readonly double _zoomFactor;
+    private readonly SKPicture? _svgPicture;
 
 
     #region Public Properties
@@ -118,6 +119,7 @@ public partial class PhotoRenderer : ICustomDrawOperation
             _samplingOptions = SkiaCodec.ToSamplingOptions(viewer.CurrentInterpolation);
             _tileCache = viewer._mipmapCache;
             _zoomFactor = viewer.ZoomFactor;
+            _svgPicture = viewer._svgPicture;
 
             // Atomically claim first-draw ownership so that concurrent
             // InvalidateVisual() calls cannot trigger duplicate
@@ -166,7 +168,19 @@ public partial class PhotoRenderer : ICustomDrawOperation
             {
                 SKImage? imageRender;
 
-                if (_isFirstDraw)
+                // Vector (SVG) rendering: re-draw the picture at current scale
+                if (_svgPicture is not null)
+                {
+                    RenderVector(lease.SkCanvas);
+
+                    if (_isFirstDraw)
+                    {
+                        _isFirstDraw = false;
+                        // no raster image to process for vector; pass null
+                        Dispatcher.UIThread.Post(() => _onDrawFirstTime(null), DispatcherPriority.Send);
+                    }
+                }
+                else if (_isFirstDraw)
                 {
                     srcLease = _imgSource?.Acquire();
                     var srcImage = srcLease?.Image;
@@ -290,6 +304,27 @@ public partial class PhotoRenderer : ICustomDrawOperation
             }
         }
 
+        canvas.Restore();
+    }
+
+
+    /// <summary>
+    /// Renders the SVG picture scaled to the destination rect.
+    /// </summary>
+    private void RenderVector(SKCanvas canvas)
+    {
+        var picture = _svgPicture!;
+        var cullRect = picture.CullRect;
+
+        // compute transform: map SVG CullRect to destRect, accounting for srcRect (pan/zoom)
+        var transform = ViewerControl.ComputeVectorTransform(
+            _srcRect,
+            _destRect);
+
+        canvas.Save();
+        canvas.ClipRect(_destRect);
+        canvas.SetMatrix(canvas.TotalMatrix.PreConcat(transform));
+        canvas.DrawPicture(picture);
         canvas.Restore();
     }
 
