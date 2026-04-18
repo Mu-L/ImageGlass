@@ -314,11 +314,6 @@ public static class Core
             var fm = FontFamily.Parse("Segoe UI Variable Text");
             Resx.Set(ResxId.ContentControlThemeFontFamily, fm);
         }
-
-
-        // 2. update control styles
-        Resx.Set(ResxId.ControlCornerRadius, new CornerRadius(6));
-        Resx.Set(ResxId.MenuFlyoutSeparatorThemePadding, new Thickness(0, 4));
     }
 
 

@@ -275,7 +275,8 @@ public partial class Config
 
     /// <summary>
     /// Loads and merges configs from multiple sources.
-    /// Priority (lowest -> highest): developer defaults -> igconfig.default.json -> igconfig.json -> CLI args -> igconfig.admin.json.
+    /// Priority (lowest -> highest):
+    /// developer defaults -> igconfig.default.json -> igconfig.json -> CLI args -> igconfig.admin.json.
     /// </summary>
     public static Config Load(string configFileName, string[]? cliArgs = null)
     {
