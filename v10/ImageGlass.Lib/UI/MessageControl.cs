@@ -294,6 +294,10 @@ public class MessageControl : PhControl
             {
                 await Task.Delay(delayMs, token);
             }
+
+            // check if this message was superseded by a newer ShowAsync call
+            if (token.IsCancellationRequested) return;
+
             SetMessage(message, heading, details);
 
 
