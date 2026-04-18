@@ -268,6 +268,16 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
+    /// Gets, sets the value indicating whether to use vector renderer (Svg.Skia)
+    /// instead of rasterizing through Magick.NET.
+    /// </summary>
+    public bool EnableVectorRenderer
+    {
+        get => Get(ConfigId.EnableVectorRenderer, true);
+        set => Set(ConfigId.EnableVectorRenderer, value);
+    }
+
+    /// <summary>
     /// Gets, sets the value indicates that HDR tone mapping is enabled when rendering image.
     /// </summary>
     public bool EnableHdrToneMapping
@@ -330,7 +340,6 @@ public partial class Config : PhReactive
         set => Set(ConfigId.EnableExplorerSortOrder, value);
     }
 
-
     /// <summary>
     /// Gets, sets value specifying that Window Fit mode is on
     /// </summary>
@@ -339,7 +348,6 @@ public partial class Config : PhReactive
         get => Get(ConfigId.EnableWindowFit, false);
         set => Set(ConfigId.EnableWindowFit, value);
     }
-
 
     /// <summary>
     /// Gets, sets value indicates the window should be always center in Window Fit mode
@@ -421,11 +429,6 @@ public partial class Config : PhReactive
         get => Get(ConfigId.EnableAutoOpenNewAddedImage, false);
         set => Set(ConfigId.EnableAutoOpenNewAddedImage, value);
     }
-
-    ///// <summary>
-    ///// Uses Webview2 for viewing SVG format.
-    ///// </summary>
-    //public bool UseWebview2ForSvg { get; set; } = true;
 
     /// <summary>
     /// Enables, disables debug mode.

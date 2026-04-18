@@ -55,6 +55,7 @@ public enum ConfigId
     EnableOpenSaveAsInCurrentFolder,
     EnableWelcomeImage,
     EnableLastSeenImage,
+    EnableVectorRenderer,
     EnableHdrToneMapping,
     EnableAlwaysApplyColorProfile,
     EnableNavigationButtons,
@@ -72,7 +73,6 @@ public enum ConfigId
     EnableCutMultipleFiles,
     EnableFileWatcher,
     EnableAutoOpenNewAddedImage,
-    // UseWebview2ForSvg,
     EnableDebug,
 
     #endregion // Boolean settings
