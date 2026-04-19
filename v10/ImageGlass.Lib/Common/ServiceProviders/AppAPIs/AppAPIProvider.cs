@@ -197,7 +197,7 @@ public partial class AppAPIProvider
     /// Opens photo by the given path, shortcut for method <see cref="PrepareLoadPhotoList"/> with params:
     /// <list type="bullet">
     ///   <item><c>currentFilePath</c> = <c>null</c></item>
-    ///   <item><c>disposeForegroundShell</c> = <c>false</c></item>
+    ///   <item><c>disposeForegroundShell</c> = <c>true</c> when loading from a different folder</item>
     ///   <item><c>loadInitPhoto</c> = <c>true</c></item>
     /// </list>
     /// </summary>
@@ -212,8 +212,12 @@ public partial class AppAPIProvider
         // 2.1 The file is located another folder, load the entire folder
         if (imageIndex == -1 || (Core.ShellProvider?.CanUseForegroundShell() ?? false))
         {
+            // dispose the foreground shell when loading from a different folder,
+            // so that file enumeration uses the new folder instead of the stale shell
+            var disposeForegroundShell = imageIndex == -1;
+
             _mainWindow.PART_MainView.PrepareLoadPhotoList([fullPath],
-                currentFilePath: null, disposeForegroundShell: false, reloadInitPhoto: true);
+                currentFilePath: null, disposeForegroundShell, reloadInitPhoto: true);
         }
         // 2.2 The file is in current folder AND it is the viewing image
         else if (Core.Photos.CurrentIndex == imageIndex)
