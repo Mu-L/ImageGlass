@@ -121,7 +121,7 @@ public static partial class MagickCodec
     /// <summary>
     /// Applies changes from <paramref name="transform"/>.
     /// </summary>
-    private static void TransformImage__(IMagickImage imgM, ImgTransform? transform = null)
+    private static void TransformImage__(IMagickImage imgM, PhotoTransform? transform = null)
     {
         if (transform == null) return;
 

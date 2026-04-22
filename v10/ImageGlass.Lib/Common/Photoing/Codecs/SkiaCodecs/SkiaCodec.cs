@@ -297,7 +297,7 @@ public static partial class SkiaCodec
     /// <returns><c>true</c> if file is saved.</returns>
     /// <exception cref="Exception"></exception>
     public static async Task SaveAsync(SKImage? srcImg, string destFilePath,
-        ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
+        PhotoTransform? transform = null, uint quality = 100, CancellationToken token = default)
     {
         if (srcImg.IsDisposed()) return;
 
@@ -430,7 +430,7 @@ public static partial class SkiaCodec
     /// <summary>
     /// Returns the new transformed image by applying flip, rotation, and color inversion.
     /// </summary>
-    public static SKImage? TransformImage(SKImage? imgSrc, ImgTransform? transform)
+    public static SKImage? TransformImage(SKImage? imgSrc, PhotoTransform? transform)
     {
         if (imgSrc.IsDisposed() || transform is null || !transform.HasChanges) return null;
 

@@ -65,8 +65,8 @@ public partial class Photo : PhDisposable
 
     /// <summary>
     /// Gets the native bitmap,
-    /// either <see cref="SKImage"/>, <see cref="SkiaAnimator"/>,
-    /// or <see cref="SkiaDecoderOutput"/> (for vector formats).
+    /// either <see cref="SKImage"/>, <see cref="AnimatorImpl"/>,
+    /// or <see cref="SkiaVectorSource"/>.
     /// </summary>
     public IDisposable? Bitmap { get; private set; } = null;
 
@@ -96,14 +96,9 @@ public partial class Photo : PhDisposable
     public PhotoState State { get; set; } = PhotoState.None;
 
     /// <summary>
-    /// Gets the codec that was used to decode the photo.
+    /// Gets the codec ID used to decode the photo.
     /// </summary>
-    public DecodedCodec DecodedBy { get; private set; } = DecodedCodec.Unknown;
-
-    /// <summary>
-    /// Gets the codec used to decode the photo.
-    /// </summary>
-    public PhotoCodec ReadCodec
+    public string CodecId
     {
         get; private set
         {
@@ -111,7 +106,7 @@ public partial class Photo : PhDisposable
             field = value;
             _ = OnPropertyChanged();
         }
-    } = PhotoCodec.None;
+    } = string.Empty;
 
 
     /// <summary>
@@ -379,65 +374,30 @@ public partial class Photo : PhDisposable
     }
 
 
-    /// <summary>
-    /// Handles the decoding of image files based on their metadata.
-    /// </summary>
-    private async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
+    private CodecSelectionContext CreateCodecSelectionContext(PhotoMetadata meta)
     {
-        // get embedded thumbnail requirements
-        var loadRawThumbnailOnly = ReadOptions.OnlyLoadRawPreview
-            && meta.RawThumbnail is not null;
-        var loadOtherThumbnailOnly = ReadOptions.OnlyLoadNonRawPreview
-            && (meta.ExifProfile?.ThumbnailLength ?? 0) > 0;
-
-        // SVG native rendering
-        if (meta.IsVector && Core.Config.EnableVectorRenderer)
+        return new CodecSelectionContext
         {
-            DecodedBy = DecodedCodec.Skia;
-            await LoadWithSkiaCodecAsync(meta, token);
-            return;
-        }
-
-        // check if we can use Skia to decode
-        var useSkiaCodec = Core.Config.NativeCodecReadFormats.Contains(meta.FileExtension)
-            && SkiaCodec.CanRead(meta)
-            && Core.IsDestColorProfileSupported
-            && !loadRawThumbnailOnly
-            && !loadOtherThumbnailOnly;
-
-
-        // use native codec
-        if (useSkiaCodec)
-        {
-            DecodedBy = DecodedCodec.Skia;
-            await LoadWithSkiaCodecAsync(meta, token);
-        }
-
-        // use Magick codec
-        else
-        {
-            DecodedBy = DecodedCodec.Magick;
-            await LoadWithMagickAsync(meta, token);
-        }
+            EnableVectorRenderer = Core.Config.EnableVectorRenderer,
+            IsDestColorProfileSupported = Core.IsDestColorProfileSupported,
+            LoadRawThumbnailOnly = ReadOptions.OnlyLoadRawPreview && meta.RawThumbnail is not null,
+            LoadOtherThumbnailOnly = ReadOptions.OnlyLoadNonRawPreview && (meta.ExifProfile?.ThumbnailLength ?? 0) > 0,
+            NativeCodecReadFormats = Core.Config.NativeCodecReadFormats,
+        };
     }
 
 
-    /// <summary>
-    /// Loads an image using native codec.
-    /// </summary>
-    private async Task LoadWithSkiaCodecAsync(PhotoMetadata meta, CancellationToken token)
+    private void ApplyDecodeResult(CodecDecodeResult result)
     {
-        ReadCodec = PhotoCodec.Native;
-        var result = await SkiaCodec.LoadAsync(meta, ReadOptions, token);
+        CodecId = result.CodecId;
 
         _width = (uint)result.Size.Width;
         _height = (uint)result.Size.Height;
 
-        // SVG vector output: store the vector source (not entire decoder output)
         if (result.VectorSource is not null)
         {
             Bitmap = result.VectorSource;
-            result.VectorSource = null; // transfer ownership
+            result.VectorSource = null;
             return;
         }
 
@@ -446,27 +406,39 @@ public partial class Photo : PhDisposable
             result.Animator.FrameChanged -= OnAnimatorFrameChanged;
             result.Animator.FrameChanged += OnAnimatorFrameChanged;
             Bitmap = result.Animator;
+            result.Animator = null;
+            return;
         }
-        else if (result.SingleFrame is not null) Bitmap = result.SingleFrame;
-        else Bitmap = null;
+
+        if (result.SingleFrame is not null)
+        {
+            Bitmap = result.SingleFrame;
+            result.SingleFrame = null;
+            return;
+        }
+
+        Bitmap = null;
+    }
+
+
+    private MagickReadSettings GetOrCreateMagickReadSettings()
+    {
+        ReadSettings ??= MagickCodec.ParseSettings(ReadOptions, false, FilePath);
+        return ReadSettings;
     }
 
 
     /// <summary>
-    /// Loads an image using Magick.
+    /// Handles the decoding of image files based on their metadata.
     /// </summary>
-    private async Task LoadWithMagickAsync(PhotoMetadata meta, CancellationToken token)
+    private async Task OnDecodingAsync(PhotoMetadata meta, CancellationToken token)
     {
-        ReadCodec = PhotoCodec.Magick;
-        using var data = await MagickCodec.DecodeImageAsync(meta, ReadOptions, ReadSettings, null, token);
+        var context = CreateCodecSelectionContext(meta);
+        var codec = Core.CodecRegistry.SelectDecodeCodec(meta, context)
+            ?? throw new FormatException("IGE: No codec available to decode the current file.");
 
-
-        // always load single frame
-        var img = SkiaCodec.FromMagick(data.SingleFrame, meta.SkiaColorSpace, meta.IsHdr);
-        _width = (uint)(img?.Width ?? 0);
-        _height = (uint)(img?.Height ?? 0);
-
-        Bitmap = img;
+        using var result = await codec.DecodeAsync(meta, ReadOptions, context, token).ConfigureAwait(false);
+        ApplyDecodeResult(result);
     }
 
 
@@ -511,7 +483,7 @@ public partial class Photo : PhDisposable
     /// </summary>
     public void UnloadBitmap()
     {
-        if (Bitmap is SkiaAnimator animator)
+        if (Bitmap is AnimatorImpl animator)
         {
             animator.FrameChanged -= OnAnimatorFrameChanged;
         }
@@ -647,7 +619,6 @@ public partial class Photo : PhDisposable
         try
         {
             ReadOptions = newOptions ?? ReadOptions;
-            ReadSettings ??= MagickCodec.ParseSettings(ReadOptions, false, FilePath);
 
             // if already started loading, wait for the task completes
             if (useCache)
@@ -671,14 +642,15 @@ public partial class Photo : PhDisposable
             // load the metadata if it's outdated
             if (hasOutdatedCache)
             {
+                var metadataCodec = Core.CodecRegistry.SelectMetadataCodec(FilePath);
+
                 // load metadata off-thread
-                if (MagickCodec.CanRead(FilePath))
+                if (metadataCodec is not null)
                 {
-                    _taskMetadata = Task.Run(() => MagickCodec.LoadMetadataAsync(FilePath, ReadOptions, ReadSettings));
-                }
-                else if (SkiaCodec.CanPing(FilePath))
-                {
-                    _taskMetadata = Task.Run(() => SkiaCodec.LoadMetadataAsync(FilePath, ReadOptions));
+                    _taskMetadata = Task.Run(() => metadataCodec.LoadMetadataAsync(
+                        FilePath,
+                        ReadOptions,
+                        CancellationToken.None));
                 }
                 else
                 {
@@ -706,7 +678,7 @@ public partial class Photo : PhDisposable
         var newFrameIndex = (int)frameIndex;
 
         // 1. animated formats: delegate to animator's own frame cache
-        if (Bitmap is SkiaAnimator animator)
+        if (Bitmap is AnimatorImpl animator)
         {
             _frameIndex = newFrameIndex;
             return animator.GetRenderedFrameBitmap(frameIndex);
@@ -731,7 +703,7 @@ public partial class Photo : PhDisposable
         var newFrame = await Task.Factory.StartNew(async () =>
         {
             var options = ReadOptions with { FrameIndex = newFrameIndex };
-            using var data = await MagickCodec.DecodeImageAsync(Metadata, options, ReadSettings,
+            using var data = await MagickCodec.DecodeImageAsync(Metadata, options, GetOrCreateMagickReadSettings(),
                 null, CancellationToken.None);
             var frameImg = SkiaCodec.FromMagick(data.SingleFrame, Metadata.SkiaColorSpace, Metadata.IsHdr);
 
@@ -763,7 +735,7 @@ public partial class Photo : PhDisposable
     /// </summary>
     /// <exception cref="Exception"></exception>
     public async Task SaveAsAsync(string destFilePath,
-        ImgTransform transforms, uint quality,
+        PhotoTransform transforms, uint quality,
         bool preserveModifiedDate = false, CancellationToken token = default)
     {
         var taskId = Guid.NewGuid();

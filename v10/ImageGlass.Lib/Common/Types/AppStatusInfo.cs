@@ -464,7 +464,7 @@ public partial class AppStatusInfo : PhDisposable
     }
 
 
-    private void ImageTransform_Changed(ImgTransform sender, EventArgs e)
+    private void ImageTransform_Changed(PhotoTransform sender, EventArgs e)
     {
         Dispatcher.UIThread.Post(() =>
         {

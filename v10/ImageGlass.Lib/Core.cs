@@ -201,6 +201,12 @@ public static class Core
 
 
     /// <summary>
+    /// Gets the registry for built-in and future external photo codecs.
+    /// </summary>
+    public static CodecRegistry CodecRegistry { get; } = new();
+
+
+    /// <summary>
     /// Gets the path of the image file from the arguments.
     /// </summary>
     public static string InputImagePathFromArgs => _initImagePathFromArgs;
@@ -209,7 +215,7 @@ public static class Core
     /// <summary>
     /// Gets, sets the changes of the current viewing image.
     /// </summary>
-    public static ImgTransform ImageTransform { get; set; } = new();
+    public static PhotoTransform ImageTransform { get; set; } = new();
 
 
     /// <summary>
@@ -263,6 +269,7 @@ public static class Core
 
         // Dispose external plugins (StopAllAsync already called in OnClosing)
         ExternalPlugins.Dispose();
+        CodecRegistry.Dispose();
 
         DisposeClipboardPhoto();
 

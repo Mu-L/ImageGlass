@@ -21,17 +21,17 @@ using System;
 
 namespace ImageGlass.Common.Photoing;
 
-public class ImgTransform
+public class PhotoTransform
 {
-    private float _rotation = 0;
     private FlipOptions _flipOptions = FlipOptions.None;
+    private float _rotation = 0;
     private bool _isColorInverted = false;
 
 
     /// <summary>
     /// Occurs when there is a change.
     /// </summary>
-    public event TEventHandler<ImgTransform, EventArgs>? Changed;
+    public event TEventHandler<PhotoTransform, EventArgs>? Changed;
 
 
     /// <summary>

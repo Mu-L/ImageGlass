@@ -470,7 +470,7 @@ public static partial class MagickCodec
     public static async Task<MagickDecoderOutput> DecodeImageAsync(
         PhotoMetadata meta,
         PhotoReadOptions options, MagickReadSettings? settings,
-        ImgTransform? transform, CancellationToken cancelToken)
+        PhotoTransform? transform, CancellationToken cancelToken)
     {
         var result = new MagickDecoderOutput();
 
@@ -740,7 +740,7 @@ public static partial class MagickCodec
     /// <param name="quality">Quality</param>
     /// <exception cref="Exception"></exception>
     public static async Task SaveAsync(PhotoMetadata meta, string destFilePath, PhotoReadOptions options,
-        ImgTransform? transform = null, uint quality = 100, CancellationToken token = default)
+        PhotoTransform? transform = null, uint quality = 100, CancellationToken token = default)
     {
         var destExt = Path.GetExtension(destFilePath);
 

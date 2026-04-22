@@ -1,0 +1,104 @@
+/*
+ImageGlass - A lightweight, versatile image viewer
+Copyright (C) 2010 - 2026 DUONG DIEU PHAP
+Project homepage: https://imageglass.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+using ImageGlass.Common.Types;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace ImageGlass.Common.Photoing;
+
+/// <summary>
+/// Provides native Skia-based raster metadata loading and decoding.
+/// </summary>
+public sealed class SkiaCodecAdapter : PhDisposable, ICodec
+{
+    private static readonly string[] _supportedExtensions = [];
+
+
+    /// <inheritdoc/>
+    public string CodecId { get; } = "skiasharp";
+
+    /// <inheritdoc/>
+    public string CodecName { get; } = "SkiaSharp";
+
+    /// <inheritdoc/>
+    public int MetadataPriority { get; } = 10;
+
+    /// <inheritdoc/>
+    public int DecodePriority { get; } = 100;
+
+    /// <inheritdoc/>
+    public IReadOnlyList<string> SupportedExtensions => _supportedExtensions;
+
+
+    /// <inheritdoc/>
+    public bool CanLoadMetadata(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || SvgCodec.IsSvgFile(filePath)) return false;
+
+        try
+        {
+            return SkiaCodec.CanPing(filePath);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+
+    /// <inheritdoc/>
+    public Task<PhotoMetadata> LoadMetadataAsync(string filePath,
+        PhotoReadOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        return SkiaCodec.LoadMetadataAsync(filePath, options, cancellationToken);
+    }
+
+
+    /// <inheritdoc/>
+    public bool CanDecode(PhotoMetadata metadata, CodecSelectionContext context)
+    {
+        if (metadata is null || metadata.IsVector) return false;
+        if (!context.IsDestColorProfileSupported) return false;
+        if (context.LoadRawThumbnailOnly || context.LoadOtherThumbnailOnly) return false;
+        if (!context.NativeCodecReadFormats.Contains(metadata.FileExtension)) return false;
+
+        try
+        {
+            return SkiaCodec.CanRead(metadata);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+
+    /// <inheritdoc/>
+    public async Task<CodecDecodeResult> DecodeAsync(PhotoMetadata metadata,
+        PhotoReadOptions options,
+        CodecSelectionContext context,
+        CancellationToken cancellationToken = default)
+    {
+        using var output = await SkiaCodec.LoadAsync(metadata, options, cancellationToken).ConfigureAwait(false);
+
+        return CodecDecodeResultFactory.FromSkiaOutput(CodecId, output, metadata);
+    }
+}

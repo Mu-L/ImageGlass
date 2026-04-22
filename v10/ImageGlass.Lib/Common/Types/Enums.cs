@@ -72,14 +72,6 @@ public enum ImageSaveSource
 }
 
 
-public enum PhotoCodec
-{
-    None,
-    Magick,
-    Native,
-}
-
-
 /// <summary>
 /// The loading order list.
 /// **If we need to rename, we MUST update the language string too.

@@ -411,7 +411,7 @@ public partial class AppAPIProvider
                 var selectedImg = SkiaCodec.ToSKImage(selectedBmp)!;
                 using var photo = new Photo(selectedImg);
 
-                await photo.SaveAsAsync(destFilePath, new ImgTransform(),
+                await photo.SaveAsAsync(destFilePath, new PhotoTransform(),
                     Core.Config.ImageEditQuality, Core.Config.EnablePreserveModifiedDate);
                 saveSource = ImageSaveSource.SelectedArea;
             }
