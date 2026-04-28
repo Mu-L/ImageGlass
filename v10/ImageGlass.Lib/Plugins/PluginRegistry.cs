@@ -36,15 +36,16 @@ public sealed unsafe class PluginRegistry : PhDisposable
 {
     private readonly Lock _lock = new();
     private readonly Dictionary<string, NativePlugin> _plugins = new(StringComparer.Ordinal);
-    private readonly PluginFailureManager _failureManager;
 
     private static int DecodeMajor(int abiVersion) => abiVersion / 1_000_000;
 
 
-    public PluginRegistry(PluginFailureManager failureManager)
-    {
-        _failureManager = failureManager;
-    }
+    /// <summary>
+    /// Tracks per-plugin crash markers and session-disabled state.
+    /// Owned by this registry so that quarantine policy and the loaded plugin
+    /// table share the same lifetime.
+    /// </summary>
+    public PluginFailureManager FailureManager { get; } = new();
 
 
     /// <summary>
@@ -59,7 +60,7 @@ public sealed unsafe class PluginRegistry : PhDisposable
             return null;
         }
 
-        if (_failureManager.IsQuarantined(manifest.Id))
+        if (FailureManager.IsQuarantined(manifest.Id))
         {
             Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' is quarantined; skipping.");
             return null;
@@ -96,7 +97,7 @@ public sealed unsafe class PluginRegistry : PhDisposable
             }
             catch (Exception ex)
             {
-                _failureManager.Quarantine(manifest.Id, $"entry point threw: {ex.Message}");
+                FailureManager.Quarantine(manifest.Id, $"entry point threw: {ex.Message}");
                 NativeLibrary.Free(libHandle);
                 return null;
             }
@@ -128,7 +129,7 @@ public sealed unsafe class PluginRegistry : PhDisposable
                 try { initStatus = pluginApi->Initialize(); }
                 catch (Exception ex)
                 {
-                    _failureManager.Quarantine(manifest.Id, $"Initialize threw: {ex.Message}");
+                    FailureManager.Quarantine(manifest.Id, $"Initialize threw: {ex.Message}");
                     NativeLibrary.Free(libHandle);
                     return null;
                 }
@@ -188,7 +189,7 @@ public sealed unsafe class PluginRegistry : PhDisposable
         catch (Exception ex)
         {
             Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' load failed: {ex.Message}");
-            _failureManager.Quarantine(manifest.Id, $"load failed: {ex.Message}");
+            FailureManager.Quarantine(manifest.Id, $"load failed: {ex.Message}");
 
             try
             {
@@ -214,7 +215,7 @@ public sealed unsafe class PluginRegistry : PhDisposable
         {
             unsafe
             {
-                list.Add(new NativeCodecProxy(handle, (IGCodecApi*)entry.CodecApiPtr, entry.Capability, _failureManager));
+                list.Add(new NativeCodecProxy(handle, (IGCodecApi*)entry.CodecApiPtr, entry.Capability, FailureManager));
             }
         }
         return list;
@@ -241,9 +242,6 @@ public sealed unsafe class PluginRegistry : PhDisposable
             SupportedExtensions = [.. exts],
             SupportsMetadata = cap.SupportsMetadata != 0,
             SupportsStaticRaster = cap.SupportsStaticRaster != 0,
-            SupportsAnimation = cap.SupportsAnimation != 0,
-            SupportsVector = cap.SupportsVector != 0,
-            SupportsHdr = cap.SupportsHdr != 0,
             SupportsColorProfiles = cap.SupportsColorProfiles != 0,
         };
     }

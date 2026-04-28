@@ -143,7 +143,7 @@ public partial class MainWindow : PhWindow
         Core.API?.IG_ToggleSlideshow(false);
 
         // stop all external tool processes before saving config
-        await Core.ExternalTools.StopAllAsync();
+        await Core.ToolRegistry.ExternalTools.StopAllAsync();
 
         // only save config here, do NOT dispose resources yet
         await SaveConfigOnClosingAsync();

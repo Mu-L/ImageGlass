@@ -2840,7 +2840,7 @@ public partial class AppAPIProvider
             if (tool is ExternalToolProxy)
             {
                 // Only allow one instance of a non-hosted external tool
-                if (Core.ExternalTools.IsRunning(toolId)) return;
+                if (Core.ToolRegistry.ExternalTools.IsRunning(toolId)) return;
 
                 // External non-hosted tool: start process and execute
                 _ = tool.ExecuteAsync(new ToolExecutionContext { Window = _mainWindow });

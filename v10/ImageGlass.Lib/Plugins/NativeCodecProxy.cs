@@ -161,16 +161,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
                 if (info.Height > 0) meta.OriginalHeight = (uint)info.Height;
                 meta.HasAlpha = info.HasAlpha != 0;
                 meta.FrameCount = (uint)Math.Max(1, info.FrameCount);
-
-                // Infer HDR from the source pixel format the plugin reports.
-                // Wide-gamut / float pixel formats imply HDR-capable content; the actual
-                // transfer function (PQ vs HLG vs scene-linear) is not reported by the
-                // current ABI, so leave HdrTransferFn unset.
-                var srcFormat = (IGPixelFormat)info.PixelFormat;
-                if (srcFormat == IGPixelFormat.Rgba16Unorm || srcFormat == IGPixelFormat.RgbaFloat16)
-                {
-                    meta.IsHdr = true;
-                }
+                meta.IsHdr = info.IsHdr != 0;
             }
         }
         finally

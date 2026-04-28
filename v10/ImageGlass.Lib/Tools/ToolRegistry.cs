@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -34,10 +35,19 @@ public delegate IToolControl ToolControlFactory(ViewerControl viewer);
 /// <summary>
 /// Central registry for all tools (hosted and non-hosted).
 /// Built-in tools register during <see cref="ImageGlass.Common.ServiceProviders.AppAPIProvider"/> construction.
+/// Also owns the <see cref="ExternalTools"/> process manager so external-tool lifetime
+/// is bound to the registry's lifetime.
 /// </summary>
-public sealed class ToolRegistry
+public sealed class ToolRegistry : PhDisposable
 {
     private readonly Dictionary<string, ITool> _tools = new();
+
+
+    /// <summary>
+    /// Process manager for external (out-of-process) tools.
+    /// Owned by the registry; disposed automatically on registry disposal.
+    /// </summary>
+    public ToolProcessManager ExternalTools { get; } = new();
 
 
     /// <summary>
@@ -130,5 +140,11 @@ public sealed class ToolRegistry
         }
     }
 
+
+    protected override void OnDisposing()
+    {
+        ExternalTools.Dispose();
+        base.OnDisposing();
+    }
 
 }

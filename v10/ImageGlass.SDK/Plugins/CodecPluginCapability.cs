@@ -20,9 +20,6 @@ public sealed class CodecPluginCapability
 
     public bool SupportsMetadata { get; init; }
     public bool SupportsStaticRaster { get; init; }
-    public bool SupportsAnimation { get; init; }
-    public bool SupportsVector { get; init; }
-    public bool SupportsHdr { get; init; }
     public bool SupportsColorProfiles { get; init; }
 }
 

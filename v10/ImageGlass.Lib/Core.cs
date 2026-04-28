@@ -121,28 +121,17 @@ public static class Core
 
 
     /// <summary>
-    /// Singleton quarantine tracker for native plugins.
-    /// </summary>
-    public static PluginFailureManager PluginFailureManager { get; } = new();
-
-
-    /// <summary>
     /// Singleton loader that owns every native plugin shared library for the process lifetime.
+    /// Also exposes <see cref="PluginRegistry.FailureManager"/> for quarantine bookkeeping.
     /// </summary>
-    public static PluginRegistry PluginRegistry { get; } = new(PluginFailureManager);
+    public static PluginRegistry PluginRegistry { get; } = new();
 
 
     /// <summary>
-    /// Gets the central registry for all plugins (hosted and non-hosted).
-    /// Built-in plugins are registered during <see cref="ServiceProviders.AppAPIProvider"/> construction.
+    /// Gets the central registry for all tools (built-in, hosted, and external).
+    /// Owns <see cref="ToolRegistry.ExternalTools"/> for external tool process management.
     /// </summary>
     public static ToolRegistry ToolRegistry { get; } = new();
-
-
-    /// <summary>
-    /// Gets the process manager for external (out-of-process) plugins.
-    /// </summary>
-    public static ToolProcessManager ExternalTools { get; } = new();
 
 
     /// <summary>
@@ -281,8 +270,8 @@ public static class Core
     {
         Config.CleanUpPropertyChangedEvents();
 
-        // Dispose external plugins (StopAllAsync already called in OnClosing)
-        ExternalTools.Dispose();
+        // Dispose tools (StopAllAsync already called in OnClosing for external tools)
+        ToolRegistry.Dispose();
         PluginRegistry.Dispose();
         CodecRegistry.Dispose();
 
@@ -359,7 +348,7 @@ public static class Core
 
             try
             {
-                var proxy = new ExternalToolProxy(tool, ExternalTools);
+                var proxy = new ExternalToolProxy(tool, ToolRegistry.ExternalTools);
                 ToolRegistry.Register(tool.ToolId, proxy);
             }
             catch (Exception ex)
@@ -711,7 +700,7 @@ public static class Core
             ColorProfileChanged?.Invoke(null, new());
         });
 
-        ExternalTools.BroadcastToAll(MessageTypes.COLOR_PROFILE_CHANGED);
+        ToolRegistry.ExternalTools.BroadcastToAll(MessageTypes.COLOR_PROFILE_CHANGED);
     }
 
 
@@ -725,7 +714,7 @@ public static class Core
             ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
         });
 
-        ExternalTools.BroadcastToAll(MessageTypes.THEME_CHANGED, new ThemeInfo
+        ToolRegistry.ExternalTools.BroadcastToAll(MessageTypes.THEME_CHANGED, new ThemeInfo
         {
             IsDarkMode = Theme.Settings.IsDarkMode,
             AccentColor = AccentColor.ToString(),
@@ -744,7 +733,7 @@ public static class Core
             LanguageChanged?.Invoke(null, new());
         });
 
-        ExternalTools.BroadcastToAll(MessageTypes.LANGUAGE_CHANGED, new LanguageChangedEventArgs
+        ToolRegistry.ExternalTools.BroadcastToAll(MessageTypes.LANGUAGE_CHANGED, new LanguageChangedEventArgs
         {
             Code = Lang.Metadata.Code,
             EnglishName = Lang.Metadata.EnglishName,
@@ -784,7 +773,7 @@ public static class Core
     {
         if (photo is null) return;
 
-        ExternalTools.BroadcastToAll(MessageTypes.PHOTO_CHANGED, new PhotoChangedEventArgs
+        ToolRegistry.ExternalTools.BroadcastToAll(MessageTypes.PHOTO_CHANGED, new PhotoChangedEventArgs
         {
             FilePath = photo.FilePath,
             Width = (int)(photo.Metadata?.OriginalWidth ?? 0),
@@ -807,7 +796,7 @@ public static class Core
 
     internal static void Viewer_PointerMovedForPlugins(ViewerControl sender, ViewerPointerEventArgs e)
     {
-        ExternalTools.BroadcastToSubscribed(
+        ToolRegistry.ExternalTools.BroadcastToSubscribed(
             MessageTypes.POINTER_MOVED,
             new PointerEventArgs
             {
@@ -821,7 +810,7 @@ public static class Core
 
     internal static void Viewer_PointerPressedForPlugins(ViewerControl sender, ViewerPointerEventArgs e)
     {
-        ExternalTools.BroadcastToSubscribed(
+        ToolRegistry.ExternalTools.BroadcastToSubscribed(
             MessageTypes.POINTER_PRESSED,
             new PointerEventArgs
             {
@@ -836,7 +825,7 @@ public static class Core
     internal static void Viewer_SelectionChangedForPlugins(ViewerControl sender, ViewerSelectionChangedEventArgs e)
     {
         var src = e.SourceSelection;
-        ExternalTools.BroadcastToSubscribed(
+        ToolRegistry.ExternalTools.BroadcastToSubscribed(
             MessageTypes.SELECTION_CHANGED,
             src == default ? null : new SelectionEventArgs
             {
@@ -850,7 +839,7 @@ public static class Core
 
     internal static void Viewer_FrameChangedForPlugins(ViewerControl sender, PhotoFrameChangedEventArgs e)
     {
-        ExternalTools.BroadcastToSubscribed(
+        ToolRegistry.ExternalTools.BroadcastToSubscribed(
             MessageTypes.FRAME_CHANGED,
             (int)e.CurrentFrame,
             s => s.FrameChanged);

@@ -36,7 +36,6 @@ internal static unsafe class PluginHostApiTable
 {
     private static IGHostApi* _hostApi;
     private static IGHostCoreApi* _coreApi;
-    private static IGHostCodecApi* _codecApi;
 
     // Tracks live cancellation tokens by an opaque integer handle that crosses the ABI as void*.
     // This avoids passing GC handles directly to native code.
@@ -87,15 +86,10 @@ internal static unsafe class PluginHostApiTable
         _coreApi->IsCancellationRequested = &HostIsCancellationRequested;
         _coreApi->GetConfigDirectory = &HostGetConfigDirectory;
 
-        _codecApi = (IGHostCodecApi*)NativeMemory.AllocZeroed((nuint)sizeof(IGHostCodecApi));
-        // All members reserved/null in this phase.
-
         _hostApi = (IGHostApi*)NativeMemory.AllocZeroed((nuint)sizeof(IGHostApi));
         _hostApi->StructSize = sizeof(IGHostApi);
         _hostApi->AbiVersion = IGNativeAbi.IG_PLUGIN_ABI_VERSION;
         _hostApi->Core = _coreApi;
-        _hostApi->Codec = _codecApi;
-        _hostApi->Viewer = null;
     }
 
 
