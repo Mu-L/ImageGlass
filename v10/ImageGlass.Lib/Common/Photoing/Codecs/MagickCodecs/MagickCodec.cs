@@ -451,8 +451,9 @@ public static partial class MagickCodec
             if (!token.IsCancellationRequested)
             {
                 var liveInfo = LivePhotoDetector.Detect(meta.FilePath);
-                meta.IsLivePhoto = liveInfo.IsLivePhoto;
-                meta.EmbeddedVideoOffsetFromEnd = liveInfo.EmbeddedVideoOffsetFromEnd;
+                meta.EmbeddedVideoOffsetFromEnd = liveInfo.IsLivePhoto
+                    ? liveInfo.EmbeddedVideoOffsetFromEnd
+                    : 0;
             }
 
         }, token).ConfigureAwait(false);
@@ -889,7 +890,6 @@ public static partial class MagickCodec
 
             if (hasGainMap)
             {
-                meta.IsHdr = true;
                 meta.HdrTransferFn = HdrTransferFunction.GainMap;
                 return; // base layer is SDR — no further HDR classification needed
             }
@@ -902,12 +902,10 @@ public static partial class MagickCodec
             {
                 if (transferFn.Equals(SKColorSpaceTransferFn.Pq))
                 {
-                    meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.PQ;
                 }
                 else if (transferFn.Equals(SKColorSpaceTransferFn.Hlg))
                 {
-                    meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.HLG;
                 }
             }
@@ -940,13 +938,11 @@ public static partial class MagickCodec
                     || icc.IndexOf("ST2084"u8) >= 0
                     || icc.IndexOf("Perceptual Quantizer"u8) >= 0)
                 {
-                    meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.PQ;
                 }
                 else if (icc.IndexOf("Hybrid Log"u8) >= 0
                     || icc.IndexOf("Hybrid Log-Gamma"u8) >= 0)
                 {
-                    meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.HLG;
                 }
 
@@ -973,12 +969,10 @@ public static partial class MagickCodec
                 // CICP transfer_characteristics: 16 = PQ (ST 2084), 18 = HLG
                 if (transfer == 16)
                 {
-                    meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.PQ;
                 }
                 else if (transfer == 18)
                 {
-                    meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.HLG;
                 }
 
@@ -997,12 +991,10 @@ public static partial class MagickCodec
             {
                 if (pngTransfer == 16)
                 {
-                    meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.PQ;
                 }
                 else if (pngTransfer == 18)
                 {
-                    meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.HLG;
                 }
 
@@ -1021,17 +1013,15 @@ public static partial class MagickCodec
                 // JXL TransferFunction (CICP-compatible): 16=PQ, 18=HLG, 8=Linear
                 if (jxlTransfer == 16)
                 {
-                    meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.PQ;
                 }
                 else if (jxlTransfer == 18)
                 {
-                    meta.IsHdr = true;
                     meta.HdrTransferFn = HdrTransferFunction.HLG;
                 }
                 else if (jxlTransfer == 8) // Linear — HDR scene-referred
                 {
-                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.Linear;
                 }
 
                 // JXL Primaries: 9=BT.2100/BT.2020, 11=P3
@@ -1049,7 +1039,7 @@ public static partial class MagickCodec
                     && (meta.IsWideGamut
                         || img?.ColorSpace is ImageMagick.ColorSpace.DisplayP3))
                 {
-                    meta.IsHdr = true;
+                    meta.HdrTransferFn = HdrTransferFunction.Linear;
                 }
             }
         }
@@ -1059,7 +1049,7 @@ public static partial class MagickCodec
         if (!meta.IsHdr
             && meta.FileExtension is ".exr" or ".hdr" or ".jxr" or ".wdp")
         {
-            meta.IsHdr = true;
+            meta.HdrTransferFn = HdrTransferFunction.Linear;
             meta.IsWideGamut = true;
         }
 
@@ -1070,7 +1060,7 @@ public static partial class MagickCodec
             var mdcv = img.GetAttribute("exif:MasteringDisplayColorVolume");
             if (cll is not null || mdcv is not null)
             {
-                meta.IsHdr = true;
+                meta.HdrTransferFn = HdrTransferFunction.Linear;
             }
         }
 

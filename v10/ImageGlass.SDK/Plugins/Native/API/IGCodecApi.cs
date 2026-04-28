@@ -47,11 +47,17 @@ public unsafe struct IGCodecApi
     public delegate* unmanaged[Cdecl]<IGStringRef, IGImageInfo*, void*, IGStatus> LoadMetadata;
 
     /// <summary>
-    /// Decodes a single static raster from the file path. The plugin allocates the buffer and
+    /// Decodes a single static raster frame from the file path. The plugin allocates the buffer and
     /// fills <paramref name="outBuffer"/>; the host releases it via <see cref="FreePixelBuffer"/>.
-    /// Signature: <c>IGStatus DecodeStaticRaster(IGStringRef filePath, IGPixelBuffer* outBuffer, void* cancellation)</c>.
+    /// <para>
+    /// <c>frameIndex</c> selects which frame to decode (0-based). For single-frame
+    /// images the host always passes 0; multi-frame plugins must respect this value.
+    /// Plugins that do not support multi-frame may treat any non-zero index as
+    /// <see cref="IGStatus.InvalidArg"/>.
+    /// </para>
+    /// Signature: <c>IGStatus DecodeStaticRaster(IGStringRef filePath, int frameIndex, IGPixelBuffer* outBuffer, void* cancellation)</c>.
     /// </summary>
-    public delegate* unmanaged[Cdecl]<IGStringRef, IGPixelBuffer*, void*, IGStatus> DecodeStaticRaster;
+    public delegate* unmanaged[Cdecl]<IGStringRef, int, IGPixelBuffer*, void*, IGStatus> DecodeStaticRaster;
 
     /// <summary>
     /// Releases a buffer previously returned by <see cref="DecodeStaticRaster"/>.

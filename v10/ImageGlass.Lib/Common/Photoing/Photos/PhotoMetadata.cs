@@ -105,11 +105,15 @@ public partial class PhotoMetadata : PhDisposable
     /// </summary>
     public bool IsVector { get; set; } = false;
 
-    /// <summary>Whether the image uses a PQ or HLG transfer function (true HDR).</summary>
-    public bool IsHdr { get; set; } = false;
-
     /// <summary>The detected HDR transfer function type.</summary>
     public HdrTransferFunction HdrTransferFn { get; set; } = HdrTransferFunction.None;
+
+    /// <summary>
+    /// Whether the image is HDR (any transfer function other than
+    /// <see cref="HdrTransferFunction.None"/>). Derived from
+    /// <see cref="HdrTransferFn"/>; set <see cref="HdrTransferFn"/> to change.
+    /// </summary>
+    public bool IsHdr => HdrTransferFn != HdrTransferFunction.None;
 
     /// <summary>Whether the image has a wider-than-sRGB color gamut.</summary>
     public bool IsWideGamut { get; set; } = false;
@@ -118,15 +122,17 @@ public partial class PhotoMetadata : PhDisposable
     public int BitsPerChannel { get; set; } = 8;
 
     /// <summary>
-    /// Gets whether this image contains an embedded motion/live photo video.
-    /// </summary>
-    public bool IsLivePhoto { get; set; } = false;
-
-    /// <summary>
     /// Gets the byte offset from end-of-file where the embedded video starts.
     /// For Google/Samsung motion photos. 0 means no embedded video.
     /// </summary>
     public long EmbeddedVideoOffsetFromEnd { get; set; } = 0;
+
+    /// <summary>
+    /// Whether this image contains an embedded motion/live photo video.
+    /// Derived from <see cref="EmbeddedVideoOffsetFromEnd"/>; assign
+    /// <see cref="EmbeddedVideoOffsetFromEnd"/> to change.
+    /// </summary>
+    public bool IsLivePhoto => EmbeddedVideoOffsetFromEnd > 0;
 
     #endregion // Bitmap information
 
@@ -207,8 +213,8 @@ public partial class PhotoMetadata : PhDisposable
         FrameCount = 0;
         Frames.Clear();
 
-        IsLivePhoto = false;
         EmbeddedVideoOffsetFromEnd = 0;
+        HdrTransferFn = HdrTransferFunction.None;
     }
 
 

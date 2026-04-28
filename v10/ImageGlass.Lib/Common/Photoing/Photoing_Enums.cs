@@ -119,21 +119,28 @@ public enum HdrToneMappingMode
 /// </summary>
 public enum HdrTransferFunction
 {
+    /// <summary>The image is SDR; no HDR transfer function applies.</summary>
     None = 0,
 
     /// <summary>
     /// Perceptual Quantizer (SMPTE ST 2084), used in HDR10 and Dolby Vision.
     /// </summary>
-    PQ,
+    PQ = 1,
 
     /// <summary>
     /// Hybrid Log-Gamma, used in broadcast HDR.
     /// </summary>
-    HLG,
+    HLG = 2,
 
     /// <summary>
     /// HDR via gain map (Ultra HDR / ISO 21496-1).
     /// </summary>
-    GainMap,
+    GainMap = 3,
+
+    /// <summary>
+    /// Scene-referred linear HDR (e.g. OpenEXR, Radiance HDR, JPEG-XR floats).
+    /// No PQ/HLG transfer; pixels are already linear and may exceed 1.0.
+    /// </summary>
+    Linear = 4,
 }
 

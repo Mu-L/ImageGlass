@@ -20,6 +20,7 @@ using Avalonia;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.SDK.Plugins;
+using ImageMagick;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
 {
     private readonly NativePlugin _plugin;
     private readonly IGCodecApi* _codecApi;
-    private readonly PluginFailureManager _quarantine;
+    private readonly PluginFailureManager _failureManager;
     private readonly HashSet<string> _supportedExtensionsSet;
 
 
@@ -62,7 +63,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     {
         _plugin = plugin;
         _codecApi = codecApi;
-        _quarantine = quarantine;
+        _failureManager = quarantine;
 
         CodecId = capability.CodecId;
         CodecName = string.IsNullOrEmpty(capability.CodecName)
@@ -89,7 +90,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     public bool CanLoadMetadata(string filePath)
     {
         if (!SupportsMetadata) return false;
-        if (_quarantine.IsQuarantined(_plugin.PluginId)) return false;
+        if (_failureManager.IsQuarantined(_plugin.PluginId)) return false;
         if (string.IsNullOrEmpty(filePath)) return false;
         var ext = Path.GetExtension(filePath);
         return _supportedExtensionsSet.Contains(ext);
@@ -99,7 +100,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     public bool CanDecode(PhotoMetadata metadata, CodecSelectionContext context)
     {
         if (!SupportsStaticRaster) return false;
-        if (_quarantine.IsQuarantined(_plugin.PluginId)) return false;
+        if (_failureManager.IsQuarantined(_plugin.PluginId)) return false;
         if (metadata is null || string.IsNullOrEmpty(metadata.FilePath)) return false;
         return _supportedExtensionsSet.Contains(metadata.FileExtension);
     }
@@ -119,7 +120,8 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
         CodecSelectionContext context,
         CancellationToken cancellationToken = default)
     {
-        return Task.Factory.StartNew(() => DecodeCore(metadata, cancellationToken),
+        var frameIndex = Math.Max(0, options?.FrameIndex ?? 0);
+        return Task.Factory.StartNew(() => DecodeCore(metadata, frameIndex, cancellationToken),
             cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
     }
 
@@ -144,7 +146,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
             }
             catch (Exception ex)
             {
-                _quarantine.RecordSoftFailure(_plugin.PluginId,
+                _failureManager.RecordSoftFailure(_plugin.PluginId,
                     $"managed exception during LoadMetadata: {ex.Message}");
                 return meta;
             }
@@ -161,7 +163,9 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
                 if (info.Height > 0) meta.OriginalHeight = (uint)info.Height;
                 meta.HasAlpha = info.HasAlpha != 0;
                 meta.FrameCount = (uint)Math.Max(1, info.FrameCount);
-                meta.IsHdr = info.IsHdr != 0;
+                meta.HdrTransferFn = MapHdrTransferFn(info.HdrTransferFn);
+
+                ApplyColorProfile(meta, in info);
             }
         }
         finally
@@ -172,7 +176,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     }
 
 
-    private CodecDecodeResult DecodeCore(PhotoMetadata metadata, CancellationToken token)
+    private CodecDecodeResult DecodeCore(PhotoMetadata metadata, int frameIndex, CancellationToken token)
     {
         if (_codecApi->DecodeStaticRaster == null || _codecApi->FreePixelBuffer == null)
         {
@@ -192,15 +196,15 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
                 fixed (char* pPath = filePath)
                 {
                     var pathRef = new IGStringRef { Data = pPath, Length = filePath.Length };
-                    status = _codecApi->DecodeStaticRaster(pathRef, &buffer, (void*)cancelHandle);
+                    status = _codecApi->DecodeStaticRaster(pathRef, frameIndex, &buffer, (void*)cancelHandle);
                 }
             }
             catch (Exception ex)
             {
-                _quarantine.RecordSoftFailure(_plugin.PluginId,
+                _failureManager.RecordSoftFailure(_plugin.PluginId,
                     $"managed exception during DecodeStaticRaster: {ex.Message}");
                 throw new InvalidDataException(
-                    $"Native codec '{CodecId}' threw during decode of '{filePath}'.", ex);
+                    $"IGE: Native codec '{CodecId}' threw during decode of '{filePath}'.", ex);
             }
 
             if (status == IGStatus.Canceled)
@@ -210,21 +214,30 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
             if (status != IGStatus.OK)
             {
                 throw new InvalidDataException(
-                    $"Native codec '{CodecId}' returned status {status} for '{filePath}'.");
+                    $"IGE: Native codec '{CodecId}' returned status {status} for '{filePath}'.");
             }
             bufferOwned = true;
 
             if (buffer.Data == null || buffer.Width <= 0 || buffer.Height <= 0)
             {
                 throw new InvalidDataException(
-                    $"Native codec '{CodecId}' returned an invalid pixel buffer.");
+                    $"IGE: Native codec '{CodecId}' returned an invalid pixel buffer.");
             }
 
-            var image = ConvertToSKImage(in buffer);
+            var (colorType, alphaType) = MapPixelFormat((IGPixelFormat)buffer.PixelFormat);
+            if (colorType == SKColorType.Unknown)
+            {
+                throw new InvalidDataException(
+                    $"IGE: Native codec '{CodecId}' returned an unsupported pixel format ({buffer.PixelFormat}).");
+            }
+
+            var image = SkiaCodec.FromPixelBuffer(
+                buffer.Data, buffer.Width, buffer.Height, buffer.Stride,
+                colorType, alphaType, metadata.SkiaColorSpace);
             if (image is null)
             {
                 throw new InvalidDataException(
-                    $"Native codec '{CodecId}' returned an unsupported pixel format ({buffer.PixelFormat}).");
+                    $"IGE: Native codec '{CodecId}' returned an unsupported pixel format ({buffer.PixelFormat}).");
             }
 
             // success: synchronize metadata size and return result
@@ -235,11 +248,12 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
 
             return new CodecDecodeResult
             {
-                CodecId = $"native:{_plugin.PluginId}:{CodecId}",
+                CodecId = $"plugin:{_plugin.PluginId}:{CodecId}",
                 ContentKind = CodecContentKind.StaticRaster,
                 Size = new Size(buffer.Width, buffer.Height),
                 SingleFrame = image,
-                HasEmbeddedColorProfile = SupportsColorProfiles,
+                IsHdr = metadata.IsHdr,
+                HasEmbeddedColorProfile = SupportsColorProfiles && metadata.SkiaColorSpace is not null,
             };
         }
         finally
@@ -261,10 +275,14 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     }
 
 
-    private SKImage? ConvertToSKImage(in IGPixelBuffer buffer)
+    /// <summary>
+    /// Maps an <see cref="IGPixelFormat"/> to the corresponding Skia color/alpha types.
+    /// Returns (<see cref="SKColorType.Unknown"/>, <see cref="SKAlphaType.Unknown"/>) when the
+    /// host has no compatible Skia format for the buffer.
+    /// </summary>
+    private static (SKColorType ColorType, SKAlphaType AlphaType) MapPixelFormat(IGPixelFormat format)
     {
-        var format = (IGPixelFormat)buffer.PixelFormat;
-        var (colorType, alphaType) = format switch
+        return format switch
         {
             IGPixelFormat.Bgra8Unorm => (SKColorType.Bgra8888, SKAlphaType.Unpremul),
             IGPixelFormat.Rgba8Unorm => (SKColorType.Rgba8888, SKAlphaType.Unpremul),
@@ -272,26 +290,92 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
             IGPixelFormat.RgbaFloat16 => (SKColorType.RgbaF16, SKAlphaType.Unpremul),
             _ => (SKColorType.Unknown, SKAlphaType.Unknown),
         };
-        if (colorType == SKColorType.Unknown) return null;
+    }
 
-        var info = new SKImageInfo(buffer.Width, buffer.Height, colorType, alphaType);
 
-        // Copy pixels into a host-owned SKBitmap so the plugin can free its buffer
-        // immediately after the decode call returns. This is one full-frame copy;
-        // a future ABI revision may add zero-copy via a host-allocated buffer.
-        var bitmap = new SKBitmap();
-        if (!bitmap.InstallPixels(info, (nint)buffer.Data, buffer.Stride))
+    /// <summary>
+    /// Maps an <see cref="IGHdrTransferFn"/> integer (as carried in <see cref="IGImageInfo.HdrTransferFn"/>)
+    /// to the host's <see cref="HdrTransferFunction"/> enum.
+    /// </summary>
+    private static HdrTransferFunction MapHdrTransferFn(int value)
+    {
+        return (IGHdrTransferFn)value switch
         {
-            bitmap.Dispose();
-            return null;
-        }
-        var copy = bitmap.Copy();
-        bitmap.Dispose();
-        if (copy is null) return null;
+            IGHdrTransferFn.PQ => HdrTransferFunction.PQ,
+            IGHdrTransferFn.HLG => HdrTransferFunction.HLG,
+            IGHdrTransferFn.GainMap => HdrTransferFunction.GainMap,
+            IGHdrTransferFn.Linear => HdrTransferFunction.Linear,
+            _ => HdrTransferFunction.None,
+        };
+    }
 
-        var image = SKImage.FromBitmap(copy);
-        copy.Dispose();
-        return image;
+
+    /// <summary>
+    /// Resolves the source color profile from the plugin-supplied
+    /// <see cref="IGImageInfo"/> and writes it into <paramref name="meta"/>.
+    /// Prefers the raw ICC bytes (handles arbitrary profiles like ProPhoto)
+    /// and falls back to the <see cref="IGColorSpace"/> enum hint.
+    /// </summary>
+    private static void ApplyColorProfile(PhotoMetadata meta, in IGImageInfo info)
+    {
+        // Prefer raw ICC bytes when supplied. The plugin owns the buffer and
+        // both SKColorSpace.CreateIcc and PhotoColorProfile copy what they need
+        // synchronously, so we don't retain the pointer past this call.
+        SKColorSpace? skiaCs = null;
+        if (info.IccProfileData != null && info.IccProfileSize > 0)
+        {
+            try
+            {
+                var iccSpan = new ReadOnlySpan<byte>(info.IccProfileData, info.IccProfileSize);
+                skiaCs = SKColorSpace.CreateIcc(iccSpan);
+
+                var bytes = iccSpan.ToArray();
+                var photoProfile = new PhotoColorProfile(bytes);
+                meta.ColorProfileName = photoProfile.GetIccDescription();
+                if (photoProfile.ProfileData is not null)
+                {
+                    meta.MagickColorProfile = new ColorProfile(photoProfile.ProfileData);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[NativeCodecProxy] ICC profile parse failed: {ex.Message}");
+            }
+        }
+
+        // Fall back to the named-enum hint if no ICC was provided.
+        skiaCs ??= MapColorSpace((IGColorSpace)info.ColorSpace);
+
+        if (skiaCs is not null)
+        {
+            meta.SkiaColorSpace?.Dispose();
+            meta.SkiaColorSpace = skiaCs;
+        }
+
+        meta.ColorSpace = skiaCs is not null && skiaCs.IsSrgb
+            ? ImageMagick.ColorSpace.sRGB
+            : ImageMagick.ColorSpace.Undefined;
+    }
+
+
+    /// <summary>
+    /// Maps an <see cref="IGColorSpace"/> identifier to a fresh <see cref="SKColorSpace"/>.
+    /// Returns <c>null</c> when the plugin reported <see cref="IGColorSpace.Unknown"/>;
+    /// the caller should leave the existing <see cref="PhotoMetadata.SkiaColorSpace"/> alone
+    /// (or assume sRGB) in that case.
+    /// </summary>
+    private static SKColorSpace? MapColorSpace(IGColorSpace cs)
+    {
+        return cs switch
+        {
+            IGColorSpace.Srgb => SKColorSpace.CreateSrgb(),
+            IGColorSpace.LinearSrgb => SKColorSpace.CreateSrgbLinear(),
+            IGColorSpace.DisplayP3 => SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3),
+            IGColorSpace.AdobeRgb => SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb),
+            IGColorSpace.Rec2020 => SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020),
+            IGColorSpace.Rec2020Linear => SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.Rec2020),
+            _ => null,
+        };
     }
 
 

@@ -141,8 +141,9 @@ public static partial class SkiaCodec
             if (!token.IsCancellationRequested)
             {
                 var liveInfo = LivePhotoDetector.Detect(meta.FilePath);
-                meta.IsLivePhoto = liveInfo.IsLivePhoto;
-                meta.EmbeddedVideoOffsetFromEnd = liveInfo.EmbeddedVideoOffsetFromEnd;
+                meta.EmbeddedVideoOffsetFromEnd = liveInfo.IsLivePhoto
+                    ? liveInfo.EmbeddedVideoOffsetFromEnd
+                    : 0;
             }
         }, token).ConfigureAwait(false);
 
@@ -995,6 +996,67 @@ public static partial class SkiaCodec
             );
 
             return SKImage.FromPixels(info, data);
+        }
+    }
+
+
+    /// <summary>
+    /// Wraps a raw native pixel buffer (typically returned by an external/native codec
+    /// plugin in <see cref="IGPixelBuffer"/>) in an <see cref="SKImage"/>.
+    /// </summary>
+    /// <remarks>
+    /// The bytes are copied into a host-owned <see cref="NativeMemoryArray{T}"/> so the
+    /// caller may free the original buffer immediately after this returns. The resulting
+    /// SKImage retains <paramref name="srcColorSpace"/> via its <see cref="SKImageInfo"/>;
+    /// the caller should NOT dispose <paramref name="srcColorSpace"/> right after this
+    /// call - SkiaSharp's managed wrapper participates in the underlying refcount and an
+    /// early dispose has been observed to surface the image as "untagged" downstream.
+    /// </remarks>
+    public static unsafe SKImage? FromPixelBuffer(byte* data, int width, int height, int stride,
+        SKColorType colorType, SKAlphaType alphaType, SKColorSpace? srcColorSpace)
+    {
+        if (data == null || width <= 0 || height <= 0 || stride <= 0) return null;
+        if (colorType == SKColorType.Unknown) return null;
+
+        var info = new SKImageInfo(width, height, colorType, alphaType);
+        if (srcColorSpace is not null)
+        {
+            info = info.WithColorSpace(srcColorSpace);
+        }
+
+        // Allocate a host-owned native buffer and copy the source rows. Using a tight
+        // (rowBytes == width * bytesPerPixel) layout simplifies SKImage.FromPixels and
+        // avoids row-padding mismatches when the host re-encodes the image later.
+        var rowBytes = info.RowBytes;
+        var totalBytes = checked((long)rowBytes * height);
+        var nativeBuffer = new NativeMemoryArray<byte>(totalBytes, skipZeroClear: true, addMemoryPressure: true);
+
+        var srcSpan = new ReadOnlySpan<byte>(data, stride * (height - 1) + rowBytes);
+        var dstSpan = nativeBuffer.AsSpan();
+        if (stride == rowBytes)
+        {
+            // tight pack -> single bulk copy
+            srcSpan.Slice(0, (int)totalBytes).CopyTo(dstSpan);
+        }
+        else
+        {
+            // row-by-row to strip the source stride padding
+            for (var y = 0; y < height; y++)
+            {
+                var src = new ReadOnlySpan<byte>(data + (long)y * stride, rowBytes);
+                src.CopyTo(dstSpan.Slice(y * rowBytes, rowBytes));
+            }
+        }
+        fixed (byte* ptr = nativeBuffer)
+        {
+            var skData = SKData.Create(
+                (nint)ptr,
+                (int)nativeBuffer.Length,
+                (addr, ctx) => ((NativeMemoryArray<byte>)ctx!).Dispose(),
+                nativeBuffer
+            );
+
+            return SKImage.FromPixels(info, skData);
         }
     }
 
