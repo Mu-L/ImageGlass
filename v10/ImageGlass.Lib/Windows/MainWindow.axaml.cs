@@ -20,7 +20,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using ImageGlass.Common.Types;
-using ImageGlass.Plugins;
+using ImageGlass.Tools;
 using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
 using ImageGlass.ViewModels;
@@ -90,8 +90,8 @@ public partial class MainWindow : PhWindow
         // load color profile
         Core.UpdateDestColorProfile();
 
-        // restore last opened plugin
-        Core.API?.IG_OpenPlugin(Core.Config.LastOpenedPlugin);
+        // restore last opened tool
+        Core.API?.IG_OpenTool(Core.Config.LastOpenedTool);
     }
 
 
@@ -142,8 +142,8 @@ public partial class MainWindow : PhWindow
         // stop slideshow so pre-slideshow config values are restored before saving
         Core.API?.IG_ToggleSlideshow(false);
 
-        // stop all external plugin processes before saving config
-        await Core.ExternalPlugins.StopAllAsync();
+        // stop all external tool processes before saving config
+        await Core.ExternalTools.StopAllAsync();
 
         // only save config here, do NOT dispose resources yet
         await SaveConfigOnClosingAsync();
@@ -291,17 +291,17 @@ public partial class MainWindow : PhWindow
         Core.Config.LastSeenImagePath = Core.Photos.CurrentFilePath;
         Core.Config.ZoomLockValue = PART_MainView.PART_Viewer.ZoomFactor * 100f;
 
-        // save current plugin setting if it's open
-        var currentPluginId = PART_MainView.PART_PluginHost.Plugin?.PluginId ?? string.Empty;
-        var currentPlugin = Core.PluginRegistry.Get(currentPluginId);
-        Core.Config.LastOpenedPlugin = (currentPlugin is not null && !currentPlugin.IsHosted)
+        // save current tool setting if it's open
+        var currentToolId = PART_MainView.PART_ToolHost.Tool?.ToolId ?? string.Empty;
+        var currentTool = Core.ToolRegistry.Get(currentToolId);
+        Core.Config.LastOpenedTool = (currentTool is not null && !currentTool.IsHosted)
             ? string.Empty
-            : currentPluginId;
+            : currentToolId;
 
-        // save settings for the current hosted plugin
-        if (PART_MainView.PART_PluginHost.Plugin is IPlugin pluginToSave)
+        // save settings for the current hosted tool
+        if (PART_MainView.PART_ToolHost.Tool is ITool toolToSave)
         {
-            Core.API?.IG_ClosePlugin(pluginToSave.PluginId);
+            Core.API?.IG_CloseTool(toolToSave.ToolId);
         }
 
         // save config to file

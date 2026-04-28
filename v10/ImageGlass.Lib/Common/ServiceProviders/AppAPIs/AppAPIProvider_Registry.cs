@@ -1,4 +1,4 @@
-﻿/*
+/*
 ImageGlass - A lightweight, versatile image viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
@@ -135,11 +135,11 @@ public partial class AppAPIProvider
 
 
         // Plugins
-        { API.IG_CloseCurrentPlugin,        PhCommands.Create(IG_CloseCurrentPlugin) },
-        { API.IG_TogglePlugin,              PhCommands.Create(IG_TogglePlugin) },
-        { API.IG_OpenPlugin,                PhCommands.Create(IG_OpenPlugin) },
-        { API.IG_ClosePlugin,               PhCommands.Create(IG_ClosePlugin) },
-        { API.IG_GetMorePlugin,             PhCommands.Create(IG_GetMorePlugin) },
+        { API.IG_CloseCurrentTool,        PhCommands.Create(IG_CloseCurrentTool) },
+        { API.IG_ToggleTool,              PhCommands.Create(IG_ToggleTool) },
+        { API.IG_OpenTool,                PhCommands.Create(IG_OpenTool) },
+        { API.IG_CloseTool,               PhCommands.Create(IG_CloseTool) },
+        { API.IG_GetMoreTools,             PhCommands.Create(IG_GetMoreTools) },
 
 
         // Settings

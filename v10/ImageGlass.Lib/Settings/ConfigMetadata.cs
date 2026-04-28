@@ -1,4 +1,4 @@
-﻿/*
+/*
 ImageGlass - A lightweight, versatile image viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
@@ -109,7 +109,7 @@ public enum ConfigId
     UpdateSkippedVersion,
     ColorProfile,
     LastSeenImagePath,
-    LastOpenedPlugin,
+    LastOpenedTool,
     // LastOpenedSetting,
     BackgroundColor,
     SlideshowBackgroundColor,
@@ -147,7 +147,8 @@ public enum ConfigId
     MouseClickActions,
     MouseWheelActions,
     Layout,
-    PluginSettings,
+    Tools,
+    ToolSettings,
     // DisabledMenus,
     ToolbarButtons,
 

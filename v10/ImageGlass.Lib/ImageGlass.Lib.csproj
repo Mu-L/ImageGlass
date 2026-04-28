@@ -57,14 +57,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Plugins\ColorPicker\ColorPickerPluginControl.axaml.cs">
-      <DependentUpon>ColorPickerPluginControl.axaml</DependentUpon>
+    <Compile Update="Tools\Builtins\ColorPicker\ColorPickerToolControl.axaml.cs">
+      <DependentUpon>ColorPickerToolControl.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Plugins\CropImage\CropImagePluginControl.axaml.cs">
-      <DependentUpon>CropImagePluginControl.axaml</DependentUpon>
+    <Compile Update="Tools\Builtins\CropImage\CropImageToolControl.axaml.cs">
+      <DependentUpon>CropImageToolControl.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Plugins\FrameNav\FrameNavPluginControl.axaml.cs">
-      <DependentUpon>FrameNavPluginControl.axaml</DependentUpon>
+    <Compile Update="Tools\Builtins\FrameNav\FrameNavToolControl.axaml.cs">
+      <DependentUpon>FrameNavToolControl.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Tools\ToolHostControl.axaml.cs">
+      <DependentUpon>ToolHostControl.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
 

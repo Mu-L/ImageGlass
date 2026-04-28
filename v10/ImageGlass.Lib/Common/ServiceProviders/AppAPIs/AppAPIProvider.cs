@@ -1,4 +1,4 @@
-﻿/*
+/*
 ImageGlass - A lightweight, versatile image viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
@@ -27,10 +27,7 @@ using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Windows;
-using ImageGlass.Plugins;
-using ImageGlass.Plugins.External;
-using ImageGlass.Plugins.ImageResizer;
-using ImageGlass.Plugins.LosslessCompression;
+using ImageGlass.Tools;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using ImageGlass.UI.Windowing;
@@ -78,7 +75,7 @@ public partial class AppAPIProvider
     private GalleryControl Gallery => _mainWindow.PART_MainView.PART_Gallery;
     private PhGridSplitter GalleryResizer => _mainWindow.PART_MainView.PART_GalleryResizer;
     private MessageControl Message => _mainWindow.PART_MainView.PART_Message;
-    private PluginHostControl PluginHost => _mainWindow.PART_MainView.PART_PluginHost;
+    private ToolHostControl ToolHost => _mainWindow.PART_MainView.PART_ToolHost;
     private SlideshowCountdownOverlay SlideshowCountdown => _mainWindow.PART_MainView.PART_SlideshowCountdown;
 
 
@@ -92,17 +89,17 @@ public partial class AppAPIProvider
     {
         _mainWindow = mainWindow;
 
-        // Register built-in hosted plugins (via PluginControlAdapter)
-        Core.PluginRegistry.Register(ColorPickerPluginControl.PLUGIN_ID,
-            new PluginControlAdapter(ColorPickerPluginControl.PLUGIN_ID, v => new ColorPickerPluginControl { Viewer = v }));
-        Core.PluginRegistry.Register(CropImagePluginControl.PLUGIN_ID,
-            new PluginControlAdapter(CropImagePluginControl.PLUGIN_ID, v => new CropImagePluginControl { Viewer = v }));
-        Core.PluginRegistry.Register(FrameNavPluginControl.PLUGIN_ID,
-            new PluginControlAdapter(FrameNavPluginControl.PLUGIN_ID, v => new FrameNavPluginControl { Viewer = v }));
+        // Register built-in hosted plugins (via ToolControlAdapter)
+        Core.ToolRegistry.Register(ColorPickerToolControl.TOOL_ID,
+            new ToolControlAdapter(ColorPickerToolControl.TOOL_ID, v => new ColorPickerToolControl { Viewer = v }));
+        Core.ToolRegistry.Register(CropImageToolControl.TOOL_ID,
+            new ToolControlAdapter(CropImageToolControl.TOOL_ID, v => new CropImageToolControl { Viewer = v }));
+        Core.ToolRegistry.Register(FrameNavToolControl.TOOL_ID,
+            new ToolControlAdapter(FrameNavToolControl.TOOL_ID, v => new FrameNavToolControl { Viewer = v }));
 
         // Register built-in non-hosted plugins
-        Core.PluginRegistry.Register(ImageResizerPlugin.PLUGIN_ID, new ImageResizerPlugin());
-        Core.PluginRegistry.Register(LosslessCompressionPlugin.PLUGIN_ID, new LosslessCompressionPlugin());
+        Core.ToolRegistry.Register(ImageResizerTool.TOOL_ID, new ImageResizerTool());
+        Core.ToolRegistry.Register(LosslessCompressionTool.TOOL_ID, new LosslessCompressionTool());
     }
 
 
@@ -2771,134 +2768,134 @@ public partial class AppAPIProvider
     #region Plugin APIs
 
     /// <summary>
-    /// Toggles a plugin by ID. Non-hosted plugins only support open (toggle = open).
+    /// Toggles a tool by ID. Non-hosted tools only support open (toggle = open).
     /// </summary>
-    public void IG_TogglePlugin(string? pluginId)
+    public void IG_ToggleTool(string? toolId)
     {
-        if (string.IsNullOrEmpty(pluginId)) return;
-        if (Core.PluginRegistry.Get(pluginId) is not { } plugin) return;
+        if (string.IsNullOrEmpty(toolId)) return;
+        if (Core.ToolRegistry.Get(toolId) is not { } tool) return;
 
-        if (plugin.IsHosted)
+        if (tool.IsHosted)
         {
-            var currentPluginId = PluginHost.Plugin?.PluginId;
+            var currentToolId = ToolHost.Tool?.ToolId;
 
-            if (string.Equals(currentPluginId, pluginId, StringComparison.Ordinal))
+            if (string.Equals(currentToolId, toolId, StringComparison.Ordinal))
             {
                 // Close: save settings first, then close UI
-                if (PluginHost.Plugin is { } currentPlugin)
+                if (ToolHost.Tool is { } currentTool)
                 {
-                    PluginRegistry.SavePluginSettings(currentPlugin);
+                    ToolRegistry.SaveToolSettings(currentTool);
                 }
 
-                PluginHost.CloseCurrentPlugin();
+                ToolHost.CloseCurrentTool();
             }
             else
             {
                 // Open: close current (with save), then open new
-                IG_ClosePlugin(currentPluginId);
+                IG_CloseTool(currentToolId);
 
-                if (plugin is PluginControlAdapter adapter)
+                if (tool is ToolControlAdapter adapter)
                 {
-                    var control = adapter.CreatePluginControl(Viewer);
-                    PluginRegistry.LoadPluginSettings(control);
-                    PluginHost.OpenPlugin(control);
+                    var control = adapter.CreateToolControl(Viewer);
+                    ToolRegistry.LoadToolSettings(control);
+                    ToolHost.OpenTool(control);
                 }
             }
         }
         else
         {
-            // Non-hosted plugins can only be opened, not toggled closed
-            IG_OpenPlugin(pluginId);
+            // Non-hosted tools can only be opened, not toggled closed
+            IG_OpenTool(toolId);
         }
     }
 
 
     /// <summary>
-    /// Opens a plugin by ID. Handles both hosted and non-hosted plugins.
-    /// Settings are loaded before the plugin is opened/executed.
+    /// Opens a tool by ID. Handles both hosted and non-hosted plugins.
+    /// Settings are loaded before the tool is opened/executed.
     /// </summary>
-    public void IG_OpenPlugin(string? pluginId)
+    public void IG_OpenTool(string? toolId)
     {
-        if (string.IsNullOrEmpty(pluginId)) return;
-        if (Core.PluginRegistry.Get(pluginId) is not { } plugin) return;
+        if (string.IsNullOrEmpty(toolId)) return;
+        if (Core.ToolRegistry.Get(toolId) is not { } tool) return;
 
-        if (plugin.IsHosted)
+        if (tool.IsHosted)
         {
-            // Hosted plugin: create via adapter, load settings, host in PluginHostControl
-            var currentPluginId = PluginHost.Plugin?.PluginId;
-            if (string.Equals(currentPluginId, pluginId, StringComparison.Ordinal)) return;
+            // Hosted tool: create via adapter, load settings, host in ToolHostControl
+            var currentToolId = ToolHost.Tool?.ToolId;
+            if (string.Equals(currentToolId, toolId, StringComparison.Ordinal)) return;
 
-            // Close current plugin (with save) before opening new one
-            IG_ClosePlugin(currentPluginId);
+            // Close current tool (with save) before opening new one
+            IG_CloseTool(currentToolId);
 
-            if (plugin is PluginControlAdapter adapter)
+            if (tool is ToolControlAdapter adapter)
             {
-                var control = adapter.CreatePluginControl(Viewer);
-                PluginRegistry.LoadPluginSettings(control);
-                PluginHost.OpenPlugin(control);
+                var control = adapter.CreateToolControl(Viewer);
+                ToolRegistry.LoadToolSettings(control);
+                ToolHost.OpenTool(control);
             }
         }
         else
         {
-            if (plugin is ExternalPluginProxy)
+            if (tool is ExternalToolProxy)
             {
-                // Only allow one instance of a non-hosted external plugin
-                if (Core.ExternalPlugins.IsRunning(pluginId)) return;
+                // Only allow one instance of a non-hosted external tool
+                if (Core.ExternalTools.IsRunning(toolId)) return;
 
-                // External non-hosted plugin: start process and execute
-                _ = plugin.ExecuteAsync(new PluginExecutionContext { Window = _mainWindow });
+                // External non-hosted tool: start process and execute
+                _ = tool.ExecuteAsync(new ToolExecutionContext { Window = _mainWindow });
             }
             else
             {
-                // Built-in non-hosted plugin: set viewer, load settings, execute
-                plugin.Viewer = Viewer;
-                PluginRegistry.LoadPluginSettings(plugin);
+                // Built-in non-hosted tool: set viewer, load settings, execute
+                tool.Viewer = Viewer;
+                ToolRegistry.LoadToolSettings(tool);
 
-                var context = new PluginExecutionContext { Window = _mainWindow };
-                _ = PluginRegistry.ExecuteNonHostedPluginAsync(plugin, context);
+                var context = new ToolExecutionContext { Window = _mainWindow };
+                _ = ToolRegistry.ExecuteNonHostedToolAsync(tool, context);
             }
         }
     }
 
 
     /// <summary>
-    /// Closes a plugin by ID. Only applicable to hosted plugins.
+    /// Closes a tool by ID. Only applicable to hosted tools.
     /// Saves settings before closing.
     /// </summary>
-    public void IG_ClosePlugin(string? pluginId)
+    public void IG_CloseTool(string? toolId)
     {
-        if (string.IsNullOrEmpty(pluginId)) return;
+        if (string.IsNullOrEmpty(toolId)) return;
 
-        // Save settings for the current hosted plugin before closing
-        if (PluginHost.Plugin is IPlugin currentPlugin
-            && string.Equals(currentPlugin.PluginId, pluginId, StringComparison.Ordinal))
+        // Save settings for the current hosted tool before closing
+        if (ToolHost.Tool is ITool currentTool
+            && string.Equals(currentTool.ToolId, toolId, StringComparison.Ordinal))
         {
-            PluginRegistry.SavePluginSettings(currentPlugin);
+            ToolRegistry.SaveToolSettings(currentTool);
         }
 
-        PluginHost.ClosePlugin(pluginId);
+        ToolHost.CloseTool(toolId);
     }
 
 
     /// <summary>
-    /// Closes the currently active plugin in the plugin host, if one is open.
+    /// Closes the currently active tool in the tool host, if one is open.
     /// </summary>
-    public void IG_CloseCurrentPlugin()
+    public void IG_CloseCurrentTool()
     {
-        if (PluginHost.Plugin is IPlugin currentPlugin)
+        if (ToolHost.Tool is ITool currentTool)
         {
-            PluginRegistry.SavePluginSettings(currentPlugin);
+            ToolRegistry.SaveToolSettings(currentTool);
         }
-        PluginHost.CloseCurrentPlugin();
+        ToolHost.CloseCurrentTool();
     }
 
 
     /// <summary>
-    /// Opens website to download more plugins.
+    /// Opens website to download more tools.
     /// </summary>
-    public void IG_GetMorePlugin()
+    public void IG_GetMoreTools()
     {
-        _ = BHelper.OpenUrlAsync(_mainWindow, "https://imageglass.org/plugins", "from_get_more_plugins");
+        _ = BHelper.OpenUrlAsync(_mainWindow, "https://imageglass.org/tools", "from_get_more_tools");
     }
 
     #endregion // Plugin APIs

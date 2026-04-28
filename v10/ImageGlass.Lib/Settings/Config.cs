@@ -1,4 +1,4 @@
-﻿/*
+/*
 ImageGlass - A lightweight, versatile image viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
@@ -22,6 +22,7 @@ using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using ImageGlass.Common.Types.JsonTypeConverters;
+using ImageGlass.Tools;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using System;
@@ -662,10 +663,10 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets the plugin ID to open on startup.
     /// </summary>
-    public string LastOpenedPlugin
+    public string LastOpenedTool
     {
-        get => Get(ConfigId.LastOpenedPlugin, string.Empty);
-        set => Set(ConfigId.LastOpenedPlugin, value);
+        get => Get(ConfigId.LastOpenedTool, string.Empty);
+        set => Set(ConfigId.LastOpenedTool, value);
     }
 
     ///// <summary>
@@ -906,13 +907,24 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
+    /// Gets, sets the list of registered external tools.
+    /// External tools are NOT discovered by scanning a folder; they are registered
+    /// explicitly here in <c>igconfig.json</c>. See <see cref="ExternalTool"/>.
+    /// </summary>
+    public ObservableCollection<ExternalTool> Tools
+    {
+        get => Get(ConfigId.Tools, new ObservableCollection<ExternalTool>());
+        set => Set(ConfigId.Tools, value);
+    }
+
+    /// <summary>
     /// Gets, sets the config section of plugin settings.
     /// Each plugin serializes/deserializes its own <see cref="JsonElement"/> using its source-generated <see cref="JsonSerializerContext"/>.
     /// </summary>
-    public Dictionary<string, JsonElement> PluginSettings
+    public Dictionary<string, JsonElement> ToolSettings
     {
-        get => Get(ConfigId.PluginSettings, new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase));
-        set => Set(ConfigId.PluginSettings, value);
+        get => Get(ConfigId.ToolSettings, new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase));
+        set => Set(ConfigId.ToolSettings, value);
     }
 
     ///// <summary>

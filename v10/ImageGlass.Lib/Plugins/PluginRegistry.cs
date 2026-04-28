@@ -16,121 +16,285 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
-using ImageGlass.Plugins.External;
-using ImageGlass.SDK;
-using ImageGlass.UI.Viewer;
+using ImageGlass.Common.Types;
+using ImageGlass.SDK.Plugins;
+using System;
 using System.Collections.Generic;
-using System.Text.Json;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace ImageGlass.Plugins;
 
 
 /// <summary>
-/// Factory delegate that creates an <see cref="IPluginControl"/> hosted plugin instance.
+/// Loads native (in-process) codec plugins, validates their ABI surface,
+/// and produces <see cref="NativeCodecProxy"/> instances ready to register in the codec registry.
 /// </summary>
-public delegate IPluginControl PluginControlFactory(ViewerControl viewer);
-
-
-/// <summary>
-/// Central registry for all plugins (hosted and non-hosted).
-/// Built-in plugins register during <see cref="ImageGlass.Common.ServiceProviders.AppAPIProvider"/> construction.
-/// </summary>
-public sealed class PluginRegistry
+public sealed unsafe class PluginRegistry : PhDisposable
 {
-    private readonly Dictionary<string, IPlugin> _plugins = new();
+    private readonly Lock _lock = new();
+    private readonly Dictionary<string, NativePlugin> _plugins = new(StringComparer.Ordinal);
+    private readonly PluginFailureManager _failureManager;
+
+    private static int DecodeMajor(int abiVersion) => abiVersion / 1_000_000;
 
 
-    /// <summary>
-    /// Registers a plugin.
-    /// </summary>
-    public void Register(string pluginId, IPlugin plugin)
+    public PluginRegistry(PluginFailureManager failureManager)
     {
-        _plugins[pluginId] = plugin;
+        _failureManager = failureManager;
     }
 
 
     /// <summary>
-    /// Gets the plugin for a plugin ID, or null if not found.
+    /// Loads the native plugin and probes its codecs. Returns null on any failure.
     /// </summary>
-    public IPlugin? Get(string pluginId)
+    internal NativePlugin? LoadAndProbe(PluginManifest manifest, string pluginDir)
     {
-        _plugins.TryGetValue(pluginId, out var plugin);
-        return plugin;
-    }
-
-
-    /// <summary>
-    /// Checks whether a plugin ID is registered.
-    /// </summary>
-    public bool Contains(string pluginId) => _plugins.ContainsKey(pluginId);
-
-
-    /// <summary>
-    /// Gets all registered external plugin proxies for menu building.
-    /// </summary>
-    public IEnumerable<PluginManifest> GetAllExternalPluginManifests()
-    {
-        foreach (var plugin in _plugins.Values)
+        if (manifest.Kind != IGPluginKind.Codec) return null;
+        if (string.IsNullOrEmpty(manifest.Executable))
         {
-            if (plugin is ExternalPluginProxy proxy)
-                yield return proxy.Manifest;
+            Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' has no Executable; skipping.");
+            return null;
         }
-    }
 
-
-    /// <summary>
-    /// Gets all registered plugin IDs.
-    /// </summary>
-    public IEnumerable<string> GetAllPluginIds() => _plugins.Keys;
-
-
-    /// <summary>
-    /// Loads settings for a plugin from the app config.
-    /// </summary>
-    public static void LoadPluginSettings(IPlugin plugin)
-    {
-        JsonElement? jsonEl = Core.Config.PluginSettings.TryGetValue(plugin.PluginId, out var el)
-            ? el
-            : null;
-
-        plugin.LoadSettings(jsonEl);
-    }
-
-
-    /// <summary>
-    /// Saves settings for a plugin to the app config.
-    /// </summary>
-    public static void SavePluginSettings(IPlugin plugin)
-    {
-        var jsonEl = plugin.SaveSettings();
-
-        if (jsonEl is null)
+        if (_failureManager.IsQuarantined(manifest.Id))
         {
-            Core.Config.PluginSettings.Remove(plugin.PluginId);
+            Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' is quarantined; skipping.");
+            return null;
         }
-        else
+
+        var libraryPath = Path.Combine(pluginDir, manifest.Executable);
+        if (!File.Exists(libraryPath))
         {
-            Core.Config.PluginSettings[plugin.PluginId] = jsonEl.Value;
+            Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' library not found: {libraryPath}");
+            return null;
         }
-    }
 
-
-    /// <summary>
-    /// Executes a non-hosted plugin and saves its settings on completion.
-    /// </summary>
-    public static async Task ExecuteNonHostedPluginAsync(IPlugin plugin, PluginExecutionContext context)
-    {
+        nint libHandle = 0;
+        IGPluginApi* pluginApi = null;
         try
         {
-            await plugin.ExecuteAsync(context);
+            // 1. Load the library
+            libHandle = NativeLibrary.Load(libraryPath);
+
+            // 2. Resolve the entry point
+            if (!NativeLibrary.TryGetExport(libHandle, IGNativeAbi.ENTRY_POINT_NAME, out var entryAddr))
+            {
+                Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' missing export '{IGNativeAbi.ENTRY_POINT_NAME}'.");
+                NativeLibrary.Free(libHandle);
+                return null;
+            }
+            var entry = (delegate* unmanaged[Cdecl]<int, IGHostApi*, IGPluginApi*>)entryAddr;
+
+            // 3. Negotiate ABI
+            var hostApi = PluginHostApiTable.Get();
+            try
+            {
+                pluginApi = entry(IGNativeAbi.IG_PLUGIN_ABI_VERSION, hostApi);
+            }
+            catch (Exception ex)
+            {
+                _failureManager.Quarantine(manifest.Id, $"entry point threw: {ex.Message}");
+                NativeLibrary.Free(libHandle);
+                return null;
+            }
+            if (pluginApi == null)
+            {
+                Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' entry point returned null (rejected).");
+                NativeLibrary.Free(libHandle);
+                return null;
+            }
+
+            // 4. Validate plugin ABI
+            if (pluginApi->StructSize != sizeof(IGPluginApi))
+            {
+                Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' StructSize mismatch (got {pluginApi->StructSize}, expected {sizeof(IGPluginApi)}).");
+                NativeLibrary.Free(libHandle);
+                return null;
+            }
+            if (DecodeMajor(pluginApi->AbiVersion) != IGNativeAbi.IG_PLUGIN_ABI_MAJOR)
+            {
+                Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' ABI major mismatch (plugin={pluginApi->AbiVersion}, host={IGNativeAbi.IG_PLUGIN_ABI_VERSION}).");
+                NativeLibrary.Free(libHandle);
+                return null;
+            }
+
+            // 5. Optional initialize
+            if (pluginApi->Initialize != null)
+            {
+                IGStatus initStatus;
+                try { initStatus = pluginApi->Initialize(); }
+                catch (Exception ex)
+                {
+                    _failureManager.Quarantine(manifest.Id, $"Initialize threw: {ex.Message}");
+                    NativeLibrary.Free(libHandle);
+                    return null;
+                }
+                if (initStatus != IGStatus.OK)
+                {
+                    Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' Initialize returned {initStatus}.");
+                    NativeLibrary.Free(libHandle);
+                    return null;
+                }
+            }
+
+            var handle = new NativePlugin(manifest.Id, libraryPath, libHandle, pluginApi);
+
+            // 6. Enumerate codecs
+            var capabilities = new List<CodecPluginCapability>(pluginApi->Info.CodecCount);
+            for (var i = 0; i < pluginApi->Info.CodecCount; i++)
+            {
+                IGCodecApi* codecApi = null;
+                IGStatus status;
+                try { status = pluginApi->GetCodec(i, &codecApi); }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' GetCodec[{i}] threw: {ex.Message}");
+                    continue;
+                }
+                if (status != IGStatus.OK || codecApi == null) continue;
+                if (codecApi->GetCapability == null) continue;
+
+
+                IGCodecCapability cap = default;
+                try { status = codecApi->GetCapability(&cap); }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' codec[{i}].GetCapability threw: {ex.Message}");
+                    continue;
+                }
+                if (status != IGStatus.OK) continue;
+
+
+                var managed = MarshalCapability(in cap);
+                capabilities.Add(managed);
+                handle.Codecs.Add(new NativeCodecEntry((nint)codecApi, managed));
+            }
+
+            // 7. Register with loader
+            lock (_lock)
+            {
+                if (_plugins.TryGetValue(manifest.Id, out var existing))
+                {
+                    existing.Dispose();
+                }
+                _plugins[manifest.Id] = handle;
+            }
+
+            return handle;
         }
-        finally
+        catch (Exception ex)
         {
-            SavePluginSettings(plugin);
+            Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' load failed: {ex.Message}");
+            _failureManager.Quarantine(manifest.Id, $"load failed: {ex.Message}");
+
+            try
+            {
+                if (libHandle != 0)
+                {
+                    NativeLibrary.Free(libHandle);
+                }
+            }
+            catch { }
+
+            return null;
         }
     }
 
 
+    /// <summary>
+    /// Builds <see cref="NativeCodecProxy"/> instances for every codec advertised by the plugin.
+    /// </summary>
+    internal IEnumerable<NativeCodecProxy> CreateProxies(NativePlugin handle)
+    {
+        var list = new List<NativeCodecProxy>(handle.Codecs.Count);
+        foreach (var entry in handle.Codecs)
+        {
+            unsafe
+            {
+                list.Add(new NativeCodecProxy(handle, (IGCodecApi*)entry.CodecApiPtr, entry.Capability, _failureManager));
+            }
+        }
+        return list;
+    }
+
+
+    private static CodecPluginCapability MarshalCapability(in IGCodecCapability cap)
+    {
+        var exts = new List<string>(cap.ExtensionCount);
+        if (cap.Extensions != null)
+        {
+            for (var i = 0; i < cap.ExtensionCount; i++)
+            {
+                exts.Add(cap.Extensions[i].ToManaged());
+            }
+        }
+
+        return new CodecPluginCapability
+        {
+            CodecId = cap.CodecId.ToManaged(),
+            CodecName = cap.CodecName.ToManaged(),
+            MetadataPriority = cap.MetadataPriority,
+            DecodePriority = cap.DecodePriority,
+            SupportedExtensions = [.. exts],
+            SupportsMetadata = cap.SupportsMetadata != 0,
+            SupportsStaticRaster = cap.SupportsStaticRaster != 0,
+            SupportsAnimation = cap.SupportsAnimation != 0,
+            SupportsVector = cap.SupportsVector != 0,
+            SupportsHdr = cap.SupportsHdr != 0,
+            SupportsColorProfiles = cap.SupportsColorProfiles != 0,
+        };
+    }
+
+
+    protected override void OnDisposing()
+    {
+        lock (_lock)
+        {
+            foreach (var handle in _plugins.Values)
+            {
+                try { handle.Dispose(); } catch { }
+            }
+            _plugins.Clear();
+        }
+        base.OnDisposing();
+    }
+
+
+    /// <summary>
+    /// Scans the given directory for native plugin manifests
+    /// (<c>imageglass.plugin.json</c>) and returns one entry per valid manifest found.
+    /// Does NOT load any libraries; manifest deserialization only.
+    /// </summary>
+    public static List<(PluginManifest Manifest, string PluginDir)> DiscoverManifests(string pluginsDirectory)
+    {
+        var results = new List<(PluginManifest, string)>();
+        if (!Directory.Exists(pluginsDirectory)) return results;
+
+        foreach (var dir in Directory.EnumerateDirectories(pluginsDirectory))
+        {
+            var manifestPath = Path.Combine(dir, PluginManifest.FILE_NAME);
+            if (!File.Exists(manifestPath)) continue;
+
+            try
+            {
+                var json = File.ReadAllText(manifestPath);
+                var manifest = System.Text.Json.JsonSerializer.Deserialize(json, PluginJsonContext.Default.PluginManifest);
+                if (manifest is not null && !string.IsNullOrEmpty(manifest.Id))
+                {
+                    results.Add((manifest, dir));
+                }
+            }
+            catch
+            {
+                // skip malformed manifests
+            }
+        }
+
+        return results;
+    }
+
 }
+

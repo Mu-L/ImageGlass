@@ -646,41 +646,41 @@ public partial class ToolbarControl : PhControl
 
     /// <summary>
     /// Rebuilds external plugin entries in the Tools submenu dynamically.
-    /// Items are inserted before <see cref="PART_MnuExternalPluginsEndSeparator"/>.
+    /// Items are inserted before <see cref="PART_MnuExternalToolsEndSeparator"/>.
     /// </summary>
     private void BuildExternalPluginMenuItems()
     {
         var items = PART_MnuTools.Items;
-        var sepEndIndex = items.IndexOf(PART_MnuExternalPluginsEndSeparator);
+        var sepEndIndex = items.IndexOf(PART_MnuExternalToolsEndSeparator);
         if (sepEndIndex < 0) return;
 
-        // remove previously added external plugin entries (tagged with our marker)
+        // remove previously added external tool entries (tagged with our marker)
         var toRemove = items
             .OfType<PhMenuItem>()
-            .Where(m => m.Tag is string tag && tag == "external_plugin")
+            .Where(m => m.Tag is string tag && tag == "external_tool")
             .ToList();
         foreach (var m in toRemove) items.Remove(m);
 
         // re-query separator index after removal
-        sepEndIndex = items.IndexOf(PART_MnuExternalPluginsEndSeparator);
+        sepEndIndex = items.IndexOf(PART_MnuExternalToolsEndSeparator);
 
-        var manifests = Core.PluginRegistry.GetAllExternalPluginManifests().ToList();
-        if (manifests.Count == 0) return;
+        var tools = Core.ToolRegistry.GetAllExternalToolManifests().ToList();
+        if (tools.Count == 0) return;
 
-        // show the separator that visually separates built-ins from external plugins
-        PART_MnuExternalPluginsEndSeparator.IsVisible = true;
+        // show the separator that visually separates built-ins from external tools
+        PART_MnuExternalToolsEndSeparator.IsVisible = true;
 
-        // insert one menu item per external plugin, before the separator
-        for (var i = 0; i < manifests.Count; i++)
+        // insert one menu item per external tool, before the separator
+        for (var i = 0; i < tools.Count; i++)
         {
-            var manifest = manifests[i];
+            var tool = tools[i];
             var mnu = new PhMenuItem
             {
-                Header = manifest.Name ?? manifest.Id,
-                Tag = "external_plugin",
-                CommandParameter = manifest.Id,
+                Header = string.IsNullOrEmpty(tool.ToolName) ? tool.ToolId : tool.ToolName,
+                Tag = "external_tool",
+                CommandParameter = tool.ToolId,
             };
-            mnu.Click += (_, _) => Core.API?.IG_OpenPlugin(manifest.Id);
+            mnu.Click += (_, _) => Core.API?.IG_OpenTool(tool.ToolId);
             items.Insert(sepEndIndex + i, mnu);
         }
     }

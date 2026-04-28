@@ -1,4 +1,4 @@
-﻿/*
+/*
 ImageGlass - A lightweight, versatile image viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
@@ -27,12 +27,13 @@ using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.Plugins;
-using ImageGlass.Plugins.External;
-using ImageGlass.SDK;
+using ImageGlass.SDK.Tools;
+using ImageGlass.Tools;
 using ImageGlass.UI.Viewer;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -118,6 +119,38 @@ public static class Core
     /// </summary>
     public static UpdateProvider? Update { get; set; } = null;
 
+
+    /// <summary>
+    /// Singleton quarantine tracker for native plugins.
+    /// </summary>
+    public static PluginFailureManager PluginFailureManager { get; } = new();
+
+
+    /// <summary>
+    /// Singleton loader that owns every native plugin shared library for the process lifetime.
+    /// </summary>
+    public static PluginRegistry PluginRegistry { get; } = new(PluginFailureManager);
+
+
+    /// <summary>
+    /// Gets the central registry for all plugins (hosted and non-hosted).
+    /// Built-in plugins are registered during <see cref="ServiceProviders.AppAPIProvider"/> construction.
+    /// </summary>
+    public static ToolRegistry ToolRegistry { get; } = new();
+
+
+    /// <summary>
+    /// Gets the process manager for external (out-of-process) plugins.
+    /// </summary>
+    public static ToolProcessManager ExternalTools { get; } = new();
+
+
+    /// <summary>
+    /// Gets the registry for built-in and future external photo codecs.
+    /// </summary>
+    public static CodecRegistry CodecRegistry { get; } = new();
+
+
     #endregion // Platform Service Provider
 
 
@@ -188,25 +221,6 @@ public static class Core
 
 
     /// <summary>
-    /// Gets the central registry for all plugins (hosted and non-hosted).
-    /// Built-in plugins are registered during <see cref="ServiceProviders.AppAPIProvider"/> construction.
-    /// </summary>
-    public static PluginRegistry PluginRegistry { get; } = new();
-
-
-    /// <summary>
-    /// Gets the process manager for external (out-of-process) plugins.
-    /// </summary>
-    public static PluginProcessManager ExternalPlugins { get; } = new();
-
-
-    /// <summary>
-    /// Gets the registry for built-in and future external photo codecs.
-    /// </summary>
-    public static CodecRegistry CodecRegistry { get; } = new();
-
-
-    /// <summary>
     /// Gets the path of the image file from the arguments.
     /// </summary>
     public static string InputImagePathFromArgs => _initImagePathFromArgs;
@@ -268,8 +282,8 @@ public static class Core
         Config.CleanUpPropertyChangedEvents();
 
         // Dispose external plugins (StopAllAsync already called in OnClosing)
-        ExternalPlugins.Dispose();
-        NativeCodecPluginLoader.Dispose();
+        ExternalTools.Dispose();
+        PluginRegistry.Dispose();
         CodecRegistry.Dispose();
 
         DisposeClipboardPhoto();
@@ -288,6 +302,71 @@ public static class Core
 
         Core.ShellProvider?.Dispose();
         Core.ShellProvider = null;
+    }
+
+
+    /// <summary>
+    /// Discovers native plugins from the <c>_plugins</c> directory and registers their codecs.
+    /// Runs on a background thread to avoid blocking app startup.
+    /// </summary>
+    public static void DiscoverPlugins()
+    {
+        _ = Task.Run(() =>
+        {
+            var pluginsDir = BHelper.ConfigDir(Dir.Plugins);
+            var discovered = PluginRegistry.DiscoverManifests(pluginsDir);
+
+            foreach (var (manifest, dir) in discovered)
+            {
+                try
+                {
+                    // Loads a single plugin and registers all of its codecs into the registry.
+                    var handle = PluginRegistry.LoadAndProbe(manifest, dir);
+                    if (handle is null) return;
+
+                    foreach (var proxy in PluginRegistry.CreateProxies(handle))
+                    {
+                        try
+                        {
+                            CodecRegistry.Register(proxy);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"[Core.DiscoverNativePlugins] register '{proxy.CodecId}' failed: {ex.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[Core.DiscoverNativePlugins] '{manifest.Id}' failed: {ex.Message}");
+                }
+            }
+        });
+    }
+
+
+    /// <summary>
+    /// Registers external tools defined in <see cref="Config.Tools"/> into the
+    /// <see cref="ToolRegistry"/>. Idempotent. Call after <see cref="Config"/> is loaded
+    /// and before any UI consumes the registry.
+    /// </summary>
+    public static void RegisterExternalTools()
+    {
+        foreach (var tool in Config.Tools)
+        {
+            if (string.IsNullOrEmpty(tool.ToolId)) continue;
+            if (ToolRegistry.Contains(tool.ToolId)) continue;
+
+            try
+            {
+                var proxy = new ExternalToolProxy(tool, ExternalTools);
+                ToolRegistry.Register(tool.ToolId, proxy);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[Core.RegisterExternalTools] '{tool.ToolId}' failed: {ex.Message}");
+            }
+        }
     }
 
 
@@ -632,7 +711,7 @@ public static class Core
             ColorProfileChanged?.Invoke(null, new());
         });
 
-        ExternalPlugins.BroadcastToAll(SDK.MessageTypes.COLOR_PROFILE_CHANGED);
+        ExternalTools.BroadcastToAll(MessageTypes.COLOR_PROFILE_CHANGED);
     }
 
 
@@ -646,7 +725,7 @@ public static class Core
             ThemeChanged?.Invoke(null, new ThemePackChangedEventArgs(propName));
         });
 
-        ExternalPlugins.BroadcastToAll(SDK.MessageTypes.THEME_CHANGED, new SDK.ThemeInfo
+        ExternalTools.BroadcastToAll(MessageTypes.THEME_CHANGED, new ThemeInfo
         {
             IsDarkMode = Theme.Settings.IsDarkMode,
             AccentColor = AccentColor.ToString(),
@@ -665,7 +744,7 @@ public static class Core
             LanguageChanged?.Invoke(null, new());
         });
 
-        ExternalPlugins.BroadcastToAll(SDK.MessageTypes.LANGUAGE_CHANGED, new SDK.LanguageChangedEventArgs
+        ExternalTools.BroadcastToAll(MessageTypes.LANGUAGE_CHANGED, new LanguageChangedEventArgs
         {
             Code = Lang.Metadata.Code,
             EnglishName = Lang.Metadata.EnglishName,
@@ -705,7 +784,7 @@ public static class Core
     {
         if (photo is null) return;
 
-        ExternalPlugins.BroadcastToAll(SDK.MessageTypes.PHOTO_CHANGED, new SDK.PhotoChangedEventArgs
+        ExternalTools.BroadcastToAll(MessageTypes.PHOTO_CHANGED, new PhotoChangedEventArgs
         {
             FilePath = photo.FilePath,
             Width = (int)(photo.Metadata?.OriginalWidth ?? 0),
@@ -716,76 +795,6 @@ public static class Core
         });
     }
 
-
-    /// <summary>
-    /// Singleton quarantine tracker for native codec plugins.
-    /// </summary>
-    public static Plugins.Native.NativePluginQuarantine NativeCodecPluginQuarantine { get; } = new();
-
-
-    /// <summary>
-    /// Singleton loader that owns every native codec plugin shared library for the process lifetime.
-    /// </summary>
-    public static Plugins.Native.NativePluginLoader NativeCodecPluginLoader { get; } =
-        new(NativeCodecPluginQuarantine);
-
-
-    /// <summary>
-    /// Discovers external plugins from the <c>_plugins</c> directory and registers them.
-    /// Runs on a background thread to avoid blocking app startup.
-    /// OOP plugins are registered as user-facing tool plugins; native codec plugins
-    /// are loaded in-process and their codecs are registered into <see cref="CodecRegistry"/>.
-    /// </summary>
-    public static void DiscoverExternalPlugins()
-    {
-        _ = Task.Run(() =>
-        {
-            var pluginsDir = BHelper.ConfigDir(Dir.Plugins);
-            var discovered = PluginProcessManager.DiscoverPlugins(pluginsDir);
-
-            foreach (var (manifest, dir) in discovered)
-            {
-                try
-                {
-                    if (manifest.Kind == SDK.Native.IGPluginKind.Native)
-                    {
-                        DiscoverNativeCodecPlugin(manifest, dir);
-                    }
-                    else
-                    {
-                        var proxy = new ExternalPluginProxy(manifest, ExternalPlugins, dir);
-                        PluginRegistry.Register(manifest.Id, proxy);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[Core.DiscoverExternalPlugins] '{manifest.Id}' failed: {ex.Message}");
-                }
-            }
-        });
-    }
-
-
-    /// <summary>
-    /// Loads a single native codec plugin and registers all of its codecs into the registry.
-    /// </summary>
-    private static void DiscoverNativeCodecPlugin(SDK.PluginManifest manifest, string pluginDir)
-    {
-        var handle = NativeCodecPluginLoader.LoadAndProbe(manifest, pluginDir);
-        if (handle is null) return;
-
-        foreach (var proxy in NativeCodecPluginLoader.CreateProxies(handle))
-        {
-            try
-            {
-                CodecRegistry.Register(proxy);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[Core.DiscoverNativeCodecPlugin] register '{proxy.CodecId}' failed: {ex.Message}");
-            }
-        }
-    }
 
 
     internal static void Viewer_PhotoLoadingForPlugins(ViewerControl sender, PhotoLoadingEventArgs e)
@@ -798,7 +807,7 @@ public static class Core
 
     internal static void Viewer_PointerMovedForPlugins(ViewerControl sender, ViewerPointerEventArgs e)
     {
-        ExternalPlugins.BroadcastToSubscribed(
+        ExternalTools.BroadcastToSubscribed(
             MessageTypes.POINTER_MOVED,
             new PointerEventArgs
             {
@@ -812,7 +821,7 @@ public static class Core
 
     internal static void Viewer_PointerPressedForPlugins(ViewerControl sender, ViewerPointerEventArgs e)
     {
-        ExternalPlugins.BroadcastToSubscribed(
+        ExternalTools.BroadcastToSubscribed(
             MessageTypes.POINTER_PRESSED,
             new PointerEventArgs
             {
@@ -827,7 +836,7 @@ public static class Core
     internal static void Viewer_SelectionChangedForPlugins(ViewerControl sender, ViewerSelectionChangedEventArgs e)
     {
         var src = e.SourceSelection;
-        ExternalPlugins.BroadcastToSubscribed(
+        ExternalTools.BroadcastToSubscribed(
             MessageTypes.SELECTION_CHANGED,
             src == default ? null : new SelectionEventArgs
             {
@@ -841,7 +850,7 @@ public static class Core
 
     internal static void Viewer_FrameChangedForPlugins(ViewerControl sender, PhotoFrameChangedEventArgs e)
     {
-        ExternalPlugins.BroadcastToSubscribed(
+        ExternalTools.BroadcastToSubscribed(
             MessageTypes.FRAME_CHANGED,
             (int)e.CurrentFrame,
             s => s.FrameChanged);

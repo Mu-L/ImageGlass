@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:cm="using:ImageGlass.Common"
-    xmlns:plugin="using:ImageGlass.Plugins"
+    xmlns:tool="using:ImageGlass.Tools"
     xmlns:ui="using:ImageGlass.UI"
     xmlns:viewer="using:ImageGlass.UI.Viewer"
     xmlns:vm="using:ImageGlass.ViewModels"
@@ -53,7 +53,7 @@
                 </Panel>
             </viewer:ViewerControl>
 
-            <plugin:PluginHostControl x:Name="PART_PluginHost" Grid.Row="1" />
+            <tool:ToolHostControl x:Name="PART_ToolHost" Grid.Row="1" />
         </Grid>
 
 

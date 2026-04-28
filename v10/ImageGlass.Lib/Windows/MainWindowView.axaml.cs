@@ -77,7 +77,7 @@ public partial class MainWindowView : PhControl
         PART_Viewer.ViewerMouseWheel += PART_Viewer_ViewerMouseWheel;
         PART_Viewer.ContextMenu?.Opened += PART_Viewer_ContextMenu_Opened;
 
-        // hook viewer events for external plugin broadcasting
+        // hook viewer events for external tool broadcasting
         PART_Viewer.PhotoLoading += Core.Viewer_PhotoLoadingForPlugins;
         PART_Viewer.ViewerPointerMoved += Core.Viewer_PointerMovedForPlugins;
         PART_Viewer.ViewerPointerPressed += Core.Viewer_PointerPressedForPlugins;
@@ -107,7 +107,7 @@ public partial class MainWindowView : PhControl
         PART_Viewer.ViewerMouseWheel -= PART_Viewer_ViewerMouseWheel;
         PART_Viewer.ContextMenu?.Opened -= PART_Viewer_ContextMenu_Opened;
 
-        // unhook viewer events for external plugins
+        // unhook viewer events for external tools
         PART_Viewer.PhotoLoading -= Core.Viewer_PhotoLoadingForPlugins;
         PART_Viewer.ViewerPointerMoved -= Core.Viewer_PointerMovedForPlugins;
         PART_Viewer.ViewerPointerPressed -= Core.Viewer_PointerPressedForPlugins;

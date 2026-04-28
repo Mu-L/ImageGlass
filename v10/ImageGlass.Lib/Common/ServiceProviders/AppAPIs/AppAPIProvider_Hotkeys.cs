@@ -1,4 +1,4 @@
-﻿/*
+/*
 ImageGlass - A lightweight, versatile image viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
@@ -22,9 +22,7 @@ using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
-using ImageGlass.Plugins;
-using ImageGlass.Plugins.ImageResizer;
-using ImageGlass.Plugins.LosslessCompression;
+using ImageGlass.Tools;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
 using System;
@@ -156,12 +154,12 @@ public partial class AppAPIProvider
 
 
         // Plugins
-        new(LangId.FrmMain_MnuColorPicker,          API.IG_TogglePlugin, ColorPickerPluginControl.PLUGIN_ID,    [new(MKeys.Alt, Key.K)]),
-        new(LangId.FrmMain_MnuCropTool,             API.IG_TogglePlugin, CropImagePluginControl.PLUGIN_ID,      [new(MKeys.Alt, Key.C)]),
-        new(LangId.FrmMain_MnuFrameNav,             API.IG_TogglePlugin, FrameNavPluginControl.PLUGIN_ID,       [new(MKeys.Alt, Key.P)]),
-        new(LangId.FrmMain_MnuResizeTool,           API.IG_OpenPlugin, ImageResizerPlugin.PLUGIN_ID,            [new(MKeys.Alt, Key.R)]),
-        new(LangId.FrmMain_MnuLosslessCompression,  API.IG_OpenPlugin, LosslessCompressionPlugin.PLUGIN_ID,     [new(MKeys.Alt, Key.S)]),
-        new(LangId.FrmMain_MnuGetMoreTools,         API.IG_GetMorePlugin),
+        new(LangId.FrmMain_MnuColorPicker,          API.IG_ToggleTool, ColorPickerToolControl.TOOL_ID,    [new(MKeys.Alt, Key.K)]),
+        new(LangId.FrmMain_MnuCropTool,             API.IG_ToggleTool, CropImageToolControl.TOOL_ID,      [new(MKeys.Alt, Key.C)]),
+        new(LangId.FrmMain_MnuFrameNav,             API.IG_ToggleTool, FrameNavToolControl.TOOL_ID,       [new(MKeys.Alt, Key.P)]),
+        new(LangId.FrmMain_MnuResizeTool,           API.IG_OpenTool, ImageResizerTool.TOOL_ID,            [new(MKeys.Alt, Key.R)]),
+        new(LangId.FrmMain_MnuLosslessCompression,  API.IG_OpenTool, LosslessCompressionTool.TOOL_ID,     [new(MKeys.Alt, Key.S)]),
+        new(LangId.FrmMain_MnuGetMoreTools,         API.IG_GetMoreTools),
 
 
         // Settings

@@ -112,12 +112,12 @@ public enum API
     IG_ToggleCheckerboard,
     IG_ToggleWindowTopMost,
 
-    // Menu > Plugins
-    IG_CloseCurrentPlugin,
-    IG_TogglePlugin,
-    IG_OpenPlugin,
-    IG_ClosePlugin,
-    IG_GetMorePlugin,
+    // Menu > Tools
+    IG_CloseCurrentTool,
+    IG_ToggleTool,
+    IG_OpenTool,
+    IG_CloseTool,
+    IG_GetMoreTools,
 
     // Menu > Settings
 
