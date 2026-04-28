@@ -269,6 +269,7 @@ public static class Core
 
         // Dispose external plugins (StopAllAsync already called in OnClosing)
         ExternalPlugins.Dispose();
+        NativeCodecPluginLoader.Dispose();
         CodecRegistry.Dispose();
 
         DisposeClipboardPhoto();
@@ -717,8 +718,23 @@ public static class Core
 
 
     /// <summary>
+    /// Singleton quarantine tracker for native codec plugins.
+    /// </summary>
+    public static Plugins.Native.NativePluginQuarantine NativeCodecPluginQuarantine { get; } = new();
+
+
+    /// <summary>
+    /// Singleton loader that owns every native codec plugin shared library for the process lifetime.
+    /// </summary>
+    public static Plugins.Native.NativePluginLoader NativeCodecPluginLoader { get; } =
+        new(NativeCodecPluginQuarantine);
+
+
+    /// <summary>
     /// Discovers external plugins from the <c>_plugins</c> directory and registers them.
     /// Runs on a background thread to avoid blocking app startup.
+    /// OOP plugins are registered as user-facing tool plugins; native codec plugins
+    /// are loaded in-process and their codecs are registered into <see cref="CodecRegistry"/>.
     /// </summary>
     public static void DiscoverExternalPlugins()
     {
@@ -729,10 +745,46 @@ public static class Core
 
             foreach (var (manifest, dir) in discovered)
             {
-                var proxy = new ExternalPluginProxy(manifest, ExternalPlugins, dir);
-                PluginRegistry.Register(manifest.Id, proxy);
+                try
+                {
+                    if (manifest.Kind == SDK.Native.IGPluginKind.Native)
+                    {
+                        DiscoverNativeCodecPlugin(manifest, dir);
+                    }
+                    else
+                    {
+                        var proxy = new ExternalPluginProxy(manifest, ExternalPlugins, dir);
+                        PluginRegistry.Register(manifest.Id, proxy);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Core.DiscoverExternalPlugins] '{manifest.Id}' failed: {ex.Message}");
+                }
             }
         });
+    }
+
+
+    /// <summary>
+    /// Loads a single native codec plugin and registers all of its codecs into the registry.
+    /// </summary>
+    private static void DiscoverNativeCodecPlugin(SDK.PluginManifest manifest, string pluginDir)
+    {
+        var handle = NativeCodecPluginLoader.LoadAndProbe(manifest, pluginDir);
+        if (handle is null) return;
+
+        foreach (var proxy in NativeCodecPluginLoader.CreateProxies(handle))
+        {
+            try
+            {
+                CodecRegistry.Register(proxy);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Core.DiscoverNativeCodecPlugin] register '{proxy.CodecId}' failed: {ex.Message}");
+            }
+        }
     }
 
 

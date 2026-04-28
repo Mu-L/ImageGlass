@@ -91,6 +91,9 @@ public sealed class PluginProcessManager : PhDisposable
     /// </summary>
     internal async Task<PluginProcessInfo?> StartPluginAsync(PluginManifest manifest, string pluginDir)
     {
+        // Sanity-guard: this method is only valid for OOP-kind manifests.
+        if (string.IsNullOrEmpty(manifest.Executable)) return null;
+
         // macOS limits Unix domain socket paths to ~104 chars — keep pipe names short
         var pipeName = $"ig_{Guid.NewGuid().ToString("N")[..8]}";
 

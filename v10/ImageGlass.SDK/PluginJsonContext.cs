@@ -13,7 +13,19 @@ namespace ImageGlass.SDK;
 /// Source-generated JSON serialization context for all IPC message types.
 /// AOT-safe — no runtime reflection.
 /// </summary>
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+/// <remarks>
+/// <para>
+/// Writes use camelCase (<c>"id"</c>, <c>"name"</c>, ...).
+/// Reads accept either casing because plugin manifests are hand-authored and frequently use PascalCase.
+/// </para>
+/// </remarks>
+[JsonSourceGenerationOptions(
+    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+    PropertyNameCaseInsensitive = true,
+    AllowTrailingCommas = true,
+    ReadCommentHandling = JsonCommentHandling.Skip,
+    WriteIndented = true,
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 [JsonSerializable(typeof(PluginMessage))]
 [JsonSerializable(typeof(PluginManifest))]
 [JsonSerializable(typeof(PluginInitPayload))]
@@ -40,4 +52,5 @@ namespace ImageGlass.SDK;
 [JsonSerializable(typeof(PluginColor))]
 [JsonSerializable(typeof(PluginRect))]
 [JsonSerializable(typeof(JsonElement))]
+[JsonSerializable(typeof(CodecPluginCapability))]
 public partial class PluginJsonContext : JsonSerializerContext;

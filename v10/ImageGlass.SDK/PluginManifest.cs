@@ -4,6 +4,8 @@ Copyright (C) 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
 MIT License
 */
+using ImageGlass.SDK.Native;
+
 namespace ImageGlass.SDK;
 
 /// <summary>
@@ -42,10 +44,20 @@ public sealed class PluginManifest
     public string? Website { get; init; }
 
     /// <summary>
-    /// Executable filename (e.g. "MyPlugin.exe" on Windows, "MyPlugin" on Linux/macOS).
+    /// Plugin kind. Defaults to <see cref="IGPluginKind.OOP"/> for backwards compatibility
+    /// with existing manifests that omit this field.
+    /// </summary>
+    public IGPluginKind Kind { get; init; } = IGPluginKind.OOP;
+
+    /// <summary>
+    /// Filename of the plugin binary, relative to the plugin folder.
+    /// <list type="bullet">
+    /// <item>For <see cref="IGPluginKind.OOP"/>: the executable (e.g. <c>MyPlugin.exe</c> on Windows, <c>MyPlugin</c> on Linux/macOS).</item>
+    /// <item>For <see cref="IGPluginKind.Native"/>: the shared library (e.g. <c>MyPlugin.dll</c>, <c>libMyPlugin.so</c>, <c>MyPlugin.dylib</c>).</item>
+    /// </list>
+    /// Required for both kinds. <see cref="Kind"/> determines how the file is launched/loaded.
     /// </summary>
     public required string Executable { get; init; }
-
 
 
     /// <summary>
