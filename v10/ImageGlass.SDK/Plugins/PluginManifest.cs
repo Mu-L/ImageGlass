@@ -55,6 +55,17 @@ public sealed class PluginManifest
     /// </summary>
     public required string Executable { get; init; }
 
+    /// <summary>
+    /// Optional semicolon-separated list of file extensions the codec should
+    /// handle (e.g. <c>".jpg;.jpeg;.tif"</c>). When empty, the host falls back
+    /// to the extensions the plugin reports through its
+    /// <c>IGCodecCapability</c>. When non-empty, this list overrides the
+    /// plugin-reported list, allowing users to add or restrict the codec's
+    /// scope without rebuilding the plugin. Entries are normalized to
+    /// lowercase and a leading dot is added if missing.
+    /// </summary>
+    public string SupportedExtensions { get; init; } = string.Empty;
+
 
     /// <summary>
     /// Gets the plugin manifest filename.

@@ -16,7 +16,13 @@ public sealed class CodecPluginCapability
     public string CodecName { get; init; } = string.Empty;
     public required int MetadataPriority { get; init; }
     public required int DecodePriority { get; init; }
-    public required string[] SupportedExtensions { get; init; }
+
+    /// <summary>
+    /// Extensions the codec handles. May be the plugin-reported list or, when
+    /// the manifest specifies <see cref="PluginManifest.SupportedExtensions"/>,
+    /// the user-overridden list. Always normalized (lowercase, leading dot).
+    /// </summary>
+    public required string[] SupportedExtensions { get; set; }
 
     public bool SupportsMetadata { get; init; }
     public bool SupportsStaticRaster { get; init; }

@@ -170,6 +170,14 @@ public sealed unsafe class PluginRegistry : PhDisposable
 
 
                 var managed = MarshalCapability(in cap);
+
+                // Apply per-manifest extension override if present.
+                var manifestExts = ParseManifestExtensions(manifest.SupportedExtensions);
+                if (manifestExts.Length > 0)
+                {
+                    managed.SupportedExtensions = manifestExts;
+                }
+
                 capabilities.Add(managed);
                 handle.Codecs.Add(new NativeCodecEntry((nint)codecApi, managed));
             }
@@ -244,6 +252,29 @@ public sealed unsafe class PluginRegistry : PhDisposable
             SupportsStaticRaster = cap.SupportsStaticRaster != 0,
             SupportsColorProfiles = cap.SupportsColorProfiles != 0,
         };
+    }
+
+
+    /// <summary>
+    /// Parses a semicolon-separated extension list from the manifest into a
+    /// normalized array (lowercase, leading dot, deduplicated). Returns an
+    /// empty array when the input is null/whitespace.
+    /// </summary>
+    private static string[] ParseManifestExtensions(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return [];
+
+        var parts = raw.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length == 0) return [];
+
+        var set = new HashSet<string>(parts.Length, StringComparer.OrdinalIgnoreCase);
+        var result = new List<string>(parts.Length);
+        foreach (var part in parts)
+        {
+            var ext = part.StartsWith('.') ? part.ToLowerInvariant() : "." + part.ToLowerInvariant();
+            if (set.Add(ext)) result.Add(ext);
+        }
+        return [.. result];
     }
 
 

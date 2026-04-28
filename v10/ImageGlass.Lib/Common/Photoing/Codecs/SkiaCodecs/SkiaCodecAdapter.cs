@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.Types;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +29,14 @@ namespace ImageGlass.Common.Photoing;
 /// </summary>
 public sealed class SkiaCodecAdapter : PhDisposable, ICodec
 {
-    private static readonly string[] _supportedExtensions = [];
+    /// <summary>
+    /// Built-in extensions handled by the Skia codec. Plugins can override
+    /// individual extensions at runtime by claiming the same extension with a
+    /// higher <c>DecodePriority</c>; this list is the safe default that ships
+    /// with the host.
+    /// </summary>
+    private static readonly string[] _supportedExtensions =
+        [".bmp", ".gif", ".gifv", ".jpg", ".jpeg", ".png", ".webp"];
 
 
     /// <inheritdoc/>
@@ -78,7 +86,7 @@ public sealed class SkiaCodecAdapter : PhDisposable, ICodec
         if (metadata is null || metadata.IsVector) return false;
         if (!context.IsDestColorProfileSupported) return false;
         if (context.LoadRawThumbnailOnly || context.LoadOtherThumbnailOnly) return false;
-        if (!context.NativeCodecReadFormats.Contains(metadata.FileExtension)) return false;
+        if (Array.IndexOf(_supportedExtensions, metadata.FileExtension) < 0) return false;
 
         try
         {

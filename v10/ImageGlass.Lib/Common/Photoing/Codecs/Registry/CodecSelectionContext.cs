@@ -45,9 +45,4 @@ public sealed class CodecSelectionContext
     /// Gets or sets a value indicating whether a non-raw embedded preview should be used instead of the full image.
     /// </summary>
     public bool LoadOtherThumbnailOnly { get; init; }
-
-    /// <summary>
-    /// Gets or sets the configured set of extensions preferred for native decoding.
-    /// </summary>
-    public IReadOnlySet<string> NativeCodecReadFormats { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 }

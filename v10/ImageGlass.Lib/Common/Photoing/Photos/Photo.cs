@@ -382,7 +382,6 @@ public partial class Photo : PhDisposable
             IsDestColorProfileSupported = Core.IsDestColorProfileSupported,
             LoadRawThumbnailOnly = ReadOptions.OnlyLoadRawPreview && meta.RawThumbnail is not null,
             LoadOtherThumbnailOnly = ReadOptions.OnlyLoadNonRawPreview && (meta.ExifProfile?.ThumbnailLength ?? 0) > 0,
-            NativeCodecReadFormats = Core.Config.NativeCodecReadFormats,
         };
     }
 

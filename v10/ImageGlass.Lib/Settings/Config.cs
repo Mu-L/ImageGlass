@@ -842,12 +842,6 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets the list of formats that always use native codec to decode.
     /// </summary>
-    [JsonConverter(typeof(JsonHashSetToStringConverter))]
-    public HashSet<string> NativeCodecReadFormats
-    {
-        get => Get(ConfigId.NativeCodecReadFormats, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".bmp", ".gif", ".gifv", ".jpg", ".png", ".webp" });
-        set => Set(ConfigId.NativeCodecReadFormats, value);
-    }
 
     /// <summary>
     /// Gets, sets the list of supported image formats
