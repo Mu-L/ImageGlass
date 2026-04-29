@@ -42,7 +42,18 @@ internal sealed class ToolClient : IDisposable
     /// </summary>
     public async Task ConnectAndRunAsync()
     {
-        await _pipe.ConnectAsync(5000, _cts.Token).ConfigureAwait(false);
+        _tool.Trace("ToolClient: connecting to pipe...");
+        try
+        {
+            await _pipe.ConnectAsync(5000, _cts.Token).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _tool.Trace($"ToolClient: ConnectAsync failed: {ex}");
+            throw;
+        }
+        _tool.Trace($"ToolClient: connected. IsConnected={_pipe.IsConnected}");
+
         _reader = new StreamReader(_pipe, leaveOpen: true);
         _writer = new StreamWriter(_pipe, leaveOpen: true) { AutoFlush = true };
 
@@ -50,19 +61,34 @@ internal sealed class ToolClient : IDisposable
         {
             while (!_cts.IsCancellationRequested)
             {
-                var line = await _reader.ReadLineAsync(_cts.Token).ConfigureAwait(false);
-                if (line is null) break; // pipe closed
+                string? line;
+                try
+                {
+                    line = await _reader.ReadLineAsync(_cts.Token).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _tool.Trace($"ToolClient: ReadLineAsync threw: {ex}");
+                    throw;
+                }
+                if (line is null)
+                {
+                    _tool.Trace("ToolClient: pipe closed, exiting loop.");
+                    break;
+                }
 
                 ToolMessage? msg;
                 try
                 {
                     msg = JsonSerializer.Deserialize(line, ToolJsonContext.Default.ToolMessage);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    continue; // skip malformed messages
+                    _tool.Trace($"ToolClient: malformed JSON ({line.Length} chars): {ex.Message}");
+                    continue;
                 }
                 if (msg is null) continue;
+                _tool.Trace($"ToolClient: recv Type={msg.Type} RequestId={msg.RequestId}");
 
                 if (msg.RequestId.HasValue && _pending.TryRemove(msg.RequestId.Value, out var tcs))
                 {
@@ -77,7 +103,8 @@ internal sealed class ToolClient : IDisposable
                 }
             }
         }
-        catch (OperationCanceledException) { }
+        catch (OperationCanceledException) { _tool.Trace("ToolClient: loop cancelled."); }
+        _tool.Trace("ToolClient: ConnectAndRunAsync exiting.");
     }
 
 
@@ -127,6 +154,7 @@ internal sealed class ToolClient : IDisposable
 
     private async Task DispatchEventAsync(ToolMessage msg)
     {
+        _tool.Trace($"Dispatch enter: {msg.Type}");
         try
         {
             switch (msg.Type)
@@ -150,6 +178,10 @@ internal sealed class ToolClient : IDisposable
                     var theme = Deserialize<ThemeInfo>(msg.Payload);
                     if (theme is not null) _tool.CurrentTheme = theme;
                     _tool.OnThemeChanged(theme ?? new ThemeInfo());
+                    break;
+
+                case MessageTypes.COLOR_PROFILE_CHANGED:
+                    _tool.OnColorProfileChanged();
                     break;
 
                 case MessageTypes.LANGUAGE_CHANGED:
@@ -182,18 +214,21 @@ internal sealed class ToolClient : IDisposable
                     break;
 
                 case MessageTypes.SHUTDOWN:
+                    await _tool.OnShutdownAsync().ConfigureAwait(false);
                     _cts.Cancel();
                     break;
             }
         }
         catch (Exception ex)
         {
+            _tool.Trace($"Dispatch FAILED for {msg.Type}: {ex}");
             try
             {
                 Console.Error.WriteLine($"[{_tool.ToolId}] {msg.Type} failed: {ex}");
             }
             catch { }
         }
+        _tool.Trace($"Dispatch exit: {msg.Type}");
     }
 
 

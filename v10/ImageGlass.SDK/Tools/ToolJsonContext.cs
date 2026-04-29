@@ -19,7 +19,11 @@ namespace ImageGlass.SDK.Tools;
     PropertyNameCaseInsensitive = true,
     AllowTrailingCommas = true,
     ReadCommentHandling = JsonCommentHandling.Skip,
-    WriteIndented = true,
+    // Must stay false: the tool IPC protocol is newline-delimited JSON
+    // (one message per line). Indented output would break the framing
+    // because StreamReader.ReadLine would treat each indented line as a
+    // separate, malformed message.
+    WriteIndented = false,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 [JsonSerializable(typeof(ToolMessage))]
 [JsonSerializable(typeof(ToolInitPayload))]

@@ -16,6 +16,34 @@ public abstract class ToolBase : IDisposable
     private ToolClient? _client;
 
     /// <summary>
+    /// When <c>true</c>, the SDK writes detailed IPC lifecycle traces
+    /// (pipe connect, every received message, dispatch enter/exit/failure)
+    /// to <see cref="DebugLog"/>. Use this to diagnose tools that appear
+    /// to "do nothing" — e.g. wire-format mismatches, swallowed exceptions
+    /// in event handlers, or pipe-connection failures.
+    /// <para>Set BEFORE calling <see cref="RunAsync"/>.</para>
+    /// </summary>
+    public bool EnableDebug { get; set; }
+
+    /// <summary>
+    /// Sink that receives debug trace lines when <see cref="EnableDebug"/>
+    /// is <c>true</c>. Typical implementations append to a log file or
+    /// forward to <c>Console.WriteLine</c>. Exceptions thrown by the sink
+    /// are swallowed so logging cannot crash the tool.
+    /// </summary>
+    public Action<string>? DebugLog { get; set; }
+
+    /// <summary>
+    /// Writes a trace line to <see cref="DebugLog"/> when
+    /// <see cref="EnableDebug"/> is enabled.
+    /// </summary>
+    internal void Trace(string msg)
+    {
+        if (!EnableDebug) return;
+        try { DebugLog?.Invoke(msg); } catch { }
+    }
+
+    /// <summary>
     /// Unique tool identifier. Must match the <c>ToolId</c> registered in <c>igconfig.json</c>.
     /// </summary>
     public abstract string ToolId { get; }
@@ -51,9 +79,14 @@ public abstract class ToolBase : IDisposable
     protected internal virtual Task OnInitializedAsync() => Task.CompletedTask;
 
     /// <summary>
-    /// Called when the host requests plugin execution (non-hosted).
+    /// Called when the host requests tool execution.
     /// </summary>
     protected internal virtual Task OnExecuteAsync(CancellationToken ct) => Task.CompletedTask;
+
+    /// <summary>
+    /// Called when the host requests the tool to shut down.
+    /// </summary>
+    protected internal virtual Task OnShutdownAsync() => Task.CompletedTask;
 
     #endregion
 
@@ -69,6 +102,11 @@ public abstract class ToolBase : IDisposable
     /// Called when theme changes.
     /// </summary>
     protected internal virtual void OnThemeChanged(ThemeInfo theme) { }
+
+    /// <summary>
+    /// Called when the viewer color profile changes.
+    /// </summary>
+    protected internal virtual void OnColorProfileChanged() { }
 
     /// <summary>
     /// Called when language changes.

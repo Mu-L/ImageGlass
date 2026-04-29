@@ -841,7 +841,10 @@ public static class Core
     {
         ToolRegistry.ExternalTools.BroadcastToSubscribed(
             MessageTypes.FRAME_CHANGED,
-            (int)e.CurrentFrame,
+            new FrameChangedPayload
+            {
+                FrameIndex = (int)e.CurrentFrame,
+            },
             s => s.FrameChanged);
     }
 

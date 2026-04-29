@@ -56,7 +56,7 @@ if (!System.IO.File.Exists(OutputPath) || System.IO.File.ReadAllText(OutputPath)
   <Target Name="GenerateAppBuildInfo"
           BeforeTargets="CoreCompile"
           DependsOnTargets="PrepareForBuild"
-          Condition="'$(OutputType)' == 'WinExe' OR '$(OutputType)' == 'Exe'">
+          Condition="('$(OutputType)' == 'WinExe' OR '$(OutputType)' == 'Exe') AND '$(GenerateIgAppBuildInfo)' != 'false'">
     <PropertyGroup>
       <_AppBuildInfoFile>$(IntermediateOutputPath)AppBuildInfo.g.cs</_AppBuildInfoFile>
     </PropertyGroup>
