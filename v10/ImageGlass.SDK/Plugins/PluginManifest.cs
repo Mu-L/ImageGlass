@@ -7,7 +7,7 @@ MIT License
 namespace ImageGlass.SDK.Plugins;
 
 /// <summary>
-/// JSON metadata for a native plugin, read from <c>imageglass.plugin.json</c>.
+/// JSON metadata for a native plugin, read from <c>igplugin.json</c>.
 /// Native plugins are loaded in-process via <c>NativeLibrary.Load</c> and the C ABI in
 /// <see cref="IGNativeAbi"/>.
 /// </summary>
@@ -70,6 +70,6 @@ public sealed class PluginManifest
     /// <summary>
     /// Gets the plugin manifest filename.
     /// </summary>
-    public static string FILE_NAME { get; } = "imageglass.plugin.json";
+    public static string FILE_NAME { get; } = "igplugin.json";
 
 }

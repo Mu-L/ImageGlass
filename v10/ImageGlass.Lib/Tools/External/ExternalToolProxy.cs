@@ -42,15 +42,37 @@ internal sealed class ExternalToolProxy : ITool
     private readonly ExternalTool _tool;
     private readonly ToolProcessManager _processManager;
 
+    /// <summary>
+    /// Gets the stable ID of the proxied external tool.
+    /// </summary>
     public string ToolId => _tool.ToolId;
+
+    /// <summary>
+    /// Gets whether the tool is hosted in-process.
+    /// External tools always return <c>false</c>.
+    /// </summary>
     public bool IsHosted => false;
+
+    /// <summary>
+    /// Gets the tool settings payload.
+    /// External tools currently do not expose structured settings here.
+    /// </summary>
     public object? Settings => null;
+
+    /// <summary>
+    /// Gets or sets the active viewer associated with the tool contract.
+    /// </summary>
     public ViewerControl Viewer { get; set; } = null!;
 
-    /// <summary>The original registration for menu building.</summary>
+    /// <summary>
+    /// Gets the original registration entry used for menu building and launch metadata.
+    /// </summary>
     internal ExternalTool Tool => _tool;
 
 
+    /// <summary>
+    /// Creates a proxy for one configured external tool entry.
+    /// </summary>
     public ExternalToolProxy(ExternalTool tool, ToolProcessManager processManager)
     {
         _tool = tool;
@@ -58,6 +80,9 @@ internal sealed class ExternalToolProxy : ITool
     }
 
 
+    /// <summary>
+    /// Launches the external tool in either detached mode or integrated IPC mode.
+    /// </summary>
     public async Task ExecuteAsync(ToolExecutionContext context)
     {
         // Detached mode: just spawn the executable with arguments and walk away.
@@ -67,14 +92,14 @@ internal sealed class ExternalToolProxy : ITool
             return;
         }
 
-        // Integrated mode: pipe-IPC.
+        // Integrated mode: reuse an existing process when possible.
         var info = _processManager.GetRunningTool(ToolId);
         if (info is null)
         {
+            // Start the process, establish the pipe, and send the one-time init payload.
             info = await _processManager.StartToolAsync(_tool);
             if (info is null) return;
 
-            // Send INIT
             info.PipeHandler.SendEvent(MessageTypes.INIT, new ToolInitPayload
             {
                 ToolId = ToolId,
@@ -88,15 +113,18 @@ internal sealed class ExternalToolProxy : ITool
                 },
             });
 
-            // Start message loop in the background
+            // Keep the pipe reader alive for follow-up requests from the tool.
             _ = Task.Run(() => info.PipeHandler.RunMessageLoopAsync(CancellationToken.None));
         }
 
-        // Tell the tool to execute
+        // Trigger the tool's actual action once the process is ready.
         info.PipeHandler.SendEvent(MessageTypes.EXECUTE);
     }
 
 
+    /// <summary>
+    /// Starts the external tool without IPC, expanding basic launch placeholders.
+    /// </summary>
     private void LaunchDetached(ToolExecutionContext context)
     {
         if (string.IsNullOrEmpty(_tool.Executable)) return;

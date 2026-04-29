@@ -55,10 +55,15 @@ internal sealed class ToolPipeServer : IDisposable
     // Pixel buffer management
     private readonly Dictionary<string, (MemoryMappedFile Mmf, string Path)> _activeBuffers = [];
 
-    // Event subscriptions for this tool
+    /// <summary>
+    /// Gets the event subscriptions currently requested by the tool.
+    /// </summary>
     internal ToolEventSubscriptions Subscriptions { get; private set; } = new();
 
 
+    /// <summary>
+    /// Creates a host-side pipe handler around one connected tool stream.
+    /// </summary>
     public ToolPipeServer(NamedPipeServerStream pipeServer, string toolId)
     {
         _toolId = toolId;
@@ -68,16 +73,20 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
-    /// <summary>Runs the message loop, dispatching tool requests until cancellation or pipe close.</summary>
+    /// <summary>
+    /// Runs the message loop, dispatching tool requests until cancellation or pipe close.
+    /// </summary>
     public async Task RunMessageLoopAsync(CancellationToken ct)
     {
         try
         {
             while (!ct.IsCancellationRequested)
             {
+                // Read one newline-delimited message from the pipe.
                 var line = await _reader.ReadLineAsync(ct);
                 if (line is null) break;
 
+                // Ignore malformed JSON payloads so one bad message does not kill the session.
                 ToolMessage? msg;
                 try
                 {
@@ -97,6 +106,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Routes one decoded tool message to the appropriate handler.
+    /// </summary>
     private async Task HandleToolMessageAsync(ToolMessage msg)
     {
         switch (msg.Type)
@@ -155,6 +167,9 @@ internal sealed class ToolPipeServer : IDisposable
     #region Message Handlers
 
 
+    /// <summary>
+    /// Reads one rendered pixel from the active viewer.
+    /// </summary>
     private async Task HandleReadPixelAsync(ToolMessage msg)
     {
         var req = DeserializePayload<ReadPixelRequest>(msg);
@@ -176,11 +191,15 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Exports the current rendered bitmap to a temporary memory-mapped file for the tool.
+    /// </summary>
     private async Task HandleGetPixelBufferAsync(ToolMessage msg)
     {
         var req = DeserializePayload<GetPixelBufferRequest>(msg);
         var selectionOnly = req?.SelectionOnly ?? false;
 
+        // Capture the current bitmap on the UI thread.
         var bitmap = await Dispatcher.UIThread.InvokeAsync(() =>
         {
             if (Core.API?.GetViewer() is not { } viewer) return null;
@@ -195,6 +214,7 @@ internal sealed class ToolPipeServer : IDisposable
 
         try
         {
+            // Materialize the bitmap into a temp file so the tool can map it read-only.
             var tempPath = Path.Combine(Path.GetTempPath(), $"ig_pixels_{Guid.NewGuid():N}.bin");
             var byteCount = bitmap.ByteCount;
 
@@ -212,6 +232,7 @@ internal sealed class ToolPipeServer : IDisposable
                 byteCount, MemoryMappedFileAccess.Read);
             _activeBuffers[tempPath] = (mmf, tempPath);
 
+            // Return the mapping metadata the tool needs to open and interpret the buffer.
             SendResponse(msg.RequestId, new GetPixelBufferResponse
             {
                 MmfPath = tempPath,
@@ -228,6 +249,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Releases a previously exported pixel buffer and deletes its backing temp file.
+    /// </summary>
     private void HandleReleasePixelBuffer(ToolMessage msg)
     {
         var req = DeserializePayload<ReleasePixelBufferRequest>(msg);
@@ -240,6 +264,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Executes a host API command requested by the tool.
+    /// </summary>
     private async Task HandleRunApiAsync(ToolMessage msg)
     {
         var req = DeserializePayload<RunApiRequest>(msg);
@@ -251,6 +278,7 @@ internal sealed class ToolPipeServer : IDisposable
 
         try
         {
+            // Marshal the request to the UI thread because host APIs may touch UI state.
             await Dispatcher.UIThread.InvokeAsync(async () =>
             {
                 await (Core.API?.RunApiAsync(req.ApiName, req.Argument) ?? Task.CompletedTask);
@@ -264,8 +292,12 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Returns the current photo metadata in the tool SDK shape.
+    /// </summary>
     private async Task HandleGetPhotoMetadataAsync(ToolMessage msg)
     {
+        // Snapshot the current photo and project only the fields exposed to tools.
         var meta = await Dispatcher.UIThread.InvokeAsync(() =>
         {
             var photo = Core.Photos?.Get(Core.Photos.CurrentIndex);
@@ -313,6 +345,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Returns the current photo list and active index.
+    /// </summary>
     private async Task HandleGetPhotoListAsync(ToolMessage msg)
     {
         var result = await Dispatcher.UIThread.InvokeAsync(() =>
@@ -339,6 +374,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Returns the size of the current viewer source bitmap.
+    /// </summary>
     private async Task HandleGetSourceSizeAsync(ToolMessage msg)
     {
         var size = await Dispatcher.UIThread.InvokeAsync(() =>
@@ -351,6 +389,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Returns the current source-space selection rectangle.
+    /// </summary>
     private async Task HandleGetSelectionAsync(ToolMessage msg)
     {
         var sel = await Dispatcher.UIThread.InvokeAsync(() =>
@@ -372,6 +413,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Updates the viewer selection rectangle from a tool request.
+    /// </summary>
     private async Task HandleSetSelectionAsync(ToolMessage msg)
     {
         var req = DeserializePayload<SetSelectionRequest>(msg);
@@ -394,6 +438,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Enables or disables the viewer selection overlay.
+    /// </summary>
     private async Task HandleEnableSelectionAsync(ToolMessage msg)
     {
         var req = DeserializePayload<EnableSelectionRequest>(msg);
@@ -411,6 +458,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Replaces the current event subscription set with the tool-requested subscriptions.
+    /// </summary>
     private void HandleSubscribeEvents(ToolMessage msg)
     {
         var subs = DeserializePayload<ToolEventSubscriptions>(msg);
@@ -422,6 +472,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Returns the current theme information the tool needs for initial UI sync.
+    /// </summary>
     private void HandleGetThemeInfo(ToolMessage msg)
     {
         var info = new ThemeInfo
@@ -438,12 +491,16 @@ internal sealed class ToolPipeServer : IDisposable
 
     #region Sending
 
+    /// <summary>
+    /// Serializes outbound messages onto the pipe in send order.
+    /// </summary>
     private async Task WriteLoopAsync()
     {
         try
         {
             while (await _outboundMessages.Reader.WaitToReadAsync(_writeCts.Token))
             {
+                // Drain the channel batch currently available before waiting again.
                 while (_outboundMessages.Reader.TryRead(out var message))
                 {
                     await _writer.WriteLineAsync(message);
@@ -456,13 +513,18 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Queues one outbound message for the dedicated writer loop.
+    /// </summary>
     private void QueueMessage(ToolMessage msg)
     {
         var json = JsonSerializer.Serialize(msg, ToolJsonContext.Default.ToolMessage);
         _ = _outboundMessages.Writer.TryWrite(json);
     }
 
-    /// <summary>Sends an event (no requestId) to the tool.</summary>
+    /// <summary>
+    /// Sends an event (no requestId) to the tool.
+    /// </summary>
     public void SendEvent(string type, object? payload = null)
     {
         var jsonPayload = payload is null
@@ -474,7 +536,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
-    /// <summary>Sends a response with a matching requestId.</summary>
+    /// <summary>
+    /// Sends a response with a matching requestId.
+    /// </summary>
     private void SendResponse(int? requestId, object? payload)
     {
         var jsonPayload = payload is null
@@ -492,6 +556,9 @@ internal sealed class ToolPipeServer : IDisposable
         Justification = "Serializer uses source-generated PluginJsonContext options")]
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
         Justification = "Serializer uses source-generated PluginJsonContext options")]
+    /// <summary>
+    /// Deserializes the message payload into the requested tool contract type.
+    /// </summary>
     private static T? DeserializePayload<T>(ToolMessage msg) where T : class
     {
         if (msg.Payload is null) return null;
@@ -499,6 +566,9 @@ internal sealed class ToolPipeServer : IDisposable
     }
 
 
+    /// <summary>
+    /// Disposes the pipe handler, writer loop, and any active exported pixel buffers.
+    /// </summary>
     public void Dispose()
     {
         // Clean up active pixel buffers

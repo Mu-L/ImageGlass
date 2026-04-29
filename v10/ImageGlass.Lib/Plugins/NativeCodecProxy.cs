@@ -45,16 +45,50 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     private readonly HashSet<string> _supportedExtensionsSet;
 
 
+    /// <summary>
+    /// Gets the stable codec identifier reported by the plugin.
+    /// </summary>
     public string CodecId { get; }
+
+    /// <summary>
+    /// Gets the human-readable codec name used in diagnostics and selection output.
+    /// </summary>
     public string CodecName { get; }
+
+    /// <summary>
+    /// Gets the priority used during metadata codec selection.
+    /// </summary>
     public int MetadataPriority { get; }
+
+    /// <summary>
+    /// Gets the priority used during full decode selection.
+    /// </summary>
     public int DecodePriority { get; }
+
+    /// <summary>
+    /// Gets the normalized list of extensions this codec proxy handles.
+    /// </summary>
     public IReadOnlyList<string> SupportedExtensions { get; }
+
+    /// <summary>
+    /// Gets whether the plugin codec supports metadata probing.
+    /// </summary>
     public bool SupportsMetadata { get; }
+
+    /// <summary>
+    /// Gets whether the plugin codec supports static-raster decoding.
+    /// </summary>
     public bool SupportsStaticRaster { get; }
+
+    /// <summary>
+    /// Gets whether the plugin codec can report embedded color profiles.
+    /// </summary>
     public bool SupportsColorProfiles { get; }
 
 
+    /// <summary>
+    /// Creates a managed proxy around one native codec entry.
+    /// </summary>
     public NativeCodecProxy(
         NativePlugin plugin,
         IGCodecApi* codecApi,
@@ -87,6 +121,9 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     }
 
 
+    /// <summary>
+    /// Checks whether this codec should participate in metadata loading for the given file.
+    /// </summary>
     public bool CanLoadMetadata(string filePath)
     {
         if (!SupportsMetadata) return false;
@@ -97,6 +134,9 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     }
 
 
+    /// <summary>
+    /// Checks whether this codec can decode the given photo metadata.
+    /// </summary>
     public bool CanDecode(PhotoMetadata metadata, CodecSelectionContext context)
     {
         if (!SupportsStaticRaster) return false;
@@ -106,6 +146,9 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     }
 
 
+    /// <summary>
+    /// Loads plugin-provided metadata on a background thread.
+    /// </summary>
     public Task<PhotoMetadata> LoadMetadataAsync(string filePath,
         PhotoReadOptions? options = null,
         CancellationToken cancellationToken = default)
@@ -115,6 +158,9 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     }
 
 
+    /// <summary>
+    /// Decodes one raster frame through the native plugin on a background thread.
+    /// </summary>
     public Task<CodecDecodeResult> DecodeAsync(PhotoMetadata metadata,
         PhotoReadOptions options,
         CodecSelectionContext context,
@@ -126,11 +172,15 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     }
 
 
+    /// <summary>
+    /// Invokes the plugin metadata entry point and maps the result into <see cref="PhotoMetadata"/>.
+    /// </summary>
     private PhotoMetadata LoadMetadataCore(string filePath, CancellationToken token)
     {
         var meta = new PhotoMetadata(filePath);
         if (_codecApi->LoadMetadata == null) return meta;
 
+        // Register a host-side cancellation handle before crossing the ABI.
         var cancelHandle = PluginHostApiTable.RegisterCancellation(token);
         try
         {
@@ -138,6 +188,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
             IGStatus status;
             try
             {
+                // Call the native metadata entry point with a fixed UTF-16 file path.
                 fixed (char* pPath = filePath)
                 {
                     var pathRef = new IGStringRef { Data = pPath, Length = filePath.Length };
@@ -157,6 +208,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
             }
             if (status == IGStatus.OK)
             {
+                // Copy the native metadata fields into the managed photo model.
                 if (info.Width > 0) meta.Width = (uint)info.Width;
                 if (info.Height > 0) meta.Height = (uint)info.Height;
                 if (info.Width > 0) meta.OriginalWidth = (uint)info.Width;
@@ -176,6 +228,9 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     }
 
 
+    /// <summary>
+    /// Invokes the plugin decode entry point and wraps the returned pixel buffer in a codec result.
+    /// </summary>
     private CodecDecodeResult DecodeCore(PhotoMetadata metadata, int frameIndex, CancellationToken token)
     {
         if (_codecApi->DecodeStaticRaster == null || _codecApi->FreePixelBuffer == null)
@@ -183,6 +238,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
             throw new NotSupportedException($"Native codec '{CodecId}' does not support static-raster decode.");
         }
 
+        // Register cancellation before entering native code and keep track of buffer ownership.
         var cancelHandle = PluginHostApiTable.RegisterCancellation(token);
         var filePath = metadata.FilePath;
         IGPixelBuffer buffer = default;
@@ -193,6 +249,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
             IGStatus status;
             try
             {
+                // Ask the plugin to decode the requested frame into its ABI buffer struct.
                 fixed (char* pPath = filePath)
                 {
                     var pathRef = new IGStringRef { Data = pPath, Length = filePath.Length };
@@ -218,6 +275,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
             }
             bufferOwned = true;
 
+            // Validate the returned buffer before handing it to Skia.
             if (buffer.Data == null || buffer.Width <= 0 || buffer.Height <= 0)
             {
                 throw new InvalidDataException(
@@ -231,6 +289,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
                     $"IGE: Native codec '{CodecId}' returned an unsupported pixel format ({buffer.PixelFormat}).");
             }
 
+            // Wrap the plugin-owned pixels in an SKImage without copying them.
             var image = SkiaCodec.FromPixelBuffer(
                 buffer.Data, buffer.Width, buffer.Height, buffer.Stride,
                 colorType, alphaType, metadata.SkiaColorSpace);
@@ -240,12 +299,13 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
                     $"IGE: Native codec '{CodecId}' returned an unsupported pixel format ({buffer.PixelFormat}).");
             }
 
-            // success: synchronize metadata size and return result
+            // Synchronize the managed metadata dimensions with the decoded image.
             if (metadata.Width == 0) metadata.Width = (uint)buffer.Width;
             if (metadata.Height == 0) metadata.Height = (uint)buffer.Height;
             if (metadata.OriginalWidth == 0) metadata.OriginalWidth = (uint)buffer.Width;
             if (metadata.OriginalHeight == 0) metadata.OriginalHeight = (uint)buffer.Height;
 
+            // Build the final decode result the registry expects.
             return new CodecDecodeResult
             {
                 CodecId = $"plugin:{_plugin.PluginId}:{CodecId}",
@@ -258,6 +318,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
         }
         finally
         {
+            // Always return the pixel buffer to the plugin, then release cancellation bookkeeping.
             if (bufferOwned)
             {
                 try
@@ -326,6 +387,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
         {
             try
             {
+                // Build Skia/Magick profile objects and the human-readable profile name.
                 var iccSpan = new ReadOnlySpan<byte>(info.IccProfileData, info.IccProfileSize);
                 skiaCs = SKColorSpace.CreateIcc(iccSpan);
 
@@ -346,6 +408,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
         // Fall back to the named-enum hint if no ICC was provided.
         skiaCs ??= MapColorSpace((IGColorSpace)info.ColorSpace);
 
+        // Store the resolved color space and the coarse Magick color-space classification.
         if (skiaCs is not null)
         {
             meta.SkiaColorSpace?.Dispose();
@@ -379,6 +442,9 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     }
 
 
+    /// <summary>
+    /// Releases any resources owned directly by the proxy.
+    /// </summary>
     protected override void OnDisposing()
     {
         base.OnDisposing();

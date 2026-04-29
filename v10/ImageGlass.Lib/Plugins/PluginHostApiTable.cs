@@ -77,8 +77,12 @@ internal static unsafe class PluginHostApiTable
     }
 
 
+    /// <summary>
+    /// Allocates and initializes the host API tables exposed to native plugins.
+    /// </summary>
     private static void Initialize()
     {
+        // Build the nested core API first so the top-level table can point to it.
         _coreApi = (IGHostCoreApi*)NativeMemory.AllocZeroed((nuint)sizeof(IGHostCoreApi));
         _coreApi->Log = &HostLog;
         _coreApi->Alloc = &HostAlloc;
@@ -86,6 +90,7 @@ internal static unsafe class PluginHostApiTable
         _coreApi->IsCancellationRequested = &HostIsCancellationRequested;
         _coreApi->GetConfigDirectory = &HostGetConfigDirectory;
 
+        // Expose the finalized core table through the top-level host API.
         _hostApi = (IGHostApi*)NativeMemory.AllocZeroed((nuint)sizeof(IGHostApi));
         _hostApi->StructSize = sizeof(IGHostApi);
         _hostApi->AbiVersion = IGNativeAbi.IG_PLUGIN_ABI_VERSION;
@@ -95,6 +100,9 @@ internal static unsafe class PluginHostApiTable
 
     #region Host callbacks (called by native plugins)
 
+    /// <summary>
+    /// Writes a plugin log message to the host debug output.
+    /// </summary>
     [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     private static void HostLog(int level, IGStringRef message)
     {
@@ -110,6 +118,9 @@ internal static unsafe class PluginHostApiTable
     }
 
 
+    /// <summary>
+    /// Allocates unmanaged memory on behalf of a plugin.
+    /// </summary>
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void* HostAlloc(nuint size)
     {
@@ -124,6 +135,9 @@ internal static unsafe class PluginHostApiTable
     }
 
 
+    /// <summary>
+    /// Frees unmanaged memory previously returned by <see cref="HostAlloc(nuint)"/>.
+    /// </summary>
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void HostFree(void* ptr)
     {
@@ -138,6 +152,9 @@ internal static unsafe class PluginHostApiTable
     }
 
 
+    /// <summary>
+    /// Checks whether the host-side cancellation token associated with a plugin call has been canceled.
+    /// </summary>
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static int HostIsCancellationRequested(void* cancellation)
     {
@@ -155,6 +172,9 @@ internal static unsafe class PluginHostApiTable
     }
 
 
+    /// <summary>
+    /// Returns the configured ImageGlass config directory, optionally copying it into a caller buffer.
+    /// </summary>
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static int HostGetConfigDirectory(char* buffer, int bufferLength)
     {
@@ -173,4 +193,5 @@ internal static unsafe class PluginHostApiTable
     }
 
     #endregion
+
 }

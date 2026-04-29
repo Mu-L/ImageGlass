@@ -294,7 +294,7 @@ public sealed unsafe class PluginRegistry : PhDisposable
 
     /// <summary>
     /// Scans the given directory for native plugin manifests
-    /// (<c>imageglass.plugin.json</c>) and returns one entry per valid manifest found.
+    /// (<c>igplugin.json</c>) and returns one entry per valid manifest found.
     /// Does NOT load any libraries; manifest deserialization only.
     /// </summary>
     public static List<(PluginManifest Manifest, string PluginDir)> DiscoverManifests(string pluginsDirectory)

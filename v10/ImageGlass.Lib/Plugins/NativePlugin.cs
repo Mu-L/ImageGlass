@@ -31,13 +31,35 @@ namespace ImageGlass.Plugins;
 /// </summary>
 internal sealed unsafe class NativePlugin : PhDisposable
 {
+    /// <summary>
+    /// Gets the manifest ID of the loaded plugin.
+    /// </summary>
     public string PluginId { get; }
+
+    /// <summary>
+    /// Gets the absolute path to the loaded shared library.
+    /// </summary>
     public string LibraryPath { get; }
+
+    /// <summary>
+    /// Gets the native library handle returned by <see cref="NativeLibrary.Load(string)"/>.
+    /// </summary>
     public nint LibraryHandle { get; }
+
+    /// <summary>
+    /// Gets the root API table exported by the plugin.
+    /// </summary>
     public IGPluginApi* PluginApi { get; }
+
+    /// <summary>
+    /// Gets the codec entries advertised by the plugin during probing.
+    /// </summary>
     public List<NativeCodecEntry> Codecs { get; } = [];
 
 
+    /// <summary>
+    /// Creates a wrapper around one loaded native plugin instance.
+    /// </summary>
     public NativePlugin(string pluginId, string libraryPath, nint libraryHandle, IGPluginApi* pluginApi)
     {
         PluginId = pluginId;
@@ -47,8 +69,12 @@ internal sealed unsafe class NativePlugin : PhDisposable
     }
 
 
+    /// <summary>
+    /// Shuts the plugin down and releases the native library handle.
+    /// </summary>
     protected override void OnDisposing()
     {
+        // Give the plugin a chance to release its own process-lifetime state.
         try
         {
             if (PluginApi != null && PluginApi->Shutdown != null)
@@ -61,6 +87,7 @@ internal sealed unsafe class NativePlugin : PhDisposable
             Debug.WriteLine($"[NativePlugin] Shutdown threw for '{PluginId}': {ex.Message}");
         }
 
+        // Release the loaded shared library after shutdown has completed.
         try
         {
             if (LibraryHandle != 0) NativeLibrary.Free(LibraryHandle);
@@ -81,9 +108,19 @@ internal sealed unsafe class NativePlugin : PhDisposable
 /// </summary>
 internal readonly struct NativeCodecEntry
 {
+    /// <summary>
+    /// Gets the raw pointer to the codec-specific API table.
+    /// </summary>
     public readonly nint CodecApiPtr;
+
+    /// <summary>
+    /// Gets the managed capability snapshot gathered during probing.
+    /// </summary>
     public readonly CodecPluginCapability Capability;
 
+    /// <summary>
+    /// Creates one plugin-codec entry pairing the API pointer with its capability data.
+    /// </summary>
     public NativeCodecEntry(nint codecApiPtr, CodecPluginCapability capability)
     {
         CodecApiPtr = codecApiPtr;

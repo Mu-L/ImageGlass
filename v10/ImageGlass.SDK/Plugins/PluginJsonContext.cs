@@ -12,7 +12,6 @@ namespace ImageGlass.SDK.Plugins;
 /// <summary>
 /// Source-generated JSON serialization context for native plugin types
 /// (<see cref="PluginManifest"/>, <see cref="CodecPluginCapability"/>).
-/// AOT-safe — no runtime reflection.
 /// </summary>
 /// <remarks>
 /// Writes use camelCase. Reads accept either casing because plugin manifests are hand-authored

@@ -902,8 +902,6 @@ public partial class Config : PhReactive
 
     /// <summary>
     /// Gets, sets the list of registered external tools.
-    /// External tools are NOT discovered by scanning a folder; they are registered
-    /// explicitly here in <c>igconfig.json</c>. See <see cref="ExternalTool"/>.
     /// </summary>
     public ObservableCollection<ExternalTool> Tools
     {
