@@ -272,6 +272,22 @@ public partial class AppAPIProvider
                 AppHotkeysMap.TryAdd(hk.KeyString, item.Value);
             }
         }
+
+
+        // 4. register hotkeys of external tools (Config.Tools)
+        foreach (var tool in Core.Config.Tools)
+        {
+            if (tool.Hotkeys.Length == 0) continue;
+
+            // build a single action that opens the tool by its ToolId
+            var toolAction = new SingleAction(API.IG_OpenTool, tool.ToolId);
+
+            foreach (var hk in tool.Hotkeys)
+            {
+                if (hk is null) continue;
+                AppHotkeysMap.TryAdd(hk.KeyString, toolAction);
+            }
+        }
     }
 
 

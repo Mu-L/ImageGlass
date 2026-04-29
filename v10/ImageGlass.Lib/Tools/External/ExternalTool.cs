@@ -67,7 +67,7 @@ public sealed class ExternalTool
     public bool IsIntegrated { get; init; }
 
     /// <summary>
-    /// Optional global hotkey that triggers <c>IG_OpenTool(ToolId)</c>.
+    /// Optional global hotkeys for launching the tool.
     /// </summary>
-    public Hotkey? Hotkey { get; init; }
+    public Hotkey[] Hotkeys { get; init; } = [];
 }

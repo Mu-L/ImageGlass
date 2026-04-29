@@ -285,8 +285,8 @@ public partial class ToolbarControl : PhControl
             = hasMultiFrames;
 
 
-        // 3. rebuild external plugin entries in the Tools submenu
-        BuildExternalPluginMenuItems();
+        // 3. rebuild external tool entries in the Tools submenu
+        BuildExternalToolMenuItems();
     }
 
 
@@ -645,10 +645,10 @@ public partial class ToolbarControl : PhControl
 
 
     /// <summary>
-    /// Rebuilds external plugin entries in the Tools submenu dynamically.
+    /// Rebuilds external tool entries in the Tools submenu dynamically.
     /// Items are inserted before <see cref="PART_MnuExternalToolsEndSeparator"/>.
     /// </summary>
-    private void BuildExternalPluginMenuItems()
+    private void BuildExternalToolMenuItems()
     {
         var items = PART_MnuTools.Items;
         var sepEndIndex = items.IndexOf(PART_MnuExternalToolsEndSeparator);
@@ -674,9 +674,16 @@ public partial class ToolbarControl : PhControl
         for (var i = 0; i < tools.Count; i++)
         {
             var tool = tools[i];
+
+            // build hotkey display text from tool's configured hotkeys
+            var hotkeyText = tool.Hotkeys.Length > 0
+                ? string.Join(", ", tool.Hotkeys.Select(hk => hk.KeyString))
+                : string.Empty;
+
             var mnu = new PhMenuItem
             {
                 Header = string.IsNullOrEmpty(tool.ToolName) ? tool.ToolId : tool.ToolName,
+                HotkeyText = hotkeyText,
                 Tag = "external_tool",
                 CommandParameter = tool.ToolId,
             };
