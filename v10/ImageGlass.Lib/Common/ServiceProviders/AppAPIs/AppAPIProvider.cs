@@ -177,7 +177,7 @@ public partial class AppAPIProvider
 
 
     /// <summary>
-    /// Shows folder picker to open a photo folder. 
+    /// Shows folder picker to open a photo folder.
     /// </summary>
     public async Task IG_OpenFolderAsync()
     {
@@ -710,7 +710,7 @@ public partial class AppAPIProvider
             Title = title,
             Description = $"""
             {oldFilePath}
-            
+
             {Core.Lang[LangId.FrmMain_MnuRename_Description]}
             """,
             InputValue = newName,
@@ -888,7 +888,7 @@ public partial class AppAPIProvider
         {
             throw new ArgumentException($"""
                 Step '{stepStr}' is not a valid integer.
-                
+
                 ----------
                 👉🏼 Method: {nameof(IG_ViewByStep)}
                 """,
@@ -1016,7 +1016,7 @@ public partial class AppAPIProvider
         {
             throw new ArgumentException($"""
                 Frame index '{frameIndexStr}' is not a valid integer.
-                
+
                 ----------
                 👉🏼 Method: {nameof(IG_ViewFrame)}
                 """,
@@ -1123,7 +1123,7 @@ public partial class AppAPIProvider
         {
             throw new ArgumentException($"""
                 Zoom factor '{factorStr}' is not a valid float.
-                
+
                 ----------
                 👉🏼 Method: {nameof(IG_SetZoom)}
                 """,
@@ -1168,7 +1168,7 @@ public partial class AppAPIProvider
         {
             throw new ArgumentException($"""
                 '{modeStr}' is not a valid zoom mode.
-                
+
                 ----------
                 👉🏼 Method: {nameof(IG_SetZoomMode)}
                 """,
@@ -1441,7 +1441,7 @@ public partial class AppAPIProvider
         {
             throw new ArgumentException($"""
                 '{orderByStr}' is not a valid loading order.
-                
+
                 ----------
                 👉🏼 Method: {nameof(IG_SetLoadingOrderBy)}
                 """,
@@ -1473,7 +1473,7 @@ public partial class AppAPIProvider
         {
             throw new ArgumentException($"""
                 '{orderTypeStr}' is not a valid loading order.
-                
+
                 ----------
                 👉🏼 Method: {nameof(IG_SetLoadingOrderType)}
                 """,
@@ -1505,7 +1505,7 @@ public partial class AppAPIProvider
         {
             throw new ArgumentException($"""
                 '{channelsStr}' is not a valid color channel.
-                
+
                 ----------
                 👉🏼 Method: {nameof(IG_SetColorChannels)}
                 """,
@@ -1686,7 +1686,7 @@ public partial class AppAPIProvider
         {
             throw new ArgumentException($"""
                 '{optionStr}' is not a valid rotation option.
-                
+
                 ----------
                 👉🏼 Method: {nameof(IG_Rotate)}
                 """,
@@ -1735,7 +1735,7 @@ public partial class AppAPIProvider
         {
             throw new ArgumentException($"""
                 '{optionStr}' is not a valid flip option.
-                
+
                 ----------
                 👉🏼 Method: {nameof(IG_FlipImage)}
                 """,
@@ -1947,7 +1947,7 @@ public partial class AppAPIProvider
             }
 
 
-            // 3.2 get photo from base64 string 
+            // 3.2 get photo from base64 string
             try
             {
                 var photo = await MagickCodec.DecodeBase64Async(text);
@@ -2015,13 +2015,13 @@ public partial class AppAPIProvider
     /// <summary>
     /// Copy the current image path.
     /// </summary>
-    public void IG_CopyImagePathAsync()
+    public async Task IG_CopyImagePathAsync()
     {
-        if (string.IsNullOrWhiteSpace(Core.Photos.CurrentFilePath)) return;
+        if (string.IsNullOrWhiteSpace(Core.Photos.CurrentFilePath) || _mainWindow.Clipboard is null) return;
 
         try
         {
-            _mainWindow.Clipboard?.SetTextAsync(Core.Photos.CurrentFilePath);
+            await _mainWindow.Clipboard.SetTextAsync(Core.Photos.CurrentFilePath);
 
             // show message
             _ = Message.ShowAsync(Core.Lang[LangId.FrmMain_MnuCopyPath_Success]);
@@ -2093,10 +2093,6 @@ public partial class AppAPIProvider
 
             // 4. perform copy/cut
             await _mainWindow.Clipboard.SetDataAsync(dt);
-
-            // permanently adds the data that is on the Clipboard so that it is available
-            // after the data's original application closes.
-            await _mainWindow.Clipboard.FlushAsync();
 
             _ = Message.ShowAsync(Core.Lang[forCutting
                     ? LangId.FrmMain_MnuCutFile_Success

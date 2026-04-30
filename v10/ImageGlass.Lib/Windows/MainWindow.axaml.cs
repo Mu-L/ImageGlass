@@ -304,9 +304,26 @@ public partial class MainWindow : PhWindow
             Core.API?.IG_CloseTool(toolToSave.ToolId);
         }
 
-        // save config to file
-        await Core.Config.SaveAsync();
 
+        // hide the window
+        Hide();
+
+        // save config to file
+        var taskConfig = Core.Config.SaveAsync();
+
+
+        // permanently adds the data that is on the Clipboard so that it is available
+        // after the data's original application closes.
+        if (Clipboard is not null)
+        {
+            try
+            {
+                await Clipboard.FlushAsync();
+            }
+            catch { }
+        }
+
+        await taskConfig;
 
         // cleaning
         try
