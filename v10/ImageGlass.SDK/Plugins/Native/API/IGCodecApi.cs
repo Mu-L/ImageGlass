@@ -60,8 +60,55 @@ public unsafe struct IGCodecApi
     public delegate* unmanaged[Cdecl]<IGStringRef, int, IGPixelBuffer*, void*, IGStatus> DecodeStaticRaster;
 
     /// <summary>
-    /// Releases a buffer previously returned by <see cref="DecodeStaticRaster"/>.
+    /// Releases a buffer previously returned by <see cref="DecodeStaticRaster"/>
+    /// or <see cref="DecodeAnimationFrame"/>.
+    /// <para>
+    /// MUST be thread-safe. The host hands plugin-owned pixel buffers to SkiaSharp
+    /// via <c>SKImage.FromPixels(..., releaseDelegate, ctx)</c>; SkiaSharp may invoke
+    /// the release delegate (which calls back into <see cref="FreePixelBuffer"/>) from
+    /// any thread when the SKImage is disposed. A typical implementation forwards to
+    /// <c>free()</c>, <c>NativeMemory.Free</c>, or <c>CoTaskMemFree</c>, which are all
+    /// thread-safe.
+    /// </para>
     /// Signature: <c>void FreePixelBuffer(IGPixelBuffer* buffer)</c>.
     /// </summary>
     public delegate* unmanaged[Cdecl]<IGPixelBuffer*, void> FreePixelBuffer;
+
+
+    // ============================================================================
+    // Animation entry points.
+    // All three pointers MUST be non-null when SupportsAnimation = 1.
+    // ============================================================================
+
+    /// <summary>
+    /// Reports per-codec animation traits and per-frame timing.
+    /// Required when the codec advertises <c>IGCodecCapability.SupportsAnimation = 1</c>.
+    /// <para>
+    /// Plugin allocates <see cref="IGAnimationInfo.Frames"/>; the host MUST release the
+    /// entire <see cref="IGAnimationInfo"/> via <see cref="FreeAnimationInfo"/>.
+    /// </para>
+    /// Signature: <c>IGStatus GetAnimationInfo(IGStringRef filePath, IGAnimationInfo* outInfo, void* cancellation)</c>.
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<IGStringRef, IGAnimationInfo*, void*, IGStatus> GetAnimationInfo;
+
+    /// <summary>
+    /// Releases the frame array (and any other plugin-owned memory) attached to an
+    /// <see cref="IGAnimationInfo"/> previously returned by <see cref="GetAnimationInfo"/>.
+    /// Signature: <c>void FreeAnimationInfo(IGAnimationInfo* info)</c>.
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<IGAnimationInfo*, void> FreeAnimationInfo;
+
+    /// <summary>
+    /// Decodes a single animation frame. The plugin allocates the buffer and fills
+    /// <paramref name="outBuffer"/>; the host releases it via the codec's existing
+    /// <see cref="FreePixelBuffer"/>.
+    /// <para>
+    /// The buffer MUST hold a fully composed RGBA frame at the full canvas size.
+    /// The host does not run sub-rect composition or disposal/blend replay --
+    /// plugins for codecs whose native frame stream is sub-rect (e.g. GIF, APNG)
+    /// must composite internally before returning.
+    /// </para>
+    /// Signature: <c>IGStatus DecodeAnimationFrame(IGStringRef filePath, int frameIndex, IGPixelBuffer* outBuffer, void* cancellation)</c>.
+    /// </summary>
+    public delegate* unmanaged[Cdecl]<IGStringRef, int, IGPixelBuffer*, void*, IGStatus> DecodeAnimationFrame;
 }

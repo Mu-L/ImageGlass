@@ -55,6 +55,12 @@ public sealed class CodecPluginCapability
     /// Gets whether the codec can report embedded color-profile information.
     /// </summary>
     public bool SupportsColorProfiles { get; init; }
+
+    /// <summary>
+    /// Gets whether the codec implements the animation entry points
+    /// (<c>GetAnimationInfo</c>, <c>FreeAnimationInfo</c>, <c>DecodeAnimationFrame</c>).
+    /// </summary>
+    public bool SupportsAnimation { get; set; }
 }
 
 

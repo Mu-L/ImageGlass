@@ -36,6 +36,14 @@ public unsafe struct IGCodecCapability
     /// <summary>1 if the codec returns embedded color profile information.</summary>
     public int SupportsColorProfiles;
 
+    /// <summary>
+    /// 1 if the codec implements the animation entry points
+    /// (<c>GetAnimationInfo</c>, <c>FreeAnimationInfo</c>, <c>DecodeAnimationFrame</c>)
+    /// on its <c>IGCodecApi</c>. The host downgrades this flag to 0 if any of the
+    /// three function pointers are null.
+    /// </summary>
+    public int SupportsAnimation;
+
     /// <summary>Number of file extensions in <see cref="Extensions"/>.</summary>
     public int ExtensionCount;
 
