@@ -810,7 +810,7 @@ public partial class ViewerControl : PhControl
 
         // source
         SKImage? imgFrame = null;
-        SkiaAnimator? animator = null;
+        AnimatorImpl? animator = null;
         var hasSource = false;
 
         try
@@ -840,7 +840,7 @@ public partial class ViewerControl : PhControl
                     hasSource = true;
                 }
                 // native bitmap is an animated bitmap
-                else if (e.Photo.Bitmap is SkiaAnimator skAnimator)
+                else if (e.Photo.Bitmap is AnimatorImpl skAnimator)
                 {
                     // update bitmap size
                     BitmapSize = e.Photo.Size;

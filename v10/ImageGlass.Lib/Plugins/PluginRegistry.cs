@@ -144,8 +144,16 @@ public sealed unsafe class PluginRegistry : PhDisposable
             var handle = new NativePlugin(manifest.Id, libraryPath, libHandle, pluginApi);
 
             // 6. Enumerate codecs
-            var capabilities = new List<CodecPluginCapability>(pluginApi->Info.CodecCount);
-            for (var i = 0; i < pluginApi->Info.CodecCount; i++)
+            var codecCount = pluginApi->Info.CodecCount;
+            if (codecCount < 0 || codecCount > 1024)
+            {
+                Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' reported invalid CodecCount={codecCount} (struct layout mismatch?).");
+                FailureManager.Quarantine(manifest.Id, $"invalid CodecCount={codecCount} (likely IGPluginInfo struct layout mismatch).");
+                NativeLibrary.Free(libHandle);
+                return null;
+            }
+            var capabilities = new List<CodecPluginCapability>(codecCount);
+            for (var i = 0; i < codecCount; i++)
             {
                 IGCodecApi* codecApi = null;
                 IGStatus status;
@@ -176,6 +184,22 @@ public sealed unsafe class PluginRegistry : PhDisposable
                 if (manifestExts.Length > 0)
                 {
                     managed.SupportedExtensions = manifestExts;
+                }
+
+                // Validate animation entry points if the codec advertises animation.
+                // If any of the three pointers is null, downgrade SupportsAnimation
+                // silently so the rest of the host treats this as a static-only codec.
+                if (managed.SupportsAnimation)
+                {
+                    if (codecApi->GetAnimationInfo == null
+                        || codecApi->FreeAnimationInfo == null
+                        || codecApi->DecodeAnimationFrame == null)
+                    {
+                        Debug.WriteLine($"[PluginRegistry] '{manifest.Id}' codec[{i}] advertises SupportsAnimation "
+                            + "but is missing one of GetAnimationInfo / FreeAnimationInfo / DecodeAnimationFrame "
+                            + "-> downgraded.");
+                        managed.SupportsAnimation = false;
+                    }
                 }
 
                 capabilities.Add(managed);
@@ -232,10 +256,19 @@ public sealed unsafe class PluginRegistry : PhDisposable
 
     private static CodecPluginCapability MarshalCapability(in IGCodecCapability cap)
     {
-        var exts = new List<string>(cap.ExtensionCount);
+        // Defensive: a negative ExtensionCount almost always indicates a struct
+        // layout mismatch (plugin built against a stale SDK assembly). Clamp +
+        // surface the bad value via Debug rather than throwing from List<>.
+        var extCount = cap.ExtensionCount;
+        if (extCount < 0)
+        {
+            Debug.WriteLine($"[PluginRegistry] codec capability reports negative ExtensionCount={extCount} (likely struct layout mismatch); clamping to 0.");
+            extCount = 0;
+        }
+        var exts = new List<string>(extCount);
         if (cap.Extensions != null)
         {
-            for (var i = 0; i < cap.ExtensionCount; i++)
+            for (var i = 0; i < extCount; i++)
             {
                 exts.Add(cap.Extensions[i].ToManaged());
             }
@@ -251,6 +284,7 @@ public sealed unsafe class PluginRegistry : PhDisposable
             SupportsMetadata = cap.SupportsMetadata != 0,
             SupportsStaticRaster = cap.SupportsStaticRaster != 0,
             SupportsColorProfiles = cap.SupportsColorProfiles != 0,
+            SupportsAnimation = cap.SupportsAnimation != 0,
         };
     }
 

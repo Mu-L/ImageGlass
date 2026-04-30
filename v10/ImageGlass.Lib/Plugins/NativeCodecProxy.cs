@@ -44,6 +44,21 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     private readonly PluginFailureManager _failureManager;
     private readonly HashSet<string> _supportedExtensionsSet;
 
+    /// <summary>
+    /// Gets the plugin handle that owns this codec entry.
+    /// </summary>
+    internal NativePlugin Plugin => _plugin;
+
+    /// <summary>
+    /// Gets the native codec API table this proxy bridges into the host.
+    /// </summary>
+    internal IGCodecApi* CodecApi => _codecApi;
+
+    /// <summary>
+    /// Gets the failure manager used to record soft failures and quarantine the plugin.
+    /// </summary>
+    internal PluginFailureManager FailureManager => _failureManager;
+
 
     /// <summary>
     /// Gets the stable codec identifier reported by the plugin.
@@ -85,6 +100,11 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
     /// </summary>
     public bool SupportsColorProfiles { get; }
 
+    /// <summary>
+    /// Gets whether the plugin codec implements the animation entry points.
+    /// </summary>
+    public bool SupportsAnimation { get; }
+
 
     /// <summary>
     /// Creates a managed proxy around one native codec entry.
@@ -107,6 +127,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
         SupportsMetadata = capability.SupportsMetadata;
         SupportsStaticRaster = capability.SupportsStaticRaster;
         SupportsColorProfiles = capability.SupportsColorProfiles;
+        SupportsAnimation = capability.SupportsAnimation;
 
         var exts = new List<string>(capability.SupportedExtensions.Length);
         _supportedExtensionsSet = new(StringComparer.OrdinalIgnoreCase);
@@ -167,8 +188,42 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
         CancellationToken cancellationToken = default)
     {
         var frameIndex = Math.Max(0, options?.FrameIndex ?? 0);
+
+        // Animation branch: the plugin advertises animation AND metadata says
+        // the file plays as a timeline. Build the animator on a background
+        // thread; per-frame decode is lazy inside the animator.
+        if (SupportsAnimation && metadata.CanAnimate)
+        {
+            return Task.Factory.StartNew(() => DecodeAnimationCore(metadata, cancellationToken),
+                cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
+
         return Task.Factory.StartNew(() => DecodeCore(metadata, frameIndex, cancellationToken),
             cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+    }
+
+
+    /// <summary>
+    /// Builds a <see cref="NativePluginAnimator"/> for the current photo and wraps
+    /// it in a <see cref="CodecDecodeResult"/>. Pixels are decoded lazily by the
+    /// animator on every frame change.
+    /// </summary>
+    private CodecDecodeResult DecodeAnimationCore(PhotoMetadata metadata, CancellationToken token)
+    {
+        // PHASE 1: cross the ABI once to pull animation traits and per-frame timing.
+        var animator = NativePluginAnimator.Create(this, metadata, token);
+
+        // PHASE 2: hand the animator back to the host. Photo.LoadAsync moves it
+        // into Photo.Bitmap, ViewerControl wires FrameChanged + StartAnimator.
+        return new CodecDecodeResult
+        {
+            CodecId = $"plugin:{_plugin.PluginId}:{CodecId}",
+            ContentKind = CodecContentKind.Animation,
+            Size = new Size(metadata.Width, metadata.Height),
+            Animator = animator,
+            IsHdr = metadata.IsHdr,
+            HasEmbeddedColorProfile = SupportsColorProfiles && metadata.SkiaColorSpace is not null,
+        };
     }
 
 
@@ -217,6 +272,11 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
                 meta.FrameCount = (uint)Math.Max(1, info.FrameCount);
                 meta.HdrTransferFn = MapHdrTransferFn(info.HdrTransferFn);
 
+                // Animation gate: only flip CanAnimate when the codec advertises animation
+                // AND the file genuinely has multiple frames. Multi-page documents (e.g. TIFF)
+                // report FrameCount > 1 but must NOT trigger the animation pipeline.
+                meta.CanAnimate = SupportsAnimation && info.FrameCount > 1;
+
                 ApplyColorProfile(meta, in info);
             }
         }
@@ -243,6 +303,7 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
         var filePath = metadata.FilePath;
         IGPixelBuffer buffer = default;
         var bufferOwned = false;
+        var ownershipTransferred = false;
 
         try
         {
@@ -275,29 +336,11 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
             }
             bufferOwned = true;
 
-            // Validate the returned buffer before handing it to Skia.
-            if (buffer.Data == null || buffer.Width <= 0 || buffer.Height <= 0)
-            {
-                throw new InvalidDataException(
-                    $"IGE: Native codec '{CodecId}' returned an invalid pixel buffer.");
-            }
-
-            var (colorType, alphaType) = MapPixelFormat((IGPixelFormat)buffer.PixelFormat);
-            if (colorType == SKColorType.Unknown)
-            {
-                throw new InvalidDataException(
-                    $"IGE: Native codec '{CodecId}' returned an unsupported pixel format ({buffer.PixelFormat}).");
-            }
-
-            // Wrap the plugin-owned pixels in an SKImage without copying them.
-            var image = SkiaCodec.FromPixelBuffer(
-                buffer.Data, buffer.Width, buffer.Height, buffer.Stride,
-                colorType, alphaType, metadata.SkiaColorSpace);
-            if (image is null)
-            {
-                throw new InvalidDataException(
-                    $"IGE: Native codec '{CodecId}' returned an unsupported pixel format ({buffer.PixelFormat}).");
-            }
+            // Wrap zero-copy: the SKImage takes ownership of the plugin buffer; when
+            // SkiaSharp disposes it, the release delegate calls back into the plugin's
+            // FreePixelBuffer (which the SDK contract requires to be thread-safe).
+            var image = WrapPluginBufferAsImage(in buffer, metadata.SkiaColorSpace);
+            ownershipTransferred = true;
 
             // Synchronize the managed metadata dimensions with the decoded image.
             if (metadata.Width == 0) metadata.Width = (uint)buffer.Width;
@@ -318,8 +361,8 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
         }
         finally
         {
-            // Always return the pixel buffer to the plugin, then release cancellation bookkeeping.
-            if (bufferOwned)
+            // If we never handed buffer ownership to Skia, return it to the plugin now.
+            if (bufferOwned && !ownershipTransferred)
             {
                 try
                 {
@@ -337,11 +380,68 @@ internal sealed unsafe class NativeCodecProxy : PhDisposable, ICodec
 
 
     /// <summary>
+    /// Wraps a plugin-owned <see cref="IGPixelBuffer"/> in an <see cref="SKImage"/>
+    /// without copying the pixels. The returned image owns the plugin buffer:
+    /// disposing the image calls back into the plugin's <c>FreePixelBuffer</c>
+    /// via the release delegate (which the SDK contract requires to be thread-safe).
+    /// </summary>
+    internal SKImage WrapPluginBufferAsImage(in IGPixelBuffer buffer, SKColorSpace? srcColorSpace)
+    {
+        // Validate the buffer before we hand it to Skia.
+        if (buffer.Data == null || buffer.Width <= 0 || buffer.Height <= 0)
+        {
+            throw new InvalidDataException(
+                $"IGE: Native codec '{CodecId}' returned an invalid pixel buffer.");
+        }
+
+        var (colorType, alphaType) = MapPixelFormat((IGPixelFormat)buffer.PixelFormat);
+        if (colorType == SKColorType.Unknown)
+        {
+            throw new InvalidDataException(
+                $"IGE: Native codec '{CodecId}' returned an unsupported pixel format ({buffer.PixelFormat}).");
+        }
+
+        var info = new SKImageInfo(buffer.Width, buffer.Height, colorType, alphaType);
+        if (srcColorSpace is not null)
+        {
+            info = info.WithColorSpace(srcColorSpace);
+        }
+
+        // Carrier holds the plugin codec API + a copy of the buffer descriptor so
+        // SkiaSharp can hand the pointer back to the plugin on dispose.
+        var carrier = new PluginPixelBufferRelease
+        {
+            CodecApiPtr = (nint)_codecApi,
+            Buffer = buffer,
+            PluginId = _plugin.PluginId,
+        };
+
+        // Wrap the plugin pointer in SKData with a release callback, then build the SKImage.
+        var byteCount = checked(buffer.Stride * buffer.Height);
+        var data = SKData.Create((nint)buffer.Data, byteCount,
+            PluginPixelBufferRelease.ReleaseData, carrier);
+
+        var image = SKImage.FromPixels(info, data, buffer.Stride);
+
+        if (image is null)
+        {
+            // Skia rejected the layout; release the plugin buffer ourselves.
+            data?.Dispose();
+            carrier.ReleaseFromHost();
+            throw new InvalidDataException(
+                $"IGE: Native codec '{CodecId}' returned an unsupported pixel buffer layout.");
+        }
+
+        return image;
+    }
+
+
+    /// <summary>
     /// Maps an <see cref="IGPixelFormat"/> to the corresponding Skia color/alpha types.
     /// Returns (<see cref="SKColorType.Unknown"/>, <see cref="SKAlphaType.Unknown"/>) when the
     /// host has no compatible Skia format for the buffer.
     /// </summary>
-    private static (SKColorType ColorType, SKAlphaType AlphaType) MapPixelFormat(IGPixelFormat format)
+    internal static (SKColorType ColorType, SKAlphaType AlphaType) MapPixelFormat(IGPixelFormat format)
     {
         return format switch
         {
