@@ -111,6 +111,7 @@ public enum API
     IG_ToggleGallery,
     IG_ToggleCheckerboard,
     IG_ToggleWindowTopMost,
+    IG_SetBackgroundColor,
 
     // Menu > Tools
     IG_CloseCurrentTool,

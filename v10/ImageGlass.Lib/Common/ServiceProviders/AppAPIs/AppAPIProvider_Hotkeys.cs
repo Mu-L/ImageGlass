@@ -143,14 +143,15 @@ public partial class AppAPIProvider
         new(LangId.FrmMain_MnuFrameless,            API.IG_ToggleFrameless,             Key.F10),
         new(LangId.FrmMain_MnuFullScreen,           API.IG_ToggleFullScreen,            Key.F11),
         new(LangId.FrmMain_MnuSlideshow,            API.IG_ToggleSlideshow,             Key.F12),
-        new(LangId.FrmSlideshow_MnuPauseResumeSlideshow,    API.IG_ToggleSlideshowPlayback,     [new(Key.Space)]),
+        new(LangId.FrmSlideshow_MnuPauseResumeSlideshow,    API.IG_ToggleSlideshowPlayback,     Key.Space),
 
 
         // Layout
-        new(LangId.FrmMain_MnuToggleToolbar,        API.IG_ToggleToolbar,           Key.T),
-        new(LangId.FrmMain_MnuToggleGallery,        API.IG_ToggleGallery,           Key.G),
-        new(LangId.FrmMain_MnuToggleCheckerboard,   API.IG_ToggleCheckerboard,      Key.B),
-        new(LangId.FrmMain_MnuToggleTopMost,        API.IG_ToggleWindowTopMost),
+        new(LangId.FrmMain_MnuToggleTopMost,            API.IG_ToggleWindowTopMost),
+        new(LangId.FrmMain_MnuToggleToolbar,            API.IG_ToggleToolbar,           Key.T),
+        new(LangId.FrmMain_MnuToggleGallery,            API.IG_ToggleGallery,           Key.G),
+        new(LangId.FrmMain_MnuToggleCheckerboard,       API.IG_ToggleCheckerboard,      Key.B),
+        new(LangId.FrmMain_MnuChangeBackgroundColor,    API.IG_SetBackgroundColor,      Key.M),
 
 
         // Plugins

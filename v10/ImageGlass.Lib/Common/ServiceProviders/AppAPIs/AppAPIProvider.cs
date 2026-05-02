@@ -20,6 +20,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using ImageGlass.Common.Extensions;
@@ -2757,11 +2758,45 @@ public partial class AppAPIProvider
     }
 
 
+    /// <summary>
+    /// Sets background color,
+    /// opens Color Picker dialog if the <paramref name="hexColor"/> is <c>null</c>.
+    /// </summary>
+    public void IG_SetBackgroundColor(string? hexColor = null)
+    {
+        var color = Color.FromArgb(0, 0, 0, 0);
+
+        // 1. open Color picker to select color if hexColor not defined
+        if (string.IsNullOrEmpty(hexColor))
+        {
+            // TODO:
+        }
+
+        // 2. convert the input hex color string
+        else
+        {
+            color = BHelper.ColorFromHex(hexColor);
+        }
+
+        if (color.IsEmpty) return;
+
+
+        // 3. set background color
+        if (Core.Config.EnableSlideshow)
+        {
+            Core.Config.SlideshowBackgroundColor = color.ToHex();
+        }
+        else
+        {
+            Core.Config.BackgroundColor = color.ToHex();
+        }
+    }
+
     #endregion // Layout APIs
 
 
 
-    #region Plugin APIs
+    #region Tools APIs
 
     /// <summary>
     /// Toggles a tool by ID. Non-hosted tools only support open (toggle = open).
@@ -2894,7 +2929,7 @@ public partial class AppAPIProvider
         _ = BHelper.OpenUrlAsync(_mainWindow, "https://imageglass.org/tools", "from_get_more_tools");
     }
 
-    #endregion // Plugin APIs
+    #endregion // Tools APIs
 
 
 

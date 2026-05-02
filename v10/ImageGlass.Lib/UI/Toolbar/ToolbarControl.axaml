@@ -460,10 +460,7 @@
                                     ToggleType="CheckBox" />
                                 <ui:PhMenuItem Header="-" />
                                 <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuToggleCheckerboard" />
-                                <ui:PhMenuItem
-                                    Click="MainMenuItem_Click"
-                                    IsVisible="False"
-                                    LangKey="FrmMain_MnuChangeBackgroundColor" />
+                                <ui:PhMenuItem Click="MainMenuItem_Click" LangKey="FrmMain_MnuChangeBackgroundColor" />
                             </ui:PhMenuItem>
 
 
