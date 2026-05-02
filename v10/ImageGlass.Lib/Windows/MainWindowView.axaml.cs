@@ -135,6 +135,12 @@ public partial class MainWindowView : PhControl
             // set file watcher
             AppAPIProvider.SetFileWatcher(Core.Config.EnableFileWatcher);
         }
+        else if (e.PropertyName is nameof(Config.BackgroundColor)
+            or nameof(Config.SlideshowBackgroundColor)
+            or nameof(Config.EnableSlideshow))
+        {
+            Core.UpdateViewerBackgroundBrushResource();
+        }
     }
 
 

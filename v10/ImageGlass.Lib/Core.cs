@@ -406,6 +406,7 @@ public static class Core
         Resx.Set(ResxId.IG_ThemeToolbarBackgroundBrush, AppThemeColors.ToolbarBgBrush);
         Resx.Set(ResxId.IG_ThemeGalleryBackgroundBrush, AppThemeColors.GalleryBgBrush);
         Resx.Set(ResxId.IG_ThemeMenuBackgroundBrush, AppThemeColors.MenuBgBrush);
+        UpdateViewerBackgroundBrushResource();
 
         // update situational colors
         if (Core.Theme.Settings.IsDarkMode)
@@ -499,6 +500,30 @@ public static class Core
         Resx.Set(ResxId.ComboBoxItemForegroundPointerOver, menuText);
         Resx.Set(ResxId.ComboBoxItemForegroundPressed, menuText);
         Resx.Set(ResxId.ComboBoxItemForegroundDisabled, menuTextDisabled);
+    }
+
+
+    /// <summary>
+    /// Updates the viewer background resource according to app and slideshow settings.
+    /// </summary>
+    public static void UpdateViewerBackgroundBrushResource()
+    {
+        if (Application.Current is not App app) return;
+
+        // 1. get background color from settings
+        var bgColorText = Config.EnableSlideshow
+            ? Config.SlideshowBackgroundColor
+            : Config.BackgroundColor;
+        var bgColor = BHelper.ColorFromHex(bgColorText, AccentColor);
+
+        // 2. use default background color from theme pack
+        if (bgColor.IsEmpty)
+        {
+            bgColor = AppThemeColors.BgBrush.Color;
+        }
+
+        // 3. set background color
+        Resx.Set(ResxId.IG_ViewerBackgroundBrush, bgColor.ToBrush());
     }
 
 
