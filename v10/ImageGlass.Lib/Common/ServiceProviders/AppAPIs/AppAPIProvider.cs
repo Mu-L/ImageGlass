@@ -2762,33 +2762,45 @@ public partial class AppAPIProvider
     /// Sets background color,
     /// opens Color Picker dialog if the <paramref name="hexColor"/> is <c>null</c>.
     /// </summary>
-    public void IG_SetBackgroundColor(string? hexColor = null)
+    public async Task IG_SetBackgroundColorAsync(string? hexColor = null)
     {
-        var color = Color.FromArgb(0, 0, 0, 0);
+        Color? newColor = null;
 
         // 1. open Color picker to select color if hexColor not defined
         if (string.IsNullOrEmpty(hexColor))
         {
-            // TODO:
+            var oldColor = Resx.Get<SolidColorBrush>(ResxId.IG_ViewerBackgroundBrush).Color;
+            var defaultColor = Core.Config.EnableSlideshow
+                ? Colors.Black
+                : Const.COLOR_EMPTY;
+
+            var cp = new PhColorPickerDialog(oldColor, defaultColor)
+            {
+                Title = Core.Lang[LangId.FrmMain_MnuChangeBackgroundColor],
+            };
+            var result = await cp.ShowAsync(_mainWindow);
+
+            if (result != DialogExitCode.OK) return;
+            newColor = cp.SelectedColor;
         }
 
         // 2. convert the input hex color string
         else
         {
-            color = BHelper.ColorFromHex(hexColor);
+            newColor = BHelper.ColorFromHex(hexColor);
         }
 
-        if (color.IsEmpty) return;
+        if (newColor == null) return;
 
 
         // 3. set background color
         if (Core.Config.EnableSlideshow)
         {
-            Core.Config.SlideshowBackgroundColor = color.ToHex();
+            Core.Config.SlideshowBackgroundColor = newColor.Value.ToHex();
         }
         else
         {
-            Core.Config.BackgroundColor = color.ToHex();
+            Core.Config.BackgroundColor = newColor.Value.ToHex();
         }
     }
 

@@ -132,7 +132,7 @@ public partial class AppAPIProvider
         { API.IG_ToggleGallery,         PhCommands.Create(IG_ToggleGalleryAsync) },
         { API.IG_ToggleCheckerboard,    PhCommands.Create(IG_ToggleCheckerboard) },
         { API.IG_ToggleWindowTopMost,   PhCommands.Create(IG_ToggleWindowTopMost) },
-        { API.IG_SetBackgroundColor,    PhCommands.Create(IG_SetBackgroundColor) },
+        { API.IG_SetBackgroundColor,    PhCommands.Create(IG_SetBackgroundColorAsync) },
 
 
         // Plugins

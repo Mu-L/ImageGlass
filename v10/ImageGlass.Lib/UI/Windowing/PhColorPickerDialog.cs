@@ -88,6 +88,7 @@ public partial class PhColorPickerDialog : DialogWindow
     public PhColorPickerDialog(Color? initColor = null, Color? defaultColor = null)
     {
         // Configure the modal buttons and default focus behavior.
+        Title = string.Empty;
         IsButton1Visible = true;
         IsButton2Visible = true;
         IsButton3Visible = false;
@@ -130,7 +131,6 @@ public partial class PhColorPickerDialog : DialogWindow
         base.OnIgLanguageChanged();
 
         // Refresh all localized dialog captions.
-        Title = Core.Lang[LangId.FrmMain_MnuChangeBackgroundColor];
         Button1Text = Core.Lang[LangId._OK];
         Button2Text = Core.Lang[LangId._Cancel];
         _btnReset.Text = Core.Lang[LangId._Reset];
