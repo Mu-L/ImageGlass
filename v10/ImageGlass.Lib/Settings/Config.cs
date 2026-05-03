@@ -891,6 +891,16 @@ public partial class Config : PhReactive
     }
 
     /// <summary>
+    /// Gets, sets the list of locked features.
+    /// </summary>
+    [JsonConverter(typeof(JsonObservableCollectionToStringConverter))]
+    public ObservableCollection<string> LockFeatures
+    {
+        get => Get(ConfigId.LockFeatures, new ObservableCollection<string>());
+        set => Set(ConfigId.LockFeatures, value);
+    }
+
+    /// <summary>
     /// Gets, sets layout for FrmMain. Syntax:
     /// <c>Dictionary["ControlName", "LayoutPosition"]</c>
     /// </summary>
@@ -918,11 +928,6 @@ public partial class Config : PhReactive
         get => Get(ConfigId.ToolSettings, new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase));
         set => Set(ConfigId.ToolSettings, value);
     }
-
-    ///// <summary>
-    ///// Gets, sets the list of disabled menus
-    ///// </summary>
-    //public FrozenSet<string> DisabledMenus { get; set; } = FrozenSet<string>.Empty;
 
     /// <summary>
     /// Gets, sets the list of toolbar buttons

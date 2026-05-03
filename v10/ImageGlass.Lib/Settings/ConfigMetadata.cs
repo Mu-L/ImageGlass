@@ -145,10 +145,10 @@ public enum ConfigId
     MenuHotkeys,
     MouseClickActions,
     MouseWheelActions,
+    LockFeatures,
     Layout,
     Tools,
     ToolSettings,
-    // DisabledMenus,
     ToolbarButtons,
 
     #endregion // Array settings
