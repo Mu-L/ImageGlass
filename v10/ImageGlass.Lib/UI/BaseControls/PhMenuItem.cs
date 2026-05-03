@@ -23,6 +23,7 @@ using Avalonia.Controls.Shapes;
 using Avalonia.Interactivity;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using System;
 
@@ -144,7 +145,16 @@ public class PhMenuItem : MenuItem
         var localizedText = Core.Lang[LangKey, LangParams];
         if (string.IsNullOrWhiteSpace(localizedText)) return;
 
-        Header = localizedText;
+        // Check if this menu item is locked
+        if (FeatureManager.IsLocked(LangKey))
+        {
+            Header = $"{localizedText} 🔒";
+            IsEnabled = false;
+        }
+        else
+        {
+            Header = localizedText;
+        }
     }
 
     #endregion // Control Methods

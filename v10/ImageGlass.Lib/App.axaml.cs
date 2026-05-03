@@ -146,10 +146,12 @@ public partial class App : Application
 
             if (!string.IsNullOrEmpty(filePath) && !isModulePath)
             {
-                Dispatcher.UIThread.Post(() =>
+                Dispatcher.UIThread.Post(async () =>
                 {
                     Core.UpdateInitImagePath(filePath);
-                    Core.API?.IG_OpenPath(filePath);
+
+                    if (Core.API is not null)
+                        _ = Core.API.RunApiAsync(API.IG_OpenPath, filePath);
 
                     MainWindow?.Activate();
                 });
@@ -247,6 +249,8 @@ public partial class App : Application
         Core.Args = Environment.GetCommandLineArgs();
         Core.Config = Config.Load(Config.CONFIG_USER, Core.Args);
 
+        // Initialize lock manager with loaded config
+        ServiceProviders.FeatureManager.Refresh();
 
         // 3. initialize service providers
         installServicesFn();
@@ -333,19 +337,19 @@ public partial class App : Application
 
 
         // initialize update provider and auto-check
-        InitializeUpdateProvider();
+        _ = InitializeUpdateProviderAsync();
     }
 
 
     /// <summary>
     /// Initializes the update provider and fires a silent update check.
     /// </summary>
-    private static void InitializeUpdateProvider()
+    private static async Task InitializeUpdateProviderAsync()
     {
         Core.Update = new UpdateProvider();
 
         // silent check handles disabled/interval logic
-        _ = Core.API!.IG_CheckForUpdateAsync(false);
+        _ = await Core.API.RunApiAsync(API.IG_CheckForUpdate, "false");
     }
 
 

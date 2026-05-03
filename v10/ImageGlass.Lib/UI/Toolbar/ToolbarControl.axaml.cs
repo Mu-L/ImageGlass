@@ -295,11 +295,11 @@ public partial class ToolbarControl : PhControl
         if (sender is not PhMenuItem mnu) return;
 
         var action = AppAPIProvider.GetMenuAction(mnu.LangKey);
-        _ = Core.API?.RunActionAsync(action, mnu.CommandParameter?.ToString());
+        _ = Core.API.RunActionAsync(action, mnu.CommandParameter?.ToString());
     }
 
 
-    public void MainMenu_ViewChannelItem_Click(object? sender, RoutedEventArgs e)
+    public async void MainMenu_ViewChannelItem_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is not PhMenuItem mnu) return;
 
@@ -311,13 +311,13 @@ public partial class ToolbarControl : PhControl
             // toggle a channel
             if (mnu.ToggleType == MenuItemToggleType.CheckBox)
             {
-                SetColorChannels(channels, mnu.IsChecked);
+                await SetColorChannelsAsync(channels, mnu.IsChecked);
             }
 
             // set channels
             else
             {
-                SetColorChannels(channels, null);
+                await SetColorChannelsAsync(channels, null);
             }
         }
     }
@@ -617,7 +617,7 @@ public partial class ToolbarControl : PhControl
     }
 
 
-    private void SetColorChannels(ColorChannels channels, bool? isEnabled)
+    private async Task SetColorChannelsAsync(ColorChannels channels, bool? isEnabled)
     {
         var newChannels = Core.ColorChannels;
 
@@ -640,7 +640,7 @@ public partial class ToolbarControl : PhControl
             newChannels = channels;
         }
 
-        Core.API?.IG_SetColorChannels(newChannels);
+        _ = await Core.API.RunApiAsync(API.IG_SetColorChannels, newChannels.ToString());
     }
 
 
@@ -687,7 +687,7 @@ public partial class ToolbarControl : PhControl
                 Tag = "external_tool",
                 CommandParameter = tool.ToolId,
             };
-            mnu.Click += (_, _) => Core.API?.IG_OpenTool(tool.ToolId);
+            mnu.Click += async (_, _) => await Core.API.RunApiAsync(API.IG_OpenTool, tool.ToolId);
             items.Insert(sepEndIndex + i, mnu);
         }
     }

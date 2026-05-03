@@ -24,6 +24,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Svg.Skia;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Localization;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.UI;
 using ImageGlass.UI.Windowing;
@@ -316,9 +317,9 @@ public partial class AboutWindow : DialogWindow
             HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center,
         };
-        _btnCheckForUpdate.Click += (_, _) =>
+        _btnCheckForUpdate.Click += async (_, _) =>
         {
-            _ = Core.API?.IG_CheckForUpdateAsync(true);
+            _ = await Core.API.RunApiAsync(API.IG_CheckForUpdate, "true");
         };
 
         var footerLeftPanel = new StackPanel

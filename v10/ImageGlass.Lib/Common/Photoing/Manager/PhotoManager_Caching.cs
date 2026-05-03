@@ -83,7 +83,7 @@ public partial class PhotoManager
     public void RequestCacheAround(int centerIndex)
     {
         // skip caching during quick browsing (user is holding arrow keys)
-        if (Core.API?.IsQuickBrowsing ?? false) return;
+        if (Core.API.IsQuickBrowsing) return;
 
         CancellationToken token;
         lock (_cacheLock)
@@ -199,7 +199,7 @@ public partial class PhotoManager
                 if (token.IsCancellationRequested) return;
 
                 // re-check quick browsing each iteration
-                if (Core.API?.IsQuickBrowsing ?? false) return;
+                if (Core.API.IsQuickBrowsing) return;
 
                 var photo = Get(idx);
                 if (photo is null) continue;

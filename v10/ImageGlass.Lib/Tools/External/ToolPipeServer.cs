@@ -177,7 +177,7 @@ internal sealed class ToolPipeServer : IDisposable
 
         var color = await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            if (Core.API?.GetViewer() is not { } viewer) return default;
+            if (Core.API.GetViewer() is not { } viewer) return default;
             return viewer.GetColorAt(req.X, req.Y);
         });
 
@@ -202,7 +202,7 @@ internal sealed class ToolPipeServer : IDisposable
         // Capture the current bitmap on the UI thread.
         var bitmap = await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            if (Core.API?.GetViewer() is not { } viewer) return null;
+            if (Core.API.GetViewer() is not { } viewer) return null;
             return viewer.GetRenderedBitmap(selectionOnly);
         });
 
@@ -281,7 +281,7 @@ internal sealed class ToolPipeServer : IDisposable
             // Marshal the request to the UI thread because host APIs may touch UI state.
             await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                await (Core.API?.RunApiAsync(req.ApiName, req.Argument) ?? Task.CompletedTask);
+                await (Core.API.RunApiAsync(req.ApiName, req.Argument) ?? Task.CompletedTask);
             });
             SendResponse(msg.RequestId, new RunApiResponse { Success = true });
         }
@@ -381,7 +381,7 @@ internal sealed class ToolPipeServer : IDisposable
     {
         var size = await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            if (Core.API?.GetViewer() is not { } viewer) return (0, 0);
+            if (Core.API.GetViewer() is not { } viewer) return (0, 0);
             return ((int)viewer.BitmapSize.Width, (int)viewer.BitmapSize.Height);
         });
 
@@ -396,7 +396,7 @@ internal sealed class ToolPipeServer : IDisposable
     {
         var sel = await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            if (Core.API?.GetViewer() is not { } viewer
+            if (Core.API.GetViewer() is not { } viewer
                 || viewer.SourceSelection == default) return (SetSelectionRequest?)null;
 
             var s = viewer.SourceSelection;
@@ -421,7 +421,7 @@ internal sealed class ToolPipeServer : IDisposable
         var req = DeserializePayload<SetSelectionRequest>(msg);
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            if (Core.API?.GetViewer() is not { } viewer) return;
+            if (Core.API.GetViewer() is not { } viewer) return;
 
             if (req?.X is null)
             {
@@ -448,7 +448,7 @@ internal sealed class ToolPipeServer : IDisposable
 
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            if (Core.API?.GetViewer() is { } viewer)
+            if (Core.API.GetViewer() is { } viewer)
             {
                 viewer.EnableSelection = req.Enable;
             }

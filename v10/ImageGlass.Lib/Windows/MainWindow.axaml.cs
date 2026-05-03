@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using ImageGlass.Tools;
 using ImageGlass.UI;
@@ -72,14 +73,14 @@ public partial class MainWindow : PhWindow
     #region Override Methods
 
 
-    protected override void OnOpened(EventArgs e)
+    protected override async void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
 
         if (Core.Config.EnableWindowFit)
         {
             // load Window fit
-            Core.API?.IG_ToggleWindowFit(true);
+            _ = await Core.API.RunApiAsync(API.IG_ToggleWindowFit, "true");
         }
         else
         {
@@ -91,7 +92,7 @@ public partial class MainWindow : PhWindow
         Core.UpdateDestColorProfile();
 
         // restore last opened tool
-        Core.API?.IG_OpenTool(Core.Config.LastOpenedTool);
+        _ = await Core.API.RunApiAsync(API.IG_OpenTool, Core.Config.LastOpenedTool);
     }
 
 
@@ -109,7 +110,7 @@ public partial class MainWindow : PhWindow
         base.OnLoaded(e);
 
         // register app hotkeys
-        Core.API?.RegisterHotkeys();
+        Core.API.RegisterHotkeys();
 
         // control events
         _status.Changed += Status_Changed;
@@ -140,7 +141,7 @@ public partial class MainWindow : PhWindow
 
 
         // stop slideshow so pre-slideshow config values are restored before saving
-        Core.API?.IG_ToggleSlideshow(false);
+        _ = await Core.API.RunApiAsync(API.IG_ToggleSlideshow, "false");
 
         // stop all external tool processes before saving config
         await Core.ToolRegistry.ExternalTools.StopAllAsync();
@@ -173,21 +174,18 @@ public partial class MainWindow : PhWindow
             or AutoCompleteBox) return;
 
         // process app hotkeys
-        if (Core.API is not null)
+        // press ESC: exit slideshow if it is running
+        var hk = new Hotkey(e);
+        if (hk.IsSame(Key.Escape) && Core.Slideshow?.IsRunning == true)
         {
-            // press ESC: exit slideshow if it is running
-            var hk = new Hotkey(e);
-            if (hk.IsSame(Key.Escape) && Core.Slideshow?.IsRunning == true)
-            {
-                Core.API?.IG_ToggleSlideshow(false);
-                e.Handled = true;
-                return;
-            }
-
-
-            await Core.API.HandleKeyDownAsync(e);
-            if (e.Handled) return;
+            _ = await Core.API.RunApiAsync(API.IG_ToggleSlideshow, "false");
+            e.Handled = true;
+            return;
         }
+
+
+        await Core.API.HandleKeyDownAsync(e);
+        if (e.Handled) return;
     }
 
 
@@ -197,11 +195,8 @@ public partial class MainWindow : PhWindow
         if (e.Handled) return;
 
         // process app hotkeys
-        if (Core.API is not null)
-        {
-            await Core.API.HandleKeyUpAsync(e);
-            if (e.Handled) return;
-        }
+        await Core.API.HandleKeyUpAsync(e);
+        if (e.Handled) return;
     }
 
 
@@ -211,7 +206,7 @@ public partial class MainWindow : PhWindow
 
     #region Control Events
 
-    private void AppInstance_InstanceInvoked(AppInstance sender, InstanceInvokedEventArgs e)
+    private async void AppInstance_InstanceInvoked(AppInstance sender, InstanceInvokedEventArgs e)
     {
         // handle single instance command
         if (e.Command.Equals(ExeParams.SINGLE_INSTANCE))
@@ -229,8 +224,11 @@ public partial class MainWindow : PhWindow
             // apply any -p: config overrides from the forwarded args
             Config.ApplyCliOverrides(Core.Config, e.Arguments);
 
+            // Refresh lock manager after CLI overrides
+            ServiceProviders.FeatureManager.Refresh();
+
             // load image path
-            Core.API?.IG_OpenPath(Core.InputImagePathFromArgs);
+            _ = await Core.API.RunApiAsync(API.IG_OpenPath, Core.InputImagePathFromArgs);
 
             Activate();
             Topmost = true;
@@ -247,14 +245,14 @@ public partial class MainWindow : PhWindow
 
     private void PART_Toolbar_ItemClicked(object sender, ToolbarItemClickEventArgs e)
     {
-        _ = Core.API?.RunActionAsync(e.VM.OnClick);
+        _ = Core.API.RunActionAsync(e.VM.OnClick);
     }
 
 
-    private void PART_Gallery_ItemClicked(GalleryItem sender, GalleryItemClickEventArgs e)
+    private async void PART_Gallery_ItemClicked(GalleryItem sender, GalleryItemClickEventArgs e)
     {
         var photoIndex = Core.Photos.IndexOf(sender.VM.FilePath);
-        Core.API?.IG_ViewByIndex(photoIndex);
+        _ = await Core.API.RunApiAsync(API.IG_ViewByIndex, photoIndex.ToString());
     }
 
 
@@ -301,7 +299,7 @@ public partial class MainWindow : PhWindow
         // save settings for the current hosted tool
         if (PART_MainView.PART_ToolHost.Tool is ITool toolToSave)
         {
-            Core.API?.IG_CloseTool(toolToSave.ToolId);
+            _ = await Core.API.RunApiAsync(API.IG_CloseTool, toolToSave.ToolId);
         }
 
 

@@ -302,6 +302,13 @@ public partial class AppAPIProvider
         var action = AppHotkeysMap.GetValueOrDefault(hotkey.KeyString);
         if (action is null) return;
 
+        // Check if the action is locked - silently ignore locked hotkeys
+        if (FeatureManager.IsLocked(action.Executable))
+        {
+            e.Handled = true;
+            return;
+        }
+
         var isHotkeyPressMultiTimes = hotkey.IsSame(_lastHotkeyPressed);
         var executable = action.Executable ?? string.Empty;
 

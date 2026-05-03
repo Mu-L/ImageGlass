@@ -43,7 +43,7 @@ internal static class FeatureManager
     {
         if (!Const.ENABLE_LOCK_FEATURES) return;
 
-        var newLocked = FrozenSet.ToFrozenSet(Core.Config.LockFeatures, StringComparer.OrdinalIgnoreCase);
+        var newLocked = FrozenSet.ToFrozenSet(Core.Config.LockedFeatures, StringComparer.OrdinalIgnoreCase);
 
         lock (_lock)
         {

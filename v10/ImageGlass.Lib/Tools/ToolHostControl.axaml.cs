@@ -21,6 +21,7 @@ using Avalonia.Interactivity;
 using Avalonia.Metadata;
 using ImageGlass.Common;
 using ImageGlass.Common.Localization;
+using ImageGlass.Common.ServiceProviders;
 using ImageGlass.UI;
 using System;
 
@@ -104,12 +105,12 @@ public partial class ToolHostControl : PhControl
     }
 
 
-    private void PART_BtnClose_Click(object? sender, RoutedEventArgs e)
+    private async void PART_BtnClose_Click(object? sender, RoutedEventArgs e)
     {
         // Route through API so settings are saved before closing
         if (Tool is IToolControl tool)
         {
-            Core.API?.IG_CloseTool(tool.ToolId);
+            _ = await Core.API.RunApiAsync(API.IG_CloseTool, tool.ToolId);
         }
     }
 

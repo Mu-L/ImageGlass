@@ -96,7 +96,7 @@ public partial class AppAPIProvider
         { API.IG_Reload,                        PhCommands.Create(IG_Reload) },
         { API.IG_ReloadList,                    PhCommands.Create(IG_ReloadList) },
         { API.IG_Unload,                        PhCommands.Create(IG_UnloadAsync) },
-        { API.IG_ToggleExplorerSortOrder,    PhCommands.Create(IG_ToggleExplorerSortOrder) },
+        { API.IG_ToggleExplorerSortOrder,       PhCommands.Create(IG_ToggleExplorerSortOrder) },
         { API.IG_SetLoadingOrderBy,             PhCommands.Create(IG_SetLoadingOrderBy) },
         { API.IG_SetLoadingOrderType,           PhCommands.Create(IG_SetLoadingOrderType) },
         { API.IG_SetColorChannels,              PhCommands.Create(IG_SetColorChannels) },
@@ -197,6 +197,10 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task<ActionResult> RunApiAsync(API api, string? args = null)
     {
+        // Check if the API is locked
+        if (FeatureManager.IsLocked(api))
+            return new ActionResult(ActionExitCode.Locked);
+
         var cmd = GetApiCommand(api);
 
         return await RunApiCommandAsync_(cmd, args);
@@ -208,6 +212,10 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task<ActionResult> RunApiAsync(string? apiName, string? args = null)
     {
+        // Check if the API is locked
+        if (FeatureManager.IsLocked(apiName))
+            return new ActionResult(ActionExitCode.Locked);
+
         var cmd = GetApiCommand(apiName);
 
         return await RunApiCommandAsync_(cmd, args);
@@ -274,14 +282,18 @@ public partial class AppAPIProvider
         if (acResults.ExitCode == ActionExitCode.Cancelled) return null;
 
 
-        // 3. run next action on success
+        // 3. exit silently if the action is locked (feature is invisible to user)
+        if (acResults.ExitCode == ActionExitCode.Locked) return null;
+
+
+        // 4. run next action on success
         if (acResults.ExitCode == ActionExitCode.Success)
         {
             return await RunActionAsync(ac.NextAction, showError);
         }
 
 
-        // 4. if there was an error from API
+        // 5. if there was an error from API
         Exception? error = null;
         if (acResults.ExitCode == ActionExitCode.Error && acResults.Error != null)
         {
@@ -289,8 +301,8 @@ public partial class AppAPIProvider
         }
 
 
-        // 5. if action name is not an built-in API
-        // try to run with Shell
+        // 6. if action name is not an built-in API
+        // try to run with Shell (but NOT if locked - locked means invisible)
         else if (acResults.ExitCode == ActionExitCode.ApiNotFound)
         {
             var args = string.Join(string.Empty, acArgs) ?? string.Empty;

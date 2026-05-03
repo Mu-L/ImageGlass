@@ -158,7 +158,7 @@ public partial class MainWindowView : PhControl
     }
 
 
-    private void PART_Viewer_Drop(object? sender, DragEventArgs e)
+    private async void PART_Viewer_Drop(object? sender, DragEventArgs e)
     {
         // if drag data contains files or folders
         if (e.DataTransfer.TryGetFiles() is not IStorageItem[] sItems) return;
@@ -185,7 +185,7 @@ public partial class MainWindowView : PhControl
         Core.UpdateInitImagePath(paths[0]);
 
         // 3.2 open the path
-        Core.API?.IG_OpenPath(paths[0]);
+        _ = await Core.API.RunApiAsync(API.IG_OpenPath, paths[0]);
     }
 
 
@@ -389,20 +389,20 @@ public partial class MainWindowView : PhControl
             && e.ChangeSource != ZoomChangeSource.SizeChanged
             && (e.IsManualZoom || e.IsZoomModeChange))
         {
-            Core.API?.ApplyWindowFitMode(e.ChangeSource == ZoomChangeSource.ZoomMode);
+            Core.API.ApplyWindowFitMode(e.ChangeSource == ZoomChangeSource.ZoomMode);
         }
     }
 
 
-    private void PART_Viewer_NavButtonClicked(ViewerControl sender, NavButtonClickedEventArgs e)
+    private async void PART_Viewer_NavButtonClicked(ViewerControl sender, NavButtonClickedEventArgs e)
     {
         if (e.Direction == NavButtonDirection.Right)
         {
-            Core.API?.IG_ViewNext();
+            _ = await Core.API.RunApiAsync(API.IG_ViewNext);
         }
         else
         {
-            Core.API?.IG_ViewPrevious();
+            _ = await Core.API.RunApiAsync(API.IG_ViewPrevious);
         }
     }
 
@@ -422,7 +422,7 @@ public partial class MainWindowView : PhControl
     }
 
 
-    private void PART_Viewer_ViewerMouseWheel(ViewerControl sender, ViewerMouseWheelEventArgs e)
+    private async void PART_Viewer_ViewerMouseWheel(ViewerControl sender, ViewerMouseWheelEventArgs e)
     {
         // get mouse wheel action from user settings
         if (!Core.Config.MouseWheelActions.TryGetValue(e.WheelEvent, out var wheelAction))
@@ -446,8 +446,8 @@ public partial class MainWindowView : PhControl
                 break;
 
             case MouseWheelAction.BrowseImages:
-                if (e.Delta > 0) Core.API?.IG_ViewPrevious();
-                else Core.API?.IG_ViewNext();
+                if (e.Delta > 0) _ = await Core.API.RunApiAsync(API.IG_ViewPrevious);
+                else _ = await Core.API.RunApiAsync(API.IG_ViewNext);
                 break;
 
             case MouseWheelAction.DoNothing:
@@ -482,13 +482,13 @@ public partial class MainWindowView : PhControl
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmSlideshow_MnuPauseResumeSlideshow,
-                Command = Core.API?.GetApiCommand(API.IG_ToggleSlideshowPlayback),
+                Command = Core.API.GetApiCommand(API.IG_ToggleSlideshowPlayback),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmSlideshow_MnuPauseResumeSlideshow),
             });
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmSlideshow_MnuExitSlideshow,
-                Command = Core.API?.GetApiCommand(API.IG_ToggleSlideshow),
+                Command = Core.API.GetApiCommand(API.IG_ToggleSlideshow),
                 CommandParameter = false,
                 HotkeyText = string.Join(", ", [
                     new Hotkey(Key.Escape),
@@ -500,7 +500,7 @@ public partial class MainWindowView : PhControl
                 ToggleType = MenuItemToggleType.CheckBox,
                 IsChecked = Core.Config.EnableSlideshowCountdown,
                 LangKey = LangId.FrmSlideshow_MnuToggleCountdown,
-                Command = Core.API?.GetApiCommand(API.IG_ToggleSlideshowCountdown),
+                Command = Core.API.GetApiCommand(API.IG_ToggleSlideshowCountdown),
                 CommandParameter = !Core.Config.EnableSlideshowCountdown,
             });
             mnuContext.Items.Add("-"); //------------
@@ -515,7 +515,7 @@ public partial class MainWindowView : PhControl
             LangKey = LangId.FrmMain_MnuToggleToolbar,
             ToggleType = MenuItemToggleType.CheckBox,
             IsChecked = Core.Config.ShowToolbar,
-            Command = Core.API?.GetApiCommand(API.IG_ToggleToolbar),
+            Command = Core.API.GetApiCommand(API.IG_ToggleToolbar),
             HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuToggleToolbar),
         });
         // menu Top most
@@ -524,7 +524,7 @@ public partial class MainWindowView : PhControl
             LangKey = LangId.FrmMain_MnuToggleTopMost,
             ToggleType = MenuItemToggleType.CheckBox,
             IsChecked = Core.Config.EnableWindowTopMost,
-            Command = Core.API?.GetApiCommand(API.IG_ToggleWindowTopMost),
+            Command = Core.API.GetApiCommand(API.IG_ToggleWindowTopMost),
             HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuToggleTopMost),
         });
         #endregion // Menu group: Layout
@@ -550,7 +550,7 @@ public partial class MainWindowView : PhControl
                     LangKey = LangId.FrmSettings_EnableExplorerSortOrder,
                     ToggleType = MenuItemToggleType.CheckBox,
                     IsChecked = Core.Config.EnableExplorerSortOrder,
-                    Command = Core.API?.GetApiCommand(API.IG_ToggleExplorerSortOrder),
+                    Command = Core.API.GetApiCommand(API.IG_ToggleExplorerSortOrder),
                     HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmSettings_EnableExplorerSortOrder),
                 });
                 mnuLoadingOrders.Items.Add("-");
@@ -565,7 +565,7 @@ public partial class MainWindowView : PhControl
                     LangKey = Lang.GetKey($"{nameof(ImageOrderBy)}_{orderBy}"),
                     ToggleType = MenuItemToggleType.Radio,
                     IsChecked = Core.Config.ImageLoadingOrder == Enum.Parse<ImageOrderBy>(orderBy),
-                    Command = Core.API?.GetApiCommand(API.IG_SetLoadingOrderBy),
+                    Command = Core.API.GetApiCommand(API.IG_SetLoadingOrderBy),
                     CommandParameter = orderBy,
                 });
             }
@@ -579,7 +579,7 @@ public partial class MainWindowView : PhControl
                     LangKey = Lang.GetKey($"{nameof(ImageOrderType)}_{orderType}"),
                     ToggleType = MenuItemToggleType.Radio,
                     IsChecked = Core.Config.ImageLoadingOrderType == Enum.Parse<ImageOrderType>(orderType),
-                    Command = Core.API?.GetApiCommand(API.IG_SetLoadingOrderType),
+                    Command = Core.API.GetApiCommand(API.IG_SetLoadingOrderType),
                     CommandParameter = orderType,
                 });
             }
@@ -626,7 +626,7 @@ public partial class MainWindowView : PhControl
             var mnuEdit = new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuEdit,
-                Command = Core.API?.GetApiCommand(API.IG_OpenEditingApp),
+                Command = Core.API.GetApiCommand(API.IG_OpenEditingApp),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuEdit),
             };
 
@@ -642,7 +642,7 @@ public partial class MainWindowView : PhControl
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuSetDesktopBackground,
-                Command = Core.API?.GetApiCommand(API.IG_SetDesktopBackground),
+                Command = Core.API.GetApiCommand(API.IG_SetDesktopBackground),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuSetDesktopBackground),
             });
 
@@ -651,7 +651,7 @@ public partial class MainWindowView : PhControl
                 mnuContext.Items.Add(new PhMenuItem
                 {
                     LangKey = LangId.FrmMain_MnuSetLockScreen,
-                    Command = Core.API?.GetApiCommand(API.IG_SetLockScreenImage),
+                    Command = Core.API.GetApiCommand(API.IG_SetLockScreenImage),
                     HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuSetLockScreen),
                 });
             }
@@ -665,13 +665,13 @@ public partial class MainWindowView : PhControl
         mnuContext.Items.Add(new PhMenuItem
         {
             LangKey = LangId.FrmMain_MnuPasteImage,
-            Command = Core.API?.GetApiCommand(API.IG_PasteImage),
+            Command = Core.API.GetApiCommand(API.IG_PasteImage),
             HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuPasteImage),
         });
         mnuContext.Items.Add(new PhMenuItem
         {
             LangKey = LangId.FrmMain_MnuCopyImagePixels,
-            Command = Core.API?.GetApiCommand(API.IG_CopyImagePixels),
+            Command = Core.API.GetApiCommand(API.IG_CopyImagePixels),
             HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCopyImagePixels),
         });
 
@@ -680,25 +680,25 @@ public partial class MainWindowView : PhControl
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuCopyPath,
-                Command = Core.API?.GetApiCommand(API.IG_CopyImagePath),
+                Command = Core.API.GetApiCommand(API.IG_CopyImagePath),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCopyPath),
             });
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuCopyFile,
-                Command = Core.API?.GetApiCommand(API.IG_CopyFiles),
+                Command = Core.API.GetApiCommand(API.IG_CopyFiles),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCopyFile),
             });
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuCutFile,
-                Command = Core.API?.GetApiCommand(API.IG_CutFiles),
+                Command = Core.API.GetApiCommand(API.IG_CutFiles),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuCutFile),
             });
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuClearClipboard,
-                Command = Core.API?.GetApiCommand(API.IG_ClearClipboard),
+                Command = Core.API.GetApiCommand(API.IG_ClearClipboard),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuClearClipboard),
             });
         }
@@ -712,26 +712,26 @@ public partial class MainWindowView : PhControl
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuRename,
-                Command = Core.API?.GetApiCommand(API.IG_Rename),
+                Command = Core.API.GetApiCommand(API.IG_Rename),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuRename),
             });
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuMoveToRecycleBin,
-                Command = Core.API?.GetApiCommand(API.IG_Delete),
+                Command = Core.API.GetApiCommand(API.IG_Delete),
                 CommandParameter = "true",
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuMoveToRecycleBin),
             });
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuOpenLocation,
-                Command = Core.API?.GetApiCommand(API.IG_OpenLocation),
+                Command = Core.API.GetApiCommand(API.IG_OpenLocation),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuOpenLocation),
             });
             mnuContext.Items.Add(new PhMenuItem
             {
                 LangKey = LangId.FrmMain_MnuImageProperties,
-                Command = Core.API?.GetApiCommand(API.IG_OpenProperties),
+                Command = Core.API.GetApiCommand(API.IG_OpenProperties),
                 HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuImageProperties),
             });
         }
@@ -743,9 +743,13 @@ public partial class MainWindowView : PhControl
         mnuContext.Items.Add(new PhMenuItem
         {
             LangKey = LangId.FrmMain_MnuExit,
-            Command = Core.API?.GetApiCommand(API.IG_Exit),
+            Command = Core.API.GetApiCommand(API.IG_Exit),
             HotkeyText = AppAPIProvider.GetMenuHotkeyText(LangId.FrmMain_MnuExit),
         });
+
+
+        // Hide locked menu items
+        ServiceProviders.FeatureManager.HideLockedMenuItems(mnuContext.Items);
     }
 
 
