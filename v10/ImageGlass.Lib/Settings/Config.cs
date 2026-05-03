@@ -893,10 +893,10 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets the list of locked features.
     /// </summary>
-    [JsonConverter(typeof(JsonObservableCollectionToStringConverter))]
-    public ObservableCollection<string> LockFeatures
+    [JsonConverter(typeof(JsonHashSetToStringConverter))]
+    public HashSet<string> LockFeatures
     {
-        get => Get(ConfigId.LockFeatures, new ObservableCollection<string>());
+        get => Get(ConfigId.LockFeatures, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
         set => Set(ConfigId.LockFeatures, value);
     }
 

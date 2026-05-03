@@ -34,6 +34,7 @@ public enum ActionExitCode
     Error,
     Cancelled,
     ApiNotFound,
+    Locked,
 }
 
 

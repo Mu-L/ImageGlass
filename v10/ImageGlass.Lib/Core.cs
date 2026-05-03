@@ -105,7 +105,7 @@ public static class Core
     /// <summary>
     /// Provides a singleton instance to access app APIs.
     /// </summary>
-    public static AppAPIProvider? API { get; set; } = null;
+    public static AppAPIProvider API { get; set; } = null!;
 
 
     /// <summary>

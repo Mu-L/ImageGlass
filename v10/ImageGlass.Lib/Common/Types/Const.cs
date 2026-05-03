@@ -45,6 +45,12 @@ public static class Const
 
     public const bool ENABLE_CONFIG_MERGE = true;
 
+    /// <summary>
+    /// Gates the Pro-only "Lock Features" subsystem. When false, all
+    /// lock checks short-circuit to "not locked" and no UI markers appear.
+    /// </summary>
+    public const bool ENABLE_LOCK_FEATURES = true;
+
 
     /// <summary>
     /// A file macro to replace with the current viewing image file path in double quotes.
