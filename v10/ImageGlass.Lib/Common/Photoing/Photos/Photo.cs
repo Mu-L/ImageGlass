@@ -883,7 +883,6 @@ public partial class Photo : PhDisposable
 
 
                 // 5. get thumbnail from platform provider
-                if (Core.PreviewProvider is null) return;
                 using var skThumb = await Task.Run(
                     () => Core.PreviewProvider.GetThumbnailAsync(Metadata, thumbSize, token), token)
                     .ConfigureAwait(false);

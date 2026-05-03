@@ -82,9 +82,6 @@ public partial class PhotoManager
         FileSearchOptions searchOptions, Action<FileSearchingEventArgs> progressFn,
         bool reloadInitPhoto)
     {
-        if (Core.FileSearchProvider is null)
-            throw new NullReferenceException(nameof(Core.FileSearchProvider));
-
         // 1. stop any ongoing search
         Core.FileSearchProvider.CancelSearching();
 

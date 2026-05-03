@@ -601,8 +601,6 @@ public partial class AppAPIProvider
             throw new NotSupportedException($"IGE: This feature is not supported on {BHelper.OS}.");
         }
 
-        if (Core.PrintProvider is null) return;
-
         var fileToPrint = Core.Photos.CurrentFilePath;
         _ = Message.ShowAsync(Core.Lang[LangId._CreatingFile], delayMs: 500);
 
@@ -642,8 +640,6 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_ShareAsync()
     {
-        if (Core.ShareProvider is null) return;
-
         var filePath = Core.Photos.CurrentFilePath;
 
         // print clipboard image
@@ -2973,9 +2969,6 @@ public partial class AppAPIProvider
     /// </summary>
     public async Task IG_CheckForUpdateAsync(bool showUI = true)
     {
-        if (Core.Update is null) throw new NullReferenceException(nameof(Core.Update));
-
-
         // silent mode: skip if disabled or checked recently
         if (!showUI)
         {

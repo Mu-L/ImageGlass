@@ -75,13 +75,13 @@ public static class Core
     /// <summary>
     /// Provides a singleton instance to retrieve photo preview & thumbnail.
     /// </summary>
-    public static IPhotoPreviewProvider? PreviewProvider { get; set; } = null;
+    public static IPhotoPreviewProvider PreviewProvider { get; set; } = null!;
 
 
     /// <summary>
     /// Provides a singleton instance to search photo files.
     /// </summary>
-    public static IFileSearchProvider? FileSearchProvider { get; set; } = null;
+    public static IFileSearchProvider FileSearchProvider { get; set; } = null!;
 
 
     /// <summary>
@@ -93,13 +93,13 @@ public static class Core
     /// <summary>
     /// Provides a singleton instance to manage Print service.
     /// </summary>
-    public static IPrintProvider? PrintProvider { get; set; } = null;
+    public static IPrintProvider PrintProvider { get; set; } = null!;
 
 
     /// <summary>
     /// Provides a singleton instance to manage Share dialog.
     /// </summary>
-    public static IShareProvider? ShareProvider { get; set; } = null;
+    public static IShareProvider ShareProvider { get; set; } = null!;
 
 
     /// <summary>
@@ -117,7 +117,7 @@ public static class Core
     /// <summary>
     /// Provides the update service for checking and downloading app updates.
     /// </summary>
-    public static UpdateProvider? Update { get; set; } = null;
+    public static UpdateProvider Update { get; set; } = null!;
 
 
     /// <summary>
@@ -280,14 +280,12 @@ public static class Core
         Core.Slideshow?.Dispose();
         Core.Slideshow = null;
 
-        Core.Update = null;
-
         Core.Photos.Dispose();
         Core.ColorProfileProvider?.Dispose();
         Core.ColorProfileProvider = null;
 
         Core.FileSearchProvider?.Dispose();
-        Core.FileSearchProvider = null;
+        Core.FileSearchProvider = null!;
 
         Core.ShellProvider?.Dispose();
         Core.ShellProvider = null;

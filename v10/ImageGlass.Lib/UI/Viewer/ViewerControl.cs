@@ -713,10 +713,7 @@ public partial class ViewerControl : PhControl
             else
             {
                 var previewHeight = Math.Min(Math.Min(DrawingArea.Height, e.Metadata.Height), 700);
-                if (Core.PreviewProvider is not null)
-                {
-                    imgPreview = await Core.PreviewProvider.GetPreviewAsync(e.Metadata, previewHeight, token);
-                }
+                imgPreview = await Core.PreviewProvider.GetPreviewAsync(e.Metadata, previewHeight, token);
             }
             hasPreview = imgPreview is not null;
 
