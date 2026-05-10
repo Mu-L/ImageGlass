@@ -200,8 +200,14 @@ public partial class Win32FileSearchProvider : FileSearchProvider
         if (token.IsCancellationRequested) return;
 
 
-        // 4. search all sub-directories if root dir is not empty
-        if (Options.SearchSubDirectories && !string.IsNullOrWhiteSpace(rootDir))
+        // 4. search all sub-directories if root dir is a real filesystem directory.
+        // Skip for shell URIs like `search-ms:` or `shell:` which are not valid paths
+        // for Directory.EnumerateDirectories and would throw IOException.
+        // https://github.com/d2phap/ImageGlass/issues/2189
+        if (Options.SearchSubDirectories
+            && !string.IsNullOrWhiteSpace(rootDir)
+            && Path.IsPathFullyQualified(rootDir)
+            && Directory.Exists(rootDir))
         {
             // search files for the sub dirs
             // get sub folders
