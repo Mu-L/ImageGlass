@@ -201,8 +201,13 @@ public class FileFinder
         FilesEnumerated?.Invoke(this, new FilesEnumeratedEventArgs(filePaths));
 
 
-        // search all sub-directories if root dir is not empty
-        if (searchSubDirectories && !string.IsNullOrWhiteSpace(rootDir))
+        // search all sub-directories if root dir is a real filesystem directory.
+        // Skip for shell URIs like `search-ms:` or `shell:` which are not valid paths
+        // for Directory.EnumerateDirectories and would throw IOException.
+        if (searchSubDirectories
+            && !string.IsNullOrWhiteSpace(rootDir)
+            && Path.IsPathFullyQualified(rootDir)
+            && Directory.Exists(rootDir))
         {
             // search files for the sub dirs
             // get sub folders
