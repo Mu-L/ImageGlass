@@ -35,6 +35,17 @@ namespace ImageGlass;
 public partial class FrmMain
 {
     /// <summary>
+    /// Indicates whether the saved window placement has been restored from
+    /// config during startup. Until this is true, <see cref="FrmMainConfig_SizeChanged"/>
+    /// must NOT persist the current window bounds to <see cref="Config"/>,
+    /// otherwise the designer-default ClientSize that WinForms applies during
+    /// initial layout / handle creation would overwrite the user's saved
+    /// position and size before <see cref="FrmMain_Load"/> can restore them.
+    /// </summary>
+    private bool _isPlacementRestored;
+
+
+    /// <summary>
     /// Hotkeys list of main menu
     /// </summary>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -269,6 +280,7 @@ public partial class FrmMain
             // position of window so that when user exists the fullscreen mode,
             // it can be restore correctly
             WindowSettings.LoadFrmMainPlacementFromConfig(this, autoCorrectBounds: !Program.IsStartupBoostMode);
+            _isPlacementRestored = true;
 
             IG_ToggleFullScreen(true);
         }
@@ -276,6 +288,7 @@ public partial class FrmMain
         {
             // load window placement from settings
             WindowSettings.LoadFrmMainPlacementFromConfig(this, autoCorrectBounds: !Program.IsStartupBoostMode);
+            _isPlacementRestored = true;
 
             // toggle frameless window
             IG_ToggleFrameless(Config.EnableFrameless, false);
@@ -390,7 +403,14 @@ public partial class FrmMain
 
     private void FrmMainConfig_SizeChanged(object? sender, EventArgs e)
     {
-        if (WindowState == FormWindowState.Normal
+        // Do not persist bounds until the saved placement has been restored.
+        // During startup, WinForms fires SizeChanged with the designer-default
+        // ClientSize before FrmMain_Load gets a chance to call
+        // WindowSettings.LoadFrmMainPlacementFromConfig(). Persisting those
+        // values here would overwrite the user's last saved position and size
+        // (the very bug we are guarding against - see FrmMain.Configs.cs).
+        if (_isPlacementRestored
+            && WindowState == FormWindowState.Normal
             && !Config.EnableFullScreen)
         {
             Config.FrmMainPositionX = Location.X;

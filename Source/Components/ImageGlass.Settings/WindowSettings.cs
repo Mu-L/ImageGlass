@@ -46,7 +46,9 @@ public partial class WindowSettings
 
         if (isBoundsVisible)
         {
+            frm.StartPosition = FormStartPosition.Manual;
             frm.Bounds = bounds;
+            frm.WindowState = formState;
         }
         else
         {
@@ -54,12 +56,8 @@ public partial class WindowSettings
             // Prevent us from appearing off-screen.
             frm.StartPosition = FormStartPosition.WindowsDefaultLocation;
             frm.Size = new(bounds.Width, bounds.Height);
+            frm.WindowState = formState;
         }
-
-        frm.WindowState = formState;
-
-        // flush all pending paint tasks
-        Application.DoEvents();
     }
 
 
