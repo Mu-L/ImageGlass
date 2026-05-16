@@ -74,8 +74,9 @@ public class UpdateService
     {
         var url = $"https://imageglass.org/url/update?channel={Const.UPDATE_CHANNEL}&version={App.Version}";
 
-
         using var httpClient = new HttpClient();
+        _ = httpClient.DefaultRequestHeaders.UserAgent.TryParseAdd($"ImageGlass/{App.Version}");
+
         var response = await httpClient.GetAsync(url);
 
         if (!response.IsSuccessStatusCode)
