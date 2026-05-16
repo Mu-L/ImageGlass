@@ -196,8 +196,7 @@ public sealed class UpdateProvider
             Timeout = UpdateConstants.MetadataTimeout,
         };
 
-        client.DefaultRequestHeaders.UserAgent.ParseAdd(
-            $"ImageGlass/{Core.BuildInfo?.AppVersion ?? "10.0"} (update-check)");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd($"ImageGlass/{Core.BuildInfo?.AppVersion ?? "10.0.0.0"}");
 
         return client;
     }
