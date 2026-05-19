@@ -305,7 +305,8 @@ public static partial class SkiaCodec
         try
         {
             // 1. apply transforms
-            using var dstImg = TransformImage(srcImg, transform) ?? srcImg;
+            using var transformedImg = TransformImage(srcImg, transform);
+            var dstImg = transformedImg ?? srcImg;
             if (dstImg.IsDisposed() || token.IsCancellationRequested) return;
 
 
@@ -1186,53 +1187,29 @@ public static partial class SkiaCodec
 
     /// <summary>
     /// Converts <see cref="SKImage"/> to <see cref="MagickImage"/>.
-    /// High-bit-depth images are normalized to Bgra8888 before import
-    /// so that Magick's raw BGRA reader receives the expected 8-bit data.
+    /// Images are read as tightly packed Bgra8888 pixels so Skia handles
+    /// color type conversion before Magick imports the pixel buffer.
     /// </summary>
-    public static MagickImage? ToMagick(SKImage? skImg)
+    public static unsafe MagickImage? ToMagick(SKImage? skImg)
     {
         if (skImg.IsDisposed()) return null;
 
-        // Normalize to Bgra8888 when the source uses a different color type.
-        // MagickFormat.Bgra expects 8-bit per channel; high-bit-depth data
-        // would be misinterpreted without this conversion.
-        SKImage? normalized = null;
-        var srcImage = skImg;
+        var info = new SKImageInfo(skImg.Width, skImg.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+        var rowBytes = info.Width * info.BytesPerPixel;
+        var pixelBuffer = new byte[rowBytes * info.Height];
 
-        if (skImg.ColorType != SKColorType.Bgra8888)
+        fixed (byte* ptr = pixelBuffer)
         {
-            var normInfo = new SKImageInfo(skImg.Width, skImg.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
-            using var surface = SKSurface.Create(normInfo);
-            if (surface is not null)
-            {
-                surface.Canvas.DrawImage(skImg, 0, 0);
-                normalized = surface.Snapshot();
-                srcImage = normalized;
-            }
+            if (!skImg.ReadPixels(info, (nint)ptr, rowBytes, 0, 0)) return null;
         }
 
-        try
-        {
-            // convert to pixels
-            using var pixmap = srcImage.PeekPixels();
-            var pixSpan = pixmap.GetPixelSpan();
+        // convert to MagickImage
+        var imgM = new MagickImage();
+        var settings = new PixelReadSettings((uint)info.Width, (uint)info.Height,
+            StorageType.Char, PixelMapping.BGRA);
+        imgM.ReadPixels(pixelBuffer, settings);
 
-            // convert to MagickImage
-            var imgM = new MagickImage();
-            var settings = new MagickReadSettings()
-            {
-                Format = MagickFormat.Bgra,
-                Width = (uint)srcImage.Width,
-                Height = (uint)srcImage.Height,
-            };
-            imgM.Read(pixSpan, settings);
-
-            return imgM;
-        }
-        finally
-        {
-            normalized?.Dispose();
-        }
+        return imgM;
     }
 
 
