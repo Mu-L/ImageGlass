@@ -53,7 +53,7 @@ public sealed class ExternalTool
     public string Executable { get; init; } = string.Empty;
 
     /// <summary>
-    /// Command-line arguments. Supports the <c>{file_path}</c> placeholder
+    /// Command-line arguments. Supports the <see cref="Const.FILE_MACRO"/> placeholder
     /// (replaced with the currently viewed file path at launch time).
     /// </summary>
     public string Arguments { get; init; } = string.Empty;

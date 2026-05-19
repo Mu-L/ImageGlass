@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common;
+using ImageGlass.Common.Types;
 using ImageGlass.SDK.Tools;
 using ImageGlass.UI.Viewer;
 using System.Diagnostics;
@@ -130,11 +131,11 @@ internal sealed class ExternalToolProxy : ITool
         if (string.IsNullOrEmpty(_tool.Executable)) return;
 
         var filePath = Core.Photos?.Current?.FilePath ?? string.Empty;
-        var args = (_tool.Arguments ?? string.Empty).Replace("{file_path}", filePath);
+        var args = (_tool.Arguments ?? string.Empty).Replace(Const.FILE_MACRO, filePath);
 
         try
         {
-            Process.Start(new ProcessStartInfo
+            _ = Process.Start(new ProcessStartInfo
             {
                 FileName = _tool.Executable,
                 Arguments = args,
