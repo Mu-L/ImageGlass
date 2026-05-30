@@ -25,6 +25,7 @@ using ImageGlass.Common.Types;
 using ImageGlass.Tools;
 using ImageGlass.UI;
 using ImageGlass.UI.Viewer;
+using ImageGlass.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -203,7 +204,8 @@ public partial class AppAPIProvider
             ?? [];
         var mainMenuHotkeyText = string.Join(", ", mainMenuHotkeys.Select(hk => hk.KeyString));
 
-        _mainWindow.PART_MainView.PART_Toolbar.VM.ButtonMenuVM = new ToolbarItemModel()
+        // Use the shared static toolbar VM directly
+        MainWindowViewModel.ToolbarVM.ButtonMenuVM = new ToolbarItemModel()
         {
             Image = nameof(IgThemeIcon.MainMenu),
             Text = nameof(LangId.FrmMain_MnuMain),

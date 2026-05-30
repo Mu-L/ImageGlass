@@ -566,7 +566,9 @@ public partial class DialogWindow : PhWindow
     {
         _taskSourceExitCode = new TaskCompletionSource<DialogExitCode>();
 
-        if (owner is not null)
+        // Only show as a modal child when the owner is actually visible.
+        // During early startup the owner may not be shown yet on some backends.
+        if (owner is not null && owner.IsVisible)
         {
             await ShowDialog(owner);
         }
