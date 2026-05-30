@@ -20,6 +20,7 @@ using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.Types;
 using SkiaSharp;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -85,6 +86,15 @@ public class PhotoPreviewProvider : IPhotoPreviewProvider
         }
 
 
+        // 2b. slowest path: decode through the codec registry so that custom/plugin
+        //     codecs can supply a thumbnail for formats neither SkiaSharp nor
+        //     ImageMagick can decode on their own.
+        if (imgPreview.IsDisposed())
+        {
+            imgPreview = await DecodeViaCodecRegistryAsync(meta, maxSize, token);
+        }
+
+
         // 3. resize if needed
         if (minSize > 0 && (imgPreview?.Width > maxSize || imgPreview?.Height > maxSize))
         {
@@ -96,6 +106,40 @@ public class PhotoPreviewProvider : IPhotoPreviewProvider
 
         if (imgPreview.IsDisposed()) imgPreview = null;
         return imgPreview;
+    }
+
+
+    /// <summary>
+    /// Decodes the image through the codec registry and returns its raster frame.
+    /// This lets custom/plugin codecs produce a thumbnail for formats that the
+    /// built-in SkiaSharp/ImageMagick paths cannot decode. Orientation and color
+    /// management are intentionally left to the codec (as in the full-image decode
+    /// path), so no further processing is applied here.
+    /// </summary>
+    protected static async Task<SKImage?> DecodeViaCodecRegistryAsync(PhotoMetadata meta,
+        int maxSize, CancellationToken token)
+    {
+        var context = new CodecSelectionContext
+        {
+            EnableVectorRenderer = Core.Config.EnableVectorRenderer,
+            IsDestColorProfileSupported = Core.IsDestColorProfileSupported,
+        };
+
+        var codec = Core.CodecRegistry.SelectDecodeCodec(meta, context);
+        if (codec is null) return null;
+
+        var options = new PhotoReadOptions
+        {
+            Width = (uint)Math.Max(0, maxSize),
+            Height = (uint)Math.Max(0, maxSize),
+        };
+
+        using var result = await codec.DecodeAsync(meta, options, context, token).ConfigureAwait(false);
+
+        // detach the raster frame so disposing the result does not dispose it
+        var imgFrame = result.SingleFrame;
+        result.SingleFrame = null;
+        return imgFrame;
     }
 
 
