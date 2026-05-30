@@ -22,8 +22,8 @@ fi
 PACKAGE_NAME="imageglass"
 DEB_DIR="$BUNDLE_DIR/${PACKAGE_NAME}_${DEB_VERSION}_amd64"
 INSTALL_DIR="$DEB_DIR/opt/imageglass"
-ICON_SVG="$WORKSPACE_DIR/assets/Logo.svg"
-ICON_PNG="$WORKSPACE_DIR/assets/Logo512.png"
+ICON_SVG="$WORKSPACE_DIR/_assets/Logo.svg"
+ICON_PNG="$WORKSPACE_DIR/_assets/Logo512.png"
 
 # --- Clean previous build ---
 rm -rf "$DEB_DIR"

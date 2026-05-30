@@ -7,7 +7,7 @@ APP_DIR="$WORKSPACE_DIR/artifacts/bundle/osx-arm64/ImageGlass.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 INFO_PLIST="$CONTENTS_DIR/Info.plist"
 BUILD_PROPS_FILE="$WORKSPACE_DIR/Directory.Build.props"
-ICON_SOURCE_FILE="$WORKSPACE_DIR/assets/Logo.icns"
+ICON_SOURCE_FILE="$WORKSPACE_DIR/_assets/Logo.icns"
 ICON_TARGET_FILE="$CONTENTS_DIR/Resources/Logo.icns"
 
 IG_VERSION="$(sed -n 's:.*<IgVersion>\(.*\)</IgVersion>.*:\1:p' "$BUILD_PROPS_FILE" | head -n 1)"
@@ -26,7 +26,7 @@ mkdir -p "$CONTENTS_DIR/MacOS" "$CONTENTS_DIR/Resources"
 cp -R "$PUBLISH_DIR/." "$CONTENTS_DIR/MacOS/"
 cp "$ICON_SOURCE_FILE" "$ICON_TARGET_FILE"
 
-INFO_PLIST_TEMPLATE="$WORKSPACE_DIR/assets/Info.plist"
+INFO_PLIST_TEMPLATE="$WORKSPACE_DIR/_assets/Info.plist"
 
 sed -e "s/\${IG_VERSION}/$IG_VERSION/g" \
     -e "s/\${IG_SHORT_VERSION}/$IG_SHORT_VERSION/g" \
