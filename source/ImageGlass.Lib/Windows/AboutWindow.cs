@@ -67,10 +67,6 @@ public partial class AboutWindow : DialogWindow
           https://github.com/wieslawsoltes/Svg.Skia
           Copyright (c) 2020 Wiesław Šoltés
 
-        ◍ PhotoSauce.MagicScaler                        MIT license
-          https://github.com/saucecontrol/photosauce
-          Copyright (c) 2015-2024 Clinton Ingram and Contributors
-
         ◍ NativeMemoryArray                             MIT licence
           https://github.com/Cysharp/NativeMemoryArray
           Copyright (c) 2021 Cysharp, Inc.

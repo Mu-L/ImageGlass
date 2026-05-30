@@ -98,7 +98,7 @@ public class PhotoPreviewProvider : IPhotoPreviewProvider
         // 3. resize if needed
         if (minSize > 0 && (imgPreview?.Width > maxSize || imgPreview?.Height > maxSize))
         {
-            var resizedBmpPreview = await SkiaCodec.ResizeAsync(imgPreview, minSize, ImageResamplingMethod.Auto, token);
+            var resizedBmpPreview = await SkiaCodec.ResizeAsync(imgPreview, minSize, token: token);
             imgPreview?.Dispose();
             imgPreview = SKImage.FromBitmap(resizedBmpPreview);
         }

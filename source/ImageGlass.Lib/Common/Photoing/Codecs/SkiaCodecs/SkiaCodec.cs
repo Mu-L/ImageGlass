@@ -24,7 +24,6 @@ using ImageGlass.Common.Extensions;
 using ImageGlass.Common.Types;
 using ImageGlass.UI.Viewer;
 using ImageMagick;
-using PhotoSauce.MagicScaler;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -842,51 +841,28 @@ public static partial class SkiaCodec
 
         try
         {
-            using var inputMs = ToBitmapV4Stream(bmpSrc);
-            if (inputMs is null || token.IsCancellationRequested) return null;
+            if (token.IsCancellationRequested) return null;
 
+            // the enum mirrors FilterType (Auto = Undefined), so it casts directly
+            var filter = (FilterType)resample;
 
-            // build settings
-            var settings = new ProcessImageSettings()
-            {
-                Width = width,
-                Height = height,
-                ResizeMode = CropScaleMode.Stretch,
-                HybridMode = HybridScaleMode.Turbo,
-                ColorProfileMode = ColorProfileMode.Preserve,
-            };
-
-            InterpolationSettings? interpolation = resample switch
-            {
-                ImageResamplingMethod.Average => InterpolationSettings.Average,
-                ImageResamplingMethod.CatmullRom => InterpolationSettings.CatmullRom,
-                ImageResamplingMethod.Cubic => InterpolationSettings.Cubic,
-                ImageResamplingMethod.CubicSmoother => InterpolationSettings.CubicSmoother,
-                ImageResamplingMethod.Hermite => InterpolationSettings.Hermite,
-                ImageResamplingMethod.Lanczos => InterpolationSettings.Lanczos,
-                ImageResamplingMethod.Linear => InterpolationSettings.Linear,
-                ImageResamplingMethod.Mitchell => InterpolationSettings.Mitchell,
-                ImageResamplingMethod.NearestNeighbor => InterpolationSettings.NearestNeighbor,
-                ImageResamplingMethod.Quadratic => InterpolationSettings.Quadratic,
-                ImageResamplingMethod.Spline36 => InterpolationSettings.Spline36,
-                _ => null,
-            };
-            if (interpolation != null) settings.Interpolation = interpolation.Value;
-
-
-            // perform resizing
-            using var outputMs = new MemoryStream();
-            await Task.Run(() =>
+            // resize with Magick.NET on a background thread
+            return await Task.Run(() =>
             {
                 token.ThrowIfCancellationRequested();
 
-                _ = MagicImageProcessor.ProcessImage(inputMs, outputMs, settings);
-                outputMs.Position = 0;
+                using var imgM = ToMagick(bmpSrc);
+                if (imgM is null) return null;
+
+                if (filter != FilterType.Undefined) imgM.FilterType = filter;
+
+                // resize to the exact target size (the caller already computed it)
+                imgM.Resize(new MagickGeometry((uint)width, (uint)height) { IgnoreAspectRatio = true });
+                token.ThrowIfCancellationRequested();
+
+                using var resizedImg = FromMagick(imgM);
+                return resizedImg is null ? null : SKBitmap.FromImage(resizedImg);
             }, token).ConfigureAwait(false);
-
-
-            // get output bitmap
-            return SKBitmap.Decode(outputMs);
         }
         catch (OperationCanceledException) { }
         catch { }

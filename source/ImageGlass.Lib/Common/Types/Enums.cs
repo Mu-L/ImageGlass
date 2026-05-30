@@ -105,22 +105,45 @@ public enum ImageOrderType
 
 
 /// <summary>
-/// Options for image resampling methods.
+/// Image resampling methods. Member names and order mirror Magick.NET's <c>FilterType</c>
+/// (with <see cref="Auto"/> in place of <c>Undefined</c>), so a value casts directly to its filter.
 /// </summary>
 public enum ImageResamplingMethod : int
 {
     Auto = 0,
-    Average,
-    CatmullRom,
-    Cubic,
-    CubicSmoother,
+    Point,
+    Box,
+    Triangle,
     Hermite,
-    Lanczos,
-    Linear,
-    Mitchell,
-    NearestNeighbor,
+    Hann,
+    Hamming,
+    Blackman,
+    Gaussian,
     Quadratic,
-    Spline36,
+    Cubic,
+    Catrom,
+    Mitchell,
+    Jinc,
+    Sinc,
+    SincFast,
+    Kaiser,
+    Welch,
+    Parzen,
+    Bohman,
+    Bartlett,
+    Lagrange,
+    Lanczos,
+    LanczosSharp,
+    Lanczos2,
+    Lanczos2Sharp,
+    Robidoux,
+    RobidouxSharp,
+    Cosine,
+    Spline,
+    LanczosRadius,
+    CubicSpline,
+    MagicKernelSharp2013,
+    MagicKernelSharp2021,
 }
 
 
