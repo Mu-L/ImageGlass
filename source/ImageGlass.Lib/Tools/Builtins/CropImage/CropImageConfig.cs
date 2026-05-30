@@ -66,7 +66,7 @@ public class CropImageConfig() : PhReactive
     /// <summary>
     /// Gets, sets the aspect ratio type.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<SelectionAspectRatio>))]
+    [JsonConverter(typeof(JsonStringEnumSafeConverter<SelectionAspectRatio>))]
     public SelectionAspectRatio AspectRatio
     {
         get; set
@@ -96,7 +96,7 @@ public class CropImageConfig() : PhReactive
     /// <summary>
     /// Gets, sets the default selection type.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<DefaultSelectionType>))]
+    [JsonConverter(typeof(JsonStringEnumSafeConverter<DefaultSelectionType>))]
     public DefaultSelectionType InitSelectionType
     {
         get; set

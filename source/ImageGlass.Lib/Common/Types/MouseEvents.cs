@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System.Text.Json.Serialization;
+using ImageGlass.Common.Types.JsonTypeConverters;
 
 namespace ImageGlass.Common.Types;
 
@@ -24,7 +25,7 @@ namespace ImageGlass.Common.Types;
 /// <summary>
 /// List of mouse click events
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter<MouseClickEvent>))]
+[JsonConverter(typeof(JsonStringEnumSafeConverter<MouseClickEvent>))]
 public enum MouseClickEvent
 {
     LeftClick = 1,
@@ -40,7 +41,7 @@ public enum MouseClickEvent
 /// <summary>
 /// List of mouse wheel events
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter<MouseWheelEvent>))]
+[JsonConverter(typeof(JsonStringEnumSafeConverter<MouseWheelEvent>))]
 public enum MouseWheelEvent
 {
     Scroll = 1,
@@ -53,7 +54,7 @@ public enum MouseWheelEvent
 /// <summary>
 /// List of mouse wheel action for the <see cref="MouseWheelEvent"/>
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter<MouseWheelAction>))]
+[JsonConverter(typeof(JsonStringEnumSafeConverter<MouseWheelAction>))]
 public enum MouseWheelAction
 {
     DoNothing = 0,

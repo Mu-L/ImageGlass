@@ -25,6 +25,7 @@ using ImageGlass.Common.Types;
 using System;
 using System.IO;
 using System.Text.Json.Serialization;
+using ImageGlass.Common.Types.JsonTypeConverters;
 
 namespace ImageGlass.UI;
 
@@ -211,7 +212,7 @@ public partial class ToolbarItemModel : PhReactive, IJsonOnDeserialized
     /// <summary>
     /// Gets, sets the alignment of toolbar item.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<ToolbarItemAlignment>))]
+    [JsonConverter(typeof(JsonStringEnumSafeConverter<ToolbarItemAlignment>))]
     public ToolbarItemAlignment Alignment
     {
         get; set

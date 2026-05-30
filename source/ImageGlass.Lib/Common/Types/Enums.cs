@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using System.Text.Json.Serialization;
+using ImageGlass.Common.Types.JsonTypeConverters;
 
 namespace ImageGlass.Common.Types;
 
@@ -145,7 +146,7 @@ public enum LayoutControl
 /// <summary>
 /// Specifies the position for app layout.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter<LayoutPosition>))]
+[JsonConverter(typeof(JsonStringEnumSafeConverter<LayoutPosition>))]
 public enum LayoutPosition
 {
     Top,

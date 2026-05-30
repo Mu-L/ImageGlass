@@ -727,7 +727,7 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets checkerboard mode of the viewer.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<CheckerboardType>))]
+    [JsonConverter(typeof(JsonStringEnumSafeConverter<CheckerboardType>))]
     public CheckerboardType CheckerboardMode
     {
         get => Get(ConfigId.CheckerboardMode, CheckerboardType.None);
@@ -737,7 +737,7 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets image loading order
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<ImageOrderBy>))]
+    [JsonConverter(typeof(JsonStringEnumSafeConverter<ImageOrderBy>))]
     public ImageOrderBy ImageLoadingOrder
     {
         get => Get(ConfigId.ImageLoadingOrder, ImageOrderBy.Name);
@@ -747,7 +747,7 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets image loading order type
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<ImageOrderType>))]
+    [JsonConverter(typeof(JsonStringEnumSafeConverter<ImageOrderType>))]
     public ImageOrderType ImageLoadingOrderType
     {
         get => Get(ConfigId.ImageLoadingOrderType, ImageOrderType.Asc);
@@ -757,7 +757,7 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets zoom mode value
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<ZoomMode>))]
+    [JsonConverter(typeof(JsonStringEnumSafeConverter<ZoomMode>))]
     public ZoomMode ZoomMode
     {
         get => Get(ConfigId.ZoomMode, ZoomMode.AutoZoom);
@@ -768,7 +768,7 @@ public partial class Config : PhReactive
     /// Gets, sets the interpolation mode to render the viewing image
     /// when the zoom factor is <c>less than or equals 100%</c>.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
+    [JsonConverter(typeof(JsonStringEnumSafeConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleDown
     {
         get => Get(ConfigId.ImageInterpolationScaleDown, ImageInterpolation.LinearMipmapNearest);
@@ -779,7 +779,7 @@ public partial class Config : PhReactive
     /// Gets, sets the interpolation mode to render the viewing image
     /// when the zoom factor is <c>greater than 100%</c>.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<ImageInterpolation>))]
+    [JsonConverter(typeof(JsonStringEnumSafeConverter<ImageInterpolation>))]
     public ImageInterpolation ImageInterpolationScaleUp
     {
         get => Get(ConfigId.ImageInterpolationScaleUp, ImageInterpolation.Nearest);
@@ -798,7 +798,7 @@ public partial class Config : PhReactive
     /// <summary>
     /// Gets, sets the interpolation mode to render the viewing image when the zoom factor is <c>greater than 100%</c>.
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<BackdropStyle>))]
+    [JsonConverter(typeof(JsonStringEnumSafeConverter<BackdropStyle>))]
     public BackdropStyle WindowBackdrop
     {
         get => Get(ConfigId.WindowBackdrop, BackdropStyle.Mica);
