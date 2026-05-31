@@ -61,7 +61,7 @@ if [[ -z "$IG_VERSION" ]]; then
 	exit 1
 fi
 
-DMG_NAME="ImageGlass-${IG_VERSION}-macOS-arm64.dmg"
+DMG_NAME="ImageGlass_${IG_VERSION}_mac-arm64.dmg"
 DMG_PATH="$OUTPUT_DIR/$DMG_NAME"
 VOLUME_NAME="ImageGlass ${IG_VERSION}"
 

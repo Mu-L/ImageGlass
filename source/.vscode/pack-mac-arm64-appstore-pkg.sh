@@ -77,7 +77,7 @@ if [[ -z "$IG_VERSION" ]]; then
 	exit 1
 fi
 
-PKG_NAME="ImageGlass-${IG_VERSION}-macOS-arm64-AppStore.pkg"
+PKG_NAME="ImageGlass_${IG_VERSION}_mac-arm64.pkg"
 PKG_PATH="$OUTPUT_DIR/$PKG_NAME"
 
 echo "==> Packaging ImageGlass $IG_VERSION (arm64) for the Mac App Store"
@@ -97,6 +97,15 @@ find "$APP_DIR" -type d -name "*.dSYM" -exec rm -rf {} +
 # ---------------------------------------------------------------------------
 echo "==> Embedding provisioning profile"
 cp "$PROVISION_PROFILE" "$APP_DIR/Contents/embedded.provisionprofile"
+
+# ---------------------------------------------------------------------------
+# 2b. Strip extended attributes (com.apple.quarantine, etc.) BEFORE signing.
+#     Files copied from downloads (e.g. the provisioning profile) carry the
+#     quarantine xattr, which the App Store rejects (ITMS-91109). Must run
+#     before codesign so the signature is computed over clean files.
+# ---------------------------------------------------------------------------
+echo "==> Stripping extended attributes (quarantine, etc.)"
+xattr -cr "$APP_DIR"
 
 # ---------------------------------------------------------------------------
 # 3. Codesign nested Mach-O binaries first (inside-out), then the bundle.

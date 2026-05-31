@@ -13,7 +13,7 @@
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.13</string>
+	<string>12.0</string>
 	<key>NSRequiresAquaSystemAppearance</key>
 	<false/>
 	<key>NSSupportsAutomaticTermination</key>
@@ -26,6 +26,8 @@
 	</array>
 	<key>CFBundleIdentifier</key>
 	<string>com.duongdieuphap.imageglass</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.photography</string>
 	<key>CFBundleName</key>
 	<string>ImageGlass</string>
 	<key>CFBundleDisplayName</key>
@@ -33,7 +35,7 @@
 	<key>CFBundleExecutable</key>
 	<string>ImageGlass</string>
 	<key>CFBundleVersion</key>
-	<string>${IG_VERSION}</string>
+	<string>${IG_BUILD}</string>
 	<key>CFBundleShortVersionString</key>
 	<string>${IG_SHORT_VERSION}</string>
 	<key>CFBundleIconFile</key>
@@ -48,6 +50,8 @@
 			<string>Image</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>public.image</string>

@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- App Store identity: these MUST match the embedded provisioning profile,
+	     otherwise the upload is rejected ("signature ... is missing an application
+	     identifier"). The value is <TeamID>.<CFBundleIdentifier>. -->
+	<key>com.apple.application-identifier</key>
+	<string>7DV5HBKZ58.com.duongdieuphap.imageglass</string>
+	<key>com.apple.developer.team-identifier</key>
+	<string>7DV5HBKZ58</string>
+
 	<!-- App Sandbox is MANDATORY for Mac App Store distribution. -->
 	<key>com.apple.security.app-sandbox</key>
 	<true/>

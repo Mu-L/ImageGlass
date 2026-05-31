@@ -16,12 +16,38 @@ if [[ -z "$IG_VERSION" ]]; then
 	exit 1
 fi
 
-IG_SHORT_VERSION="${IG_VERSION%.*}"
+# Marketing version (CFBundleShortVersionString): up to 3 integers, e.g. 10.0.0.
+# Prefer the explicit <IgBundleShortVersion>; fall back to IgVersion minus its
+# last segment.
+IG_SHORT_VERSION="$(sed -n 's:.*<IgBundleShortVersion>\(.*\)</IgBundleShortVersion>.*:\1:p' "$BUILD_PROPS_FILE" | head -n 1)"
 if [[ -z "$IG_SHORT_VERSION" ]]; then
-	IG_SHORT_VERSION="$IG_VERSION"
+	IG_SHORT_VERSION="${IG_VERSION%.*}"
+	[[ -z "$IG_SHORT_VERSION" ]] && IG_SHORT_VERSION="$IG_VERSION"
 fi
 
-rm -rf "$APP_DIR"
+# Build number (CFBundleVersion): at most three integers; must increase with
+# every App Store upload. Prefer the explicit <IgBundleBuild>; fall back to the
+# last segment of IgVersion (e.g. 531).
+IG_BUILD="$(sed -n 's:.*<IgBundleBuild>\(.*\)</IgBundleBuild>.*:\1:p' "$BUILD_PROPS_FILE" | head -n 1)"
+if [[ -z "$IG_BUILD" ]]; then
+	IG_BUILD="${IG_VERSION##*.}"
+	[[ -z "$IG_BUILD" ]] && IG_BUILD="$IG_VERSION"
+fi
+
+# Remove any previous bundle. If a prior run created it as root (e.g. a task was
+# run with sudo), the user-level rm fails on every nested file — surface a single
+# actionable message instead of a wall of "Permission denied" lines.
+if [[ -d "$APP_DIR" ]]; then
+	if ! rm -rf "$APP_DIR" 2>/dev/null || [[ -d "$APP_DIR" ]]; then
+		echo "Error: could not remove the existing bundle at:" >&2
+		echo "       $APP_DIR" >&2
+		echo "       It is likely owned by root from a previous sudo run. Remove it with:" >&2
+		echo "         sudo rm -rf \"$APP_DIR\"" >&2
+		echo "       Then re-run this task WITHOUT sudo." >&2
+		exit 1
+	fi
+fi
+
 mkdir -p "$CONTENTS_DIR/MacOS" "$CONTENTS_DIR/Resources"
 cp -R "$PUBLISH_DIR/." "$CONTENTS_DIR/MacOS/"
 cp "$ICON_SOURCE_FILE" "$ICON_TARGET_FILE"
@@ -30,6 +56,7 @@ INFO_PLIST_TEMPLATE="$WORKSPACE_DIR/_assets/Info.plist"
 
 sed -e "s/\${IG_VERSION}/$IG_VERSION/g" \
     -e "s/\${IG_SHORT_VERSION}/$IG_SHORT_VERSION/g" \
+    -e "s/\${IG_BUILD}/$IG_BUILD/g" \
     "$INFO_PLIST_TEMPLATE" > "$INFO_PLIST"
 
 chmod +x "$CONTENTS_DIR/MacOS/ImageGlass"
