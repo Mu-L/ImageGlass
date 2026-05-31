@@ -33,4 +33,18 @@ sed -e "s/\${IG_VERSION}/$IG_VERSION/g" \
     "$INFO_PLIST_TEMPLATE" > "$INFO_PLIST"
 
 chmod +x "$CONTENTS_DIR/MacOS/ImageGlass"
+
+# Relocate non-code data folders into Contents/Resources/ and symlink them back
+# into Contents/MacOS/. codesign treats Contents/MacOS/ as the executable dir and
+# rejects loose resource files in nested subfolders ("code object is not signed at
+# all / In subcomponent ..."). Resources must live under Contents/Resources/.
+# The symlinks keep AppDomain.CurrentDomain.BaseDirectory (Contents/MacOS) lookups
+# working at runtime, so no app code changes are needed.
+for data_dir in _themes _credits; do
+	if [[ -d "$CONTENTS_DIR/MacOS/$data_dir" ]]; then
+		mv "$CONTENTS_DIR/MacOS/$data_dir" "$CONTENTS_DIR/Resources/$data_dir"
+		ln -s "../Resources/$data_dir" "$CONTENTS_DIR/MacOS/$data_dir"
+	fi
+done
+
 echo "Created bundle: $APP_DIR"
