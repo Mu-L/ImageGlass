@@ -173,6 +173,7 @@ public enum LangId
     FrmMain_ReachedFirstImage,
     FrmMain_ReachedLastImage,
     FrmMain_ClipboardImage,
+    FrmMain_FolderAccessPrompt,
     #endregion // Main Window > General
 
 
