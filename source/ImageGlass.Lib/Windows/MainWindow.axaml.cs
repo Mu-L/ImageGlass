@@ -112,6 +112,13 @@ public partial class MainWindow : PhWindow
         // register app hotkeys
         Core.API.RegisterHotkeys();
 
+        // build the macOS menu bar (window-level) from the existing main menu;
+        // the application (⌘) menu is defined in App.axaml
+        if (OperatingSystem.IsMacOS())
+        {
+            NativeMenu.SetMenu(this, PART_MainView.PART_Toolbar.BuildNativeWindowMenu());
+        }
+
         // control events
         _status.Changed += Status_Changed;
         PART_MainView.PART_Toolbar.ItemClicked += PART_Toolbar_ItemClicked;

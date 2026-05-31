@@ -257,14 +257,38 @@ public partial class ToolbarControl : PhControl
 
     private void PART_BtnMainMenu_DropdownOpened(ContextMenu sender, RoutedEventArgs e)
     {
+        RefreshMainMenuState();
+    }
+
+
+    /// <summary>
+    /// Refreshes the dynamic state of the main menu (localized text, editing app name,
+    /// per-format enablement, and external tool entries) just before it is shown.
+    /// Shared by the in-app dropdown menu and the macOS native menu.
+    /// </summary>
+    public void RefreshMainMenuState()
+    {
         UpdateMenuTextIfNeeded();
 
         // 1. update editing app name
         EditingApp.UpdateAppNameForMenuEdit(PART_MnuEdit);
 
+        // 2. update per-format enablement of menu items
+        UpdateMenuItemEnableStates();
 
-        // 2. update menu state
-        // 2.1 animated format
+        // 3. rebuild external tool entries in the Tools submenu
+        BuildExternalToolMenuItems();
+    }
+
+
+    /// <summary>
+    /// Updates the enabled state of format-dependent menu items (animated and multi-frame).
+    /// Separated out so the macOS native menu can reuse it without the structural
+    /// external-tool rebuild (which must not run while AppKit is iterating the menu).
+    /// </summary>
+    private void UpdateMenuItemEnableStates()
+    {
+        // animated format
         var isAnimator = Core.Photos.Current?.Bitmap is AnimatorImpl;
         PART_MnuToggleImageAnimation.IsEnabled = isAnimator;
         PART_MnuViewChannels.IsEnabled
@@ -275,7 +299,7 @@ public partial class ToolbarControl : PhControl
             = PART_MnuFlipVertical.IsEnabled
             = !isAnimator;
 
-        // 2.2 multi-frame format
+        // multi-frame format
         var hasMultiFrames = Core.Photos.CurrentMetadata?.FrameCount > 1;
         PART_MnuExportFrames.IsEnabled
             = PART_MnuViewNextFrame.IsEnabled
@@ -283,10 +307,6 @@ public partial class ToolbarControl : PhControl
             = PART_MnuViewFirstFrame.IsEnabled
             = PART_MnuViewLastFrame.IsEnabled
             = hasMultiFrames;
-
-
-        // 3. rebuild external tool entries in the Tools submenu
-        BuildExternalToolMenuItems();
     }
 
 

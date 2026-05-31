@@ -3,8 +3,27 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ImageGlass.UI"
-    RequestedThemeVariant="Default">
-    <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
+    RequestedThemeVariant="Default"
+    Name="ImageGlass">
+
+    <!--  macOS application (⌘) menu.
+        Items are declared here so they exist at startup
+        and Avalonia composes them with its standard system items (Services, Hide, Quit).
+        Headers are localized in code-behind (see App.LocalizeAppMenu).  -->
+    <NativeMenu.Menu>
+        <NativeMenu>
+            <NativeMenuItem
+                Click="AppMenuAbout_Click"
+                CommandParameter="FrmMain_MnuAbout"
+                Header="About ImageGlass" />
+            <NativeMenuItemSeparator />
+            <NativeMenuItem
+                Click="AppMenuSettings_Click"
+                CommandParameter="FrmMain_MnuSettings"
+                Header="Settings…" />
+        </NativeMenu>
+    </NativeMenu.Menu>
+
 
 
     <Application.Styles>

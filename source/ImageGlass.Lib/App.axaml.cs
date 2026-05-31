@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Platform;
@@ -26,6 +27,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using ImageGlass.Common.AppThemes;
 using ImageGlass.Common.Extensions;
+using ImageGlass.Common.Localization;
 using ImageGlass.Common.Photoing;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
@@ -90,6 +92,13 @@ public partial class App : Application
     {
         _ = ApplyUIConfigsAsync();
         PlatformSettings?.ColorValuesChanged += PlatformSettings_ColorValuesChanged;
+
+        // localize the macOS application (⌘) menu now and whenever the language changes
+        if (OperatingSystem.IsMacOS())
+        {
+            LocalizeAppMenu();
+            Core.LanguageChanged += (_, _) => LocalizeAppMenu();
+        }
 
         // subscribe to activated event to handle app activation from file associations
         var activable = this.TryGetFeature<IActivatableLifetime>();
@@ -165,6 +174,44 @@ public partial class App : Application
             {
                 MainWindow?.Activate();
             });
+        }
+    }
+
+
+    private void AppMenuAbout_Click(object? sender, EventArgs e) => RunAppMenuAction(LangId.FrmMain_MnuAbout);
+
+    private void AppMenuSettings_Click(object? sender, EventArgs e) => RunAppMenuAction(LangId.FrmMain_MnuSettings);
+
+
+    /// <summary>
+    /// Runs the app action bound to a main-menu language key (shared routing used by the macOS app menu).
+    /// </summary>
+    private static void RunAppMenuAction(LangId menuKey)
+    {
+        var action = AppAPIProvider.GetMenuAction(menuKey);
+        if (Core.API is not null) _ = Core.API.RunActionAsync(action);
+    }
+
+
+    /// <summary>
+    /// Localizes the macOS application (⌘) menu items declared in App.axaml, matching each item to
+    /// its <see cref="LangId"/> via the item's CommandParameter, and assigns the Settings shortcut.
+    /// </summary>
+    private void LocalizeAppMenu()
+    {
+        if (NativeMenu.GetMenu(this) is not { } menu) return;
+
+        foreach (var item in menu.Items.OfType<NativeMenuItem>())
+        {
+            if (item.CommandParameter is not string tag || !Enum.TryParse<LangId>(tag, out var langId)) continue;
+
+            var text = Core.Lang[langId];
+            if (!string.IsNullOrWhiteSpace(text)) item.Header = text;
+
+            if (langId == LangId.FrmMain_MnuSettings)
+            {
+                item.Gesture = new KeyGesture(Key.OemComma, KeyModifiers.Meta);
+            }
         }
     }
 
