@@ -11,7 +11,10 @@
         "${workspaceFolder}/ImageGlass.Win32/ImageGlass.Win32.csproj",
         "-c",
         "Debug",
-        "-p:Platform=x64"
+        "-p:Platform=x64",
+        "-r",
+        "win-x64",
+        "--no-incremental"
       ],
       "problemMatcher": "$msCompile",
       "group": "build"
@@ -25,7 +28,10 @@
         "${workspaceFolder}/ImageGlass.Win32/ImageGlass.Win32.csproj",
         "-c",
         "Debug",
-        "-p:Platform=ARM64"
+        "-p:Platform=ARM64",
+        "-r",
+        "win-arm64",
+        "--no-incremental"
       ],
       "problemMatcher": "$msCompile",
       "group": "build"
@@ -39,7 +45,10 @@
         "${workspaceFolder}/ImageGlass.Linux/ImageGlass.Linux.csproj",
         "-c",
         "Debug",
-        "-p:Platform=x64"
+        "-p:Platform=x64",
+        "-r",
+        "linux-x64",
+        "--no-incremental"
       ],
       "problemMatcher": "$msCompile",
       "group": "build"
@@ -53,7 +62,10 @@
         "${workspaceFolder}/ImageGlass.Mac/ImageGlass.Mac.csproj",
         "-c",
         "Debug",
-        "-p:Platform=ARM64"
+        "-p:Platform=ARM64",
+        "-r",
+        "osx-arm64",
+        "--no-incremental"
       ],
       "problemMatcher": "$msCompile",
       "group": "build"
