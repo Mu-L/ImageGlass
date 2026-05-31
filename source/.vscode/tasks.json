@@ -133,6 +133,20 @@
       "group": "build"
     },
     {
+      "label": "pack-mac-arm64-appstore-pkg",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/.vscode/pack-mac-arm64-appstore-pkg.sh"
+      ],
+      "problemMatcher": [],
+      "dependsOn": [
+        "bundle-mac-arm64-app"
+      ],
+      "dependsOrder": "sequence",
+      "group": "build"
+    },
+    {
       "label": "bundle-linux-x64-deb",
       "type": "process",
       "command": "/bin/bash",
