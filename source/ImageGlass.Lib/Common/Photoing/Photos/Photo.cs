@@ -327,7 +327,13 @@ public partial class Photo : PhDisposable
         if (disposeEverything)
         {
             await UnloadThumbnailAsync().ConfigureAwait(false);
-            _thumbnailLock.Dispose();
+
+            // Do NOT dispose _thumbnailLock: a concurrent LoadThumbnailAsync may
+            // still be parked on its WaitAsync (e.g. behind the throttle lock), and
+            // disposing it makes that await throw ObjectDisposedException on a
+            // background task — surfacing as an unobserved-exception crash. We only
+            // use WaitAsync/Release (never AvailableWaitHandle), so the SemaphoreSlim
+            // holds no unmanaged handle and is reclaimed safely by the GC.
 
             if (_taskMetadata is not null)
             {

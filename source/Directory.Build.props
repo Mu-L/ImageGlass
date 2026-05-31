@@ -13,6 +13,6 @@
       - IgBundleBuild -> CFBundleVersion: build number, 1-3 integers; must
         INCREASE with every App Store upload for the same short version. -->
     <IgBundleShortVersion>10.0.0</IgBundleShortVersion>
-    <IgBundleBuild>532</IgBundleBuild>
+    <IgBundleBuild>533</IgBundleBuild>
   </PropertyGroup>
 </Project>
