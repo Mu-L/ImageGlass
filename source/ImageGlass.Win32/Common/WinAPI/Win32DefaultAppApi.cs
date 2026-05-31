@@ -1,5 +1,5 @@
 ﻿/*
-ImageGlass - A lightweight, versatile image viewer
+ImageGlass - A Fast, Seamless Photo Viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
 
@@ -82,7 +82,7 @@ public static class Win32DefaultAppApi
         {
             key.SetValue("ApplicationName", BHelper.AppName);
             key.SetValue("ApplicationIcon", $"\"{BHelper.AppExePath}\", 0");
-            key.SetValue("ApplicationDescription", "A lightweight, versatile image viewer");
+            key.SetValue("ApplicationDescription", "A Fast, Seamless Photo Viewer");
 
             // register file type associations:
             // HKCU\Software\ImageGlass\Capabilities\FileAssociations

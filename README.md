@@ -2,7 +2,7 @@
 
 # 🖼️ ImageGlass
 
-### A Fast, Seamless Image Browing
+### A Fast, Seamless Photo Viewer
 
 ImageGlass is a fast, modern, open-source image viewer built for Windows, macOS, and Linux. Designed for speed and efficiency, it delivers a smooth, immersive viewing experience by combining high-performance rendering with professional-grade tools for both everyday users and designers. ImageGlass provides seamless, quick navigation across more than 90 image formats, including `WEBP`, `GIF`, `SVG`, `AVIF`, `JXL`, `HEIC`, and raw images.
 

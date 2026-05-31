@@ -53,7 +53,7 @@ fi
 cat > "$DEB_DIR/usr/share/applications/imageglass.desktop" <<DESKTOP
 [Desktop Entry]
 Name=ImageGlass
-Comment=A lightweight, versatile image viewer
+Comment=A Fast, Seamless Photo Viewer
 Exec=/opt/imageglass/ImageGlass %F
 Icon=imageglass
 Terminal=false
@@ -74,10 +74,8 @@ Architecture: amd64
 Installed-Size: $INSTALLED_SIZE
 Maintainer: Duong Dieu Phap <phap@imageglass.org>
 Homepage: https://imageglass.org
-Description: A lightweight, versatile image viewer
- ImageGlass is a lightweight, versatile image viewing application that supports
- a wide range of image formats including JPEG, PNG, GIF, BMP, TIFF, SVG, WEBP,
- AVIF, HEIC, PSD, RAW formats, and many more.
+Description: A Fast, Seamless Photo Viewer
+ ImageGlass is a fast, modern, open-source image viewer built for Windows, macOS, and Linux. Designed for speed and efficiency, it delivers a smooth, immersive viewing experience by combining high-performance rendering with professional-grade tools for both everyday users and designers. ImageGlass provides seamless, quick navigation across more than 90 image formats, including WEBP, GIF, SVG, AVIF, JXL, HEIC, and raw images.
 CONTROL
 
 # --- Build the .deb package ---

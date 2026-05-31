@@ -1,5 +1,5 @@
 ﻿/*
-ImageGlass - A lightweight, versatile image viewer
+ImageGlass - A Fast, Seamless Photo Viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
 
@@ -635,7 +635,7 @@ public class Lang
 
         
         #region FrmAbout
-        new(LangId.FrmAbout_Slogan, "A lightweight, versatile image viewer"),
+        new(LangId.FrmAbout_Slogan, "A Fast, Seamless Photo Viewer"),
         new(LangId.FrmAbout_Version, "Version:"),
         new(LangId.FrmAbout_License, "Software license"),
         new(LangId.FrmAbout_Privacy, "Privacy policy"),
