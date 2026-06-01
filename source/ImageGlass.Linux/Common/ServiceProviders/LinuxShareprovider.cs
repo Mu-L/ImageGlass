@@ -1,4 +1,4 @@
-﻿/*
+/*
 ImageGlass - A Fast, Seamless Photo Viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
@@ -17,9 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using ImageGlass.Common.ServiceProviders;
-using System;
-using System.Diagnostics;
-using System.Linq;
 
 namespace ImageGlass.Linux.Common.ServiceProviders;
 
@@ -31,64 +28,11 @@ internal class LinuxShareProvider : IShareProvider
     /// </summary>
     public void ShowShare(nint windowHandle, string[] filePaths)
     {
-        ArgumentNullException.ThrowIfNull(filePaths);
-        if (filePaths.Length == 0) return;
-
-        // try xdg-desktop-portal Email compose (modern desktop portal)
-        if (TryShareViaPortal(filePaths)) return;
-
-        // fallback: xdg-email with file attachments
-        TryShareViaXdgEmail(filePaths);
-    }
-
-
-    /// <summary>
-    /// Invokes the xdg-desktop-portal Email compose dialog via D-Bus.
-    /// </summary>
-    private static bool TryShareViaPortal(string[] filePaths)
-    {
-        try
-        {
-            // build GVariant array of file path strings for the 'attachments' option
-            var fileList = string.Join(", ", filePaths.Select(f => $"'{f}'"));
-            var options = $"{{'attachments': <[{fileList}]>}}";
-
-            using var proc = new Process();
-            proc.StartInfo.FileName = "gdbus";
-            proc.StartInfo.Arguments =
-                "call --session " +
-                "--dest org.freedesktop.portal.Desktop " +
-                "--object-path /org/freedesktop/portal/desktop " +
-                "--method org.freedesktop.portal.Email.ComposeMessage " +
-                $"\"\" \"{options}\"";
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.CreateNoWindow = true;
-            proc.StartInfo.RedirectStandardError = true;
-            proc.Start();
-            proc.WaitForExit(5000);
-
-            return proc.ExitCode == 0;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-
-    /// <summary>
-    /// Opens the default email client with file attachments using xdg-email.
-    /// </summary>
-    private static void TryShareViaXdgEmail(string[] filePaths)
-    {
-        var attachArgs = string.Join(" ", filePaths.Select(f => $"--attach \"{f}\""));
-
-        using var proc = new Process();
-        proc.StartInfo.FileName = "xdg-email";
-        proc.StartInfo.Arguments = attachArgs;
-        proc.StartInfo.UseShellExecute = false;
-        proc.StartInfo.CreateNoWindow = true;
-        proc.Start();
+        // Sharing is disabled on Linux for now (the Share button is hidden in the UI).
+        // Linux has no general "share" sheet; the closest target is the XDG Email
+        // portal, but it accepts attachments only as file descriptors (attachment_fds),
+        // which the gdbus CLI cannot pass. Re-enable here once a managed D-Bus client
+        // that can pass FDs is wired up.
     }
 
 }

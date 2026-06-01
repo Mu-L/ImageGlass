@@ -1,4 +1,4 @@
-﻿/*
+/*
 ImageGlass - A Fast, Seamless Photo Viewer
 Copyright (C) 2010 - 2026 DUONG DIEU PHAP
 Project homepage: https://imageglass.org
@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-using ImageGlass.Common;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.Types;
 using System;
@@ -60,8 +59,14 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     {
         if (moveToRecycleBin)
         {
-            // use 'gio trash' to move file to the FreeDesktop trash
-            BHelper.RunProcess("gio", $"trash \"{filePath}\"");
+            // Move to the user's real trash via the FreeDesktop spec. We don't use
+            // the Trash portal (broken on some desktops) or 'gio trash' (targets
+            // the sandbox trash inside Flatpak). Throw on failure so the caller
+            // surfaces an error instead of silently "losing" the file.
+            if (!FreeDesktopTrash.Trash(filePath))
+            {
+                throw new IOException($"IGE: Could not move the file to trash: {filePath}");
+            }
         }
         else
         {
@@ -131,8 +136,8 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public Task OpenDefaultEditingAppAsync(string filePath, Action? callbackFn = null)
     {
-        // xdg-open launches the file in its associated application
-        BHelper.RunProcess("xdg-open", $"\"{filePath}\"");
+        // Open the file in its associated application via the OpenURI portal.
+        XdgPortal.OpenPath(filePath);
         callbackFn?.Invoke();
 
         return Task.CompletedTask;
@@ -146,23 +151,8 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     {
         if (string.IsNullOrWhiteSpace(filePath)) return;
 
-        // try DBus call to select the file in the default file manager
-        try
-        {
-            BHelper.RunProcess("dbus-send",
-                "--session --type=method_call --dest=org.freedesktop.FileManager1 " +
-                "/org/freedesktop/FileManager1 org.freedesktop.FileManager1.ShowItems " +
-                $"array:string:\"file://{filePath}\" string:\"\"");
-            return;
-        }
-        catch { }
-
-        // fallback: open the parent directory
-        var dirPath = Path.GetDirectoryName(filePath);
-        if (!string.IsNullOrEmpty(dirPath))
-        {
-            BHelper.RunProcess("xdg-open", $"\"{dirPath}\"");
-        }
+        // Reveal & select the file in the default file manager.
+        XdgPortal.ShowInFileManager(filePath);
     }
 
 
@@ -179,7 +169,8 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
         }
         catch { }
 
-        BHelper.RunProcess("xdg-open", $"\"{dirPath}\"");
+        // Open the folder in the default file manager via the OpenURI portal.
+        XdgPortal.OpenPath(dirPath);
     }
 
 
@@ -206,11 +197,10 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public void SetWallpaper(string filePath)
     {
-        // GNOME desktop wallpaper (light and dark)
-        BHelper.RunProcess("gsettings",
-            $"set org.gnome.desktop.background picture-uri \"file://{filePath}\"");
-        BHelper.RunProcess("gsettings",
-            $"set org.gnome.desktop.background picture-uri-dark \"file://{filePath}\"");
+        // Route through the Wallpaper portal so it works inside the Flatpak
+        // sandbox (gsettings would only change the sandbox's own dconf). The
+        // portal shows the system wallpaper preview dialog for confirmation.
+        XdgPortal.SetWallpaper(filePath);
     }
 
 
@@ -228,15 +218,10 @@ internal class LinuxShellProvider : PhDisposable, IShellProvider
     /// </summary>
     public void ShowFileProperties(string filePath, nint windowHandle)
     {
-        // try DBus call to show the properties dialog in the file manager
-        try
-        {
-            BHelper.RunProcess("dbus-send",
-                "--session --type=method_call --dest=org.freedesktop.FileManager1 " +
-                "/org/freedesktop/FileManager1 org.freedesktop.FileManager1.ShowItemProperties " +
-                $"array:string:\"file://{filePath}\" string:\"\"");
-        }
-        catch { }
+        if (string.IsNullOrWhiteSpace(filePath)) return;
+
+        // Show the file manager's properties dialog for the file.
+        XdgPortal.ShowInFileManager(filePath, showProperties: true);
     }
 
 

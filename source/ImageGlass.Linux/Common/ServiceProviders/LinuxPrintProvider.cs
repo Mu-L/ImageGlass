@@ -67,8 +67,11 @@ internal class LinuxPrintProvider : IPrintProvider
         if (string.IsNullOrEmpty(fileToPrint)) return;
 
 
-        // print via CUPS lp command, scaling the image to fit the page
-        BHelper.RunProcess("lp", $"-o fit-to-page -- \"{fileToPrint}\"");
+        // Print via the CUPS 'lpr' command, scaling the image to fit the page.
+        // 'lpr' (not 'lp') is used because the Flatpak runtime ships lpr but not
+        // lp; both drive CUPS, which applies its own image filters. The Flatpak
+        // grants --socket=cups so this reaches the host's print system.
+        BHelper.RunProcess("lpr", $"-o fit-to-page \"{fileToPrint}\"");
 
     }
 }

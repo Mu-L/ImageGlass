@@ -55,6 +55,14 @@
 
   <content_rating type="oars-1.1" />
 
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+  <supports>
+    <control>touch</control>
+  </supports>
+
   <releases>
     <release version="10.0.0" date="2026-06-01">
       <url>https://github.com/d2phap/ImageGlass/releases</url>

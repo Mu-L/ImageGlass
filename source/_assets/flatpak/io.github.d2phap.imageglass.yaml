@@ -7,6 +7,7 @@ command: imageglass
 finish-args:
   - --socket=x11
   - --share=ipc
+  - --share=network
   - --device=dri
   - --filesystem=host
   - --socket=cups
@@ -27,8 +28,8 @@ modules:
       - install -Dm644 io.github.d2phap.imageglass.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/io.github.d2phap.imageglass.png
     sources:
       - type: archive
-        url: https://github.com/d2phap/ImageGlass/releases/download/v10.0.0.531/ImageGlass_10.0.0.531_linux-x64.tar.gz
-        sha256: 52a6a01c02e60e0d5c676992c6e7f5aee76b18cc1d7c82448fb6eca882e580dd
+        url: https://github.com/d2phap/ImageGlass/releases/download/10.0.2.66-beta-2/ImageGlass_10.0.2.66-beta-2_linux-x64.tar.gz
+        sha256: edcf1329d2e7a4341bc6843d2a5ec43d1186c2430e4aa739b775722c7dd26edf
         strip-components: 1
       - type: file
         path: io.github.d2phap.imageglass.desktop

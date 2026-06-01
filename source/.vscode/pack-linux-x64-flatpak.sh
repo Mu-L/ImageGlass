@@ -11,7 +11,8 @@
 # Run after the publish-linux-x64 task. Distribution steps: _assets/flatpak/README.md
 #
 # Env overrides:
-#   RELEASE_TAG=v10.0.0   tag used to build the GitHub download URL
+#   RELEASE_TAG=10.0.2.66-beta-2   tag used to build the GitHub download URL
+#                                  (defaults to <IgVersion>-<IgReleaseType>)
 #   GPG_KEY=<keyid>       sign the .flatpak bundle with this GPG key (optional)
 
 set -euo pipefail
@@ -27,24 +28,55 @@ MANIFEST="$FLATPAK_DIR/io.github.d2phap.imageglass.yaml"
 APP_ID="io.github.d2phap.imageglass"
 GPG_KEY="${GPG_KEY:-}"
 
-# --- Read version from Directory.Build.props ---
+# --- Bump the build number (4th version component) on every deploy ---
+# A fresh version each run means the installed app can never look stale and the
+# release tag/tarball name are always unique. Set NO_VERSION_BUMP=1 to re-pack the
+# same version (e.g. to retry a failed build without advancing the number).
+if [[ "${NO_VERSION_BUMP:-0}" != "1" ]]; then
+	_cur="$(sed -n 's:.*<IgVersion>\(.*\)</IgVersion>.*:\1:p' "$BUILD_PROPS_FILE" | head -n 1)"
+	if [[ "$_cur" =~ ^([0-9]+\.[0-9]+\.[0-9]+)\.([0-9]+)$ ]]; then
+		_new="${BASH_REMATCH[1]}.$((BASH_REMATCH[2] + 1))"
+		sed -i -E "s#(<IgVersion>)[^<]*(</IgVersion>)#\1${_new}\2#" "$BUILD_PROPS_FILE"
+		echo "==> Bumped IgVersion: $_cur -> $_new"
+	else
+		echo "Warning: IgVersion '$_cur' is not N.N.N.N; skipping auto-bump." >&2
+	fi
+fi
+
+# --- Read version + release type from Directory.Build.props ---
 IG_VERSION="$(sed -n 's:.*<IgVersion>\(.*\)</IgVersion>.*:\1:p' "$BUILD_PROPS_FILE" | head -n 1)"
 if [[ -z "$IG_VERSION" ]]; then
 	echo "Error: could not read IgVersion from $BUILD_PROPS_FILE" >&2
 	exit 1
 fi
+IG_RELEASE_TYPE="$(sed -n 's:.*<IgReleaseType>\(.*\)</IgReleaseType>.*:\1:p' "$BUILD_PROPS_FILE" | head -n 1)"
 
-RELEASE_TAG="${RELEASE_TAG:-v$IG_VERSION}"
-TARBALL_NAME="ImageGlass_${IG_VERSION}_linux-x64.tar.gz"
-BUNDLE_NAME="ImageGlass_${IG_VERSION}_linux-x64.flatpak"
+# Release label mirrors the GitHub release tag/asset naming: <version>-<releasetype>
+# (e.g. 10.0.2.66-beta-2). No "v" prefix. The tag and the asset file share this label.
+REL_LABEL="$IG_VERSION"
+[[ -n "$IG_RELEASE_TYPE" ]] && REL_LABEL="${IG_VERSION}-${IG_RELEASE_TYPE}"
+
+RELEASE_TAG="${RELEASE_TAG:-$REL_LABEL}"
+TARBALL_NAME="ImageGlass_${REL_LABEL}_linux-x64.tar.gz"
+BUNDLE_NAME="ImageGlass_${REL_LABEL}_linux-x64.flatpak"
 TARBALL_PATH="$DIST_DIR/$TARBALL_NAME"
 BUNDLE_PATH="$DIST_DIR/$BUNDLE_NAME"
 RELEASE_URL="https://github.com/d2phap/ImageGlass/releases/download/${RELEASE_TAG}/${TARBALL_NAME}"
 
-# --- Sanity checks ---
+# --- Publish a fresh self-contained AOT build ---
+# Always re-publish so the bundle matches the current source and IgVersion. The
+# version is baked into the binary (AppBuildInfo.g.cs); packaging a stale publish
+# dir would ship the wrong version and old code.
+echo "==> Publishing ImageGlass $IG_VERSION (linux-x64, AOT)"
+rm -rf "$PUBLISH_DIR"
+dotnet publish "$WORKSPACE_DIR/ImageGlass.Linux/ImageGlass.Linux.csproj" \
+	-c Release -r linux-x64 -p:Platform=x64 \
+	-p:PublishAot=true -p:PublishSingleFile=true -p:PublishTrimmed=true \
+	-o "$PUBLISH_DIR" --self-contained true
+cp -r "$WORKSPACE_DIR/_assets/resources/." "$PUBLISH_DIR/"
+
 if [[ ! -x "$PUBLISH_DIR/ImageGlass" ]]; then
-	echo "Error: published binary not found at $PUBLISH_DIR/ImageGlass" >&2
-	echo "       Run the 'publish-linux-x64' task first." >&2
+	echo "Error: publish did not produce $PUBLISH_DIR/ImageGlass" >&2
 	exit 1
 fi
 
@@ -121,7 +153,12 @@ else
 
 	# Build into a repo (for the bundle) and install for the current user (to test).
 	# --state-dir keeps the build cache under artifacts/ instead of the repo root.
-	flatpak-builder --state-dir="$STATE_DIR" --user --install --force-clean \
+	# --disable-cache is REQUIRED: the single module is a local tarball whose name is
+	# constant (app.tar.gz) but whose contents change every release. Without it,
+	# flatpak-builder matches the cached module build and ships the OLD binary even
+	# though the tarball is fresh (--force-clean only wipes the build dir, not the
+	# cache) — the .flatpak ends up version-stamped new but containing old code.
+	flatpak-builder --state-dir="$STATE_DIR" --user --install --force-clean --disable-cache \
 		--repo="$REPO_DIR" "${GPG_ARGS[@]}" \
 		"$BUILD_ROOT/build" "$LOCAL_DIR/$APP_ID.yaml"
 
@@ -143,8 +180,16 @@ echo "  Manifest url            : $RELEASE_URL"
 if [[ "$BUNDLE_BUILT" == "1" ]]; then
 	echo "  Bundle (direct install) : $BUNDLE_PATH"
 	echo ""
-	echo "Test the local install:   flatpak run $APP_ID [image-path]"
-	echo "Or install the bundle:    flatpak install --user $BUNDLE_PATH"
+	echo "Installed to your USER flatpak. Test with:"
+	echo "    flatpak run $APP_ID [image-path]"
+	# A previously double-clicked bundle installs SYSTEM-wide and will shadow this
+	# fresh user install (you'd keep testing the old code). Warn if one exists.
+	if flatpak --system info "$APP_ID" >/dev/null 2>&1; then
+		echo ""
+		echo "WARNING: an older SYSTEM-wide install exists and will be launched instead."
+		echo "         Remove it so you test this build:"
+		echo "             flatpak uninstall --system $APP_ID"
+	fi
 fi
 echo ""
 echo "Next: upload both files to the '$RELEASE_TAG' GitHub release, then submit"

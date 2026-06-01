@@ -110,9 +110,7 @@
                                     LangKey="FrmMain_MnuOpenWith" />
                                 <ui:PhMenuItem
                                     Click="MainMenuItem_Click"
-                                    IsVisible="{OnPlatform False,
-                                                           Windows=True,
-                                                           x:TypeArguments=x:Boolean}"
+                                    IsVisible="{OnPlatform False, Windows=True, x:TypeArguments=x:Boolean}"
                                     LangKey="FrmMain_MnuPrint" />
                                 <ui:PhMenuItem
                                     Click="MainMenuItem_Click"
