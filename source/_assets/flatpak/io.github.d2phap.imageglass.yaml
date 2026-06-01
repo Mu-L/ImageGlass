@@ -29,7 +29,7 @@ modules:
     sources:
       - type: archive
         url: https://github.com/d2phap/ImageGlass/releases/download/10.0.2.66-beta-2/ImageGlass_10.0.2.66-beta-2_linux-x64.tar.gz
-        sha256: edcf1329d2e7a4341bc6843d2a5ec43d1186c2430e4aa739b775722c7dd26edf
+        sha256: 6116337192180f0e2783b36183036cea26c021f3ea15a82793d09ce351f9e19c
         strip-components: 1
       - type: file
         path: io.github.d2phap.imageglass.desktop
