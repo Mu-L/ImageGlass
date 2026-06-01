@@ -88,6 +88,9 @@ project.fragment.lock.json
 artifacts/
 .artifacts/
 
+# Flatpak build cache (created by flatpak-builder)
+.flatpak-builder/
+
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 

@@ -160,5 +160,19 @@
       "dependsOrder": "sequence",
       "group": "build"
     },
+    {
+      "label": "pack-linux-x64-flatpak",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/.vscode/pack-linux-x64-flatpak.sh"
+      ],
+      "problemMatcher": [],
+      "dependsOn": [
+        "publish-linux-x64"
+      ],
+      "dependsOrder": "sequence",
+      "group": "build"
+    },
   ],
 }
