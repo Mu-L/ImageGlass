@@ -388,6 +388,15 @@ public static class Core
             var fm = FontFamily.Parse("Segoe UI Variable Text");
             Resx.Set(ResxId.ContentControlThemeFontFamily, fm);
         }
+
+        // 2. The bundled Inter font has a larger x-height than the native macOS
+        // system font it replaces, so at the same point size the UI reads
+        // noticeably bigger. Nudge the default control font size down on macOS
+        // so the app matches the Windows/Linux builds.
+        if (BHelper.OS == OSType.Mac)
+        {
+            app.Resources["ControlContentThemeFontSize"] = 13d;
+        }
     }
 
 

@@ -70,10 +70,7 @@ sealed class Program
 #endif
         .UseSkia()
         .UseHarfBuzz()
-        // Pin the default UI font so the app looks identical whether it runs on
-        // the host (dev/F5) or inside the Flatpak sandbox, which otherwise falls
-        // back to the runtime's default (DejaVu Sans). "Inter" is a clean, modern
-        // UI font shipped by both the freedesktop runtime and common distros.
+        .WithInterFont()
         .With(new FontManagerOptions
         {
             DefaultFamilyName = "Inter",

@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 using Avalonia;
 using Avalonia.Input;
+using Avalonia.Media;
 using ImageGlass.Common;
 using ImageGlass.Common.ServiceProviders;
 using ImageGlass.Common.ServiceProviders.FileSearchService;
@@ -69,6 +70,11 @@ sealed class Program
 #endif
         .UseSkia()
         .UseHarfBuzz()
+        .WithInterFont()
+        .With(new FontManagerOptions
+        {
+            DefaultFamilyName = "Inter",
+        })
         .With(new SkiaOptions
         {
             MaxGpuResourceSizeBytes = long.MaxValue,

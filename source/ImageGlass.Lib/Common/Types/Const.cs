@@ -80,9 +80,15 @@ public static class Const
 
 
     public const string FONT_CODE = "Cascadia Code, Consolas, SF Mono, Menlo, Monaco, Courier New, monospace";
-    public const double FONT_SIZE_TITLE = 20;
-    public const double FONT_SIZE_SUBTITLE = 18;
-    public const double FONT_SIZE_SMALL = 13;
+
+    /// <summary>
+    /// On macOS the bundled Inter font renders larger than the native system font,
+    /// so the standard sizes are nudged down to match the Windows/Linux builds.
+    /// </summary>
+    private static readonly double FONT_SIZE_MAC_OFFSET = BHelper.OS == OSType.Mac ? -1 : 0;
+    public static readonly double FONT_SIZE_TITLE = 20 + FONT_SIZE_MAC_OFFSET;
+    public static readonly double FONT_SIZE_SUBTITLE = 18 + FONT_SIZE_MAC_OFFSET;
+    public static readonly double FONT_SIZE_SMALL = 13 + FONT_SIZE_MAC_OFFSET;
 
 }
 
