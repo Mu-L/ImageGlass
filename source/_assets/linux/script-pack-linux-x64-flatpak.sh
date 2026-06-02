@@ -8,7 +8,7 @@
 #   3. If flatpak-builder is available: builds a single-file .flatpak bundle
 #      (for direct download / GitHub Releases) and installs it locally to test.
 #
-# Run after the publish-linux-x64 task. Distribution steps: _assets/flatpak/README.md
+# Run after the publish-linux-x64 task. Distribution steps: _assets/linux/flatpak/README.md
 #
 # Env overrides:
 #   RELEASE_TAG=10.0.2.66-beta-2   tag used to build the GitHub download URL
@@ -17,9 +17,9 @@
 
 set -euo pipefail
 
-WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PUBLISH_DIR="$WORKSPACE_DIR/artifacts/publish/linux-x64"
-FLATPAK_DIR="$WORKSPACE_DIR/_assets/flatpak"
+FLATPAK_DIR="$WORKSPACE_DIR/_assets/linux/flatpak"
 DIST_DIR="$WORKSPACE_DIR/artifacts/dist"
 BUILD_ROOT="$WORKSPACE_DIR/artifacts/bundle/linux-flatpak"
 STATE_DIR="$BUILD_ROOT/.flatpak-builder"
@@ -73,7 +73,7 @@ dotnet publish "$WORKSPACE_DIR/ImageGlass.Linux/ImageGlass.Linux.csproj" \
 	-c Release -r linux-x64 -p:Platform=x64 \
 	-p:PublishAot=true -p:PublishSingleFile=true -p:PublishTrimmed=true \
 	-o "$PUBLISH_DIR" --self-contained true
-cp -r "$WORKSPACE_DIR/_assets/resources/." "$PUBLISH_DIR/"
+cp -r "$WORKSPACE_DIR/_assets/_app/." "$PUBLISH_DIR/"
 
 if [[ ! -x "$PUBLISH_DIR/ImageGlass" ]]; then
 	echo "Error: publish did not produce $PUBLISH_DIR/ImageGlass" >&2
@@ -81,11 +81,11 @@ if [[ ! -x "$PUBLISH_DIR/ImageGlass" ]]; then
 fi
 
 # --- Prepare app-id-named icons from the shared assets ---
-if [[ -f "$WORKSPACE_DIR/_assets/Logo.svg" ]]; then
-	cp "$WORKSPACE_DIR/_assets/Logo.svg" "$FLATPAK_DIR/$APP_ID.svg"
+if [[ -f "$WORKSPACE_DIR/_assets/logo.svg" ]]; then
+	cp "$WORKSPACE_DIR/_assets/logo.svg" "$FLATPAK_DIR/$APP_ID.svg"
 fi
-if [[ -f "$WORKSPACE_DIR/_assets/Logo512.png" ]]; then
-	cp "$WORKSPACE_DIR/_assets/Logo512.png" "$FLATPAK_DIR/$APP_ID.png"
+if [[ -f "$WORKSPACE_DIR/_assets/logo512.png" ]]; then
+	cp "$WORKSPACE_DIR/_assets/logo512.png" "$FLATPAK_DIR/$APP_ID.png"
 fi
 
 # --- Stage the payload and build the tarball ---
@@ -193,4 +193,4 @@ if [[ "$BUNDLE_BUILT" == "1" ]]; then
 fi
 echo ""
 echo "Next: upload both files to the '$RELEASE_TAG' GitHub release, then submit"
-echo "      the manifest to Flathub (see _assets/flatpak/README.md)."
+echo "      the manifest to Flathub (see _assets/linux/flatpak/README.md)."

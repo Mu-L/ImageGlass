@@ -13,10 +13,10 @@
 #
 #      (The app-specific password is NOT your normal Apple ID password.)
 #
-# Run AFTER the app bundle exists (task: bundle-mac-arm64-app).
+# Run AFTER the app bundle exists (task: pack-mac-arm64-app).
 #
 # Override defaults via environment variables, e.g.:
-#   NOTARY_PROFILE=my-profile SIGN_IDENTITY="Developer ID Application: ..." ./pack-mac-arm64-dmg.sh
+#   NOTARY_PROFILE=my-profile SIGN_IDENTITY="Developer ID Application: ..." ./script-pack-mac-arm64-dmg.sh
 
 set -euo pipefail
 
@@ -26,9 +26,9 @@ set -euo pipefail
 SIGN_IDENTITY="${SIGN_IDENTITY:-Developer ID Application: Phap Duong (7DV5HBKZ58)}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-imageglass-notary}"
 
-WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APP_DIR="$WORKSPACE_DIR/artifacts/bundle/osx-arm64/ImageGlass.app"
-ENTITLEMENTS_FILE="$WORKSPACE_DIR/_assets/ImageGlass.entitlements"
+ENTITLEMENTS_FILE="$WORKSPACE_DIR/_assets/mac/ImageGlass.entitlements"
 BUILD_PROPS_FILE="$WORKSPACE_DIR/Directory.Build.props"
 DMG_STAGING_DIR="$WORKSPACE_DIR/artifacts/bundle/osx-arm64/dmg-staging"
 OUTPUT_DIR="$WORKSPACE_DIR/artifacts/dist"
@@ -38,7 +38,7 @@ OUTPUT_DIR="$WORKSPACE_DIR/artifacts/dist"
 # ---------------------------------------------------------------------------
 if [[ ! -d "$APP_DIR" ]]; then
 	echo "Error: app bundle not found at $APP_DIR" >&2
-	echo "       Run the 'bundle-mac-arm64-app' task first." >&2
+	echo "       Run the 'pack-mac-arm64-app' task first." >&2
 	exit 1
 fi
 if [[ ! -f "$ENTITLEMENTS_FILE" ]]; then

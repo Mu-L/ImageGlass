@@ -39,7 +39,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>${IG_SHORT_VERSION}</string>
 	<key>CFBundleIconFile</key>
-	<string>Logo.icns</string>
+	<string>logo.icns</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright (C) 2010-2026 Dương Diệu Pháp</string>
 

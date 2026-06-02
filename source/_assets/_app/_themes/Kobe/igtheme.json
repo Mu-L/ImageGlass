@@ -17,7 +17,7 @@
     "NavButtonLeft": "ViewPreviousImage.svg",
     "NavButtonRight": "ViewNextImage.svg",
     "PreviewImage": "preview.webp",
-    "AppLogo": "Logo.svg"
+    "AppLogo": "logo.svg"
   },
   "Colors": {
     "BgColor": "#151b1faa",

@@ -3,8 +3,8 @@
 # Sign and package ImageGlass.app into a Mac App Store .pkg, then optionally
 # upload it to App Store Connect.
 #
-# This is a SEPARATE pipeline from pack-mac-arm64-dmg.sh (Developer ID / website).
-# It reuses the same unsigned bundle produced by bundle-mac-arm64-app.sh, but
+# This is a SEPARATE pipeline from script-pack-mac-arm64-dmg.sh (Developer ID / website).
+# It reuses the same unsigned bundle produced by script-pack-mac-arm64-app.sh, but
 # signs it with the App Store identities, embeds a provisioning profile, and
 # applies the sandbox entitlements. App Store builds are NOT notarized — Apple's
 # review replaces notarization.
@@ -16,13 +16,13 @@
 #          certificate at developer.apple.com and import it.
 #   3. A Mac App Store provisioning profile bound to the Apple Distribution cert
 #      and the App ID com.duongdieuphap.imageglass, saved to:
-#        _assets/ImageGlass_AppStore.provisionprofile
+#        _assets/mac/appstore/ImageGlass_AppStore.provisionprofile
 #
-# Run AFTER the app bundle exists (task: bundle-mac-arm64-app).
+# Run AFTER the app bundle exists (task: pack-mac-arm64-app).
 #
 # To also upload to App Store Connect, set UPLOAD=1 and provide credentials:
 #   UPLOAD=1 APPLE_ID="you@example.com" APPLE_APP_PASSWORD="app-specific-pw" \
-#       ./pack-mac-arm64-appstore-pkg.sh
+#       ./script-pack-mac-arm64-pkg-appstore.sh
 # (Or omit UPLOAD and submit artifacts/dist/*.pkg via the Transporter app.)
 
 set -euo pipefail
@@ -33,10 +33,10 @@ set -euo pipefail
 APP_SIGN_IDENTITY="${APP_SIGN_IDENTITY:-Apple Distribution: Phap Duong (7DV5HBKZ58)}"
 INSTALLER_SIGN_IDENTITY="${INSTALLER_SIGN_IDENTITY:-3rd Party Mac Developer Installer: Phap Duong (7DV5HBKZ58)}"
 
-WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APP_DIR="$WORKSPACE_DIR/artifacts/bundle/osx-arm64/ImageGlass.app"
-ENTITLEMENTS_FILE="$WORKSPACE_DIR/_assets/ImageGlass.AppStore.entitlements"
-PROVISION_PROFILE="${PROVISION_PROFILE:-$WORKSPACE_DIR/_assets/ImageGlass_AppStore.provisionprofile}"
+ENTITLEMENTS_FILE="$WORKSPACE_DIR/_assets/mac/appstore/ImageGlass.AppStore.entitlements"
+PROVISION_PROFILE="${PROVISION_PROFILE:-$WORKSPACE_DIR/_assets/mac/appstore/ImageGlass_AppStore.provisionprofile}"
 BUILD_PROPS_FILE="$WORKSPACE_DIR/Directory.Build.props"
 OUTPUT_DIR="$WORKSPACE_DIR/artifacts/dist"
 
@@ -47,7 +47,7 @@ UPLOAD="${UPLOAD:-0}"
 # ---------------------------------------------------------------------------
 if [[ ! -d "$APP_DIR" ]]; then
 	echo "Error: app bundle not found at $APP_DIR" >&2
-	echo "       Run the 'bundle-mac-arm64-app' task first." >&2
+	echo "       Run the 'pack-mac-arm64-app' task first." >&2
 	exit 1
 fi
 if [[ ! -f "$ENTITLEMENTS_FILE" ]]; then
