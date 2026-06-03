@@ -153,8 +153,24 @@
       "args": [
         "${workspaceFolder}/_assets/linux/script-pack-linux-x64-flatpak.sh"
       ],
+      "options": {
+        "env": {
+          // Prompts on each run; leave blank to build an unsigned bundle.
+          "GPG_KEY": "${input:gpgKey}"
+        }
+      },
       "problemMatcher": [],
       "group": "build"
     },
+  ],
+  "inputs": [
+    {
+      // Used by "pack-linux-x64-flatpak". Not stored on disk — VS Code only keeps
+      // the last value for the current session. Blank => unsigned bundle.
+      "id": "gpgKey",
+      "type": "promptString",
+      "description": "GPG key (email or key ID) to sign the .flatpak bundle. Leave blank for an unsigned bundle.",
+      "default": ""
+    }
   ],
 }

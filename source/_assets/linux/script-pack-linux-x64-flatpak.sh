@@ -13,7 +13,9 @@
 # Env overrides:
 #   RELEASE_TAG=10.0.2.66-beta-2   tag used to build the GitHub download URL
 #                                  (defaults to <IgVersion>-<IgReleaseType>)
-#   GPG_KEY=<keyid>       sign the .flatpak bundle with this GPG key (optional)
+#   GPG_KEY=<keyid>       sign the .flatpak bundle with this GPG key and embed its
+#                         public half so the signature is verifiable on install
+#                         (optional; unset => unsigned bundle)
 
 set -euo pipefail
 
@@ -26,22 +28,11 @@ STATE_DIR="$BUILD_ROOT/.flatpak-builder"
 BUILD_PROPS_FILE="$WORKSPACE_DIR/Directory.Build.props"
 MANIFEST="$FLATPAK_DIR/io.github.d2phap.imageglass.yaml"
 APP_ID="io.github.d2phap.imageglass"
+# Signing key for the .flatpak bundle, supplied via the GPG_KEY env var — the VS Code
+# "pack-linux-x64-flatpak" task prompts for it, or run: GPG_KEY=<id> bash <script>.
+# Empty => unsigned bundle. If the key isn't in the local keyring, the build falls
+# back to unsigned (with a warning) rather than failing.
 GPG_KEY="${GPG_KEY:-}"
-
-# --- Bump the build number (4th version component) on every deploy ---
-# A fresh version each run means the installed app can never look stale and the
-# release tag/tarball name are always unique. Set NO_VERSION_BUMP=1 to re-pack the
-# same version (e.g. to retry a failed build without advancing the number).
-if [[ "${NO_VERSION_BUMP:-0}" != "1" ]]; then
-	_cur="$(sed -n 's:.*<IgVersion>\(.*\)</IgVersion>.*:\1:p' "$BUILD_PROPS_FILE" | head -n 1)"
-	if [[ "$_cur" =~ ^([0-9]+\.[0-9]+\.[0-9]+)\.([0-9]+)$ ]]; then
-		_new="${BASH_REMATCH[1]}.$((BASH_REMATCH[2] + 1))"
-		sed -i -E "s#(<IgVersion>)[^<]*(</IgVersion>)#\1${_new}\2#" "$BUILD_PROPS_FILE"
-		echo "==> Bumped IgVersion: $_cur -> $_new"
-	else
-		echo "Warning: IgVersion '$_cur' is not N.N.N.N; skipping auto-bump." >&2
-	fi
-fi
 
 # --- Read version + release type from Directory.Build.props ---
 IG_VERSION="$(sed -n 's:.*<IgVersion>\(.*\)</IgVersion>.*:\1:p' "$BUILD_PROPS_FILE" | head -n 1)"
@@ -147,9 +138,30 @@ else
 	       -e "/^ *sha256: [0-9a-f]{64}/d" \
 	       "$MANIFEST" > "$LOCAL_DIR/$APP_ID.yaml"
 
-	# Sign with the given key if GPG_KEY is set, else produce unsigned output.
-	GPG_ARGS=()
-	[[ -n "$GPG_KEY" ]] && GPG_ARGS=(--gpg-sign="$GPG_KEY")
+	# --- GPG signing (optional, when GPG_KEY is set) ---
+	# Sign the OSTree commit AND embed the matching public key in the bundle, so
+	# the origin remote created on `flatpak install <bundle>.flatpak` can actually
+	# verify the signature. Without --gpg-keys the embedded signature has nothing
+	# to check against and is effectively inert. Unset GPG_KEY => unsigned output.
+	GPG_SIGN_ARGS=()    # repo commit signing (flatpak-builder + build-bundle)
+	GPG_BUNDLE_ARGS=()  # build-bundle only: signing + embedded public key
+	if [[ -z "$GPG_KEY" ]]; then
+		echo "==> GPG_KEY empty — building an UNSIGNED bundle."
+	elif ! gpg --list-secret-keys "$GPG_KEY" >/dev/null 2>&1; then
+		# Don't abort the whole pack (the tarball is already built); just skip signing.
+		echo "WARNING: GPG_KEY='$GPG_KEY' is set but no matching SECRET key is in your keyring." >&2
+		echo "         Building an UNSIGNED bundle. To sign, generate the key once:" >&2
+		echo "             gpg --quick-generate-key \"$GPG_KEY\" default default never" >&2
+		echo "         (an EV/code-signing cert is X.509 and cannot be used here — gpg needs its own key)" >&2
+	else
+		PUBKEY_FILE="$BUILD_ROOT/$APP_ID.pubkey.gpg"
+		echo "==> GPG signing enabled (key: $GPG_KEY) — embedding public key in bundle"
+		# Export the public half (binary, what flatpak --gpg-keys expects). Redirect
+		# instead of --output to avoid gpg's interactive overwrite prompt on re-runs.
+		gpg --export "$GPG_KEY" > "$PUBKEY_FILE"
+		GPG_SIGN_ARGS=(--gpg-sign="$GPG_KEY")
+		GPG_BUNDLE_ARGS=(--gpg-sign="$GPG_KEY" --gpg-keys="$PUBKEY_FILE")
+	fi
 
 	# Build into a repo (for the bundle) and install for the current user (to test).
 	# --state-dir keeps the build cache under artifacts/ instead of the repo root.
@@ -159,14 +171,14 @@ else
 	# though the tarball is fresh (--force-clean only wipes the build dir, not the
 	# cache) — the .flatpak ends up version-stamped new but containing old code.
 	flatpak-builder --state-dir="$STATE_DIR" --user --install --force-clean --disable-cache \
-		--repo="$REPO_DIR" "${GPG_ARGS[@]}" \
+		--repo="$REPO_DIR" "${GPG_SIGN_ARGS[@]}" \
 		"$BUILD_ROOT/build" "$LOCAL_DIR/$APP_ID.yaml"
 
 	# Single-file bundle for direct download / GitHub Releases. --runtime-repo
 	# lets installers auto-fetch the freedesktop runtime from Flathub.
 	echo "==> Building .flatpak bundle: $BUNDLE_NAME"
 	rm -f "$BUNDLE_PATH"
-	flatpak build-bundle "${GPG_ARGS[@]}" \
+	flatpak build-bundle "${GPG_BUNDLE_ARGS[@]}" \
 		--runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
 		"$REPO_DIR" "$BUNDLE_PATH" "$APP_ID"
 	BUNDLE_BUILT=1
@@ -179,6 +191,15 @@ echo "  sha256                  : $SHA256"
 echo "  Manifest url            : $RELEASE_URL"
 if [[ "$BUNDLE_BUILT" == "1" ]]; then
 	echo "  Bundle (direct install) : $BUNDLE_PATH"
+	# PUBKEY_FILE is only set when signing actually happened (key present in keyring).
+	if [[ -n "${PUBKEY_FILE:-}" ]]; then
+		echo "  Signed with GPG key     : $GPG_KEY"
+		echo "  Embedded public key     : $PUBKEY_FILE"
+		echo "  Publish the fingerprint so users can trust the key:"
+		echo "      gpg --fingerprint $GPG_KEY"
+	else
+		echo "  (unsigned bundle — no usable GPG key)"
+	fi
 	echo ""
 	echo "Installed to your USER flatpak. Test with:"
 	echo "    flatpak run $APP_ID [image-path]"
