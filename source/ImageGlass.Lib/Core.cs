@@ -389,13 +389,10 @@ public static class Core
             Resx.Set(ResxId.ContentControlThemeFontFamily, fm);
         }
 
-        // 2. The bundled Inter font has a larger x-height than the native macOS
-        // system font it replaces, so at the same point size the UI reads
-        // noticeably bigger. Nudge the default control font size down on macOS
-        // so the app matches the Windows/Linux builds.
-        if (BHelper.OS == OSType.Mac)
+        // 2. Set default Inter font size for macOS, Linux
+        if (BHelper.OS != OSType.Windows)
         {
-            app.Resources["ControlContentThemeFontSize"] = 12d;
+            app.Resources["ControlContentThemeFontSize"] = Const.FONT_SIZE_BODY;
         }
     }
 

@@ -79,13 +79,27 @@ public static class Const
 
 
 
-    public const string FONT_CODE = "Cascadia Code, Consolas, SF Mono, Menlo, Monaco, Courier New, monospace";
+    /// <summary>
+    /// Monospace font stack for code / credits / metadata text. The list is
+    /// OS-specific because Avalonia's font matcher resolves the first family the
+    /// platform recognizes — and on Linux fontconfig substitutes any unknown
+    /// family (e.g. "Cascadia Code") with the default <i>proportional</i> font
+    /// instead of failing, so a real monospace family must be listed first.
+    /// "monospace" is the generic fontconfig alias kept as a final fallback.
+    /// </summary>
+    public static readonly string FONT_CODE = BHelper.OS switch
+    {
+        OSType.Mac => "SF Mono, Menlo, Monaco, Courier New, monospace",
+        OSType.Windows => "Cascadia Code, Cascadia Mono, Consolas, Courier New, monospace",
+        _ => "DejaVu Sans Mono, Liberation Mono, Noto Sans Mono, monospace",
+    };
 
     /// <summary>
     /// On macOS the bundled Inter font renders larger than the native system font,
     /// so the standard sizes are nudged down to match the Windows/Linux builds.
     /// </summary>
-    private static readonly double FONT_SIZE_MAC_OFFSET = BHelper.OS == OSType.Mac ? -1 : 0;
+    private static readonly double FONT_SIZE_MAC_OFFSET = BHelper.OS != OSType.Mac ? -1 : 0;
+    public static readonly double FONT_SIZE_BODY = BHelper.OS == OSType.Mac ? 12 : 13;
     public static readonly double FONT_SIZE_TITLE = 20 + FONT_SIZE_MAC_OFFSET;
     public static readonly double FONT_SIZE_SUBTITLE = 18 + FONT_SIZE_MAC_OFFSET;
     public static readonly double FONT_SIZE_SMALL = 13 + FONT_SIZE_MAC_OFFSET;
