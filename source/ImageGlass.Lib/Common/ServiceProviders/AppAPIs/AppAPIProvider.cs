@@ -120,9 +120,16 @@ public partial class AppAPIProvider
     /// <summary>
     /// Open app settings.
     /// </summary>
-    public static void IG_OpenSettings()
+    public static async Task IG_OpenSettingsAsync()
     {
         var configPath = BHelper.ConfigDir(Config.CONFIG_USER);
+
+        // The user config (igconfig.json) is only written on save/exit, so it can
+        // be missing on a fresh run. Create it first so there is a real file to open.
+        if (!File.Exists(configPath))
+        {
+            await Core.Config.SaveAsync();
+        }
 
         if (BHelper.OS == OSType.Windows)
         {
@@ -131,8 +138,17 @@ public partial class AppAPIProvider
             proc.StartInfo.UseShellExecute = true;
             proc.Start();
         }
+        else if (BHelper.OS == OSType.Linux)
+        {
+            // Most Linux desktops have no default app for ".json", so opening it
+            // directly via the OpenURI portal does nothing. Reveal & select the
+            // file in the file manager instead, so the user can open it with any
+            // editor of their choice.
+            BHelper.OpenFilePath(configPath);
+        }
         else
         {
+            // macOS: 'open' launches the file's default associated app.
             _ = Core.ShellProvider?.OpenDefaultEditingAppAsync(configPath);
         }
     }

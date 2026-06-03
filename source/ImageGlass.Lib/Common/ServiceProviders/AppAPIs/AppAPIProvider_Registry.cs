@@ -144,7 +144,7 @@ public partial class AppAPIProvider
 
 
         // Settings
-        { API.IG_OpenSettings,              PhCommands.Create(IG_OpenSettings) },
+        { API.IG_OpenSettings,              PhCommands.Create(IG_OpenSettingsAsync) },
 
 
         // Help
