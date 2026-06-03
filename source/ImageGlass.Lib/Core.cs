@@ -395,7 +395,7 @@ public static class Core
         // so the app matches the Windows/Linux builds.
         if (BHelper.OS == OSType.Mac)
         {
-            app.Resources["ControlContentThemeFontSize"] = 13d;
+            app.Resources["ControlContentThemeFontSize"] = 12d;
         }
     }
 
