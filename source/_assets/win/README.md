@@ -42,18 +42,31 @@ pwsh _assets/win/script-pack-win-msix.ps1 -Platform arm64
 pwsh _assets/win/script-pack-win-msix.ps1 -Platform x64   -Sign
 pwsh _assets/win/script-pack-win-msix.ps1 -Platform arm64 -Sign
 
+# One .msixbundle holding BOTH x64 + arm64
+pwsh _assets/win/script-pack-win-msix.ps1 -Bundle -Sign   # signed, for GitHub
+pwsh _assets/win/script-pack-win-msix.ps1 -Bundle         # unsigned, for the Store
+
 # Sign with a PFX instead of a store certificate
 pwsh _assets/win/script-pack-win-msix.ps1 -Platform x64 -Sign -CertFile C:\ig.pfx -CertPassword <pw>
 ```
 
-VS Code tasks: `pack-win-x64-msix`, `pack-win-arm64-msix` (signed / GitHub),
-`pack-win-x64-msix-msstore`, `pack-win-arm64-msix-msstore`, and `pack-win-all-msix`
-(builds all four).
+VS Code tasks:
+
+- **Self-host (GitHub):** `pack-win-x64-msix`, `pack-win-arm64-msix` — a signed `.msix` per arch.
+- **Microsoft Store:** `pack-win-msstore-msixbundle` — one unsigned `.msixbundle` (x64 + arm64).
+- **Everything:** `pack-win-all` — builds all three.
 
 Output lands in `artifacts/dist/`:
 
-- `ImageGlass_<version>_win-<arch>.msix` — signed, for GitHub.
-- `ImageGlass_<version>_win-<arch>-msstore.msix` — unsigned, for the Store.
+- `ImageGlass_<version>_win-x64.msix` / `..._win-arm64.msix` — signed, for GitHub.
+- `ImageGlass_<version>_win-msstore.msixbundle` — unsigned bundle, for the Store.
+
+### .msix vs .msixbundle
+
+A `.msixbundle` packs the x64 and arm64 `.msix` together; Windows installs the
+architecture matching the device, so you publish one file instead of two. The
+per-arch packages inside the bundle are payload-signed (their `.exe`/`.dll` carry
+a trust chain) but **not** package-signed — only the `.msixbundle` itself is signed.
 
 ## Notes
 

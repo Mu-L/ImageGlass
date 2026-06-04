@@ -163,44 +163,12 @@
       "group": "build"
     },
 
-    // Windows MSIX pack tasks.
-    // The script publishes a fresh AOT build, so these do NOT depend on the
-    // publish-win-* tasks. Two flavours per arch:
-    //   *-msstore -> UNSIGNED, Store identity + Store artwork -> Partner Center as-is.
-    //   (plain)   -> SIGNED payload + package, logo-rendered artwork -> GitHub release.
-    //              (built UNSIGNED if no signing certificate is found)
-    {
-      "label": "pack-win-x64-msix-msstore",
-      "type": "process",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "${workspaceFolder}/_assets/win/script-pack-win-msix.ps1",
-        "-Platform",
-        "x64"
-      ],
-      "problemMatcher": [],
-      "group": "build"
-    },
-    {
-      "label": "pack-win-arm64-msix-msstore",
-      "type": "process",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "${workspaceFolder}/_assets/win/script-pack-win-msix.ps1",
-        "-Platform",
-        "arm64"
-      ],
-      "problemMatcher": [],
-      "group": "build"
-    },
+    // Windows MSIX pack tasks. The script publishes a fresh AOT build, so these
+    // do NOT depend on the publish-win-* tasks.
+    //
+    //   Self-host (GitHub): a SIGNED .msix per architecture, logo-rendered artwork.
+    //                       (built UNSIGNED if no signing certificate is found)
+    //   Microsoft Store:    one UNSIGNED .msixbundle (x64 + arm64), Store artwork.
     {
       "label": "pack-win-x64-msix",
       "type": "process",
@@ -235,14 +203,29 @@
       "problemMatcher": [],
       "group": "build"
     },
-    // Convenience: build BOTH signed (GitHub) packages, then BOTH msstore packages.
     {
-      "label": "pack-win-all-msix",
+      "label": "pack-win-msstore-msixbundle",
+      "type": "process",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/_assets/win/script-pack-win-msix.ps1",
+        "-Bundle"
+      ],
+      "problemMatcher": [],
+      "group": "build"
+    },
+    // Convenience: build everything for a release — both signed .msix (self-host)
+    // and the .msixbundle (Microsoft Store).
+    {
+      "label": "pack-win-all",
       "dependsOn": [
         "pack-win-x64-msix",
         "pack-win-arm64-msix",
-        "pack-win-x64-msix-msstore",
-        "pack-win-arm64-msix-msstore"
+        "pack-win-msstore-msixbundle"
       ],
       "dependsOrder": "sequence",
       "problemMatcher": [],

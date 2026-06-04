@@ -1,7 +1,8 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    Build (and optionally sign) an MSIX package of ImageGlass.Win32 for x64 or arm64.
+    Build (and optionally sign) an MSIX of ImageGlass.Win32 — one .msix per
+    architecture, or a single x64+arm64 .msixbundle (-Bundle).
 
 .DESCRIPTION
     Produces two flavours of MSIX from the same source, selected by the -Sign switch:
@@ -26,14 +27,23 @@
     <IgBundleShortVersion>) . <IgBundleBuild> . 0 — e.g. 10.0.535.0. The 4th
     (revision) part is 0 because the Microsoft Store reserves it.
 
+    With -Bundle, both x64 and arm64 are built and packed into a single
+    .msixbundle (Windows installs the matching architecture). The per-arch packages
+    are payload-signed but NOT package-signed; only the .msixbundle is signed.
+
     The script publishes a fresh self-contained AOT build first (so the package
     always matches the current source and the version baked into the binary),
     stages the payload under an "ImageGlass\" subfolder, generates AppxManifest.xml
-    from the template, packs with makeappx, and (when -Sign) signs with signtool.
-    makeappx.exe / signtool.exe are auto-located in the latest Windows 10/11 SDK.
+    from the template, packs with makeappx, and (when signing) signs with signtool.
+    makeappx.exe / makepri.exe / signtool.exe are auto-located in the latest
+    Windows 10/11 SDK.
 
 .PARAMETER Platform
-    Target architecture: x64 (default) or arm64.
+    Target architecture: x64 (default) or arm64. Ignored when -Bundle is used
+    (a bundle always contains both).
+
+.PARAMETER Bundle
+    Build a single x64+arm64 .msixbundle instead of one .msix per architecture.
 
 .PARAMETER Sign
     Build the signed (sideload / GitHub) flavour. The package is signed when a
@@ -72,6 +82,14 @@
 
 .EXAMPLE
     pwsh _assets/win/script-pack-win-msix.ps1 -Platform x64 -Sign -CertFile C:\ig.pfx -CertPassword hunter2
+
+.EXAMPLE
+    pwsh _assets/win/script-pack-win-msix.ps1 -Bundle -Sign
+    # Signed x64+arm64 .msixbundle for GitHub Releases.
+
+.EXAMPLE
+    pwsh _assets/win/script-pack-win-msix.ps1 -Bundle
+    # Unsigned x64+arm64 .msixbundle for the Microsoft Store.
 #>
 
 [CmdletBinding()]
@@ -96,7 +114,11 @@ param(
     [string]$SideloadIdentityName = 'DuongDieuPhap.ImageGlass',
     [string]$PublisherDisplayName = 'Duong Dieu Phap',
 
-    [switch]$SkipPublish
+    [switch]$SkipPublish,
+
+    # Pack x64 + arm64 into a single .msixbundle instead of one .msix per arch.
+    # -Platform is ignored in this mode.
+    [switch]$Bundle
 )
 
 $ErrorActionPreference = 'Stop'
@@ -111,12 +133,6 @@ $ManifestTpl  = Join-Path $PSScriptRoot 'appxmanifest\AppxManifest.xml'
 # Store-supplied artwork. (Regenerate the signed set with script-generate-msix-assets.ps1.)
 $AssetsDir    = Join-Path $PSScriptRoot ($Sign ? 'appxmanifest\Assets-signed' : 'appxmanifest\Assets-msstore')
 $AppExtras    = Join-Path $WorkspaceDir '_assets\_app'
-
-$Rid          = "win-$Platform"
-$MsbuildPlat  = if ($Platform -eq 'x64') { 'x64' } else { 'ARM64' }
-$PublishDir   = Join-Path $WorkspaceDir "artifacts\publish\$Rid"
-$StagingDir   = Join-Path $WorkspaceDir "artifacts\bundle\$Rid-msix"
-$PayloadDir   = Join-Path $StagingDir 'ImageGlass'
 $DistDir      = Join-Path $WorkspaceDir 'artifacts\dist'
 
 # --- Helpers -------------------------------------------------------------------
@@ -204,6 +220,86 @@ function Invoke-SignTool([string]$SignTool, [string[]]$Files) {
     return ($LASTEXITCODE -eq 0)
 }
 
+# Build ONE architecture's .msix (publish -> stage -> manifest -> payload-sign ->
+# resource index -> pack) and write it to $OutMsixPath. The package itself is NOT
+# signed here — the caller signs the final artifact (the .msix in single mode, or
+# the .msixbundle in bundle mode). Reads the flavour-level $identityName,
+# $publisher, $pkgVersion, $script:doSign and the located SDK tools from script scope.
+function New-MsixPackage([string]$Platform, [string]$OutMsixPath) {
+    $rid         = "win-$Platform"
+    $msbuildPlat = if ($Platform -eq 'x64') { 'x64' } else { 'ARM64' }
+    $publishDir  = Join-Path $WorkspaceDir "artifacts\publish\$rid"
+    $stagingDir  = Join-Path $WorkspaceDir "artifacts\bundle\$rid-msix"
+    $payloadDir  = Join-Path $stagingDir 'ImageGlass'
+
+    Write-Host ''
+    Write-Host "==> [$Platform] Building MSIX package"
+
+    # 1. Publish a fresh self-contained AOT build.
+    if ($SkipPublish -and (Test-Path (Join-Path $publishDir 'ImageGlass.exe'))) {
+        Write-Host "    reusing publish output: $publishDir"
+    }
+    else {
+        Write-Host "    publishing $rid (Release, AOT, self-contained)"
+        if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
+        & dotnet publish $ProjectFile -c Release -r $rid -p:Platform=$msbuildPlat -o $publishDir
+        if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed for $rid (exit $LASTEXITCODE)." }
+        # Bundle the shared app assets (themes, credits, etc.) — mirrors the publish-win tasks.
+        Copy-Item -Path (Join-Path $AppExtras '*') -Destination $publishDir -Recurse -Force
+    }
+    if (-not (Test-Path (Join-Path $publishDir 'ImageGlass.exe'))) {
+        throw "Publish did not produce ImageGlass.exe in $publishDir"
+    }
+
+    # 2. Stage the layout:  <staging>\AppxManifest.xml + \Assets\* + \ImageGlass\*
+    if (Test-Path $stagingDir) { Remove-Item $stagingDir -Recurse -Force }
+    New-Item -ItemType Directory -Path $payloadDir -Force | Out-Null
+    Copy-Item -Path (Join-Path $publishDir '*') -Destination $payloadDir -Recurse -Force
+    # Drop debug symbols — they bloat the package and are not part of the product.
+    Get-ChildItem -Path $payloadDir -Recurse -Include '*.pdb' -File -ErrorAction SilentlyContinue |
+        Remove-Item -Force
+    Copy-Item -Path $AssetsDir -Destination (Join-Path $stagingDir 'Assets') -Recurse -Force
+
+    # 3. Generate AppxManifest.xml from the template (UTF-8 BOM, as the SDK expects).
+    $manifest = Get-Content -Path $ManifestTpl -Raw
+    $manifest = $manifest.Replace('{{IDENTITY_NAME}}', $identityName).
+                          Replace('{{PUBLISHER}}', $publisher).
+                          Replace('{{PUBLISHER_DISPLAY_NAME}}', $PublisherDisplayName).
+                          Replace('{{VERSION}}', $pkgVersion).
+                          Replace('{{ARCH}}', $Platform)
+    $utf8Bom = [System.Text.UTF8Encoding]::new($true)
+    [System.IO.File]::WriteAllText((Join-Path $stagingDir 'AppxManifest.xml'), $manifest, $utf8Bom)
+
+    # 4. Sign payload binaries so installed .exe/.dll carry a trust chain.
+    if ($script:doSign) {
+        $binaries = Get-ChildItem -Path $payloadDir -Recurse -Include '*.exe', '*.dll' -File |
+            Select-Object -ExpandProperty FullName
+        Write-Host "    signing $($binaries.Count) payload binary file(s)"
+        if (-not (Invoke-SignTool -SignTool $signtool -Files $binaries)) {
+            Write-Warning "Could not sign payload binaries — the package will be left UNSIGNED."
+            $script:doSign = $false
+        }
+    }
+
+    # 5. Build the resource index so the manifest's unqualified logo names resolve
+    #    to the scale-qualified assets (and Windows picks the right tile per DPI).
+    $priConfig = Join-Path (Split-Path $stagingDir) "$rid-msix.priconfig.xml"
+    $manOut    = Join-Path $stagingDir 'AppxManifest.xml'
+    $priOut    = Join-Path $stagingDir 'resources.pri'
+    if (Test-Path $priConfig) { Remove-Item $priConfig -Force }
+    & $makepri createconfig /cf $priConfig /dq en-US /o
+    if ($LASTEXITCODE -ne 0) { throw "makepri createconfig failed (exit $LASTEXITCODE)." }
+    & $makepri new /pr $stagingDir /cf $priConfig /mn $manOut /of $priOut /o
+    if ($LASTEXITCODE -ne 0) { throw "makepri new failed (exit $LASTEXITCODE)." }
+
+    # 6. Pack the .msix.
+    New-Item -ItemType Directory -Path (Split-Path $OutMsixPath) -Force | Out-Null
+    if (Test-Path $OutMsixPath) { Remove-Item $OutMsixPath -Force }
+    & $makeappx pack /o /d $stagingDir /p $OutMsixPath
+    if ($LASTEXITCODE -ne 0) { throw "makeappx pack failed for $rid (exit $LASTEXITCODE)." }
+    Write-Host "    packed: $OutMsixPath"
+}
+
 # --- Version -------------------------------------------------------------------
 $igVersion = Get-BuildProp 'IgVersion'
 if (-not $igVersion) { throw "Could not read <IgVersion> from $BuildProps" }
@@ -231,158 +327,108 @@ else {
 }
 
 # --- Identity / publisher per flavour -----------------------------------------
+# (Flavour-level: identical across architectures; only ProcessorArchitecture, set
+# inside New-MsixPackage, differs — which is exactly what a .msixbundle requires.)
 if ($Sign) {
     $identityName = $SideloadIdentityName
     $cert         = Resolve-SigningCert
     if ($cert) {
         $publisher              = $cert.Subject
-        $doSign                 = $true
+        $script:doSign          = $true
         $script:UseMachineStore = $cert.Machine
     }
     else {
-        # No usable certificate — build the GitHub package UNSIGNED. Use a
-        # placeholder Publisher; the package must be signed before it can install.
-        $publisher = "CN=$PublisherDisplayName"
-        $doSign    = $false
+        # No usable certificate — build the GitHub package(s) UNSIGNED. Use a
+        # placeholder Publisher; they must be signed before they can install.
+        $publisher     = "CN=$PublisherDisplayName"
+        $script:doSign = $false
         Write-Warning "No signing certificate found — building an UNSIGNED package."
     }
-    $outName = "ImageGlass_${relLabel}_$Rid.msix"
 }
 else {
-    $identityName = $MsStoreIdentityName
-    $publisher    = $MsStorePublisher
-    $doSign       = $false
-    $outName      = "ImageGlass_${relLabel}_$Rid-msstore.msix"
+    $identityName  = $MsStoreIdentityName
+    $publisher     = $MsStorePublisher
+    $script:doSign = $false
 }
-$outMsix = Join-Path $DistDir $outName
+
+# --- Output artifact name ------------------------------------------------------
+$ext         = if ($Bundle) { 'msixbundle' } else { 'msix' }
+$archTag     = if ($Bundle) { 'win' } else { "win-$Platform" }
+$storeSuffix = if ($Sign) { '' } else { '-msstore' }
+$outArtifact = Join-Path $DistDir "ImageGlass_${relLabel}_${archTag}${storeSuffix}.$ext"
 
 $flavourLabel = if (-not $Sign) { 'MSSTORE (unsigned, Microsoft Store)' }
-                elseif ($doSign) { 'SIGNED (sideload / GitHub)' }
+                elseif ($script:doSign) { 'SIGNED (sideload / GitHub)' }
                 else { 'GitHub (UNSIGNED — no certificate found)' }
-Write-Host "==> Packing ImageGlass $igVersion ($Platform) as MSIX"
+Write-Host "==> Packing ImageGlass $igVersion as $(if ($Bundle) { 'MSIXBUNDLE (x64 + arm64)' } else { "MSIX ($Platform)" })"
 Write-Host "    Flavour     : $flavourLabel"
 Write-Host "    Identity    : $identityName"
 Write-Host "    Publisher   : $publisher"
 Write-Host "    Version     : $pkgVersion"
 Write-Host "    Assets      : $(Split-Path $AssetsDir -Leaf)"
-Write-Host "    Output      : $outMsix"
+Write-Host "    Output      : $outArtifact"
 
 # --- Locate SDK tools ----------------------------------------------------------
 $makeappx = Find-SdkTool 'makeappx.exe'
 $makepri  = Find-SdkTool 'makepri.exe'
-$signtool = if ($doSign) { Find-SdkTool 'signtool.exe' } else { '' }
+$signtool = if ($script:doSign) { Find-SdkTool 'signtool.exe' } else { '' }
 Write-Host "    makeappx    : $makeappx"
 Write-Host "    makepri     : $makepri"
-if ($doSign) { Write-Host "    signtool    : $signtool" }
+if ($script:doSign) { Write-Host "    signtool    : $signtool" }
 
-# --- 1. Publish a fresh self-contained AOT build ------------------------------
-if ($SkipPublish -and (Test-Path (Join-Path $PublishDir 'ImageGlass.exe'))) {
-    Write-Host "==> Reusing existing publish output: $PublishDir"
+# --- Build the package(s) ------------------------------------------------------
+New-Item -ItemType Directory -Path $DistDir -Force | Out-Null
+if (Test-Path $outArtifact) { Remove-Item $outArtifact -Force }
+
+if ($Bundle) {
+    # Build each arch into a clean input dir (makeappx bundle /d requires a folder
+    # holding ONLY the packages to bundle), then bundle them.
+    $bundleInput = Join-Path $WorkspaceDir 'artifacts\bundle\win-msixbundle-input'
+    if (Test-Path $bundleInput) { Remove-Item $bundleInput -Recurse -Force }
+    New-Item -ItemType Directory -Path $bundleInput -Force | Out-Null
+
+    foreach ($arch in @('x64', 'arm64')) {
+        New-MsixPackage -Platform $arch -OutMsixPath (Join-Path $bundleInput "ImageGlass-$arch.msix")
+    }
+
+    Write-Host ''
+    Write-Host "==> Bundling x64 + arm64 into .msixbundle"
+    & $makeappx bundle /o /d $bundleInput /bv $pkgVersion /p $outArtifact
+    if ($LASTEXITCODE -ne 0) { throw "makeappx bundle failed (exit $LASTEXITCODE)." }
 }
 else {
-    Write-Host "==> Publishing $Rid (Release, AOT, self-contained)"
-    if (Test-Path $PublishDir) { Remove-Item $PublishDir -Recurse -Force }
-    & dotnet publish $ProjectFile -c Release -r $Rid -p:Platform=$MsbuildPlat -o $PublishDir
-    if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed (exit $LASTEXITCODE)." }
-    # Bundle the shared app assets (themes, credits, etc.) — mirrors the publish-win tasks.
-    Copy-Item -Path (Join-Path $AppExtras '*') -Destination $PublishDir -Recurse -Force
-}
-if (-not (Test-Path (Join-Path $PublishDir 'ImageGlass.exe'))) {
-    throw "Publish did not produce ImageGlass.exe in $PublishDir"
+    New-MsixPackage -Platform $Platform -OutMsixPath $outArtifact
 }
 
-# --- 2. Stage the package layout ----------------------------------------------
-#   <staging>\AppxManifest.xml
-#   <staging>\Assets\*            (logos)
-#   <staging>\ImageGlass\*        (the app payload)
-Write-Host "==> Staging package layout"
-if (Test-Path $StagingDir) { Remove-Item $StagingDir -Recurse -Force }
-New-Item -ItemType Directory -Path $PayloadDir -Force | Out-Null
-Copy-Item -Path (Join-Path $PublishDir '*') -Destination $PayloadDir -Recurse -Force
-
-# Drop debug symbols — they bloat the package and are not part of the signed product.
-Get-ChildItem -Path $PayloadDir -Recurse -Include '*.pdb' -File -ErrorAction SilentlyContinue |
-    Remove-Item -Force
-
-# Copy the logo assets.
-Copy-Item -Path $AssetsDir -Destination (Join-Path $StagingDir 'Assets') -Recurse -Force
-
-# --- 3. Generate AppxManifest.xml from the template ---------------------------
-Write-Host "==> Generating AppxManifest.xml"
-$manifest = Get-Content -Path $ManifestTpl -Raw
-$manifest = $manifest.Replace('{{IDENTITY_NAME}}', $identityName).
-                      Replace('{{PUBLISHER}}', $publisher).
-                      Replace('{{PUBLISHER_DISPLAY_NAME}}', $PublisherDisplayName).
-                      Replace('{{VERSION}}', $pkgVersion).
-                      Replace('{{ARCH}}', $Platform)
-# makeappx requires the manifest with a UTF-8 BOM to match the SDK's expectations.
-$utf8Bom = [System.Text.UTF8Encoding]::new($true)
-[System.IO.File]::WriteAllText((Join-Path $StagingDir 'AppxManifest.xml'), $manifest, $utf8Bom)
-
-# --- 4. Sign payload binaries (signed flavour only) ----------------------------
-# Each .exe/.dll is Authenticated individually so installed files carry a trust
-# chain, then the package signature is applied in step 7.
-if ($doSign) {
-    Write-Host "==> Signing payload binaries (.exe / .dll)"
-    $binaries = Get-ChildItem -Path $PayloadDir -Recurse -Include '*.exe', '*.dll' -File |
-        Select-Object -ExpandProperty FullName
-    Write-Host "    $($binaries.Count) file(s) to sign"
-    if (-not (Invoke-SignTool -SignTool $signtool -Files $binaries)) {
-        Write-Warning "Could not sign the payload binaries — building an UNSIGNED package."
-        $doSign = $false
-    }
-}
-
-# --- 5. Build the resource index (resources.pri) ------------------------------
-# The logos are scale-qualified (StoreLogo.scale-100.png, ...) but the manifest
-# references the unqualified logical names (Assets\StoreLogo.png). makeappx in
-# directory mode only resolves those through a resource index, so build one with
-# makepri; it also lets Windows pick the right tile size per display DPI.
-Write-Host "==> Building resource index (resources.pri)"
-$priConfig   = Join-Path (Split-Path $StagingDir) "$Rid-msix.priconfig.xml"
-$manifestOut = Join-Path $StagingDir 'AppxManifest.xml'
-$priOut      = Join-Path $StagingDir 'resources.pri'
-if (Test-Path $priConfig) { Remove-Item $priConfig -Force }
-& $makepri createconfig /cf $priConfig /dq en-US /o
-if ($LASTEXITCODE -ne 0) { throw "makepri createconfig failed (exit $LASTEXITCODE)." }
-& $makepri new /pr $StagingDir /cf $priConfig /mn $manifestOut /of $priOut /o
-if ($LASTEXITCODE -ne 0) { throw "makepri new failed (exit $LASTEXITCODE)." }
-
-# --- 6. Pack the MSIX ----------------------------------------------------------
-Write-Host "==> Packing MSIX"
-New-Item -ItemType Directory -Path $DistDir -Force | Out-Null
-if (Test-Path $outMsix) { Remove-Item $outMsix -Force }
-& $makeappx pack /o /d $StagingDir /p $outMsix
-if ($LASTEXITCODE -ne 0) { throw "makeappx failed (exit $LASTEXITCODE)." }
-
-# --- 7. Sign the package (only when a certificate was found) -------------------
-if ($doSign) {
-    Write-Host "==> Signing MSIX package"
-    if (Invoke-SignTool -SignTool $signtool -Files @($outMsix)) {
-        Write-Host "==> Verifying package signature"
-        & $signtool verify /pa $outMsix
+# --- Sign the final artifact (.msix or .msixbundle) ----------------------------
+if ($script:doSign) {
+    Write-Host ''
+    Write-Host "==> Signing the $ext"
+    if (Invoke-SignTool -SignTool $signtool -Files @($outArtifact)) {
+        Write-Host "==> Verifying signature"
+        & $signtool verify /pa $outArtifact
         if ($LASTEXITCODE -ne 0) { throw "signtool verify failed (exit $LASTEXITCODE)." }
     }
     else {
-        Write-Warning "Could not sign the package — it has been left UNSIGNED."
-        $doSign = $false
+        Write-Warning "Could not sign the $ext — it has been left UNSIGNED."
+        $script:doSign = $false
     }
 }
 
 # --- Done ----------------------------------------------------------------------
 Write-Host ''
 Write-Host 'Done.'
-Write-Host "  Package : $outMsix"
-if ($doSign) {
+Write-Host "  Package : $outArtifact"
+if ($script:doSign) {
     Write-Host '  Signed  : yes (payload binaries + package)'
     Write-Host '  Next    : upload to the GitHub release for this version.'
 }
 elseif ($Sign) {
     Write-Host '  Signed  : no (no signing certificate was found)'
-    Write-Host '  Next    : sign the package before publishing it to the GitHub release.'
+    Write-Host "  Next    : sign the $ext before publishing it to the GitHub release."
 }
 else {
     Write-Host '  Signed  : no (the Microsoft Store signs it on submission)'
     Write-Host '  Next    : upload to Partner Center (Microsoft Store) as-is.'
-    Write-Host '            Do NOT sign this msstore package yourself.'
+    Write-Host "            Do NOT sign this msstore $ext yourself."
 }

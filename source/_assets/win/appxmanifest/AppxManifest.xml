@@ -28,7 +28,7 @@
     <Application Id="IMAGEGLASS" Executable="ImageGlass\ImageGlass.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
         BackgroundColor="transparent"
-        DisplayName="ImageGlass"
+        DisplayName="ImageGlass 10"
         Square150x150Logo="Assets\IMAGEGLASS-Square150x150Logo.png"
         Square44x44Logo="Assets\IMAGEGLASS-Square44x44Logo.png"
         Description="A Fast, Seamless Photo Viewer">
