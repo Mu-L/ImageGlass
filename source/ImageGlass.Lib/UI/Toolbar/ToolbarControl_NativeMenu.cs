@@ -102,9 +102,11 @@ public partial class ToolbarControl
     private void PrepareSourceMenu()
     {
         _nativeMenuPairs.Clear();
-        PART_MainMenu.DataContext = VM.ButtonMenuVM;
+        if (DataContext is not ToolbarControlModel vm) return;
+
+        PART_MainMenu.DataContext = vm.ButtonMenuVM;
         RefreshMainMenuState();
-        _ = VM.ButtonMenuVM.OnPropertyChanged(string.Empty); // evaluate IsChecked bindings
+        _ = vm.ButtonMenuVM.OnPropertyChanged(string.Empty); // evaluate IsChecked bindings
     }
 
 
@@ -178,7 +180,8 @@ public partial class ToolbarControl
     {
         UpdateMenuItemEnableStates();
         EditingApp.UpdateAppNameForMenuEdit(PART_MnuEdit);
-        _ = VM.ButtonMenuVM.OnPropertyChanged(string.Empty); // re-evaluate IsChecked bindings
+        if (DataContext is ToolbarControlModel vm)
+            _ = vm.ButtonMenuVM.OnPropertyChanged(string.Empty); // re-evaluate IsChecked bindings
 
         foreach (var (native, source) in _nativeMenuPairs)
         {

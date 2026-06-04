@@ -1,18 +1,12 @@
 <Project>
   <PropertyGroup>
-    <!-- Central app version: change ONLY here to update all platform projects.
-      Each executable project sets <IgPlatformId> (e.g. win32, mac, linux).
-      IgFullVersion is composed in Directory.Build.targets after all properties are set. -->
+    <!-- Central app version: change ONLY here to update all platform projects -->
     <IgVersion>10.0.2.66</IgVersion>
     <IgReleaseType>beta-2</IgReleaseType>
     <IgUpdateChannel>beta</IgUpdateChannel>
 
-    <!-- App bundle version. Leave empty to derive from IgVersion.
-      - IgBundleShortVersion -> CFBundleShortVersionString: marketing version,
-        1-3 integers (e.g. 10.0.0).
-      - IgBundleBuild -> CFBundleVersion: build number, 1-3 integers; must
-        INCREASE with every App Store upload for the same short version. -->
+    <!-- App bundle version. Leave empty to derive from IgVersion -->
     <IgBundleShortVersion>10.0.2</IgBundleShortVersion>
-    <IgBundleBuild>534</IgBundleBuild>
+    <IgBundleBuild>535</IgBundleBuild>
   </PropertyGroup>
 </Project>
