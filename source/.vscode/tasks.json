@@ -162,6 +162,92 @@
       "problemMatcher": [],
       "group": "build"
     },
+
+    // Windows MSIX pack tasks.
+    // The script publishes a fresh AOT build, so these do NOT depend on the
+    // publish-win-* tasks. Two flavours per arch:
+    //   *-msstore -> UNSIGNED, Store identity + Store artwork -> Partner Center as-is.
+    //   (plain)   -> SIGNED payload + package, logo-rendered artwork -> GitHub release.
+    //              (built UNSIGNED if no signing certificate is found)
+    {
+      "label": "pack-win-x64-msix-msstore",
+      "type": "process",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/_assets/win/script-pack-win-msix.ps1",
+        "-Platform",
+        "x64"
+      ],
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "pack-win-arm64-msix-msstore",
+      "type": "process",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/_assets/win/script-pack-win-msix.ps1",
+        "-Platform",
+        "arm64"
+      ],
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "pack-win-x64-msix",
+      "type": "process",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/_assets/win/script-pack-win-msix.ps1",
+        "-Platform",
+        "x64",
+        "-Sign"
+      ],
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "pack-win-arm64-msix",
+      "type": "process",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/_assets/win/script-pack-win-msix.ps1",
+        "-Platform",
+        "arm64",
+        "-Sign"
+      ],
+      "problemMatcher": [],
+      "group": "build"
+    },
+    // Convenience: build BOTH signed (GitHub) packages, then BOTH msstore packages.
+    {
+      "label": "pack-win-all-msix",
+      "dependsOn": [
+        "pack-win-x64-msix",
+        "pack-win-arm64-msix",
+        "pack-win-x64-msix-msstore",
+        "pack-win-arm64-msix-msstore"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": "build"
+    },
   ],
   "inputs": [
     {
