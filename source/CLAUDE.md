@@ -474,10 +474,10 @@ Occurs in `Program.cs` before Avalonia app setup (Linux/Mac have equivalent regi
 - **Mipmap strategy**: Precompute at load time; cache tiles on-demand; preserve zoom-aware LRU
 
 ### Magick.NET-Specific (native heap safety)
-A cancelled gallery scroll once crashed the app with `0xc0000374`, bucket `BlockNotBusy DOUBLE_FREE` in `Magick.Native-*.dll`. Two rules fixed it; a third suspect was ruled out.
+A cancelled gallery scroll has crashed the app twice, as `0xc0000374` (`BlockNotBusy DOUBLE_FREE`) and later as `0xc0000005`, both in `Magick.Native-*.dll`.
 - **Never `Ping` then `Read` into the same `MagickImage`.** `Ping` allocates a native image, and reading into that same wrapper leaves a second one to be freed twice. Probe with a throwaway `using var`, or `Dispose()` before re-reading (`MagickCodec.DecodeImageAsync` does the latter).
 - **Dispose the `MagickImage` on every failure path**, including early returns and `catch`. An abandoned partially-read image handed to the finalizer is what turns the above into a delayed crash that surfaces at an unrelated allocation, pointing nowhere near the read.
-- **Passing a `CancellationToken` to `ReadAsync` is fine** and was tested: it is NOT the cause. Cancellation only *exposed* the two bugs above, because a fast scroll cancels many in-flight reads at once. Do not remove tokens from Magick reads chasing this class of crash; look for an undisposed or double-allocated image instead.
+- **Cancelling a Magick `ReadAsync` was a hard process kill in 14.15.0-14.17.0, so the floor is 14.17.1** ([upstream #2084](https://github.com/dlemstra/Magick.NET/issues/2084)). 14.15.0 rewrote the file overload to stream through a reverse-P/Invoke callback; a firing token killed the pump, the callback returned `-1`, and libjpeg read that as an unsigned `bytes_in_buffer` and walked off the heap. The same race could instead strand the decode thread in `_readDone.Wait()` forever. 14.17.0 fixed only the access violation (natively), 14.17.1 fixed the deadlock. Never lower this floor to pick up an older Magick.NET.
 - Applies to any path a fast gallery scroll can cancel: `QuickDecodeAsync` is reached from `PhotoPreviewProvider.GetThumbnailAsync`, whose token is cancelled on every container recycle.
 
 ### Performance-Critical Code
