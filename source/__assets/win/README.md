@@ -299,6 +299,14 @@ directory, and the exe component's key path is a file, so it never resolves.
   It runs from `IgLaunchTarget` instead, set to `[#FileImageGlassExe]` **after** `ExecuteAction`: at
   `CostFinalize` the folder the dialog chose is not applied yet, so the path would still be the
   per-user default and the launch would silently fail.
+- **`Magick.Native-*.dll` is hand-authored as a companion file of `ImageGlass.exe`.** Costing runs
+  at `CostFinalize` (1000) but `RemoveExistingProducts` only at 1401, so MSI decides each component
+  against the *old* product's files, which are still on disk. It skips a component whose key path is
+  already present at a **higher** version (`Action: Null`), and the removal then deletes that file,
+  leaving it installed by neither product; only a Repair brings it back. Magick.NET 14.14 stamped
+  that DLL `10.2.0.0` and 14.17.1 stamps `7.1.2.31`, so the version went backwards and the upgrade
+  silently dropped it. As a companion file its version is read from `ImageGlass.exe`, which only ever
+  rises. Any other payload file whose version drops needs the same treatment.
 - **The package must NOT be marked "UAC compliant".** Word Count summary bit 3 ("elevated
   privileges are not required") turns an MSI into a per-user-only package: Windows Installer then
   logs *"MSIINSTALLPERUSER property is not valid for UAC compliant package"*, deletes `ALLUSERS`,

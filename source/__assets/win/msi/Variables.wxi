@@ -17,6 +17,9 @@
   <!-- 10.0.5.825: its "All users" install actually ran per-user, so it cannot be upgraded. -->
   <?define IgBrokenScopeProductCode = "1B2217AA-C4FA-50EE-A284-588149763B66" ?>
 
+  <!-- Magick.NET renumbered this DLL downwards once; a missing file here must fail the build. -->
+  <?define IgMagickNativeFile = "Magick.Native-Q16-HDRI-OpenMP-x64.dll" ?>
+
   <!-- Version-qualified, so Apps & features and the wizard title name the exact build. The install
        folder deliberately stays unversioned: an upgrade must land on top of the previous one. -->
   <?define IgProductName  = "ImageGlass $(var.ProductVersion)" ?>

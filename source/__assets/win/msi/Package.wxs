@@ -268,6 +268,9 @@
       <Component Id="CmpImageGlassExe" Guid="$(var.IgExeComponentGuid)">
         <File Id="FileImageGlassExe" Source="$(var.PayloadDir)\ImageGlass.exe"
               Name="ImageGlass.exe" KeyPath="yes" />
+        <!-- Rides the exe's version because its own went backwards once; see README. -->
+        <File Id="FileMagickNative" Source="$(var.PayloadDir)\$(var.IgMagickNativeFile)"
+              Name="$(var.IgMagickNativeFile)" CompanionFile="FileImageGlassExe" />
       </Component>
 
       <!-- Unconditional, unlike the shortcut markers, so the next upgrade can still tell which
@@ -284,6 +287,7 @@
            via BHelper.BaseDir(). _store is pruned by the packer; Files throws on absent dirs. -->
       <Files Include="$(var.PayloadDir)\**">
         <Exclude Files="$(var.PayloadDir)\ImageGlass.exe" />
+        <Exclude Files="$(var.PayloadDir)\$(var.IgMagickNativeFile)" />
         <Exclude Files="**\*.pdb" />
         <Exclude Files="**\.igportable" />
       </Files>
